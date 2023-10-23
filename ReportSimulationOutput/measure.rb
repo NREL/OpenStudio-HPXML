@@ -2692,13 +2692,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
           if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
-            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           else
-            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           end
         else
           fuel = object.to_BoilerHotWater.get.fuelType
-          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
@@ -2820,7 +2820,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
                     Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool,
                     Constants.ObjectNameWaterHeaterAdjustment => EUT::HotWater,
-                    Constants.ObjectNameBoilerPilotLight => EUT::Heating,
                     Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery }[subcategory]
         if not end_use.nil?
           # Use Output:Meter instead of Output:Variable because they incorporate thermal zone multipliers

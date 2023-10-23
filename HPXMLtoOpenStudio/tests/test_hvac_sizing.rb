@@ -32,55 +32,87 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     Dir["#{@sample_files_path}/base-hvac*.xml"].each do |hvac_hpxml|
       next if hvac_hpxml.include? 'autosize'
 
-      hvac_hpxml = File.basename(hvac_hpxml)
-      puts "Autosizing #{hvac_hpxml}..."
+      { 'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => 'denver',
+        'USA_TX_Houston-Bush.Intercontinental.AP.722430_TMY3.epw' => 'houston' }.each do |epw_path, location|
+        hvac_hpxml = File.basename(hvac_hpxml)
 
-      hpxml, hpxml_bldg = _create_hpxml(hvac_hpxml)
-      _remove_hardsized_capacities(hpxml_bldg)
+        hpxml, hpxml_bldg = _create_hpxml(hvac_hpxml)
+        hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = epw_path
+        _remove_hardsized_capacities(hpxml_bldg)
 
-      if hpxml_bldg.heat_pumps.size > 0
-        hp_sizing_methodologies = [HPXML::HeatPumpSizingACCA,
-                                   HPXML::HeatPumpSizingHERS,
-                                   HPXML::HeatPumpSizingMaxLoad]
-      else
-        hp_sizing_methodologies = [nil]
-      end
-
-      hp_capacity_acca, hp_capacity_hers, hp_capacity_maxload = nil, nil, nil
-      hp_sizing_methodologies.each do |hp_sizing_methodology|
-        if not hp_sizing_methodology.nil?
-          puts "  ... using HP Sizing Methodology=#{hp_sizing_methodology}"
+        if hpxml_bldg.heat_pumps.size > 0
+          hp_sizing_methodologies = [HPXML::HeatPumpSizingACCA,
+                                     HPXML::HeatPumpSizingHERS,
+                                     HPXML::HeatPumpSizingMaxLoad]
+        else
+          hp_sizing_methodologies = [nil]
         end
-        hpxml_bldg.header.heat_pump_sizing_methodology = hp_sizing_methodology
 
-        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-        _autosized_model, _autosized_hpxml, autosized_hpxml_bldg = _test_measure(args_hash)
+        hp_capacity_acca, hp_capacity_maxload = nil, nil
+        hp_sizing_methodologies.each do |hp_sizing_methodology|
+          test_name = hvac_hpxml.gsub('base-hvac-', "#{location}-hvac-autosize-")
+          if not hp_sizing_methodology.nil?
+            test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}.xml")
+          end
 
-        test_name = hvac_hpxml.gsub('base-hvac-', 'base-hvac-autosize')
-        if not hp_sizing_methodology.nil?
-          test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}.xml")
-        end
-        htg_cap, clg_cap, hp_backup_cap = Outputs.get_total_hvac_capacities(autosized_hpxml_bldg)
-        sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => htg_cap.round(1),
-                                      'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
-                                      'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1) }
+          puts "Running #{test_name}..."
 
-        if hpxml_bldg.heat_pumps.size == 1
+          hpxml_bldg.header.heat_pump_sizing_methodology = hp_sizing_methodology
+
+          XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+          _autosized_model, _autosized_hpxml, autosized_bldg = _test_measure(args_hash)
+
+          htg_cap, clg_cap, hp_backup_cap = Outputs.get_total_hvac_capacities(autosized_bldg)
+          sizing_results[test_name] = { 'HVAC Capacity: Heating (Btu/h)' => htg_cap.round(1),
+                                        'HVAC Capacity: Cooling (Btu/h)' => clg_cap.round(1),
+                                        'HVAC Capacity: Heat Pump Backup (Btu/h)' => hp_backup_cap.round(1) }
+
+          next unless hpxml_bldg.heat_pumps.size == 1
+
+          htg_load = autosized_bldg.hvac_plant.hdl_total
+          clg_load = autosized_bldg.hvac_plant.cdl_sens_total + autosized_bldg.hvac_plant.cdl_lat_total
+          hp = autosized_bldg.heat_pumps[0]
+          htg_cap = hp.heating_capacity
+          clg_cap = hp.cooling_capacity
+          charge_defect_ratio = hp.charge_defect_ratio.to_f
+          airflow_defect_ratio = hp.airflow_defect_ratio.to_f
+
           if hp_sizing_methodology == HPXML::HeatPumpSizingACCA
-            hp_capacity_acca = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+            hp_capacity_acca = htg_cap
           elsif hp_sizing_methodology == HPXML::HeatPumpSizingHERS
-            hp_capacity_hers = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+            next if hp.is_dual_fuel
+
+            if (charge_defect_ratio != 0) || (airflow_defect_ratio != 0)
+              # Check HP capacity is greater than max(htg_load, clg_load)
+              if hp.fraction_heat_load_served == 0
+                assert_operator(clg_cap, :>, clg_load)
+              elsif hp.fraction_cool_load_served == 0
+                assert_operator(htg_cap, :>, htg_load)
+              else
+                assert_operator(htg_cap, :>, [htg_load, clg_load].max)
+                assert_operator(clg_cap, :>, [htg_load, clg_load].max)
+              end
+            else
+              # Check HP capacity equals max(htg_load, clg_load)
+              if hp.fraction_heat_load_served == 0
+                assert_in_delta(clg_cap, clg_load, 1.0)
+              elsif hp.fraction_cool_load_served == 0
+                assert_in_delta(htg_cap, htg_load, 1.0)
+              else
+                assert_in_delta(htg_cap, [htg_load, clg_load].max, 1.0)
+                assert_in_delta(clg_cap, [htg_load, clg_load].max, 1.0)
+              end
+            end
           elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
-            hp_capacity_maxload = autosized_hpxml_bldg.heat_pumps[0].heating_capacity
+            hp_capacity_maxload = htg_cap
           end
         end
+
+        next unless hpxml_bldg.heat_pumps.size == 1
+
+        # Check that MaxLoad >= >= ACCA for heat pump heating capacity
+        assert_operator(hp_capacity_maxload, :>=, hp_capacity_acca)
       end
-
-      next unless hpxml_bldg.heat_pumps.size == 1
-
-      # Check that MaxLoad >= HERS >= ACCA for heat pump heating capacity
-      assert_operator(hp_capacity_maxload, :>=, hp_capacity_hers)
-      assert_operator(hp_capacity_hers, :>=, hp_capacity_acca)
     end
 
     # Write results to a file

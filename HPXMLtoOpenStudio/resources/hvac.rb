@@ -70,8 +70,8 @@ class HVAC
         else
           htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
           htg_coil.setGasBurnerEfficiency(cooling_system.integrated_heating_system_efficiency_percent)
-          htg_coil.setParasiticElectricLoad(0)
-          htg_coil.setParasiticGasLoad(0)
+          htg_coil.setOnCycleParasiticElectricLoad(0)
+          htg_coil.setOffCycleParasiticGasLoad(0)
           htg_coil.setFuelType(EPlus.fuel_type(cooling_system.integrated_heating_system_fuel))
         end
         htg_coil.setNominalCapacity(UnitConversions.convert(cooling_system.integrated_heating_system_capacity, 'Btu/hr', 'W'))
@@ -104,8 +104,8 @@ class HVAC
         else
           htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
           htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
-          htg_coil.setParasiticElectricLoad(0)
-          htg_coil.setParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
+          htg_coil.setOnCycleParasiticElectricLoad(0)
+          htg_coil.setOffCycleParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
           htg_coil.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
         end
         htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
@@ -301,6 +301,10 @@ class HVAC
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
       ground_heat_exch_vert.addGFunction(hp_ap.GSHP_G_Functions[0][i], hp_ap.GSHP_G_Functions[1][i])
     end
+    kusuda = ground_heat_exch_vert.undisturbedGroundTemperatureModel.to_SiteGroundTemperatureUndisturbedKusudaAchenbach.get
+    kusuda.setSoilThermalConductivity(ground_heat_exch_vert.groundThermalConductivity.get)
+    kusuda.setSoilSpecificHeat(ground_heat_exch_vert.groundThermalHeatCapacity.get / kusuda.soilDensity)
+    kusuda.setAverageSoilSurfaceTemperature(ground_heat_exch_vert.groundTemperature.get)
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
@@ -447,7 +451,7 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods, unit_multiplier)
+  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
     obj_name = Constants.ObjectNameBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
@@ -523,16 +527,13 @@ class HVAC
     boiler.setBoilerFlowMode('LeavingSetpointModulated')
     boiler.setOptimumPartLoadRatio(1.0)
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
-    boiler.setParasiticElectricLoad(0)
+    boiler.setOnCycleParasiticElectricLoad(0)
     boiler.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
+    boiler.setOffCycleParasiticFuelLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
     plant_loop.addSupplyBranchForComponent(boiler)
     boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
-
-    # EMS program to model pilot light
-    # FUTURE: Can be replaced if https://github.com/NREL/EnergyPlus/issues/9875 is ever implemented
-    set_boiler_pilot_light_ems_program(model, boiler, heating_system, control_zone, unit_multiplier)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -667,8 +668,8 @@ class HVAC
     else
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_coil.setGasBurnerEfficiency(efficiency)
-      htg_coil.setParasiticElectricLoad(0.0)
-      htg_coil.setParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
+      htg_coil.setOnCycleParasiticElectricLoad(0.0)
+      htg_coil.setOffCycleParasiticGasLoad(UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W'))
       htg_coil.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
     end
     htg_coil.setNominalCapacity(UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W'))
@@ -1451,35 +1452,6 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.set_boiler_pilot_light_ems_program(model, boiler, heating_system, control_zone, unit_multiplier)
-    # Create Equipment object for fuel consumption
-    space = control_zone.spaces[0] # Arbitrary
-    fuel_type = heating_system.heating_system_fuel
-    pilot_light_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameBoilerPilotLight, space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
-
-    # Sensor
-    boiler_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
-    boiler_plr_sensor.setName("#{boiler.name} plr s")
-    boiler_plr_sensor.setKeyName(boiler.name.to_s)
-
-    # Actuator
-    pilot_light_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pilot_light_object, *EPlus::EMSActuatorOtherEquipmentPower, pilot_light_object.space.get)
-    pilot_light_act.setName("#{boiler.name} pilot light act")
-
-    # Program
-    pilot_light_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    pilot_light_program.setName("#{boiler.name} pilot light program")
-    # Since the pilot light has been multiplied by the unit_multiplier, and this OtherEquipment object will be adding
-    # load to a thermal zone with an E+ multiplier, we would double-count the multiplier if we didn't divide by it here.
-    pilot_light_program.addLine("Set #{pilot_light_act.name} = (1.0 - #{boiler_plr_sensor.name}) * #{UnitConversions.convert(heating_system.pilot_light_btuh.to_f, 'Btu/hr', 'W')} / #{unit_multiplier}")
-
-    # Program Calling Manager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{boiler.name} pilot light program manager")
-    program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    program_calling_manager.addProgram(pilot_light_program)
-  end
-
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
 
@@ -1663,8 +1635,8 @@ class HVAC
     else
       htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
-      htg_supp_coil.setParasiticElectricLoad(0)
-      htg_supp_coil.setParasiticGasLoad(0)
+      htg_supp_coil.setOnCycleParasiticElectricLoad(0)
+      htg_supp_coil.setOffCycleParasiticGasLoad(0)
       htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
     end
     htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
@@ -1722,14 +1694,12 @@ class HVAC
     air_loop_unitary.setSupplyFan(fan)
     air_loop_unitary.setFanPlacement('BlowThrough')
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(cycle_fan_sch)
-    air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
     if htg_coil.nil?
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
     else
       air_loop_unitary.setHeatingCoil(htg_coil)
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(htg_cfm, 'cfm', 'm^3/s'))
     end
-    air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
     if clg_coil.nil?
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(0.0)
     else
