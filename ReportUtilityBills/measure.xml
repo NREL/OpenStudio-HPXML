@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>a80ee391-1c55-4703-9152-1777873241ff</version_id>
-  <version_modified>2023-10-18T23:50:05Z</version_modified>
+  <version_id>257f00ca-0857-48d7-9ce1-d5967528988d</version_id>
+  <version_modified>2023-10-23T16:23:45Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -131,7 +131,7 @@
       <filename>README.md.erb</filename>
       <filetype>erb</filetype>
       <usage_type>readmeerb</usage_type>
-      <checksum>1AA6085D</checksum>
+      <checksum>513F28E9</checksum>
     </file>
     <file>
       <version>

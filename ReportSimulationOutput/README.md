@@ -451,7 +451,7 @@ If not provided, defaults to 'results_timeseries.csv' (or 'results_timeseries.js
 
 
 ## Outputs
-Measure outputs are:
+All possible measure outputs are listed below. Actual outputs depend on measure argument values provided.
 
 
 - ``energy_use_total_m_btu``
