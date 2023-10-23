@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>51550788-bcc9-4a1f-a4e1-f9d2b485e8c3</version_id>
-  <version_modified>2023-10-18T23:50:01Z</version_modified>
+  <version_id>01adb54e-d8ba-453d-90ad-44338e342922</version_id>
+  <version_modified>2023-10-23T16:19:25Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CB98D4F0</checksum>
+      <checksum>FD70CB3F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -160,13 +160,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F03A106D</checksum>
+      <checksum>E73FC04E</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0C411629</checksum>
+      <checksum>E0D043FF</checksum>
     </file>
     <file>
       <filename>data/ashrae_622_wsf.csv</filename>
@@ -226,7 +226,7 @@
       <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>788F897B</checksum>
+      <checksum>801A6A26</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
@@ -238,7 +238,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5EC1A92D</checksum>
+      <checksum>C106D41E</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -250,7 +250,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1CFB3AB3</checksum>
+      <checksum>EDEAFE81</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -286,13 +286,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>961B23D0</checksum>
+      <checksum>6281BDD6</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3A0EED3</checksum>
+      <checksum>CB7E432C</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -442,7 +442,7 @@
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3AFD26FF</checksum>
+      <checksum>327A900C</checksum>
     </file>
     <file>
       <filename>unit_conversions.rb</filename>
@@ -466,7 +466,7 @@
       <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BC8EE0D7</checksum>
+      <checksum>6A05B3F0</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
@@ -514,7 +514,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5ECD9878</checksum>
+      <checksum>D31818E1</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -538,7 +538,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>A03C780B</checksum>
+      <checksum>89BFFDED</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
