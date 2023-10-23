@@ -288,6 +288,13 @@ class WeatherProcess
     @design.HeatingDrybulb = UnitConversions.convert(heat99per_db, 'C', 'F')
   end
 
+  def self.adjusted_annual_avg_drybulb(annual_avg_drybulb)
+    # The regression coefficients are from L. Xing's simplified design model ground temperatures (Appendix A-3) and the nearest TMY3 station's annual dry bulb.
+    adj_annual_avg_drybulb_c = 0.91 * UnitConversions.convert(annual_avg_drybulb, 'F', 'C') + 1.82
+    adj_annual_avg_drybulb = UnitConversions.convert(adj_annual_avg_drybulb_c, 'C', 'F')
+    return adj_annual_avg_drybulb
+  end
+
   def calc_ground_temperatures
     # Return monthly ground temperatures.
 
@@ -308,9 +315,7 @@ class WeatherProcess
     bo = (data.MonthlyAvgDrybulbs.max - data.MonthlyAvgDrybulbs.min) * 0.5
 
     @data.GroundMonthlyTemps = []
-    # The regression coefficients are from L. Xing's simplified design model ground temperatures (Appendix A-3) and the nearest TMY3 station's annual dry bulb.
-    adj_annual_avg_drybulb_c = 0.91 * UnitConversions.convert(data.AnnualAvgDrybulb, 'F', 'C') + 1.82
-    adj_annual_avg_drybulb_f = UnitConversions.convert(adj_annual_avg_drybulb_c, 'C', 'F')
+    adj_annual_avg_drybulb_f = WeatherProcess.adjusted_annual_avg_drybulb(data.AnnualAvgDrybulb)
     for i in 0..11
       theta = amon[i] * 24.0
       @data.GroundMonthlyTemps << UnitConversions.convert(adj_annual_avg_drybulb_f - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
