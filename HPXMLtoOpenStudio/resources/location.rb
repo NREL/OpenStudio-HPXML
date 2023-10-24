@@ -81,6 +81,35 @@ class Location
     return
   end
 
+  def self.get_supplement_table_short_grass
+    supplement_table_short_grass_csv = File.join(File.dirname(__FILE__), 'data', 'Supplement_Table-Short-Grass-US.csv')
+    if not File.exist?(supplement_table_short_grass_csv)
+      fail 'Could not find Supplement_Table-Short-Grass-US.csv'
+    end
+
+    return supplement_table_short_grass_csv
+  end
+
+  def self.get_xing_amplitudes(latitude, longitude)
+    supplement_table_short_grass = get_supplement_table_short_grass
+
+    require 'csv'
+    require 'matrix'
+
+    v1 = Vector[latitude, longitude]
+    dist = 1 / Constants.small
+    xing_amplitudes = nil
+    CSV.foreach(supplement_table_short_grass) do |row|
+      v2 = Vector[row[3].to_f, row[4].to_f]
+      if (v1 - v2).magnitude < dist
+        xing_amplitudes = row[5..9].map(&:to_f)
+        dist = (v1 - v2).magnitude
+      end
+    end
+
+    return xing_amplitudes
+  end
+
   def self.get_epw_path(hpxml, hpxml_path)
     epw_filepath = hpxml.climate_and_risk_zones.weather_station_epw_filepath
     abs_epw_path = File.absolute_path(epw_filepath)
