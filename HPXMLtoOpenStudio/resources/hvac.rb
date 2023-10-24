@@ -1350,6 +1350,7 @@ class HVAC
   def self.drop_var_speed_heating_indice(heat_pump)
     return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
     return unless heat_pump.is_a? HPXML::HeatPump
+
     hp_ap = heat_pump.additional_properties
     nominal_speed_index = hp_ap.heat_capacity_ratios.find_index(1.0)
 
