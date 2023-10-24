@@ -318,6 +318,11 @@ class WeatherProcess
       theta = amon[i] * 24.0
       @data.GroundMonthlyTemps << @data.GroundAnnualTemp - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm
     end
+
+    if @header.Latitude < 0
+      # Southern hemisphere
+      @data.GroundMonthlyTemps.rotate!(6)
+    end
   end
 
   def calc_mains_temperatures(n_days)

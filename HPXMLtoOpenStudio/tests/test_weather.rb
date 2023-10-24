@@ -159,7 +159,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     [61.0, 61.9, 59.7, 54.5, 50.8, 46.7, 45.3, 47.7, 50.1, 50.6, 57.9, 59.6].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.MonthlyAvgDailyLowDrybulbs[i], 0.1)
     end
-    [59.4, 58.3, 58.2, 58.7, 61.0, 63.2, 65.1, 66.4, 66.5, 65.5, 63.6, 61.4].each_with_index do |monthly_temp, i|
+    [65.1, 66.4, 66.5, 65.5, 63.6, 61.4, 59.4, 58.3, 58.2, 58.7, 61.0, 63.2].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.GroundMonthlyTemps[i], 0.1)
     end
     [72.0, 72.1, 71.0, 69.1, 66.9, 64.8, 63.5, 63.4, 64.3, 66.1, 68.4, 70.5].each_with_index do |monthly_temp, i|

@@ -58,7 +58,7 @@ class Location
     # Deep ground temperatures used by GSHP setpoint manager
     dgts = model.getSiteGroundTemperatureDeep
     dgts.resetAllMonths
-    dgts.setAllMonthlyTemperatures([UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C')] * 12)
+    dgts.setAllMonthlyTemperatures([UnitConversions.convert(weather.data.GroundAnnualTemp, 'F', 'C')] * 12)
   end
 
   def self.get_climate_zones
