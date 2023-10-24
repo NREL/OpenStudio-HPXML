@@ -271,13 +271,22 @@ class HVAC
     # Supplemental Heating Coil
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
 
+    # Site Ground Temperature Undisturbed
+    ts_avg, ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(weather.header.Latitude, weather.header.Longitude)
+    xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
+    xing.setSoilDensity(920)
+    xing.setSoilSurfaceTemperatureAmplitude1(ts_amp_1)
+    xing.setSoilSurfaceTemperatureAmplitude2(ts_amp_2)
+    xing.setPhaseShiftofTemperatureAmplitude1(pl_1)
+    xing.setPhaseShiftofTemperatureAmplitude2(pl_2)
+
     # Ground Heat Exchanger
-    ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
+    ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model, xing)
     ground_heat_exch_vert.setName(obj_name + ' exchanger')
     ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(heat_pump.geothermal_loop.bore_diameter / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
-    ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C'))
+    ground_heat_exch_vert.setGroundTemperature(ts_avg)
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))
@@ -292,10 +301,10 @@ class HVAC
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
       ground_heat_exch_vert.addGFunction(hp_ap.GSHP_G_Functions[0][i], hp_ap.GSHP_G_Functions[1][i])
     end
-    kusuda = ground_heat_exch_vert.undisturbedGroundTemperatureModel.to_SiteGroundTemperatureUndisturbedKusudaAchenbach.get
-    kusuda.setSoilThermalConductivity(ground_heat_exch_vert.groundThermalConductivity.get)
-    kusuda.setSoilSpecificHeat(ground_heat_exch_vert.groundThermalHeatCapacity.get / kusuda.soilDensity)
-    kusuda.setAverageSoilSurfaceTemperature(ground_heat_exch_vert.groundTemperature.get)
+    xing = ground_heat_exch_vert.undisturbedGroundTemperatureModel.to_SiteGroundTemperatureUndisturbedXing.get
+    xing.setSoilThermalConductivity(ground_heat_exch_vert.groundThermalConductivity.get)
+    xing.setSoilSpecificHeat(ground_heat_exch_vert.groundThermalHeatCapacity.get / xing.soilDensity)
+    xing.setAverageSoilSurfaceTemperature(ground_heat_exch_vert.groundTemperature.get)
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
