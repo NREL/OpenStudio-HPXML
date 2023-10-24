@@ -272,7 +272,7 @@ class HVAC
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
 
     # Site Ground Temperature Undisturbed
-    ts_avg, ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(weather.header.Latitude, weather.header.Longitude)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(weather.header.Latitude, weather.header.Longitude)
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
     xing.setSoilDensity(920)
     xing.setSoilSurfaceTemperatureAmplitude1(ts_amp_1)
@@ -286,7 +286,7 @@ class HVAC
     ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(heat_pump.geothermal_loop.bore_diameter / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
-    ground_heat_exch_vert.setGroundTemperature(ts_avg)
+    ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C'))
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))

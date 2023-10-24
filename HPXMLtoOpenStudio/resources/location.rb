@@ -101,9 +101,10 @@ class Location
     xing_amplitudes = nil
     CSV.foreach(supplement_table_short_grass) do |row|
       v2 = Vector[row[3].to_f, row[4].to_f]
-      if (v1 - v2).magnitude < dist
-        xing_amplitudes = row[5..9].map(&:to_f)
-        dist = (v1 - v2).magnitude
+      new_dist = (v1 - v2).magnitude
+      if new_dist < dist
+        xing_amplitudes = row[6..9].map(&:to_f)
+        dist = new_dist
       end
     end
 
