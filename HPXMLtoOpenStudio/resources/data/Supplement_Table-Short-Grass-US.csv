@@ -1,4 +1,4 @@
-﻿Region,Country,Station,Latitude,Longitude,"Ts,avg","Ts,amplitude,1","Ts,amplitude,2",PL1,PL2
+Region,Country,Station,Latitude,Longitude,"Ts,avg","Ts,amplitude,1","Ts,amplitude,2",PL1,PL2
 5,USA,Adak NAS    ,51.88,-176.65,5.4,4.4,-1.1,41,61
 5,USA,Ambler     ,67.1,-157.85,-0.5,8.5,-1.2,25,-4
 5,USA,Anaktuvuk Pass    ,68.13,-151.73,-3.4,9.8,-2.5,36,-20

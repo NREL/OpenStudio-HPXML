@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>628c49cf-91e3-4bb9-94c5-28dfe2b0d374</version_id>
-  <version_modified>2023-10-24T23:41:24Z</version_modified>
+  <version_id>381ccea4-6316-4d44-90e9-09468bb32de1</version_id>
+  <version_modified>2023-10-24T23:46:02Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -172,7 +172,7 @@
       <filename>data/Supplement_Table-Short-Grass-US.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>48CA1EB6</checksum>
+      <checksum>9FFC08FA</checksum>
     </file>
     <file>
       <filename>data/ashrae_622_wsf.csv</filename>
