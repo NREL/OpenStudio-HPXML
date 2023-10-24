@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>771140f7-ea4b-4cb4-9580-ae71927f31ee</version_id>
-  <version_modified>2023-10-24T20:43:04Z</version_modified>
+  <version_id>d18b4343-0e5e-4367-9cd3-f3b3ac32dce3</version_id>
+  <version_modified>2023-10-24T23:28:01Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -244,7 +244,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DE9728DA</checksum>
+      <checksum>37F2514E</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -478,7 +478,7 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4E39BD30</checksum>
+      <checksum>C6E124C1</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1B56132A</checksum>
+      <checksum>84F8B616</checksum>
     </file>
     <file>
       <filename>util.rb</filename>

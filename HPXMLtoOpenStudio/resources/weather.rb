@@ -10,7 +10,8 @@ end
 class WeatherData
   def initialize
   end
-  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundAnnualTemp, :GroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
+  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundAnnualTemp, :GroundMonthlyTemps, :WSF,
+             :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs, :MainsAnnualTemp, :MainsDailyTemps, :MainsMonthlyTemps]
   attr_accessor(*ATTRS)
 end
 
@@ -121,6 +122,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_ground_temperatures
+    calc_mains_temperatures(dailydbs.size)
     @data.WSF = calc_ashrae_622_wsf(rowdata)
 
     if not epwHasDesignData
@@ -300,10 +302,9 @@ class WeatherProcess
 
     beta = Math::sqrt(Math::PI / (p * dif)) * 10.0
     x = Math::exp(-beta)
-    x2 = x * x
     s = Math::sin(beta)
     c = Math::cos(beta)
-    y = (x2 - 2.0 * x * c + 1.0) / (2.0 * beta**2.0)
+    y = (x**2 - 2.0 * x * c + 1.0) / (2.0 * beta**2.0)
     gm = Math::sqrt(y)
     z = (1.0 - x * (c + s)) / (1.0 - x * (c - s))
     phi = Math::atan(z)
@@ -319,31 +320,31 @@ class WeatherProcess
     end
   end
 
-  def self.calc_mains_temperatures(avgOAT, maxDiffMonthlyAvgOAT, latitude, year)
-    n_days = Constants.NumDaysInYear(year)
-    pi = Math::PI
-    deg_rad = pi / 180
-    mainsDailyTemps = Array.new(n_days, 0)
-    mainsMonthlyTemps = Array.new(12, 0)
-    mainsAvgTemp = 0
+  def calc_mains_temperatures(n_days)
+    # Algorithm based on Burch & Christensen "Towards Development of an Algorithm for Mains Water Temperature"
+    deg_rad = Math::PI / 180
 
-    tmains_ratio = 0.4 + 0.01 * (avgOAT - 44)
-    tmains_lag = 35 - (avgOAT - 44)
-    if latitude < 0
+    tmains_ratio = 0.4 + 0.01 * (@data.AnnualAvgDrybulb - 44)
+    tmains_lag = 35 - (@data.AnnualAvgDrybulb - 44)
+    if @header.Latitude < 0
       sign = 1 # southern hemisphere
     else
       sign = -1
     end
 
+    maxDiffMonthlyAvgOAT = @data.MonthlyAvgDrybulbs.max - @data.MonthlyAvgDrybulbs.min
+
     # Calculate daily and annual
+    @data.MainsDailyTemps = []
     for d in 1..n_days
-      mainsDailyTemps[d - 1] = avgOAT + 6 + tmains_ratio * maxDiffMonthlyAvgOAT / 2 * Math.sin(deg_rad * (0.986 * (d - 15 - tmains_lag) + sign * 90))
-      mainsAvgTemp += mainsDailyTemps[d - 1] / Float(n_days)
+      @data.MainsDailyTemps << @data.AnnualAvgDrybulb + 6 + tmains_ratio * maxDiffMonthlyAvgOAT / 2 * Math.sin(deg_rad * (0.986 * (d - 15 - tmains_lag) + sign * 90))
     end
+    @data.MainsAnnualTemp = @data.MainsDailyTemps.sum / n_days
+
     # Calculate monthly
+    @data.MainsMonthlyTemps = []
     for m in 1..12
-      mainsMonthlyTemps[m - 1] = avgOAT + 6 + tmains_ratio * maxDiffMonthlyAvgOAT / 2 * Math.sin(deg_rad * (0.986 * ((m * 30 - 15) - 15 - tmains_lag) + sign * 90))
+      @data.MainsMonthlyTemps << @data.AnnualAvgDrybulb + 6 + tmains_ratio * maxDiffMonthlyAvgOAT / 2 * Math.sin(deg_rad * (0.986 * ((m * 30 - 15) - 15 - tmains_lag) + sign * 90))
     end
-    return mainsAvgTemp, mainsMonthlyTemps, mainsDailyTemps
   end
 end
