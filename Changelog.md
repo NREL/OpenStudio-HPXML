@@ -21,9 +21,9 @@ __New Features__
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 - Battery losses now split between charging and discharging.
 - Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
+- Updates ground temperatures using a correlation based on L. Xing's simplified design model (2014).
 - Improvements to HERS & MaxLoad heat pump sizing methodologies.
 - Added README.md documentation for all OpenStudio measures.
-- For ground temperatures, use an adjustment based on a correlation between annual mean drybulb temperature and L. Xing's simplified design model (2014).
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
