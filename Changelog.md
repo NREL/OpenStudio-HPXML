@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
-- **Breaking change**: Updates to official HPXML v4.0:
+- **Breaking change**: Updates to HPXML v4.0-rc2:
   - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09
   - Replaces "living space" with "conditioned space", which better represents what is modeled.
   - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
