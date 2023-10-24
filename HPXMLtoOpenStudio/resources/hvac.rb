@@ -1093,8 +1093,8 @@ class HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
       # So we assume that there is only one corresponding airflow rate for each compressor speed.
-      eir_fflow_spec = [[1, 0, 0]] * 4
-      cap_fflow_spec = [[1, 0, 0]] * 4
+      eir_fflow_spec = [[1, 0, 0]] * 2
+      cap_fflow_spec = [[1, 0, 0]] * 2
     end
     return cap_fflow_spec, eir_fflow_spec
   end
@@ -1124,8 +1124,8 @@ class HVAC
       eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
                         [2.001041353, -1.58869128, 0.587593517]]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      cap_fflow_spec = [[1, 0, 0]] * 4
-      eir_fflow_spec = [[1, 0, 0]] * 4
+      cap_fflow_spec = [[1, 0, 0]] * 3
+      eir_fflow_spec = [[1, 0, 0]] * 3
     end
     return cap_fflow_spec, eir_fflow_spec
   end
@@ -1222,7 +1222,6 @@ class HVAC
 
     elsif heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       is_ducted = !heating_system.distribution_system_idref.nil?
-      htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system, is_ducted)
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
@@ -1335,17 +1334,33 @@ class HVAC
       end
       if is_ducted && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         # central ducted
-        return [0.358 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
+        return [0.358 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
       elsif !is_ducted
         # wall placement
-        return [0.252 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
+        return [0.252 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
       else
         # ducted minisplit
-        return [0.305 / nominal_to_max_ratio, 1.0 / nominal_to_max_ratio]
+        return [0.305 / nominal_to_max_ratio, 1.0, 1.0 / nominal_to_max_ratio]
       end
     end
 
     fail 'Unable to get heating capacity ratios.'
+  end
+
+  def self.drop_var_speed_heating_indice(heat_pump)
+    return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+    return unless heat_pump.is_a? HPXML::HeatPump
+    hp_ap = heat_pump.additional_properties
+    nominal_speed_index = hp_ap.heat_capacity_ratios.find_index(1.0)
+
+    # Remove intermediate speed to before creating model, only models min/max speed
+    # Heating
+    hp_ap.heat_cap_fflow_spec.delete_at(nominal_speed_index)
+    hp_ap.heat_eir_fflow_spec.delete_at(nominal_speed_index)
+    hp_ap.heat_plf_fplr_spec.delete_at(nominal_speed_index)
+    hp_ap.heat_rated_cfm_per_ton.delete_at(nominal_speed_index)
+    hp_ap.heat_capacity_ratios.delete_at(nominal_speed_index)
+    hp_ap.heat_fan_speed_ratios.delete_at(nominal_speed_index)
   end
 
   def self.get_default_cool_cfm_per_ton(compressor_type, use_eer = false)
@@ -1376,7 +1391,7 @@ class HVAC
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [391.3333, 352.2]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      return [400.0, 400.0]
+      return [400.0, 400.0, 400.0]
     else
       fail 'Compressor type not supported.'
     end
