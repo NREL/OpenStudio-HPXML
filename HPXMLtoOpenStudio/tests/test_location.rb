@@ -57,6 +57,48 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(0, model.getObjectsByType('OS:RunPeriodControl:DaylightSavingTime'.to_IddObjectType).size)
   end
 
+  def weather_dir
+    return File.join(File.dirname(__FILE__), '..', '..', 'weather')
+  end
+
+  def test_xing
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
+
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    assert_equal(12.5, ts_amp_1)
+    assert_equal(-1.3, ts_amp_2)
+    assert_equal(20, pl_1)
+    assert_equal(31, pl_2)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'), runner: runner)
+
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    assert_equal(2.6, ts_amp_1)
+    assert_equal(0.1, ts_amp_2)
+    assert_equal(37, pl_1)
+    assert_equal(-13, pl_2)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'ZAF_Cape.Town.688160_IWEC.epw'), runner: runner)
+
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    assert_equal(13.4, ts_amp_1)
+    assert_equal(0.7, ts_amp_2)
+    assert_equal(25, pl_1)
+    assert_equal(30, pl_2)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'US_CO_Boulder_AMY_2012.epw'), runner: runner)
+
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    assert_equal(12.3, ts_amp_1)
+    assert_equal(1.1, ts_amp_2)
+    assert_equal(19, pl_1)
+    assert_equal(-34, pl_2)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

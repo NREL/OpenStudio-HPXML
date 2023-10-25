@@ -272,9 +272,10 @@ class HVAC
     htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
 
     # Site Ground Temperature Undisturbed
-    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(weather.header.Latitude, weather.header.Longitude)
+
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
     # xing.setSoilDensity(920)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(xing.soilSurfaceTemperatureAmplitude1, xing.soilSurfaceTemperatureAmplitude2, xing.phaseShiftofTemperatureAmplitude1, xing.phaseShiftofTemperatureAmplitude2, weather.header)
     xing.setSoilSurfaceTemperatureAmplitude1(ts_amp_1)
     xing.setSoilSurfaceTemperatureAmplitude2(ts_amp_2)
     xing.setPhaseShiftofTemperatureAmplitude1(pl_1)

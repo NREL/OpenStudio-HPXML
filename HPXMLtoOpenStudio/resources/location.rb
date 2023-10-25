@@ -90,13 +90,13 @@ class Location
     return supplement_table_short_grass_csv
   end
 
-  def self.get_xing_amplitudes(latitude, longitude)
+  def self.get_xing_amplitudes(ts_amp_1, ts_amp_2, pl_1, pl_2, weather_header)
     supplement_table_short_grass = get_supplement_table_short_grass
 
     require 'csv'
     require 'matrix'
 
-    v1 = Vector[latitude, longitude]
+    v1 = Vector[weather_header.Latitude, weather_header.Longitude]
     dist = 1 / Constants.small
     xing_amplitudes = nil
     CSV.foreach(supplement_table_short_grass) do |row|
@@ -107,6 +107,7 @@ class Location
         dist = new_dist
       end
     end
+    return [ts_amp_1, ts_amp_2, pl_1, pl_2] if dist > 1 # return default values; not close enough
 
     return xing_amplitudes
   end
