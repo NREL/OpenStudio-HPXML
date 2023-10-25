@@ -2399,25 +2399,19 @@ class HVACSizing
   end
 
   def self.get_sizing_speed(hvac_ap, is_cooling)
-    if is_cooling
-      num_speeds = hvac_ap.cool_capacity_ratios.size if hvac_ap.respond_to?(:cool_capacity_ratios) && (hvac_ap.cool_capacity_ratios.size > 1)
+    if is_cooling && hvac_ap.respond_to?(:cool_capacity_ratios)
       capacity_ratios = hvac_ap.cool_capacity_ratios
-    else
-      num_speeds = hvac_ap.heat_capacity_ratios.size if hvac_ap.respond_to?(:heat_capacity_ratios) && (hvac_ap.heat_capacity_ratios.size > 1)
+    elsif (not is_cooling) && hvac_ap.respond_to?(:heat_capacity_ratios)
       capacity_ratios = hvac_ap.heat_capacity_ratios
     end
-    if num_speeds
-      sizing_speed = num_speeds # Default
-      sizing_speed_delta = 10 # Initialize
-      for speed in 0..(num_speeds - 1)
-        # Select curves for sizing using the speed with the capacity ratio closest to 1
-        delta = (capacity_ratios[speed] - 1).abs
-        if delta <= sizing_speed_delta
-          sizing_speed = speed
-          sizing_speed_delta = delta
-        end
+    if not capacity_ratios.nil?
+      for speed in 0..(capacity_ratios.size - 1)
+        # Select curves for sizing using the speed with the capacity ratio of 1
+        next if capacity_ratios[speed] != 1
+
+        return speed
       end
-      return sizing_speed
+      fail 'No speed with capacity ratio of 1.0 found.'
     end
     return 0
   end
