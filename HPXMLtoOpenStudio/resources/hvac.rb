@@ -274,7 +274,7 @@ class HVAC
     # Site Ground Temperature Undisturbed
     ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(weather.header.Latitude, weather.header.Longitude)
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
-    xing.setSoilDensity(920)
+    # xing.setSoilDensity(920)
     xing.setSoilSurfaceTemperatureAmplitude1(ts_amp_1)
     xing.setSoilSurfaceTemperatureAmplitude2(ts_amp_2)
     xing.setPhaseShiftofTemperatureAmplitude1(pl_1)

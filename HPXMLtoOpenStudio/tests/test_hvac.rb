@@ -728,6 +728,18 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(pipe_conductivity, ghx.pipeThermalConductivity.get, 0.01)
     assert_in_epsilon(shank_spacing, ghx.uTubeDistance.get, 0.01)
 
+    # Check xing
+    assert(1, model.getSiteGroundTemperatureUndisturbedXings.size)
+    xing = model.getSiteGroundTemperatureUndisturbedXings[0]
+    assert_in_epsilon(ghx.groundThermalConductivity.get, xing.soilThermalConductivity, 0.01)
+    assert_in_epsilon(962, xing.soilDensity, 0.01)
+    assert_in_epsilon(ghx.groundThermalHeatCapacity.get / xing.soilDensity, xing.soilSpecificHeat, 0.01)
+    assert_in_epsilon(ghx.groundTemperature.get, xing.averageSoilSurfaceTemperature, 0.01)
+    assert_in_epsilon(12.5, xing.soilSurfaceTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(-1.3, xing.soilSurfaceTemperatureAmplitude2, 0.01)
+    assert_in_epsilon(20, xing.phaseShiftofTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(31, xing.phaseShiftofTemperatureAmplitude2, 0.01)
+
     # Check G-Functions
     # Expected values
     # 4_4: 1: g: 5._96._0.075 from "LopU_configurations_5m_v1.0.json"
