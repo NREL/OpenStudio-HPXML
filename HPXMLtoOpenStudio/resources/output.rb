@@ -169,4 +169,22 @@ class Outputs
     end
     return htg_cap, clg_cap, hp_backup_cap
   end
+
+  def self.get_total_hvac_airflows(hpxml)
+    htg_cfm, clg_cfm = 0.0, 0.0
+    hpxml.hvac_systems.each do |hvac_system|
+      if hvac_system.is_a? HPXML::HeatingSystem
+        htg_cfm += hvac_system.heating_airflow_cfm.to_f
+      elsif hvac_system.is_a? HPXML::CoolingSystem
+        clg_cfm += hvac_system.cooling_airflow_cfm.to_f
+        if hvac_system.has_integrated_heating
+          htg_cfm += hvac_system.integrated_heating_system_airflow_cfm.to_f
+        end
+      elsif hvac_system.is_a? HPXML::HeatPump
+        htg_cfm += hvac_system.heating_airflow_cfm.to_f
+        clg_cfm += hvac_system.cooling_airflow_cfm.to_f
+      end
+    end
+    return htg_cfm, clg_cfm
+  end
 end
