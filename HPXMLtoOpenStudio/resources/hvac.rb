@@ -1228,8 +1228,9 @@ class HVAC
 
     # Default data inputs based on NEEP data
     detailed_performance_data = heat_pump.heating_detailed_performance_data
-    max_cap_maint_5 = 1.0 - (1.0 - heat_pump.heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) /
-                            (HVAC::AirSourceHeatRatedODB - heat_pump.heating_capacity_retention_temp)
+    heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heat_pump)
+    max_cap_maint_5 = 1.0 - (1.0 - heating_capacity_retention_fraction) * (HVAC::AirSourceHeatRatedODB - 5.0) /
+                            (HVAC::AirSourceHeatRatedODB - heating_capacity_retention_temp)
 
     if is_ducted
       a, b, c, d, e = 0.4348, 0.008923, 1.090, -0.1861, -0.07564
