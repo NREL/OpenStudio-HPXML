@@ -1515,10 +1515,12 @@ class SchedulesFile
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
-    # cwd = Dir.getwd
-    Dir.chdir(File.dirname(@output_schedules_path))
+    file_path = File.dirname(@output_schedules_path)
+    workflow_json = @model.workflowJSON
+    file_paths = workflow_json.filePaths.map(&:to_s)
+    workflow_json.addFilePath(file_path) unless file_paths.include?(file_path)
+
     schedule_file = OpenStudio::Model::ScheduleFile.new(@model, File.basename(@output_schedules_path))
-    # Dir.chdir(cwd) # if we change it back, you get 'FT Warning: Cannot find file ""' in run.log
     schedule_file.setName(col_name)
     schedule_file.setColumnNumber(col_index + 1)
     schedule_file.setRowstoSkipatTop(rows_to_skip)
