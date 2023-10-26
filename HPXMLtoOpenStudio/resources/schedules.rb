@@ -740,8 +740,8 @@ class Schedule
     rule.setApplySunday(true)
   end
 
-  def self.get_unavailable_periods(schedule_name, unavailable_periods)
-    return unavailable_periods.select { |p| Schedule.unavailable_period_applies(schedule_name, p.column_name) }
+  def self.get_unavailable_periods(runner, schedule_name, unavailable_periods)
+    return unavailable_periods.select { |p| Schedule.unavailable_period_applies(runner, schedule_name, p.column_name) }
   end
 
   def self.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
@@ -1098,27 +1098,27 @@ class Schedule
     return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
   end
 
-  def self.HotTubPumpWeekdayFractions
+  def self.PermanentSpaPumpWeekdayFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
-  def self.HotTubPumpWeekendFractions
+  def self.PermanentSpaPumpWeekendFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
-  def self.HotTubPumpMonthlyMultipliers
+  def self.PermanentSpaPumpMonthlyMultipliers
     return '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921'
   end
 
-  def self.HotTubHeaterWeekdayFractions
+  def self.PermanentSpaHeaterWeekdayFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
-  def self.HotTubHeaterWeekendFractions
+  def self.PermanentSpaHeaterWeekendFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
-  def self.HotTubHeaterMonthlyMultipliers
+  def self.PermanentSpaHeaterMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
 
@@ -1256,9 +1256,10 @@ class Schedule
     return unavailable_periods_csv_data
   end
 
-  def self.unavailable_period_applies(schedule_name, col_name)
+  def self.unavailable_period_applies(runner, schedule_name, col_name)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = get_unavailable_periods_csv_data
+
     end
     @unavailable_periods_csv_data.each do |csv_row|
       next if csv_row['Schedule Name'] != schedule_name
@@ -1273,6 +1274,13 @@ class Schedule
         fail "Value is not a valid integer for row='#{schedule_name}' and column='#{col_name}' in unavailable_periods.csv."
       end
       if applies == 1
+        if not runner.nil?
+          if schedule_name == SchedulesFile::ColumnHVAC
+            runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.')
+          elsif schedule_name == SchedulesFile::ColumnWaterHeater
+            runner.registerWarning('It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.')
+          end
+        end
         return true
       elsif applies == 0
         return false
@@ -1345,8 +1353,8 @@ class SchedulesFile
   ColumnFuelLoadsFireplace = 'fuel_loads_fireplace'
   ColumnPoolPump = 'pool_pump'
   ColumnPoolHeater = 'pool_heater'
-  ColumnHotTubPump = 'hot_tub_pump'
-  ColumnHotTubHeater = 'hot_tub_heater'
+  ColumnPermanentSpaPump = 'permanent_spa_pump'
+  ColumnPermanentSpaHeater = 'permanent_spa_heater'
   ColumnHotWaterDishwasher = 'hot_water_dishwasher'
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
@@ -1381,6 +1389,7 @@ class SchedulesFile
 
     import()
     battery_schedules
+    expand_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(unavailable_periods)
     convert_setpoints
@@ -1636,6 +1645,16 @@ class SchedulesFile
     end
   end
 
+  def expand_schedules
+    # Expand schedules with fewer elements such that all the schedules have the same number of elements
+    max_size = @schedules.map { |_k, v| v.size }.uniq.max
+    @schedules.each do |col, values|
+      if values.size < max_size
+        @schedules[col] = values.map { |v| [v] * (max_size / values.size) }.flatten
+      end
+    end
+  end
+
   def set_unavailable_periods(unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -1662,13 +1681,13 @@ class SchedulesFile
         end
 
         # Skip those unaffected
-        next unless Schedule.unavailable_period_applies(schedule_name2, column_name)
+        next unless Schedule.unavailable_period_applies(@runner, schedule_name2, column_name)
 
         @tmp_schedules[column_name].each_with_index do |_ts, i|
           if schedule_name == ColumnWaterHeaterSetpoint
             # Temperature of tank < 2C indicates of possibility of freeze.
             @tmp_schedules[schedule_name][i] = UnitConversions.convert(2.0, 'C', 'F') if @tmp_schedules[column_name][i] == 1.0
-          else
+          elsif ![SchedulesFile::ColumnHeatingSetpoint, SchedulesFile::ColumnCoolingSetpoint].include?(schedule_name)
             @tmp_schedules[schedule_name][i] *= (1.0 - @tmp_schedules[column_name][i])
           end
         end
@@ -1733,8 +1752,8 @@ class SchedulesFile
       ColumnFuelLoadsFireplace,
       ColumnPoolPump,
       ColumnPoolHeater,
-      ColumnHotTubPump,
-      ColumnHotTubHeater,
+      ColumnPermanentSpaPump,
+      ColumnPermanentSpaHeater,
       ColumnHotWaterDishwasher,
       ColumnHotWaterClothesWasher,
       ColumnHotWaterFixtures

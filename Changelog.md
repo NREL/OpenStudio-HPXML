@@ -1,7 +1,48 @@
+## OpenStudio-HPXML v1.7.0
+
+__New Features__
+- Updates to OpenStudio 3.7.0/EnergyPlus 23.2.
+- **Breaking change**: Updates to HPXML v4.0-rc2:
+  - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09.
+  - Replaces "living space" with "conditioned space", which better represents what is modeled.
+  - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
+  - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
+- Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
+- Output updates:
+  - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
+  - Adds "Peak Electricity: Annual Total (W)" output.
+  - Adds battery resilience hours output; allows requesting timeseries output.
+  - ReportUtilityBills measure: Allows reporting monthly utility bills in addition to (or instead of) annual bills.
+- Update to 2022 EIA energy costs.
+- BuildResidentialHPXML measure:
+  - Allow duct area fractions (as an alternative to duct areas in ft^2).
+  - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
+  - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
+  - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
+- Battery losses now split between charging and discharging.
+- Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
+- Updates ground temperatures using a correlation based on L. Xing's simplified design model (2014).
+- Improvements to HERS & MaxLoad heat pump sizing methodologies.
+- Added README.md documentation for all OpenStudio measures.
+
+__Bugfixes__
+- Fixes battery resilience output to properly incorporate battery losses.
+- Fixes lighting multipliers not being applied when kWh/yr inputs are used.
+- Fixes running detailed schedules with mixed timesteps (e.g., hourly heating/cooling setpoints and 15-minutely miscellaneous plug load schedules).
+- Fixes calculation of utility bill fixed costs for simulations with abbreviated run periods.
+- Fixes error if heat pump `CompressorLockoutTemperature` == `BackupHeatingLockoutTemperature`.
+- Fixes possible "Electricity category end uses do not sum to total" error for a heat pump w/o backup.
+- Fixes ground source heat pump fan/pump adjustment to rated efficiency.
+- Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
+- Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
+- Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
+- Fixes AC/HP cooling bug when applying cooling equipment adjustment.
+- BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
+
 ## OpenStudio-HPXML v1.6.0
 
 __New Features__
-- Updates to OpenStudio 3.6.0/EnergyPlus 23.1.
+- Updates to OpenStudio 3.6.1/EnergyPlus 23.1.
 - **Breaking change**: Updates to newer proposed HPXML v4.0:
   - Replaces `VentilationFan/Quantity` and `CeilingFan/Quantity` with `Count`.
   - Replaces `PVSystem/InverterEfficiency` with `PVSystem/AttachedToInverter` and `Inverter/InverterEfficiency`.
@@ -24,13 +65,18 @@ __New Features__
    - If `NumberofResidents` not provided, an *asset* calculation is performed assuming standard occupancy per ANSI/RESNET/ICC 301.
    - If `NumberofResidents` is provided, an *operational* calculation is performed using a relationship between #Bedrooms and #Occupants from RECS 2015.
 - Heat pump enhancements:
+  - Allows `HeatingCapacityRetention[Fraction | Temperature]` inputs to define cold-climate performance; like `HeatingCapacity17F` but can apply to autosized systems and can use a user-specified temperature.
+  - Default mini-split heating capacity retention updated from 0.4 to 0.5 (at 5 deg-F).
   - Allows `CompressorLockoutTemperature` as an optional input to control the minimum temperature the compressor can operate at.
   - Defaults for `CompressorLockoutTemperature`: 25F for dual-fuel, -20F for mini-split, 0F for all other heat pumps.
   - Defaults for `BackupHeatingLockoutTemperature`: 50F for dual-fuel, 40F for all other heat pumps.
   - Provides a warning if `BackupHeatingSwitchoverTemperature` or `BackupHeatingLockoutTemperature` are low and may cause unmet hours.
-  - `BackupHeatingCapacity` can now be defaulted (autosized) even when the heat pump capacities are provided (hard-sized).
+  - Autosizing is no longer all-or-none; backup heating can be autosized (defaulted) while specifying the heat pump capacities, or vice versa.
+  - Allows `extension/CrankcaseHeaterPowerWatts` as an optional input; defaults to 50 W for central HPs/ACs and mini-splits.
+  - Increased consistency between variable-speed central HP and mini-split HP models for degradation coefficients, gross SHR calculations, etc.
 - Infiltration changes:
   - **Breaking change**: Infiltration for SFA/MF dwelling units must include `TypeOfInfiltrationLeakage` ("unit total" or "unit exterior only").
+  - **Breaking change**: Replaces `BuildingConstruction/extension/HasFlueOrChimney` with `AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace`; defaults now incorporate HVAC/water heater location.
   - Allows infiltration to be specified using `CFMnatural` or `EffectiveLeakageArea`.
 - Lighting changes:
   - LightingGroups can now be specified using kWh/year annual consumption values as an alternative to fractions of different lighting types.
@@ -39,6 +85,9 @@ __New Features__
   - Allows optional inputs under `HVACSizingControl/ManualJInputs` to override Manual J defaults for HVAC autosizing calculations.
   - Updates to better align various default values and algorithms with Manual J.
   - Updates design load calculations to handle conditioned basements with insulated slabs.
+- Duct enhancements:
+  - Allows modeling ducts buried in attic loose-fill insulation using `Ducts/DuctBuriedInsulationLevel`.
+  - Allows specifying `Ducts/DuctEffectiveRValue`, the value that will be used in the model, though its use is not recommended.
 - Allows modeling a pilot light for non-electric heating systems (furnaces, stoves, boilers, and fireplaces).
 - Allows summer vs winter shading seasons to be specified for windows and skylights.
 - Allows defining one or more `UnavailablePeriods` (e.g., occupant vacancies or power outage periods).
@@ -57,6 +106,8 @@ __Bugfixes__
 - Adds a warning for SFA/MF dwelling units without at least one attached wall/ceiling/floor surface.
 - Various fixes for window/skylight/duct design loads for Manual J HVAC autosizing calculations.
 - Ensure that ductless HVAC systems do not have a non-zero airflow defect ratio specified.
+- Fixes possible "A neighbor building has an azimuth (XX) not equal to the azimuth of any wall" for SFA/MF units with neighboring buildings for shade.
+- Fixes reported loads when no/partial HVAC system (e.g., room air conditioner that meets 30% of the cooling load).
 
 ## OpenStudio-HPXML v1.5.1
 

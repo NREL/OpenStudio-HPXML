@@ -47,15 +47,17 @@ class HPXMLDefaults
     apply_hvac(runner, hpxml, weather, convert_shared_systems)
     apply_hvac_control(hpxml, schedules_file)
     apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
+    apply_hvac_location(hpxml)
     apply_ventilation_fans(hpxml, weather, cfa, nbeds)
     apply_water_heaters(hpxml, nbeds, eri_version, schedules_file)
+    apply_flue_or_chimney(hpxml)
     apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
     apply_water_fixtures(hpxml, schedules_file)
     apply_solar_thermal_systems(hpxml)
     apply_appliances(hpxml, nbeds, eri_version, schedules_file)
     apply_lighting(hpxml, schedules_file)
     apply_ceiling_fans(hpxml, nbeds, weather, schedules_file)
-    apply_pools_and_hot_tubs(hpxml, cfa, schedules_file)
+    apply_pools_and_permanent_spas(hpxml, cfa, schedules_file)
     apply_plug_loads(hpxml, cfa, schedules_file)
     apply_fuel_loads(hpxml, cfa, schedules_file)
     apply_pv_systems(hpxml)
@@ -548,35 +550,6 @@ class HPXMLDefaults
       hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i
       hpxml.building_construction.number_of_bathrooms_isdefaulted = true
     end
-
-    if hpxml.building_construction.has_flue_or_chimney.nil?
-      hpxml.building_construction.has_flue_or_chimney = false
-      hpxml.building_construction.has_flue_or_chimney_isdefaulted = true
-      hpxml.heating_systems.each do |heating_system|
-        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
-          if not heating_system.heating_efficiency_afue.nil?
-            next if heating_system.heating_efficiency_afue >= 0.89
-          elsif not heating_system.heating_efficiency_percent.nil?
-            next if heating_system.heating_efficiency_percent >= 0.89
-          end
-
-          hpxml.building_construction.has_flue_or_chimney = true
-        elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
-          next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-
-          hpxml.building_construction.has_flue_or_chimney = true
-        end
-      end
-      hpxml.water_heating_systems.each do |water_heating_system|
-        if not water_heating_system.energy_factor.nil?
-          next if water_heating_system.energy_factor >= 0.63
-        elsif not water_heating_system.uniform_energy_factor.nil?
-          next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
-        end
-
-        hpxml.building_construction.has_flue_or_chimney = true
-      end
-    end
   end
 
   def self.apply_climate_and_risk_zones(hpxml, epw_file)
@@ -629,20 +602,36 @@ class HPXMLDefaults
   end
 
   def self.apply_foundations(hpxml)
-    return unless hpxml.has_location(HPXML::LocationCrawlspaceVented)
+    if hpxml.has_location(HPXML::LocationCrawlspaceVented)
+      vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+      if vented_crawls.empty?
+        hpxml.foundations.add(id: 'VentedCrawlspace',
+                              foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawls << hpxml.foundations[-1]
+      end
+      vented_crawls.each do |vented_crawl|
+        next unless vented_crawl.vented_crawlspace_sla.nil?
 
-    vented_crawls = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
-    if vented_crawls.empty?
-      hpxml.foundations.add(id: 'VentedCrawlspace',
-                            foundation_type: HPXML::FoundationTypeCrawlspaceVented)
-      vented_crawls << hpxml.foundations[-1]
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl.vented_crawlspace_sla_isdefaulted = true
+        break # EPvalidator.xml only allows a single ventilation rate
+      end
     end
-    vented_crawls.each do |vented_crawl|
-      next unless vented_crawl.vented_crawlspace_sla.nil?
 
-      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
-      vented_crawl.vented_crawlspace_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+    if hpxml.has_location(HPXML::LocationManufacturedHomeUnderBelly)
+      belly_and_wing_foundations = hpxml.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+      if belly_and_wing_foundations.empty?
+        hpxml.foundations.add(id: 'BellyAndWing',
+                              foundation_type: HPXML::FoundationTypeBellyAndWing)
+        belly_and_wing_foundations << hpxml.foundations[-1]
+      end
+      belly_and_wing_foundations.each do |foundation|
+        next unless foundation.belly_wing_skirt_present.nil?
+
+        foundation.belly_wing_skirt_present_isdefaulted = true
+        foundation.belly_wing_skirt_present = true
+        break
+      end
     end
   end
 
@@ -886,6 +875,16 @@ class HPXMLDefaults
         slab.carpet_fraction = conditioned_slab ? 0.8 : 0.0
         slab.carpet_fraction_isdefaulted = true
       end
+      if slab.connected_foundation_walls.empty?
+        if slab.depth_below_grade.nil?
+          slab.depth_below_grade = 0.0
+          slab.depth_below_grade_isdefaulted = true
+        end
+      else
+        if !slab.depth_below_grade.nil?
+          slab.depth_below_grade = nil # Ignore Slab/DepthBelowGrade; use values from adjacent foundation walls instead
+        end
+      end
     end
   end
 
@@ -1104,7 +1103,6 @@ class HPXMLDefaults
       cooling_system.cooling_efficiency_seer_isdefaulted = true
       cooling_system.cooling_efficiency_seer2 = nil
     end
-
     hpxml.heat_pumps.each do |heat_pump|
       next unless [HPXML::HVACTypeHeatPumpAirToAir,
                    HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
@@ -1138,6 +1136,22 @@ class HPXMLDefaults
 
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
       heat_pump.compressor_type_isdefaulted = true
+    end
+
+    # Default HP heating capacity retention
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heating_capacity_retention_fraction.nil?
+      next unless heat_pump.heating_capacity_17F.nil?
+      next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
+
+      heat_pump.heating_capacity_retention_temp = 5.0
+      if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.425
+      elsif [HPXML::HVACCompressorTypeVariableSpeed].include? heat_pump.compressor_type
+        heat_pump.heating_capacity_retention_fraction = 0.5
+      end
+      heat_pump.heating_capacity_retention_fraction_isdefaulted = true
+      heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
 
     # Default HP compressor lockout temp
@@ -1320,8 +1334,7 @@ class HPXMLDefaults
         end
       elsif [HPXML::HVACTypeWallFurnace,
              HPXML::HVACTypeFloorFurnace,
-             HPXML::HVACTypePortableHeater,
-             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeSpaceHeater,
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         if heating_system.fan_watts.nil?
           heating_system.fan_watts = 0.0 # W/cfm, assume no fan power
@@ -1380,6 +1393,30 @@ class HPXMLDefaults
       end
     end
 
+    # Crankcase heater power [Watts]
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner, HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+      next unless cooling_system.crankcase_heater_watts.nil?
+
+      if [HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
+        cooling_system.crankcase_heater_watts = 0.0
+      else
+        cooling_system.crankcase_heater_watts = 50 # From RESNET Publication No. 002-2017
+      end
+      cooling_system.crankcase_heater_watts_isdefaulted = true
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+      next unless heat_pump.crankcase_heater_watts.nil?
+
+      if [HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
+        heat_pump.crankcase_heater_watts = 0.0
+      else
+        heat_pump.crankcase_heater_watts = heat_pump.fraction_heat_load_served <= 0 ? 0.0 : 50 # From RESNET Publication No. 002-2017
+      end
+      heat_pump.crankcase_heater_watts_isdefaulted = true
+    end
+
     # Pilot Light
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeFurnace,
@@ -1414,22 +1451,19 @@ class HPXMLDefaults
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_num_speeds(cooling_system)
         HVAC.set_fan_power_rated(cooling_system) unless use_eer
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_cool_c_d(cooling_system, clg_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
-        HVAC.set_cool_rated_cfm_per_ton(cooling_system)
-        HVAC.set_cool_rated_shrs_gross(cooling_system)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs(cooling_system) unless use_eer
 
       elsif [HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         num_speeds = 10
         HVAC.set_num_speeds(cooling_system)
-        HVAC.set_crankcase_assumptions(cooling_system)
         HVAC.set_fan_power_rated(cooling_system)
 
         HVAC.set_cool_c_d(cooling_system, num_speeds)
         HVAC.set_cool_curves_mshp(cooling_system, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(cooling_system, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(runner, cooling_system)
         HVAC.set_cool_rated_eirs_mshp(cooling_system, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(cooling_system)
@@ -1441,13 +1475,12 @@ class HPXMLDefaults
     end
     hpxml.heating_systems.each do |heating_system|
       next unless [HPXML::HVACTypeStove,
-                   HPXML::HVACTypePortableHeater,
-                   HPXML::HVACTypeFixedHeater,
+                   HPXML::HVACTypeSpaceHeater,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
                    HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
-      HVAC.set_heat_rated_cfm_per_ton(heating_system)
+      heating_system.additional_properties.heat_rated_cfm_per_ton = HVAC.get_default_heat_cfm_per_ton(1, true)
     end
     hpxml.heat_pumps.each do |heat_pump|
       hp_ap = heat_pump.additional_properties
@@ -1461,35 +1494,30 @@ class HPXMLDefaults
         end
         HVAC.set_num_speeds(heat_pump)
         HVAC.set_fan_power_rated(heat_pump) unless use_eer_cop
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_cool_rated_cfm_per_ton(heat_pump)
-        HVAC.set_cool_rated_shrs_gross(heat_pump)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs(heat_pump) unless use_eer_cop
 
         HVAC.set_heat_c_d(heat_pump, hp_ap.num_speeds)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
-        HVAC.set_heat_rated_cfm_per_ton(heat_pump)
         HVAC.set_heat_rated_eirs(heat_pump) unless use_eer_cop
 
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         num_speeds = 10
         HVAC.set_num_speeds(heat_pump)
-        HVAC.set_crankcase_assumptions(heat_pump)
         HVAC.set_fan_power_rated(heat_pump)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
 
         HVAC.set_cool_c_d(heat_pump, num_speeds)
         HVAC.set_cool_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_cool_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
+        HVAC.set_cool_rated_shrs_gross(runner, heat_pump)
         HVAC.set_cool_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_heat_c_d(heat_pump, num_speeds)
         HVAC.set_heat_curves_mshp(heat_pump, num_speeds)
-        HVAC.set_heat_rated_cfm_per_ton_mshp(heat_pump, num_speeds)
         HVAC.set_heat_rated_eirs_mshp(heat_pump, num_speeds)
 
         HVAC.set_mshp_downselected_speed_indices(heat_pump)
@@ -1564,8 +1592,6 @@ class HPXMLDefaults
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
 
-      # Default ducts
-
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
 
@@ -1584,7 +1610,7 @@ class HPXMLDefaults
           ducts.each do |duct|
             primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
             primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml)
-            if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+            if primary_duct_location.nil? # If a home doesn't have any unconditioned spaces (outside conditioned space), place all ducts in conditioned space.
               duct.duct_surface_area = primary_duct_area + secondary_duct_area
               duct.duct_surface_area_isdefaulted = true
               duct.duct_location = secondary_duct_location
@@ -1628,10 +1654,18 @@ class HPXMLDefaults
         next unless duct.duct_fraction_area.nil?
 
         if duct.duct_type == HPXML::DuctTypeSupply
-          duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
+          if total_supply_area > 0
+            duct.duct_fraction_area = (duct.duct_surface_area / total_supply_area).round(3)
+          else
+            duct.duct_fraction_area = (1.0 / supply_ducts.size).round(3) # Arbitrary
+          end
           duct.duct_fraction_area_isdefaulted = true
         elsif duct.duct_type == HPXML::DuctTypeReturn
-          duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
+          if total_return_area > 0
+            duct.duct_fraction_area = (duct.duct_surface_area / total_return_area).round(3)
+          else
+            duct.duct_fraction_area = (1.0 / return_ducts.size).round(3) # Arbitrary
+          end
           duct.duct_fraction_area_isdefaulted = true
         end
       end
@@ -1641,6 +1675,76 @@ class HPXMLDefaults
 
         ducts.duct_surface_area_multiplier = 1.0
         ducts.duct_surface_area_multiplier_isdefaulted = true
+      end
+
+      # Default buried insulation level
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_buried_insulation_level.nil?
+
+        ducts.duct_buried_insulation_level = HPXML::DuctBuriedInsulationNone
+        ducts.duct_buried_insulation_level_isdefaulted = true
+      end
+
+      # Default effective R-value
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_effective_r_value.nil?
+
+        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value, ducts.duct_type, ducts.duct_buried_insulation_level)
+        ducts.duct_effective_r_value_isdefaulted = true
+      end
+    end
+  end
+
+  def self.apply_hvac_location(hpxml)
+    # This needs to come after we have applied defaults for ducts
+    hpxml.hvac_systems.each do |hvac_system|
+      next unless hvac_system.location.nil?
+
+      hvac_system.location_isdefaulted = true
+
+      # Set default location based on distribution system
+      dist_system = hvac_system.distribution_system
+      if dist_system.nil?
+        hvac_system.location = HPXML::LocationConditionedSpace
+      else
+        dist_type = dist_system.distribution_system_type
+        if dist_type == HPXML::HVACDistributionTypeAir
+          # Find largest unconditioned supply duct location
+          uncond_duct_locations = {}
+          dist_system.ducts.select { |d| d.duct_type == HPXML::DuctTypeSupply }.each do |d|
+            next if HPXML::conditioned_locations_this_unit.include? d.duct_location
+            next if [HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? d.duct_location # air handler won't be here
+
+            uncond_duct_locations[d.duct_location] = 0.0 if uncond_duct_locations[d.duct_location].nil?
+            uncond_duct_locations[d.duct_location] += d.duct_surface_area
+          end
+          if uncond_duct_locations.empty?
+            hvac_system.location = HPXML::LocationConditionedSpace
+          else
+            hvac_system.location = uncond_duct_locations.key(uncond_duct_locations.values.max)
+            if hvac_system.location == HPXML::LocationOutside
+              # DuctLocation "outside" needs to be converted to a valid UnitLocation enumeration
+              hvac_system.location = HPXML::LocationOtherExterior
+            end
+          end
+        elsif dist_type == HPXML::HVACDistributionTypeHydronic
+          # Assume same default logic as a water heater
+          hvac_system.location = Waterheater.get_default_location(hpxml, hpxml.climate_and_risk_zones.climate_zone_ieccs[0])
+        elsif dist_type == HPXML::HVACDistributionTypeDSE
+          # DSE=1 implies distribution system in conditioned space
+          has_dse_of_one = true
+          if (hvac_system.respond_to? :fraction_heat_load_served) && (dist_system.annual_heating_dse != 1)
+            has_dse_of_one = false
+          end
+          if (hvac_system.respond_to? :fraction_cool_load_served) && (dist_system.annual_cooling_dse != 1)
+            has_dse_of_one = false
+          end
+          if has_dse_of_one
+            hvac_system.location = HPXML::LocationConditionedSpace
+          else
+            hvac_system.location = HPXML::LocationUnconditionedSpace
+          end
+        end
       end
     end
   end
@@ -1812,6 +1916,14 @@ class HPXMLDefaults
         water_heating_system.usage_bin = HPXML::WaterHeaterUsageBinMedium
       end
       water_heating_system.usage_bin_isdefaulted = true
+    end
+  end
+
+  def self.apply_flue_or_chimney(hpxml)
+    # This needs to come after we have applied defaults for HVAC/DHW systems
+    if hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space.nil?
+      hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space = get_default_flue_or_chimney_in_conditioned_space(hpxml)
+      hpxml.air_infiltration.has_flue_or_chimney_in_conditioned_space_isdefaulted = true
     end
   end
 
@@ -2006,7 +2118,7 @@ class HPXMLDefaults
         clothes_washer.is_shared_appliance_isdefaulted = true
       end
       if clothes_washer.location.nil?
-        clothes_washer.location = HPXML::LocationLivingSpace
+        clothes_washer.location = HPXML::LocationConditionedSpace
         clothes_washer.location_isdefaulted = true
       end
       if clothes_washer.rated_annual_kwh.nil?
@@ -2053,7 +2165,7 @@ class HPXMLDefaults
         clothes_dryer.is_shared_appliance_isdefaulted = true
       end
       if clothes_dryer.location.nil?
-        clothes_dryer.location = HPXML::LocationLivingSpace
+        clothes_dryer.location = HPXML::LocationConditionedSpace
         clothes_dryer.location_isdefaulted = true
       end
       if clothes_dryer.combined_energy_factor.nil? && clothes_dryer.energy_factor.nil?
@@ -2101,7 +2213,7 @@ class HPXMLDefaults
         dishwasher.is_shared_appliance_isdefaulted = true
       end
       if dishwasher.location.nil?
-        dishwasher.location = HPXML::LocationLivingSpace
+        dishwasher.location = HPXML::LocationConditionedSpace
         dishwasher.location_isdefaulted = true
       end
       if dishwasher.place_setting_capacity.nil?
@@ -2169,7 +2281,7 @@ class HPXMLDefaults
         end
       else # primary refrigerator
         if refrigerator.location.nil?
-          refrigerator.location = HPXML::LocationLivingSpace
+          refrigerator.location = HPXML::LocationConditionedSpace
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
@@ -2231,7 +2343,7 @@ class HPXMLDefaults
     if hpxml.cooking_ranges.size > 0
       cooking_range = hpxml.cooking_ranges[0]
       if cooking_range.location.nil?
-        cooking_range.location = HPXML::LocationLivingSpace
+        cooking_range.location = HPXML::LocationConditionedSpace
         cooking_range.location_isdefaulted = true
       end
       if cooking_range.is_induction.nil?
@@ -2378,7 +2490,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_pools_and_hot_tubs(hpxml, cfa, schedules_file)
+  def self.apply_pools_and_permanent_spas(hpxml, cfa, schedules_file)
     nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
     hpxml.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
@@ -2436,59 +2548,59 @@ class HPXMLDefaults
       end
     end
 
-    hpxml.hot_tubs.each do |hot_tub|
-      next if hot_tub.type == HPXML::TypeNone
+    hpxml.permanent_spas.each do |spa|
+      next if spa.type == HPXML::TypeNone
 
-      if hot_tub.pump_type != HPXML::TypeNone
+      if spa.pump_type != HPXML::TypeNone
         # Pump
-        if hot_tub.pump_kwh_per_year.nil?
-          hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
-          hot_tub.pump_kwh_per_year_isdefaulted = true
+        if spa.pump_kwh_per_year.nil?
+          spa.pump_kwh_per_year = MiscLoads.get_permanent_spa_pump_default_values(cfa, nbeds)
+          spa.pump_kwh_per_year_isdefaulted = true
         end
-        if hot_tub.pump_usage_multiplier.nil?
-          hot_tub.pump_usage_multiplier = 1.0
-          hot_tub.pump_usage_multiplier_isdefaulted = true
+        if spa.pump_usage_multiplier.nil?
+          spa.pump_usage_multiplier = 1.0
+          spa.pump_usage_multiplier_isdefaulted = true
         end
-        schedules_file_includes_hot_tub_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotTubPump))
-        if hot_tub.pump_weekday_fractions.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_weekday_fractions = Schedule.HotTubPumpWeekdayFractions
-          hot_tub.pump_weekday_fractions_isdefaulted = true
+        schedules_file_includes_permanent_spa_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnPermanentSpaPump))
+        if spa.pump_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_weekday_fractions = Schedule.PermanentSpaPumpWeekdayFractions
+          spa.pump_weekday_fractions_isdefaulted = true
         end
-        if hot_tub.pump_weekend_fractions.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_weekend_fractions = Schedule.HotTubPumpWeekendFractions
-          hot_tub.pump_weekend_fractions_isdefaulted = true
+        if spa.pump_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_weekend_fractions = Schedule.PermanentSpaPumpWeekendFractions
+          spa.pump_weekend_fractions_isdefaulted = true
         end
-        if hot_tub.pump_monthly_multipliers.nil? && !schedules_file_includes_hot_tub_pump
-          hot_tub.pump_monthly_multipliers = Schedule.HotTubPumpMonthlyMultipliers
-          hot_tub.pump_monthly_multipliers_isdefaulted = true
+        if spa.pump_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_pump
+          spa.pump_monthly_multipliers = Schedule.PermanentSpaPumpMonthlyMultipliers
+          spa.pump_monthly_multipliers_isdefaulted = true
         end
       end
 
-      next unless hot_tub.heater_type != HPXML::TypeNone
+      next unless spa.heater_type != HPXML::TypeNone
 
       # Heater
-      if hot_tub.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
-        hot_tub.heater_load_units = default_heater_load_units
-        hot_tub.heater_load_value = default_heater_load_value
-        hot_tub.heater_load_value_isdefaulted = true
+      if spa.heater_load_value.nil?
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_permanent_spa_heater_default_values(cfa, nbeds, spa.heater_type)
+        spa.heater_load_units = default_heater_load_units
+        spa.heater_load_value = default_heater_load_value
+        spa.heater_load_value_isdefaulted = true
       end
-      if hot_tub.heater_usage_multiplier.nil?
-        hot_tub.heater_usage_multiplier = 1.0
-        hot_tub.heater_usage_multiplier_isdefaulted = true
+      if spa.heater_usage_multiplier.nil?
+        spa.heater_usage_multiplier = 1.0
+        spa.heater_usage_multiplier_isdefaulted = true
       end
-      schedules_file_includes_hot_tub_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotTubHeater))
-      if hot_tub.heater_weekday_fractions.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_weekday_fractions = Schedule.HotTubHeaterWeekdayFractions
-        hot_tub.heater_weekday_fractions_isdefaulted = true
+      schedules_file_includes_permanent_spa_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnPermanentSpaHeater))
+      if spa.heater_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_weekday_fractions = Schedule.PermanentSpaHeaterWeekdayFractions
+        spa.heater_weekday_fractions_isdefaulted = true
       end
-      if hot_tub.heater_weekend_fractions.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_weekend_fractions = Schedule.HotTubHeaterWeekendFractions
-        hot_tub.heater_weekend_fractions_isdefaulted = true
+      if spa.heater_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_weekend_fractions = Schedule.PermanentSpaHeaterWeekendFractions
+        spa.heater_weekend_fractions_isdefaulted = true
       end
-      if hot_tub.heater_monthly_multipliers.nil? && !schedules_file_includes_hot_tub_heater
-        hot_tub.heater_monthly_multipliers = Schedule.HotTubHeaterMonthlyMultipliers
-        hot_tub.heater_monthly_multipliers_isdefaulted = true
+      if spa.heater_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_heater
+        spa.heater_monthly_multipliers = Schedule.PermanentSpaHeaterMonthlyMultipliers
+        spa.heater_monthly_multipliers_isdefaulted = true
       end
     end
   end
@@ -2783,11 +2895,6 @@ class HPXMLDefaults
                 htg_sys.heating_capacity_17F = htg_cap_17f.round
                 htg_sys.heating_capacity_17F_isdefaulted = true
               end
-            else
-              # Autosized
-              # FUTURE: Calculate HeatingCapacity17F from heat_cap_ft_spec? Might be confusing
-              # since user would not be able to replicate the results using this value, as the
-              # default curves are non-linear.
             end
           end
           htg_sys.heating_capacity = hvac_sizing_values.Heat_Capacity.round
@@ -2822,7 +2929,7 @@ class HPXMLDefaults
       end
 
       # Cooling system
-      next unless not clg_sys.nil?
+      next if clg_sys.nil?
 
       # Cooling capacities
       if clg_sys.cooling_capacity.nil? || ((clg_sys.cooling_capacity - hvac_sizing_values.Cool_Capacity).abs >= 1.0)
@@ -2902,5 +3009,45 @@ class HPXMLDefaults
     else
       fail "Unexpected residential facility type: #{unit_type}."
     end
+  end
+
+  def self.get_default_flue_or_chimney_in_conditioned_space(hpxml)
+    # Check for atmospheric heating system in conditioned space
+    hpxml.heating_systems.each do |heating_system|
+      next unless HPXML::conditioned_locations_this_unit.include? heating_system.location
+
+      if [HPXML::HVACTypeFurnace,
+          HPXML::HVACTypeBoiler,
+          HPXML::HVACTypeWallFurnace,
+          HPXML::HVACTypeFloorFurnace,
+          HPXML::HVACTypeStove,
+          HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
+        if not heating_system.heating_efficiency_afue.nil?
+          next if heating_system.heating_efficiency_afue >= 0.89
+        elsif not heating_system.heating_efficiency_percent.nil?
+          next if heating_system.heating_efficiency_percent >= 0.89
+        end
+
+        return true
+      elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+        next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+
+        return true
+      end
+    end
+
+    # Check for atmospheric water heater in conditioned space
+    hpxml.water_heating_systems.each do |water_heating_system|
+      next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
+
+      if not water_heating_system.energy_factor.nil?
+        next if water_heating_system.energy_factor >= 0.63
+      elsif not water_heating_system.uniform_energy_factor.nil?
+        next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
+      end
+
+      return true
+    end
+    return false
   end
 end

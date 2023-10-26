@@ -169,7 +169,7 @@ class Geometry
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
       next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation', 'adiabatic'].include? surface.outsideBoundaryCondition.downcase
+      next unless ['outdoors', 'foundation', 'adiabatic', 'othersidecoefficients'].include? surface.outsideBoundaryCondition.downcase
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -257,15 +257,6 @@ class Geometry
           end
         end
       end
-      model.getShadingSurfaceGroups.each do |shading_group|
-        next unless [Constants.ObjectNameSkylightShade, Constants.ObjectNameWindowShade].include? shading_group.name.to_s
-
-        shading_group.shadingSurfaces.each do |window_shade|
-          next unless window_shade.additionalProperties.getFeatureAsString('ParentSurface').get == surface.name.to_s
-
-          shading_surfaces << window_shade
-        end
-      end
 
       # Push out horizontally
       distance = explode_distance
@@ -313,7 +304,7 @@ class Geometry
     hpxml.neighbor_buildings.each do |neighbor_building|
       height = neighbor_building.height.nil? ? walls_top : neighbor_building.height
 
-      vertices = Geometry.create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
+      vertices = create_wall_vertices(length, height, z_origin, neighbor_building.azimuth)
       shading_surface = OpenStudio::Model::ShadingSurface.new(vertices, model)
       shading_surface.additionalProperties.setFeature('Azimuth', neighbor_building.azimuth)
       shading_surface.additionalProperties.setFeature('Distance', neighbor_building.distance)
@@ -356,15 +347,18 @@ class Geometry
   end
 
   def self.set_zone_volumes(spaces, hpxml, apply_ashrae140_assumptions)
-    # Living space
-    spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
+    # Conditioned space
+    volume = UnitConversions.convert(hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3')
+    spaces[HPXML::LocationConditionedSpace].thermalZone.get.setVolume(volume)
+    spaces[HPXML::LocationConditionedSpace].setVolume(volume)
 
     # Basement, crawlspace, garage
     spaces.keys.each do |location|
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented, HPXML::LocationGarage].include? location
 
-      volume = calculate_zone_volume(hpxml, location)
-      spaces[location].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
+      volume = UnitConversions.convert(calculate_zone_volume(hpxml, location), 'ft^3', 'm^3')
+      spaces[location].thermalZone.get.setVolume(volume)
+      spaces[location].setVolume(volume)
     end
 
     # Attic
@@ -372,12 +366,13 @@ class Geometry
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? location
 
       if apply_ashrae140_assumptions
-        volume = 3463 # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
+        volume = UnitConversions.convert(3463, 'ft^3', 'm^3') # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
       else
-        volume = calculate_zone_volume(hpxml, location)
+        volume = UnitConversions.convert(calculate_zone_volume(hpxml, location), 'ft^3', 'm^3')
       end
 
-      spaces[location].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
+      spaces[location].thermalZone.get.setVolume(volume)
+      spaces[location].setVolume(volume)
     end
   end
 
@@ -424,6 +419,15 @@ class Geometry
                outdoor_weight: 0.0,
                ground_weight: 1.0,
                f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+    elsif location == HPXML::LocationManufacturedHomeBelly
+      # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+      # 3.5 Manufactured House Belly Pan Temperatures
+      # FUTURE: Consider modeling the belly as a separate thermal zone so that we dynamically calculate temperatures.
+      return { temp_min: nil,
+               indoor_weight: 1.0,
+               outdoor_weight: 0.0,
+               ground_weight: 0.0,
+               f_regain: 0.62 }
     end
     fail "Unhandled location: #{location}."
   end
@@ -433,14 +437,14 @@ class Geometry
     minzs = []
     maxzs = []
     spaces.each do |space|
-      zvalues = getSurfaceZValues(space.surfaces)
+      zvalues = get_surface_z_values(space.surfaces)
       minzs << zvalues.min + UnitConversions.convert(space.zOrigin, 'm', 'ft')
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
     return maxzs.max - minzs.min
   end
 
-  def self.getSurfaceZValues(surfaceArray)
+  def self.get_surface_z_values(surfaceArray)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
     surfaceArray.each do |surface|
@@ -449,6 +453,46 @@ class Geometry
       end
     end
     return zValueArray
+  end
+
+  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_x_values(surfaceArray)
+    xValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft').round(5)
+      end
+    end
+    return xValueArray
+  end
+
+  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  def self.get_surface_y_values(surfaceArray)
+    yValueArray = []
+    surfaceArray.each do |surface|
+      surface.vertices.each do |vertex|
+        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft').round(5)
+      end
+    end
+    return yValueArray
+  end
+
+  def self.get_surface_length(surface)
+    xvalues = get_surface_x_values([surface])
+    yvalues = get_surface_y_values([surface])
+    xrange = xvalues.max - xvalues.min
+    yrange = yvalues.max - yvalues.min
+    if xrange > yrange
+      return xrange
+    end
+
+    return yrange
+  end
+
+  def self.get_surface_height(surface)
+    zvalues = get_surface_z_values([surface])
+    zrange = zvalues.max - zvalues.min
+    return zrange
   end
 
   def self.get_z_origin_for_zone(zone)
@@ -471,7 +515,7 @@ class Geometry
   end
 
   def self.apply_occupants(model, runner, hpxml, num_occ, space, schedules_file, unavailable_periods)
-    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Geometry.get_occupancy_default_values()
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
@@ -485,7 +529,7 @@ class Geometry
       people_sch = schedules_file.create_schedule_file(col_name: people_col_name)
     end
     if people_sch.nil?
-      people_unavailable_periods = Schedule.get_unavailable_periods(people_col_name, unavailable_periods)
+      people_unavailable_periods = Schedule.get_unavailable_periods(runner, people_col_name, unavailable_periods)
       weekday_sch = hpxml.building_occupancy.weekday_fractions.split(',').map(&:to_f)
       weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
       weekend_sch = hpxml.building_occupancy.weekend_fractions.split(',').map(&:to_f)

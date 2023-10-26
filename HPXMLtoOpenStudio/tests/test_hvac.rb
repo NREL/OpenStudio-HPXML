@@ -8,7 +8,7 @@ require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 require_relative 'util.rb'
 
-class HPXMLtoOpenStudioHVACTest < MiniTest::Test
+class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -684,14 +684,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
-    cop = 5.36 # Expected values
+    cop = 4.87 # Expected values
     assert_in_epsilon(cop, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
     htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
-    cop = 3.65 # Expected values
+    cop = 3.6 # Expected values
     assert_in_epsilon(cop, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
     assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
 
@@ -862,14 +862,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
     clg_coil = model.getCoilCoolingWaterToAirHeatPumpEquationFits[0]
-    cop = 5.36 # Expected values
+    cop = 4.87 # Expected values
     assert_in_epsilon(cop, clg_coil.ratedCoolingCoefficientofPerformance, 0.01)
     assert_in_epsilon(clg_capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
     htg_coil = model.getCoilHeatingWaterToAirHeatPumpEquationFits[0]
-    cop = 3.65 # Expected values
+    cop = 3.6 # Expected values
     assert_in_epsilon(cop, htg_coil.ratedHeatingCoefficientofPerformance, 0.01)
     assert_in_epsilon(htg_capacity, htg_coil.ratedHeatingCapacity.get, 0.01)
 
@@ -1129,6 +1129,20 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     end
     assert_includes(start_dates, start_date)
     assert_includes(end_dates, end_date)
+  end
+
+  def test_crankcase_heater_watts
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-crankcase-heater-40w.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    cooling_system = hpxml.cooling_systems[0]
+    crankcase_heater_watts = cooling_system.crankcase_heater_watts
+
+    # Check cooling coil
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+    assert_in_epsilon(crankcase_heater_watts, clg_coil.crankcaseHeaterCapacity, 0.01)
   end
 
   def _test_measure(args_hash)

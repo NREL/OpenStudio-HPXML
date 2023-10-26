@@ -10,7 +10,7 @@ class HotWaterAndAppliances
     ncfl = hpxml.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
-    living_space = spaces[HPXML::LocationLivingSpace]
+    conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
 
     # Get appliances, etc.
@@ -52,7 +52,7 @@ class HotWaterAndAppliances
         cw_power_schedule = schedules_file.create_schedule_file(col_name: cw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cw_power_schedule.nil?
-        cw_unavailable_periods = Schedule.get_unavailable_periods(cw_col_name, unavailable_periods)
+        cw_unavailable_periods = Schedule.get_unavailable_periods(runner, cw_col_name, unavailable_periods)
         cw_weekday_sch = clothes_washer.weekday_fractions
         cw_weekend_sch = clothes_washer.weekend_fractions
         cw_monthly_sch = clothes_washer.monthly_multipliers
@@ -66,7 +66,7 @@ class HotWaterAndAppliances
       end
 
       cw_space = clothes_washer.additional_properties.space
-      cw_space = living_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      cw_space = conditioned_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameClothesWasher, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_power_schedule)
     end
 
@@ -83,7 +83,7 @@ class HotWaterAndAppliances
         cd_schedule = schedules_file.create_schedule_file(col_name: cd_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cd_schedule.nil?
-        cd_unavailable_periods = Schedule.get_unavailable_periods(cd_col_name, unavailable_periods)
+        cd_unavailable_periods = Schedule.get_unavailable_periods(runner, cd_col_name, unavailable_periods)
         cd_weekday_sch = clothes_dryer.weekday_fractions
         cd_weekend_sch = clothes_dryer.weekend_fractions
         cd_monthly_sch = clothes_dryer.monthly_multipliers
@@ -98,7 +98,7 @@ class HotWaterAndAppliances
       end
 
       cd_space = clothes_dryer.additional_properties.space
-      cd_space = living_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      cd_space = conditioned_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule)
       add_other_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
     end
@@ -115,7 +115,7 @@ class HotWaterAndAppliances
         dw_power_schedule = schedules_file.create_schedule_file(col_name: dw_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if dw_power_schedule.nil?
-        dw_unavailable_periods = Schedule.get_unavailable_periods(dw_col_name, unavailable_periods)
+        dw_unavailable_periods = Schedule.get_unavailable_periods(runner, dw_col_name, unavailable_periods)
         dw_weekday_sch = dishwasher.weekday_fractions
         dw_weekend_sch = dishwasher.weekend_fractions
         dw_monthly_sch = dishwasher.monthly_multipliers
@@ -129,7 +129,7 @@ class HotWaterAndAppliances
       end
 
       dw_space = dishwasher.additional_properties.space
-      dw_space = living_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      dw_space = conditioned_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameDishwasher, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_power_schedule)
     end
 
@@ -145,7 +145,7 @@ class HotWaterAndAppliances
         fridge_schedule = schedules_file.create_schedule_file(col_name: fridge_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fridge_schedule.nil?
-        fridge_unavailable_periods = Schedule.get_unavailable_periods(fridge_col_name, unavailable_periods)
+        fridge_unavailable_periods = Schedule.get_unavailable_periods(runner, fridge_col_name, unavailable_periods)
         fridge_weekday_sch = refrigerator.weekday_fractions
         fridge_weekend_sch = refrigerator.weekend_fractions
         fridge_monthly_sch = refrigerator.monthly_multipliers
@@ -159,7 +159,7 @@ class HotWaterAndAppliances
       end
 
       rf_space = refrigerator.additional_properties.space
-      rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameRefrigerator, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
     end
 
@@ -175,7 +175,7 @@ class HotWaterAndAppliances
         freezer_schedule = schedules_file.create_schedule_file(col_name: freezer_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if freezer_schedule.nil?
-        freezer_unavailable_periods = Schedule.get_unavailable_periods(freezer_col_name, unavailable_periods)
+        freezer_unavailable_periods = Schedule.get_unavailable_periods(runner, freezer_col_name, unavailable_periods)
         freezer_weekday_sch = freezer.weekday_fractions
         freezer_weekend_sch = freezer.weekend_fractions
         freezer_monthly_sch = freezer.monthly_multipliers
@@ -189,7 +189,7 @@ class HotWaterAndAppliances
       end
 
       fz_space = freezer.additional_properties.space
-      fz_space = living_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      fz_space = conditioned_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameFreezer, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
     end
 
@@ -206,7 +206,7 @@ class HotWaterAndAppliances
         cook_schedule = schedules_file.create_schedule_file(col_name: cook_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if cook_schedule.nil?
-        cook_unavailable_periods = Schedule.get_unavailable_periods(cook_col_name, unavailable_periods)
+        cook_unavailable_periods = Schedule.get_unavailable_periods(runner, cook_col_name, unavailable_periods)
         cook_weekday_sch = cooking_range.weekday_fractions
         cook_weekend_sch = cooking_range.weekend_fractions
         cook_monthly_sch = cooking_range.monthly_multipliers
@@ -221,7 +221,7 @@ class HotWaterAndAppliances
       end
 
       cook_space = cooking_range.additional_properties.space
-      cook_space = living_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      cook_space = conditioned_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
       add_other_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
     end
@@ -242,8 +242,7 @@ class HotWaterAndAppliances
         wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
-      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow,
-                                                                               hpxml.header.sim_calendar_year)
+      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
       daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, avg_setpoint_temp, t_mix)
 
@@ -268,7 +267,7 @@ class HotWaterAndAppliances
         fixtures_schedule = schedules_file.create_schedule_file(col_name: fixtures_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if fixtures_schedule.nil?
-        fixtures_unavailable_periods = Schedule.get_unavailable_periods(fixtures_col_name, unavailable_periods)
+        fixtures_unavailable_periods = Schedule.get_unavailable_periods(runner, fixtures_col_name, unavailable_periods)
         fixtures_weekday_sch = hpxml.water_heating.water_fixtures_weekday_fractions
         fixtures_weekend_sch = hpxml.water_heating.water_fixtures_weekend_fractions
         fixtures_monthly_sch = hpxml.water_heating.water_fixtures_monthly_multipliers
@@ -315,7 +314,7 @@ class HotWaterAndAppliances
           if dist_pump_design_level.nil?
             dist_pump_design_level = fixtures_schedule_obj.calc_design_level_from_daily_kwh(dist_pump_annual_kwh / 365.0)
           end
-          dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, living_space, dist_pump_design_level * gpd_frac, 0.0, 0.0, fixtures_schedule)
+          dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, conditioned_space, dist_pump_design_level * gpd_frac, 0.0, 0.0, fixtures_schedule)
           if not dist_pump.nil?
             dist_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
@@ -348,7 +347,7 @@ class HotWaterAndAppliances
       end
 
       # Dishwasher
-      next unless not dishwasher.nil?
+      next if dishwasher.nil?
 
       gpd_frac = nil
       if dishwasher.is_shared_appliance && (not dishwasher.hot_water_distribution.nil?)
@@ -358,7 +357,7 @@ class HotWaterAndAppliances
       elsif not dishwasher.is_shared_appliance
         gpd_frac = water_heating_system.fraction_dhw_load_served
       end
-      next unless not gpd_frac.nil?
+      next if gpd_frac.nil?
 
       # Create schedule
       water_dw_schedule = nil
@@ -386,8 +385,8 @@ class HotWaterAndAppliances
         water_design_level_sens = fixtures_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
         water_design_level_lat = fixtures_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       end
-      add_other_equipment(model, Constants.ObjectNameWaterSensible, living_space, water_design_level_sens, 1.0, 0.0, fixtures_schedule, nil)
-      add_other_equipment(model, Constants.ObjectNameWaterLatent, living_space, water_design_level_lat, 0.0, 1.0, fixtures_schedule, nil)
+      add_other_equipment(model, Constants.ObjectNameWaterSensible, conditioned_space, water_design_level_sens, 1.0, 0.0, fixtures_schedule, nil)
+      add_other_equipment(model, Constants.ObjectNameWaterLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, fixtures_schedule, nil)
     end
   end
 
@@ -861,23 +860,18 @@ class HotWaterAndAppliances
     return eff_adj, iFrac, plc, locF, fixF
   end
 
-  def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow, year)
-    # Get daily mains temperatures
-    avgOAT = weather.data.AnnualAvgDrybulb
-    maxDiffMonthlyAvgOAT = weather.data.MonthlyAvgDrybulbs.max - weather.data.MonthlyAvgDrybulbs.min
-    tmains_daily = WeatherProcess.calc_mains_temperatures(avgOAT, maxDiffMonthlyAvgOAT, weather.header.Latitude, year)[2]
-
-    wh_temps_daily = tmains_daily
+  def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
+    wh_temps_daily = weather.data.MainsDailyTemps
     if (not hot_water_distribution.dwhr_efficiency.nil?)
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, hot_water_distribution, fixtures_all_low_flow)
       # Adjust inlet temperatures
       dwhr_inT = 97.0 # F
-      for day in 0..tmains_daily.size - 1
-        dwhr_WHinTadj = dwhr_iFrac * (dwhr_inT - tmains_daily[day]) * hot_water_distribution.dwhr_efficiency * dwhr_eff_adj * dwhr_plc * dwhr_locF * dwhr_fixF
+      for day in 0..wh_temps_daily.size - 1
+        dwhr_WHinTadj = dwhr_iFrac * (dwhr_inT - wh_temps_daily[day]) * hot_water_distribution.dwhr_efficiency * dwhr_eff_adj * dwhr_plc * dwhr_locF * dwhr_fixF
         wh_temps_daily[day] = (wh_temps_daily[day] + dwhr_WHinTadj).round(3)
       end
     else
-      for day in 0..tmains_daily.size - 1
+      for day in 0..wh_temps_daily.size - 1
         wh_temps_daily[day] = (wh_temps_daily[day]).round(3)
       end
     end
@@ -1066,7 +1060,7 @@ class HotWaterAndAppliances
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
                                              HPXML::LocationBasementUnconditioned,
                                              HPXML::LocationBasementConditioned,
-                                             HPXML::LocationLivingSpace]
+                                             HPXML::LocationConditionedSpace]
 
     extra_refrigerator_location = nil
     extra_refrigerator_location_hierarchy.each do |location|
