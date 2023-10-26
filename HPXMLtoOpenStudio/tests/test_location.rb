@@ -65,38 +65,44 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
 
-    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(runner, 13.4, 0.7, 25, 30, weather.header)
     assert_equal(12.5, ts_amp_1)
     assert_equal(-1.3, ts_amp_2)
     assert_equal(20, pl_1)
     assert_equal(31, pl_2)
+    assert_equal(0, runner.result.stepWarnings.size)
 
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'), runner: runner)
 
-    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(runner, 13.4, 0.7, 25, 30, weather.header)
     assert_equal(2.6, ts_amp_1)
     assert_equal(0.1, ts_amp_2)
     assert_equal(37, pl_1)
     assert_equal(-13, pl_2)
+    assert_equal(0, runner.result.stepWarnings.size)
 
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'ZAF_Cape.Town.688160_IWEC.epw'), runner: runner)
 
-    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(runner, 13.4, 0.7, 25, 30, weather.header)
     assert_equal(13.4, ts_amp_1)
     assert_equal(0.7, ts_amp_2)
     assert_equal(25, pl_1)
     assert_equal(30, pl_2)
+    assert_equal(1, runner.result.stepWarnings.size)
+    assert_equal(1, runner.result.stepWarnings.select { |w| w == "Could not find appropriate (38.738 > 3) amplitude values from Xing's model; using default values." }.size)
 
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
     weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'US_CO_Boulder_AMY_2012.epw'), runner: runner)
 
-    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(13.4, 0.7, 25, 30, weather.header)
+    ts_amp_1, ts_amp_2, pl_1, pl_2 = Location.get_xing_amplitudes(runner, 13.4, 0.7, 25, 30, weather.header)
     assert_equal(12.3, ts_amp_1)
     assert_equal(1.1, ts_amp_2)
     assert_equal(19, pl_1)
     assert_equal(-34, pl_2)
+    assert_equal(1, runner.result.stepWarnings.size)
+    assert_equal(1, runner.result.stepWarnings.select { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' }.size)
   end
 
   def _test_measure(args_hash)

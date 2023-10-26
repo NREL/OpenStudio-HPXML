@@ -90,7 +90,7 @@ class Location
     return supplement_table_short_grass_csv
   end
 
-  def self.get_xing_amplitudes(ts_amp_1, ts_amp_2, pl_1, pl_2, weather_header)
+  def self.get_xing_amplitudes(runner, ts_amp_1, ts_amp_2, pl_1, pl_2, weather_header)
     supplement_table_short_grass = get_supplement_table_short_grass
 
     require 'csv'
@@ -107,7 +107,12 @@ class Location
         dist = new_dist
       end
     end
-    return [ts_amp_1, ts_amp_2, pl_1, pl_2] if dist > 1 # return default values; not close enough
+
+    tol = 3
+    if dist > tol # return default values; not close enough
+      runner.registerWarning("Could not find appropriate (#{dist.round(3)} > #{tol}) amplitude values from Xing's model; using default values.")
+      return [ts_amp_1, ts_amp_2, pl_1, pl_2]
+    end
 
     return xing_amplitudes
   end

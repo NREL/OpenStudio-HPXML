@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8241099e-b8ab-4173-b24a-7ba973e31256</version_id>
-  <version_modified>2023-10-25T18:23:26Z</version_modified>
+  <version_id>72c82828-ba8d-4370-9d7c-ff59ecf4163e</version_id>
+  <version_modified>2023-10-26T22:26:40Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -340,7 +340,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24209964</checksum>
+      <checksum>4BB9793E</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -358,7 +358,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7AFF8F33</checksum>
+      <checksum>87BAD346</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -604,7 +604,7 @@
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B31B84C7</checksum>
+      <checksum>2CE30469</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
