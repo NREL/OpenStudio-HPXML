@@ -1086,6 +1086,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_fan_watts_per_cfm', false)
+    arg.setDisplayName('Heating System: Blower Fan Efficiency')
+    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to #{HPXML::HVACTypeFurnace}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('W/CFM')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
     arg.setDisplayName('Cooling System: Type')
     arg.setDescription("The type of cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.")
@@ -1150,6 +1156,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Crankcase Heater Power Watts')
     arg.setDescription("Cooling system crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeCentralAirConditioner}, #{HPXML::HVACTypeMiniSplitAirConditioner}, #{HPXML::HVACTypePTAC} and #{HPXML::HVACTypeRoomAirConditioner}. If not provided, the OS-HPXML default is used.")
     arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_fan_watts_per_cfm', false)
+    arg.setDisplayName('Cooling System: Blower Fan Efficiency')
+    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('W/CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_integrated_heating_system_fuel', heating_system_fuel_choices, false)
@@ -1345,6 +1357,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
     arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default is used.")
     arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_fan_watts_per_cfm', false)
+    arg.setDisplayName('Heat Pump: Blower Fan Efficiency')
+    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default is used.")
+    arg.setUnits('W/CFM')
     args << arg
 
     heating_system_2_type_choices = OpenStudio::StringVector.new
@@ -4680,6 +4698,12 @@ class HPXMLFile
       end
     end
 
+    if args[:heating_system_fan_watts_per_cfm].is_initialized
+      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
+        heating_system_fan_watts_per_cfm = args[:heating_system_fan_watts_per_cfm].get
+      end
+    end
+
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
 
     if heating_system_type.include?('Shared')
@@ -4702,6 +4726,7 @@ class HPXMLFile
                               airflow_defect_ratio: airflow_defect_ratio,
                               pilot_light: pilot_light,
                               pilot_light_btuh: pilot_light_btuh,
+                              fan_watts_per_cfm: heating_system_fan_watts_per_cfm,
                               is_shared_system: is_shared_system,
                               number_of_units_served: number_of_units_served,
                               primary_system: true)
@@ -4758,6 +4783,12 @@ class HPXMLFile
       end
     end
 
+    if args[:cooling_system_fan_watts_per_cfm].is_initialized
+      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
+        cooling_system_fan_watts_per_cfm = args[:cooling_system_fan_watts_per_cfm].get
+      end
+    end
+
     if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type)
       if args[:cooling_system_integrated_heating_system_fuel].is_initialized
         integrated_heating_system_fuel = args[:cooling_system_integrated_heating_system_fuel].get
@@ -4790,6 +4821,7 @@ class HPXMLFile
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: charge_defect_ratio,
                               crankcase_heater_watts: cooling_system_crankcase_heater_watts,
+                              fan_watts_per_cfm: cooling_system_fan_watts_per_cfm,
                               primary_system: true,
                               integrated_heating_system_fuel: integrated_heating_system_fuel,
                               integrated_heating_system_capacity: integrated_heating_system_capacity,
@@ -4897,6 +4929,12 @@ class HPXMLFile
       end
     end
 
+    if args[:heat_pump_fan_watts_per_cfm].is_initialized
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
+        heat_pump_fan_watts_per_cfm = args[:heat_pump_fan_watts_per_cfm].get
+      end
+    end
+
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 
@@ -4941,6 +4979,7 @@ class HPXMLFile
                          airflow_defect_ratio: airflow_defect_ratio,
                          charge_defect_ratio: charge_defect_ratio,
                          crankcase_heater_watts: heat_pump_crankcase_heater_watts,
+                         fan_watts_per_cfm: heat_pump_fan_watts_per_cfm,
                          primary_heating_system: primary_heating_system,
                          primary_cooling_system: primary_cooling_system)
   end
