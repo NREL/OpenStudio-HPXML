@@ -2264,6 +2264,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_battery_present', true)
+    arg.setDisplayName('Electric Vehicle Battery: Present')
+    arg.setDescription('Whether there is an electric vehicle battery present.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_power', false)
+    arg.setDisplayName('Electric Vehicle Battery: Rated Power Output')
+    arg.setDescription('The rated power output of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_capacity', false)
+    arg.setDisplayName('Electric Vehicle Battery: Nominal Capacity')
+    arg.setDescription('The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_usable_capacity', false)
+    arg.setDisplayName('Electric Vehicle Battery: Usable Capacity')
+    arg.setDescription('The usable capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_round_trip_efficiency', false)
+    arg.setDisplayName('Electric Vehicle Battery: Round Trip Efficiency')
+    arg.setDescription('The round trip efficiency of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('Frac')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -3409,6 +3439,7 @@ class HPXMLFile
     set_solar_thermal(hpxml, args, epw_file)
     set_pv_systems(hpxml, args, epw_file)
     set_battery(hpxml, args)
+    set_ev_battery(hpxml, args)
     set_lighting(hpxml, args)
     set_dehumidifier(hpxml, args)
     set_clothes_washer(hpxml, args)
@@ -5805,6 +5836,37 @@ class HPXMLFile
 
     hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
+                        location: location,
+                        rated_power_output: rated_power_output,
+                        nominal_capacity_kwh: nominal_capacity_kwh,
+                        usable_capacity_kwh: usable_capacity_kwh,
+                        round_trip_efficiency: round_trip_efficiency)
+  end
+
+  def self.set_ev_battery(hpxml, args)
+    return unless args[:ev_battery_present]
+
+    location = get_location("outside", hpxml.foundations[-1].foundation_type, hpxml.attics[-1].attic_type)
+
+    if args[:ev_battery_power].is_initialized
+      rated_power_output = args[:ev_battery_power].get
+    end
+
+    if args[:ev_battery_capacity].is_initialized
+      nominal_capacity_kwh = args[:ev_battery_capacity].get
+    end
+
+    if args[:ev_battery_usable_capacity].is_initialized
+      usable_capacity_kwh = args[:ev_battery_usable_capacity].get
+    end
+
+    if args[:ev_battery_round_trip_efficiency].is_initialized
+      round_trip_efficiency = args[:ev_battery_round_trip_efficiency].get
+    end
+
+    hpxml.batteries.add(id: "EV_Battery#{hpxml.batteries.size + 1}",
+                        type: HPXML::BatteryTypeLithiumIon,
+                        is_ev: true,
                         location: location,
                         rated_power_output: rated_power_output,
                         nominal_capacity_kwh: nominal_capacity_kwh,
