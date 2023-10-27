@@ -23,6 +23,7 @@ __New Features__
 - Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
 - Updates ground temperatures using a correlation based on L. Xing's simplified design model (2014).
 - Improvements to HERS & MaxLoad heat pump sizing methodologies.
+- Allows `WaterFixture/FlowRate` as an alternative to `LowFlow`; hot water credit is now calculated based on fraction of low flow fixtures.
 - Added README.md documentation for all OpenStudio measures.
 
 __Bugfixes__
