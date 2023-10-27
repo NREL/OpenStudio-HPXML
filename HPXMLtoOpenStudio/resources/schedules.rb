@@ -1366,6 +1366,9 @@ class SchedulesFile
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
+  ColumnEVBattery = 'ev_battery'
+  ColumnEVBatteryCharging = 'ev_battery_charging'
+  ColumnEVBatteryDischarging = 'ev_battery_discharging'
   ColumnHVAC = 'hvac'
   ColumnWaterHeater = 'water_heater'
   ColumnDehumidifier = 'dehumidifier'
@@ -1665,6 +1668,7 @@ class SchedulesFile
         next if column_names.include? schedule_name
         next if SchedulesFile.OperatingModeColumnNames.include?(schedule_name)
         next if SchedulesFile.BatteryColumnNames.include?(schedule_name)
+        next if SchedulesFile.EVBatteryColumnNames.include?(schedule_name)
 
         schedule_name2 = schedule_name
         if [SchedulesFile::ColumnHotWaterDishwasher].include?(schedule_name)
@@ -1707,22 +1711,31 @@ class SchedulesFile
   end
 
   def battery_schedules
-    return if !@schedules.keys.include?(SchedulesFile::ColumnBattery)
+    return if (!@schedules.keys.include?(SchedulesFile::ColumnBattery) && !@schedules.keys.include?(SchedulesFile::ColumnEVBattery))
+    if battery.is_ev
+      battery_col = SchedulesFile::ColumnEVBattery
+      charging_col = SchedulesFile::ColumnEVBatteryCharging
+      discharging_col = SchedulesFile::ColumnEVBatteryDischarging
+    else
+      battery_col = SchedulesFile::ColumnBattery
+      charging_col = SchedulesFile::ColumnBatteryCharging
+      discharging_col = SchedulesFile::ColumnBatteryDischarging
+    end
 
-    @schedules[SchedulesFile::ColumnBatteryCharging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
-    @schedules[SchedulesFile::ColumnBatteryDischarging] = Array.new(@schedules[SchedulesFile::ColumnBattery].size, 0)
-    @schedules[SchedulesFile::ColumnBattery].each_with_index do |_ts, i|
-      if @schedules[SchedulesFile::ColumnBattery][i] > 0
-        @schedules[SchedulesFile::ColumnBatteryCharging][i] = @schedules[SchedulesFile::ColumnBattery][i]
-      elsif @schedules[SchedulesFile::ColumnBattery][i] < 0
-        @schedules[SchedulesFile::ColumnBatteryDischarging][i] = -1 * @schedules[SchedulesFile::ColumnBattery][i]
+    @schedules[charging_col] = Array.new(@schedules[battery_col].size, 0)
+    @schedules[discharging_col] = Array.new(@schedules[battery_col].size, 0)
+    @schedules[battery_col].each_with_index do |_ts, i|
+      if @schedules[battery_col][i] > 0
+        @schedules[charging_col][i] = @schedules[battery_col][i]
+      elsif @schedules[battery_col][i] < 0
+        @schedules[discharging_col][i] = -1 * @schedules[battery_col][i]
       end
     end
-    @schedules.delete(SchedulesFile::ColumnBattery)
+    @schedules.delete(battery_col)
   end
 
   def self.ColumnNames
-    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames
+    return SchedulesFile.OccupancyColumnNames + SchedulesFile.HVACSetpointColumnNames + SchedulesFile.WaterHeaterColumnNames + SchedulesFile.BatteryColumnNames + SchedulesFile.EVBatteryColumnNames
   end
 
   def self.OccupancyColumnNames
@@ -1793,6 +1806,14 @@ class SchedulesFile
     ]
   end
 
+  def self.EVBatteryColumnNames
+    return [
+      ColumnEVBattery,
+      ColumnEVBatteryCharging,
+      ColumnEVBatteryDischarging
+    ]
+  end
+
   def max_value_one
     max_value_one = {}
     column_names = SchedulesFile.ColumnNames
@@ -1810,7 +1831,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       min_value_zero[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name) || SchedulesFile.EVBatteryColumnNames.include?(column_name)
         min_value_zero[column_name] = false
       end
     end

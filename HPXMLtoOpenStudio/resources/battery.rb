@@ -4,9 +4,17 @@ class Battery
   def self.apply(runner, model, pv_systems, battery, schedules_file)
     charging_schedule = nil
     discharging_schedule = nil
+    if battery.is_ev
+      charging_col = SchedulesFile::ColumnEVBatteryCharging
+      discharging_col = SchedulesFile::ColumnEVBatteryDischarging
+    else
+      charging_col = SchedulesFile::ColumnBatteryCharging
+      discharging_col = SchedulesFile::ColumnBatteryDischarging
+    end
+
     if not schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryCharging)
-      discharging_schedule = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnBatteryDischarging)
+      charging_schedule = schedules_file.create_schedule_file(col_name: charging_col)
+      discharging_schedule = schedules_file.create_schedule_file(col_name: discharging_col)
     end
 
     if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
