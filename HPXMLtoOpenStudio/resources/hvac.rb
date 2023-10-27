@@ -1287,7 +1287,7 @@ class HVAC
     min_capacity_95 = max_capacity_95 / hp_ap.cool_capacity_ratios[-1] * hp_ap.cool_capacity_ratios[0]
     min_cop_95 = is_ducted ? max_cop_95 * 1.231 : max_cop_95 * (0.01377 * seer + 1.13948)
     max_capacity_82 = max_capacity_95 * max_cap_maint_82
-    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.375 * max_cop_95)
+    max_cop_82 = is_ducted ? (1.297 * max_cop_95) : (1.300 * max_cop_95)
     min_capacity_82 = min_capacity_95 * 1.099
     min_cop_82 = is_ducted ? (1.402 * min_cop_95) : (1.333 * min_cop_95)
 
@@ -3149,10 +3149,8 @@ class HVAC
       # Fan not separately modeled
       hvac_ap.fan_power_rated = 0.0
     elsif hvac_system.distribution_system.nil?
-      # Ductless
-      # Should typically have the same fan power as installed, but we need to use a fixed value
-      # so that, e.g., grade 3 installation quality (0.58 W/cfm) has the appropriate effect.
-      hvac_ap.fan_power_rated = 0.07 # W/cfm
+      # Ductless, installed and rated value should be equal
+      hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
     else
       # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
       if hvac_system.cooling_efficiency_seer <= 14
