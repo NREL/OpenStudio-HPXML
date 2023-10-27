@@ -1526,6 +1526,7 @@ class SchedulesFile
     schedule_file.setRowstoSkipatTop(rows_to_skip)
     schedule_file.setNumberofHoursofData(num_hrs_in_year.to_i)
     schedule_file.setMinutesperItem(min_per_item.to_i)
+    schedule_file.setTranslateFileName(true)
 
     Schedule.set_schedule_type_limits(@model, schedule_file, schedule_type_limits_name)
 
