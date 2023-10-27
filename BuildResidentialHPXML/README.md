@@ -1733,19 +1733,6 @@ The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / Design
 
 <br/>
 
-**Heating System: Blower Fan Efficiency**
-
-The blower fan efficiency at maximum fan speed. Applies only to Furnace. If not provided, the OS-HPXML default is used.
-
-- **Name:** ``heating_system_fan_watts_per_cfm``
-- **Type:** ``Double``
-
-- **Units:** ``W/CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Cooling System: Type**
 
 The type of cooling system. Use 'none' if there is no cooling system or if there is a heat pump serving a cooling load.
@@ -1880,19 +1867,6 @@ Cooling system crankcase heater power consumption in Watts. Applies only to cent
 - **Type:** ``Double``
 
 - **Units:** ``W``
-
-- **Required:** ``false``
-
-<br/>
-
-**Cooling System: Blower Fan Efficiency**
-
-The blower fan efficiency at maximum fan speed. Applies only to central air conditioner and mini-split. If not provided, the OS-HPXML default is used.
-
-- **Name:** ``cooling_system_fan_watts_per_cfm``
-- **Type:** ``Double``
-
-- **Units:** ``W/CFM``
 
 - **Required:** ``false``
 
@@ -2254,19 +2228,6 @@ Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-ai
 
 <br/>
 
-**Heat Pump: Blower Fan Efficiency**
-
-The blower fan efficiency at maximum fan speed. Applies only to air-to-air, mini-split, and ground-to-air. If not provided, the OS-HPXML default is used.
-
-- **Name:** ``heat_pump_fan_watts_per_cfm``
-- **Type:** ``Double``
-
-- **Units:** ``W/CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heating System 2: Type**
 
 The type of the second heating system.
@@ -2329,6 +2290,19 @@ The heat load served fraction of the second heating system. Ignored if this heat
 - **Units:** ``Frac``
 
 - **Required:** ``true``
+
+<br/>
+
+**HVAC Distribution: Blower Fan Efficiency**
+
+The blower fan efficiency at maximum fan speed. Applies only to Furnace heating system, central air conditioner and mini-split cooling systems, and air-to-air, mini-split, and ground-to-air heat pumps. If not provided, the OS-HPXML default is used.
+
+- **Name:** ``hvac_distribution_fan_watts_per_cfm``
+- **Type:** ``Double``
+
+- **Units:** ``W/CFM``
+
+- **Required:** ``false``
 
 <br/>
 
