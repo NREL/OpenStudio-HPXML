@@ -1968,6 +1968,15 @@ class HPXMLDefaults
   def self.apply_water_fixtures(hpxml, schedules_file)
     return if hpxml.hot_water_distributions.size == 0
 
+    hpxml.water_fixtures.each do |wf|
+      next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? wf.water_fixture_type
+
+      if wf.low_flow.nil?
+        wf.low_flow = (wf.flow_rate <= 2.0)
+        wf.low_flow_isdefaulted = true
+      end
+    end
+
     if hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
       hpxml.water_heating.water_fixtures_usage_multiplier_isdefaulted = true

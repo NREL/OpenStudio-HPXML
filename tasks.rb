@@ -1767,6 +1767,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                     water_heating_system_idref: nil, # Apply to all water heaters
                                     solar_fraction: 0.65)
   end
+  if ['base-dhw-low-flow-fixtures.xml'].include? hpxml_file
+    hpxml.water_fixtures[0].count = 2
+    hpxml.water_fixtures[1].low_flow = nil
+    hpxml.water_fixtures[1].flow_rate = 2.0
+    hpxml.water_fixtures[1].count = 3
+  end
 
   # -------------------- #
   # HPXML VentilationFan #
