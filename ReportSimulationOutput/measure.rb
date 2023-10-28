@@ -495,10 +495,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
       # Also report thermostat setpoints
       if has_heating
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationConditionedSpace.upcase},Zone Thermostat Heating Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
       if has_cooling
-        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationLivingSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
+        result << OpenStudio::IdfObject.load("Output:Variable,#{HPXML::LocationConditionedSpace.upcase},Zone Thermostat Cooling Setpoint Temperature,#{args[:timeseries_frequency]};").get
       end
     end
 
@@ -961,69 +961,69 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @resilience.each do |key, resilience|
       next unless key == RT::Battery
       next unless (args[:include_annual_resilience] || args[:include_timeseries_resilience])
+      next if resilience.variables.empty?
 
-      resilience.variables.map { |v| v[0] }.uniq.each do |sys_id|
-        keys = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[1] }
-        vars = resilience.variables.select { |v| v[0] == sys_id }.map { |v| v[2] }
+      resilience_frequency = 'timestep'
+      ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
+      if args[:timeseries_frequency] != 'timestep'
+        resilience_frequency = 'hourly'
+        ts_per_hr = 1
+      end
 
-        minimum_storage_state_of_charge_fraction = nil
-        batt_kwh = nil
-        batt_kw = nil
-        batt_roundtrip_eff = nil
-        batt_loss = nil
+      vars = ['Electric Storage Charge Fraction']
+      keys = resilience.variables.select { |v| v[2] == vars[0] }.map { |v| v[1] }
+      batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
 
-        @hpxml.batteries.each do |battery|
-          @model.getElectricLoadCenterDistributions.each do |elcd|
-            battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
-            next unless (battery_id.is_initialized && battery_id.get == battery.id)
+      keys = ['EMS']
+      vars = resilience.variables.select { |v| v[1] == keys[0] }.map { |v| v[2] }
+      batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(-1.0, 'J', 'kWh'), 0, resilience_frequency)
 
-            minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
-          end
+      minimum_storage_state_of_charge_fraction = nil
+      batt_kwh = nil
+      batt_kw = nil
+      batt_roundtrip_eff = nil
 
-          batt_kw = battery.rated_power_output / 1000.0
-          batt_roundtrip_eff = battery.round_trip_efficiency
+      @hpxml.batteries.each do |battery|
+        @model.getElectricLoadCenterDistributions.each do |elcd|
+          battery_id = elcd.additionalProperties.getFeatureAsString('HPXML_ID')
+          next unless (battery_id.is_initialized && battery_id.get == battery.id)
 
-          @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
-            battery_id = elcs.additionalProperties.getFeatureAsString('HPXML_ID')
-            next unless (battery_id.is_initialized && battery_id.get == battery.id)
-
-            batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
-            batt_loss = "#{Constants.ObjectNameBatteryLossesAdjustment(elcs.name)} outvar"
-          end
+          minimum_storage_state_of_charge_fraction = elcd.minimumStorageStateofChargeFraction
         end
 
-        resilience_frequency = 'timestep'
-        ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
-        if args[:timeseries_frequency] != 'timestep'
-          resilience_frequency = 'hourly'
-          ts_per_hr = 1
+        batt_kw = battery.rated_power_output / 1000.0
+        batt_roundtrip_eff = battery.round_trip_efficiency
+
+        @model.getElectricLoadCenterStorageLiIonNMCBatterys.each do |elcs|
+          battery_id = elcs.additionalProperties.getFeatureAsString('HPXML_ID')
+          next unless (battery_id.is_initialized && battery_id.get == battery.id)
+
+          batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
         end
+      end
 
-        batt_soc = get_report_variable_data_timeseries(keys, vars, 1, 0, resilience_frequency)
-        batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
-        elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        batt_loss = get_report_variable_data_timeseries(['EMS'], [batt_loss], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
-        elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
-        crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
+      batt_soc_kwh = batt_soc.map { |soc| soc - minimum_storage_state_of_charge_fraction }.map { |soc| soc * batt_kwh }
+      elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      elec_stor = get_report_meter_data_timeseries(['ElectricStorage:ElectricityProduced'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      elec_prod = elec_prod.zip(elec_stor).map { |x, y| -1 * (x - y) }
+      elec = get_report_meter_data_timeseries(['Electricity:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
+      crit_load = elec.zip(elec_prod, batt_loss).map { |x, y, z| x + y + z }
 
-        resilience_timeseries = []
-        n_timesteps = crit_load.size
-        (0...n_timesteps).each do |init_time_step|
-          resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
-        end
+      resilience_timeseries = []
+      n_timesteps = crit_load.size
+      (0...n_timesteps).each do |init_time_step|
+        resilience_timeseries << get_resilience_timeseries(init_time_step, batt_kwh, batt_kw, batt_soc_kwh[init_time_step], crit_load, batt_roundtrip_eff, n_timesteps, ts_per_hr)
+      end
 
-        resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
+      resilience.annual_output = resilience_timeseries.sum(0.0) / resilience_timeseries.size
 
-        next unless args[:include_timeseries_resilience]
+      next unless args[:include_timeseries_resilience]
 
-        resilience.timeseries_output = resilience_timeseries
+      resilience.timeseries_output = resilience_timeseries
 
-        # Aggregate up from hourly to the desired timeseries frequency
-        if ['daily', 'monthly'].include? args[:timeseries_frequency]
-          resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
-        end
+      # Aggregate up from hourly to the desired timeseries frequency
+      if ['daily', 'monthly'].include? args[:timeseries_frequency]
+        resilience.timeseries_output = rollup_timeseries_output_to_daily_or_monthly(resilience.timeseries_output, args[:timeseries_frequency], true)
       end
     end
 
@@ -1059,7 +1059,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         @zone_temps[sp_name] = ZoneTemp.new
         @zone_temps[sp_name].name = "Temperature: #{sp_name}"
         @zone_temps[sp_name].timeseries_units = 'F'
-        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationLivingSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
+        @zone_temps[sp_name].timeseries_output = get_report_variable_data_timeseries([HPXML::LocationConditionedSpace.upcase], [sp_var], 9.0 / 5.0, 32.0, args[:timeseries_frequency])
       end
     end
 
@@ -1519,27 +1519,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def append_sizing_results(results_out, line_break)
     # Summary HVAC capacities
-    htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
-    @hpxml.hvac_systems.each do |hvac_system|
-      if hvac_system.is_a? HPXML::HeatingSystem
-        next if hvac_system.is_heat_pump_backup_system
-
-        htg_cap += hvac_system.heating_capacity.to_f
-      elsif hvac_system.is_a? HPXML::CoolingSystem
-        clg_cap += hvac_system.cooling_capacity.to_f
-        if hvac_system.has_integrated_heating
-          htg_cap += hvac_system.integrated_heating_system_capacity.to_f
-        end
-      elsif hvac_system.is_a? HPXML::HeatPump
-        htg_cap += hvac_system.heating_capacity.to_f
-        clg_cap += hvac_system.cooling_capacity.to_f
-        if hvac_system.backup_type == HPXML::HeatPumpBackupTypeIntegrated
-          hp_backup_cap += hvac_system.backup_heating_capacity.to_f
-        elsif hvac_system.backup_type == HPXML::HeatPumpBackupTypeSeparate
-          hp_backup_cap += hvac_system.backup_system.heating_capacity.to_f
-        end
-      end
-    end
+    htg_cap, clg_cap, hp_backup_cap = Outputs.get_total_hvac_capacities(@hpxml)
     results_out << ['HVAC Capacity: Heating (Btu/h)', htg_cap.round(1)]
     results_out << ['HVAC Capacity: Cooling (Btu/h)', clg_cap.round(1)]
     results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hp_backup_cap.round(1)]
@@ -2272,8 +2252,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Elec, EUT::WellPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::WellPump]))
     @end_uses[[FT::Elec, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolHeater]))
     @end_uses[[FT::Elec, EUT::PoolPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PoolPump]))
-    @end_uses[[FT::Elec, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubHeater]))
-    @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::HotTubPump]))
+    @end_uses[[FT::Elec, EUT::PermanentSpaHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PermanentSpaHeater]))
+    @end_uses[[FT::Elec, EUT::PermanentSpaPump]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PermanentSpaPump]))
     @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::PV]),
                                                 is_negative: true)
     @end_uses[[FT::Elec, EUT::Generator]] = EndUse.new(variables: get_object_variables(EUT, [FT::Elec, EUT::Generator]),
@@ -2287,7 +2267,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::RangeOven]))
     @end_uses[[FT::Gas, EUT::MechVentPreheat]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::MechVentPreheat]))
     @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PoolHeater]))
-    @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::HotTubHeater]))
+    @end_uses[[FT::Gas, EUT::PermanentSpaHeater]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::PermanentSpaHeater]))
     @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Grill]))
     @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Lighting]))
     @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(variables: get_object_variables(EUT, [FT::Gas, EUT::Fireplace]))
@@ -2671,13 +2651,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if not is_combi_boiler # Exclude combi boiler, whose heating & dhw energy is handled separately via EMS
           fuel = object.to_BoilerHotWater.get.fuelType
           if not is_heat_pump_backup(sys_id)
-            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::Heating] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           else
-            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy"] }
+            return { [to_ft[fuel], EUT::HeatingHeatPumpBackup] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
           end
         else
           fuel = object.to_BoilerHotWater.get.fuelType
-          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy"] }
+          return { [to_ft[fuel], EUT::HotWater] => ["Boiler #{fuel} Energy", "Boiler Ancillary #{fuel} Energy"] }
         end
 
       elsif object.to_CoilCoolingDXSingleSpeed.is_initialized || object.to_CoilCoolingDXMultiSpeed.is_initialized
@@ -2768,8 +2748,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscTelevision => EUT::Television,
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
                     Constants.ObjectNameMiscPoolPump => EUT::PoolPump,
-                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
-                    Constants.ObjectNameMiscHotTubPump => EUT::HotTubPump,
+                    Constants.ObjectNameMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
+                    Constants.ObjectNameMiscPermanentSpaPump => EUT::PermanentSpaPump,
                     Constants.ObjectNameMiscElectricVehicleCharging => EUT::Vehicle,
                     Constants.ObjectNameMiscWellPump => EUT::WellPump }[object.to_ElectricEquipment.get.endUseSubcategory]
         if not end_use.nil?
@@ -2784,7 +2764,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                     Constants.ObjectNameMiscLighting => EUT::Lighting,
                     Constants.ObjectNameMiscFireplace => EUT::Fireplace,
                     Constants.ObjectNameMiscPoolHeater => EUT::PoolHeater,
-                    Constants.ObjectNameMiscHotTubHeater => EUT::HotTubHeater,
+                    Constants.ObjectNameMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
                     Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
                     Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool }[object.to_OtherEquipment.get.endUseSubcategory]
         if not end_use.nil?
@@ -2806,9 +2786,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           return { [to_ft[fuel], EUT::HotWater] => [object.name.to_s] }
         elsif object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
           return { [FT::Elec, EUT::Battery] => [object.name.to_s] }
-        elsif object.name.to_s.include? Constants.ObjectNameBoilerPilotLight(nil)
-          fuel = object.additionalProperties.getFeatureAsString('FuelType').get
-          return { [to_ft[fuel], EUT::Heating] => [object.name.to_s] }
         else
           return { ems: [object.name.to_s] }
         end
@@ -2882,6 +2859,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       if object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
         return { RT::Battery => ['Electric Storage Charge Fraction'] }
+
+      elsif object.to_EnergyManagementSystemOutputVariable.is_initialized
+        if object.name.to_s.include? Constants.ObjectNameBatteryLossesAdjustment(nil)
+          return { RT::Battery => [object.name.to_s] }
+        end
+
       end
     end
 
