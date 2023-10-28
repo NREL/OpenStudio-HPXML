@@ -632,19 +632,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    roof_radiant_barrier_location_choices = OpenStudio::StringVector.new
-    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationUndersideOfRafters
-    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationAtticFloor
-    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationBelowBottomChordOfTruss
-    roof_radiant_barrier_location_choices << HPXML::RadiantBarrierLocationTopsideOfTrussUnderSheathing
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_location', roof_radiant_barrier_location_choices, false)
-    arg.setDisplayName('Roof: Radiant Barrier Location')
-    arg.setDescription('The location of the radiant barrier. If not provided, the OS-HPXML default is used.')
-    arg.setDefaultValue(HPXML::RadiantBarrierLocationTopsideOfTrussUnderSheathing)
-    args << arg
-
-
     roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
     roof_radiant_barrier_grade_choices << '1'
     roof_radiant_barrier_grade_choices << '2'
@@ -655,6 +642,53 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The grade of the radiant barrier. If not provided, the OS-HPXML default is used.')
     arg.setDefaultValue('1')
     args << arg
+
+    radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
+    radiant_barrier_attic_location_choices << 'Attic roof only'
+    radiant_barrier_attic_location_choices << 'Attic roof and gable walls'
+    radiant_barrier_attic_location_choices << 'Attic floor'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
+    arg.setDisplayName('Roof: Radiant Barrier Attic Location')
+    arg.setDescription('The location of the radiant barrier in the attic')
+    arg.setDefaultValue('Attic roof only')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('wall_radiant_barrier', true)
+    arg.setDisplayName('Wall: Has Radiant Barrier')
+    arg.setDescription('Presence of a radiant barrier in the gable wall.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    wall_radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    wall_radiant_barrier_grade_choices << '1'
+    wall_radiant_barrier_grade_choices << '2'
+    wall_radiant_barrier_grade_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('wall_radiant_barrier_grade', wall_radiant_barrier_grade_choices, false)
+    arg.setDisplayName('Roof: Radiant Barrier Grade')
+    arg.setDescription('The grade of the radiant barrier. If not provided, the OS-HPXML default is used.')
+    arg.setDefaultValue('1')
+    args << arg
+
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('floor_radiant_barrier', true)
+    arg.setDisplayName('Floor: Has Radiant Barrier')
+    arg.setDescription('Presence of a radiant barrier in the attic floor.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    floor_radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    floor_radiant_barrier_grade_choices << '1'
+    floor_radiant_barrier_grade_choices << '2'
+    floor_radiant_barrier_grade_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_radiant_barrier_grade', floor_radiant_barrier_grade_choices, false)
+    arg.setDisplayName('Floor: Radiant Barrier Grade')
+    arg.setDescription('The grade of the radiant barrier. If not provided, the OS-HPXML default is used.')
+    arg.setDefaultValue('1')
+    args << arg
+
 
     wall_type_choices = OpenStudio::StringVector.new
     wall_type_choices << HPXML::WallTypeWoodStud
@@ -4056,12 +4090,11 @@ class HPXMLFile
         roof_color = args[:roof_color].get
       end
 
-      radiant_barrier = args[:roof_radiant_barrier]
-      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_location].is_initialized
-        radiant_barrier_location = args[:roof_radiant_barrier_location].get
-      end
-      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
-        radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
+      if args[:roof_radiant_barrier_attic_location] == 'Attic roof only' || args[:roof_radiant_barrier_attic_location] == 'Attic roof and gable walls'
+        radiant_barrier = args[:roof_radiant_barrier]
+        if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
+          radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
+        end
       end
 
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
@@ -4078,7 +4111,6 @@ class HPXMLFile
                       roof_color: roof_color,
                       pitch: args[:geometry_roof_pitch],
                       radiant_barrier: radiant_barrier,
-                      radiant_barrier_location: radiant_barrier_location,
                       radiant_barrier_grade: radiant_barrier_grade,
                       insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml.roofs[-1].id
@@ -4189,6 +4221,14 @@ class HPXMLFile
         color = args[:wall_color].get
       end
 
+
+      if args[:roof_radiant_barrier_attic_location] == 'Attic roof and gable walls'
+        radiant_barrier = args[:wall_radiant_barrier]
+        if args[:wall_radiant_barrier] && args[:wall_radiant_barrier_grade].is_initialized
+          radiant_barrier_grade = args[:wall_radiant_barrier_grade].get
+        end
+      end
+
       azimuth = Geometry.get_surface_azimuth(surface: surface, orientation: args[:geometry_unit_orientation])
 
       hpxml.walls.add(id: "Wall#{hpxml.walls.size + 1}",
@@ -4199,6 +4239,8 @@ class HPXMLFile
                       attic_wall_type: attic_wall_type,
                       siding: siding,
                       color: color,
+                      radiant_barrier: radiant_barrier,
+                      radiant_barrier_grade: radiant_barrier_grade,
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'))
       @surface_ids[surface.name.to_s] = hpxml.walls[-1].id
 
@@ -4341,6 +4383,13 @@ class HPXMLFile
         end
       end
 
+      if args[:roof_radiant_barrier_attic_location] == 'Attic floor'
+        radiant_barrier = args[:floor_radiant_barrier]
+        if args[:floor_radiant_barrier] && args[:floor_radiant_barrier_grade].is_initialized
+          radiant_barrier_grade = args[:floor_radiant_barrier_grade].get
+        end
+      end
+
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
       next if [HPXML::LocationLivingSpace,
@@ -4352,7 +4401,9 @@ class HPXMLFile
                        interior_adjacent_to: interior_adjacent_to,
                        floor_type: args[:floor_type],
                        area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
-                       floor_or_ceiling: floor_or_ceiling)
+                       floor_or_ceiling: floor_or_ceiling,
+                       radiant_barrier: radiant_barrier,
+                       radiant_barrier_grade: radiant_barrier_grade,)
       if hpxml.floors[-1].floor_or_ceiling.nil?
         if hpxml.floors[-1].is_floor
           hpxml.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor

@@ -200,65 +200,6 @@
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
-	<xs:complexType name="DetailedConstruction">
-		<xs:annotation>
-			<xs:documentation>Can be used to describe properties for each individual material in the construction</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:group ref="SystemInfo"/>
-			<xs:element maxOccurs="unbounded" name="ConstructionLayer">
-				<xs:annotation>
-					<xs:documentation>Layers should be ordered from exterior to interior. Do not include air films.</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" name="LayerType" type="ConstructionLayerType"/>
-						<xs:element minOccurs="0" name="LayerThickness" type="LengthMeasurement">
-							<xs:annotation>
-								<xs:documentation>[in]</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element maxOccurs="unbounded" name="LayerMaterial">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="AreaFraction" type="FractionGreaterThanZero">
-										<xs:annotation>
-											<xs:documentation>Fraction of the layer's area defined by this material. Values across all materials in a layer should sum to 1.</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="MaterialType" type="xs:string">
-										<xs:annotation>
-											<xs:documentation>E.g., "wood", "concrete", "drywall", etc.</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="Conductivity" type="HPXMLDoubleGreaterThanZero">
-										<xs:annotation>
-											<xs:documentation>[Btu/hr-ft-F]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="Density" type="HPXMLDoubleGreaterThanZero">
-										<xs:annotation>
-											<xs:documentation>[lb/ft3]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="SpecificHeat" type="HPXMLDoubleGreaterThanZero">
-										<xs:annotation>
-											<xs:documentation>[Btu/lb-F]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="RValue" type="RValue"/>
-									<xs:element ref="extension" minOccurs="0"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element ref="extension" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
-			</xs:element>
-			<xs:element ref="extension" minOccurs="0"/>
-		</xs:sequence>
-		<xs:attribute name="dataSource" type="DataSource"/>
-	</xs:complexType>
 	<xs:complexType name="InsulationMaterial">
 		<xs:choice>
 			<xs:element name="Batt" type="InsulationBattType"/>
@@ -1048,7 +989,6 @@
 									<xs:element name="RadiantBarrierLocation" type="RadiantBarrierLocation" minOccurs="0"/>
 									<xs:element name="RadiantBarrierGrade" type="InsulationGrade" minOccurs="0"/>
 									<xs:element minOccurs="0" name="Insulation" type="InsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -1089,7 +1029,6 @@
 									<xs:element minOccurs="0" name="SolarAbsorptance" type="SolarAbsorptance"/>
 									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
 									<xs:element minOccurs="0" name="Insulation" type="InsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element minOccurs="0" name="FloorJoists" type="StudProperties"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
@@ -1142,8 +1081,9 @@
 									<xs:element minOccurs="0" name="SolarAbsorptance" type="SolarAbsorptance"/>
 									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
 									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"/>
+									<xs:element name="RadiantBarrier" type="HPXMLBoolean" minOccurs="0"/>
+									<xs:element name="RadiantBarrierGrade" type="InsulationGrade" minOccurs="0"/>
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -1211,7 +1151,6 @@
 									<xs:element minOccurs="0" name="InteriorStuds" type="StudProperties"/>
 									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"/>
 									<xs:element maxOccurs="1" minOccurs="0" name="Insulation" type="FoundationWallInsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -1250,8 +1189,9 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="InteriorFinish" type="InteriorFinishInfo"/>
+									<xs:element name="RadiantBarrier" type="HPXMLBoolean" minOccurs="0"/>
+									<xs:element name="RadiantBarrierGrade" type="InsulationGrade" minOccurs="0"/>
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -1306,7 +1246,6 @@
 									<xs:element minOccurs="0" name="FloorCovering" type="FloorCovering"/>
 									<xs:element maxOccurs="1" minOccurs="0" name="PerimeterInsulation" type="SlabPerimeterInsulationInfo"/>
 									<xs:element minOccurs="0" name="UnderSlabInsulation" type="UnderSlabInsulationInfo"/>
-									<xs:element minOccurs="0" name="DetailedConstruction" type="DetailedConstruction"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -2408,7 +2347,7 @@
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
-						<xs:element minOccurs="0" name="Location" type="LightingLocation"/>
+						<xs:element minOccurs="0" name="Location" type="LightingAndPlugLoadLocation"/>
 						<xs:element name="Count" type="HPXMLInteger" minOccurs="0"/>
 						<xs:element minOccurs="0" name="FractionofUnitsInLocation" type="Fraction">
 							<xs:annotation>
@@ -2478,7 +2417,7 @@
 						<xs:element minOccurs="0" name="AttachedToLightingGroup" type="LocalReference"/>
 						<xs:element name="LightingControlType" type="LightingControls" minOccurs="0"/>
 						<xs:element name="NumberofLightingControls" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
-						<xs:element name="Location" type="LightingLocation" minOccurs="0"/>
+						<xs:element name="Location" type="LightingAndPlugLoadLocation" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
@@ -3025,7 +2964,7 @@
 						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
 						<xs:element name="PlugLoadType" type="PlugLoadType" minOccurs="0"/>
-						<xs:element minOccurs="0" name="Location" type="PlugLoadLocation"/>
+						<xs:element minOccurs="0" name="Location" type="LightingAndPlugLoadLocation"/>
 						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 						<xs:element minOccurs="0" name="Load">
 							<xs:complexType>
@@ -3062,7 +3001,7 @@
 						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
 						<xs:element name="FuelLoadType" type="FuelLoadType" minOccurs="0"/>
-						<xs:element minOccurs="0" name="Location" type="FuelLoadLocation"/>
+						<xs:element minOccurs="0" name="Location" type="LightingAndPlugLoadLocation"/>
 						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 						<xs:element minOccurs="0" name="Load">
 							<xs:complexType>
@@ -3855,7 +3794,6 @@
 			<xs:element name="SpaceHeater">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Portable" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
@@ -4012,7 +3950,6 @@
 							</xs:sequence>
 						</xs:complexType>
 					</xs:element>
-					<xs:element name="RoomCoolingType" type="RoomCoolingType" minOccurs="0"/>
 					<xs:element minOccurs="0" name="IntegratedHeatingSystemFuel" type="FuelType"/>
 					<xs:element minOccurs="0" name="IntegratedHeatingSystemCapacity" type="Capacity">
 						<xs:annotation>
@@ -4233,6 +4170,7 @@
 								<xs:documentation>[sq.ft.]</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="DuctShape" type="DuctShape"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
@@ -4555,7 +4493,11 @@
 									<xs:element minOccurs="0" name="GaragePresent" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" name="GarageLocation" type="GarageLocation"/>
 									<xs:element minOccurs="0" name="SpaceAboveGarage" type="SpaceAboveGarage"/>
-									<xs:element minOccurs="0" name="ManufacturedHomeSections" type="ManufacturedHomeSections"/>
+									<xs:element minOccurs="0" name="ManufacturedHomeSections" type="ManufacturedHomeSections">
+										<xs:annotation>
+											<xs:documentation>The number of sections (width) of the manufactured home. CrossMod is a new style of manufactured home with more flexibility in configuration, higher roof pitch, covered porches, and garages or carports. They look more like a site-built single family detached home, but are manufactured in a factory and assembled on site. </xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -5339,14 +5281,9 @@
 						<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
 						<xs:element minOccurs="0" name="FrameType" type="WindowFrameType"/>
 						<xs:element minOccurs="0" name="Location" type="StormLocation"/>
-						<xs:element minOccurs="0" name="Operable" type="HPXMLBoolean">
+						<xs:element minOccurs="0" name="FractionOperable" type="Fraction">
 							<xs:annotation>
-								<xs:documentation>DEPRECATED. This will be removed in v4.0. Use FractionOperable element instead.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="FractionOperable" type="HPXMLBoolean">
-							<xs:annotation>
-								<xs:documentation>If the Window/Skylight element represents a single window/skylight, the value should be 0 or 1, otherwise the fraction of area that is operable.</xs:documentation>
+								<xs:documentation>Defined as the sum of the areas for operable storms divided by the sum of the areas for all storms. The fraction should not take into account how much a storm can be opened (e.g., 50% for a double hung storm). If the StormWindow element represents a single storm, the value should be 0 or 1.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="Condition" type="WindowCondition"/>
@@ -5391,14 +5328,9 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="WeatherStripping" type="HPXMLBoolean"/>
-			<xs:element minOccurs="0" name="Operable" type="HPXMLBoolean">
-				<xs:annotation>
-					<xs:documentation>DEPRECATED. This will be removed in v4.0. Use FractionOperable element instead.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
 			<xs:element minOccurs="0" name="FractionOperable" type="Fraction">
 				<xs:annotation>
-					<xs:documentation>The fraction of windows/skylights that are operable. If the Window/Skylight element represents a single window/skylight, the value should be 0 or 1.</xs:documentation>
+					<xs:documentation>Defined as the sum of the areas for operable windows divided by the sum of the areas for all windows. The fraction should not take into account how much a window can be opened (e.g., 50% for a double hung window). If the Window/Skylight element represents a single window/skylight, the value should be 0 or 1.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="LeakinessDescription" type="BuildingLeakiness"/>
@@ -5592,6 +5524,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" name="Finished" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="Walkout" type="HPXMLBoolean">
+							<xs:annotation>
+								<xs:documentation>A partially underground basement that has a door directly on grade to the outside, typically built on a sloping lot.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
@@ -6484,18 +6421,6 @@
 	<xs:complexType name="HPXMLDouble">
 		<xs:simpleContent>
 			<xs:extension base="xs:double">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="HPXMLDoubleGreaterThanZero_simple">
-		<xs:restriction base="xs:double">
-			<xs:minExclusive value="0"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="HPXMLDoubleGreaterThanZero">
-		<xs:simpleContent>
-			<xs:extension base="HPXMLDoubleGreaterThanZero_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -7615,6 +7540,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="AdjacentTo_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
@@ -7648,9 +7576,6 @@
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="AdjacentTo">
-		<xs:annotation>
-			<xs:documentation>DEPRECATION WARNING: Choices "other housing unit above" and "other housing unit below" will be deprecated in the future.</xs:documentation>
-		</xs:annotation>
 		<xs:simpleContent>
 			<xs:extension base="AdjacentTo_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
@@ -7851,7 +7776,7 @@
 	</xs:complexType>
 	<!--Lighting Below-->
 	<!--Lighting Controls Below-->
-	<xs:simpleType name="LightingLocation_simple">
+	<xs:simpleType name="LightingAndPlugLoadLocation_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="interior"/>
 			<xs:enumeration value="exterior"/>
@@ -7859,9 +7784,9 @@
 			<xs:enumeration value="common area"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:complexType name="LightingLocation">
+	<xs:complexType name="LightingAndPlugLoadLocation">
 		<xs:simpleContent>
-			<xs:extension base="LightingLocation_simple">
+			<xs:extension base="LightingAndPlugLoadLocation_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -8017,7 +7942,6 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="top side of truss under sheathing"/>
 			<xs:enumeration value="below bottom chord of truss"/>
-			<xs:enumeration value="attic floor"/>
 			<xs:enumeration value="underside of rafters"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
@@ -8485,7 +8409,25 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="DuctShape_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="rectangular"/>
+			<xs:enumeration value="round"/>
+			<xs:enumeration value="oval"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DuctShape">
+		<xs:simpleContent>
+			<xs:extension base="DuctShape_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="DuctLocation_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
@@ -8672,6 +8614,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="UnitLocation_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
@@ -9316,30 +9261,6 @@
 			<xs:extension base="FuelLoadType_simple"/>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="PlugLoadLocation_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="interior"/>
-			<xs:enumeration value="exterior"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="PlugLoadLocation">
-		<xs:simpleContent>
-			<xs:extension base="PlugLoadLocation_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="FuelLoadLocation_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="interior"/>
-			<xs:enumeration value="exterior"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadLocation">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadLocation_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="PlugLoadUnits_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="kWh/year"/>
@@ -9353,17 +9274,6 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
-	<xs:simpleType name="FuelLoadUnits_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="therm/year"/>
-			<xs:enumeration value="Btuh"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="FuelLoadUnits">
-		<xs:simpleContent>
-			<xs:extension base="FuelLoadUnits_simple"/>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:simpleType name="PoolHeaterUnits_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="kWh/year"/>
@@ -9375,6 +9285,17 @@
 	<xs:complexType name="PoolHeaterUnits">
 		<xs:simpleContent>
 			<xs:extension base="PoolHeaterUnits_simple"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="FuelLoadUnits_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="therm/year"/>
+			<xs:enumeration value="Btuh"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="FuelLoadUnits">
+		<xs:simpleContent>
+			<xs:extension base="FuelLoadUnits_simple"/>
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="WindowCondition_simple">
@@ -9471,6 +9392,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="LaundryMachineLocation_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="basement"/>
 			<xs:enumeration value="basement - conditioned"/>
@@ -9536,6 +9460,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="RefrigeratorLocation_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="basement"/>
 			<xs:enumeration value="basement - conditioned"/>
@@ -9832,19 +9759,6 @@
 	<xs:complexType name="Fraction">
 		<xs:simpleContent>
 			<xs:extension base="Fraction_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="FractionGreaterThanZero_simple">
-		<xs:annotation>
-			<xs:documentation>A fraction that has to be between 0 (exclusive) and 1 (inclusive)</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:double"/>
-	</xs:simpleType>
-	<xs:complexType name="FractionGreaterThanZero">
-		<xs:simpleContent>
-			<xs:extension base="FractionGreaterThanOne_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
@@ -10536,7 +10450,7 @@
 			<xs:enumeration value="ENERGY STAR Most Efficient"/>
 			<xs:enumeration value="CEE Tier 1"/>
 			<xs:enumeration value="CEE Tier 2"/>
-			<xs:enumeration value="Cee Tier 3"/>
+			<xs:enumeration value="CEE Tier 3"/>
 			<xs:enumeration value="other"/>
 			<xs:enumeration value="unknown"/>
 			<xs:enumeration value="none"/>
@@ -10945,6 +10859,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 	<xs:simpleType name="BatteryLocation_simple">
+		<xs:annotation>
+			<xs:documentation>"other housing unit" refers to the living/conditioned space of the adjacent unit.</xs:documentation>
+		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
@@ -11499,25 +11416,6 @@
 	<xs:complexType name="MoisureType">
 		<xs:simpleContent>
 			<xs:extension base="MoistureType_simple">
-				<xs:attribute name="dataSource" type="DataSource"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:simpleType name="ConstructionLayerType_simple">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="exterior finish"/>
-			<xs:enumeration value="sheathing"/>
-			<xs:enumeration value="continuous insulation"/>
-			<xs:enumeration value="framing/cavity insulation"/>
-			<xs:enumeration value="structural core"/>
-			<xs:enumeration value="interior finish"/>
-			<xs:enumeration value="subfloor"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="ConstructionLayerType">
-		<xs:simpleContent>
-			<xs:extension base="ConstructionLayerType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>

@@ -848,7 +848,6 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          | - **cool roof**: 0.30
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is living space, otherwise "none".
-  .. [#] RadiantBarrierLocation defaults to "top side of truss under sheathing".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Rim Joists
@@ -907,6 +906,8 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
   ``Emittance``                           double                               0 - 1                  No             0.90         Emittance
   ``InteriorFinish/Type``                 string                               See [#]_               No             See [#]_     Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                   No             0.5          Interior finish thickness
+  ``RadiantBarrier``                      boolean                                                     No             false        Presence of radiant barrier
+  ``RadiantBarrierGrade``                 integer                              1 - 3                  No             1            Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                          Yes                         Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                    Yes                         Assembly R-value [#]_
   ======================================  =================  ================  =====================  =============  ===========  ====================================
@@ -1004,6 +1005,8 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Area``                                double    ft2           > 0          Yes                 Gross area
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
   ``InteriorFinish/Thickness``            double    in            >= 0         No        0.5       Interior finish thickness
+  ``RadiantBarrier``                      boolean                              No        false     Presence of radiant barrier
+  ``RadiantBarrierGrade``                 integer                 1 - 3        No        1         Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                   Yes                 Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================

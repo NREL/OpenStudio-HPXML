@@ -45,6 +45,8 @@
     "roof_color": "medium",
     "roof_assembly_r": 1.99,
     "roof_radiant_barrier": false,
+    "wall_radiant_barrier": false,
+    "floor_radiant_barrier": false,
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -409,6 +411,8 @@
     "roof_color": "medium",
     "roof_assembly_r": 2.3,
     "roof_radiant_barrier": false,
+    "wall_radiant_barrier": false,
+    "floor_radiant_barrier": false,
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -738,10 +742,23 @@
     "roof_radiant_barrier": true,
     "roof_radiant_barrier_grade": 2
   },
-  "sample_files/base-atticroof-radiant-barrier-location.xml": {
+  "sample_files/base-atticfloor-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
-    "roof_radiant_barrier": true,
-    "roof_radiant_barrier_location": "top side of truss under sheathing"
+    "ceiling_assembly_r": 8.7,
+    "roof_radiant_barrier_attic_location": "Attic floor",
+    "floor_radiant_barrier": true,
+    "floor_radiant_barrier_grade": 2,
+    "roof_radiant_barrier": false,
+    "roof_radiant_barrier_grade": 2
+  },
+  "sample_files/base-atticwall-radiant-barrier.xml": {
+    "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
+    "ceiling_assembly_r": 8.7,
+    "roof_radiant_barrier_attic_location": "Attic roof and gable walls",
+    "wall_radiant_barrier": true,
+    "wall_radiant_barrier_grade": 2,
+    "roof_radiant_barrier": false,
+    "roof_radiant_barrier_grade": 2
   },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",

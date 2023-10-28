@@ -270,10 +270,6 @@ class HPXML < Object
   PVTrackingType1Axis = '1-axis'
   PVTrackingType1AxisBacktracked = '1-axis backtracked'
   PVTrackingType2Axis = '2-axis'
-  RadiantBarrierLocationUndersideOfRafters = 'underside of rafters'
-  RadiantBarrierLocationAtticFloor = 'attic floor'
-  RadiantBarrierLocationBelowBottomChordOfTruss = 'below bottom chord of truss'
-  RadiantBarrierLocationTopsideOfTrussUnderSheathing = 'top side of truss under sheathing'
   ResidentialTypeApartment = 'apartment unit'
   ResidentialTypeManufactured = 'manufactured home'
   ResidentialTypeSFA = 'single-family attached'
@@ -2242,7 +2238,7 @@ class HPXML < Object
 
   class Roof < BaseElement
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
-             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier, :radiant_barrier_location,
+             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
              :insulation_continuous_r_value, :radiant_barrier_grade, :insulation_grade,
              :interior_finish_type, :interior_finish_thickness, :framing_factor,
@@ -2334,7 +2330,6 @@ class HPXML < Object
       end
       XMLHelper.add_element(roof, 'Pitch', @pitch, :float) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
-      XMLHelper.add_element(roof, 'RadiantBarrierLocation', @radiant_barrier_location, :string, @radiant_barrier_location_isdefaulted) unless @radiant_barrier_location.nil?
       XMLHelper.add_element(roof, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(roof, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
@@ -2379,7 +2374,6 @@ class HPXML < Object
       @framing_spacing = XMLHelper.get_value(roof, 'Rafters/Spacing', :float)
       @pitch = XMLHelper.get_value(roof, 'Pitch', :float)
       @radiant_barrier = XMLHelper.get_value(roof, 'RadiantBarrier', :boolean)
-      @radiant_barrier_location = XMLHelper.get_value(roof, 'RadiantBarrierLocation', :string)
       @radiant_barrier_grade = XMLHelper.get_value(roof, 'RadiantBarrierGrade', :integer)
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
@@ -2536,7 +2530,7 @@ class HPXML < Object
 
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
-             :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
+             :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :radiant_barrier, :radiant_barrier_grade, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :interior_finish_type, :interior_finish_thickness, :attic_wall_type, :framing_factor,
              :framing_size, :framing_spacing, :insulation_grade]
@@ -2648,6 +2642,8 @@ class HPXML < Object
         XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
         XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
       end
+      XMLHelper.add_element(wall, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
+      XMLHelper.add_element(wall, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(wall, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -2695,6 +2691,8 @@ class HPXML < Object
         @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
         @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
       end
+      @radiant_barrier = XMLHelper.get_value(wall, 'RadiantBarrier', :boolean)
+      @radiant_barrier_grade = XMLHelper.get_value(wall, 'RadiantBarrierGrade', :integer)
       insulation = XMLHelper.get_element(wall, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
@@ -2917,7 +2915,7 @@ class HPXML < Object
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness, :insulation_grade,
-             :framing_factor, :framing_size, :framing_spacing]
+             :framing_factor, :framing_size, :framing_spacing, :radiant_barrier, :radiant_barrier_grade]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -3008,6 +3006,8 @@ class HPXML < Object
         XMLHelper.add_element(interior_finish, 'Type', @interior_finish_type, :string, @interior_finish_type_isdefaulted) unless @interior_finish_type.nil?
         XMLHelper.add_element(interior_finish, 'Thickness', @interior_finish_thickness, :float, @interior_finish_thickness_isdefaulted) unless @interior_finish_thickness.nil?
       end
+      XMLHelper.add_element(floor, 'RadiantBarrier', @radiant_barrier, :boolean, @radiant_barrier_isdefaulted) unless @radiant_barrier.nil?
+      XMLHelper.add_element(floor, 'RadiantBarrierGrade', @radiant_barrier_grade, :integer, @radiant_barrier_grade_isdefaulted) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(floor, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -3046,6 +3046,8 @@ class HPXML < Object
         @interior_finish_type = XMLHelper.get_value(interior_finish, 'Type', :string)
         @interior_finish_thickness = XMLHelper.get_value(interior_finish, 'Thickness', :float)
       end
+      @radiant_barrier = XMLHelper.get_value(floor, 'RadiantBarrier', :boolean)
+      @radiant_barrier_grade = XMLHelper.get_value(floor, 'RadiantBarrierGrade', :integer)
       insulation = XMLHelper.get_element(floor, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)

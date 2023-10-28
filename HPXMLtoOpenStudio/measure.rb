@@ -510,7 +510,10 @@ class OSModel
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
       # wall type while ensuring the correct assembly R-value.
-
+      has_radiant_barrier = wall.radiant_barrier
+      if has_radiant_barrier
+        radiant_barrier_grade = wall.radiant_barrier_grade
+      end
       inside_film = Material.AirFilmVertical
       if wall.is_exterior
         outside_film = Material.AirFilmOutside
@@ -526,7 +529,8 @@ class OSModel
       mat_int_finish = Material.InteriorFinishMaterial(wall.interior_finish_type, wall.interior_finish_thickness)
 
       Constructions.apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
-                                            mat_int_finish, inside_film, outside_film, mat_ext_finish, wall.solar_absorptance,
+                                            mat_int_finish, has_radiant_barrier, inside_film, outside_film,
+                                            radiant_barrier_grade, mat_ext_finish, wall.solar_absorptance,
                                             wall.emittance)
     end
   end
@@ -652,6 +656,10 @@ class OSModel
           outside_film = Material.AirFilmFloorAverage
         end
         mat_int_finish_or_covering = Material.InteriorFinishMaterial(floor.interior_finish_type, floor.interior_finish_thickness)
+        has_radiant_barrier = floor.radiant_barrier
+        if has_radiant_barrier
+          radiant_barrier_grade = floor.radiant_barrier_grade
+        end
       else # Floor
         if @apply_ashrae140_assumptions
           # Raised floor
@@ -673,7 +681,7 @@ class OSModel
       end
 
       Constructions.apply_floor_ceiling_construction(runner, model, [surface], floor.id, floor.floor_type, floor.is_ceiling, floor.insulation_assembly_r_value,
-                                                     mat_int_finish_or_covering, inside_film, outside_film)
+                                                     mat_int_finish_or_covering, has_radiant_barrier, inside_film, outside_film, radiant_barrier_grade)
     end
   end
 
