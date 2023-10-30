@@ -201,6 +201,15 @@ class Battery
              usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
   end
 
+  def self.get_ev_battery_default_values
+    # FIXME: update values
+    return { lifetime_model: HPXML::BatteryLifetimeModelNone,
+             nominal_capacity_kwh: 10.0,
+             nominal_voltage: 50.0,
+             round_trip_efficiency: 0.925,
+             usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
+  end
+
   def self.get_Ah_from_kWh(nominal_capacity_kwh, nominal_voltage)
     return nominal_capacity_kwh * 1000.0 / nominal_voltage
   end
