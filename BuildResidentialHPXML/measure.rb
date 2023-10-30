@@ -5834,7 +5834,9 @@ class HPXMLFile
       round_trip_efficiency = args[:battery_round_trip_efficiency].get
     end
 
-    hpxml.batteries.add(id: "Battery#{hpxml.batteries.size + 1}",
+    battery_ct = hpxml.batteries.count { |battery| !battery.is_ev }
+
+    hpxml.batteries.add(id: "Battery#{battery_ct + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         location: location,
                         rated_power_output: rated_power_output,
@@ -5864,7 +5866,9 @@ class HPXMLFile
       round_trip_efficiency = args[:ev_battery_round_trip_efficiency].get
     end
 
-    hpxml.batteries.add(id: "EV_Battery#{hpxml.batteries.size + 1}",
+    ev_ct = hpxml.batteries.count { |battery| battery.is_ev }
+
+    hpxml.batteries.add(id: "EVBattery#{ev_ct + 1}",
                         type: HPXML::BatteryTypeLithiumIon,
                         is_ev: true,
                         location: location,
