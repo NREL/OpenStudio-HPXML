@@ -1712,26 +1712,27 @@ class SchedulesFile
 
   def battery_schedules
     return if (!@schedules.keys.include?(SchedulesFile::ColumnBattery) && !@schedules.keys.include?(SchedulesFile::ColumnEVBattery))
-    if battery.is_ev
-      battery_col = SchedulesFile::ColumnEVBattery
-      charging_col = SchedulesFile::ColumnEVBatteryCharging
-      discharging_col = SchedulesFile::ColumnEVBatteryDischarging
-    else
-      battery_col = SchedulesFile::ColumnBattery
-      charging_col = SchedulesFile::ColumnBatteryCharging
-      discharging_col = SchedulesFile::ColumnBatteryDischarging
-    end
 
-    @schedules[charging_col] = Array.new(@schedules[battery_col].size, 0)
-    @schedules[discharging_col] = Array.new(@schedules[battery_col].size, 0)
-    @schedules[battery_col].each_with_index do |_ts, i|
-      if @schedules[battery_col][i] > 0
-        @schedules[charging_col][i] = @schedules[battery_col][i]
-      elsif @schedules[battery_col][i] < 0
-        @schedules[discharging_col][i] = -1 * @schedules[battery_col][i]
+    if @schedules.keys.include?(SchedulesFile::ColumnBattery)
+      split_signed_column(SchedulesFile::ColumnBattery, SchedulesFile::ColumnBatteryCharging, SchedulesFile::ColumnBatteryDischarging)
+    end
+    if @schedules.keys.include?(SchedulesFile::ColumnEVBattery)
+      split_signed_column(SchedulesFile::ColumnEVBattery, SchedulesFile::ColumnEVBatteryCharging, SchedulesFile::ColumnEVBatteryDischarging)
+    end
+  end
+
+  def split_signed_column(column, positive_col, negative_col)
+    # Takes a single column and writes two new columns, one with positive values, one with negative values
+    @schedules[positive_col] = Array.new(@schedules[column].size, 0)
+    @schedules[negative_col] = Array.new(@schedules[column].size, 0)
+    @schedules[column].each_with_index do |_ts, i|
+      if @schedules[column][i] > 0
+        @schedules[positive_col][i] = @schedules[column][i]
+      elsif @schedules[column][i] < 0
+        @schedules[negative_col][i] = -1 * @schedules[column][i]
       end
     end
-    @schedules.delete(battery_col)
+    @schedules.delete(column)
   end
 
   def self.ColumnNames
