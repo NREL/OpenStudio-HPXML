@@ -387,11 +387,14 @@ class HPXMLTest < Minitest::Test
       for i in 0..n_bldgs - 1
         hpxml_bldg = hpxml.buildings[i]
         if hpxml_bldg.dehumidifiers.size > 0
-          # FIXME: Dehumidifiers currently don't give good results w/ unit multipliers
+          # FUTURE: Dehumidifiers currently don't give desired results w/ unit multipliers
+          # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
-          # FIXME: GSHPs currently don't give good results w/ unit multipliers
+          # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
+          # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         elsif hpxml_bldg.batteries.size > 0
-          # FIXME: Batteries currently don't work with whole SFA/MF buildings
+          # FUTURE: Batteries currently don't work with whole SFA/MF buildings
+          # https://github.com/NREL/OpenStudio-HPXML/issues/1499
           return
         else
           hpxml_bldg.building_construction.number_of_units *= 5
@@ -588,7 +591,8 @@ class HPXMLTest < Minitest::Test
         next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
       end
 
-      # FIXME: Revert this eventually
+      # FUTURE: Revert this eventually
+      # https://github.com/NREL/OpenStudio-HPXML/issues/1499
       if hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
         uses_unit_multipliers = hpxml.buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
         if uses_unit_multipliers || hpxml.buildings.size > 1
@@ -1331,7 +1335,6 @@ class HPXMLTest < Minitest::Test
     # Check that results_10x are expected compared to results_1x
 
     def get_tolerances(key)
-      # FIXME: Tighten these tolerances
       if key.include?('(MBtu)') || key.include?('(kBtu)') || key.include?('(kWh)')
         # Check that the energy difference is less than 0.5 MBtu or less than 5%
         abs_delta_tol = 0.5 # MBtu
@@ -1342,14 +1345,14 @@ class HPXMLTest < Minitest::Test
           abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kWh')
         end
       elsif key.include?('Peak Electricity:')
-        # Check that the peak electricity difference is less than 1000 W or less than 10%
+        # Check that the peak electricity difference is less than 500 W or less than 2%
         # Wider tolerances than others because a small change in when an event (like the
         # water heating firing) occurs can significantly impact the peak.
-        abs_delta_tol = 1000.0
-        abs_frac_tol = 0.1
+        abs_delta_tol = 500.0
+        abs_frac_tol = 0.02
       elsif key.include?('Peak Load:')
-        # Check that the peak load difference is less than 0.5 kBtu/hr or less than 5%
-        abs_delta_tol = 0.5
+        # Check that the peak load difference is less than 0.2 kBtu/hr or less than 5%
+        abs_delta_tol = 0.2
         abs_frac_tol = 0.05
       elsif key.include?('Hot Water:')
         # Check that the hot water usage difference is less than 10 gal/yr or less than 2%
@@ -1359,19 +1362,15 @@ class HPXMLTest < Minitest::Test
         # Check that the battery resilience difference is less than 1 hr or less than 1%
         abs_delta_tol = 1.0
         abs_frac_tol = 0.01
-      elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:')
-        # Check that the HVAC capacity/design load difference is less than 500 Btu/h or less than 1%
-        abs_delta_tol = 500.0
-        abs_frac_tol = 0.01
       elsif key.include?('Airflow:')
-        # Check that airflow rate difference is less than 0.1 cfm or less than 1%
+        # Check that airflow rate difference is less than 0.1 cfm or less than 0.5%
         abs_delta_tol = 0.1
-        abs_frac_tol = 0.01
+        abs_frac_tol = 0.005
       elsif key.include?('Unmet Hours:')
-        # Check that the unmet hours difference is less than 20 hrs
-        abs_delta_tol = 20
+        # Check that the unmet hours difference is less than 10 hrs
+        abs_delta_tol = 10
         abs_frac_tol = nil
-      elsif key.include?('HVAC Design Temperature:') || key.include?('Weather:')
+      elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:')
         # Check that there is no difference
         abs_delta_tol = 0
         abs_frac_tol = nil
@@ -1420,7 +1419,7 @@ class HPXMLTest < Minitest::Test
             abs_val_frac = abs_val_delta / avg_val
           end
 
-          # FIXME: Address these
+          # FUTURE: Address these
           if hpxml_bldg.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
             next if key.include?('Airflow:')
             next if key.include?('Peak')

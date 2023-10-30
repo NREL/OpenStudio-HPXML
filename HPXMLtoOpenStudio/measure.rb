@@ -139,10 +139,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       if (building_id == 'ALL') && (hpxml.buildings.size > 1)
         if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.batteries.size }.sum > 0
-          # FIXME: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
+          # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
           # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
           # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
           # and switch to "TrackMeterDemandStoreExcessOnSite".
+          # https://github.com/NREL/OpenStudio-HPXML/issues/1499
           fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
         end
       end
