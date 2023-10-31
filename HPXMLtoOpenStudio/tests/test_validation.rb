@@ -283,7 +283,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.conditioned_floor_area = 1348.8
       elsif ['enclosure-floor-area-exceeds-cfa2'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit.xml')
         hpxml_bldg.building_construction.conditioned_floor_area = 898.8
       elsif ['enclosure-garage-missing-exterior-wall'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
@@ -338,7 +338,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.heating_systems[0].heating_efficiency_afue *= 100.0
       elsif ['generator-number-of-bedrooms-served'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-generator.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-generator.xml')
         hpxml_bldg.generators[0].number_of_bedrooms_served = 3
       elsif ['generator-output-greater-than-consumption'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-misc-generators.xml')
@@ -419,7 +419,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hvac_distributions[0].ducts[2].duct_fraction_area = 0.15
         hpxml_bldg.hvac_distributions[0].ducts[3].duct_fraction_area = 0.15
       elsif ['invalid-facility-type'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-laundry-room.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-laundry-room.xml')
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
       elsif ['invalid-foundation-wall-properties'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement-wall-insulation.xml')
@@ -497,19 +497,19 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.natvent_days_per_week = -1
       elsif ['invalid-number-of-bedrooms-served'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-pv.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-pv.xml')
         hpxml_bldg.pv_systems[0].number_of_bedrooms_served = 3
       elsif ['invalid-number-of-conditioned-floors'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 3
       elsif ['invalid-number-of-units-served'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-water-heater.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-water-heater.xml')
         hpxml_bldg.water_heating_systems[0].number_of_units_served = 1
       elsif ['invalid-pilot-light-heating-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-floor-furnace-propane-only-pilot-light.xml')
         hpxml_bldg.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
       elsif ['invalid-shared-vent-in-unit-flowrate'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-mechvent.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-mechvent.xml')
         hpxml_bldg.ventilation_fans[0].rated_flow_rate = 80
       elsif ['invalid-timestep'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1052,7 +1052,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = 0.55
         hpxml_bldg.heating_systems[0].fan_watts_per_cfm = 0.45
       elsif ['hvac-shared-boiler-multiple'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-boiler-only-baseboard.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml')
         hpxml_bldg.hvac_distributions << hpxml_bldg.hvac_distributions[0].dup
         hpxml_bldg.hvac_distributions[-1].id = "HVACDistribution#{hpxml_bldg.hvac_distributions.size}"
         hpxml_bldg.heating_systems[0].fraction_heat_load_served = 0.5
@@ -1062,7 +1062,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heating_systems[1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         hpxml_bldg.heating_systems[1].primary_system = true
       elsif ['hvac-shared-chiller-multiple'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-chiller-only-baseboard.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.hvac_distributions << hpxml_bldg.hvac_distributions[0].dup
         hpxml_bldg.hvac_distributions[-1].id = "HVACDistribution#{hpxml_bldg.hvac_distributions.size}"
         hpxml_bldg.cooling_systems[0].fraction_cool_load_served = 0.5
@@ -1072,7 +1072,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.cooling_systems[1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         hpxml_bldg.cooling_systems[1].primary_system = true
       elsif ['hvac-shared-chiller-negative-seer-eq'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-chiller-only-baseboard.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.cooling_systems[0].shared_loop_watts *= 100.0
       elsif ['invalid-battery-capacity-units'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
@@ -1277,18 +1277,18 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-solar-indirect-flat-plate.xml')
         hpxml_bldg.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
       elsif ['unattached-shared-clothes-washer-dhw-distribution'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-laundry-room.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-laundry-room.xml')
         hpxml_bldg.clothes_washers[0].water_heating_system_idref = nil
         hpxml_bldg.clothes_washers[0].hot_water_distribution_idref = 'foobar'
       elsif ['unattached-shared-clothes-washer-water-heater'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-laundry-room.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-laundry-room.xml')
         hpxml_bldg.clothes_washers[0].water_heating_system_idref = 'foobar'
       elsif ['unattached-shared-dishwasher-dhw-distribution'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-laundry-room.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-laundry-room.xml')
         hpxml_bldg.dishwashers[0].water_heating_system_idref = nil
         hpxml_bldg.dishwashers[0].hot_water_distribution_idref = 'foobar'
       elsif ['unattached-shared-dishwasher-water-heater'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-multifamily-shared-laundry-room.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-laundry-room.xml')
         hpxml_bldg.dishwashers[0].water_heating_system_idref = 'foobar'
       elsif ['unattached-window'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
