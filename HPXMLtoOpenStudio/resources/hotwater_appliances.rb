@@ -1004,7 +1004,7 @@ class HotWaterAndAppliances
       showers_weekday_sch = Schedule.ShowersWeekdayFractions
       showers_weekend_sch = Schedule.ShowersWeekendFractions
       showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
-      showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
+      showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
       showers_schedule = showers_schedule_obj.schedule
     else
       runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekdayFractions.nil?
@@ -1020,7 +1020,7 @@ class HotWaterAndAppliances
         shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: shower_gpd)
       end
       if shower_peak_flow.nil?
-        shower_peak_flow = shower_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
+        shower_peak_flow = showers_schedule_obj.calc_design_level_from_daily_gpm(shower_gpd)
       end
     end
 
