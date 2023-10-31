@@ -1895,20 +1895,22 @@ class OSModel
 
   def self.add_unmet_wh_loads(runner, model, weather, hw_plant_loop)
     @hpxml.water_heating_systems.each do |water_heating_system|
-      #Get shower schedule max value
-      shower_peak_flow = HotWaterAndAppliances.add_showers_and_calculate_max(model, runner, @hpxml, weather, water_heating_system, @eri_version, @schedules_file)
-      sys_id = water_heating_system.id
-      #Get the water storage tanks for the outlet temp sensor
+      # Get shower schedule max value
+      shower_peak_flow = HotWaterAndAppliances.add_showers_and_calculate_max(model, runner, @hpxml, weather, water_heating_system, @eri_version, @schedules_file, @hpxml.header.unavailable_periods)
+
+      # Get the water storage tanks for the outlet temp sensor
       num_tanks = 0
       tank = nil
 
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterMixed.is_initialized
+
         tank = c.to_WaterHeaterMixed.get
         num_tanks += 1
       end
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterStratified.is_initialized
+
         tank = c.to_WaterHeaterStratified.get
         num_tanks += 1
       end
@@ -1930,17 +1932,17 @@ class OSModel
       shower_flow_sensor.setName('Shower Volume')
       shower_flow_sensor.setKeyName('hot_water_showers')
 
-      #cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      #cw_flow_sensor.setName('Clothes Washer Volume')
-      #cw_flow_sensor.setKeyName('clothes washer')
+      # cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      # cw_flow_sensor.setName('Clothes Washer Volume')
+      # cw_flow_sensor.setKeyName('clothes washer')
 
-      #dw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      #dw_flow_sensor.setName('Dishwasher Volume')
-      #dw_flow_sensor.setKeyName('dishwasher')
+      # dw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      # dw_flow_sensor.setName('Dishwasher Volume')
+      # dw_flow_sensor.setKeyName('dishwasher')
 
-      #fx_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      #fx_flow_sensor.setName('Fixture Volume')
-      #fx_flow_sensor.setKeyName('dhw fixtures')
+      # fx_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      # fx_flow_sensor.setName('Fixture Volume')
+      # fx_flow_sensor.setKeyName('dhw fixtures')
 
       # EMS program
       unmet_wh_loads_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1951,9 +1953,9 @@ class OSModel
       unmet_wh_loads_program.addLine('Set ShowerTime=0')
       unmet_wh_loads_program.addLine('EndIf')
       unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
-      #unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (49 < #{mixed_setpoint_sensor.name})")
+      # unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (49 < #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine('Set ShowerSagTime=SystemTimeStep')
-      #unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{shower_peak_flow} * 4141170 * (49 - #{mixed_setpoint_sensor.name})")
+      # unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{shower_peak_flow} * 4141170 * (49 - #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{shower_peak_flow} * 4141170 * (#{wh_temp_sensor.name} - #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine('Else')
       unmet_wh_loads_program.addLine('Set ShowerSagTime=0')

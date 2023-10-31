@@ -393,6 +393,7 @@ class Constants
   def self.ObjectNameRoomAirConditioner
     return 'room ac'
   end
+
   def self.ObjectNameShowers
     return 'showers'
   end

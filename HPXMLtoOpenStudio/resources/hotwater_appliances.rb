@@ -289,19 +289,15 @@ class HotWaterAndAppliances
       if gpd_frac > 0
 
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
-        shower_gpd = get_showers_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
-        shower_peak_flow = nil
         if not schedules_file.nil?
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: fx_gpd)
-          shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: shower_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: w_gpd)
         end
         if fx_peak_flow.nil?
           fx_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
-          shower_peak_flow = shower_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
           dist_water_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(w_gpd)
         end
 
@@ -395,8 +391,6 @@ class HotWaterAndAppliances
       add_other_equipment(model, Constants.ObjectNameWaterLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, fixtures_schedule, nil)
     end
   end
-
-  
 
   def self.get_range_oven_default_values()
     return { is_induction: false,
@@ -971,19 +965,19 @@ class HotWaterAndAppliances
     return f_eff * ref_f_gpd * fixtures_usage_multiplier
   end
 
-  def self.add_showers_and_calculate_max(model, runner, hpxml, weather, water_heating_system, eri_version, schedules_file)
-    #JEFF
+  def self.add_showers_and_calculate_max(model, runner, hpxml, weather, water_heating_system, eri_version, schedules_file, unavailable_periods)
     nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
-    
-    #Process fixtures
+
+    # Process fixtures
     fixtures_usage_multiplier = hpxml.water_heating.water_fixtures_usage_multiplier
     fixtures_all_low_flow = true
     hpxml.water_fixtures.each do |water_fixture|
       next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
+
       fixtures_all_low_flow = false if not water_fixture.low_flow
     end
 
-    #Get distribution system
+    # Get distribution system
     if hpxml.water_heating_systems.size > 0
       hot_water_distribution = hpxml.hot_water_distributions[0]
     end
@@ -999,7 +993,7 @@ class HotWaterAndAppliances
     daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow, hpxml.header.sim_calendar_year)
     daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, avg_setpoint_temp, t_mix)
 
-    #Create separate shower schedule: Only used for calculating unmet loads. Shower hot water usage is part of the fixtures usage.
+    # Create separate shower schedule: Only used for calculating unmet loads. Shower hot water usage is part of the fixtures usage.
     showers_schedule = nil
     showers_col_name = SchedulesFile::ColumnHotWaterShowers
     if not schedules_file.nil?
@@ -1010,7 +1004,7 @@ class HotWaterAndAppliances
       showers_weekday_sch = Schedule.ShowersWeekdayFractions
       showers_weekend_sch = Schedule.ShowersWeekendFractions
       showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
-      showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fixtures_unavailable_periods)
+      showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
       showers_schedule = showers_schedule_obj.schedule
     else
       runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekdayFractions.nil?
@@ -1031,8 +1025,6 @@ class HotWaterAndAppliances
     end
 
     return shower_peak_flow
-
-
   end
 
   def self.get_showers_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
@@ -1041,7 +1033,7 @@ class HotWaterAndAppliances
     end
 
     if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
-      #Note that the standard only has a total hot water usage, it does not specify a fraction for showers. Assuming showers are 40% of total HW usage (based on BA Benchmark usage)
+      # Note that the standard only has a total hot water usage, it does not specify a fraction for showers. Assuming showers are 40% of total HW usage (based on BA Benchmark usage)
       showers_gpd = 0.4 * (30.0 + 10.0 * nbeds) # Table 4.2.2(1) Service water heating systems
       # Convert to mixed water gpd
       avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
