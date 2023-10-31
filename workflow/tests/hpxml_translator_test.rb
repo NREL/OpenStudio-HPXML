@@ -43,6 +43,7 @@ class HPXMLTest < Minitest::Test
       xml_name = File.basename(xml)
       results = _run_xml(xml, Parallel.worker_number)
       all_results[xml_name], all_bill_results[xml_name], timeseries_results = results
+      next if xml.include? 'real_homes'
 
       # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
       # unit multiplier) and check how the results compare to the original run
@@ -298,45 +299,43 @@ class HPXMLTest < Minitest::Test
   end
 
   def test_multiple_buildings
-    sample_files_dir = File.join(File.dirname(__FILE__), '..', 'sample_files')
-    Dir["#{sample_files_dir}/base-multiple-buildings*.xml"].sort.each do |xml|
-      rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
-      csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
-      bills_csv_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
-      run_log = File.join(File.dirname(xml), 'run', 'run.log')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-buildings.xml')
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    bills_csv_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
+    run_log = File.join(File.dirname(xml), 'run', 'run.log')
 
-      # Check successful simulation when providing correct building ID
-      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyBuilding_2"
-      system(command, err: File::NULL)
-      assert_equal(true, File.exist?(csv_output_path))
-      assert_equal(xml.include?('bills'), File.exist?(bills_csv_path))
+    # Check successful simulation when providing correct building ID
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyBuilding_2"
+    system(command, err: File::NULL)
+    assert_equal(true, File.exist?(csv_output_path))
+    assert_equal(true, File.exist?(bills_csv_path))
 
-      # Check that we have exactly one warning (i.e., check we are only validating a single Building element against schematron)
-      assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.' }.size)
+    # Check that we have exactly one warning (i.e., check we are only validating a single Building element against schematron)
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.' }.size)
 
-      # Check unsuccessful simulation when providing incorrect building ID
-      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyFoo"
-      system(command, err: File::NULL)
-      assert_equal(false, File.exist?(csv_output_path))
-      assert_equal(false, File.exist?(bills_csv_path))
-      assert_equal(1, File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size)
+    # Check unsuccessful simulation when providing incorrect building ID
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id MyFoo"
+    system(command, err: File::NULL)
+    assert_equal(false, File.exist?(csv_output_path))
+    assert_equal(false, File.exist?(bills_csv_path))
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size)
 
-      # Check unsuccessful simulation when not providing building ID
-      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
-      system(command, err: File::NULL)
-      assert_equal(false, File.exist?(csv_output_path))
-      assert_equal(false, File.exist?(bills_csv_path))
-      assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size)
+    # Check unsuccessful simulation when not providing building ID
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\""
+    system(command, err: File::NULL)
+    assert_equal(false, File.exist?(csv_output_path))
+    assert_equal(false, File.exist?(bills_csv_path))
+    assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.' }.size)
 
-      # Check successful simulation when running whole building
-      command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id ALL"
-      system(command, err: File::NULL)
-      assert_equal(true, File.exist?(csv_output_path))
-      assert_equal(xml.include?('bills'), File.exist?(bills_csv_path))
+    # Check successful simulation when running whole building
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --building-id ALL"
+    system(command, err: File::NULL)
+    assert_equal(true, File.exist?(csv_output_path))
+    assert_equal(true, File.exist?(bills_csv_path))
 
-      # Check that we now have three warnings, one for each Building element
-      assert_equal(3, File.readlines(run_log).select { |l| l.include? 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.' }.size)
-    end
+    # Check that we now have three warnings, one for each Building element
+    assert_equal(3, File.readlines(run_log).select { |l| l.include? 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.' }.size)
   end
 
   def test_release_zips

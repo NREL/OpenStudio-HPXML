@@ -2215,8 +2215,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("If #{clg_cond_load_sensors[unit].name} > 0")
       program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_cond_load_sensors[unit].name} - #{htg_cond_load_sensors[unit].name}) * #{total_cool_load_serveds[unit]}")
       for i in 0..clg_duct_load_sensors[unit].size - 1
-        # FIXME: Seems like the duct load shouldn't be multiplied by total_cool_load_serveds? Need to check.
-        # Code below mirrors what we do on the master branch.
         program.addLine("  Set loads_clg_tot = loads_clg_tot + (#{clg_duct_load_sensors[unit][i].name} - #{htg_duct_load_sensors[unit][i].name}) * #{total_cool_load_serveds[unit]}")
       end
       if not dehumidifier_sensors[unit].nil?
