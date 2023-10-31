@@ -212,7 +212,7 @@ class OSModel
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
-    add_hot_water_and_appliances(runner, model, weather, spaces)
+    hw_plant_loop = add_hot_water_and_appliances(runner, model, weather, spaces)
 
     # Plug Loads & Fuel Loads & Lighting
     add_mels(runner, model, spaces)
@@ -232,7 +232,7 @@ class OSModel
 
     # Output
     add_unmet_hours_output(model, spaces)
-    add_unmet_wh_loads(runner, model, weather)
+    add_unmet_wh_loads(runner, model, weather, hw_plant_loop)
     add_loads_output(model, spaces, add_component_loads)
     set_output_files(model)
     # Uncomment to debug EMS
@@ -1295,6 +1295,7 @@ class OSModel
     unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml.header.unavailable_periods)
     has_uncond_bsmnt = @hpxml.has_location(HPXML::LocationBasementUnconditioned)
     plantloop_map = {}
+    sys_id = nil
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
 
@@ -1327,6 +1328,8 @@ class OSModel
 
     # Add combi-system EMS program with water use equipment information
     Waterheater.apply_combi_system_EMS(model, @hpxml.water_heating_systems, plantloop_map)
+
+    return plantloop_map[sys_id]
   end
 
   def self.add_cooling_system(model, spaces, airloop_map)
@@ -1899,21 +1902,28 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  def self.add_unmet_wh_loads(runner, model, weather)
-    #JEFFGO
-    
+  def self.add_unmet_wh_loads(runner, model, weather, hw_plant_loop)
     @hpxml.water_heating_systems.each do |water_heating_system|
       #Get shower schedule max value
       shower_peak_flow = HotWaterAndAppliances.add_showers_and_calculate_max(model, runner, @hpxml, weather, water_heating_system, @eri_version, @schedules_file)
-      
+      sys_id = water_heating_system.id
       #Get the water storage tanks for the outlet temp sensor
+      num_tanks = 0
       tank = nil
-      dhw_source_loop = model.getPlantLoops.find { |l| l.demandComponents.include? water_heater }
-      dhw_source_loop.components.each do |c|
+
+      hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterMixed.is_initialized
         tank = c.to_WaterHeaterMixed.get
+        num_tanks += 1
+      end
+      hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterStratified.is_initialized
         tank = c.to_WaterHeaterStratified.get
+        num_tanks += 1
+      end
+
+      if num_tanks > 1
+        runner.registerError("Found more WHs than expected. There are #{num_tanks} water heaters instead of 1.")
       end
 
       # EMS sensors
@@ -1929,17 +1939,17 @@ class OSModel
       shower_flow_sensor.setName('Shower Volume')
       shower_flow_sensor.setKeyName('hot_water_showers')
 
-      cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      cw_flow_sensor.setName('Clothes Washer Volume')
-      cw_flow_sensor.setKeyName('clothes washer')
+      #cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      #cw_flow_sensor.setName('Clothes Washer Volume')
+      #cw_flow_sensor.setKeyName('clothes washer')
 
-      dw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      dw_flow_sensor.setName('Dishwasher Volume')
-      dw_flow_sensor.setKeyName('dishwasher')
+      #dw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      #dw_flow_sensor.setName('Dishwasher Volume')
+      #dw_flow_sensor.setKeyName('dishwasher')
 
-      fx_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      fx_flow_sensor.setName('Fixture Volume')
-      fx_flow_sensor.setKeyName('Fixtures')
+      #fx_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
+      #fx_flow_sensor.setName('Fixture Volume')
+      #fx_flow_sensor.setKeyName('dhw fixtures')
 
       # EMS program
       unmet_wh_loads_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
