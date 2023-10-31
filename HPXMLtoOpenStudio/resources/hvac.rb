@@ -1133,8 +1133,7 @@ class HVAC
   def self.set_cool_curves_central_air_source(runner, cooling_system, use_eer = false)
     clg_ap = cooling_system.additional_properties
     clg_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
-    is_ducted = !cooling_system.distribution_system_idref.nil?
-    clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system, is_ducted)
+    clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_cool_c_d(cooling_system)
 
     if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1175,13 +1174,14 @@ class HVAC
     set_cool_rated_shrs_gross(runner, cooling_system)
   end
 
-  def self.get_cool_capacity_ratios(hvac_system, is_ducted)
+  def self.get_cool_capacity_ratios(hvac_system)
     # For each speed, ratio of capacity to nominal capacity
     if hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      is_ducted = !hvac_system.distribution_system_idref.nil?
       if is_ducted
         return [0.394, 1.0]
       else
@@ -1221,9 +1221,8 @@ class HVAC
       htg_ap.heat_rated_eirs = htg_ap.heat_cops.map { |heat_cop| calc_eir_from_cop(heat_cop, htg_ap.fan_power_rated) }
 
     elsif heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      is_ducted = !heating_system.distribution_system_idref.nil?
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
-      htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system, is_ducted)
+      htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
     end
   end
@@ -1320,13 +1319,14 @@ class HVAC
                                   isdefaulted: true)
   end
 
-  def self.get_heat_capacity_ratios(heat_pump, is_ducted = nil)
+  def self.get_heat_capacity_ratios(heat_pump)
     # For each speed, ratio of capacity to nominal capacity
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       return [1.0]
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
       return [0.72, 1.0]
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      is_ducted = !heat_pump.distribution_system_idref.nil?
       if is_ducted
         nominal_to_max_ratio = 0.972
       else
