@@ -230,10 +230,18 @@ class HotWaterAndAppliances
       fixtures = hpxml.water_fixtures.select { |wf| [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? wf.water_fixture_type }
       if fixtures.size > 0
         if fixtures.any? { |wf| wf.count.nil? }
-          showerheads = fixtures.select{ |wf| wf.water_fixture_type == HPXML::WaterFixtureTypeShowerhead }
-          frac_low_flow_showerheads = showerheads.select{ |wf| wf.low_flow }.size / Float(showerheads.size)
-          faucets = fixtures.select{ |wf| wf.water_fixture_type == HPXML::WaterFixtureTypeFaucet }
-          frac_low_flow_faucets = faucets.select{ |wf| wf.low_flow }.size / Float(faucets.size)
+          showerheads = fixtures.select { |wf| wf.water_fixture_type == HPXML::WaterFixtureTypeShowerhead }
+          if showerheads.size > 0
+            frac_low_flow_showerheads = showerheads.select { |wf| wf.low_flow }.size / Float(showerheads.size)
+          else
+            frac_low_flow_showerheads = 0.0
+          end
+          faucets = fixtures.select { |wf| wf.water_fixture_type == HPXML::WaterFixtureTypeFaucet }
+          if faucets.size > 0
+            frac_low_flow_faucets = faucets.select { |wf| wf.low_flow }.size / Float(faucets.size)
+          else
+            frac_low_flow_faucets = 0.0
+          end
           frac_low_flow_fixtures = 0.4 * frac_low_flow_showerheads + 0.6 * frac_low_flow_faucets
         else
           num_wfs = fixtures.map { |wf| wf.count }.sum
