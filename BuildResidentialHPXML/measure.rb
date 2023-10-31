@@ -2264,7 +2264,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_battery_present', true)
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_battery_present', false)
     arg.setDisplayName('Electric Vehicle Battery: Present')
     arg.setDescription('Whether there is an electric vehicle battery present.')
     arg.setDefaultValue(false)
@@ -5846,7 +5846,9 @@ class HPXMLFile
   end
 
   def self.set_ev_battery(hpxml, args)
-    return unless args[:ev_battery_present]
+    if args[:ev_battery_present].is_initialized && args[:ev_battery_present].get != true
+      return
+    end
 
     location = get_location("outside", hpxml.foundations[-1].foundation_type, hpxml.attics[-1].attic_type)
 
