@@ -30,7 +30,6 @@ class HPXMLTest < Minitest::Test
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
         next if xml.include? 'base-multiple-buildings' # Tested by test_multiple_buildings()
-        next if xml.include? 'base-bldgtype-multifamily-shared-mechvent-multiple' # FIXME: Won't work w/ unit multipliers until https://github.com/NREL/EnergyPlus/pull/10131 is available in E+
 
         xmls << File.absolute_path(xml)
       end

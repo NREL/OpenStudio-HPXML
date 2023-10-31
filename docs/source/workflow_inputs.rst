@@ -36,8 +36,10 @@ Building Type Scope
 
 OpenStudio-HPXML can be used to model either individual residential dwelling units or whole residential buildings.
 
-Modeling Dwelling Units
-~~~~~~~~~~~~~~~~~~~~~~~
+.. _bldg_type_units:
+
+Dwelling Units
+~~~~~~~~~~~~~~
 
 The OpenStudio-HPXML workflow was originally developed to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
 This approach:
@@ -53,8 +55,10 @@ When modeling individual units of SFA/MF buildings, current capabilities include
 
 Note that only the energy use attributed to each dwelling unit is calculated.
 
-Modeling Whole Buildings
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. _bldg_type_bldgs:
+
+Whole SFA/MF Buildings
+~~~~~~~~~~~~~~~~~~~~~~
 
 As of OpenStudio-HPXML v1.7.0, a new capability was added for modeling whole SFA/MF buildings in a single combined simulation.
 
@@ -255,10 +259,11 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ====================
   ``FuelType``                      string             electricity  Yes                 Fuel type
-  ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
+  ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge [#]_
   ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ====================
 
+  .. [#] If running :ref:`bldg_type_bldgs`, the fixed charge will apply to every dwelling unit in the building.
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
 **Detailed**
@@ -490,7 +495,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
-         For example, when modeling a whole SFA/MF building, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
+         For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
