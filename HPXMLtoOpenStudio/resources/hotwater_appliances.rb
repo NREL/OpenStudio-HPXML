@@ -289,19 +289,16 @@ class HotWaterAndAppliances
       if gpd_frac > 0
 
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
-        shower_gpd = get_showers_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
         shower_peak_flow = nil
         if not schedules_file.nil?
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: fx_gpd)
-          shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: shower_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: w_gpd)
         end
         if fx_peak_flow.nil?
           fx_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
-          shower_peak_flow = shower_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
           dist_water_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(w_gpd)
         end
 
@@ -972,7 +969,6 @@ class HotWaterAndAppliances
   end
 
   def self.add_showers_and_calculate_max(model, runner, hpxml, weather, water_heating_system, eri_version, schedules_file)
-    #JEFF
     nbeds = hpxml.building_construction.additional_properties.adjusted_number_of_bedrooms
     
     #Process fixtures
