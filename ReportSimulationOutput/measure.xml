@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>771c07f9-c245-4ea8-81c4-a5e365866cb4</version_id>
-  <version_modified>2023-10-23T18:37:54Z</version_modified>
+  <version_id>b23c41ef-ba54-42da-b89f-2dde421d6ac4</version_id>
+  <version_modified>2023-10-31T19:06:13Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>

@@ -1678,11 +1678,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
     end
-    if hpxml_file.include? 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature2.xml'
-      hpxml_bldg.heat_pumps[0].compressor_lockout_temp = hpxml_bldg.heat_pumps[0].backup_heating_switchover_temp
-      hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = hpxml_bldg.heat_pumps[0].backup_heating_switchover_temp
-      hpxml_bldg.heat_pumps[0].backup_heating_switchover_temp = nil
-    end
 
     # ------------------ #
     # HPXML WaterHeating #
