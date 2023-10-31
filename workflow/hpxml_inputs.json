@@ -2761,9 +2761,38 @@
     "permanent_spa_heater_annual_kwh": 1300,
     "permanent_spa_heater_usage_multiplier": 0.9
   },
-  "sample_files/base-multiple-buildings.xml": {
+  "sample_files/base-multiple-sfd-buildings.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "clothes_dryer_present": false
+  },
+  "sample_files/base-multiple-mf-units.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "geometry_unit_type": "apartment unit",
+    "geometry_unit_right_wall_is_adiabatic": true,
+    "geometry_unit_cfa": 1200,
+    "geometry_unit_aspect_ratio": 0.75,
+    "geometry_building_num_units": 6,
+    "floor_over_foundation_assembly_r": 22.84,
+    "air_leakage_type": "unit exterior only",
+    "air_leakage_units": "ACHnatural",
+    "air_leakage_value": 0.375,
+    "window_front_wwr": 0.18,
+    "window_back_wwr": 0.18,
+    "window_left_wwr": 0.18,
+    "window_right_wwr": 0.18,
+    "window_area_front": 0,
+    "window_area_back": 0,
+    "window_area_left": 0,
+    "window_area_right": 0,
+    "door_area": 20,
+    "cooling_system_type": "room air conditioner",
+    "cooling_system_cooling_efficiency_type": "EER",
+    "cooling_system_cooling_efficiency": 8.5,
+    "cooling_system_cooling_capacity": 12000,
+    "heating_system_type": "ElectricResistance",
+    "heating_system_fuel": "electricity",
+    "heating_system_heating_efficiency": 1,
+    "heating_system_heating_capacity": 12000
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",

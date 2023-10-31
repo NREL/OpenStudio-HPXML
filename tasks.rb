@@ -53,13 +53,22 @@ def create_hpxmls
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    num_apply_measures = hpxml_path.include?('base-multiple-buildings') ? 3 : 1
+    num_apply_measures = 1
+    if hpxml_path.include?('base-multiple-sfd-buildings')
+      num_apply_measures = 3
+    elsif hpxml_path.include?('base-multiple-mf-units')
+      num_apply_measures = 6
+    end
 
     for i in 1..num_apply_measures
       measures['BuildResidentialHPXML'][0]['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include? 'base-multiple-buildings'
+      if hpxml_path.include?('base-multiple-sfd-buildings') || hpxml_path.include?('base-multiple-mf-units')
         suffix = "_#{i}" if i > 1
         measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
+      end
+      if hpxml_path.include?('base-multiple-mf-units')
+        measures['BuildResidentialHPXML'][0]['geometry_foundation_type'] = (i <= 1 ? 'UnconditionedBasement' : 'AboveApartment')
+        measures['BuildResidentialHPXML'][0]['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
       end
 
       # Re-generate stochastic schedule CSV?
@@ -100,7 +109,9 @@ def create_hpxmls
     errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
     next unless errors.size > 0
 
-    puts errors.to_s
+    errors.each do |s|
+      puts "Error: #{s}"
+    end
     puts "\nError: Did not successfully validate #{hpxml_filename}."
     exit!
   end

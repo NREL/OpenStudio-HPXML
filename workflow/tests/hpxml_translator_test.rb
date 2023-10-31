@@ -29,7 +29,8 @@ class HPXMLTest < Minitest::Test
     sample_files_dirs.each do |sample_files_dir|
       Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
         next if xml.end_with? '-10x.xml'
-        next if xml.include? 'base-multiple-buildings' # Tested by test_multiple_buildings()
+        next if xml.include? 'base-multiple-sfd-buildings' # Tested by test_multiple_buildings()
+        next if xml.include? 'base-multiple-mf-units' # Tested by test_multiple_buildings()
 
         xmls << File.absolute_path(xml)
       end
@@ -299,7 +300,7 @@ class HPXMLTest < Minitest::Test
   end
 
   def test_multiple_buildings
-    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-buildings.xml')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-multiple-sfd-buildings.xml')
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
     bills_csv_path = File.join(File.dirname(xml), 'run', 'results_bills.csv')
