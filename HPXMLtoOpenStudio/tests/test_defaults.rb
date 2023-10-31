@@ -2600,18 +2600,25 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.water_heating.water_fixtures_weekday_fractions = ConstantDaySchedule
     hpxml.water_heating.water_fixtures_weekend_fractions = ConstantDaySchedule
     hpxml.water_heating.water_fixtures_monthly_multipliers = ConstantMonthSchedule
+    hpxml.water_fixtures[0].low_flow = false
+    hpxml.water_fixtures[0].count = 9
+    hpxml.water_fixtures[1].low_flow = nil
+    hpxml.water_fixtures[1].flow_rate = 99
+    hpxml.water_fixtures[1].count = 8
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_fixture_values(hpxml_default, 2.0, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_water_fixture_values(hpxml_default, 2.0, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, false, false)
 
     # Test defaults
     hpxml.water_heating.water_fixtures_usage_multiplier = nil
     hpxml.water_heating.water_fixtures_weekday_fractions = nil
     hpxml.water_heating.water_fixtures_weekend_fractions = nil
     hpxml.water_heating.water_fixtures_monthly_multipliers = nil
+    hpxml.water_fixtures[0].low_flow = true
+    hpxml.water_fixtures[1].flow_rate = 2
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_fixture_values(hpxml_default, 1.0, Schedule.FixturesWeekdayFractions, Schedule.FixturesWeekendFractions, Schedule.FixturesMonthlyMultipliers)
+    _test_default_water_fixture_values(hpxml_default, 1.0, Schedule.FixturesWeekdayFractions, Schedule.FixturesWeekendFractions, Schedule.FixturesMonthlyMultipliers, true, true)
   end
 
   def test_solar_thermal_systems
@@ -4442,7 +4449,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_in_epsilon(pump_power, hot_water_distribution.shared_recirculation_pump_power, 0.01)
   end
 
-  def _test_default_water_fixture_values(hpxml, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_water_fixture_values(hpxml, usage_multiplier, weekday_sch, weekend_sch, monthly_mults, low_flow1, low_flow2)
     assert_equal(usage_multiplier, hpxml.water_heating.water_fixtures_usage_multiplier)
     if weekday_sch.nil?
       assert_nil(hpxml.water_heating.water_fixtures_weekday_fractions)
@@ -4459,6 +4466,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(monthly_mults, hpxml.water_heating.water_fixtures_monthly_multipliers)
     end
+    assert_equal(low_flow1, hpxml.water_fixtures[0].low_flow)
+    assert_equal(low_flow2, hpxml.water_fixtures[1].low_flow)
   end
 
   def _test_default_solar_thermal_values(solar_thermal_system, storage_volume, azimuth)

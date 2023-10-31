@@ -5306,7 +5306,7 @@ class HPXML < Object
   end
 
   class WaterFixture < BaseElement
-    ATTRS = [:id, :water_fixture_type, :low_flow]
+    ATTRS = [:id, :water_fixture_type, :low_flow, :flow_rate, :count]
     attr_accessor(*ATTRS)
 
     def delete
@@ -5326,7 +5326,9 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(water_fixture, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(water_fixture, 'WaterFixtureType', @water_fixture_type, :string) unless @water_fixture_type.nil?
-      XMLHelper.add_element(water_fixture, 'LowFlow', @low_flow, :boolean) unless @low_flow.nil?
+      XMLHelper.add_element(water_fixture, 'Count', @count, :integer, @count_isdefaulted) unless @count.nil?
+      XMLHelper.add_element(water_fixture, 'FlowRate', @flow_rate, :float, @flow_rate_isdefaulted) unless @flow_rate.nil?
+      XMLHelper.add_element(water_fixture, 'LowFlow', @low_flow, :boolean, @low_flow_isdefaulted) unless @low_flow.nil?
     end
 
     def from_oga(water_fixture)
@@ -5334,6 +5336,8 @@ class HPXML < Object
 
       @id = HPXML::get_id(water_fixture)
       @water_fixture_type = XMLHelper.get_value(water_fixture, 'WaterFixtureType', :string)
+      @count = XMLHelper.get_value(water_fixture, 'Count', :integer)
+      @flow_rate = XMLHelper.get_value(water_fixture, 'FlowRate', :float)
       @low_flow = XMLHelper.get_value(water_fixture, 'LowFlow', :boolean)
     end
   end
