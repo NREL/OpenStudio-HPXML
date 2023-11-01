@@ -7,6 +7,10 @@ __New Features__
   - Replaces "living space" with "conditioned space", which better represents what is modeled.
   - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
+- HVAC updates:
+  - Replaces inverse calculations, used to calculate COPs from rated efficiencies, with regressions for single/two-speed central ACs and ASHPs.
+    - Significant improvement to low-speed heating COPs for two-speed HPs with HSPFs > 10 or HSPFs <= 7.
+    - Moderate improvement to cooling COPs for single-speed ACs/HPs with SEERs in the 11-12.7 range.
 - Allows simulating whole multifamily (MF) buildings in a single combined simulation:
   - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across units:
     - `HVACSizingControl`
