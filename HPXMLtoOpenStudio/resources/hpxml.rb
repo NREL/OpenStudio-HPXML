@@ -1078,7 +1078,12 @@ class HPXML < Object
         building_site = XMLHelper.add_element(building, 'Site')
         building_site_id = XMLHelper.add_element(building_site, 'SiteID')
         if @site_id.nil?
-          XMLHelper.add_attribute(building_site_id, 'id', 'SiteID')
+          bldg_idx = XMLHelper.get_elements(hpxml, 'Building').size
+          if bldg_idx > 1
+            XMLHelper.add_attribute(building_site_id, 'id', "SiteID_#{bldg_idx}")
+          else
+            XMLHelper.add_attribute(building_site_id, 'id', 'SiteID')
+          end
         else
           XMLHelper.add_attribute(building_site_id, 'id', @site_id)
         end
