@@ -4400,7 +4400,7 @@ class HPXML < Object
 
   class GeothermalLoops < BaseArrayElement
     def add(**kwargs)
-      self << GeothermalLoop.new(@hpxml_object, **kwargs)
+      self << GeothermalLoop.new(@parent_object, **kwargs)
     end
 
     def from_doc(building)
