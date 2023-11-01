@@ -9,16 +9,22 @@ require_relative '../resources/util.rb'
 require_relative 'util.rb'
 
 class HPXMLtoOpenStudioHVACTest < Minitest::Test
-  def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+  def setup
+    @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
+    @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
+    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+  end
+
+  def teardown
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
   end
 
   def test_central_air_conditioner_1_speed
     ['base-hvac-central-ac-only-1-speed.xml',
      'base-hvac-central-ac-only-1-speed-seer2.xml'].each do |hpxml_path|
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_path))
-      model, _hpxml = _test_measure(args_hash)
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
+      model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
       # Check cooling coil
       assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
@@ -36,8 +42,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_central_air_conditioner_2_speed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-central-ac-only-2-speed.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-central-ac-only-2-speed.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -58,8 +64,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_central_air_conditioner_var_speed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-central-ac-only-var-speed.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-central-ac-only-var-speed.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -80,11 +86,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_room_air_conditioner
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
@@ -99,11 +105,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_room_air_conditioner_ceer
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-only-ceer.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-ceer.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     ceer = cooling_system.cooling_efficiency_ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
     capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
@@ -117,11 +123,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_room_ac_with_heating
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-with-heating.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-with-heating.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
@@ -147,11 +153,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_ptac
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ptac.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
@@ -167,11 +173,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_ptac_with_heating_electricity
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac-with-heating-electricity.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ptac-with-heating-electricity.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
@@ -197,11 +203,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_ptac_with_heating_gas
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ptac-with-heating-electricity.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ptac-with-heating-electricity.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     eer = cooling_system.cooling_efficiency_eer
     ceer = eer / 1.01 # convert to ceer
     cop = UnitConversions.convert(ceer, 'Btu/hr', 'W') # Expected value
@@ -227,11 +233,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_pthp
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-pthp.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-pthp.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
@@ -262,11 +268,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_room_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-room-ac-with-reverse-cycle.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-with-reverse-cycle.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
@@ -299,11 +305,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_furnace_gas
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-furnace-gas-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-furnace-gas-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -318,11 +324,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_furnace_electric
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-furnace-elec-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-furnace-elec-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
 
@@ -335,11 +341,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_boiler_gas
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-boiler-gas-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-boiler-gas-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -354,11 +360,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_boiler_coal
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-boiler-coal-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-boiler-coal-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -373,11 +379,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_boiler_electric
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-boiler-elec-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-boiler-elec-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -392,11 +398,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_electric_resistance
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-elec-resistance-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-elec-resistance-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     efficiency = heating_system.heating_efficiency_percent
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
 
@@ -409,11 +415,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_stove_oil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-stove-oil-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-stove-oil-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     efficiency = heating_system.heating_efficiency_percent
     capacity = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -430,11 +436,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
      'base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml'].each do |hpxml_path|
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_path))
-      model, hpxml = _test_measure(args_hash)
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       # Get HPXML values
-      heat_pump = hpxml.heat_pumps[0]
+      heat_pump = hpxml_bldg.heat_pumps[0]
       backup_efficiency = heat_pump.backup_heating_efficiency_percent
       supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
@@ -472,11 +478,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
      'base-hvac-mini-split-heat-pump-ductless.xml',
      'base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml'].each do |hpxml_name|
       args_hash = {}
-      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
-      model, hpxml = _test_measure(args_hash)
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_name))
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
       # Get HPXML values
-      heat_pump = hpxml.heat_pumps[0]
+      heat_pump = hpxml_bldg.heat_pumps[0]
       if not heat_pump.backup_heating_switchover_temp.nil?
         backup_lockout_temp = UnitConversions.convert(heat_pump.backup_heating_switchover_temp, 'F', 'C')
         compressor_lockout_temp = UnitConversions.convert(heat_pump.backup_heating_switchover_temp, 'F', 'C')
@@ -507,11 +513,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_2_speed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-2-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-2-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
@@ -550,11 +556,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_var_speed
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-var-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
@@ -593,11 +599,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_var_speed_detailed_performance
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -636,8 +642,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_mini_split_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-heat-pump-ductless.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -671,7 +677,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_mini_split_heat_pump_detailed_performance
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml'))
     model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
@@ -706,8 +712,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_mini_split_air_conditioner
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-mini-split-air-conditioner-only-ductless.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-air-conditioner-only-ductless.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -728,11 +734,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_ground_to_air_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-ground-to-air-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
@@ -765,11 +771,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_chiller_baseboard
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-baseboard.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -781,11 +787,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_chiller_fan_coil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-fan-coil.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-chiller-only-fan-coil.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -797,11 +803,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_chiller_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-chiller-only-water-loop-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-chiller-only-water-loop-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     capacity = UnitConversions.convert(cooling_system.cooling_capacity, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -813,11 +819,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_cooling_tower_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-cooling-tower-only-water-loop-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-cooling-tower-only-water-loop-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     capacity = UnitConversions.convert(cooling_system.cooling_capacity.to_f, 'Btu/hr', 'W')
 
     # Check cooling coil
@@ -829,11 +835,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_boiler_baseboard
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-baseboard.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -848,11 +854,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_boiler_fan_coil
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-fan-coil.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
@@ -867,15 +873,15 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_boiler_water_loop_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-boiler-only-water-loop-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-boiler-only-water-loop-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     wlhp_cop = heat_pump.heating_efficiency_cop
 
     # Check boiler
@@ -900,11 +906,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_shared_ground_loop_ground_to_air_heat_pump
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-ground-loop-ground-to-air-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-ground-loop-ground-to-air-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
     clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
     htg_capacity = UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W')
@@ -931,11 +937,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_air_to_air_heat_pump_1_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     charge_defect = heat_pump.charge_defect_ratio
     fan_watts_cfm = heat_pump.fan_watts_per_cfm
 
@@ -971,39 +977,39 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_air_to_air_heat_pump_2_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
   end
 
   def test_install_quality_air_to_air_heat_pump_var_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
 
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
   end
 
   def test_install_quality_furnace_central_air_conditioner_1_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
-    heating_system = hpxml.heating_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     charge_defect = cooling_system.charge_defect_ratio
     fan_watts_cfm = cooling_system.fan_watts_per_cfm
     fan_watts_cfm2 = heating_system.fan_watts_per_cfm
@@ -1036,31 +1042,31 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_furnace_central_air_conditioner_2_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     _check_install_quality_multispeed_ratio(cooling_system, model)
   end
 
   def test_install_quality_furnace_central_air_conditioner_var_speed_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     _check_install_quality_multispeed_ratio(cooling_system, model)
   end
 
   def test_install_quality_furnace_gas_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-furnace-gas-only.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-only.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heating_system = hpxml.heating_systems[0]
+    heating_system = hpxml_bldg.heating_systems[0]
     fan_watts_cfm = heating_system.fan_watts_per_cfm
 
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
@@ -1073,11 +1079,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_ground_to_air_heat_pump_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-ground-to-air-heat-pump.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-ground-to-air-heat-pump.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     charge_defect = heat_pump.charge_defect_ratio
     fan_watts_cfm = heat_pump.fan_watts_per_cfm
 
@@ -1113,31 +1119,31 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_install_quality_mini_split_air_conditioner_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     _check_install_quality_multispeed_ratio(cooling_system, model)
   end
 
   def test_install_quality_mini_split_heat_pump_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-install-quality-mini-split-heat-pump-ducted.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-mini-split-heat-pump-ducted.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
+    heat_pump = hpxml_bldg.heat_pumps[0]
     _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
   end
 
   def test_custom_seasons
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-seasons.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-seasons.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    hvac_control = hpxml.hvac_controls[0]
+    hvac_control = hpxml_bldg.hvac_controls[0]
     seasons_heating_begin_month = hvac_control.seasons_heating_begin_month
     seasons_heating_begin_day = hvac_control.seasons_heating_begin_day
     seasons_heating_end_month = hvac_control.seasons_heating_end_month
@@ -1189,11 +1195,14 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_crankcase_heater_watts
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-crankcase-heater-40w.xml'))
-    model, hpxml = _test_measure(args_hash)
+    args_hash['hpxml_path'] = @tmp_hpxml_path
+    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.cooling_systems[0].crankcase_heater_watts = 40.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
-    cooling_system = hpxml.cooling_systems[0]
+    cooling_system = hpxml_bldg.cooling_systems[0]
     crankcase_heater_watts = cooling_system.crankcase_heater_watts
 
     # Check cooling coil
@@ -1236,7 +1245,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
-    return model, hpxml
+    return model, hpxml, hpxml.buildings[0]
   end
 
   def _check_install_quality_multispeed_ratio(hpxml_clg_sys, model, hpxml_htg_sys = nil)
@@ -1283,5 +1292,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
       assert_in_epsilon(program_values['FF_AF_htg'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
     end
+  end
+
+  def _create_hpxml(hpxml_name)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
+    return hpxml, hpxml.buildings[0]
   end
 end
