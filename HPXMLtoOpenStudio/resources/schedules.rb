@@ -726,7 +726,6 @@ class Schedule
       # FUTURE: Assign an object type to the schedules and use that to determine what
       # kind of schedule each is, rather than looking at object names. That would
       # be more robust. See https://github.com/NREL/OpenStudio-HPXML/issues/1450.
-      puts "#{sch_name} #{Constants.ObjectNameWaterHeaterSetpoint} #{sch_name.include? Constants.ObjectNameWaterHeaterSetpoint}"
       if sch_name.include? Constants.ObjectNameWaterHeaterSetpoint
         # Water heater setpoint
         # Temperature of tank < 2C indicates of possibility of freeze.

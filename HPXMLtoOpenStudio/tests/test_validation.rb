@@ -506,7 +506,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-water-heater.xml')
         hpxml_bldg.water_heating_systems[0].number_of_units_served = 1
       elsif ['invalid-pilot-light-heating-system'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-floor-furnace-propane-only-pilot-light.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-floor-furnace-propane-only.xml')
         hpxml_bldg.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
       elsif ['invalid-shared-vent-in-unit-flowrate'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-mechvent.xml')

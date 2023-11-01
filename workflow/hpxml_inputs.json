@@ -1883,10 +1883,7 @@
   "sample_files/base-hvac-floor-furnace-propane-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
     "heating_system_type": "FloorFurnace",
-    "heating_system_fuel": "propane"
-  },
-  "sample_files/base-hvac-floor-furnace-propane-only-pilot-light.xml": {
-    "parent_hpxml": "sample_files/base-hvac-floor-furnace-propane-only.xml",
+    "heating_system_fuel": "propane",
     "heating_system_pilot_light": 600
   },
   "sample_files/base-hvac-furnace-coal-only.xml": {
@@ -2276,9 +2273,6 @@
     "cooling_system_cooling_capacity": 2400,
     "ducts_supply_leakage_to_outside_value": 7.5,
     "ducts_return_leakage_to_outside_value": 2.5
-  },
-  "sample_files/base-hvac-undersized-allow-increased-fixed-capacities.xml": {
-    "parent_hpxml": "sample_files/base-hvac-undersized.xml"
   },
   "sample_files/base-hvac-wall-furnace-elec-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2937,23 +2931,9 @@
     "parent_hpxml": "sample_files/base.xml",
     "schedules_vacancy_period": "Dec 1 - Jan 31"
   },
-  "sample_files/base-schedules-simple-vacancy-year-round.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "schedules_vacancy_period": "Jan 1 - Dec 31"
-  },
   "sample_files/base-schedules-simple-power-outage.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_power_outage_period": "Jul 1 5 - Jul 31 14"
-  },
-  "sample_files/base-schedules-simple-power-outage-natvent-available.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "schedules_power_outage_period": "Jul 1 5 - Jul 31 14",
-    "schedules_power_outage_window_natvent_availability": "always available"
-  },
-  "sample_files/base-schedules-simple-power-outage-natvent-unavailable.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "schedules_power_outage_period": "Jul 1 5 - Jul 31 14",
-    "schedules_power_outage_window_natvent_availability": "always unavailable"
   },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
@@ -2984,10 +2964,6 @@
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
     "schedules_vacancy_period": "Dec 1 - Jan 31"
-  },
-  "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy-year-round.xml": {
-    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_vacancy_period": "Jan 1 - Dec 31"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-power-outage.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",

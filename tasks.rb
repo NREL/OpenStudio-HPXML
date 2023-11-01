@@ -277,7 +277,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
-        'base-schedules-simple-vacancy-year-round.xml',
         'base-schedules-simple-power-outage.xml',
         'base-misc-loads-large-uncommon.xml',
         'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
@@ -1697,7 +1696,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
-        'base-schedules-simple-vacancy-year-round.xml',
         'base-schedules-simple-power-outage.xml',
         'base-misc-loads-large-uncommon.xml',
         'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
@@ -2030,7 +2028,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
-        'base-schedules-simple-vacancy-year-round.xml',
         'base-schedules-simple-power-outage.xml',
         'base-misc-loads-large-uncommon.xml',
         'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
@@ -2117,7 +2114,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     elsif ['base-schedules-simple.xml',
            'base-schedules-simple-vacancy.xml',
-           'base-schedules-simple-vacancy-year-round.xml',
            'base-schedules-simple-power-outage.xml',
            'base-misc-loads-large-uncommon.xml',
            'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
@@ -2168,7 +2164,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
         'base-schedules-simple-vacancy.xml',
-        'base-schedules-simple-vacancy-year-round.xml',
         'base-schedules-simple-power-outage.xml',
         'base-misc-loads-large-uncommon.xml',
         'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
