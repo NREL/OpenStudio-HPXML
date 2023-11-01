@@ -394,7 +394,7 @@ class Constants
     return 'room ac'
   end
   def self.ObjectNameShowers
-    return 'showers'
+    return 'hot_water_showers'
   end
 
   def self.ObjectNameSolarHotWater

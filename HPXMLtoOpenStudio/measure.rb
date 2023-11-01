@@ -1896,7 +1896,7 @@ class OSModel
   def self.add_unmet_wh_loads(runner, model, weather, hw_plant_loop)
     @hpxml.water_heating_systems.each do |water_heating_system|
       #Get shower schedule max value
-      shower_peak_flow = HotWaterAndAppliances.add_showers_and_calculate_max(model, runner, @hpxml, weather, water_heating_system, @eri_version, @schedules_file)
+      shower_peak_flow = HotWaterAndAppliances.add_showers_and_calculate_max(model, runner, @hpxml, weather, water_heating_system, @eri_version, @schedules_file, @hpxml.header.unavailable_periods)
       sys_id = water_heating_system.id
       #Get the water storage tanks for the outlet temp sensor
       num_tanks = 0
