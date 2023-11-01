@@ -78,7 +78,6 @@ denver-hvac-autosize-evap-cooler-furnace-gas.xml,32235.0,13458.0,0.0
 denver-hvac-autosize-evap-cooler-only-ducted.xml,0.0,15717.0,0.0
 denver-hvac-autosize-evap-cooler-only.xml,0.0,13458.0,0.0
 denver-hvac-autosize-fireplace-wood-only.xml,23640.0,0.0,0.0
-denver-hvac-autosize-floor-furnace-propane-only-pilot-light.xml,23640.0,0.0,0.0
 denver-hvac-autosize-floor-furnace-propane-only.xml,23640.0,0.0,0.0
 denver-hvac-autosize-furnace-coal-only.xml,32235.0,0.0,0.0
 denver-hvac-autosize-furnace-elec-central-ac-1-speed.xml,32235.0,21309.0,0.0
@@ -179,7 +178,6 @@ denver-hvac-autosize-setpoints.xml,32235.0,21309.0,0.0
 denver-hvac-autosize-space-heater-gas-only.xml,23640.0,0.0,0.0
 denver-hvac-autosize-stove-oil-only.xml,23640.0,0.0,0.0
 denver-hvac-autosize-stove-wood-pellets-only.xml,23640.0,0.0,0.0
-denver-hvac-autosize-undersized-allow-increased-fixed-capacities.xml,28898.0,19717.0,0.0
 denver-hvac-autosize-undersized.xml,28898.0,19717.0,0.0
 denver-hvac-autosize-wall-furnace-elec-only.xml,23640.0,0.0,0.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,27095.0,0.0
@@ -261,7 +259,6 @@ houston-hvac-autosize-evap-cooler-furnace-gas.xml,21260.0,16939.0,0.0
 houston-hvac-autosize-evap-cooler-only-ducted.xml,0.0,18494.0,0.0
 houston-hvac-autosize-evap-cooler-only.xml,0.0,16939.0,0.0
 houston-hvac-autosize-fireplace-wood-only.xml,14077.0,0.0,0.0
-houston-hvac-autosize-floor-furnace-propane-only-pilot-light.xml,14077.0,0.0,0.0
 houston-hvac-autosize-floor-furnace-propane-only.xml,14077.0,0.0,0.0
 houston-hvac-autosize-furnace-coal-only.xml,21260.0,0.0,0.0
 houston-hvac-autosize-furnace-elec-central-ac-1-speed.xml,21260.0,27095.0,0.0
@@ -362,6 +359,5 @@ houston-hvac-autosize-setpoints.xml,21260.0,27095.0,0.0
 houston-hvac-autosize-space-heater-gas-only.xml,14077.0,0.0,0.0
 houston-hvac-autosize-stove-oil-only.xml,14077.0,0.0,0.0
 houston-hvac-autosize-stove-wood-pellets-only.xml,14077.0,0.0,0.0
-houston-hvac-autosize-undersized-allow-increased-fixed-capacities.xml,17839.0,23548.0,0.0
 houston-hvac-autosize-undersized.xml,17839.0,23548.0,0.0
 houston-hvac-autosize-wall-furnace-elec-only.xml,14077.0,0.0,0.0
