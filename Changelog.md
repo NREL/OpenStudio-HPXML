@@ -9,8 +9,6 @@ __New Features__
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
 - HVAC updates:
   - Replaces inverse calculations, used to calculate COPs from rated efficiencies, with regressions for single/two-speed central ACs and ASHPs.
-    - Significant improvement to low-speed heating COPs for two-speed HPs with HSPFs > 10 or HSPFs <= 7.
-    - Moderate improvement to cooling COPs for single-speed ACs/HPs with SEERs in the 11-12.7 range.
 - Allows simulating whole multifamily (MF) buildings in a single combined simulation:
   - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across units:
     - `HVACSizingControl`
@@ -57,6 +55,7 @@ __Bugfixes__
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 - Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
 - Fixes AC/HP cooling bug when applying cooling equipment adjustment.
+- Fixes low-speed heating COPs for some two-speed ASHPs and cooling COPs for some single-speed ACs/HPs.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
