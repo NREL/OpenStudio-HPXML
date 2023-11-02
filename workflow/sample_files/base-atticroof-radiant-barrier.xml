@@ -110,6 +110,7 @@
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>true</RadiantBarrier>
+            <RadiantBarrierGrade>2</RadiantBarrierGrade>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -148,7 +149,7 @@
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
-            <RadiantBarrier>true</RadiantBarrier>
+            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -168,7 +169,7 @@
             <InteriorFinish>
               <Type>gypsum board</Type>
             </InteriorFinish>
-            <RadiantBarrier>true</RadiantBarrier>
+            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>

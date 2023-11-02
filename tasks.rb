@@ -24,7 +24,11 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    if !hpxml_filename.include? 'base-atticroof-radiant-barrier.xml'
+    if !(
+      hpxml_filename.include?('base-atticroof-radiant-barrier.xml') ||
+      hpxml_filename.include?('base-atticwall-radiant-barrier.xml')||
+      hpxml_filename.include?('base-atticfloor-radiant-barrier.xml')
+    )
       next
     end
 

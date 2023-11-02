@@ -44,9 +44,10 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 1.99,
-    "roof_radiant_barrier": true,
-    "wall_radiant_barrier": true,
-    "floor_radiant_barrier": true,
+    "roof_radiant_barrier": false,
+    "roof_radiant_barrier_grade": 2,
+    "wall_radiant_barrier": false,
+    "floor_radiant_barrier": false,
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -410,9 +411,9 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 2.3,
-    "roof_radiant_barrier": true,
-    "wall_radiant_barrier": true,
-    "floor_radiant_barrier": true,
+    "roof_radiant_barrier": false,
+    "wall_radiant_barrier": false,
+    "floor_radiant_barrier": false,
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -740,6 +741,16 @@
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
     "roof_radiant_barrier": true,
     "roof_radiant_barrier_grade": 2
+  },
+  "sample_files/base-atticwall-radiant-barrier.xml": {
+    "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
+    "wall_radiant_barrier": true,
+    "wall_radiant_barrier_grade": 2
+  },
+  "sample_files/base-atticfloor-radiant-barrier.xml": {
+    "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
+    "floor_radiant_barrier": true,
+    "floor_radiant_barrier_grade": 2
   },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {
     "parent_hpxml": "sample_files/base.xml",

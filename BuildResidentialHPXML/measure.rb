@@ -660,7 +660,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('floor_radiant_barrier_grade', radiant_barrier_grade_choices, false)
-    arg.setDisplayName('Attic: Floor Wall Radiant Barrier Grade')
+    arg.setDisplayName('Attic: Floor Radiant Barrier Grade')
     arg.setDescription('The grade of the radiant barrier in the attic floor. If not provided, the OS-HPXML default is used.')
     args << arg
 
@@ -4062,7 +4062,7 @@ class HPXMLFile
       end
 
       radiant_barrier = args[:roof_radiant_barrier]
-      if args[:radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
+      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
         radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
       end
 
