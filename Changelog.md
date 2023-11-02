@@ -2,11 +2,26 @@
 
 __New Features__
 - Updates to OpenStudio 3.7.0/EnergyPlus 23.2.
-- **Breaking change**: Updates to official HPXML v4.0:
+- **Breaking change**: Updates to HPXML v4.0-rc2:
   - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09.
   - Replaces "living space" with "conditioned space", which better represents what is modeled.
   - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
+- Allows simulating whole multifamily (MF) buildings in a single combined simulation:
+  - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across units:
+    - `HVACSizingControl`
+    - `ShadingControl`
+    - `SchedulesFilePath`
+    - `NaturalVentilationAvailabilityDaysperWeek`
+  - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
+  - Notes:
+    - Each dwelling unit is described by a separate `Building` element in the HPXML file.
+    - To run the single simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
+    - Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones, as described in the documentation.
+    - Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit, as described in the documentation.
+    - Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if `NumberofUnits` is 1.
+    - Utility bill calculations using detailed rates are not supported.
+    - Simulation results will be for the entire building; results for individual dwelling units are not available.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
@@ -21,7 +36,9 @@ __New Features__
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 - Battery losses now split between charging and discharging.
 - Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
+- Updates ground temperatures using a correlation based on L. Xing's simplified design model (2014).
 - Improvements to HERS & MaxLoad heat pump sizing methodologies.
+- Allows `WaterFixture/FlowRate` as an alternative to `LowFlow`; hot water credit is now calculated based on fraction of low flow fixtures.
 - Added README.md documentation for all OpenStudio measures.
 
 __Bugfixes__
