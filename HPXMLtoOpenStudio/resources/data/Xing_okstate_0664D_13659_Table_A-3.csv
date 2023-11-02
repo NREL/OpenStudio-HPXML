@@ -1,4 +1,4 @@
-﻿Region,Country,Station,Latitude,Longitude,"Ts,avg","Ts,amplitude,1","Ts,amplitude,2",PL1,PL2,
+Region,Country,Station,Latitude,Longitude,"Ts,avg","Ts,amplitude,1","Ts,amplitude,2",PL1,PL2,
 1,BEN,COTONOU,6.35,2.38,28.0,-1.5,0.7,56,32,
 1,BEN,PARAKOU,9.35,2.62,27.6,-2.2,1.0,69,21,
 1,BFA,BOBO-DIOULASSO,11.17,-4.32,27.8,-1.7,1.8,99,24,
