@@ -349,15 +349,19 @@ class WeatherProcess
     if dist > tol # default values; not close enough
       runner.registerWarning("Could not find appropriate (#{dist.round(3)} > #{tol}) temperatures and amplitudes from Xing's model; using default values.")
       # Following are from E+ docs
-      data.DeepGroundAnnualTemp = 11.1
-      data.DeepGroundSurfTempAmp1 = 13.4
-      data.DeepGroundSurfTempAmp2 = 0.7
-      data.DeepGroundPhaseShiftTempAmp1 = 25.0
-      data.DeepGroundPhaseShiftTempAmp2 = 30.0
+      data.DeepGroundAnnualTemp = UnitConversions.convert(11.1, 'C', 'F')
+      data.DeepGroundSurfTempAmp1 = 13.4 # deltaC
+      data.DeepGroundSurfTempAmp2 = 0.7 # deltaC
+      data.DeepGroundPhaseShiftTempAmp1 = 25.0 # days
+      data.DeepGroundPhaseShiftTempAmp2 = 30.0 # days
       return
     end
 
-    data.DeepGroundAnnualTemp, data.DeepGroundSurfTempAmp1, data.DeepGroundSurfTempAmp2, data.DeepGroundPhaseShiftTempAmp1, data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes
+    data.DeepGroundAnnualTemp = UnitConversions.convert(temperatures_amplitudes[0], 'C', 'F')
+    data.DeepGroundSurfTempAmp1 = temperatures_amplitudes[1] # deltaC
+    data.DeepGroundSurfTempAmp2 = temperatures_amplitudes[2] # deltaC
+    data.DeepGroundPhaseShiftTempAmp1 = temperatures_amplitudes[3] # days
+    data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes[4] # days
   end
 
   def calc_mains_temperatures(n_days)

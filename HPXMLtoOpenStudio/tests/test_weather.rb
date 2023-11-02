@@ -10,6 +10,7 @@ require_relative '../resources/psychrometrics.rb'
 require_relative '../resources/materials.rb'
 require_relative '../resources/constants.rb'
 require_relative '../resources/util.rb'
+require_relative '../resources/location.rb'
 
 class HPXMLtoOpenStudioWeatherTest < Minitest::Test
   def weather_dir
@@ -36,6 +37,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(51.6, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(51.6, weather.data.ShallowGroundAnnualTemp, 0.1)
+    assert_in_delta(56.3, weather.data.DeepGroundAnnualTemp, 0.1)
     assert_in_delta(57.6, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(3072.3, weather.data.CDD50F, 0.1)
     assert_in_delta(883.6, weather.data.CDD65F, 0.1)
@@ -90,6 +92,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(76.8, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(76.8, weather.data.ShallowGroundAnnualTemp, 0.1)
+    assert_in_delta(81.0, weather.data.DeepGroundAnnualTemp, 0.1)
     assert_in_delta(82.8, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(9798.7, weather.data.CDD50F, 0.1)
     assert_in_delta(4323.7, weather.data.CDD65F, 0.1)
@@ -144,6 +147,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(61.7, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(61.7, weather.data.ShallowGroundAnnualTemp, 0.1)
+    assert_in_delta(65.8, weather.data.DeepGroundAnnualTemp, 0.1)
     assert_in_delta(67.7, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(4297.8, weather.data.CDD50F, 0.1)
     assert_in_delta(503.0, weather.data.CDD65F, 0.1)
@@ -198,6 +202,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(49.4, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(49.4, weather.data.ShallowGroundAnnualTemp, 0.1)
+    assert_in_delta(55.2, weather.data.DeepGroundAnnualTemp, 0.1)
     assert_in_delta(55.4, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(2633.8, weather.data.CDD50F, 0.1)
     assert_in_delta(609.1, weather.data.CDD65F, 0.1)
