@@ -36,6 +36,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(51.6, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(53.1, weather.data.GroundAnnualTemp, 0.1)
+    assert_in_delta(57.6, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(3072.3, weather.data.CDD50F, 0.1)
     assert_in_delta(883.6, weather.data.CDD65F, 0.1)
     assert_in_delta(2497.2, weather.data.HDD50F, 0.1)
@@ -52,6 +53,9 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     end
     [45.3, 42.1, 41.8, 43.3, 49.4, 55.5, 60.7, 64.0, 64.3, 61.6, 56.5, 50.6].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.GroundMonthlyTemps[i], 0.1)
+    end
+    [48.7, 47.7, 49.2, 52.9, 57.8, 62.7, 66.2, 67.5, 66.2, 62.7, 57.8, 52.9].each_with_index do |monthly_temp, i|
+      assert_in_delta(monthly_temp, weather.data.MainsMonthlyTemps[i], 0.1)
     end
 
     # Check design
@@ -86,6 +90,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(76.8, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(76.1, weather.data.GroundAnnualTemp, 0.1)
+    assert_in_delta(82.8, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(9798.7, weather.data.CDD50F, 0.1)
     assert_in_delta(4323.7, weather.data.CDD65F, 0.1)
     assert_in_delta(0.0, weather.data.HDD50F, 0.1)
@@ -102,6 +107,9 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     end
     [74.5, 73.9, 73.9, 74.2, 75.4, 76.6, 77.6, 78.2, 78.3, 77.8, 76.8, 75.6].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.GroundMonthlyTemps[i], 0.1)
+    end
+    [79.8, 80.2, 81.2, 82.7, 84.2, 85.3, 85.8, 85.6, 84.6, 83.2, 81.6, 80.4].each_with_index do |monthly_temp, i|
+      assert_in_delta(monthly_temp, weather.data.MainsMonthlyTemps[i], 0.1)
     end
 
     # Check design
@@ -136,6 +144,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(61.7, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(62.3, weather.data.GroundAnnualTemp, 0.1)
+    assert_in_delta(67.7, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(4297.8, weather.data.CDD50F, 0.1)
     assert_in_delta(503.0, weather.data.CDD65F, 0.1)
     assert_in_delta(17.5, weather.data.HDD50F, 0.1)
@@ -152,6 +161,9 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     end
     [59.4, 58.3, 58.2, 58.7, 61.0, 63.2, 65.1, 66.4, 66.5, 65.5, 63.6, 61.4].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.GroundMonthlyTemps[i], 0.1)
+    end
+    [72.0, 72.1, 71.0, 69.1, 66.9, 64.8, 63.5, 63.4, 64.3, 66.1, 68.4, 70.5].each_with_index do |monthly_temp, i|
+      assert_in_delta(monthly_temp, weather.data.MainsMonthlyTemps[i], 0.1)
     end
 
     # Check design
@@ -186,6 +198,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(1, weather.header.RecordsPerHour)
     assert_in_delta(49.4, weather.data.AnnualAvgDrybulb, 0.1)
     assert_in_delta(51.1, weather.data.GroundAnnualTemp, 0.1)
+    assert_in_delta(55.4, weather.data.MainsAnnualTemp, 0.1)
     assert_in_delta(2633.8, weather.data.CDD50F, 0.1)
     assert_in_delta(609.1, weather.data.CDD65F, 0.1)
     assert_in_delta(2863.0, weather.data.HDD50F, 0.1)
@@ -202,6 +215,9 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     end
     [42.7, 39.2, 39.0, 40.6, 47.1, 53.6, 59.3, 62.8, 63.1, 60.2, 54.7, 48.4].each_with_index do |monthly_temp, i|
       assert_in_delta(monthly_temp, weather.data.GroundMonthlyTemps[i], 0.1)
+    end
+    [46.5, 45.2, 46.6, 50.2, 55.2, 60.3, 64.0, 65.5, 64.4, 60.9, 56.0, 50.9].each_with_index do |monthly_temp, i|
+      assert_in_delta(monthly_temp, weather.data.MainsMonthlyTemps[i], 0.1)
     end
 
     # Check design
