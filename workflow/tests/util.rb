@@ -5,9 +5,8 @@ def run_simulation_tests(hpxml_files_dir)
   xmls = []
   Dir["#{hpxml_files_dir}/*.xml"].sort.each do |xml|
     next if xml.end_with? '-10x.xml'
-
-    next if xml.include?('base-multiple-sfd-buildings') ||
-            next if xml.include? 'base-multiple-mf-units'
+    next if xml.include? 'base-multiple-sfd-buildings' # Separate tests cover this
+    next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
 
     xmls << File.absolute_path(xml)
   end
