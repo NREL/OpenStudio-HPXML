@@ -10,8 +10,9 @@ end
 class WeatherData
   def initialize
   end
-  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :ShallowGroundAnnualTemp, :ShallowGroundMonthlyTemps, :DeepGroundAnnualTemp, :WSF,
-             :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs, :MainsAnnualTemp, :MainsDailyTemps, :MainsMonthlyTemps]
+  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :ShallowGroundAnnualTemp, :ShallowGroundMonthlyTemps,
+             :DeepGroundAnnualTemp, :DeepGroundSurfTempAmp1, :DeepGroundSurfTempAmp2, :DeepGroundPhaseShiftTempAmp1, :DeepGroundPhaseShiftTempAmp2,
+             :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs, :MainsAnnualTemp, :MainsDailyTemps, :MainsMonthlyTemps]
   attr_accessor(*ATTRS)
 end
 
@@ -121,7 +122,8 @@ class WeatherProcess
 
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
-    calc_ground_temperatures
+    calc_shallow_ground_temperatures
+    calc_deep_ground_temperatures
     calc_mains_temperatures(dailydbs.size)
     data.WSF = calc_ashrae_622_wsf(rowdata)
 
@@ -290,8 +292,8 @@ class WeatherProcess
     design.HeatingDrybulb = UnitConversions.convert(heat99per_db, 'C', 'F')
   end
 
-  def calc_ground_temperatures
-    # Return monthly ground temperatures.
+  def calc_shallow_ground_temperatures
+    # Return shallow monthly/annual ground temperatures.
     # This correlation is the same that is used in DOE-2's src\WTH.f file, subroutine GTEMP
 
     amon = [15.0, 46.0, 74.0, 95.0, 135.0, 166.0, 196.0, 227.0, 258.0, 288.0, 319.0, 349.0]
@@ -320,6 +322,41 @@ class WeatherProcess
       # Southern hemisphere
       data.ShallowGroundMonthlyTemps.rotate!(6)
     end
+  end
+
+  def calc_deep_ground_temperatures
+    # Return deep annual ground temperature.
+    # Annual average ground temperature using Xing's model.
+
+    deep_ground_temperatures = Location.get_deep_ground_temperatures
+
+    require 'csv'
+    require 'matrix'
+
+    v1 = Vector[header.Latitude, header.Longitude]
+    dist = 1 / Constants.small
+    temperatures_amplitudes = nil
+    CSV.foreach(deep_ground_temperatures) do |row|
+      v2 = Vector[row[3].to_f, row[4].to_f]
+      new_dist = (v1 - v2).magnitude
+      if new_dist < dist
+        temperatures_amplitudes = row[5..9].map(&:to_f)
+        dist = new_dist
+      end
+    end
+
+    tol = 3
+    if dist > tol # default values; not close enough
+      runner.registerWarning("Could not find appropriate (#{dist.round(3)} > #{tol}) temperatures and amplitudes from Xing's model; using default values.")
+      # Following are from E+ docs
+      data.DeepGroundAnnualTemp = 11.1
+      data.DeepGroundSurfTempAmp1 = 13.4
+      data.DeepGroundSurfTempAmp2 = 0.7
+      data.DeepGroundPhaseShiftTempAmp1 = 25.0
+      data.DeepGroundPhaseShiftTempAmp2 = 30.0
+    end
+
+    data.DeepGroundAnnualTemp, data.DeepGroundSurfTempAmp1, data.DeepGroundSurfTempAmp2, data.DeepGroundPhaseShiftTempAmp1, data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes
   end
 
   def calc_mains_temperatures(n_days)
