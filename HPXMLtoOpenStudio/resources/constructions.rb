@@ -345,7 +345,7 @@ class Constructions
     constr.add_layer(inside_film)
 
     constr.set_exterior_material_properties(solar_absorptance, emittance)
-    constr.set_interior_material_properties()  unless has_radiant_barrier
+    constr.set_interior_material_properties() unless has_radiant_barrier
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -1291,7 +1291,7 @@ class Constructions
                          false,
                          Material.AirFilmVertical,
                          Material.AirFilmVertical,
-                         0,
+                         1,
                          nil,
                          nil)
   end
@@ -1916,13 +1916,23 @@ class Constructions
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
 
-      apply_wood_stud_wall(model, surfaces, "#{wall_id} construction",
-                           cavity_r, install_grade, constr_set.stud.thick_in,
-                           cavity_filled, constr_set.framing_factor,
-                           constr_set.mat_int_finish, constr_set.osb_thick_in,
-                           constr_set.rigid_r, constr_set.mat_ext_finish,
-                           has_radiant_barrier, inside_film, outside_film,
-                           radiant_barrier_grade, solar_absorptance,
+      apply_wood_stud_wall(model,
+                           surfaces,
+                           "#{wall_id} construction",
+                           cavity_r,
+                           install_grade,
+                           constr_set.stud.thick_in,
+                           cavity_filled,
+                           constr_set.framing_factor,
+                           constr_set.mat_int_finish,
+                           constr_set.osb_thick_in,
+                           constr_set.rigid_r,
+                           constr_set.mat_ext_finish,
+                           has_radiant_barrier,
+                           inside_film,
+                           outside_film,
+                           radiant_barrier_grade,
+                           solar_absorptance,
                            emittance)
     elsif wall_type == HPXML::WallTypeSteelStud
       install_grade = 1

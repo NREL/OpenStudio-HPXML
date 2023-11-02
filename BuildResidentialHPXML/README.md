@@ -991,9 +991,9 @@ Assembly R-value of the roof.
 
 <br/>
 
-**Roof: Has Radiant Barrier**
+**Attic: Has Roof Radiant Barrier**
 
-Presence of a radiant barrier in the attic.
+Presence of a radiant barrier in the attic roof.
 
 - **Name:** ``roof_radiant_barrier``
 - **Type:** ``Boolean``
@@ -1002,11 +1002,59 @@ Presence of a radiant barrier in the attic.
 
 <br/>
 
-**Roof: Radiant Barrier Grade**
+**Attic: Roof Radiant Barrier Grade**
 
-The grade of the radiant barrier. If not provided, the OS-HPXML default is used.
+The grade of the radiant barrier in the attic roof. If not provided, the OS-HPXML default is used.
 
 - **Name:** ``roof_radiant_barrier_grade``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `1`, `2`, `3`
+
+<br/>
+
+**Attic: Has Wall Radiant Barrier**
+
+Presence of a radiant barrier in the attic gable wall.
+
+- **Name:** ``wall_radiant_barrier``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Attic: Gable Wall Radiant Barrier Grade**
+
+The grade of the radiant barrier in the attic gable wall. If not provided, the OS-HPXML default is used.
+
+- **Name:** ``wall_radiant_barrier_grade``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `1`, `2`, `3`
+
+<br/>
+
+**Attic: Flor Has Wall Radiant Barrier**
+
+Presence of a radiant barrier in the attic floor.
+
+- **Name:** ``floor_radiant_barrier``
+- **Type:** ``Boolean``
+
+- **Required:** ``true``
+
+<br/>
+
+**Attic: Floor Wall Radiant Barrier Grade**
+
+The grade of the radiant barrier in the attic floor. If not provided, the OS-HPXML default is used.
+
+- **Name:** ``floor_radiant_barrier_grade``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
