@@ -10,7 +10,7 @@ end
 class WeatherData
   def initialize
   end
-  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :GroundAnnualTemp, :GroundMonthlyTemps, :WSF,
+  ATTRS ||= [:AnnualAvgDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :ShallowGroundAnnualTemp, :ShallowGroundMonthlyTemps, :DeepGroundAnnualTemp, :WSF,
              :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs, :MainsAnnualTemp, :MainsDailyTemps, :MainsMonthlyTemps]
   attr_accessor(*ATTRS)
 end
@@ -292,8 +292,7 @@ class WeatherProcess
 
   def calc_ground_temperatures
     # Return monthly ground temperatures.
-    # This correlation is the same that is used in DOE-2's src\WTH.f file, subroutine GTEMP,
-    # except that we have replaced the annual average ground temperature using Xing's model.
+    # This correlation is the same that is used in DOE-2's src\WTH.f file, subroutine GTEMP
 
     amon = [15.0, 46.0, 74.0, 95.0, 135.0, 166.0, 196.0, 227.0, 258.0, 288.0, 319.0, 349.0]
     po = 0.6
@@ -310,13 +309,16 @@ class WeatherProcess
     phi = Math::atan(z)
     bo = (data.MonthlyAvgDrybulbs.max - data.MonthlyAvgDrybulbs.min) * 0.5
 
-    # The regression coefficients are from L. Xing's simplified design model ground temperatures (Appendix A-3) and the nearest TMY3 station's annual dry bulb.
-    data.GroundAnnualTemp = UnitConversions.convert(0.91 * UnitConversions.convert(data.AnnualAvgDrybulb, 'F', 'C') + 1.82, 'C', 'F')
-
-    data.GroundMonthlyTemps = []
+    data.ShallowGroundMonthlyTemps = []
     for i in 0..11
       theta = amon[i] * 24.0
-      data.GroundMonthlyTemps << data.GroundAnnualTemp - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm
+      data.ShallowGroundMonthlyTemps << UnitConversions.convert(data.AnnualAvgDrybulb - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
+    end
+    data.ShallowGroundAnnualTemp = data.AnnualAvgDrybulb
+
+    if header.Latitude < 0
+      # Southern hemisphere
+      data.ShallowGroundMonthlyTemps.rotate!(6)
     end
   end
 

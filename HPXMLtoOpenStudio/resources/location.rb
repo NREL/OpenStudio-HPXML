@@ -47,7 +47,7 @@ class Location
     # Shallow ground temperatures only currently used for ducts located under slab
     sgts = model.getSiteGroundTemperatureShallow
     sgts.resetAllMonths
-    sgts.setAllMonthlyTemperatures(weather.data.GroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
+    sgts.setAllMonthlyTemperatures(weather.data.ShallowGroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
 
     # Deep ground temperatures used by GSHP setpoint manager
     dgts = model.getSiteGroundTemperatureDeep
