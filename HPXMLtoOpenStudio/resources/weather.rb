@@ -354,6 +354,7 @@ class WeatherProcess
       data.DeepGroundSurfTempAmp2 = 0.7
       data.DeepGroundPhaseShiftTempAmp1 = 25.0
       data.DeepGroundPhaseShiftTempAmp2 = 30.0
+      return
     end
 
     data.DeepGroundAnnualTemp, data.DeepGroundSurfTempAmp1, data.DeepGroundSurfTempAmp2, data.DeepGroundPhaseShiftTempAmp1, data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes
