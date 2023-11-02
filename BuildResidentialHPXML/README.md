@@ -1015,7 +1015,7 @@ The grade of the radiant barrier in the attic roof. If not provided, the OS-HPXM
 
 <br/>
 
-**Attic: Has Wall Radiant Barrier**
+**Attic: Has Gable Wall Radiant Barrier**
 
 Presence of a radiant barrier in the attic gable wall.
 
@@ -1039,7 +1039,7 @@ The grade of the radiant barrier in the attic gable wall. If not provided, the O
 
 <br/>
 
-**Attic: Flor Has Wall Radiant Barrier**
+**Attic: Has Floor Radiant Barrier**
 
 Presence of a radiant barrier in the attic floor.
 

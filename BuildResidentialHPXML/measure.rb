@@ -643,7 +643,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('wall_radiant_barrier', true)
-    arg.setDisplayName('Attic: Has Wall Radiant Barrier')
+    arg.setDisplayName('Attic: Has Gable Wall Radiant Barrier')
     arg.setDescription('Presence of a radiant barrier in the attic gable wall.')
     arg.setDefaultValue(false)
     args << arg
@@ -654,7 +654,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('floor_radiant_barrier', true)
-    arg.setDisplayName('Attic: Flor Has Wall Radiant Barrier')
+    arg.setDisplayName('Attic: Has Floor Radiant Barrier')
     arg.setDescription('Presence of a radiant barrier in the attic floor.')
     arg.setDefaultValue(false)
     args << arg
@@ -4061,9 +4061,9 @@ class HPXMLFile
         roof_color = args[:roof_color].get
       end
 
-      radiant_barrier = args[:radiant_barrier]
-      if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
-        radiant_barrier_grade = args[:radiant_barrier_grade].get
+      radiant_barrier = args[:roof_radiant_barrier]
+      if args[:radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
+        radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
       end
 
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
