@@ -327,7 +327,7 @@ class WeatherProcess
   def calc_deep_ground_temperatures(hpxml)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
-    
+
     # Avoid this lookup/calculation if there's no GSHP since there is a (small) runtime penalty.
     if !hpxml.nil?
       has_gshp = false
