@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3fd0d61d-6deb-439c-8f45-a807ea2095fd</version_id>
-  <version_modified>2023-11-03T01:16:16Z</version_modified>
+  <version_id>080307ba-bc1e-402e-9033-82830e43b579</version_id>
+  <version_modified>2023-11-03T20:34:45Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,13 +142,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5BFBE071</checksum>
+      <checksum>58A2987F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>72035A85</checksum>
+      <checksum>83E00DDE</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -167,6 +167,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>E7E0949D</checksum>
+    </file>
+    <file>
+      <filename>data/Xing_okstate_0664D_13659_Table_A-3 - Copy.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>50B7055C</checksum>
     </file>
     <file>
       <filename>data/ashrae_622_wsf.csv</filename>
@@ -328,7 +334,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AF5961B5</checksum>
+      <checksum>F8595E25</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -502,7 +508,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C162FE36</checksum>
+      <checksum>B6B9743C</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
