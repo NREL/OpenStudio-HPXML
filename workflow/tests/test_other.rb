@@ -7,7 +7,7 @@ require 'parallel'
 require_relative '../../HPXMLtoOpenStudio/measure.rb'
 require_relative 'util.rb'
 
-class HPXMLTest < Minitest::Test
+class WorkflowOtherTest < Minitest::Test
   def test_run_simulation_output_formats
     # Check that the simulation produces outputs in the appropriate format
     ['csv', 'json', 'msgpack', 'csv_dview'].each do |output_format|
