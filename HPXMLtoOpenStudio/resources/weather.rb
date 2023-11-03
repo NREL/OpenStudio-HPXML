@@ -123,7 +123,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_shallow_ground_temperatures
-    calc_deep_ground_temperatures
+    calc_deep_ground_temperatures(runner)
     calc_mains_temperatures(dailydbs.size)
     data.WSF = calc_ashrae_622_wsf(rowdata)
 
@@ -324,7 +324,7 @@ class WeatherProcess
     end
   end
 
-  def calc_deep_ground_temperatures
+  def calc_deep_ground_temperatures(runner)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
 
@@ -361,8 +361,8 @@ class WeatherProcess
     end
 
     data.DeepGroundAnnualTemp = UnitConversions.convert(temperatures_amplitudes[0], 'C', 'F')
-    data.DeepGroundSurfTempAmp1 = temperatures_amplitudes[1] # deltaC
-    data.DeepGroundSurfTempAmp2 = temperatures_amplitudes[2] # deltaC
+    data.DeepGroundSurfTempAmp1 = UnitConversions.convert(temperatures_amplitudes[1], 'deltac', 'deltaf')
+    data.DeepGroundSurfTempAmp2 = UnitConversions.convert(temperatures_amplitudes[2], 'deltac', 'deltaf')
     data.DeepGroundPhaseShiftTempAmp1 = temperatures_amplitudes[3] # days
     data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes[4] # days
   end
