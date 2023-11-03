@@ -2922,7 +2922,7 @@ class HVACSizing
         u_effective << 1.0 / r_air_to_air
       end
 
-      f_values << u_effective.inject(0, :+) # sum array
+      f_values << u_effective.sum
     end
 
     return f_values.sum() / f_values.size
