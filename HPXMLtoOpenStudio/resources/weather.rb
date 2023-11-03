@@ -24,7 +24,7 @@ class WeatherDesign
 end
 
 class WeatherProcess
-  def initialize(epw_path:, runner:)
+  def initialize(epw_path:, runner:, hpxml: nil)
     @header = WeatherHeader.new
     @data = WeatherData.new
     @design = WeatherDesign.new
@@ -35,14 +35,14 @@ class WeatherProcess
 
     epw_file = OpenStudio::EpwFile.new(epw_path, true)
 
-    process_epw(runner, epw_file)
+    process_epw(runner, epw_file, hpxml)
   end
 
   attr_accessor(:header, :data, :design)
 
   private
 
-  def process_epw(runner, epw_file)
+  def process_epw(runner, epw_file, hpxml)
     # Header info:
     header.City = epw_file.city
     header.State = epw_file.stateProvinceRegion
@@ -123,7 +123,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_shallow_ground_temperatures
-    calc_deep_ground_temperatures(runner)
+    calc_deep_ground_temperatures(runner, hpxml)
     calc_mains_temperatures(dailydbs.size)
     data.WSF = calc_ashrae_622_wsf(rowdata)
 
@@ -324,9 +324,16 @@ class WeatherProcess
     end
   end
 
-  def calc_deep_ground_temperatures(runner)
+  def calc_deep_ground_temperatures(runner, hpxml)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
+    if !hpxml.nil?
+      has_gshp = false
+      hpxml.buildings.each do |hpxml_bldg|
+        has_gshp = true if hpxml_bldg.heat_pumps.select { |h| h.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
+      end
+      return if !has_gshp
+    end
 
     deep_ground_temperatures = File.join(File.dirname(__FILE__), 'data', 'Xing_okstate_0664D_13659_Table_A-3.csv')
     if not File.exist?(deep_ground_temperatures)
