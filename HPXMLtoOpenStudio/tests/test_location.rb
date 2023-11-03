@@ -12,6 +12,10 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
+  def weather_dir
+    return File.join(File.dirname(__FILE__), '..', '..', 'weather')
+  end
+
   def get_daylight_saving_month_and_days(model)
     run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
     start_date = run_period_control_daylight_saving_time.startDate
@@ -55,6 +59,45 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     assert_equal(0, model.getObjectsByType('OS:RunPeriodControl:DaylightSavingTime'.to_IddObjectType).size)
+  end
+
+  def test_xing
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
+
+    assert_equal(12.5, weather.data.DeepGroundSurfTempAmp1)
+    assert_equal(-1.3, weather.data.DeepGroundSurfTempAmp2)
+    assert_equal(20, weather.data.DeepGroundPhaseShiftTempAmp1)
+    assert_equal(31, weather.data.DeepGroundPhaseShiftTempAmp2)
+    assert_equal(0, runner.result.stepWarnings.size)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'), runner: runner)
+
+    assert_equal(2.6, weather.data.DeepGroundSurfTempAmp1)
+    assert_equal(0.1, weather.data.DeepGroundSurfTempAmp2)
+    assert_equal(37, weather.data.DeepGroundPhaseShiftTempAmp1)
+    assert_equal(-13, weather.data.DeepGroundPhaseShiftTempAmp2)
+    assert_equal(0, runner.result.stepWarnings.size)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'ZAF_Cape.Town.688160_IWEC.epw'), runner: runner)
+
+    assert_equal(-5.2, weather.data.DeepGroundSurfTempAmp1)
+    assert_equal(0.1, weather.data.DeepGroundSurfTempAmp2)
+    assert_equal(17, weather.data.DeepGroundPhaseShiftTempAmp1)
+    assert_equal(15, weather.data.DeepGroundPhaseShiftTempAmp2)
+    assert_equal(0, runner.result.stepWarnings.size)
+
+    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'US_CO_Boulder_AMY_2012.epw'), runner: runner)
+
+    assert_equal(12.3, weather.data.DeepGroundSurfTempAmp1)
+    assert_equal(1.1, weather.data.DeepGroundSurfTempAmp2)
+    assert_equal(19, weather.data.DeepGroundPhaseShiftTempAmp1)
+    assert_equal(-34, weather.data.DeepGroundPhaseShiftTempAmp2)
+    assert_equal(1, runner.result.stepWarnings.size)
+    assert_equal(1, runner.result.stepWarnings.select { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' }.size)
   end
 
   def _test_measure(args_hash)

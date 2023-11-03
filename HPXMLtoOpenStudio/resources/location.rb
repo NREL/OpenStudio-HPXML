@@ -47,12 +47,12 @@ class Location
     # Shallow ground temperatures only currently used for ducts located under slab
     sgts = model.getSiteGroundTemperatureShallow
     sgts.resetAllMonths
-    sgts.setAllMonthlyTemperatures(weather.data.GroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
+    sgts.setAllMonthlyTemperatures(weather.data.ShallowGroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
 
     # Deep ground temperatures used by GSHP setpoint manager
     dgts = model.getSiteGroundTemperatureDeep
     dgts.resetAllMonths
-    dgts.setAllMonthlyTemperatures([UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C')] * 12)
+    dgts.setAllMonthlyTemperatures([UnitConversions.convert(weather.data.DeepGroundAnnualTemp, 'F', 'C')] * 12)
   end
 
   def self.get_climate_zones
@@ -73,6 +73,15 @@ class Location
     end
 
     return
+  end
+
+  def self.get_deep_ground_temperatures
+    supplement_table_short_grass_csv = File.join(File.dirname(__FILE__), 'data', 'Xing_okstate_0664D_13659_Table_A-3.csv')
+    if not File.exist?(supplement_table_short_grass_csv)
+      fail 'Could not find Xing_okstate_0664D_13659_Table_A-3.csv'
+    end
+
+    return supplement_table_short_grass_csv
   end
 
   def self.get_epw_path(hpxml_bldg, hpxml_path)
