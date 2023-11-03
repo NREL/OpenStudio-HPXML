@@ -53,6 +53,7 @@ __Bugfixes__
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
 - Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
 - Fixes AC/HP cooling bug when applying cooling equipment adjustment.
+- Fixes order of shallow ground temperatures array when location is southern hemisphere.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
