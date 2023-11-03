@@ -416,7 +416,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(3, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-    assert_in_epsilon(884.6 / 3 + 5.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+    assert_in_epsilon(776.7 / 3 + 5.0, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
 
     # Bore depth greater than the max -> increase number of boreholes
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
@@ -424,11 +424,11 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(5, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-    assert_in_epsilon(2450.2 / 5 + 5, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+    assert_in_epsilon(2151.1 / 5 + 5, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
 
     # Bore depth greater than the max -> increase number of boreholes until the max, set depth to the max, and issue warning
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
-    hpxml_bldg.site.ground_conductivity = 0.08
+    hpxml_bldg.site.ground_conductivity = 0.07
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(10, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
@@ -440,7 +440,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(10, test_hpxml_bldg.geothermal_loops[0].num_bore_holes)
-    assert_in_epsilon(3434.3 / 10 + 5, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
+    assert_in_epsilon(3761.5 / 10 + 5, test_hpxml_bldg.geothermal_loops[0].bore_length, 0.01)
   end
 
   def _test_measure(args_hash)

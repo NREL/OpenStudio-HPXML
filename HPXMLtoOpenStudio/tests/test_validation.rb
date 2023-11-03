@@ -1508,7 +1508,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         end
       elsif ['hvac-gshp-bore-depth-autosized-high'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
-        hpxml_bldg.site.ground_conductivity = 0.08
+        hpxml_bldg.site.ground_conductivity = 0.07
       elsif ['hvac-setpoint-adjustments'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_controls[0].heating_setpoint_temp = 76.0
