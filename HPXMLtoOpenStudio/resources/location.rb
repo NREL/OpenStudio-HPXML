@@ -75,15 +75,6 @@ class Location
     return
   end
 
-  def self.get_deep_ground_temperatures
-    supplement_table_short_grass_csv = File.join(File.dirname(__FILE__), 'data', 'Xing_okstate_0664D_13659_Table_A-3.csv')
-    if not File.exist?(supplement_table_short_grass_csv)
-      fail 'Could not find Xing_okstate_0664D_13659_Table_A-3.csv'
-    end
-
-    return supplement_table_short_grass_csv
-  end
-
   def self.get_epw_path(hpxml_bldg, hpxml_path)
     epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
     abs_epw_path = File.absolute_path(epw_filepath)

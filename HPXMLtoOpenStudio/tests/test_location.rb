@@ -12,10 +12,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
-  def weather_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'weather')
-  end
-
   def get_daylight_saving_month_and_days(model)
     run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
     start_date = run_period_control_daylight_saving_time.startDate
@@ -63,6 +59,7 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
 
   def test_xing
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    weather_dir = File.join(File.dirname(__FILE__), '..', '..', 'weather')
     weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
 
     assert_equal(12.5, weather.data.DeepGroundSurfTempAmp1)

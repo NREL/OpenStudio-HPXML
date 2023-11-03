@@ -328,7 +328,10 @@ class WeatherProcess
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
 
-    deep_ground_temperatures = Location.get_deep_ground_temperatures
+    deep_ground_temperatures = File.join(File.dirname(__FILE__), 'data', 'Xing_okstate_0664D_13659_Table_A-3.csv')
+    if not File.exist?(deep_ground_temperatures)
+      fail 'Could not find Xing_okstate_0664D_13659_Table_A-3.csv'
+    end
 
     require 'csv'
     require 'matrix'
@@ -347,11 +350,11 @@ class WeatherProcess
 
     tol = 3
     if dist > tol # default values; not close enough
-      runner.registerWarning("Could not find appropriate (#{dist.round(3)} > #{tol}) temperatures and amplitudes from Xing's model; using default values.")
+      runner.registerWarning("Could not find nearby (#{dist.round(3)} > #{tol}) values from Xing's ground temperature model; using default values.")
       # Following are from E+ docs
       data.DeepGroundAnnualTemp = UnitConversions.convert(11.1, 'C', 'F')
-      data.DeepGroundSurfTempAmp1 = 13.4 # deltaC
-      data.DeepGroundSurfTempAmp2 = 0.7 # deltaC
+      data.DeepGroundSurfTempAmp1 = UnitConversions.convert(13.4, 'deltac', 'deltaf')
+      data.DeepGroundSurfTempAmp2 = UnitConversions.convert(0.7, 'deltac', 'deltaf')
       data.DeepGroundPhaseShiftTempAmp1 = 25.0 # days
       data.DeepGroundPhaseShiftTempAmp2 = 30.0 # days
       return

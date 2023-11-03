@@ -283,8 +283,8 @@ class HVAC
 
     # Site Ground Temperature Undisturbed
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
-    xing.setSoilSurfaceTemperatureAmplitude1(weather.data.DeepGroundSurfTempAmp1)
-    xing.setSoilSurfaceTemperatureAmplitude2(weather.data.DeepGroundSurfTempAmp2)
+    xing.setSoilSurfaceTemperatureAmplitude1(UnitConversions.convert(weather.data.DeepGroundSurfTempAmp1, 'deltaf', 'deltac'))
+    xing.setSoilSurfaceTemperatureAmplitude2(UnitConversions.convert(weather.data.DeepGroundSurfTempAmp2, 'deltaf', 'deltac'))
     xing.setPhaseShiftofTemperatureAmplitude1(weather.data.DeepGroundPhaseShiftTempAmp1)
     xing.setPhaseShiftofTemperatureAmplitude2(weather.data.DeepGroundPhaseShiftTempAmp2)
 
