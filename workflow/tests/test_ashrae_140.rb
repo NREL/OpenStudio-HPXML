@@ -7,7 +7,7 @@ require 'parallel'
 require_relative '../../HPXMLtoOpenStudio/measure.rb'
 require_relative 'util.rb'
 
-class HPXMLTest < Minitest::Test
+class WorkflowASHRAE140Test < Minitest::Test
   def test_simulations_ashrae_140
     results_dir = File.join(File.dirname(__FILE__), 'results')
     FileUtils.mkdir_p results_dir
