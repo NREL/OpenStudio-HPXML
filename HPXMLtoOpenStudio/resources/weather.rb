@@ -24,7 +24,7 @@ class WeatherDesign
 end
 
 class WeatherProcess
-  def initialize(epw_path:, runner:)
+  def initialize(epw_path:, runner:, hpxml: nil)
     @header = WeatherHeader.new
     @data = WeatherData.new
     @design = WeatherDesign.new
@@ -35,14 +35,14 @@ class WeatherProcess
 
     epw_file = OpenStudio::EpwFile.new(epw_path, true)
 
-    process_epw(runner, epw_file)
+    process_epw(runner, epw_file, hpxml)
   end
 
   attr_accessor(:header, :data, :design)
 
   private
 
-  def process_epw(runner, epw_file)
+  def process_epw(runner, epw_file, hpxml)
     # Header info:
     header.City = epw_file.city
     header.State = epw_file.stateProvinceRegion
@@ -123,7 +123,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_shallow_ground_temperatures
-    calc_deep_ground_temperatures
+    calc_deep_ground_temperatures(runner, hpxml)
     calc_mains_temperatures(dailydbs.size)
     data.WSF = calc_ashrae_622_wsf(rowdata)
 
@@ -324,11 +324,21 @@ class WeatherProcess
     end
   end
 
-  def calc_deep_ground_temperatures
+  def calc_deep_ground_temperatures(runner, hpxml)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
+    if !hpxml.nil?
+      has_gshp = false
+      hpxml.buildings.each do |hpxml_bldg|
+        has_gshp = true if hpxml_bldg.heat_pumps.select { |h| h.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
+      end
+      return if !has_gshp
+    end
 
-    deep_ground_temperatures = Location.get_deep_ground_temperatures
+    deep_ground_temperatures = File.join(File.dirname(__FILE__), 'data', 'Xing_okstate_0664D_13659_Table_A-3.csv')
+    if not File.exist?(deep_ground_temperatures)
+      fail 'Could not find Xing_okstate_0664D_13659_Table_A-3.csv'
+    end
 
     require 'csv'
     require 'matrix'
@@ -347,19 +357,19 @@ class WeatherProcess
 
     tol = 3
     if dist > tol # default values; not close enough
-      runner.registerWarning("Could not find appropriate (#{dist.round(3)} > #{tol}) temperatures and amplitudes from Xing's model; using default values.")
+      runner.registerWarning("Could not find nearby (#{dist.round(3)} > #{tol}) values from Xing's ground temperature model; using default values.")
       # Following are from E+ docs
       data.DeepGroundAnnualTemp = UnitConversions.convert(11.1, 'C', 'F')
-      data.DeepGroundSurfTempAmp1 = 13.4 # deltaC
-      data.DeepGroundSurfTempAmp2 = 0.7 # deltaC
+      data.DeepGroundSurfTempAmp1 = UnitConversions.convert(13.4, 'deltac', 'deltaf')
+      data.DeepGroundSurfTempAmp2 = UnitConversions.convert(0.7, 'deltac', 'deltaf')
       data.DeepGroundPhaseShiftTempAmp1 = 25.0 # days
       data.DeepGroundPhaseShiftTempAmp2 = 30.0 # days
       return
     end
 
     data.DeepGroundAnnualTemp = UnitConversions.convert(temperatures_amplitudes[0], 'C', 'F')
-    data.DeepGroundSurfTempAmp1 = temperatures_amplitudes[1] # deltaC
-    data.DeepGroundSurfTempAmp2 = temperatures_amplitudes[2] # deltaC
+    data.DeepGroundSurfTempAmp1 = UnitConversions.convert(temperatures_amplitudes[1], 'deltac', 'deltaf')
+    data.DeepGroundSurfTempAmp2 = UnitConversions.convert(temperatures_amplitudes[2], 'deltac', 'deltaf')
     data.DeepGroundPhaseShiftTempAmp1 = temperatures_amplitudes[3] # days
     data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes[4] # days
   end

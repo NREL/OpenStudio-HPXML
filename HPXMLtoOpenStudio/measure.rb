@@ -128,7 +128,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Process weather once upfront
       epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
-      weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
+      weather = WeatherProcess.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       epw_file = OpenStudio::EpwFile.new(epw_path)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
         next if i == 0
