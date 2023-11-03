@@ -1842,11 +1842,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     (@hpxml_bldg.pools + @hpxml_bldg.permanent_spas).each do |pool_or_spa|
       next if pool_or_spa.type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationConditionedSpace],
+      MiscLoads.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, spaces[HPXML::LocationConditionedSpace],
                                                    @schedules_file, @hpxml_header.unavailable_periods)
       next if pool_or_spa.pump_type == HPXML::TypeNone
 
-      MiscLoads.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationConditionedSpace],
+      MiscLoads.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, spaces[HPXML::LocationConditionedSpace],
                                                  @schedules_file, @hpxml_header.unavailable_periods)
     end
   end
