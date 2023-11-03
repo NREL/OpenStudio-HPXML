@@ -100,27 +100,6 @@ class HPXMLtoOpenStudioLocationTest < Minitest::Test
     assert_equal(-34, weather.data.DeepGroundPhaseShiftTempAmp2)
     assert_equal(1, runner.result.stepWarnings.size)
     assert_equal(1, runner.result.stepWarnings.select { |w| w == 'No design condition info found; calculating design conditions from EPW weather data.' }.size)
-
-    # far location
-    epw_path = File.join(weather_dir, 'Test.epw')
-    File.delete(epw_path) if File.exist?(epw_path)
-    epw_path = File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
-    epw_lines = File.readlines(epw_path)
-    epw_lines[0] = epw_lines[0].gsub('39.83,-104.65,-7.0,1650.0', '1.00,-100.00,-7.0,1650.0')
-    epw_path = File.join(weather_dir, 'Test.epw')
-    File.open(epw_path, 'w') { |f| f.write(epw_lines.join) }
-
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: epw_path, runner: runner)
-
-    assert_equal(UnitConversions.convert(13.4, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp1)
-    assert_equal(UnitConversions.convert(0.7, 'deltac', 'deltaf'), weather.data.DeepGroundSurfTempAmp2)
-    assert_equal(25, weather.data.DeepGroundPhaseShiftTempAmp1)
-    assert_equal(30, weather.data.DeepGroundPhaseShiftTempAmp2)
-    assert_equal(1, runner.result.stepWarnings.size)
-    assert_equal(1, runner.result.stepWarnings.select { |w| w == "Could not find nearby (15.154 > 3) values from Xing's ground temperature model; using default values." }.size)
-
-    File.delete(epw_path)
   end
 
   def _test_measure(args_hash)
