@@ -123,7 +123,7 @@ class WeatherProcess
     calc_heat_cool_degree_days(dailydbs)
     calc_avg_monthly_highs_lows(dailyhighdbs, dailylowdbs)
     calc_shallow_ground_temperatures
-    calc_deep_ground_temperatures(runner, hpxml)
+    calc_deep_ground_temperatures(hpxml)
     calc_mains_temperatures(dailydbs.size)
     data.WSF = calc_ashrae_622_wsf(rowdata)
 
@@ -324,9 +324,11 @@ class WeatherProcess
     end
   end
 
-  def calc_deep_ground_temperatures(runner, hpxml)
+  def calc_deep_ground_temperatures(hpxml)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
+
+    # Avoid this lookup/calculation if there's no GSHP since there is a (small) runtime penalty.
     if !hpxml.nil?
       has_gshp = false
       hpxml.buildings.each do |hpxml_bldg|
@@ -343,6 +345,7 @@ class WeatherProcess
     require 'csv'
     require 'matrix'
 
+    # Minimize distance to Station
     v1 = Vector[header.Latitude, header.Longitude]
     dist = 1 / Constants.small
     temperatures_amplitudes = nil
@@ -353,18 +356,6 @@ class WeatherProcess
         temperatures_amplitudes = row[5..9].map(&:to_f)
         dist = new_dist
       end
-    end
-
-    tol = 3
-    if dist > tol # default values; not close enough
-      runner.registerWarning("Could not find nearby (#{dist.round(3)} > #{tol}) values from Xing's ground temperature model; using default values.")
-      # Following are from E+ docs
-      data.DeepGroundAnnualTemp = UnitConversions.convert(11.1, 'C', 'F')
-      data.DeepGroundSurfTempAmp1 = UnitConversions.convert(13.4, 'deltac', 'deltaf')
-      data.DeepGroundSurfTempAmp2 = UnitConversions.convert(0.7, 'deltac', 'deltaf')
-      data.DeepGroundPhaseShiftTempAmp1 = 25.0 # days
-      data.DeepGroundPhaseShiftTempAmp2 = 30.0 # days
-      return
     end
 
     data.DeepGroundAnnualTemp = UnitConversions.convert(temperatures_amplitudes[0], 'C', 'F')

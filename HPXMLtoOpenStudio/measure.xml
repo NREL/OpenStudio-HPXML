@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>487ba3f5-f541-4b50-baea-789d028e3229</version_id>
-  <version_modified>2023-11-03T18:44:49Z</version_modified>
+  <version_id>6f555b2d-5fb8-40b7-91d4-ca0ec7da01b0</version_id>
+  <version_modified>2023-11-04T16:30:40Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,13 +142,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>356945BC</checksum>
+      <checksum>603A7A2E</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>72035A85</checksum>
+      <checksum>58EDCD0B</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -298,7 +298,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8C181D00</checksum>
+      <checksum>668B8044</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -382,7 +382,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AF5961B5</checksum>
+      <checksum>7D800940</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -556,13 +556,13 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C162FE36</checksum>
+      <checksum>73019632</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AEDAF74F</checksum>
+      <checksum>A42A2AC9</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -634,7 +634,7 @@
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>BCBA591C</checksum>
+      <checksum>663B10FB</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
