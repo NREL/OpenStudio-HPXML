@@ -14,14 +14,7 @@ __New Features__
     - `SchedulesFilePath`
     - `NaturalVentilationAvailabilityDaysperWeek`
   - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
-  - Notes:
-    - Each dwelling unit is described by a separate `Building` element in the HPXML file.
-    - To run the single simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
-    - Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones, as described in the documentation.
-    - Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit, as described in the documentation.
-    - Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if `NumberofUnits` is 1.
-    - Utility bill calculations using detailed rates are not supported.
-    - Simulation results will be for the entire building; results for individual dwelling units are not available.
+  - See the [OpenStudio-HPXML documentation](https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#whole-sfa-mf-buildings) for more detail.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
@@ -280,7 +273,7 @@ __New Features__
 - **Breaking change**: Any heat pump backup heating requires `HeatPump/BackupType` ("integrated" or "separate") to be specified.
 - **Breaking change**: For homes with multiple PV arrays, all inverter efficiencies must have the same value.
 - **Breaking change**: HPXML schema version must now be '4.0' (proposed).
-  - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/IsVented`.
+  - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/Vented`.
   - Moves `ClothesDryer/extension/VentedFlowRate` to `ClothesDryer/VentedFlowRate`.
   - Moves `FoundationWall/Insulation/Layer/extension/DistanceToTopOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToTopOfInsulation`.
   - Moves `FoundationWall/Insulation/Layer/extension/DistanceToBottomOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToBottomOfInsulation`.
