@@ -1,17 +1,6 @@
 <%#= README.md.erb is used to auto-generate README.md. %>
 ###### (Automatically generated documentation)
 
-<%
-def href_to_markdown(str)
-  if str.include?('<a href')
-    url = str.split("<a href '").last.split("'>").first
-    name = str.split("'>").last.split("</a>").first
-    str = str.gsub("<a href '#{url}'>#{name}</a>", "[#{name}](#{url})")
-  end
-  return str
-end
-%>
-
 # <%= name %>
 
 ## Description
@@ -24,7 +13,7 @@ end
 <% arguments.each do |argument| %>
 **<%= argument[:display_name] %>**
 
-<%= href_to_markdown(argument[:description]) %>
+<%= argument[:description] %>
 
 - **Name:** ``<%= argument[:name] %>``
 - **Type:** ``<%= argument[:type] %>``
