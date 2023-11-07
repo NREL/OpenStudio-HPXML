@@ -48,6 +48,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.95, 4.53].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -70,6 +71,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [5.89, 5.25].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -524,6 +526,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.95, 4.53].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -534,6 +537,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
     [4.52, 3.93].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -567,6 +571,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [5.39, 4.77].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -577,6 +582,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
     [4.56, 3.89].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -608,6 +614,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.51, 2.88].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -618,6 +625,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
     [4.75, 3.59].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -648,6 +656,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.40, 3.20].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -658,6 +667,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
     [4.63, 3.31].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -683,6 +693,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.06, 3.33].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -693,6 +704,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
     [4.82, 3.23].each_with_index do |cop, i|
       assert_in_epsilon(cop, htg_coil.stages[i].grossRatedHeatingCOP, 0.01)
     end
@@ -718,6 +730,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
     clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
     [4.40, 3.23].each_with_index do |cop, i|
       assert_in_epsilon(cop, clg_coil.stages[i].grossRatedCoolingCOP, 0.01)
     end
@@ -767,6 +780,22 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
     assert(program_values.empty?) # Check no EMS program
+
+    # Check ghx
+    assert(1, model.getGroundHeatExchangerVerticals.size)
+    ghx = model.getGroundHeatExchangerVerticals[0]
+
+    # Check xing
+    assert(1, model.getSiteGroundTemperatureUndisturbedXings.size)
+    xing = model.getSiteGroundTemperatureUndisturbedXings[0]
+    assert_in_epsilon(ghx.groundThermalConductivity.get, xing.soilThermalConductivity, 0.01)
+    assert_in_epsilon(962, xing.soilDensity, 0.01)
+    assert_in_epsilon(ghx.groundThermalHeatCapacity.get / xing.soilDensity, xing.soilSpecificHeat, 0.01)
+    assert_in_epsilon(ghx.groundTemperature.get, xing.averageSoilSurfaceTemperature, 0.01)
+    assert_in_epsilon(12.5, xing.soilSurfaceTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(-1.3, xing.soilSurfaceTemperatureAmplitude2, 0.01)
+    assert_in_epsilon(20, xing.phaseShiftofTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(31, xing.phaseShiftofTemperatureAmplitude2, 0.01)
   end
 
   def test_shared_chiller_baseboard
@@ -935,7 +964,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(supp_htg_capacity, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
-  def test_install_quality_air_to_air_heat_pump_1_speed_ratio
+  def test_install_quality_air_to_air_heat_pump_1_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -975,34 +1004,52 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['FF_AF_htg'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
   end
 
-  def test_install_quality_air_to_air_heat_pump_2_speed_ratio
+  def test_install_quality_air_to_air_heat_pump_2_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.806, 0.806].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
-  def test_install_quality_air_to_air_heat_pump_var_speed_ratio
+  def test_install_quality_air_to_air_heat_pump_var_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
-  def test_install_quality_furnace_central_air_conditioner_1_speed_ratio
+  def test_install_quality_furnace_central_air_conditioner_1_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -1040,27 +1087,33 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['FF_AF_clg'].sum, cooling_cfm / rated_airflow_cfm, 0.01)
   end
 
-  def test_install_quality_furnace_central_air_conditioner_2_speed_ratio
+  def test_install_quality_furnace_central_air_conditioner_2_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
-    _check_install_quality_multispeed_ratio(cooling_system, model)
+    program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
+    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
-  def test_install_quality_furnace_central_air_conditioner_var_speed_ratio
+  def test_install_quality_furnace_central_air_conditioner_var_speed
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
-    _check_install_quality_multispeed_ratio(cooling_system, model)
+    program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
-  def test_install_quality_furnace_gas_ratio
+  def test_install_quality_furnace_gas
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-furnace-gas-only.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -1077,7 +1130,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(fan_watts_cfm, fan.designPressureRise / fan.fanTotalEfficiency * UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.01)
   end
 
-  def test_install_quality_ground_to_air_heat_pump_ratio
+  def test_install_quality_ground_to_air_heat_pump
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-ground-to-air-heat-pump.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -1117,24 +1170,33 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['FF_AF_htg'].sum, heating_cfm / rated_airflow_cfm_htg, 0.01)
   end
 
-  def test_install_quality_mini_split_air_conditioner_ratio
+  def test_install_quality_mini_split_air_conditioner
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
-    _check_install_quality_multispeed_ratio(cooling_system, model)
+    program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
-  def test_install_quality_mini_split_heat_pump_ratio
+  def test_install_quality_mini_split_heat_pump
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-mini-split-heat-pump-ducted.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
-    _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
   def test_custom_seasons
@@ -1292,6 +1354,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       htg_speed_cfms = htg_ratios.map { |ratio| heating_cfm * ratio }
       assert_in_epsilon(program_values['FF_AF_htg'].sum, htg_speed_cfms.zip(rated_airflow_cfm_htg).map { |cfm, rated_cfm| cfm / rated_cfm }.sum, 0.01)
     end
+
+    return program_values
   end
 
   def _create_hpxml(hpxml_name)
