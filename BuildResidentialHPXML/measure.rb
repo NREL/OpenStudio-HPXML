@@ -1129,7 +1129,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_capacity', false)
     arg.setDisplayName('Cooling System: Cooling Capacity')
-    arg.setDescription("The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, [Evaporative Cooler](#{docs_base_url}#evaporative-cooler), <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
+    arg.setDescription("The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#evaporative-cooler'>Evaporative Cooler</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1253,19 +1253,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
     arg.setDisplayName('Heat Pump: Cooling Sensible Heat Fraction')
-    arg.setDescription("The sensible heat fraction of the heat pump. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
+    arg.setDescription("The sensible heat fraction of the heat pump. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity', false)
     arg.setDisplayName('Heat Pump: Heating Capacity')
-    arg.setDescription("The output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
+    arg.setDescription("The output heating capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     arg.setUnits('Btu/hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Retention Fraction')
-    arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('Frac')
     args << arg
 
@@ -1277,7 +1277,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_capacity', false)
     arg.setDisplayName('Heat Pump: Cooling Capacity')
-    arg.setDescription("The output cooling capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
+    arg.setDescription("The output cooling capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1297,7 +1297,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_compressor_lockout_temp', false)
     arg.setDisplayName('Heat Pump: Compressor Lockout Temperature')
-    arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('deg-F')
     args << arg
 
@@ -1355,7 +1355,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_crankcase_heater_watts', false)
     arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
-    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, [Mini-Split Heat Pump](#{docs_base_url}#mini-split-heat-pump), [Packaged Terminal Heat Pump](#{docs_base_url}#packaged-terminal-heat-pump), <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
+    arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('W')
     args << arg
 
