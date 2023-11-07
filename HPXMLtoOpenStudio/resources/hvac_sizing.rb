@@ -1333,6 +1333,7 @@ class HVACSizing
 
     if not hvac_cooling.nil?
       hvac_cooling_ap = hvac_cooling.additional_properties
+      is_ducted = !hvac_cooling.distribution_system.nil?
     end
 
     if hvac_sizing_values.Cool_Load_Tot <= 0
@@ -1342,7 +1343,12 @@ class HVACSizing
       hvac_sizing_values.Cool_Airflow = 0.0
 
     elsif [HPXML::HVACTypeCentralAirConditioner,
-           HPXML::HVACTypeHeatPumpAirToAir].include? @cooling_type
+           HPXML::HVACTypeHeatPumpAirToAir].include?(@cooling_type) ||
+          ([HPXML::HVACTypeMiniSplitAirConditioner,
+            HPXML::HVACTypeHeatPumpMiniSplit].include?(@cooling_type) && is_ducted)
+      # For central systems, the installer can take steps to try to meet both sensible and latent loads,
+      # such as different indoor/outdoor coil combinations and different blower settings.
+      # Ductless systems don't offer this flexibility.
 
       entering_temp = @hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
@@ -1453,7 +1459,7 @@ class HVACSizing
       hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(cool_load_sens_cap_design, (@cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
 
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
-           HPXML::HVACTypeMiniSplitAirConditioner].include? @cooling_type
+           HPXML::HVACTypeMiniSplitAirConditioner].include?(@cooling_type) && !is_ducted
 
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1578,6 +1584,7 @@ class HVACSizing
 
     if not hvac_heating.nil?
       hvac_heating_ap = hvac_heating.additional_properties
+      is_ducted = !hvac_heating.distribution_system.nil?
     end
 
     if hvac_sizing_values.Heat_Load <= 0
@@ -1599,7 +1606,7 @@ class HVACSizing
       end
 
       hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
-      if @heating_type == HPXML::HVACTypeHeatPumpAirToAir
+      if (@heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (@heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (@supply_air_temp - @heat_setpoint), hvac_sizing_values.Heat_Capacity)
       else
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate_user(hvac_sizing_values.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed], hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed])
