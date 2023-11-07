@@ -469,6 +469,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
 
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
          If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
+         
          - **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
          - **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
