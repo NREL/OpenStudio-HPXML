@@ -87,7 +87,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
     arg.setDisplayName('Simulation Control: Timestep')
     arg.setUnits('min')
-    arg.setDescription("Value must be a divisor of 60. If not provided, the OS-HPXML default (see [HPXML Simulation Control](#{docs_base_url}#hpxml-simulation-control)) is used.")
+    arg.setDescription("Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a href '#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_run_period', false)
