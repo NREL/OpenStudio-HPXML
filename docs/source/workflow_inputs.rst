@@ -302,11 +302,11 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
          
-         &dash; **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
+         \- **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
          
-         &dash; **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
+         \- **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
          
-         &dash; **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
+         \- **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
          
          or defaults to $0.015/kBtu for other fuels.
 
