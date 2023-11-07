@@ -1768,7 +1768,7 @@ class HVACSizing
 
       if not cool_airflow_rated_defect_ratio.empty?
         # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
-        clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_airflow_fault_cooling_coeff()
+        clg_fff_cap_coeff, _clg_fff_eir_coeff = HVAC.get_cool_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)[0]
         a1_AF_Qgr_c = clg_fff_cap_coeff[0]
         a2_AF_Qgr_c = clg_fff_cap_coeff[1]
         a3_AF_Qgr_c = clg_fff_cap_coeff[2]
@@ -1835,7 +1835,7 @@ class HVACSizing
       end
 
       if not heat_airflow_rated_defect_ratio.empty?
-        htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_airflow_fault_heating_coeff()
+        htg_fff_cap_coeff, _htg_fff_eir_coeff = HVAC.get_heat_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)[0]
         a1_AF_Qgr_h = htg_fff_cap_coeff[0]
         a2_AF_Qgr_h = htg_fff_cap_coeff[1]
         a3_AF_Qgr_h = htg_fff_cap_coeff[2]

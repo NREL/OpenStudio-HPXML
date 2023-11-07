@@ -1111,8 +1111,8 @@ class HVAC
   def self.get_cool_cap_eir_fflow_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
-      cap_fflow_spec = [get_airflow_fault_cooling_coeff()[0]]
-      eir_fflow_spec = [get_airflow_fault_cooling_coeff()[1]]
+      cap_fflow_spec = [[0.718664047, 0.41797409, -0.136638137]]
+      eir_fflow_spec = [[1.143487507, -0.13943972, -0.004047787]]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
       # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
       cap_fflow_spec = [[0.655239515, 0.511655216, -0.166894731],
@@ -1145,14 +1145,18 @@ class HVAC
 
   def self.get_heat_cap_eir_fflow_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
-      cap_fflow_spec = [get_airflow_fault_heating_coeff()[0]]
-      eir_fflow_spec = [get_airflow_fault_heating_coeff()[1]]
+      # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
+      cap_fflow_spec = [[0.694045465, 0.474207981, -0.168253446]]
+      eir_fflow_spec = [[2.185418751, -1.942827919, 0.757409168]]
     elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
+      # Most two stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
       cap_fflow_spec = [[0.741466907, 0.378645444, -0.119754733],
                         [0.76634609, 0.32840943, -0.094701495]]
       eir_fflow_spec = [[2.153618211, -1.737190609, 0.584269478],
                         [2.001041353, -1.58869128, 0.587593517]]
     elsif compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      # Variable speed systems have constant flow ECM blowers, so the air handler can always achieve the design airflow rate by sacrificing blower power.
+      # So we assume that there is only one corresponding airflow rate for each compressor speed.
       cap_fflow_spec = [[1, 0, 0]] * 3
       eir_fflow_spec = [[1, 0, 0]] * 3
     end
@@ -1373,21 +1377,31 @@ class HVAC
     fail 'Unable to get heating capacity ratios.'
   end
 
-  def self.drop_var_speed_heating_indice(heat_pump)
-    return unless heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-    return unless heat_pump.is_a? HPXML::HeatPump
+  def self.drop_intermediate_speeds(hvac_system)
+    # For variable-speed systems, we only want to model min/max speeds in E+.
+    # Here we drop any intermediate speeds that we may have added for other purposes (e.g. hvac sizing).
+    return unless hvac_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
-    hp_ap = heat_pump.additional_properties
-    nominal_speed_index = hp_ap.heat_capacity_ratios.find_index(1.0)
+    hvac_ap = hvac_system.additional_properties
 
-    # Remove intermediate speed to before creating model, only models min/max speed
-    # Heating
-    hp_ap.heat_cap_fflow_spec.delete_at(nominal_speed_index)
-    hp_ap.heat_eir_fflow_spec.delete_at(nominal_speed_index)
-    hp_ap.heat_plf_fplr_spec.delete_at(nominal_speed_index)
-    hp_ap.heat_rated_cfm_per_ton.delete_at(nominal_speed_index)
-    hp_ap.heat_capacity_ratios.delete_at(nominal_speed_index)
-    hp_ap.heat_fan_speed_ratios.delete_at(nominal_speed_index)
+    while hvac_ap.cool_capacity_ratios.size > 2
+      hvac_ap.cool_cap_fflow_spec.delete_at(1)
+      hvac_ap.cool_eir_fflow_spec.delete_at(1)
+      hvac_ap.cool_plf_fplr_spec.delete_at(1)
+      hvac_ap.cool_rated_cfm_per_ton.delete_at(1)
+      hvac_ap.cool_capacity_ratios.delete_at(1)
+      hvac_ap.cool_fan_speed_ratios.delete_at(1)
+    end
+    if hvac_system.is_a? HPXML::HeatPump
+      while hvac_ap.heat_capacity_ratios.size > 2
+        hvac_ap.heat_cap_fflow_spec.delete_at(1)
+        hvac_ap.heat_eir_fflow_spec.delete_at(1)
+        hvac_ap.heat_plf_fplr_spec.delete_at(1)
+        hvac_ap.heat_rated_cfm_per_ton.delete_at(1)
+        hvac_ap.heat_capacity_ratios.delete_at(1)
+        hvac_ap.heat_fan_speed_ratios.delete_at(1)
+      end
+    end
   end
 
   def self.get_default_cool_cfm_per_ton(compressor_type, use_eer = false)
@@ -3434,21 +3448,7 @@ class HVAC
     return qgr_values, p_values, ff_chg_values
   end
 
-  def self.get_airflow_fault_cooling_coeff()
-    # Cutler curve coefficients for single speed
-    cool_cap_fflow_spec = [0.718664047, 0.41797409, -0.136638137]
-    cool_eir_fflow_spec = [1.143487507, -0.13943972, -0.004047787]
-    return cool_cap_fflow_spec, cool_eir_fflow_spec
-  end
-
-  def self.get_airflow_fault_heating_coeff()
-    # Cutler curve coefficients for single speed
-    heat_cap_fflow_spec = [0.694045465, 0.474207981, -0.168253446]
-    heat_eir_fflow_spec = [2.185418751, -1.942827919, 0.757409168]
-    return heat_cap_fflow_spec, heat_eir_fflow_spec
-  end
-
-  def self.add_install_quality_calculations(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, clg_htg_ap)
+  def self.add_install_quality_calculations(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
     if mode == :clg
       if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
         num_speeds = 1
@@ -3515,20 +3515,20 @@ class HVAC
 
     # Apply Cutler curve airflow coefficients to later equations
     if mode == :clg
-      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_cooling_coeff()
+      cap_fflow_spec, eir_fflow_spec = get_cool_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)
       qgr_values, p_values, ff_chg_values = get_charge_fault_cooling_coeff(f_chg)
       suffix = 'clg'
     elsif mode == :htg
-      cap_fflow_spec, eir_fflow_spec = get_airflow_fault_heating_coeff()
+      cap_fflow_spec, eir_fflow_spec = get_heat_cap_eir_fflow_spec(HPXML::HVACCompressorTypeSingleStage)
       qgr_values, p_values, ff_chg_values = get_charge_fault_heating_coeff(f_chg)
       suffix = 'htg'
     end
-    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[2]}")
-    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0]}")
-    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[1]}")
-    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[2]}")
+    fault_program.addLine("Set a1_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][0]}")
+    fault_program.addLine("Set a2_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][1]}")
+    fault_program.addLine("Set a3_AF_Qgr_#{suffix} = #{cap_fflow_spec[0][2]}")
+    fault_program.addLine("Set a1_AF_EIR_#{suffix} = #{eir_fflow_spec[0][0]}")
+    fault_program.addLine("Set a2_AF_EIR_#{suffix} = #{eir_fflow_spec[0][1]}")
+    fault_program.addLine("Set a3_AF_EIR_#{suffix} = #{eir_fflow_spec[0][2]}")
 
     # charge fault coefficients
     fault_program.addLine("Set a1_CH_Qgr_#{suffix} = #{qgr_values[0]}")
@@ -3583,8 +3583,8 @@ class HVAC
       fault_program.addLine("Set EIR_IQ_adj_#{suffix} = EIR_Cutler_Curve_After_#{suffix} / EIR_Cutler_Curve_Pre_#{suffix}")
       # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults;
       if (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit) && (not clg_or_htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit)
-        cap_fff_specs_coeff = (mode == :clg) ? clg_htg_ap.cool_cap_fflow_spec[speed] : clg_htg_ap.heat_cap_fflow_spec[speed]
-        eir_fff_specs_coeff = (mode == :clg) ? clg_htg_ap.cool_eir_fflow_spec[speed] : clg_htg_ap.heat_eir_fflow_spec[speed]
+        cap_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_cap_fflow_spec[speed] : hvac_ap.heat_cap_fflow_spec[speed]
+        eir_fff_specs_coeff = (mode == :clg) ? hvac_ap.cool_eir_fflow_spec[speed] : hvac_ap.heat_eir_fflow_spec[speed]
         fault_program.addLine("Set CAP_c1_#{suffix} = #{cap_fff_specs_coeff[0]}")
         fault_program.addLine("Set CAP_c2_#{suffix} = #{cap_fff_specs_coeff[1]}")
         fault_program.addLine("Set CAP_c3_#{suffix} = #{cap_fff_specs_coeff[2]}")
