@@ -474,9 +474,9 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
          If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
 
-         **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
+         \- **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
 
-         **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
+         \- **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
 
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
@@ -817,11 +817,11 @@ The presence of a flue or chimney with combustion air from conditioned space can
 
   .. [#] If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
          
-         heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         \- heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
          
-         heating system is non-electric Fireplace located in conditioned space, or
+         \- heating system is non-electric Fireplace located in conditioned space, or
          
-         water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
+         \- water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
 HPXML Attics
 ************
@@ -894,23 +894,23 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
          
-         **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         \- **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
          
-         **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         \- **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
          
-         **shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         \- **shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
          
-         **slate or tile shingles**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         \- **slate or tile shingles**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
          
-         **metal surfacing**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         \- **metal surfacing**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
          
-         **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         \- **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
          
-         **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         \- **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
          
-         **concrete**: dark=0.90, medium dark=0.83, medium=0.75, light=0.65, reflective=0.50
+         \- **concrete**: dark=0.90, medium dark=0.83, medium=0.75, light=0.65, reflective=0.50
          
-         **cool roof**: 0.30
+         \- **cool roof**: 0.30
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
@@ -947,15 +947,15 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
          
-         **dark**: 0.95
+         \- **dark**: 0.95
          
-         **medium dark**: 0.85
+         \- **medium dark**: 0.85
          
-         **medium**: 0.70
+         \- **medium**: 0.70
          
-         **light**: 0.50
+         \- **light**: 0.50
          
-         **reflective**: 0.30
+         \- **reflective**: 0.30
          
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
@@ -994,15 +994,15 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
   .. [#] If SolarAbsorptance not provided, defaults based on Color:
          
-         **dark**: 0.95
+         \- **dark**: 0.95
          
-         **medium dark**: 0.85
+         \- **medium dark**: 0.85
          
-         **medium**: 0.70
+         \- **medium**: 0.70
          
-         **light**: 0.50
+         \- **light**: 0.50
          
-         **reflective**: 0.30
+         \- **reflective**: 0.30
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "none".
@@ -1178,9 +1178,9 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          
-         **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
+         \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
          
-         **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
+         \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
          
          Note that a storm window is not allowed for a window with U-factor lower than 0.45.
          
@@ -1286,9 +1286,9 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          
-         **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
+         \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
          
-         **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
+         \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
          
          Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
          
@@ -1420,13 +1420,13 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
-         **none**: "conditioned space"
+         \- **none**: "conditioned space"
          
-         **air**: supply duct location with the largest area, otherwise "conditioned space"
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
          
-         **hydronic**: same default logic as :ref:`waterheatingsystems`
+         \- **hydronic**: same default logic as :ref:`waterheatingsystems`
          
-         **dse**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
+         \- **dse**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
          
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``SpaceHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -1533,9 +1533,9 @@ If an in-unit boiler if specified, additional information is entered in ``Heatin
 
   .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows:
          
-         **Oil boiler**: 330 kWh/yr
+         \- **Oil boiler**: 330 kWh/yr
          
-         **Gas boiler**: 170 kWh/yr
+         \- **Gas boiler**: 170 kWh/yr
 
 If instead a shared boiler is specified, additional information is entered in ``HeatingSystem``.
 
@@ -1549,11 +1549,11 @@ If instead a shared boiler is specified, additional information is entered in ``
 
   .. [#] If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows:
          
-         **Shared boiler w/ baseboard**: 220 kWh/yr
+         \- **Shared boiler w/ baseboard**: 220 kWh/yr
          
-         **Shared boiler w/ water loop heat pump**: 265 kWh/yr
+         \- **Shared boiler w/ water loop heat pump**: 265 kWh/yr
          
-         **Shared boiler w/ fan coil**: 438 kWh/yr
+         \- **Shared boiler w/ fan coil**: 438 kWh/yr
          
   .. [#] FanCoilWatts only used if boiler connected to fan coil and SharedLoopWatts provided.
 
@@ -1617,11 +1617,11 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
-         **none**: "conditioned space"
+         \- **none**: "conditioned space"
          
-         **air**: supply duct location with the largest area, otherwise "conditioned space"
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
          
-         **dse**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
+         \- **dse**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
          
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
@@ -1842,13 +1842,13 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
-         **none**: "conditioned space"
+         \- **none**: "conditioned space"
          
-         **air**: supply duct location with the largest area, otherwise "conditioned space"
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
          
-         **hydronic**: same default logic as :ref:`waterheatingsystems`
+         \- **hydronic**: same default logic as :ref:`waterheatingsystems`
          
-         **dse**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         \- **dse**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
          
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
@@ -1896,9 +1896,9 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
   .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F provided, heating capacity retention defaults based on CompressorType:
          
-         **single/two stage**: 0.425 at 5F
+         \- **single/two stage**: 0.425 at 5F
          
-         **variable speed**: 0.5 at 5F
+         \- **variable speed**: 0.5 at 5F
          
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
@@ -2312,23 +2312,23 @@ Additional information is entered in each ``Ducts``.
          On the other hand, DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
          DuctEffectiveRValue is used for the actual model heat transfer, and when not provided is calculated as follows:
          
-         **Uninsulated**: 1.7                                     
+         \- **Uninsulated**: 1.7                                     
          
-         **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
+         \- **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
          
-         **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
+         \- **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
          
-         **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
+         \- **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
          
-         **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
+         \- **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
          
-         **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
+         \- **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
          
-         **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
+         \- **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
          
-         **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
+         \- **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
          
-         **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
+         \- **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
          
          The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals.
          The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_.
@@ -2350,13 +2350,13 @@ Additional information is entered in each ``Ducts``.
          If both are provided, DuctSurfaceArea will be used in the model.
   .. [#] If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
          
-         **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
+         \- **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
          
-         **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
+         \- **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
          
-         **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
+         \- **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
          
-         **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
+         \- **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
          
          where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
          
@@ -2457,13 +2457,13 @@ If not entered, the simulation will not include mechanical ventilation.
          For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          
-         **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
+         \- **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
          
-         **balanced**: 0.7 W/cfm
+         \- **balanced**: 0.7 W/cfm
          
-         **central fan integrated supply**: 0.5 W/cfm
+         \- **central fan integrated supply**: 0.5 W/cfm
          
-         **exhaust only" or "supply only**: 0.35 W/cfm
+         \- **exhaust only" or "supply only**: 0.35 W/cfm
 
 **Exhaust/Supply Only**
 
@@ -2643,9 +2643,9 @@ If not entered, the simulation will not include water heating.
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Location not provided, defaults to the first present space type:
          
-         **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
          
-         **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
          
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
@@ -2681,11 +2681,11 @@ If a conventional storage water heater is specified, additional information is e
   .. [#] RecoveryEfficiency must also be greater than the EnergyFactor (or UniformEnergyFactor).
   .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
          
-         **Electric**: 0.98
+         \- **Electric**: 0.98
          
-         **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
+         \- **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
          
-         **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
+         \- **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
          
   .. [#] TankModelType choices are "mixed" or "stratified".
 
@@ -2843,15 +2843,15 @@ If the in-unit distribution system is specified as recirculation, additional inf
 
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
-         **manual demand control**: The pump only runs when a user presses a button indicating they are about to use hot water.
+         \- **manual demand control**: The pump only runs when a user presses a button indicating they are about to use hot water.
          
-         **presence sensor demand control**: The pump only runs when a sensor detects someone is present at the faucet.
+         \- **presence sensor demand control**: The pump only runs when a sensor detects someone is present at the faucet.
          
-         **temperature**: The pump runs based on monitoring temperature at some point in the system.
+         \- **temperature**: The pump runs based on monitoring temperature at some point in the system.
          
-         **timer**: The pump is controlled by a timer.
+         \- **timer**: The pump is controlled by a timer.
          
-         **no control**: The pump runs continuously.
+         \- **no control**: The pump runs continuously.
          
   .. [#] If RecirculationPipingLoopLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
          
@@ -3040,25 +3040,25 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] SystemLossesFraction default is derived from the `PVWatts documentation <https://www.nrel.gov/docs/fy14osti/62641.pdf>`_, which breaks down the losses as follows.
          Note that the total loss (14%) is not the sum of the individual losses but is calculated by multiplying the reduction due to each loss.
          
-         **Soiling**: 2%
+         \- **Soiling**: 2%
          
-         **Shading**: 3%
+         \- **Shading**: 3%
          
-         **Snow**: 0%
+         \- **Snow**: 0%
          
-         **Mismatch**: 2%
+         \- **Mismatch**: 2%
          
-         **Wiring**: 2%
+         \- **Wiring**: 2%
          
-         **Connections**: 0.5%
+         \- **Connections**: 0.5%
          
-         **Light-induced degradation**: 1.5%
+         \- **Light-induced degradation**: 1.5%
          
-         **Nameplate rating**: 1%
+         \- **Nameplate rating**: 1%
          
-         **Age**: 0%
+         \- **Age**: 0%
          
-         **Availability**: 3%
+         \- **Availability**: 3%
          
          If YearModulesManufactured provided but not SystemLossesFraction, calculated as:
          
@@ -3592,11 +3592,11 @@ If not entered, the simulation will not include a pool heater.
          If "none" is entered, the simulation will not include a pool heater.
   .. [#] If Value not provided, defaults as follows:
          
-         **gas fired [therm/year]**: 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **gas fired [therm/year]**: 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         \- **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
@@ -3666,11 +3666,11 @@ If not entered, the simulation will not include a permanent spa heater.
          If "none" is entered, the simulation will not include a permanent spa heater.
   .. [#] If Value not provided, defaults as follows:
          
-         **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         \- **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
@@ -3709,66 +3709,66 @@ If not entered, the simulation will not include that type of plug load.
   .. [#] PlugLoadType choices are "other", "TV other", "well pump", or "electric vehicle charging".
   .. [#] If Value not provided, defaults as:
          
-         **other**: 0.91 * ConditionedFloorArea (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
+         \- **other**: 0.91 * ConditionedFloorArea (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
          
-         **TV other**: 413.0 + 69.0 * NumberofBedrooms (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
+         \- **TV other**: 413.0 + 69.0 * NumberofBedrooms (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
          
-         **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
+         \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
   .. [#] If FracSensible not provided, defaults as:
          
-         **other**: 0.855
+         \- **other**: 0.855
          
-         **TV other**: 1.0
+         \- **TV other**: 1.0
          
-         **well pump**: 0.0
+         \- **well pump**: 0.0
          
-         **electric vehicle charging**: 0.0
+         \- **electric vehicle charging**: 0.0
          
   .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults as:
          
-         **other**: 0.045
+         \- **other**: 0.045
          
-         **TV other**: 0.0
+         \- **TV other**: 0.0
          
-         **well pump**: 0.0
+         \- **well pump**: 0.0
          
-         **electric vehicle charging**: 0.0
+         \- **electric vehicle charging**: 0.0
          
   .. [#] If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
          
-         **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **TV other**: "0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         \- **TV other**: "0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
          
-         **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         \- **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
          
   .. [#] If WeekdendScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
          
-         **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **TV other**: "0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         \- **TV other**: "0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
          
-         **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         \- **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
          
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), defaults as:
          
-         **other**: "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **other**: "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **TV other**: "1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         \- **TV other**: "1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
          
-         **well pump**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         \- **well pump**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         **electric vehicle charging**: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+         \- **electric vehicle charging**: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
 
 HPXML Fuel Loads
 ****************
@@ -3796,11 +3796,11 @@ If not entered, the simulation will not include that type of fuel load.
   .. [#] FuelLoadType choices are "grill", "fireplace", or "lighting".
   .. [#] If Value not provided, calculated as based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_:
          
-         **grill**: 0.87 / 0.029 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         \- **grill**: 0.87 / 0.029 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          
-         **fireplace**: 1.95 / 0.032 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         \- **fireplace**: 1.95 / 0.032 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          
-         **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         \- **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
@@ -3810,19 +3810,19 @@ If not entered, the simulation will not include that type of fuel load.
   .. [#] If FracLatent not provided, defaults to 0.1 for fireplace and 0.0 for all other types.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
          
-         **grill**: "0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007";
+         \- **grill**: "0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007";
          
-         **fireplace**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065";
+         \- **fireplace**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065";
          
-         **lighting**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065".
+         \- **lighting**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065".
          
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
          
-         **grill**: "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097";
+         \- **grill**: "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097";
          
-         **fireplace**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154";
+         \- **fireplace**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154";
          
-         **lighting**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
+         \- **lighting**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
 .. _hpxmllocations:
 
