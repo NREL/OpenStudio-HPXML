@@ -1012,8 +1012,12 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    refute_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
-    refute_equal(0.75 * 2, program_values['FF_AF_htg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
+    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.806, 0.806].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
   def test_install_quality_air_to_air_heat_pump_var_speed
@@ -1024,8 +1028,12 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    refute_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
-    refute_equal(0.75 * 2, program_values['FF_AF_htg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
 
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -1033,8 +1041,12 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    refute_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
-    refute_equal(0.75 * 2, program_values['FF_AF_htg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
   def test_install_quality_furnace_central_air_conditioner_1_speed
@@ -1083,7 +1095,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    refute_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
+    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
   def test_install_quality_furnace_central_air_conditioner_var_speed
@@ -1094,7 +1108,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    refute_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of NOT 0.75 for each speed; NOT constant flow ECM blower
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
   def test_install_quality_furnace_gas
@@ -1162,7 +1178,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    assert_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of 0.75 for each speed; constant flow ECM blower
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i])
+    end
   end
 
   def test_install_quality_mini_split_heat_pump
@@ -1173,8 +1191,12 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    assert_equal(0.75 * 2, program_values['FF_AF_clg'].sum) # Ratio of 0.75 for each speed; constant flow ECM blower
-    assert_equal(0.75 * 2, program_values['FF_AF_htg'].sum) # Ratio of 0.75 for each speed; constant flow ECM blower
+    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
+    end
+    [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
+      assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_htg'][i], 0.01)
+    end
   end
 
   def test_custom_seasons
