@@ -40,6 +40,13 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <Soil>
+            <SoilType>sand</SoilType>
+            <MoistureType>dry</MoistureType>
+            <extension>
+              <Diffusivity>0.03</Diffusivity>
+            </extension>
+          </Soil>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>

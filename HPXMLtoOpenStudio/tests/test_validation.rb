@@ -378,13 +378,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[-1].primary_heating_system = false
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-gshp-invalid-bore-config'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-geothermal-loop.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.geothermal_loops[0].bore_config = 'Invalid'
       elsif ['hvac-gshp-invalid-bore-depth-low'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-geothermal-loop.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.geothermal_loops[0].bore_length = 78
       elsif ['hvac-gshp-invalid-bore-depth-high'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-geothermal-loop.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.geothermal_loops[0].bore_length = 501
       elsif ['hvac-location-heating-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
@@ -1073,7 +1073,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.site.ground_conductivity = 0.1
       elsif ['hvac-gshp-invalid-num-bore-holes'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-geothermal-loop.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.geothermal_loops[0].num_bore_holes = 5
       elsif ['hvac-gshp-invalid-num-bore-holes-autosized'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
@@ -1187,7 +1187,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.windows[0].area = 1000
       elsif ['orphaned-geothermal-loop'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-geothermal-loop.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.heat_pumps[0].geothermal_loop_idref = nil
       elsif ['orphaned-hvac-distribution'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-furnace-gas-room-ac.xml')
