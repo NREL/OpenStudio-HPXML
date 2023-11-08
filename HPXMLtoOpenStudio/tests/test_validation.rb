@@ -947,6 +947,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'storm-windows-unexpected-window-ufactor' => ['Unexpected base window U-Factor (0.33) for a storm window.'],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
                             'unattached-door' => ["Attached wall 'foobar' not found for door 'Door1'."],
+                            'unattached-gshp' => ["Attached geothermal loop 'foobar' not found for heat pump 'HeatPump1'."],
                             'unattached-hvac-distribution' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem1'."],
                             'unattached-pv-system' => ["Attached inverter 'foobar' not found for pv system 'PVSystem1'."],
                             'unattached-skylight' => ["Attached roof 'foobar' not found for skylight 'Skylight1'."],
@@ -1299,6 +1300,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['unattached-door'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.doors[0].wall_idref = 'foobar'
+      elsif ['unattached-gshp'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
+        hpxml_bldg.heat_pumps[0].geothermal_loop_idref = 'foobar'
       elsif ['unattached-hvac-distribution'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.heating_systems[0].distribution_system_idref = 'foobar'
