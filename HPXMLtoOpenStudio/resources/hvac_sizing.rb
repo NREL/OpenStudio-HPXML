@@ -1964,10 +1964,10 @@ class HVACSizing
       bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     end
 
-    valid_configs = HVAC.valid_bore_configs
+    valid_configs = valid_bore_configs
     g_functions_filename = valid_configs[bore_config]
-    g_functions_json = HVAC.get_g_functions_json(g_functions_filename)
-    valid_num_bores = HVAC.get_valid_num_bores(g_functions_json)
+    g_functions_json = get_g_functions_json(g_functions_filename)
+    valid_num_bores = get_valid_num_bores(g_functions_json)
 
     unless valid_num_bores.include? num_bore_holes
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
@@ -1980,6 +1980,41 @@ class HVACSizing
     hvac_sizing_values.GSHP_Bore_Holes = num_bore_holes
     hvac_sizing_values.GSHP_G_Functions = [lntts, gfnc_coeff]
     hvac_sizing_values.GSHP_Bore_Config = bore_config
+  end
+
+  def self.valid_bore_configs
+    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
+                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }
+    return valid_configs
+  end
+
+  def self.get_g_functions_json(g_functions_filename)
+    require 'json'
+
+    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
+    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
+    return g_functions_json
+  end
+
+  def self.get_valid_num_bores(g_functions_json)
+    valid_num_bores = []
+    g_functions_json.each do |_key_1, values_1|
+      if values_1.keys.include?(:bore_locations)
+        valid_num_bores << values_1[:bore_locations].size
+      else
+        values_1.each do |_key_2, values_2|
+          if values_2.keys.include?(:bore_locations)
+            valid_num_bores << values_2[:bore_locations].size
+          end
+        end
+      end
+    end
+
+    return valid_num_bores
   end
 
   def self.apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)

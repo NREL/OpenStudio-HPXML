@@ -3391,41 +3391,6 @@ class HVAC
     end
   end
 
-  def self.valid_bore_configs
-    valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
-                      HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
-                      HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
-                      HPXML::GeothermalLoopBorefieldConfigurationL => 'L_configurations_5m_v1.0.json',
-                      HPXML::GeothermalLoopBorefieldConfigurationU => 'U_configurations_5m_v1.0.json',
-                      HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => 'LopU_configurations_5m_v1.0.json' }
-    return valid_configs
-  end
-
-  def self.get_g_functions_json(g_functions_filename)
-    require 'json'
-
-    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
-    g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
-    return g_functions_json
-  end
-
-  def self.get_valid_num_bores(g_functions_json)
-    valid_num_bores = []
-    g_functions_json.each do |_key_1, values_1|
-      if values_1.keys.include?(:bore_locations)
-        valid_num_bores << values_1[:bore_locations].size
-      else
-        values_1.each do |_key_2, values_2|
-          if values_2.keys.include?(:bore_locations)
-            valid_num_bores << values_2[:bore_locations].size
-          end
-        end
-      end
-    end
-
-    return valid_num_bores
-  end
-
   def self.calc_mshp_hspf(cop_47, c_d, capacity_ratio, cfm_tons, fan_power_rated, heat_eir_ft_spec, heat_cap_ft_spec)
     n_max = (cop_47.length - 1.0) #-3 # Don't use max speed; FIXME: this is different than calc_mshp_seer?
     n_min = 0

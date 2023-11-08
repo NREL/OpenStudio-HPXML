@@ -768,9 +768,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
     bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
     bore_diameter = UnitConversions.convert(UnitConversions.convert(80.0, 'mm', 'm'), 'm', 'in') * 2
-    valid_bore_configs = HVAC.valid_bore_configs
+    valid_bore_configs = HVACSizing.valid_bore_configs
     g_functions_filename = valid_bore_configs[bore_config]
-    g_functions_json = HVAC.get_g_functions_json(g_functions_filename)
+    g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
 
     actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
@@ -795,7 +795,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     valid_configs.each do |bore_config, valid_num_bores|
       g_functions_filename = HVAC.valid_bore_configs[bore_config]
-      g_functions_json = HVAC.get_g_functions_json(g_functions_filename)
+      g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
       valid_num_bores.each do |num_bore_holes|
         HVACSizing.get_g_functions(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
       end
