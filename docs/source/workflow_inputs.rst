@@ -449,8 +449,10 @@ Soil information is entered in ``Soil``.
   ``extension/Diffusivity`` or ``SoilType``/``MoistureType``          string or double  ft2/hr       See or > 0       No        mixed     Diffusivity [#]_ or soil/moisture type
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
-  .. [#] | SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
-         | MoistureType choices are "dry", "wet", or "mixed".
+  .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
+         
+         \ MoistureType choices are "dry", "wet", or "mixed".
+
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
 
@@ -2206,32 +2208,49 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
   .. [#] LoopFlow autosized per TODO.
-  .. [#] | If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
-         | - **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
-         | - **Open Rectangle**: 8 or 10
-         | - **C**: 7 or 9
-         | - **L**: 4, 5, 6, 7, 8, 9, or 10
-         | - **U**: 7, 9, or 10
-         | - **Lopsided U**: 6, 7, 8, 9, or 10
+  .. [#] If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
+         
+         \- **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **Open Rectangle**: 8 or 10
+         
+         \- **C**: 7 or 9
+         
+         \- **L**: 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **U**: 7, 9, or 10
+         
+         \- **Lopsided U**: 6, 7, 8, 9, or 10
+
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
-  .. [#] | BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
-         | To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
-         | BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
-         | BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
+  .. [#] BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
+         To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
+         BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
+         BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
-  .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
-         | - **standard**: 0.4 Btu/hr-ft-F
-         | - **thermally enhanced**: 0.8 Btu/hr-ft-F
+  .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
+         
+         \- **standard**: 0.4 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 0.8 Btu/hr-ft-F
+
   .. [#] Pipe/Type choices are "standard" or "thermally enhanced".
-  .. [#] | If Pipe/Conductivity not provided, defaults based on Pipe/Type:
-         | - **standard**: 0.23 Btu/hr-ft-F
-         | - **thermally enhanced**: 0.40 Btu/hr-ft-F
+  .. [#] If Pipe/Conductivity not provided, defaults based on Pipe/Type:
+         
+         \- **standard**: 0.23 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 0.40 Btu/hr-ft-F
+
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
-  .. [#] | ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
-         | - **0.75 in pipe**: 1.050 in
-         | - **1.0 in pipe**: 1.315 in
-         | - **1.25 in pipe**: 1.660 in
+  .. [#] ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
+         
+         \- **0.75 in pipe**: 1.050 in
+         
+         \- **1.0 in pipe**: 1.315 in
+         
+         \- **1.25 in pipe**: 1.660 in
+
   .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
 
 .. note::
