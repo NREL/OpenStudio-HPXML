@@ -919,9 +919,25 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-ground-loop-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "heating_system_type": "none",
+    "heating_system_heating_efficiency": 0,
+    "heating_system_fraction_heat_load_served": 0,
+    "cooling_system_type": "none",
+    "cooling_system_cooling_efficiency": 0,
+    "cooling_system_fraction_cool_load_served": 0,
     "heat_pump_type": "ground-to-air",
     "heat_pump_heating_efficiency_type": "COP",
-    "heat_pump_cooling_efficiency_type": "EER"
+    "heat_pump_heating_efficiency": 3.6,
+    "heat_pump_cooling_efficiency_type": "EER",
+    "heat_pump_cooling_efficiency": 16.6,
+    "heat_pump_cooling_sensible_heat_fraction": 0.73,
+    "heat_pump_heating_capacity": 12000,
+    "heat_pump_cooling_capacity": 12000,
+    "heat_pump_fraction_heat_load_served": 1,
+    "heat_pump_fraction_cool_load_served": 1,
+    "heat_pump_backup_type": "integrated",
+    "heat_pump_backup_heating_efficiency": 1,
+    "heat_pump_backup_heating_capacity": 12000
   },
   "sample_files/base-bldgtype-mf-unit-shared-laundry-room.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"

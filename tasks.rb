@@ -1308,30 +1308,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       end
     end
     if hpxml_file.include? 'shared-ground-loop'
-      hpxml_bldg.heating_systems.reverse_each do |heating_system|
-        heating_system.delete
-      end
-      hpxml_bldg.cooling_systems.reverse_each do |cooling_system|
-        cooling_system.delete
-      end
-      hpxml_bldg.heat_pumps[0].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-      hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpGroundToAir
-      hpxml_bldg.heat_pumps[0].heat_pump_fuel = HPXML::FuelTypeElectricity
-      hpxml_bldg.heat_pumps[0].backup_type = HPXML::HeatPumpBackupTypeIntegrated
-      hpxml_bldg.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
       hpxml_bldg.heat_pumps[0].is_shared_system = true
       hpxml_bldg.heat_pumps[0].number_of_units_served = 6
-      hpxml_bldg.heat_pumps[0].backup_heating_efficiency_percent = 1.0
-      hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 1
-      hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 1
-      hpxml_bldg.heat_pumps[0].heating_efficiency_cop = 3.6
-      hpxml_bldg.heat_pumps[0].cooling_efficiency_eer = 16.6
-      hpxml_bldg.heat_pumps[0].heating_capacity = 12000
-      hpxml_bldg.heat_pumps[0].cooling_capacity = 12000
-      hpxml_bldg.heat_pumps[0].backup_heating_capacity = 12000
-      hpxml_bldg.heat_pumps[0].cooling_shr = 0.73
-      hpxml_bldg.heat_pumps[0].primary_heating_system = true
-      hpxml_bldg.heat_pumps[0].primary_cooling_system = true
       hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
     end
     if hpxml_file.include? 'eae'
