@@ -23,7 +23,7 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <StateCode>OR</StateCode>
+        <StateCode>CO</StateCode>
       </Address>
     </Site>
     <ProjectStatus>
@@ -43,6 +43,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+          <NumberofUnits>10</NumberofUnits>
           <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
@@ -55,13 +56,13 @@
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2006</Year>
-          <ClimateZone>4C</ClimateZone>
+          <ClimateZone>5B</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>USA_OR_Portland.Intl.AP.726980_TMY3</Name>
+          <Name>USA_CO_Denver.Intl.AP.725650_TMY3</Name>
           <extension>
-            <EPWFilePath>USA_OR_Portland.Intl.AP.726980_TMY3.epw</EPWFilePath>
+            <EPWFilePath>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
@@ -327,7 +328,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>24000.0</HeatingCapacity>
+              <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
@@ -443,8 +444,10 @@
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer1'/>
           <Location>conditioned space</Location>
-          <FuelType>propane</FuelType>
-          <CombinedEnergyFactor>3.3</CombinedEnergyFactor>
+          <FuelType>electricity</FuelType>
+          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <Vented>true</Vented>
+          <VentedFlowRate>150.0</VentedFlowRate>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher1'/>
@@ -465,7 +468,7 @@
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
           <Location>conditioned space</Location>
-          <FuelType>propane</FuelType>
+          <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
