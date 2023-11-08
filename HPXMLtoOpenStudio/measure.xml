@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>cbf11deb-d0d8-46f5-a5d8-a2ca0db27f8b</version_id>
-  <version_modified>2023-11-06T16:02:56Z</version_modified>
+  <version_id>f0819217-3058-4bc7-903d-6cbfaea2d32d</version_id>
+  <version_modified>2023-11-08T16:08:35Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>604D1907</checksum>
+      <checksum>BA95510D</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -346,7 +346,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>103E4D71</checksum>
+      <checksum>8724E279</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -388,7 +388,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3DE5829C</checksum>
+      <checksum>7AC7F779</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -622,7 +622,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>81BC03ED</checksum>
+      <checksum>A7E685ED</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
