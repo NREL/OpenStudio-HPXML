@@ -1465,12 +1465,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
       mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
       Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
-                                         0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish,
-                                         Material.AirFilmVertical, Material.AirFilmVertical)
+                                         0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish, false,
+                                         Material.AirFilmVertical, Material.AirFilmVertical, nil)
     elsif type == 'floor'
       Constructions.apply_wood_frame_floor_ceiling(model, surfaces, 'AdiabaticFloorConstruction', false,
-                                                   0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare,
-                                                   Material.AirFilmFloorReduced, Material.AirFilmFloorReduced)
+                                                   0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare, false,
+                                                   Material.AirFilmFloorReduced, Material.AirFilmFloorReduced, nil)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
