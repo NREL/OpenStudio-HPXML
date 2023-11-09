@@ -17,8 +17,11 @@ class Battery
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
     end
 
-    if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
+    if !battery.is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
+      return
+    elsif battery.is_ev && charging_schedule.nil? && discharging_schedule.nil?
+      runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
       return
     end
 
