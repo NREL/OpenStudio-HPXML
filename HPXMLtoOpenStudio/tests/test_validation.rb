@@ -1303,6 +1303,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['unattached-gshp'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
         hpxml_bldg.heat_pumps[0].geothermal_loop_idref = 'foobar'
+        hpxml_bldg.geothermal_loops[0].delete
       elsif ['unattached-hvac-distribution'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.heating_systems[0].distribution_system_idref = 'foobar'
