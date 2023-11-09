@@ -478,7 +478,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
                       HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => [6, 7, 8, 9, 10] }
 
     valid_configs.each do |bore_config, valid_num_bores|
-      g_functions_filename = HVAC.valid_bore_configs[bore_config]
+      g_functions_filename = HVACSizing.valid_bore_configs[bore_config]
       g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
       valid_num_bores.each do |num_bore_holes|
         HVACSizing.get_g_functions(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
