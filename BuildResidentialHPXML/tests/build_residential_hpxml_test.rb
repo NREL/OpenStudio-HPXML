@@ -68,6 +68,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'extra-water-heater-attic.xml' => 'base-sfd.xml',
       'extra-battery-crawlspace.xml' => 'base-sfd.xml',
       'extra-battery-attic.xml' => 'base-sfd.xml',
+      'extra-ev-battery.xml' => 'base-sfd.xml',
+      'extra-two-batteries.xml' => 'base-sfd.xml',
 
       'extra-sfa-atticroof-flat.xml' => 'base-sfa.xml',
       'extra-sfa-atticroof-conditioned-eaves-gable.xml' => 'extra-sfa-slab.xml',
@@ -901,6 +903,12 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationCrawlspace
     elsif ['extra-battery-attic.xml'].include? hpxml_file
+      args['battery_present'] = true
+      args['battery_location'] = HPXML::LocationAttic
+    elsif ['extra-ev-battery.xml'].include? hpxml_file
+      args['ev_battery_present'] = true
+    elsif ['extra-two-batteries.xml'].include? hpxml_file
+      args['ev_battery_present'] = true
       args['battery_present'] = true
       args['battery_location'] = HPXML::LocationAttic
     elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
