@@ -962,7 +962,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
 HPXML Walls
 ***********
 
-Each wall surface not attached to a foundation space is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
+Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
 
   ======================================  =================  ================  =====================  =============  ===========  ====================================
   Element                                 Type               Units             Constraints            Required       Default      Notes
@@ -1011,7 +1011,8 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
 HPXML Foundation Walls
 **********************
 
-Each wall surface attached to a foundation space is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Each foundation wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Any wall surface in contact with the ground is considered a foundation wall.
 
   ==============================================================  =================  ================  ===================  =========  ==============  ====================================
   Element                                                         Type               Units             Constraints          Required   Default         Notes
