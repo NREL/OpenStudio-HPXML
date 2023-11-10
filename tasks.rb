@@ -67,7 +67,7 @@ def create_hpxmls
         measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
       end
       if hpxml_path.include?('base-multiple-mf-units')
-        measures['BuildResidentialHPXML'][0]['geometry_foundation_type'] = (i <= 1 ? 'UnconditionedBasement' : 'AboveApartment')
+        measures['BuildResidentialHPXML'][0]['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         measures['BuildResidentialHPXML'][0]['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
       end
 
