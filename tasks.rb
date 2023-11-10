@@ -1185,6 +1185,18 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       wall = hpxml_bldg.walls.select { |w| w.azimuth == hpxml_bldg.neighbor_buildings[0].azimuth }[0]
       wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     end
+    if ['base-foundation-vented-crawlspace-above-grade.xml'].include? hpxml_file
+      # Convert FoundationWall to Wall to test a foundation with only Wall elements
+      fwall = hpxml_bldg.foundation_walls[0]
+      hpxml_bldg.walls.add(id: "Wall#{hpxml_bldg.walls.size + 1}",
+                           exterior_adjacent_to: HPXML::LocationOutside,
+                           interior_adjacent_to: fwall.interior_adjacent_to,
+                           wall_type: HPXML::WallTypeConcrete,
+                           area: fwall.area,
+                           insulation_assembly_r_value: 10.1)
+      hpxml_bldg.foundations[0].attached_to_wall_idrefs << hpxml_bldg.walls[-1].id
+      hpxml_bldg.foundation_walls[0].delete
+    end
 
     # ---------- #
     # HPXML HVAC #
