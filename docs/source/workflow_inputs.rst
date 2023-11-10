@@ -1012,6 +1012,7 @@ HPXML Foundation Walls
 **********************
 
 Each foundation wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Any wall surface in contact with the ground is considered a foundation wall.
 
   ==============================================================  =================  ================  ===================  =========  ==============  ====================================
   Element                                                         Type               Units             Constraints          Required   Default         Notes
