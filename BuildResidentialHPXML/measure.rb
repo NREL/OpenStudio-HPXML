@@ -655,9 +655,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
-    radiant_barrier_attic_location_choices << 'Attic roof only'
-    radiant_barrier_attic_location_choices << 'Attic roof and gable walls'
-    radiant_barrier_attic_location_choices << 'Attic floor'
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
     arg.setDisplayName('Attic: Radiant Barrier Attic Location')
@@ -4225,12 +4225,6 @@ class HPXMLFile
       if args[:roof_color].is_initialized
         roof_color = args[:roof_color].get
       end
-      if args[:radiant_barrier] && args[:radiant_barrier_attic_location].is_initialized && (args[:radiant_barrier_attic_location].get == 'Attic roof only' || args[:radiant_barrier_attic_location].get == 'Attic roof and gable walls')
-        radiant_barrier = args[:radiant_barrier]
-        if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
-          radiant_barrier_grade = args[:radiant_barrier_grade].get
-        end
-      end
 
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
         azimuth = nil
@@ -4245,10 +4239,18 @@ class HPXMLFile
                            roof_type: roof_type,
                            roof_color: roof_color,
                            pitch: args[:geometry_roof_pitch],
-                           radiant_barrier: radiant_barrier,
-                           radiant_barrier_grade: radiant_barrier_grade,
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
+      if args[:radiant_barrier] && args[:radiant_barrier_attic_location].is_initialized && (args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticRoofOnly || args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls)
+        if hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticVented
+          if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
+            radiant_barrier_grade = args[:radiant_barrier_grade].get
+            hpxml_bldg.roofs[-1].radiant_barrier = true
+            hpxml_bldg.roofs[-1].radiant_barrier_grade = radiant_barrier_grade
+          end
+        end
+      end
+
     end
   end
 
@@ -4388,8 +4390,10 @@ class HPXMLFile
       if args[:radiant_barrier_grade].is_initialized
         radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
-      hpxml_bldg.walls[-1].radiant_barrier = true
-      hpxml_bldg.walls[-1].radiant_barrier_grade = radiant_barrier_grade
+      if hpxml_bldg.walls[-1].interior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticVented
+        hpxml_bldg.walls[-1].radiant_barrier = true
+        hpxml_bldg.walls[-1].radiant_barrier_grade = radiant_barrier_grade
+      end
     end
   end
 
@@ -4536,8 +4540,10 @@ class HPXMLFile
             if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
               radiant_barrier_grade = args[:radiant_barrier_grade].get
             end
-            hpxml_bldg.floors[-1].radiant_barrier = true
-            hpxml_bldg.floors[-1].radiant_barrier_grade = radiant_barrier_grade
+            if hpxml_bldg.floors[-1].exterior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.floors[-1].exterior_adjacent_to == HPXML::LocationAtticVented && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
+              hpxml_bldg.floors[-1].radiant_barrier = true
+              hpxml_bldg.floors[-1].radiant_barrier_grade = radiant_barrier_grade
+            end
           end
         end
       end
