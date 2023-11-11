@@ -1043,6 +1043,32 @@ class ReportSimulationOutputTest < Minitest::Test
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, cols_temps_other_side)
   end
 
+  def test_timeseries_hourly_zone_temperatures_whole_mf_building
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-multiple-mf-units.xml'),
+                  'building_id' => 'ALL',
+                  'skip_validation' => true,
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    expected_timeseries_cols = ['Time']
+    for i in 1..6
+      expected_timeseries_cols << "Temperature: Unit#{i} Conditioned Space"
+      if i <= 2
+        expected_timeseries_cols << "Temperature: Unit#{i} Basement Unconditioned"
+      elsif i >= 5
+        expected_timeseries_cols << "Temperature: Unit#{i} Attic Vented"
+      end
+      expected_timeseries_cols << "Temperature: Unit#{i} Heating Setpoint"
+      expected_timeseries_cols << "Temperature: Unit#{i} Cooling Setpoint"
+    end
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    timeseries_rows = CSV.read(timeseries_csv)
+    assert_equal(8760, timeseries_rows.size - 2)
+  end
+
   def test_timeseries_hourly_airflows_with_exhaust_mechvent
     args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-mechvent-exhaust.xml'),
                   'skip_validation' => true,
@@ -1564,6 +1590,9 @@ class ReportSimulationOutputTest < Minitest::Test
     workflow.setWorkflowSteps(steps)
     osw_path = File.join(File.dirname(template_osw), 'test.osw')
     workflow.saveAs(osw_path)
+    if args_hash.size != found_args.size
+      puts "ERROR: Did not find an argument (#{(args_hash.keys - found_args)[0]}) in #{File.basename(template_osw)}."
+    end
     assert_equal(args_hash.size, found_args.size)
 
     # Run OSW
