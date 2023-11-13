@@ -1078,7 +1078,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
                                         ext_rigid_r, int_rigid_r, mat_int_finish, mat_wall, height_ag,
-                                        soil_k_in)
+                                        soil_k_in, @hpxml_bldg.site.ground_diffusivity)
 
     if not assembly_r.nil?
       Constructions.check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
@@ -1146,7 +1146,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        exposed_length, mat_carpet, soil_k_in, kiva_foundation)
+                                        exposed_length, mat_carpet, soil_k_in, @hpxml_bldg.site.ground_diffusivity,
+                                        kiva_foundation)
 
     kiva_foundation = surface.adjacentFoundation.get
 

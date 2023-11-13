@@ -971,13 +971,13 @@ class Constructions
   def self.apply_foundation_wall(model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
-                                 mat_wall, height_above_grade, soil_k_in)
+                                 mat_wall, height_above_grade, soil_k_in, ground_diffusivity)
 
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
                                               int_rigid_ins_offset, ext_rigid_ins_height,
                                               int_rigid_ins_height, height_above_grade,
-                                              mat_wall.thick_in, mat_int_finish, soil_k_in)
+                                              mat_wall.thick_in, mat_int_finish, soil_k_in, ground_diffusivity)
 
     # Define construction
     constr = Construction.new(constr_name, [1])
@@ -999,7 +999,7 @@ class Constructions
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
-                                 mat_carpet, soil_k_in, foundation)
+                                 mat_carpet, soil_k_in, ground_diffusivity, foundation)
 
     return if surface.nil?
 
@@ -1008,7 +1008,7 @@ class Constructions
       thick = UnitConversions.convert(concrete_thick_in, 'in', 'ft')
       foundation = create_kiva_slab_foundation(model, under_r, under_width,
                                                gap_r, thick, perimeter_r, perimeter_depth,
-                                               concrete_thick_in, soil_k_in)
+                                               concrete_thick_in, soil_k_in, ground_diffusivity)
     else
       # Kiva foundation (for crawlspace/basement) exists
       if (under_r > 0) && (under_width > 0)
@@ -1388,7 +1388,7 @@ class Constructions
 
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
                                        int_vert_depth, ext_vert_r, ext_vert_depth,
-                                       concrete_thick_in, soil_k_in)
+                                       concrete_thick_in, soil_k_in, ground_diffusivity)
 
     # Create the Foundation:Kiva object for slab foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1418,7 +1418,7 @@ class Constructions
     foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, 'in', 'm'))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, 'in', 'm'))
 
-    apply_kiva_settings(model, soil_k_in)
+    apply_kiva_settings(model, soil_k_in, ground_diffusivity)
 
     return foundation
   end
@@ -1426,7 +1426,7 @@ class Constructions
   def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
                                         wall_height_above_grade, wall_material_thick_in, wall_mat_int_finish,
-                                        soil_k_in)
+                                        soil_k_in, ground_diffusivity)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1453,14 +1453,14 @@ class Constructions
     foundation.setWallHeightAboveGrade(UnitConversions.convert(wall_height_above_grade, 'ft', 'm'))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, 'in', 'm'))
 
-    apply_kiva_settings(model, soil_k_in)
+    apply_kiva_settings(model, soil_k_in, ground_diffusivity)
 
     return foundation
   end
 
-  def self.apply_kiva_settings(model, soil_k_in)
+  def self.apply_kiva_settings(model, soil_k_in, ground_diffusivity)
     # Set the Foundation:Kiva:Settings object
-    soil_mat = BaseMaterial.Soil(soil_k_in)
+    soil_mat = BaseMaterial.Soil(soil_k_in, ground_diffusivity)
     settings = model.getFoundationKivaSettings
     settings.setSoilConductivity(UnitConversions.convert(soil_mat.k_in, 'Btu*in/(hr*ft^2*R)', 'W/(m*K)'))
     settings.setSoilDensity(UnitConversions.convert(soil_mat.rho, 'lbm/ft^3', 'kg/m^3'))

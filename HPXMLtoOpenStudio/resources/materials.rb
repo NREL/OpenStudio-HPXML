@@ -399,8 +399,13 @@ class BaseMaterial
     return new(rho: (self.InsulationFiberglassLoosefill.rho + self.InsulationCelluloseLoosefill.rho) / 2.0, cp: 0.25)
   end
 
-  def self.Soil(k_in)
-    return new(rho: 115.0, cp: 0.1, k_in: k_in)
+  def self.Soil(k_in, diffusivity = nil)
+    rho = 115.0
+    cp = 0.1
+    if !diffusivity.nil?
+      rho = (diffusivity * k_in) / cp
+    end
+    return new(rho: rho, cp: cp, k_in: k_in)
   end
 
   def self.Brick

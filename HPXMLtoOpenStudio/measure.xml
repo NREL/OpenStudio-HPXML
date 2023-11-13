@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b4651456-b458-4d8e-960b-7b755f1c8f60</version_id>
-  <version_modified>2023-11-13T15:10:36Z</version_modified>
+  <version_id>b10ac12e-a3bf-4d3d-8ecf-88a07248a37e</version_id>
+  <version_modified>2023-11-13T17:30:41Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CF4007EE</checksum>
+      <checksum>F220C944</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -166,7 +166,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D28BD90F</checksum>
+      <checksum>E9F9E4EA</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -364,7 +364,7 @@
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24DCB986</checksum>
+      <checksum>AF16F15E</checksum>
     </file>
     <file>
       <filename>meta_measure.rb</filename>
