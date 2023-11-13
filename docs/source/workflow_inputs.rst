@@ -2302,12 +2302,12 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
-  .. [#] BoreholesOrTrenches/Count autosized by assuming 1 for every ton of ground source heat pump cooling capacity.
+  .. [#] BoreholesOrTrenches/Count autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
   .. [#] BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
          To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
-         BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
+         BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft) to avoid extrapolation.
          BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
-  .. [#] BoreholesOrTrenches/Length autosized per TODO.
+  .. [#] BoreholesOrTrenches/Length autosized based on the required total length of the ground heat exchanger (calculated during sizing) and the total number of boreholes, with the total length evenly distributed across each borehole. 
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
          
