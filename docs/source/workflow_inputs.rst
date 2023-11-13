@@ -2276,7 +2276,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``SystemIdentifier``                      id                                              Yes                       Unique identifier
   ``LoopConfiguration``                     string                         vertical         Yes
   ``LoopFlow``                              double            gal/min      > 0              No        autosized [#]_  Water flow rate through the geothermal loop
-  ``BoreholesOrTrenches/Count``             integer                        > 0 [#]_         No        autosized [#]_
+  ``BoreholesOrTrenches/Count``             integer                        >= 1, <= 10      No [#]_   autosized [#]_
   ``BoreholesOrTrenches/Length``            double            ft           See [#]_         No        autosized [#]_  Length (i.e., average depth) of each borehole
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0              No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
@@ -2287,7 +2287,8 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
-  .. [#] LoopFlow autosized by calculating 3 times the maximum of the ground source heat pump's heating/cooling capacity in tons. The LoopFlow minimum autosized value is 3 gal/min.
+  .. [#] LoopFlow autosized by calculating 3 times the maximum of the ground source heat pump's heating/cooling capacity in tons.
+         The LoopFlow minimum autosized value is 3 gal/min.
   .. [#] If extension/BorefieldConfiguration provided, and it is not **Rectangle**, a valid BoreholesOrTrenches/Count must also be provided:
          
          \- **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
