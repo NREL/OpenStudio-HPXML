@@ -237,7 +237,9 @@ class HVAC
 
     obj_name = Constants.ObjectNameGroundSourceHeatPump
 
+    geothermal_loop = heat_pump.geothermal_loop
     hp_ap = heat_pump.additional_properties
+
     htg_cfm = heat_pump.heating_airflow_cfm
     clg_cfm = heat_pump.cooling_airflow_cfm
     htg_cfm_rated = heat_pump.airflow_defect_ratio.nil? ? htg_cfm : (htg_cfm / (1.0 + heat_pump.airflow_defect_ratio))
@@ -249,8 +251,8 @@ class HVAC
     end
 
     # Apply unit multiplier
-    hp_ap.GSHP_Loop_flow *= unit_multiplier
-    hp_ap.GSHP_Bore_Holes = hp_ap.GSHP_Bore_Holes.to_i * unit_multiplier
+    geothermal_loop.loop_flow *= unit_multiplier
+    geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
     clg_total_cap_curve = create_curve_quad_linear(model, hp_ap.cool_cap_curve_spec[0], obj_name + ' clg total cap curve')
@@ -262,7 +264,7 @@ class HVAC
     clg_coil.setNominalTimeforCondensateRemovaltoBegin(1000)
     clg_coil.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
     clg_coil.setRatedAirFlowRate(UnitConversions.convert(clg_cfm_rated, 'cfm', 'm^3/s'))
-    clg_coil.setRatedWaterFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
+    clg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
     clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W'))
     clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hp_ap.cooling_capacity_sensible, 'Btu/hr', 'W'))
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
@@ -274,7 +276,7 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / hp_ap.heat_rated_eirs[0])
     htg_coil.setRatedAirFlowRate(UnitConversions.convert(htg_cfm_rated, 'cfm', 'm^3/s'))
-    htg_coil.setRatedWaterFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
+    htg_coil.setRatedWaterFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
     htg_coil.setRatedHeatingCapacity(UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'W'))
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
@@ -291,19 +293,19 @@ class HVAC
     # Ground Heat Exchanger
     ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model, xing)
     ground_heat_exch_vert.setName(obj_name + ' exchanger')
-    ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(heat_pump.geothermal_loop.bore_diameter / 2.0, 'in', 'm'))
+    ground_heat_exch_vert.setBoreHoleRadius(UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setGroundThermalConductivity(UnitConversions.convert(ground_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setGroundThermalHeatCapacity(UnitConversions.convert(ground_conductivity / ground_diffusivity, 'Btu/(ft^3*F)', 'J/(m^3*K)'))
     ground_heat_exch_vert.setGroundTemperature(UnitConversions.convert(weather.data.DeepGroundAnnualTemp, 'F', 'C'))
-    ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
-    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(heat_pump.geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(geothermal_loop.grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
+    ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(geothermal_loop.pipe_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(hp_ap.pipe_od, 'in', 'm'))
-    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(heat_pump.geothermal_loop.shank_spacing, 'in', 'm'))
+    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(geothermal_loop.shank_spacing, 'in', 'm'))
     ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((hp_ap.pipe_od - hp_ap.pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
-    ground_heat_exch_vert.setDesignFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
-    ground_heat_exch_vert.setNumberofBoreHoles(hp_ap.GSHP_Bore_Holes)
-    ground_heat_exch_vert.setBoreHoleLength(UnitConversions.convert(hp_ap.GSHP_Bore_Depth, 'ft', 'm'))
+    ground_heat_exch_vert.setDesignFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
+    ground_heat_exch_vert.setNumberofBoreHoles(geothermal_loop.num_bore_holes)
+    ground_heat_exch_vert.setBoreHoleLength(UnitConversions.convert(geothermal_loop.bore_length, 'ft', 'm'))
     ground_heat_exch_vert.setGFunctionReferenceRatio(ground_heat_exch_vert.boreHoleRadius.get / ground_heat_exch_vert.boreHoleLength.get) # ensure this ratio is consistent with rb/H so that g values will be taken as-is
     ground_heat_exch_vert.removeAllGFunctions
     for i in 0..(hp_ap.GSHP_G_Functions[0].size - 1)
@@ -330,7 +332,7 @@ class HVAC
     plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert)
     plant_loop.addDemandBranchForComponent(htg_coil)
     plant_loop.addDemandBranchForComponent(clg_coil)
-    plant_loop.setMaximumLoopFlowRate(UnitConversions.convert(hp_ap.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
+    plant_loop.setMaximumLoopFlowRate(UnitConversions.convert(geothermal_loop.loop_flow, 'gal/min', 'm^3/s'))
 
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Condenser')

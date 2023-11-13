@@ -3063,9 +3063,6 @@ class HPXMLDefaults
 
         # Heating GSHP loop
         if htg_sys.is_a? HPXML::HeatPump
-          htg_sys.additional_properties.GSHP_Loop_flow = hvac_sizing_values.GSHP_Loop_flow
-          htg_sys.additional_properties.GSHP_Bore_Depth = hvac_sizing_values.GSHP_Bore_Depth
-          htg_sys.additional_properties.GSHP_Bore_Holes = hvac_sizing_values.GSHP_Bore_Holes
           htg_sys.additional_properties.GSHP_G_Functions = hvac_sizing_values.GSHP_G_Functions
 
           geothermal_loop = htg_sys.geothermal_loop

@@ -1899,15 +1899,9 @@ class HVACSizing
     '''
     return if @cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
 
-    hvac_cooling_ap = hvac_cooling.additional_properties
-
-    # Autosize ground loop heat exchanger length
     geothermal_loop = hvac_cooling.geothermal_loop
     bore_spacing = geothermal_loop.bore_spacing
     bore_diameter = geothermal_loop.bore_diameter
-    grout_conductivity = geothermal_loop.grout_conductivity
-    pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
-    nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
 
     loop_flow = geothermal_loop.loop_flow
     if loop_flow.nil?
@@ -1926,9 +1920,16 @@ class HVACSizing
 
     bore_depth = geothermal_loop.bore_length
     if bore_depth.nil?
+      # Autosize ground loop heat exchanger length
+      hvac_cooling_ap = hvac_cooling.additional_properties
+      grout_conductivity = geothermal_loop.grout_conductivity
+      pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
+      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
       bore_length_heat = nom_length_heat * hvac_sizing_values.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length = [bore_length_heat, bore_length_cool].max
+
+      # Divide length by number of boreholes for average bore depth
       bore_depth = (bore_length / num_bore_holes).floor # ft
 
       active_length = 5 # the active length starts about 5 ft below the surface
