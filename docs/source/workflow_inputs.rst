@@ -2208,7 +2208,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
-  .. [#] LoopFlow autosized per TODO.
+  .. [#] LoopFlow autosized by calculating 3 times the maximum of the ground source heat pump's heating/cooling capacity in tons. The LoopFlow minimum is 3 gal/min.
   .. [#] If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
          
          \- **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
@@ -2223,7 +2223,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
-  .. [#] BoreholesOrTrenches/Count autosized per TODO.
+  .. [#] BoreholesOrTrenches/Count autosized by assuming 1 for every ton of ground source heat pump cooling capacity. The BoreholesOrTrenches/Count minimum is 1.
   .. [#] BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
          To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
          BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
