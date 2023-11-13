@@ -29,12 +29,54 @@ HPXML files submitted to OpenStudio-HPXML undergo a two step validation process:
 
 OpenStudio-HPXML **automatically validates** the HPXML file against both the XSD and Schematron documents and reports any validation errors, but software developers may find it beneficial to also integrate validation into their software.
 
-.. important::
+.. _bldg_type_scope:
 
-  Usage of both validation approaches (XSD and Schematron) is recommended for developers actively working on creating HPXML files for EnergyPlus simulations:
+Building Type Scope
+*******************
 
-  - Validation against XSD for general correctness and usage of HPXML
-  - Validation against Schematron for understanding XML document requirements specific to running EnergyPlus
+OpenStudio-HPXML can be used to model either individual residential dwelling units or whole residential buildings.
+
+.. _bldg_type_units:
+
+Dwelling Units
+~~~~~~~~~~~~~~
+
+The OpenStudio-HPXML workflow was originally developed to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
+This approach:
+
+- Is required/desired for certain applications (e.g., a Home Energy Score or an Energy Rating Index calculation).
+- Improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
+
+When modeling individual units of SFA/MF buildings, current capabilities include:
+
+- Defining surfaces adjacent to generic SFA/MF spaces (e.g., "other housing unit" or "other multifamily buffer space"), in which temperature profiles will be assumed (see :ref:`hpxmllocations`).
+- Locating various building components (e.g., ducts, water heaters, appliances) in these SFA/MF spaces.
+- Defining shared systems (HVAC, water heating, mechanical ventilation, etc.), in which individual systems are modeled with adjustments to approximate their energy use attributed to the unit.
+
+Note that only the energy use attributed to each dwelling unit is calculated.
+
+.. _bldg_type_bldgs:
+
+Whole SFA/MF Buildings
+~~~~~~~~~~~~~~~~~~~~~~
+
+As of OpenStudio-HPXML v1.7.0, a new capability was added for modeling whole SFA/MF buildings in a single combined simulation.
+
+For these simulations:
+
+- Each dwelling unit is described by a separate ``Building`` element in the HPXML file.
+- To run the single combined simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
+- Unit multipliers (using the ``NumberofUnits`` element) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
+- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones.
+- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit.
+
+Notes/caveats about this approach:
+
+- Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
+- Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
+- Utility bill calculations using detailed rates are not supported.
+
+Note that only the energy use for the entire building is calculated.
 
 Input Defaults
 **************
@@ -105,157 +147,6 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
-
-.. _hvac_sizing_control:
-
-HPXML HVAC Sizing Control
-*************************
-
-HVAC equipment sizing controls are entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl``.
-
-  =================================  ========  =====  ===========  ========  ========  ============================================
-  Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ============================================
-  ``AllowIncreasedFixedCapacities``  boolean                       No        false     Logic for fixed capacity HVAC equipment [#]_
-  ``HeatPumpSizingMethodology``      string           See [#]_     No        HERS      Logic for autosized heat pumps [#]_
-  =================================  ========  =====  ===========  ========  ========  ============================================
-
-  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
-  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
-  .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
-         If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
-         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
-
-If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/SoftwareInfo/extension/HVACSizingControl/ManualJInputs``.
-
-  =================================  ========  ======  ===========  ========  ============  ============================================
-  Element                            Type      Units   Constraints  Required  Default       Description
-  =================================  ========  ======  ===========  ========  ============  ============================================
-  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
-  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
-  ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
-  ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
-  ``HumiditySetpoint``               double    frac    0 - 1        No        See [#]_      Conditioned space relative humidity
-  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
-  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
-  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
-  =================================  ========  ======  ===========  ========  ============  ============================================
-
-  .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
-         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
-  .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
-         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
-  .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
-  .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
-  .. [#] If HumiditySetpoint not provided, defaults to 0.5 unless there is a dehumidifier with a lower setpoint, in which case that value is used.
-  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
-         This default represents loads that normally occur during the early evening in mid-summer.
-         Additional adjustments or custom internal loads can instead be specified here.
-  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
-         Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
-
-.. _shadingcontrol:
-
-HPXML Shading Control
-*********************
-
-Shading controls for window and skylight summer/winter shading coefficients are entered in ``/HPXML/SoftwareInfo/extension/ShadingControl``.
-If not provided, summer will be default based on the cooling season defined in the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_, using monthly average temperatures.
-The remainder of the year is winter.
-
-  ====================================  ========  =======  =============  ========  =======  =====================================
-  Element                               Type      Units    Constraints    Required  Default  Description
-  ====================================  ========  =======  =============  ========  =======  =====================================
-  ``SummerBeginMonth``                  integer            1 - 12         Yes                Summer shading start date
-  ``SummerBeginDayOfMonth``             integer            1 - 31         Yes                Summer shading start date
-  ``SummerEndMonth``                    integer            1 - 12         Yes                Summer shading end date
-  ``SummerEndDayOfMonth``               integer            1 - 31         Yes                Summer shading end date
-  ====================================  ========  =======  =============  ========  =======  =====================================
-
-HPXML Schedules
-***************
-
-Schedules for a variety of building features can be 1) specified via simple inputs, 2) specified via detailed inputs, or 3) defaulted.
-It is allowed to use simple, detailed, and defaulted values in the same HPXML run.
-
-Simple Schedule Inputs
-~~~~~~~~~~~~~~~~~~~~~~
-
-Simple schedule inputs are available as weekday/weekend fractions and monthly multipliers for a variety of building characteristics.
-For example, see the ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers`` inputs for :ref:`buildingoccupancy`.
-
-.. _detailedschedules:
-
-Detailed Schedule Inputs
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
-They can be used to reflect real-world or stochastic occupancy.
-
-Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/SoftwareInfo/extension/SchedulesFilePath`` elements.
-The column names available in the schedule CSV files are:
-
-  ===============================  =====  =================================================================================  ===============================
-  Column Name                      Units  Description                                                                        Can Be Stochastically Generated
-  ===============================  =====  =================================================================================  ===============================
-  ``occupants``                    frac   Occupant heat gain schedule.                                                       Yes
-  ``lighting_interior``            frac   Interior lighting energy use schedule.                                             Yes
-  ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                             No
-  ``lighting_garage``              frac   Garage lighting energy use schedule.                                               Yes
-  ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                     No
-  ``cooking_range``                frac   Cooking range & oven energy use schedule.                                          Yes
-  ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                          No
-  ``extra_refrigerator``           frac   Non-primary refrigerator energy use schedule.                                      No
-  ``freezer``                      frac   Freezer energy use schedule.                                                       No
-  ``dishwasher``                   frac   Dishwasher energy use schedule.                                                    Yes
-  ``clothes_washer``               frac   Clothes washer energy use schedule.                                                Yes
-  ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                                 Yes
-  ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                   Yes
-  ``plug_loads_other``             frac   Other plug load energy use schedule.                                               Yes
-  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                          Yes
-  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                    No
-  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                           No
-  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                               No
-  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                            No
-  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                           No
-  ``pool_pump``                    frac   Pool pump energy use schedule.                                                     No
-  ``pool_heater``                  frac   Pool heater energy use schedule.                                                   No
-  ``permanent_spa_pump``           frac   Permanent spa pump energy use schedule.                                            No
-  ``permanent_spa_heater``         frac   Permanent spa heater energy use schedule.                                          No
-  ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                                 Yes
-  ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                             Yes
-  ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
-  ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No
-  ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No
-  ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                    No
-  ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=hyrbid/auto, 1=heat pump only.   No
-  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.                 No
-  ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
-  ``outage``                       0/1    Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
-  ===============================  =====  =================================================================================  ===============================
-
-Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
-In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
-Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
-
-The schedule file must have a full year of data even if the simulation is not an entire year.
-Frequency of schedule values do not need to match the simulation timestep.
-For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
-
-A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Can Be Stochastically Generated" above for applicable columns); see the :ref:`usage_instructions` for the commands.
-Inputs for the stochastic schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
-See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
-
-.. warning::
-
-  For simulations with daylight saving enabled (which is the default), EnergyPlus will skip forward an hour in the CSV on the "spring forward" day and repeat an hour on the "fall back" day.
-
-Default Schedules
-~~~~~~~~~~~~~~~~~
-
-If neither simple nor detailed inputs are provided, then schedules are defaulted.
-Default schedules are typically smooth, averaged schedules.
-These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
 
 HPXML Emissions Scenarios
 *************************
@@ -368,10 +259,11 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   Element                           Type      Units    Constraints  Required  Default   Notes
   ================================  ========  =======  ===========  ========  ========  ====================
   ``FuelType``                      string             electricity  Yes                 Fuel type
-  ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge
+  ``FixedCharge``                   double    $/month               No        12.0      Monthly fixed charge [#]_
   ``MarginalRate``                  double    $/kWh                 No        See [#]_  Marginal flat rate
   ================================  ========  =======  ===========  ========  ========  ====================
 
+  .. [#] If running :ref:`bldg_type_bldgs`, the fixed charge will apply to every dwelling unit in the building.
   .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
 
 **Detailed**
@@ -408,11 +300,15 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] | If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
-         | - **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
-         | - **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
-         | - **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
-         | or defaults to $0.015/kBtu for other fuels.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
+         
+         \- **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
+         
+         \- **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
+         
+         \- **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
+         
+         or defaults to $0.015/kBtu for other fuels.
 
 PV Compensation
 ~~~~~~~~~~~~~~~
@@ -553,8 +449,10 @@ Soil information is entered in ``Soil``.
   ``extension/Diffusivity`` or ``SoilType``/``MoistureType``          string or double  ft2/hr       See or > 0       No        mixed     Diffusivity [#]_ or soil/moisture type
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
-  .. [#] | SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
-         | MoistureType choices are "dry", "wet", or "mixed".
+  .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
+         
+         \ MoistureType choices are "dry", "wet", or "mixed".
+
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
 
@@ -609,10 +507,13 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   ``extension/MonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated monthly multipliers
   ========================================  ========  =====  ===========  ========  ========  ========================
 
-  .. [#] | If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
-         | If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
-         | - **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
-         | - **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
+  .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+         If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
+
+         \- **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
+
+         \- **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
+
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 25 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
@@ -625,6 +526,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   Element                                                    Type      Units      Constraints                        Required  Default   Notes
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
   ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
+  ``NumberofUnits``                                          integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
   ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
   ``NumberofBedrooms``                                       integer              >= 0                               Yes                 Number of bedrooms
@@ -634,9 +536,163 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =========================================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
+  .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
+         EnergyPlus simulation results will be multiplied by this value.
+         For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
          If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+
+HPXML Schedules
+***************
+
+Schedules for a variety of building features can be 1) specified via simple inputs, 2) specified via detailed inputs, or 3) defaulted.
+It is allowed to use simple, detailed, and defaulted values in the same HPXML run.
+
+Simple Schedule Inputs
+~~~~~~~~~~~~~~~~~~~~~~
+
+Simple schedule inputs are available as weekday/weekend fractions and monthly multipliers for a variety of building characteristics.
+For example, see the ``WeekdayScheduleFractions``, ``WeekendScheduleFractions``, and ``MonthlyScheduleMultipliers`` inputs for :ref:`buildingoccupancy`.
+
+.. _detailedschedules:
+
+Detailed Schedule Inputs
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Detailed schedule inputs allow schedule values for every hour or timestep of the simulation.
+They can be used to reflect real-world or stochastic occupancy.
+
+Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/SchedulesFilePath`` elements.
+The column names available in the schedule CSV files are:
+
+  ===============================  =====  =================================================================================  ===============================
+  Column Name                      Units  Description                                                                        Can Be Stochastically Generated
+  ===============================  =====  =================================================================================  ===============================
+  ``occupants``                    frac   Occupant heat gain schedule.                                                       Yes
+  ``lighting_interior``            frac   Interior lighting energy use schedule.                                             Yes
+  ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                             No
+  ``lighting_garage``              frac   Garage lighting energy use schedule.                                               Yes
+  ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                     No
+  ``cooking_range``                frac   Cooking range & oven energy use schedule.                                          Yes
+  ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                          No
+  ``extra_refrigerator``           frac   Non-primary refrigerator energy use schedule.                                      No
+  ``freezer``                      frac   Freezer energy use schedule.                                                       No
+  ``dishwasher``                   frac   Dishwasher energy use schedule.                                                    Yes
+  ``clothes_washer``               frac   Clothes washer energy use schedule.                                                Yes
+  ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                                 Yes
+  ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                   Yes
+  ``plug_loads_other``             frac   Other plug load energy use schedule.                                               Yes
+  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                          Yes
+  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                    No
+  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                           No
+  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                               No
+  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                            No
+  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                           No
+  ``pool_pump``                    frac   Pool pump energy use schedule.                                                     No
+  ``pool_heater``                  frac   Pool heater energy use schedule.                                                   No
+  ``permanent_spa_pump``           frac   Permanent spa pump energy use schedule.                                            No
+  ``permanent_spa_heater``         frac   Permanent spa heater energy use schedule.                                          No
+  ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                                 Yes
+  ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                             Yes
+  ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
+  ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No
+  ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No
+  ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                    No
+  ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=hyrbid/auto, 1=heat pump only.   No
+  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.                 No
+  ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
+  ``outage``                       0/1    Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
+  ===============================  =====  =================================================================================  ===============================
+
+Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
+In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
+Example schedule CSV files are provided in the ``HPXMLtoOpenStudio/resources/schedule_files`` directory.
+
+The schedule file must have a full year of data even if the simulation is not an entire year.
+Frequency of schedule values do not need to match the simulation timestep.
+For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
+
+A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Can Be Stochastically Generated" above for applicable columns); see the :ref:`usage_instructions` for the commands.
+Inputs for the stochastic schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
+See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
+
+.. warning::
+
+  For simulations with daylight saving enabled (which is the default), EnergyPlus will skip forward an hour in the CSV on the "spring forward" day and repeat an hour on the "fall back" day.
+
+Default Schedules
+~~~~~~~~~~~~~~~~~
+
+If neither simple nor detailed inputs are provided, then schedules are defaulted.
+Default schedules are typically smooth, averaged schedules.
+These default schedules are described elsewhere in the documentation (e.g., see :ref:`buildingoccupancy` for the default occupant heat gain schedule).
+
+.. _hvac_sizing_control:
+
+HPXML HVAC Sizing Control
+*************************
+
+HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl``.
+
+  =================================  ========  =====  ===========  ========  ========  ============================================
+  Element                            Type      Units  Constraints  Required  Default   Description
+  =================================  ========  =====  ===========  ========  ========  ============================================
+  ``AllowIncreasedFixedCapacities``  boolean                       No        false     Logic for fixed capacity HVAC equipment [#]_
+  ``HeatPumpSizingMethodology``      string           See [#]_     No        HERS      Logic for autosized heat pumps [#]_
+  =================================  ========  =====  ===========  ========  ========  ============================================
+
+  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
+  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
+  .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
+         If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
+         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
+
+If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
+
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  Element                            Type      Units   Constraints  Required  Default       Description
+  =================================  ========  ======  ===========  ========  ============  ============================================
+  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
+  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
+  ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
+  ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
+  ``HumiditySetpoint``               double    frac    0 - 1        No        See [#]_      Conditioned space relative humidity
+  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
+  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
+  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
+  =================================  ========  ======  ===========  ========  ============  ============================================
+
+  .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
+  .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
+  .. [#] If HumiditySetpoint not provided, defaults to 0.5 unless there is a dehumidifier with a lower setpoint, in which case that value is used.
+  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
+         This default represents loads that normally occur during the early evening in mid-summer.
+         Additional adjustments or custom internal loads can instead be specified here.
+  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
+         Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
+
+.. _shadingcontrol:
+
+HPXML Shading Control
+*********************
+
+Shading controls for window and skylight summer/winter shading coefficients are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/ShadingControl``.
+If not provided, summer will be default based on the cooling season defined in the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_, using monthly average temperatures.
+The remainder of the year is winter.
+
+  ====================================  ========  =======  =============  ========  =======  =====================================
+  Element                               Type      Units    Constraints    Required  Default  Description
+  ====================================  ========  =======  =============  ========  =======  =====================================
+  ``SummerBeginMonth``                  integer            1 - 12         Yes                Summer shading start date
+  ``SummerBeginDayOfMonth``             integer            1 - 31         Yes                Summer shading start date
+  ``SummerEndMonth``                    integer            1 - 12         Yes                Summer shading end date
+  ``SummerEndDayOfMonth``               integer            1 - 31         Yes                Summer shading end date
+  ====================================  ========  =======  =============  ========  =======  =====================================
 
 HPXML Climate Zones
 -------------------
@@ -795,10 +851,13 @@ The presence of a flue or chimney with combustion air from conditioned space can
   ``extension/HasFlueOrChimneyInConditionedSpace``  boolean                      No         See [#]_  Flue or chimney with combustion air from conditioned space
   ================================================  =======  =====  ===========  =========  ========  ===============================================
 
-  .. [#] | If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
-         | - heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
-         | - heating system is non-electric Fireplace located in conditioned space, or
-         | - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
+  .. [#] If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
+         
+         \- heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         
+         \- heating system is non-electric Fireplace located in conditioned space, or
+         
+         \- water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63 and located in conditioned space.
   
 HPXML Attics
 ************
@@ -869,16 +928,26 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          Azimuth/Orientation is irrelevant for *flat* roofs.
   .. [#] RoofType choices are "asphalt or fiberglass shingles", "wood shingles or shakes", "shingles", "slate or tile shingles", "metal surfacing", "plastic/rubber/synthetic sheeting", "expanded polystyrene sheathing", "concrete", or "cool roof".
   .. [#] RoofColor choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
-         | - **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
-         | - **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
-         | - **shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
-         | - **slate or tile shingles**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
-         | - **metal surfacing**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
-         | - **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
-         | - **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
-         | - **concrete**: dark=0.90, medium dark=0.83, medium=0.75, light=0.65, reflective=0.50
-         | - **cool roof**: 0.30
+  .. [#] If SolarAbsorptance not provided, defaults based on RoofType and RoofColor:
+         
+         \- **asphalt or fiberglass shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         
+         \- **wood shingles or shakes**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         
+         \- **shingles**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         
+         \- **slate or tile shingles**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         
+         \- **metal surfacing**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         
+         \- **plastic/rubber/synthetic sheeting**: dark=0.90, medium dark=0.83, medium=0.75, light=0.60, reflective=0.30
+         
+         \- **expanded polystyrene sheathing**: dark=0.92, medium dark=0.89, medium=0.85, light=0.75, reflective=0.50
+         
+         \- **concrete**: dark=0.90, medium dark=0.83, medium=0.75, light=0.65, reflective=0.50
+         
+         \- **cool roof**: 0.30
+         
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
@@ -912,18 +981,24 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
          Azimuth/Orientation is irrelevant for *interior* rim joists.
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", "masonite siding", "composite shingle siding", "asbestos siding", "synthetic stucco", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaults based on Color:
-         | - **dark**: 0.95
-         | - **medium dark**: 0.85
-         | - **medium**: 0.70
-         | - **light**: 0.50
-         | - **reflective**: 0.30
+  .. [#] If SolarAbsorptance not provided, defaults based on Color:
+         
+         \- **dark**: 0.95
+         
+         \- **medium dark**: 0.85
+         
+         \- **medium**: 0.70
+         
+         \- **light**: 0.50
+         
+         \- **reflective**: 0.30
+         
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Walls
 ***********
 
-Each wall surface not attached to a foundation space is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
+Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
 
   ======================================  =================  ================  =====================  =============  ===========  ====================================
   Element                                 Type               Units             Constraints            Required       Default      Notes
@@ -953,12 +1028,18 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
          Azimuth/Orientation is irrelevant for *interior* walls (e.g., between conditioned space and garage).
   .. [#] Siding choices are "wood siding", "vinyl siding", "stucco", "fiber cement siding", "brick veneer", "aluminum siding", "masonite siding", "composite shingle siding", "asbestos siding", "synthetic stucco", or "none".
   .. [#] Color choices are "light", "medium", "medium dark", "dark", or "reflective".
-  .. [#] | If SolarAbsorptance not provided, defaults based on Color:
-         | - **dark**: 0.95
-         | - **medium dark**: 0.85
-         | - **medium**: 0.70
-         | - **light**: 0.50
-         | - **reflective**: 0.30
+  .. [#] If SolarAbsorptance not provided, defaults based on Color:
+         
+         \- **dark**: 0.95
+         
+         \- **medium dark**: 0.85
+         
+         \- **medium**: 0.70
+         
+         \- **light**: 0.50
+         
+         \- **reflective**: 0.30
+         
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "none".
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
@@ -966,7 +1047,8 @@ Each wall surface not attached to a foundation space is entered as an ``/HPXML/B
 HPXML Foundation Walls
 **********************
 
-Each wall surface attached to a foundation space is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Each foundation wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Any wall surface in contact with the ground is considered a foundation wall.
 
   ==============================================================  =================  ================  ===================  =========  ==============  ====================================
   Element                                                         Type               Units             Constraints          Required   Default         Notes
@@ -1131,17 +1213,21 @@ Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetail
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
-  .. [#] | GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
-         | - **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
-         | - **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
-         | Note that a storm window is not allowed for a window with U-factor lower than 0.45.
+  .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
+         
+         \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
+         
+         \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
+         
+         Note that a storm window is not allowed for a window with U-factor lower than 0.45.
+         
   .. [#] FractionOperable reflects whether the windows are operable (can be opened), not how they are used by the occupants.
          If a ``Window`` represents a single window, the value should be 0 or 1.
          If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
          The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
-If operable windows are defined, the availability of natural ventilation is entered in ``/HPXML/SoftwareInfo/extension``.
+If operable windows are defined, the availability of natural ventilation is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
 
   =============================================  ========  =========  ===========  ========  ========  ========================================================
   Element                                        Type      Units      Constraints  Required  Default   Notes
@@ -1235,10 +1321,14 @@ Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skyli
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] | GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
-         | - **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
-         | - **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
-         | Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
+  .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
+         
+         \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
+         
+         \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
+         
+         Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
+         
   .. [#] AttachedToRoof must reference a ``Roof``.
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Skylight``.
@@ -1365,11 +1455,16 @@ Each heating system (other than a heat pump) is entered as an ``/HPXML/Building/
   =================================  ========  ======  ===========  ========  ==============  ===============================
 
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
-  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "conditioned space"
-         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
-         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
-         | - **dse**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **none**: "conditioned space"
+         
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **hydronic**: same default logic as :ref:`waterheatingsystems`
+         
+         \- **dse**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
+         
   .. [#] HeatingSystemType child element choices are ``ElectricResistance``, ``Furnace``, ``WallFurnace``, ``FloorFurnace``, ``Boiler``, ``Stove``, ``SpaceHeater``, or ``Fireplace``.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
          For ``ElectricResistance``, "electricity" is required.
@@ -1473,9 +1568,11 @@ If an in-unit boiler if specified, additional information is entered in ``Heatin
   ``ElectricAuxiliaryEnergy``  double    kWh/yr  >= 0         No        See [#]_  Electric auxiliary energy
   ===========================  ========  ======  ===========  ========  ========  =========================
 
-  .. [#] | If ElectricAuxiliaryEnergy not provided, defaults as follows:
-         | - **Oil boiler**: 330 kWh/yr
-         | - **Gas boiler**: 170 kWh/yr
+  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows:
+         
+         \- **Oil boiler**: 330 kWh/yr
+         
+         \- **Gas boiler**: 170 kWh/yr
 
 If instead a shared boiler is specified, additional information is entered in ``HeatingSystem``.
 
@@ -1487,10 +1584,14 @@ If instead a shared boiler is specified, additional information is entered in ``
   ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double    kWh/yr or W  >= 0         No [#]_             Electric auxiliary energy or fan coil power
   ============================================================  ========  ===========  ===========  ========  ========  =========================
 
-  .. [#] | If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows:
-         | - **Shared boiler w/ baseboard**: 220 kWh/yr
-         | - **Shared boiler w/ water loop heat pump**: 265 kWh/yr
-         | - **Shared boiler w/ fan coil**: 438 kWh/yr
+  .. [#] If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows:
+         
+         \- **Shared boiler w/ baseboard**: 220 kWh/yr
+         
+         \- **Shared boiler w/ water loop heat pump**: 265 kWh/yr
+         
+         \- **Shared boiler w/ fan coil**: 438 kWh/yr
+         
   .. [#] FanCoilWatts only used if boiler connected to fan coil and SharedLoopWatts provided.
 
 Stove
@@ -1551,10 +1652,14 @@ Each cooling system (other than a heat pump) is entered as an ``/HPXML/Building/
   ==========================  ========  ======  ===========  ========  ========  ===============================
 
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
-  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "conditioned space"
-         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
-         | - **dse**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **none**: "conditioned space"
+         
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **dse**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
+         
   .. [#] CoolingSystemType choices are "central air conditioner", "room air conditioner", "evaporative cooler", "mini-split", "chiller", "cooling tower", or "packaged terminal air conditioner".
   .. [#] CoolingSystemFuel only choice is "electricity".
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1772,11 +1877,16 @@ Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/H
   =================================  ========  ======  ===========  ========  =========  ===============================================
 
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
-  .. [#] | If UnitLocation not provided, defaults based on the distribution system:
-         | - **none**: "conditioned space"
-         | - **air**: supply duct location with the largest area, otherwise "conditioned space"
-         | - **hydronic**: same default logic as :ref:`waterheatingsystems`
-         | - **dse**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **none**: "conditioned space"
+         
+         \- **air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **hydronic**: same default logic as :ref:`waterheatingsystems`
+         
+         \- **dse**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         
   .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
   .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] BackupType choices are "integrated" or "separate".
@@ -1821,9 +1931,12 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
-  .. [#] | If neither extension/HeatingCapacityRetention nor HeatingCapacity17F provided, heating capacity retention defaults based on CompressorType:
-         | - **single/two stage**: 0.425 at 5F
-         | - **variable speed**: 0.5 at 5F
+  .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F provided, heating capacity retention defaults based on CompressorType:
+         
+         \- **single/two stage**: 0.425 at 5F
+         
+         \- **variable speed**: 0.5 at 5F
+         
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
@@ -2096,32 +2209,49 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
 
   .. [#] LoopFlow autosized per TODO.
-  .. [#] | If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
-         | - **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
-         | - **Open Rectangle**: 8 or 10
-         | - **C**: 7 or 9
-         | - **L**: 4, 5, 6, 7, 8, 9, or 10
-         | - **U**: 7, 9, or 10
-         | - **Lopsided U**: 6, 7, 8, 9, or 10
+  .. [#] If extension/BorefieldConfiguration provided, a valid BoreholesOrTrenches/Count must also be provided:
+         
+         \- **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **Open Rectangle**: 8 or 10
+         
+         \- **C**: 7 or 9
+         
+         \- **L**: 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **U**: 7, 9, or 10
+         
+         \- **Lopsided U**: 6, 7, 8, 9, or 10
+
   .. [#] BoreholesOrTrenches/Count autosized per TODO.
-  .. [#] | BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
-         | To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
-         | BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
-         | BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
+  .. [#] BoreholesOrTrenches/Length must be between 79.0 ft and 500.0 ft.
+         To permit interpolation, each borefield configuration in the library has g-function values corresponding to heights of 24, 48, 96, 192, and 384 m.
+         BoreholesOrTrenches/Length therefore has a minimum of 24 m (or 79 ft).
+         BoreholesOrTrenches/Length, on the other hand, has a maximum of 500 ft; bore depths exceeding this value are unlikely to be used in residential applications.
   .. [#] BoreholesOrTrenches/Length autosized per TODO.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
-  .. [#] | If Grout/Conductivity not provided, defaults based on Grout/Type:
-         | - **standard**: 0.4 Btu/hr-ft-F
-         | - **thermally enhanced**: 0.8 Btu/hr-ft-F
+  .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
+         
+         \- **standard**: 0.4 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 0.8 Btu/hr-ft-F
+
   .. [#] Pipe/Type choices are "standard" or "thermally enhanced".
-  .. [#] | If Pipe/Conductivity not provided, defaults based on Pipe/Type:
-         | - **standard**: 0.23 Btu/hr-ft-F
-         | - **thermally enhanced**: 0.40 Btu/hr-ft-F
+  .. [#] If Pipe/Conductivity not provided, defaults based on Pipe/Type:
+         
+         \- **standard**: 0.23 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 0.40 Btu/hr-ft-F
+
   .. [#] Pipe diameter must be either 3/4", 1", or 1-1/4" (i.e, 0.75, 1.0, or 1.25).
-  .. [#] | ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
-         | - **0.75 in pipe**: 1.050 in
-         | - **1.0 in pipe**: 1.315 in
-         | - **1.25 in pipe**: 1.660 in
+  .. [#] ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
+         
+         \- **0.75 in pipe**: 1.050 in
+         
+         \- **1.0 in pipe**: 1.315 in
+         
+         \- **1.25 in pipe**: 1.660 in
+
   .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
 
 .. note::
@@ -2291,17 +2421,34 @@ Additional information is entered in each ``Ducts``.
   ``extension/DuctSurfaceAreaMultiplier``                  double                 >= 0              No        1.0         Duct surface area multiplier
   =======================================================  =======  ============  ================  ========  ==========  ======================================
 
-  .. [#] | It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct). For ducts buried in insulation (using DuctBuriedInsulationLevel), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value. On the other hand, DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation. DuctEffectiveRValue is used for the actual model heat transfer, and when not provided is calculated as follows:
-         | - **Uninsulated**: 1.7                                     
-         | - **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
-         | - **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
-         | - **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
-         | - **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
-         | - **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
-         | - **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
-         | - **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
-         | - **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
-         | The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals. The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_. The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_. The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter
+  .. [#] It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct).
+         For ducts buried in insulation (using DuctBuriedInsulationLevel), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value.
+         On the other hand, DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
+         DuctEffectiveRValue is used for the actual model heat transfer, and when not provided is calculated as follows:
+         
+         \- **Uninsulated**: 1.7                                     
+         
+         \- **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
+         
+         \- **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
+         
+         \- **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
+         
+         \- **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
+         
+         \- **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
+         
+         \- **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
+         
+         \- **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
+         
+         \- **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
+         
+         The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals.
+         The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_.
+         The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_.
+         The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter.
+         
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.
@@ -2315,13 +2462,19 @@ Additional information is entered in each ``Ducts``.
   .. [#] The sum of all ``FractionDuctArea`` must each equal to 1, both for the supply side and return side.
   .. [#] FractionDuctArea or DuctSurfaceArea are required if DuctLocation is provided.
          If both are provided, DuctSurfaceArea will be used in the model.
-  .. [#] | If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
-         | - **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
-         | - **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
-         | - **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
-         | - **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
-         | where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
-         | If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
+  .. [#] If neither DuctSurfaceArea nor FractionDuctArea provided, duct surface areas will be calculated based on `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_:
+         
+         \- **Primary supply duct area**: 0.27 * F_out * ConditionedFloorAreaServed
+         
+         \- **Secondary supply duct area**: 0.27 * (1 - F_out) * ConditionedFloorAreaServed
+         
+         \- **Primary return duct area**: b_r * F_out * ConditionedFloorAreaServed
+         
+         \- **Secondary return duct area**: b_r * (1 - F_out) * ConditionedFloorAreaServed
+         
+         where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
+         
+         If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
@@ -2342,9 +2495,10 @@ Distribution System Efficiency (DSE)
 .. warning::
 
   A simplified DSE model is provided for flexibility, but it is **strongly** recommended to use one of the other detailed distribution system types for better accuracy.
-  Also note that when specifying a DSE system, its effect is reflected in the :ref:`workflow_outputs` but is **not** reflected in the raw EnergyPlus simulation outputs.
+  The DSE input is simply applied to heating/cooling energy use for every hour of the year.
+  Note that when specifying a DSE, its effect is reflected in the :ref:`workflow_outputs` but is **not** reflected in the raw EnergyPlus simulation outputs.
 
-To define a DSE system, additional information is entered in ``HVACDistribution``.
+To define a DSE, additional information is entered in ``HVACDistribution``.
 
   =============================================  =======  =======  ===========  ========  =========  ===================================================
   Element                                        Type     Units    Constraints  Required  Default    Notes
@@ -2353,7 +2507,7 @@ To define a DSE system, additional information is entered in ``HVACDistribution`
   ``AnnualCoolingDistributionSystemEfficiency``  double   frac     0 - 1        Yes                  Seasonal distribution system efficiency for cooling
   =============================================  =======  =======  ===========  ========  =========  ===================================================
 
-  DSE values can be calculated from `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
+  DSE values can be calculated using, e.g., `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
 
 HPXML Ventilation Fan
 *********************
@@ -2394,24 +2548,36 @@ If not entered, the simulation will not include mechanical ventilation.
 
   .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
   .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
-  .. [#] | If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
-         | Qfan = Qtot - Φ*(Qinf * Aext)
-         | where
-         | Qfan = required mechanical ventilation rate (cfm)
-         | Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
-         | Qinf = infiltration rate (cfm)
-         | Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
-         | Φ = 1 for balanced ventilation systems, and Qinf/Qtot otherwise
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         
+         Qfan = Qtot - Φ*(Qinf * Aext)
+         
+         where
+         
+         Qfan = required mechanical ventilation rate (cfm)
+         
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         Φ = 1 for balanced ventilation systems, and Qinf/Qtot otherwise
+         
   .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a CFIS system, in which case it is not allowed.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
          For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
          For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
-  .. [#] | If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-         | - **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
-         | - **balanced**: 0.7 W/cfm
-         | - **central fan integrated supply**: 0.5 W/cfm
-         | - **exhaust only" or "supply only**: 0.35 W/cfm
+  .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         
+         \- **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
+         
+         \- **balanced**: 0.7 W/cfm
+         
+         \- **central fan integrated supply**: 0.5 W/cfm
+         
+         \- **exhaust only" or "supply only**: 0.35 W/cfm
 
 **Exhaust/Supply Only**
 
@@ -2589,9 +2755,12 @@ If not entered, the simulation will not include water heating.
   .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
-  .. [#] | If Location not provided, defaults to the first present space type:
-         | - **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
-         | - **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+  .. [#] If Location not provided, defaults to the first present space type:
+         
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -2624,10 +2793,14 @@ If a conventional storage water heater is specified, additional information is e
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
   .. [#] RecoveryEfficiency must also be greater than the EnergyFactor (or UniformEnergyFactor).
-  .. [#] | If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
-         | - **Electric**: 0.98
-         | - **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
-         | - **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
+  .. [#] If RecoveryEfficiency not provided, defaults as follows based on a regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_:
+         
+         \- **Electric**: 0.98
+         
+         \- **Non-electric, EnergyFactor < 0.75**: 0.252 * EnergyFactor + 0.608
+         
+         \- **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
+         
   .. [#] TankModelType choices are "mixed" or "stratified".
 
 Tankless
@@ -2741,6 +2914,8 @@ If any water heating systems are provided, a single hot water distribution syste
   In attached/multifamily buildings, only the hot water distribution system serving the dwelling unit should be defined.
   The hot water distribution associated with, e.g., a shared laundry room should not be defined.
 
+Hot water distribution systems are modeled according to the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
 Standard
 ~~~~~~~~
 
@@ -2752,12 +2927,18 @@ If the in-unit distribution system is specified as standard, additional informat
   ``PipingLength``  double   ft     > 0          No        See [#]_  Length of piping [#]_
   ================  =======  =====  ===========  ========  ========  =====================
 
-  .. [#] | If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-         | PipeL = 2.0 * (CFA / NCfl)^0.5 + 10.0 * NCfl + 5.0 * Bsmnt
-         | where
-         | CFA = conditioned floor area [ft2],
-         | NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
-         | Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+  .. [#] If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         
+         PipeL = 2.0 * (CFA / NCfl)^0.5 + 10.0 * NCfl + 5.0 * Bsmnt
+         
+         where
+         
+         CFA = conditioned floor area [ft2],
+         
+         NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         
+         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+         
   .. [#] PipingLength is the length of hot water piping from the hot water heater (or from a shared recirculation loop serving multiple dwelling units) to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
 
 Recirculation
@@ -2774,18 +2955,30 @@ If the in-unit distribution system is specified as recirculation, additional inf
   ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
   =================================  =======  =====  ===========  ========  ========  =====================================
 
-  .. [#] | ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
-         | - manual demand control: The pump only runs when a user presses a button indicating they are about to use hot water.
-         | - presence sensor demand control: The pump only runs when a sensor detects someone is present at the faucet.
-         | - temperature: The pump runs based on monitoring temperature at some point in the system.
-         | - timer: The pump is controlled by a timer.
-         | - no control: The pump runs continuously.
-  .. [#] | If RecirculationPipingLoopLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
-         | RecircPipeL = 2.0 * (2.0 * (CFA / NCfl)^0.5 + 10.0 * NCfl + 5.0 * Bsmnt) - 20.0
-         | where
-         | CFA = conditioned floor area [ft2],
-         | NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
-         | Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+  .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+         
+         \- **manual demand control**: The pump only runs when a user presses a button indicating they are about to use hot water.
+         
+         \- **presence sensor demand control**: The pump only runs when a sensor detects someone is present at the faucet.
+         
+         \- **temperature**: The pump runs based on monitoring temperature at some point in the system.
+         
+         \- **timer**: The pump is controlled by a timer.
+         
+         \- **no control**: The pump runs continuously.
+         
+  .. [#] If RecirculationPipingLoopLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         
+         RecircPipeL = 2.0 * (2.0 * (CFA / NCfl)^0.5 + 10.0 * NCfl + 5.0 * Bsmnt) - 20.0
+         
+         where
+         
+         CFA = conditioned floor area [ft2],
+         
+         NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         
+         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+         
   .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
@@ -2824,23 +3017,27 @@ If a drain water heat recovery (DWHR) device is specified, additional informatio
          Use "all" if there is one shower and it's connected to the DWHR or there are two or more showers connected to the DWHR.
   .. [#] EqualFlow should be true if the DWHR supplies pre-heated water to both the fixture cold water piping *and* the hot water heater potable supply piping.
 
+Drain water heat recovery is modeled according to the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
 HPXML Water Fixtures
 ********************
 
 Each water fixture is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture``.
 
-  ====================  =======  =====  ===========  ========  ========  ===============================================
-  Element               Type     Units  Constraints  Required  Default   Notes
-  ====================  =======  =====  ===========  ========  ========  ===============================================
-  ``SystemIdentifier``  id                           Yes                 Unique identifier
-  ``WaterFixtureType``  string          See [#]_     Yes                 Bathroom faucet or shower
-  ``LowFlow``           boolean                      Yes                 Whether the fixture is considered low-flow [#]_
-  ====================  =======  =====  ===========  ========  ========  ===============================================
+  ===============================  =================  =====  ===========  ========  ========  ===============================================
+  Element                          Type               Units  Constraints  Required  Default   Notes
+  ===============================  =================  =====  ===========  ========  ========  ===============================================
+  ``SystemIdentifier``             id                                     Yes                 Unique identifier
+  ``WaterFixtureType``             string                    See [#]_     Yes                 Bathroom faucet or shower
+  ``Count``                        integer                   > 0          No        See [#]_  Number of similar water fixtures
+  ``LowFlow`` and/or ``FlowRate``  boolean or double  gpm    > 0          Yes                 Whether the fixture is considered low-flow and/or the flow rate [#]_
+  ===============================  =================  =====  ===========  ========  ========  ===============================================
 
   .. [#] WaterFixtureType choices are "shower head" or "faucet".
          If the shower stall has multiple shower heads that operate simultaneously, combine them as a single entry.
-  .. [#] LowFlow should be true if the fixture's flow rate (gpm) is <= 2.0.
-         Where a shower stall has multiple shower heads that operate simultaneously, the sum of their flows must be <= 2.0.
+  .. [#] A WaterFixture is considered low-flow if the fixture's flow rate (gpm) is <= 2.0.
+         Where a shower stall has multiple shower heads that operate simultaneously, use the sum of their flows.
+  .. [#] If Count not provided for any water fixture, assumes that 60% of all fixtures are faucets and 40% are shower heads.
 
 Additional information can be entered in ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/``.
 
@@ -2855,6 +3052,8 @@ Additional information can be entered in ``/HPXML/Building/BuildingDetails/Syste
 
   .. [#] If WaterFixturesWeekdayScheduleFractions or WaterFixturesWeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figures 9-11 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026".
   .. [#] If WaterFixturesMonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
+
+Water fixture hot water use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 HPXML Solar Thermal
 *******************
@@ -2952,20 +3151,33 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] ModuleType choices are "standard", "premium", or "thin film".
   .. [#] Tracking choices are "fixed", "1-axis", "1-axis backtracked", or "2-axis".
   .. [#] ArrayOrientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
-  .. [#] | SystemLossesFraction default is derived from the `PVWatts documentation <https://www.nrel.gov/docs/fy14osti/62641.pdf>`_, which breaks down the losses as follows.
-         | Note that the total loss (14%) is not the sum of the individual losses but is calculated by multiplying the reduction due to each loss.
-         | - **Soiling**: 2%
-         | - **Shading**: 3%
-         | - **Snow**: 0%
-         | - **Mismatch**: 2%
-         | - **Wiring**: 2%
-         | - **Connections**: 0.5%
-         | - **Light-induced degradation**: 1.5%
-         | - **Nameplate rating**: 1%
-         | - **Age**: 0%
-         | - **Availability**: 3%
-         | If YearModulesManufactured provided but not SystemLossesFraction, calculated as:
-         | SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
+  .. [#] SystemLossesFraction default is derived from the `PVWatts documentation <https://www.nrel.gov/docs/fy14osti/62641.pdf>`_, which breaks down the losses as follows.
+         Note that the total loss (14%) is not the sum of the individual losses but is calculated by multiplying the reduction due to each loss.
+         
+         \- **Soiling**: 2%
+         
+         \- **Shading**: 3%
+         
+         \- **Snow**: 0%
+         
+         \- **Mismatch**: 2%
+         
+         \- **Wiring**: 2%
+         
+         \- **Connections**: 0.5%
+         
+         \- **Light-induced degradation**: 1.5%
+         
+         \- **Nameplate rating**: 1%
+         
+         \- **Age**: 0%
+         
+         \- **Availability**: 3%
+         
+         If YearModulesManufactured provided but not SystemLossesFraction, calculated as:
+         
+         SystemLossesFraction = 1.0 - (1.0 - 0.14) * (1.0 - (1.0 - 0.995^(CurrentYear - YearModulesManufactured))).
+         
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
@@ -3492,11 +3704,16 @@ If not entered, the simulation will not include a pool heater.
 
   .. [#] Type choices are "none, "gas fired", "electric resistance", or "heat pump".
          If "none" is entered, the simulation will not include a pool heater.
-  .. [#] | If Value not provided, defaults as follows:
-         | - **gas fired [therm/year]**: 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
-         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+  .. [#] If Value not provided, defaults as follows:
+         
+         \- **gas fired [therm/year]**: 3.0 / 0.014 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
@@ -3561,11 +3778,16 @@ If not entered, the simulation will not include a permanent spa heater.
 
   .. [#] Type choices are "none, "gas fired", "electric resistance", or "heat pump".
          If "none" is entered, the simulation will not include a permanent spa heater.
-  .. [#] | If Value not provided, defaults as follows:
-         | - **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
-         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+  .. [#] If Value not provided, defaults as follows:
+         
+         \- **gas fired [therm/year]**: 0.87 / 0.011 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric resistance [kWh/year]**: 49.0 / 0.048 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
 
@@ -3599,38 +3821,68 @@ If not entered, the simulation will not include that type of plug load.
   ========================================  =======  ======  ===========  ========  ========  =============================================================
 
   .. [#] PlugLoadType choices are "other", "TV other", "well pump", or "electric vehicle charging".
-  .. [#] | If Value not provided, defaults as:
-         | - **other**: 0.91 * ConditionedFloorArea (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
-         | - **TV other**: 413.0 + 69.0 * NumberofBedrooms (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
-         | - **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
-         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
-  .. [#] | If FracSensible not provided, defaults as:
-         | - **other**: 0.855
-         | - **TV other**: 1.0
-         | - **well pump**: 0.0
-         | - **electric vehicle charging**: 0.0
+  .. [#] If Value not provided, defaults as:
+         
+         \- **other**: 0.91 * ConditionedFloorArea (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
+         
+         \- **TV other**: 413.0 + 69.0 * NumberofBedrooms (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_)
+         
+         \- **well pump**: 50.8 / 0.127 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
+         
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         
+  .. [#] If FracSensible not provided, defaults as:
+         
+         \- **other**: 0.855
+         
+         \- **TV other**: 1.0
+         
+         \- **well pump**: 0.0
+         
+         \- **electric vehicle charging**: 0.0
+         
   .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
-  .. [#] | If FracLatent not provided, defaults as:
-         | - **other**: 0.045
-         | - **TV other**: 0.0
-         | - **well pump**: 0.0
-         | - **electric vehicle charging**: 0.0
-  .. [#] | If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
-         | - **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **TV other**: "0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
-         | - **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
-  .. [#] | If WeekdendScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
-         | - **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **TV other**: "0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
-         | - **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
-  .. [#] | If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), defaults as:
-         | - **other**: "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **TV other**: "1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
-         | - **well pump**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
-         | - **electric vehicle charging**: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+  .. [#] If FracLatent not provided, defaults as:
+         
+         \- **other**: 0.045
+         
+         \- **TV other**: 0.0
+         
+         \- **well pump**: 0.0
+         
+         \- **electric vehicle charging**: 0.0
+         
+  .. [#] If WeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
+         
+         \- **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **TV other**: "0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         
+         \- **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         
+  .. [#] If WeekdendScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
+         
+         \- **other**: "0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **TV other**: "0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         
+         \- **well pump**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065" (based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric vehicle charging**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), defaults as:
+         
+         \- **other**: "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **TV other**: "1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137" (based on the `American Time Use Survey <https://www.bls.gov/tus>`_)
+         
+         \- **well pump**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
+         
+         \- **electric vehicle charging**: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
 
 HPXML Fuel Loads
 ****************
@@ -3656,23 +3908,35 @@ If not entered, the simulation will not include that type of fuel load.
   ========================================  =======  ========  ===========  ========  ========  =============================================================
 
   .. [#] FuelLoadType choices are "grill", "fireplace", or "lighting".
-  .. [#] | If Value not provided, calculated as based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_:
-         | - **grill**: 0.87 / 0.029 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
-         | - **fireplace**: 1.95 / 0.032 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
-         | - **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
-         | If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+  .. [#] If Value not provided, calculated as based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_:
+         
+         \- **grill**: 0.87 / 0.029 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         
+         \- **fireplace**: 1.95 / 0.032 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         
+         \- **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
+         
+         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
   .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults to 0.1 for fireplace and 0.0 for all other types.
-  .. [#] | If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
-         | - **grill**: "0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007";
-         | - **fireplace**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065";
-         | - **lighting**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065".
-  .. [#] | If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
-         | - **grill**: "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097";
-         | - **fireplace**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154";
-         | - **lighting**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
+         
+         \- **grill**: "0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007";
+         
+         \- **fireplace**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065";
+         
+         \- **lighting**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065".
+         
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used:
+         
+         \- **grill**: "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097";
+         
+         \- **fireplace**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154";
+         
+         \- **lighting**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
 .. _hpxmllocations:
 
