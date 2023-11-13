@@ -1,11 +1,21 @@
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
-- **Breaking change**: Updates to official HPXML v4.0:
-  - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09
+- Updates to OpenStudio 3.7.0/EnergyPlus 23.2.
+- **Breaking change**: Updates to HPXML v4.0-rc2:
+  - HPXML namespace changed from http://hpxmlonline.com/2019/10 to http://hpxmlonline.com/2023/09.
   - Replaces "living space" with "conditioned space", which better represents what is modeled.
   - Replaces `HotTubs/HotTub` with `Spas/PermanentSpa`.
   - Replaces `PortableHeater` and `FixedHeater` with `SpaceHeater`.
+  - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
+- Allows simulating whole multifamily (MF) buildings in a single combined simulation:
+  - **Breaking change**: Multiple elements move from `SoftwareInfo/extension` to `BuildingDetails/BuildingSummary/extension` to allow variation across units:
+    - `HVACSizingControl`
+    - `ShadingControl`
+    - `SchedulesFilePath`
+    - `NaturalVentilationAvailabilityDaysperWeek`
+  - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
+  - See the [OpenStudio-HPXML documentation](https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#whole-sfa-mf-buildings) for more detail.
 - Adds manufactured home belly as a foundation type and allows modeling ducts in a manufactured home belly.
 - Output updates:
   - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
@@ -17,16 +27,19 @@ __New Features__
   - Allow duct area fractions (as an alternative to duct areas in ft^2).
   - Allow duct locations to be provided while defaulting duct areas (i.e., without providing duct area/fraction inputs).
   - Add generic "attic" and "crawlspace" location choices for supply/return ducts, water heater, and battery.
+  - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
-  - Add soil and moisture type arguments for determining ground conductivity and diffusivity.
 - Battery losses now split between charging and discharging.
-- For ground temperatures, use an adjustment based on a correlation between annual mean drybulb temperature and L. Xing's simplified design model (2014).
+- Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
+- Updates deep ground temperatures (used for modeling ground-source heat pumps) using L. Xing's simplified design model (2014).
+- Improvements to HERS & MaxLoad heat pump sizing methodologies.
+- Allows `WaterFixture/FlowRate` as an alternative to `LowFlow`; hot water credit is now calculated based on fraction of low flow fixtures.
+- Allows above-grade basements/crawlspaces defined solely with Wall (not FoundationWall) elements.
+- Added README.md documentation for all OpenStudio measures.
 - Ground source heat pump enhancements:
-  - Connect to `HVACPlant/GeothermalLoop` and `BuildingSummary/Site/Soil` HPXML elements.
-  - Allow optional inputs related to geothermal loop: loop flow, borehole count/length/spacing/diameter/configuration, grout conductivity, pipe conductivity/diameter/shank spacing.
-  - Allow optional ground diffusivity input for site soil.
-  - Connect to the [G-Function Library](https://gdr.openei.org/submissions/1325) (in the Geothermal Data Repository) for using precalculated g-function values with GSHP modeling.
-  - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
+  - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
+  - Allows optional ground diffusivity input.
+  - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
@@ -38,6 +51,9 @@ __Bugfixes__
 - Fixes ground source heat pump fan/pump adjustment to rated efficiency.
 - Fixes error if conditioned basement has `InsulationSpansEntireSlab=true`.
 - Fixes ReportSimulationOutput outputs for the Parametric Analysis Tool (PAT).
+- Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
+- Fixes AC/HP cooling bug when applying cooling equipment adjustment.
+- Fixes monthly shallow ground temperatures (used primarily in HVAC autosizing) for the southern hemisphere.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
@@ -264,7 +280,7 @@ __New Features__
 - **Breaking change**: Any heat pump backup heating requires `HeatPump/BackupType` ("integrated" or "separate") to be specified.
 - **Breaking change**: For homes with multiple PV arrays, all inverter efficiencies must have the same value.
 - **Breaking change**: HPXML schema version must now be '4.0' (proposed).
-  - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/IsVented`.
+  - Moves `ClothesDryer/extension/IsVented` to `ClothesDryer/Vented`.
   - Moves `ClothesDryer/extension/VentedFlowRate` to `ClothesDryer/VentedFlowRate`.
   - Moves `FoundationWall/Insulation/Layer/extension/DistanceToTopOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToTopOfInsulation`.
   - Moves `FoundationWall/Insulation/Layer/extension/DistanceToBottomOfInsulation` to `FoundationWall/Insulation/Layer/DistanceToBottomOfInsulation`.
