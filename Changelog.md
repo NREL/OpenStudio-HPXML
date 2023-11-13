@@ -35,6 +35,7 @@ __New Features__
 - Battery losses now split between charging and discharging.
 - Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
 - Allows `WaterFixture/FlowRate` as an alternative to `LowFlow`; hot water credit is now calculated based on fraction of low flow fixtures.
+- Allows above-grade basements/crawlspaces defined solely with Wall (not FoundationWall) elements.
 - Updates to 2022 EIA energy costs.
 - Added README.md documentation for all OpenStudio measures.
 
