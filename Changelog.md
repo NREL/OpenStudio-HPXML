@@ -16,9 +16,10 @@ __New Features__
   - Allows `NumberofUnits` to be used as a multiplier on dwelling unit simulation results to reduce simulation runtime.
   - See the [OpenStudio-HPXML documentation](https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#whole-sfa-mf-buildings) for more detail.
 - HVAC modeling updates:
-  - Updated assumptions for variable-speed air conditioners, heat pumps, and mini-splits.
+  - Updated assumptions for variable-speed air conditioners, heat pumps, and mini-splits based on NEEP data. Expect results to change, potentially significantly so depending on the scenario.
   - Allows detailed heating and cooling performance data (min/max COPs and capacities at different outdoor temperatures) for variable-speed systems.
   - Updates deep ground temperatures (used for modeling ground-source heat pumps) using L. Xing's simplified design model (2014).
+  - Replaces inverse calculations, used to calculate COPs from rated efficiencies, with regressions for single/two-speed central ACs and ASHPs.
 - Output updates:
   - **Breaking change**: "Hot Tub" outputs renamed to "Permanent Spa".
   - Adds "Peak Electricity: Annual Total (W)" output.
@@ -50,6 +51,7 @@ __Bugfixes__
 - Fixes missing radiation exchange between window and sky when an interior/exterior window shading multiplier less than 1 exists.
 - Fixes monthly shallow ground temperatures (used primarily in HVAC autosizing) for the southern hemisphere.
 - Various HVAC sizing bugfixes and improvements.
+- Fixes low-speed heating COPs for some two-speed ASHPs and cooling COPs for some single-speed ACs/HPs.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
 
 ## OpenStudio-HPXML v1.6.0
