@@ -2480,9 +2480,9 @@ def download_utility_rates
 end
 
 def download_g_functions
-  require_relative 'HPXMLtoOpenStudio/resources/g_functions/util'
+  require_relative 'HPXMLtoOpenStudio/resources/data/g_functions/util'
 
-  g_functions_dir = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/g_functions')
+  g_functions_dir = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources/data/g_functions')
   FileUtils.mkdir(g_functions_dir) if !File.exist?(g_functions_dir)
   filepath = File.join(g_functions_dir, 'g-function_library_1.0')
 

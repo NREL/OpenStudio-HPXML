@@ -2031,7 +2031,7 @@ class HVACSizing
   def self.get_g_functions_json(g_functions_filename)
     require 'json'
 
-    g_functions_filepath = File.join(File.dirname(__FILE__), 'g_functions', g_functions_filename)
+    g_functions_filepath = File.join(File.dirname(__FILE__), 'data/g_functions', g_functions_filename)
     g_functions_json = JSON.parse(File.read(g_functions_filepath), symbolize_names: true)
     return g_functions_json
   end
