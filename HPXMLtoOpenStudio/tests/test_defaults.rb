@@ -338,11 +338,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.6355, 0.0194, HPXML::SiteSoilTypeGravel, HPXML::SiteSoilMoistureTypeMixed)
 
     # Test defaults w/ conductivity but no diffusivity
-    hpxml_bldg.site.ground_conductivity = 0.8
+    hpxml_bldg.site.ground_conductivity = 2.0
+    hpxml_bldg.site.ground_diffusivity = nil
     hpxml_bldg.site.soil_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 0.8, 0.0208, nil, nil)
+    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 2.0, 0.0416, nil, nil)
+
+    # Test defaults w/ diffusivity but no conductivity
+    hpxml_bldg.site.ground_conductivity = nil
+    hpxml_bldg.site.ground_diffusivity = 0.025
+    hpxml_bldg.site.soil_type = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.201923076923077, 0.025, nil, nil)
   end
 
   def test_neighbor_buildings

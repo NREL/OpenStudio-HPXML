@@ -454,7 +454,7 @@ Soil information is entered in ``Soil``.
   Element                                                             Type              Units        Constraints      Required  Default   Notes
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
   ``Conductivity`` or ``SoilType``/``MoistureType``                   string or double  Btu/hr-ft-F  See [#]_ or > 0  No        unknown   Themal conductivity [#]_ or soil/moisture type
-  ``extension/Diffusivity`` or ``SoilType``/``MoistureType``          string or double  ft2/hr       See or > 0       No        mixed     Diffusivity [#]_ or soil/moisture type
+  ``extension/Diffusivity`` or ``SoilType``/``MoistureType``          string or double  ft2/hr       See or > 0       No        mixed     Thermal diffusivity [#]_ or soil/moisture type
   ==================================================================  ================  ===========  ===============  ========  ========  ============================================================
 
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
@@ -464,7 +464,7 @@ Soil information is entered in ``Soil``.
   .. [#] Conductivity used for foundation heat transfer and ground source heat pumps.
   .. [#] Diffusivity used for ground source heat pumps.
 
-If Conductivity and extension/Diffusivity not provided, defaults based on SoilType and MoistureType as follows:
+If both Conductivity and extension/Diffusivity not provided, defaults based on SoilType and MoistureType as follows:
 
   ============  ==============  ==========================  =============
   SoilType      MoistureType    Conductivity [Btu/hr-ft-F]  extension/Diffusivity [ft2/hr]
@@ -480,6 +480,11 @@ If Conductivity and extension/Diffusivity not provided, defaults based on SoilTy
   gravel        wet             1.0399                      0.0291
   gravel        mixed           0.6355                      0.0194
   ============  ==============  ==========================  =============
+
+If either Conductivity or extension/Diffusivity not provided, the 1.0/0.0208 relationship is preserved:
+
+- Conductivity = extension/Diffusivity / 0.0208
+- extension/Diffusivity = Conductvitiy * 0.0208
 
 .. note::
 

@@ -504,14 +504,20 @@ class HPXMLDefaults
         end
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
+      elsif hpxml_bldg.site.soil_type == HPXML::SiteSoilTypeUnknown
+        hpxml_bldg.site.ground_conductivity = 1.0
+        hpxml_bldg.site.ground_diffusivity = 0.0208
+        hpxml_bldg.site.ground_conductivity_isdefaulted = true
+        hpxml_bldg.site.ground_diffusivity_isdefaulted = true
       end
     end
-    if hpxml_bldg.site.ground_conductivity.nil?
-      hpxml_bldg.site.ground_conductivity = 1.0 # Btu/hr-ft-F
+    if hpxml_bldg.site.ground_conductivity.nil? && !hpxml_bldg.site.ground_diffusivity.nil?
+      # Divide diffusivity by 0.0208 to maintain 1/0.0208 relationship
+      hpxml_bldg.site.ground_conductivity = hpxml_bldg.site.ground_diffusivity / 0.0208 # Btu/hr-ft-F
       hpxml_bldg.site.ground_conductivity_isdefaulted = true
-    end
-    if hpxml_bldg.site.ground_diffusivity.nil?
-      hpxml_bldg.site.ground_diffusivity = 0.0208 # ft^2/hr
+    elsif !hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
+      # Multiply conductivity by 0.0208 to maintain 1/0.0208 relationship
+      hpxml_bldg.site.ground_diffusivity = hpxml_bldg.site.ground_conductivity * 0.0208 # ft^2/hr
       hpxml_bldg.site.ground_diffusivity_isdefaulted = true
     end
 
