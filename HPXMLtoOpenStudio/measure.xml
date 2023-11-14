@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4020d120-221e-41ae-b855-56e0ee55cdac</version_id>
-  <version_modified>2023-11-14T15:57:34Z</version_modified>
+  <version_id>d319391f-06db-47dd-8ee4-f806856cf0d3</version_id>
+  <version_modified>2023-11-14T16:07:55Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -259,6 +259,12 @@
       <checksum>B5BEF270</checksum>
     </file>
     <file>
+      <filename>data/g_functions/g-function_library_1.0/zoned_rectangle_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6A4C47AD</checksum>
+    </file>
+    <file>
       <filename>data/g_functions/rectangle_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -328,7 +334,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2CE13E5B</checksum>
+      <checksum>F61C9BE5</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
