@@ -484,7 +484,7 @@ If both Conductivity and extension/Diffusivity not provided, defaults based on S
 If either Conductivity or extension/Diffusivity not provided, the 1.0/0.0208 relationship is preserved:
 
 - Conductivity = extension/Diffusivity / 0.0208
-- extension/Diffusivity = Conductvitiy * 0.0208
+- extension/Diffusivity = Conductivity * 0.0208
 
 .. note::
 
