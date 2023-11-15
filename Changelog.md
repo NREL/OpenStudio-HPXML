@@ -53,6 +53,7 @@ __Bugfixes__
 - Various HVAC sizing bugfixes and improvements.
 - Fixes low-speed heating COPs for some two-speed ASHPs and cooling COPs for some single-speed ACs/HPs.
 - BuildResidentialHPXML measure: Fixes air distribution CFA served when there is not a central system that meets 100% of the load.
+- ReportUtilityBills measure: Fixes detailed bill calculations to exclude any metered battery production.
 
 ## OpenStudio-HPXML v1.6.0
 
