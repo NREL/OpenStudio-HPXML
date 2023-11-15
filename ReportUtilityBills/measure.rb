@@ -191,12 +191,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     has_fuel = hpxml.has_fuels(Constants.FossilFuels, hpxml.to_doc)
     has_fuel[HPXML::FuelTypeElectricity] = true
 
-    # Fuel outputs
+    # Has production
     has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
+    has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
+
+    # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
         next if is_production && !has_pv
+        next if meter.include?('Storage') && !has_battery
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
@@ -637,8 +641,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
-    fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced"]) # We add Electric Storage onto the annual Electricity fuel meter
+    fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"])
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
     fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
@@ -702,8 +706,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     rows.each do |row|
       row = row[row.keys[0]]
       val = 0.0
-      indexes.each do |i|
-        val += row[i] * unit_conv + unit_adder
+      indexes.each_with_index do |i, j|
+        if j == meter_names.index("ElectricStorage:#{EPlus::FuelTypeElectricity}Produced")
+          val -= row[i] * unit_conv + unit_adder
+        else
+          val += row[i] * unit_conv + unit_adder
+        end
       end
       vals << val
     end
