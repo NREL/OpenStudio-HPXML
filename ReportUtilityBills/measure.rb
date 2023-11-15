@@ -638,7 +638,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     fuels = {}
     fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
-    fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"])
+    fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"])
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
     fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"])
