@@ -191,12 +191,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     has_fuel = hpxml.has_fuels(Constants.FossilFuels, hpxml.to_doc)
     has_fuel[HPXML::FuelTypeElectricity] = true
 
-    # Fuel outputs
+    # Has production
     has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
+    has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0
+
+    # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
         next if is_production && !has_pv
+        next if meter.include?('Storage') && !has_battery
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
