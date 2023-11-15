@@ -637,7 +637,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"])
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced"]) # We add Electric Storage onto the annual Electricity fuel meter
     fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"])
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"])
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"])
@@ -702,8 +702,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     rows.each do |row|
       row = row[row.keys[0]]
       val = 0.0
-      indexes.each do |i|
-        val += row[i] * unit_conv + unit_adder
+      indexes.each_with_index do |i, j|
+        if j == meter_names.index("ElectricStorage:#{EPlus::FuelTypeElectricity}Produced")
+          val -= row[i] * unit_conv + unit_adder
+        else
+          val += row[i] * unit_conv + unit_adder
+        end
       end
       vals << val
     end
