@@ -225,7 +225,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
     check_battery_log = true
-    hpxml.batteries.each do |battery|
+    hpxml_bldg.batteries.each do |battery|
       if hpxml_bldg.pv_systems.empty? && !battery.is_ev && hpxml_bldg.header.schedules_filepaths.empty?
         next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
         check_battery_log = false
