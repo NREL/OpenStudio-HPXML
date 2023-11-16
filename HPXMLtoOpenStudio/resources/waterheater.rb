@@ -1916,7 +1916,6 @@ class Waterheater
       num_tanks = 0
       tank = nil
       hw_plant_loop = plantloop_map[water_heating_system.id]
-      puts("plantloop_map = #{plantloop_map}")
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterMixed.is_initialized
 
