@@ -21,6 +21,7 @@ __New Features__
   - Always validate the HPXML file before applying defaults and only optionally validate the final HPXML file.
 - Battery losses now split between charging and discharging.
 - Interior/exterior window shading multipliers are now modeled using the EnergyPlus incident solar multiplier.
+- Added metrics for unmet hot water loads
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
