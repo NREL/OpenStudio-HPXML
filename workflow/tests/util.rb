@@ -224,9 +224,17 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.windows.empty?
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
-    if hpxml_bldg.pv_systems.empty? && !hpxml_bldg.batteries.empty? && hpxml_bldg.header.schedules_filepaths.empty?
-      next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
+    check_battery_log = true
+    hpxml.batteries.each do |battery|
+      if hpxml_bldg.pv_systems.empty? && !battery.is_ev && hpxml_bldg.header.schedules_filepaths.empty?
+        next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
+        check_battery_log = false
+      elsif battery.is_ev && hpxml_bldg.header.schedules_filepaths.empty?
+        next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
+        check_battery_log = false
+      end
     end
+    next if check_battery_log
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
       next if message.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
       next if message.include? 'Could not find a marginal Electricity rate.'
