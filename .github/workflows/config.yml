@@ -116,7 +116,7 @@ jobs:
         shell: pwsh
         run: |
           $env:OS_VERSION="3.7.0-rc3"
-          $env:OS_SHA="c5eaca971b"
+          $env:OS_SHA="37087fd612"
           Invoke-WebRequest -OutFile Windows.tar.gz -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
           tar -xzf Windows.tar.gz
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
