@@ -1693,6 +1693,11 @@
     "heat_pump_cooling_efficiency": 17.25,
     "heat_pump_heating_efficiency": 10.0
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_capacity": null
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml"
   },
@@ -1776,6 +1781,10 @@
     "cooling_system_cooling_compressor_type": "variable speed",
     "cooling_system_cooling_efficiency": 17.25,
     "cooling_system_cooling_capacity": 36000
+  },
+  "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-var-speed-detailed-performance.xml",
+    "cooling_system_cooling_capacity": null
   },
   "sample_files/base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2087,6 +2096,10 @@
     "cooling_system_cooling_efficiency": 21.5,
     "cooling_system_cooling_capacity": 36000
   },
+  "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml",
+    "cooling_system_cooling_capacity": null
+  },
   "sample_files/base-hvac-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
@@ -2123,6 +2136,11 @@
     "heat_pump_cooling_efficiency": 16.7,
     "heat_pump_heating_efficiency": 11.3
   },
+  "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml",
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_capacity": null
+  },
   "sample_files/base-hvac-mini-split-heat-pump-ducted-cooling-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_heating_capacity": 0,
@@ -2148,6 +2166,11 @@
     "heat_pump_heating_capacity_retention_temp": null,
     "heat_pump_cooling_efficiency": 21.5,
     "heat_pump_heating_efficiency": 10.5
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance-autosize.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml",
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_capacity": null
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml"
