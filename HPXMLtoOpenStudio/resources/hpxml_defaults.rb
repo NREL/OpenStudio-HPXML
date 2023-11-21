@@ -1582,7 +1582,7 @@ class HPXMLDefaults
         end
 
         if heat_pump.geothermal_loop.pipe_diameter.nil?
-          heat_pump.geothermal_loop.pipe_diameter = 0.75 # in
+          heat_pump.geothermal_loop.pipe_diameter = 1.25 # in
           heat_pump.geothermal_loop.pipe_diameter_isdefaulted = true
         end
 

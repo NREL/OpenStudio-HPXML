@@ -2290,7 +2290,7 @@ Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   ``BoreholesOrTrenches/Diameter``          double            in           > 0              No        5.0
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Grout type or conductivity [#]_
   ``Pipe/Type`` or ``Pipe/Conductivity``    string or double  Btu/hr-ft-F  See [#]_ or > 0  No        standard        Pipe type or conductivity [#]_
-  ``Pipe/Diameter``                         double            in           See [#]_         No        0.75
+  ``Pipe/Diameter``                         double            in           See [#]_         No        1.25
   ``Pipe/ShankSpacing``                     double            in           > 0              No        See [#]_        Center-to-center distance between two branches of a vertical U-tube
   ``extension/BorefieldConfiguration``      string                         See [#]_         No        Rectangle
   ========================================  ================  ===========  ===============  ========  ==============  ===============================================
