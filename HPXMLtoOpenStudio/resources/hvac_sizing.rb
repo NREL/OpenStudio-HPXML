@@ -45,8 +45,8 @@ class HVACSizing
       apply_hvac_loads(hvac_heating, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
       apply_hvac_size_limits(hvac_cooling)
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
-      apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
-      apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_equipment_adjustments(hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system) # FIXME: this is hvac_sizing_values.Heat_Airflow = xxx, etc.
+      apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling) # FIXME: airflow cfm override should occur after this?
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)

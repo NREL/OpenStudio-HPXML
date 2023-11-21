@@ -381,6 +381,38 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     end
   end
 
+  def test_adjust_blower_fan_efficiency
+    # Test blower fan W/cfm gets adjusted
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    [false, true].each do |adjust_blower_fan_efficiency|
+      # Maximum rates not assigned
+      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+      hpxml_bldg.header.adjust_blower_fan_efficiency = adjust_blower_fan_efficiency
+      htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+      clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+      assert_nil(htg_cfm)
+      assert_nil(clg_cfm)
+      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+      assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+
+      # Maximum rates are assigned
+      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+      hpxml_bldg.header.adjust_blower_fan_efficiency = adjust_blower_fan_efficiency
+      hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 1000
+      hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
+      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+      if !adjust_blower_fan_efficiency
+        assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+      else
+        assert(hpxml_bldg.heat_pumps[0].fan_watts_per_cfm < 0.5)
+      end
+    end
+  end
+
   def test_use_maximum_airflow_rates
     # Test airflow rates are limited to maximum
     args_hash = {}

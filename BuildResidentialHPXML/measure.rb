@@ -1408,21 +1408,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W/CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_use_maximum_airflow_rates', false)
-    arg.setDisplayName('HVAC Distribution: Use Maximum Airflow Rates')
-    arg.setDescription('Whether to use specified heating/cooling airflow rates as the maximum allowed.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_adjust_blower_fan_efficiency', false)
+    arg.setDisplayName('HVAC Distribution: Adjust Blower Fan Efficiency')
+    arg.setDescription('Whether to adjust the blower fan efficiency based on the provided W/cfm and airflow rates, and autosized airflow rates.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_heating_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Heating Airflow Rate')
-    arg.setDescription("The heating airflow rate. When enabled, this is the maximum allowable rate. Applies only to #{HPXML::HVACTypeFurnace} heating system, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
+    arg.setDescription("The heating airflow rate. Applies only to #{HPXML::HVACTypeFurnace} heating system, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_cooling_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Cooling Airflow Rate')
-    arg.setDescription("The cooling airflow rate. When enabled, this is the maximum allowable rate. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} cooling systems, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
+    arg.setDescription("The cooling airflow rate. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} cooling systems, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
     arg.setUnits('CFM')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_use_maximum_airflow_rates', false)
+    arg.setDisplayName('HVAC Distribution: Use Maximum Airflow Rates')
+    arg.setDescription('Whether to use specified heating/cooling airflow rates as the maximum allowed.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)

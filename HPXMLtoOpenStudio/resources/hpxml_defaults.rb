@@ -227,6 +227,11 @@ class HPXMLDefaults
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
     end
 
+    if hpxml_bldg.header.adjust_blower_fan_efficiency.nil?
+      hpxml_bldg.header.adjust_blower_fan_efficiency = false
+      hpxml_bldg.header.adjust_blower_fan_efficiency_isdefaulted = true
+    end
+
     if hpxml_bldg.header.use_maximum_airflow_rates.nil?
       hpxml_bldg.header.use_maximum_airflow_rates = false
       hpxml_bldg.header.use_maximum_airflow_rates_isdefaulted = true
@@ -2908,7 +2913,7 @@ class HPXMLDefaults
 
       # Fan W/cfm adjustment
       airflow_max = get_airflow_max(htg_sys, clg_sys)
-      if !airflow_max.nil? # FIXME: we probably want a better flag here, right?
+      if !airflow_max.nil? && hpxml_bldg.header.adjust_blower_fan_efficiency
         hpxml_bldg.heat_pumps.each do |heat_pump|
           next unless [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type # FIXME: to what type(s), or when, should this apply?
 
