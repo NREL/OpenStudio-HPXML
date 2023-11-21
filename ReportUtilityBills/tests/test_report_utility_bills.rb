@@ -1223,7 +1223,8 @@ class ReportUtilityBillsTest < Minitest::Test
 
     # Run OSW
     command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}"
-    cli_output = `#{command}`
+    success = system(command)
+    assert(success)
 
     # Cleanup
     File.delete(osw_path)
@@ -1232,15 +1233,12 @@ class ReportUtilityBillsTest < Minitest::Test
     bills_monthly_csv = File.join(File.dirname(template_osw), 'run', 'results_bills_monthly.csv')
 
     # Check warnings/errors
-    if not expected_errors.empty?
-      expected_errors.each do |expected_error|
-        assert(cli_output.include?("ERROR] #{expected_error}"))
-      end
+    log_lines = File.readlines(File.join(File.dirname(template_osw), 'run', 'run.log')).map(&:strip)
+    expected_errors.each do |expected_error|
+      assert(log_lines.any? { |line| line.include?(' ERROR]') && line.include?(expected_error) })
     end
-    if not expected_warnings.empty?
-      expected_warnings.each do |expected_warning|
-        assert(cli_output.include?("WARN] #{expected_warning}"))
-      end
+    expected_warnings.each do |expected_warning|
+      assert(log_lines.any? { |line| line.include?(' WARN]') && line.include?(expected_warning) })
     end
 
     if !hpxml.nil?
