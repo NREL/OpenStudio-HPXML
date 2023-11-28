@@ -1008,8 +1008,20 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
         mat_ext_finish = nil
 
-        Constructions.apply_wall_construction(runner, model, [surface], fnd_wall.id, wall_type, assembly_r,
-                                              mat_int_finish, inside_film, outside_film, mat_ext_finish, nil, nil)
+        Constructions.apply_wall_construction(runner,
+                                              model,
+                                              [surface],
+                                              fnd_wall.id,
+                                              wall_type,
+                                              assembly_r,
+                                              mat_int_finish,
+                                              false,
+                                              inside_film,
+                                              outside_film,
+                                              nil,
+                                              mat_ext_finish,
+                                              nil,
+                                              nil)
       end
     end
   end

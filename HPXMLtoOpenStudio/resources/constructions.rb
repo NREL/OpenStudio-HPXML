@@ -1887,10 +1887,20 @@ class Constructions
     return non_cavity_r
   end
 
-  def self.apply_wall_construction(runner, model, surfaces, wall_id, wall_type, assembly_r,
-                                   mat_int_finish, has_radiant_barrier, inside_film, outside_film,
-                                   radiant_barrier_grade, mat_ext_finish,
-                                   solar_absorptance, emittance)
+  def self.apply_wall_construction(runner,
+                                    model,
+                                    surfaces,
+                                    wall_id,
+                                    wall_type,
+                                    assembly_r,
+                                    mat_int_finish,
+                                    has_radiant_barrier,
+                                    inside_film,
+                                    outside_film,
+                                    radiant_barrier_grade,
+                                    mat_ext_finish,
+                                    solar_absorptance,
+                                    emittance)
 
     if mat_ext_finish.nil?
       fallback_mat_ext_finish = nil
