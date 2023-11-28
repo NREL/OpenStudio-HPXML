@@ -561,9 +561,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       args[:use_dview_format] = false
     end
 
-    output_dir = File.dirname(runner.lastEpwFilePath.get.to_s)
-
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
+    output_dir = File.dirname(hpxml_defaults_path)
     building_id = @model.getBuilding.additionalProperties.getFeatureAsString('building_id').get
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, building_id: building_id)
 
@@ -1871,8 +1870,10 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         if args[:timeseries_frequency] == 'timestep' || args[:timeseries_frequency] == 'hourly'
           if @hpxml_bldgs[0].dst_enabled
             dst_start_ix, dst_end_ix = get_dst_start_end_indexes(@timestamps, timestamps_dst)
-            dst_end_ix.downto(dst_start_ix + 1) do |i|
-              data[i + 1] = data[i]
+            if !dst_start_ix.nil? && !dst_end_ix.nil?
+              dst_end_ix.downto(dst_start_ix + 1) do |i|
+                data[i + 1] = data[i]
+              end
             end
           end
         end
@@ -1918,7 +1919,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       dst_end_ix = i if ts[0] == ts[1] && dst_end_ix.nil? && !dst_start_ix.nil?
     end
 
-    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? # run period ends before DST ends
+    dst_end_ix = timestamps.size - 1 if dst_end_ix.nil? && !dst_start_ix.nil? # run period ends before DST ends
 
     return dst_start_ix, dst_end_ix
   end
