@@ -2567,47 +2567,11 @@ if ARGV[0].to_sym == :update_measures
 
   # Update measures XMLs
   puts 'Updating measure.xmls...'
-  require 'oga'
   Dir['**/measure.xml'].each do |measure_xml|
-    for n_attempt in 1..5 # For some reason CLI randomly generates errors, so try multiple times
-      measure_dir = File.dirname(measure_xml)
-      command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
-      system(command, [:out, :err] => File::NULL)
-
-      # Check for error
-      xml_doc = XMLHelper.parse_file(measure_xml)
-      err_val = XMLHelper.get_value(xml_doc, '/measure/error', :string)
-      if err_val.nil?
-        err_val = XMLHelper.get_value(xml_doc, '/error', :string)
-      end
-      if err_val.nil?
-        break # Successfully updated
-      else
-        if n_attempt == 5
-          fail "#{measure_xml}: #{err_val}" # Error generated all 5 times, fail
-        else
-          # Remove error from measure XML, try again
-          orig_lines = File.readlines(measure_xml)
-          new_lines = []
-          inside_error = false
-          orig_lines.each do |l|
-            if l.include? '<error>'
-              inside_error = true
-            end
-            if l.include? '</error>'
-              inside_error = false
-              next
-            end
-            next if inside_error
-
-            new_lines << l
-          end
-          File.open(measure_xml, 'w') do |file|
-            file.puts new_lines
-          end
-        end
-      end
-    end
+    measure_dir = File.dirname(measure_xml)
+    # Using classic to work around https://github.com/NREL/OpenStudio/issues/5045
+    command = "#{OpenStudio.getOpenStudioCLI} classic measure -u '#{measure_dir}'"
+    system(command, [:out, :err] => File::NULL)
   end
 
   puts 'Done.'
