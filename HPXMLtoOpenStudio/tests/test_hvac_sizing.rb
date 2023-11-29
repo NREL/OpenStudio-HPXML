@@ -386,31 +386,67 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    [false, true].each do |adjust_blower_fan_efficiency|
-      # Maximum rates not assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.adjust_blower_fan_efficiency = adjust_blower_fan_efficiency
-      htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
-      clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
-      assert_nil(htg_cfm)
-      assert_nil(clg_cfm)
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = false
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
 
-      # Maximum rates are assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.adjust_blower_fan_efficiency = adjust_blower_fan_efficiency
-      hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 1000
-      hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      if !adjust_blower_fan_efficiency
-        assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
-      else
-        assert(hpxml_bldg.heat_pumps[0].fan_watts_per_cfm < 0.5)
-      end
-    end
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = false
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.5, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.206, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+
+    # Maximum rates are assigned, fan W/cfm assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
+    hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.375
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.155, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
+
+    # Maximum rates are assigned, fan W/cfm assigned, autosized capacities
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
+    hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.375
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.276, hpxml_bldg.heat_pumps[0].fan_watts_per_cfm)
   end
 
   def test_use_maximum_airflow_rates
@@ -418,64 +454,125 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    [false, true].each do |use_maximum_airflow_rates|
-      # Define low maximum rates
-      heating_airflow_cfm = 1000
-      cooling_airflow_cfm = 1200
+    # Define low maximum rates
+    heating_airflow_cfm = 900
+    cooling_airflow_cfm = 1200
 
-      # Maximum rates not assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.use_maximum_airflow_rates = use_maximum_airflow_rates
-      htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
-      clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
-      assert_nil(htg_cfm)
-      assert_nil(clg_cfm)
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      assert(hpxml_bldg.heat_pumps[0].heating_airflow_cfm > heating_airflow_cfm)
-      assert(hpxml_bldg.heat_pumps[0].cooling_airflow_cfm > cooling_airflow_cfm)
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = false
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
 
-      # Maximum rates are assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.use_maximum_airflow_rates = use_maximum_airflow_rates
-      hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
-      hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      if !use_maximum_airflow_rates
-        assert(hpxml_bldg.heat_pumps[0].heating_airflow_cfm > heating_airflow_cfm)
-        assert(hpxml_bldg.heat_pumps[0].cooling_airflow_cfm > cooling_airflow_cfm)
-      else
-        assert_equal(hpxml_bldg.heat_pumps[0].heating_airflow_cfm, heating_airflow_cfm)
-        assert_equal(hpxml_bldg.heat_pumps[0].cooling_airflow_cfm, cooling_airflow_cfm)
-      end
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = false
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
 
-      # Define high maximum rates
-      heating_airflow_cfm = 2000
-      cooling_airflow_cfm = 2200
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
 
-      # Maximum rates not assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.use_maximum_airflow_rates = use_maximum_airflow_rates
-      htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
-      clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
-      assert_nil(htg_cfm)
-      assert_nil(clg_cfm)
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      assert(hpxml_bldg.heat_pumps[0].heating_airflow_cfm < heating_airflow_cfm)
-      assert(hpxml_bldg.heat_pumps[0].cooling_airflow_cfm < cooling_airflow_cfm)
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
 
-      # Maximum rates are assigned
-      hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-      hpxml_bldg.header.use_maximum_airflow_rates = use_maximum_airflow_rates
-      hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
-      hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
-      XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-      assert(hpxml_bldg.heat_pumps[0].heating_airflow_cfm < heating_airflow_cfm)
-      assert(hpxml_bldg.heat_pumps[0].cooling_airflow_cfm < cooling_airflow_cfm)
-    end
+    # Maximum rates are assigned, autosized capacities
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(900.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1200.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
+
+    # Define high maximum rates
+    heating_airflow_cfm = 2000
+    cooling_airflow_cfm = 2200
+
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = false
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
+
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = false
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
+
+    # Maximum rates not assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    assert_nil(htg_cfm)
+    assert_nil(clg_cfm)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
+
+    # Maximum rates are assigned
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(1136.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1497.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
+
+    # Maximum rates are assigned, autosized capacities
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+    hpxml_bldg.header.use_maximum_airflow_rates = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = heating_airflow_cfm
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = cooling_airflow_cfm
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_equal(982.0, hpxml_bldg.heat_pumps[0].heating_airflow_cfm)
+    assert_equal(1295.0, hpxml_bldg.heat_pumps[0].cooling_airflow_cfm)
   end
 
   def test_manual_j_sizing_inputs

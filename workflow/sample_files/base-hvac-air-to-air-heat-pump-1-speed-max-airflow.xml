@@ -53,6 +53,7 @@
         </BuildingConstruction>
         <extension>
           <HVACSizingControl>
+            <AdjustBlowerFanEfficiency>true</AdjustBlowerFanEfficiency>
             <UseMaximumAirflowRates>true</UseMaximumAirflowRates>
           </HVACSizingControl>
         </extension>

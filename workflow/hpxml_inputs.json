@@ -1621,9 +1621,10 @@
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-max-airflow.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_distribution_fan_watts_per_cfm": 0.375,
-    "hvac_distribution_use_maximum_airflow_rates": true,
+    "hvac_distribution_adjust_blower_fan_efficiency": true,
     "hvac_distribution_heating_airflow_cfm": 1000,
-    "hvac_distribution_cooling_airflow_cfm": 1200
+    "hvac_distribution_cooling_airflow_cfm": 1200,
+    "hvac_distribution_use_maximum_airflow_rates": true
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
