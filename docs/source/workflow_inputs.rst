@@ -1485,30 +1485,30 @@ Wall Furnace
 
 If a wall furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ==========================================================  =======  ======  ===========  ========  ========  ================
-  Element                                                     Type     Units   Constraints  Required  Default   Notes
-  ==========================================================  =======  ======  ===========  ========  ========  ================
-  ``HeatingSystemType/WallFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light (older systems)
-  ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    0 - 1        Yes                 Rated efficiency
-  ``extension/FanPowerWatts``                                 double   W       >= 0         No        0         Fan power
+  ==========================================================  =======  ======  ===========  ========  =========  ================
+  Element                                                     Type     Units   Constraints  Required  Default    Notes
+  ==========================================================  =======  ======  ===========  ========  =========  ================
+  ``HeatingSystemType/WallFurnace/PilotLight``                boolean                       No        false      Presence of standing pilot light (older systems)
+  ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    0 - 1        Yes                  Rated efficiency
+  ``extension/FanPowerWatts``                                 double   W       >= 0         No        0          Fan power
   ``extension/HeatingAirflowCFM``                             double   cfm     >= 0         No        autosized
-  ==========================================================  =======  ======  ===========  ========  ========  ================
+  ==========================================================  =======  ======  ===========  ========  =========  ================
 
 Floor Furnace
 ~~~~~~~~~~~~~
 
 If a floor furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ===========================================================  =======  ======  ===========  ========  ========  ================
-  Element                                                      Type     Units   Constraints  Required  Default   Notes
-  ===========================================================  =======  ======  ===========  ========  ========  ================
-  ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                       No        false     Presence of standing pilot light (older systems)
-  ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    0 - 1        Yes                 Rated efficiency
-  ``extension/FanPowerWatts``                                  double   W       >= 0         No        0         Fan power
+  ===========================================================  =======  ======  ===========  ========  =========  ================
+  Element                                                      Type     Units   Constraints  Required  Default    Notes
+  ===========================================================  =======  ======  ===========  ========  =========  ================
+  ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                       No        false      Presence of standing pilot light (older systems)
+  ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    0 - 1        Yes                  Rated efficiency
+  ``extension/FanPowerWatts``                                  double   W       >= 0         No        0          Fan power
   ``extension/HeatingAirflowCFM``                              double   cfm      >= 0        No        autosized
-  ===========================================================  =======  ======  ===========  ========  ========  ================
+  ===========================================================  =======  ======  ===========  ========  =========  ================
 
 .. _hvac_heating_boiler:
 
@@ -2080,8 +2080,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/HeatingAirflowCFM``                  double   cfm      >= 0         No        autosized
-  ``extension/CoolingAirflowCFM``                  double   cfm      >= 0         No        autosized
+  ``extension/HeatingAirflowCFM``                  double    cfm     >= 0         No        autosized
+  ``extension/CoolingAirflowCFM``                  double    cfm     >= 0         No        autosized
   ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
   ===============================================  ========  ======  ===========  ========  ==============  ==============================================
