@@ -1901,6 +1901,7 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double   frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/AdjustFanPowerWattsPerCFM``                           boolean                                      No        false
   ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
   ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double   frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
@@ -1961,6 +1962,7 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double    frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/AdjustFanPowerWattsPerCFM``                           boolean                                       No        false
   ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
   ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double    frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
@@ -2080,6 +2082,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/AdjustFanPowerWattsPerCFM``          boolean                        No        false
   ``extension/HeatingAirflowCFM``                  double    cfm     >= 0         No        autosized
   ``extension/CoolingAirflowCFM``                  double    cfm     >= 0         No        autosized
   ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_

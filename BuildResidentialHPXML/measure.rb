@@ -1410,18 +1410,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_adjust_blower_fan_efficiency', false)
     arg.setDisplayName('HVAC Distribution: Adjust Blower Fan Efficiency')
-    arg.setDescription('Whether to adjust the blower fan efficiency based on the provided W/cfm and airflow rates, and autosized airflow rates.')
+    arg.setDescription("Whether to adjust the blower fan efficiency based on the W/cfm and provided airflow rates, and autosized airflow rates. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_heating_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Heating Airflow Rate')
-    arg.setDescription("The heating airflow rate. Applies only to #{HPXML::HVACTypeFurnace} heating system, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
+    arg.setDescription('The heating airflow rate. If not provided, the OS-HPXML default is used.')
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_cooling_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Cooling Airflow Rate')
-    arg.setDescription("The cooling airflow rate. Applies only to #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} cooling systems, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
+    arg.setDescription('The cooling airflow rate. If not provided, the OS-HPXML default is used.')
     arg.setUnits('CFM')
     args << arg
 
@@ -4156,10 +4156,6 @@ class HPXMLFile
       hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
     end
 
-    if args[:hvac_distribution_adjust_blower_fan_efficiency].is_initialized
-      hpxml_bldg.header.adjust_blower_fan_efficiency = args[:hvac_distribution_adjust_blower_fan_efficiency].get
-    end
-
     if args[:hvac_distribution_use_maximum_airflow_rates].is_initialized
       hpxml_bldg.header.use_maximum_airflow_rates = args[:hvac_distribution_use_maximum_airflow_rates].get
     end
@@ -5143,6 +5139,12 @@ class HPXMLFile
       end
     end
 
+    if args[:hvac_distribution_adjust_blower_fan_efficiency].is_initialized
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
+        adjust_fan_watts_per_cfm = args[:hvac_distribution_adjust_blower_fan_efficiency].get
+      end
+    end
+
     if args[:hvac_distribution_heating_airflow_cfm].is_initialized
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
         heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
@@ -5196,6 +5198,7 @@ class HPXMLFile
                               charge_defect_ratio: charge_defect_ratio,
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                               fan_watts_per_cfm: fan_watts_per_cfm,
+                              adjust_fan_watts_per_cfm: adjust_fan_watts_per_cfm,
                               heating_airflow_cfm: heating_airflow_cfm,
                               cooling_airflow_cfm: cooling_airflow_cfm,
                               primary_heating_system: primary_heating_system,

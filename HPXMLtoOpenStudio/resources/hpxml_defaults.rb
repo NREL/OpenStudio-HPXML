@@ -227,11 +227,6 @@ class HPXMLDefaults
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
     end
 
-    if hpxml_bldg.header.adjust_blower_fan_efficiency.nil?
-      hpxml_bldg.header.adjust_blower_fan_efficiency = false
-      hpxml_bldg.header.adjust_blower_fan_efficiency_isdefaulted = true
-    end
-
     if hpxml_bldg.header.use_maximum_airflow_rates.nil?
       hpxml_bldg.header.use_maximum_airflow_rates = false
       hpxml_bldg.header.use_maximum_airflow_rates_isdefaulted = true
@@ -1412,6 +1407,18 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
+      end
+    end
+
+    # Fan power adjustment
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpGroundToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+
+      if heat_pump.adjust_fan_watts_per_cfm.nil?
+        heat_pump.adjust_fan_watts_per_cfm = false
+        heat_pump.adjust_fan_watts_per_cfm_isdefaulted = true
       end
     end
 
@@ -2966,6 +2973,12 @@ class HPXMLDefaults
           htg_sys.additional_properties.GSHP_Bore_Depth = hvac_sizing_values.GSHP_Bore_Depth
           htg_sys.additional_properties.GSHP_Bore_Holes = hvac_sizing_values.GSHP_Bore_Holes
           htg_sys.additional_properties.GSHP_G_Functions = hvac_sizing_values.GSHP_G_Functions
+        end
+
+        # Blower fan adjustment
+        if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
+          htg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
+          htg_sys.fan_watts_per_cfm_isdefaulted = true
         end
       end
 

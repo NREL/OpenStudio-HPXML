@@ -389,7 +389,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates not assigned
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = false
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = false
     htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
     clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
     assert_nil(htg_cfm)
@@ -400,7 +400,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates are assigned
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = false
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = false
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -409,7 +409,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates not assigned
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = true
     htg_cfm = hpxml_bldg.heat_pumps[0].heating_airflow_cfm
     clg_cfm = hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
     assert_nil(htg_cfm)
@@ -420,7 +420,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates are assigned
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = true
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
@@ -429,7 +429,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates are assigned, fan W/cfm assigned
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = true
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.375
@@ -439,7 +439,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Maximum rates are assigned, fan W/cfm assigned, autosized capacities
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-    hpxml_bldg.header.adjust_blower_fan_efficiency = true
+    hpxml_bldg.heat_pumps[0].adjust_fan_watts_per_cfm = true
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 900
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 1200
     hpxml_bldg.heat_pumps[0].fan_watts_per_cfm = 0.375

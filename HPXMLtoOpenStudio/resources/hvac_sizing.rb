@@ -1911,23 +1911,21 @@ class HVACSizing
     Fan W/cfm adjustment
     '''
 
-    return if !@hpxml_bldg.header.adjust_blower_fan_efficiency
+    return if ![HPXML::HVACTypeHeatPumpAirToAir,
+                HPXML::HVACTypeHeatPumpMiniSplit,
+                HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
+    return if !hvac_heating.adjust_fan_watts_per_cfm
 
     airflow_max = get_airflow_max(hvac_heating, hvac_cooling)
-    if not airflow_max.nil?
-      @hpxml_bldg.heat_pumps.each do |heat_pump|
-        next unless [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type # FIXME: to what type(s), or when, should this apply?
+    if !airflow_max.nil?
+      v_baseline = airflow_max
+      v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
 
-        v_baseline = airflow_max
-        v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+      p_int = v_baseline * hvac_heating.fan_watts_per_cfm
+      p_upgrade = p_int * (v_baseline / v_upgrade)**3
+      adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
 
-        p_int = v_baseline * heat_pump.fan_watts_per_cfm
-        p_upgrade = p_int * (v_baseline / v_upgrade)**3
-        fan_watts_per_cfm_adjusted = p_upgrade / v_upgrade
-
-        heat_pump.fan_watts_per_cfm = fan_watts_per_cfm_adjusted.round(3)
-        heat_pump.fan_watts_per_cfm_isdefaulted = true
-      end
+      hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
     end
   end
 
@@ -3336,7 +3334,8 @@ class HVACSizingValues
   end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
+                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions,
+                :Adjusted_Fan_Watts_Per_CFM)
 end
 
 class Numeric
