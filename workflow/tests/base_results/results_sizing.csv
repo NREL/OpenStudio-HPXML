@@ -11,9 +11,6 @@ denver-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only-sizing-methodolog
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-ACCA.xml,22911.0,22911.0,31147.0,723.0,953.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-HERS.xml,31147.0,31147.0,31147.0,982.0,1295.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-MaxLoad.xml,65909.0,65909.0,31147.0,2079.0,2741.0
-denver-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-ACCA.xml,22911.0,22911.0,31147.0,723.0,953.0
-denver-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-HERS.xml,31147.0,31147.0,31147.0,982.0,1200.0
-denver-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-MaxLoad.xml,65909.0,65909.0,31147.0,1000.0,1200.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-ACCA.xml,22911.0,22911.0,31147.0,723.0,953.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-HERS.xml,31147.0,31147.0,31147.0,982.0,1295.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-MaxLoad.xml,65909.0,65909.0,31147.0,2079.0,2741.0
@@ -195,9 +192,6 @@ houston-hvac-autosize-air-to-air-heat-pump-1-speed-heating-only-sizing-methodolo
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-ACCA.xml,27095.0,27095.0,20038.0,706.0,1127.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-HERS.xml,25329.0,25329.0,20038.0,660.0,1053.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-lockout-temperatures-sizing-methodology-MaxLoad.xml,30521.0,30521.0,20038.0,795.0,1269.0
-houston-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-ACCA.xml,27095.0,27095.0,20038.0,706.0,1127.0
-houston-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-HERS.xml,25329.0,25329.0,20038.0,660.0,1053.0
-houston-hvac-autosize-air-to-air-heat-pump-1-speed-max-airflow-sizing-methodology-MaxLoad.xml,30521.0,30521.0,20038.0,795.0,1200.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-ACCA.xml,27095.0,27095.0,20038.0,706.0,1127.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-HERS.xml,25329.0,25329.0,20038.0,660.0,1053.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-seer2-hspf2-sizing-methodology-MaxLoad.xml,30521.0,30521.0,20038.0,795.0,1269.0
