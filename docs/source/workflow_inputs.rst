@@ -1462,16 +1462,17 @@ Furnace
 
 If a furnace is specified, additional information is entered in ``HeatingSystem``.
 
-  ======================================================  =======  =========  ===========  ========  ========  ================================================
-  Element                                                 Type     Units      Constraints  Required  Default   Notes
-  ======================================================  =======  =========  ===========  ========  ========  ================================================
-  ``DistributionSystem``                                  idref    See [#]_                Yes                 ID of attached distribution system
-  ``HeatingSystemType/Furnace/PilotLight``                boolean                          No        false     Presence of standing pilot light (older systems)
-  ``HeatingSystemType/Furnace/extension/PilotLightBtuh``  double   Btu/hr     >= 0         No        500       Pilot light burn rate
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``         double   frac       0 - 1        Yes                 Rated efficiency
-  ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0         No        See [#]_  Blower fan efficiency at maximum fan speed [#]_
-  ``extension/AirflowDefectRatio``                        double   frac       -0.9 - 9     No        0.0       Deviation between design/installed airflows [#]_
-  ======================================================  =======  =========  ===========  ========  ========  ================================================
+  ======================================================  =======  =========  ===========  ========  =========  ================================================
+  Element                                                 Type     Units      Constraints  Required  Default    Notes
+  ======================================================  =======  =========  ===========  ========  =========  ================================================
+  ``DistributionSystem``                                  idref    See [#]_                Yes                  ID of attached distribution system
+  ``HeatingSystemType/Furnace/PilotLight``                boolean                          No        false      Presence of standing pilot light (older systems)
+  ``HeatingSystemType/Furnace/extension/PilotLightBtuh``  double   Btu/hr     >= 0         No        500        Pilot light burn rate
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``         double   frac       0 - 1        Yes                  Rated efficiency
+  ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0         No        See [#]_   Blower fan efficiency at maximum fan speed [#]_
+  ``extension/HeatingAirflowCFM``                         double   cfm        >= 0         No        autosized
+  ``extension/AirflowDefectRatio``                        double   frac       -0.9 - 9     No        0.0        Deviation between design/installed airflows [#]_
+  ======================================================  =======  =========  ===========  ========  =========  ================================================
 
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity" or "gravity") or DSE.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0 W/cfm if gravity distribution system, else 0.5 W/cfm if AFUE <= 0.9, else 0.375 W/cfm.
@@ -1491,6 +1492,7 @@ If a wall furnace is specified, additional information is entered in ``HeatingSy
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    0 - 1        Yes                 Rated efficiency
   ``extension/FanPowerWatts``                                 double   W       >= 0         No        0         Fan power
+  ``extension/HeatingAirflowCFM``                             double   cfm     >= 0         No        autosized
   ==========================================================  =======  ======  ===========  ========  ========  ================
 
 Floor Furnace
@@ -1505,6 +1507,7 @@ If a floor furnace is specified, additional information is entered in ``HeatingS
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500       Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    0 - 1        Yes                 Rated efficiency
   ``extension/FanPowerWatts``                                  double   W       >= 0         No        0         Fan power
+  ``extension/HeatingAirflowCFM``                              double   cfm      >= 0        No        autosized
   ===========================================================  =======  ======  ===========  ========  ========  ================
 
 .. _hvac_heating_boiler:
@@ -1579,6 +1582,7 @@ If a stove is specified, additional information is entered in ``HeatingSystem``.
   ``HeatingSystemType/Stove/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    0 - 1        Yes                  Efficiency
   ``extension/FanPowerWatts``                           double   W       >= 0         No        40         Fan power
+  ``extension/HeatingAirflowCFM``                       double   cfm     >= 0         No        autosized
   ====================================================  =======  ======  ===========  ========  =========  ===================
 
 Space Heater
@@ -1591,6 +1595,7 @@ If a space heater (portable or fixed) is specified, additional information is en
   ==================================================  ======  =====  ===========  ========  =========  ===================
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double  frac   0 - 1        Yes                  Efficiency
   ``extension/FanPowerWatts``                         double  W      >= 0         No        0          Fan power
+  ``extension/HeatingAirflowCFM``                     double  cfm    >= 0         No        autosized
   ==================================================  ======  =====  ===========  ========  =========  ===================
 
 Fireplace
@@ -1605,6 +1610,7 @@ If a fireplace is specified, additional information is entered in ``HeatingSyste
   ``HeatingSystemType/Fireplace/extension/PilotLightBtuh``  double   Btu/hr  >= 0         No        500        Pilot light burn rate
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    0 - 1        Yes                  Efficiency
   ``extension/FanPowerWatts``                               double   W       >= 0         No        0          Fan power
+  ``extension/HeatingAirflowCFM``                           double   cfm     >= 0         No        autosized
   ========================================================  =======  ======  ===========  ========  =========  ===================
 
 .. _hvac_cooling:
@@ -1652,6 +1658,7 @@ If a central air conditioner is specified, additional information is entered in 
   ``SensibleHeatFraction``                                          double   frac         0 - 1        No        See [#]_        Sensible heat fraction
   ``CoolingDetailedPerformanceData``                                element                            No        <none>          Cooling detailed performance data [#]_
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm        >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
+  ``extension/CoolingAirflowCFM``                                   double   cfm          >= 0         No        autosized
   ``extension/AirflowDefectRatio``                                  double   frac         -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac         -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W                         No        50.0            Crankcase heater power
@@ -1746,6 +1753,7 @@ If an evaporative cooler is specified, additional information is entered in ``Co
   =================================  ========  ======  ===========  ========  ==============  ==================================
   ``DistributionSystem``             idref             See [#]_     No                        ID of attached distribution system
   ``CoolingCapacity``                double    Btu/hr  >= 0         No        autosized [#]_  Cooling output capacity
+  ``extension/CoolingAirflowCFM``    double    cfm     >= 0         No        autosized
   =================================  ========  ======  ===========  ========  ==============  ==================================
 
   .. [#] If DistributionSystem provided, HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -1766,6 +1774,7 @@ If a mini-split air conditioner is specified, additional information is entered 
   ``SensibleHeatFraction``                                          double    frac    0 - 1        No        0.73            Sensible heat fraction
   ``CoolingDetailedPerformanceData``                                element                        No        <none>          Cooling detailed performance data [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/CoolingAirflowCFM``                                   double    cfm     >= 0         No        autosized
   ``extension/AirflowDefectRatio``                                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W                    No        50.0            Crankcase heater power
@@ -1892,6 +1901,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double   frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
+  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double   frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      -0.9 - 9                  No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W                                   No        50.0            Crankcase heater power
@@ -1950,6 +1961,8 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double    frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
+  ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double    frac      -0.9 - 9                  No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac      -0.9 - 9                  No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W                                   No        50.0            Crankcase heater power
@@ -2067,6 +2080,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
+  ``extension/HeatingAirflowCFM``                  double   cfm      >= 0         No        autosized
+  ``extension/CoolingAirflowCFM``                  double   cfm      >= 0         No        autosized
   ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
   ===============================================  ========  ======  ===========  ========  ==============  ==============================================
