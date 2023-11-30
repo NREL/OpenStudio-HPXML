@@ -49,7 +49,7 @@ class HVACSizing
       apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_maximum_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_blower_fan_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_blower_fan_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
 
@@ -1906,7 +1906,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_hvac_blower_fan_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
+  def self.apply_hvac_blower_fan_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
     '''
     Fan W/cfm adjustment
     '''
