@@ -329,8 +329,8 @@ class HotWaterAndAppliances
         end
 
         id = water_heating_system.id
-        shower_peak_flows[:id] = shower_peak_flow
-        
+        shower_peak_flows = {id => shower_peak_flow}
+
         # Fixtures (showers, sinks, baths)
         add_water_use_equipment(model, Constants.ObjectNameFixtures, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], mw_temp_schedule)
 
@@ -999,7 +999,6 @@ class HotWaterAndAppliances
   end
 
   def self.get_showers_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
-    #JEFF
     if nbeds < 0.0
       return 0.0
     end
