@@ -661,8 +661,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
     arg.setDisplayName('Attic: Radiant Barrier Attic Location')
-    arg.setDescription('The location of the radiant barrier in the attic')
-    arg.setDefaultValue('Attic roof only')
+    arg.setDescription('The location of the radiant barrier in the attic. Ignored if TODO.')
+    arg.setDefaultValue(HPXML::RadiantBarrierLocationAtticRoofOnly)
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new

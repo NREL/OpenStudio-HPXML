@@ -724,20 +724,17 @@
   },
   "sample_files/base-atticroof-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
+    "ceiling_assembly_r": 8.7,
     "radiant_barrier": true,
     "radiant_barrier_grade": 2,
     "radiant_barrier_attic_location": "Attic roof only"
   },
   "sample_files/base-atticwall-radiant-barrier.xml": {
-    "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
-    "radiant_barrier": true,
-    "radiant_barrier_grade": 2,
+    "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
     "radiant_barrier_attic_location": "Attic roof and gable walls"
   },
   "sample_files/base-atticfloor-radiant-barrier.xml": {
-    "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
-    "radiant_barrier": true,
-    "radiant_barrier_grade": 2,
+    "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
     "radiant_barrier_attic_location": "Attic floor"
   },
   "sample_files/base-atticroof-unvented-insulated-roof.xml": {

@@ -1039,7 +1039,7 @@ The grade of the radiant barrier in the attic. If not provided, the OS-HPXML def
 
 **Attic: Radiant Barrier Attic Location**
 
-The location of the radiant barrier in the attic
+The location of the radiant barrier in the attic. Ignored if TODO.
 
 - **Name:** ``radiant_barrier_attic_location``
 - **Type:** ``Choice``
