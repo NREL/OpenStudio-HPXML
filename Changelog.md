@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.8.0
+
+__New Features__
+
+__Bugfixes__
+- Error-checking for unrealistically low HVAC SensibleHeatFraction values (less than or equal to 0.5).
+
 ## OpenStudio-HPXML v1.7.0
 
 __New Features__
