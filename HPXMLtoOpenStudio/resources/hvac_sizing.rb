@@ -1929,6 +1929,7 @@ class HVACSizing
   end
 
   def self.apply_hvac_ground_loop(runner, hvac_sizing_values, weather, hvac_cooling)
+
     '''
     GSHP Ground Loop Sizing Calculations
     '''
