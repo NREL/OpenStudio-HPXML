@@ -1936,7 +1936,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_fraction = nil
       hpxml_bldg.heat_pumps[0].heating_capacity_retention_temp = nil
     end
-    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed.xml'
+    if hpxml_file.include? 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'
       hpxml_bldg.geothermal_loops[0].shank_spacing = 2.5
     end
 
