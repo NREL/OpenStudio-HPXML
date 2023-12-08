@@ -6709,6 +6709,9 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+
+      errors += HPXML::check_dates('Exterior Holiday Lighting', @holiday_period_begin_month, @holiday_period_begin_day, @holiday_period_end_month, @holiday_period_end_day)
+
       return errors
     end
 
