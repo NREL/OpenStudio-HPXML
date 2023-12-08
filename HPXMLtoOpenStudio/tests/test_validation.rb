@@ -131,6 +131,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-battery-capacities-kwh' => ['Expected UsableCapacity to be less than NominalCapacity'],
                             'invalid-calendar-year-low' => ['Expected CalendarYear to be greater than or equal to 1600'],
                             'invalid-calendar-year-high' => ['Expected CalendarYear to be less than or equal to 9999'],
+                            'invalid-clothes-dryer-cef' => ['Expected CombinedEnergyFactor to be greater than 0'],
+                            'invalid-clothes-washer-imef' => ['Expected IntegratedModifiedEnergyFactor to be greater than 0'],
+                            'invalid-dishwasher-ler' => ['Expected LabelElectricRate to be greater than 0'],
                             'invalid-duct-area-fractions' => ['Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]',
                                                               'Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution, id: "HVACDistribution1"]'],
                             'invalid-facility-type' => ['Expected 1 element(s) for xpath: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]] [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]',
@@ -427,6 +430,15 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-calendar-year-high'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml.header.sim_calendar_year = 20000
+      elsif ['invalid-clothes-dryer-cef'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.clothes_dryers[0].combined_energy_factor = 0
+      elsif ['invalid-clothes-washer-imef'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.clothes_washers[0].integrated_modified_energy_factor = 0
+      elsif ['invalid-dishwasher-ler'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.dishwashers[0].label_electric_rate = 0
       elsif ['invalid-duct-area-fractions'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ducts-area-fractions.xml')
         hpxml_bldg.hvac_distributions[0].ducts[0].duct_surface_area = nil
@@ -915,11 +927,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
                             'invalid-datatype-integer' => ["Element 'NumberofBedrooms': '2.5' is not a valid value of the atomic type 'IntegerGreaterThanOrEqualToZero_simple'."],
-                            'invalid-datatype-float' => ["Cannot convert 'FOOBAR' to float for Slab/extension/CarpetFraction."],
+                            'invalid-datatype-float' => ["Cannot convert 'FOOBAR' to float for EmissionsScenario/EmissionsFactor[FuelType='electricity']/Value."],
                             'invalid-daylight-saving' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-distribution-cfa-served' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                   'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath' => ["foo.epw' could not be found."],
+                            'invalid-holiday-lighting-dates' => ['Exterior Holiday Lighting Begin Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-id' => ["Element 'SystemIdentifier', attribute 'id': '' is not a valid value of the atomic type 'xs:ID'."],
                             'invalid-neighbor-shading-azimuth' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeatingSystem1'"],
@@ -1120,7 +1133,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-datatype-integer'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base.xml')
       elsif ['invalid-datatype-float'].include? error_case
-        hpxml, _hpxml_bldg = _create_hpxml('base.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-misc-emissions.xml')
       elsif ['invalid-daylight-saving'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-simcontrol-daylight-saving-custom.xml')
         hpxml_bldg.dst_begin_month = 3
@@ -1133,6 +1146,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-epw-filepath'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
+      elsif ['invalid-holiday-lighting-dates'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-lighting-holiday.xml')
+        hpxml_bldg.lighting.holiday_period_begin_month = 11
+        hpxml_bldg.lighting.holiday_period_begin_day = 31
+        hpxml_bldg.lighting.holiday_period_end_month = 1
+        hpxml_bldg.lighting.holiday_period_end_day = 15
       elsif ['invalid-id'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].id = ''
@@ -1369,7 +1388,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-datatype-integer'].include? error_case
         XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms').inner_text = '2.5'
       elsif ['invalid-datatype-float'].include? error_case
-        XMLHelper.get_element(hpxml_doc, '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction').inner_text = 'FOOBAR'
+        XMLHelper.get_element(hpxml_doc, '/HPXML/SoftwareInfo/extension/EmissionsScenarios/EmissionsScenario/EmissionsFactor/Value').inner_text = 'FOOBAR'
       elsif ['invalid-schema-version'].include? error_case
         root = XMLHelper.get_element(hpxml_doc, '/HPXML')
         XMLHelper.add_attribute(root, 'schemaVersion', '2.3')

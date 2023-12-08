@@ -1,10 +1,10 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
+- Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
-- Error-checking for unrealistically low HVAC SensibleHeatFraction values (less than or equal to 0.5).
 
 ## OpenStudio-HPXML v1.7.0
 
