@@ -2016,7 +2016,7 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
-  "sample_files/base-hvac-ground-to-air-heat-pump-detailed.xml": {
+  "sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "geothermal_loop_configuration": "vertical",
     "geothermal_loop_borefield_configuration": "Lopsided U",

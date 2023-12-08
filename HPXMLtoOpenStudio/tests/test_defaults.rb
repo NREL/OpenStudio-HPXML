@@ -1727,7 +1727,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def test_geothermal_loops
     # Test inputs not overridden by defaults
-    hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml')
     hpxml_bldg.geothermal_loops[0].loop_configuration = HPXML::GeothermalLoopLoopConfigurationVertical
     hpxml_bldg.geothermal_loops[0].loop_flow = 1
     hpxml_bldg.geothermal_loops[0].num_bore_holes = 2

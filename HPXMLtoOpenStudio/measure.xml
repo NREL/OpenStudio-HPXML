@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>568347a8-9fb2-4424-b7e2-b08d31e87cf5</version_id>
-  <version_modified>2023-12-08T16:23:24Z</version_modified>
+  <version_id>a7acda08-226c-404c-b64e-d9197023bebc</version_id>
+  <version_modified>2023-12-08T18:19:27Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -250,7 +250,7 @@
       <filename>data/g_functions/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3A6546AB</checksum>
+      <checksum>48D1301C</checksum>
     </file>
     <file>
       <filename>data/g_functions/U_configurations_5m_v1.0.json</filename>
@@ -304,7 +304,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E5CF2A9E</checksum>
+      <checksum>30B5878C</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>54C9ADCB</checksum>
+      <checksum>F90138B1</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -616,7 +616,7 @@
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4586E821</checksum>
+      <checksum>50108087</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>60DC11BB</checksum>
+      <checksum>CA056491</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
