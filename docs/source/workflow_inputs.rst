@@ -441,8 +441,8 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
   ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
-  ``Soil``                          element                0 - 1        No                  Soil properties
-  ``extension/Neighbors``           element                >= 0         No        <none>    Presence of neighboring buildings for solar shading
+  ``Soil``                          element                             No                  Soil properties
+  ``extension/Neighbors``           element                             No        <none>    Presence of neighboring buildings for solar shading
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
@@ -2091,28 +2091,6 @@ Ground-to-Air Heat Pump
 
 If a ground-to-air heat pump is specified, additional information is entered in ``HeatPump``.
 
-<<<<<<< HEAD
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
-  Element                                          Type      Units   Constraints  Required  Default         Notes
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
-  ``IsSharedSystem``                               boolean                        No        false           Whether it has a shared hydronic circulation loop [#]_
-  ``DistributionSystem``                           idref             See [#]_     Yes                       ID of attached distribution system
-  ``HeatingCapacity``                              double    Btu/hr  >= 0         No        autosized [#]_  Heating output capacity (excluding any backup heating)
-  ``CoolingCapacity``                              double    Btu/hr  >= 0         No        autosized [#]_  Cooling output capacity
-  ``CoolingSensibleHeatFraction``                  double    frac    0 - 1        No        0.73            Sensible heat fraction
-  ``FractionHeatLoadServed``                       double    frac    0 - 1 [#]_   Yes                       Fraction of heating load served
-  ``FractionCoolLoadServed``                       double    frac    0 - 1 [#]_   Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          Yes                       Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          Yes                       Rated heating efficiency
-  ``NumberofUnitsServed``                          integer           > 0          See [#]_                  Number of dwelling units served
-  ``AttachedToGeothermalLoop``                     idref             See [#]_     No [#]_                   ID of attached geothermal loop
-  ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0         No        See [#]_        Pump power [#]_
-  ``extension/SharedLoopWatts``                    double    W       >= 0         See [#]_                  Shared pump power [#]_
-  ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0         No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AirflowDefectRatio``                 double    frac    -0.9 - 9     No        0.0             Deviation between design/installed airflows [#]_
-  ``extension/ChargeDefectRatio``                  double    frac    -0.9 - 9     No        0.0             Deviation between design/installed refrigerant charges [#]_
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
-=======
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   Element                                          Type      Units   Constraints      Required  Default         Notes
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
@@ -2126,13 +2104,13 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0              Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0              Yes                       Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0              See [#]_                  Number of dwelling units served
+  ``AttachedToGeothermalLoop``                     idref             See [#]_         No [#]_                   ID of attached geothermal loop
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0             No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0             See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
->>>>>>> 64e6acc56b2234f45138d373af568d8756c0e7be
 
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
   .. [#] HVACDistribution type must be AirDistribution (type: "regular velocity") or DSE.
@@ -2142,7 +2120,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] AttachedToGeothermalLoop must reference a ``GeothermalLoop``.
-  .. [#] If not provided, the ground-to-air heat pump will be automatically attached to a geothermal loop that is entirely defaulted.
+  .. [#] If AttachedToGeothermalLoop not provided, the ground-to-air heat pump will be automatically attached to a geothermal loop that is entirely defaulted.
   .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
   .. [#] Pump power is calculated using PumpPowerWattsPerTon and the cooling capacity in tons, unless the system only provides heating, in which case the heating capacity in tons is used instead.
          Any pump power that is shared by multiple dwelling units should be included in SharedLoopWatts, *not* PumpPowerWattsPerTon, so that shared loop pump power attributed to the dwelling unit is calculated.
