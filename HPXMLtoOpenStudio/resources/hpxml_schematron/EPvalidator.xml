@@ -1352,6 +1352,20 @@
       <sch:assert role='ERROR' test='count(h:PerformanceDataPoint[h:OutdoorTemperature!=95 and h:CapacityDescription="maximum"]) &gt;= 1'>Expected 1 or more element(s) for xpath: PerformanceDataPoint[OutdoorTemperature!=95 and CapacityDescription="maximum"]</sch:assert> <!-- See [PerformanceDataPoint] -->
     </sch:rule>
   </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HeatingDetailedPerformanceDataPointWithCapacity]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:HeatingDetailedPerformanceData/h:PerformanceDataPoint/h:Capacity'>
+      <sch:assert role='ERROR' test='count(../../../h:HeatingCapacity) = 1'>Expected 1 element(s) for xpath: ../../../HeatingCapacity</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[CoolingDetailedPerformanceDataPointWithCapacity]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:CoolingDetailedPerformanceData/h:PerformanceDataPoint/h:Capacity'>
+      <sch:assert role='ERROR' test='count(../../../h:CoolingCapacity) = 1'>Expected 1 element(s) for xpath: ../../../CoolingCapacity</sch:assert>
+    </sch:rule>
+  </sch:pattern>
   
   <sch:pattern>
     <sch:title>[PerformanceDataPoint]</sch:title>

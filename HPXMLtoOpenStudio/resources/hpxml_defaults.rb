@@ -2935,7 +2935,7 @@ class HPXMLDefaults
           if not htg_sys.heating_detailed_performance_data.empty?
             # Fixed values entered; Scale w/ heating_capacity in case allow_increased_fixed_capacities=true
             htg_sys.heating_detailed_performance_data.each do |dp|
-              next if dp.capacity.nil? # using autosized values
+              next if dp.capacity.nil? # using autosized values, process later
 
               htg_cap_dp = dp.capacity * scaling_factor
               if (dp.capacity - htg_cap_dp).abs >= 1.0
