@@ -1359,7 +1359,7 @@
     <sch:title>[PerformanceDataPoint]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/*/h:PerformanceDataPoint'>
       <sch:assert role='ERROR' test='count(h:Capacity) = 1'>Expected 1 element(s) for xpath: Capacity</sch:assert>
-      <sch:assert role='ERROR' test='number(h:Capacity) &gt; 0 or not(h:Capacity)'>Expected Capacity to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Capacity) &gt;= 0 or not(h:Capacity)'>Expected Capacity to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:Efficiency[h:Units="COP"]/h:Value) = 1'>Expected 1 element(s) for xpath: Efficiency[Units="COP"]/Value</sch:assert>
     </sch:rule>
   </sch:pattern>

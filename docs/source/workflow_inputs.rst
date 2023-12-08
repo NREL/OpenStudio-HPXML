@@ -2190,7 +2190,7 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  > 0          Yes                  Cooling capacity at the specified outdoor temperature
+  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Cooling capacity at the specified outdoor temperature
   ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Cooling efficiency at the specified outdoor temperature
   =================================  ========  ======  ===========  ========  =========  ==========================================
@@ -2214,7 +2214,7 @@ For air-source HVAC systems with detailed heating performance data, two or more 
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  > 0          Yes                  Heating capacity at the specified outdoor temperature
+  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Heating capacity at the specified outdoor temperature
   ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Heating efficiency at the specified outdoor temperature
   =================================  ========  ======  ===========  ========  =========  ==========================================
