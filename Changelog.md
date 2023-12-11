@@ -6,6 +6,7 @@ __New Features__
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
+  - Updated heating/cooling performance curves to reflect newer equipment.
 - BuildResidentialHPXML measure:
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
