@@ -1925,12 +1925,13 @@ class HVACSizing
     return if !hvac_heating.adjust_fan_watts_per_cfm
 
     airflow_max = get_airflow_max(hvac_heating, hvac_cooling)
+    # TODO: are there values for airflow_max where an adjustment wouldn't make sense (e.g., some very small value)?
     if !airflow_max.nil?
       v_baseline = airflow_max
       v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
 
       p_int = v_baseline * hvac_heating.fan_watts_per_cfm
-      p_upgrade = p_int * (v_baseline / v_upgrade)**3
+      p_upgrade = p_int * (v_upgrade / v_baseline)**3
       adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
 
       hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
