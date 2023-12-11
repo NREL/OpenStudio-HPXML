@@ -166,8 +166,6 @@ class HPXML < Object
   GeothermalLoopLoopConfigurationVertical = 'vertical'
   GeothermalLoopGroutOrPipeTypeStandard = 'standard'
   GeothermalLoopGroutOrPipeTypeThermallyEnhanced = 'thermally enhanced'
-  GeothermalLoopPipeTypeStandard = 'standard'
-  GeothermalLoopPipeTypeThermallyEnhanced = 'thermally enhanced'
   HeaterTypeElectricResistance = 'electric resistance'
   HeaterTypeGas = 'gas fired'
   HeaterTypeHeatPump = 'heat pump'
@@ -4436,7 +4434,7 @@ class HPXML < Object
              :pipe_conductivity, :pipe_diameter, :shank_spacing]
     attr_accessor(*ATTRS)
 
-    def heat_pumps
+    def heat_pump
       list = []
       @parent_object.heat_pumps.each do |heat_pump|
         next if heat_pump.geothermal_loop_idref.nil?
@@ -4447,6 +4445,8 @@ class HPXML < Object
 
       if list.size == 0
         fail "Geothermal loop '#{@id}' found but no heat pump attached to it."
+      elsif list.size > 1
+        fail "Multiple heat pumps found attached to geothermal loop '#{@id}'."
       end
     end
 
@@ -4461,7 +4461,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-      begin; heat_pumps; rescue StandardError => e; errors << e.message; end
+      begin; heat_pump; rescue StandardError => e; errors << e.message; end
       return errors
     end
 

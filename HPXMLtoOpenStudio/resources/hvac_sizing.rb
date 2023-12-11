@@ -1938,17 +1938,16 @@ class HVACSizing
     end
 
     num_bore_holes = geothermal_loop.num_bore_holes
-    if num_bore_holes.nil?
-      num_bore_holes = [1, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
-    end
+    bore_depth = geothermal_loop.bore_length
 
     min_bore_depth = UnitConversions.convert(24.0, 'm', 'ft').round # based on g-function library
     # In NY the following is the depth that requires a mining permit, which has been a barrier for Dandelion Energy with installing GSHPs.
     # Sounds like people are pushing ever deeper but for now we can apply this limit and add a note about where it came from.
     max_bore_depth = 500 # ft
+    min_num_boreholes = 1
+    max_num_boreholes = 10
 
-    bore_depth = geothermal_loop.bore_length
-    if bore_depth.nil?
+    if num_bore_holes.nil? || bore_depth.nil?
       # Autosize ground loop heat exchanger length
       hvac_cooling_ap = hvac_cooling.additional_properties
       grout_conductivity = geothermal_loop.grout_conductivity
@@ -1958,35 +1957,45 @@ class HVACSizing
       bore_length_cool = nom_length_cool * hvac_sizing_values.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length = [bore_length_heat, bore_length_cool].max
 
-      # Divide length by number of boreholes for average bore depth
-      bore_depth = (bore_length / num_bore_holes).floor # ft
+      if num_bore_holes.nil? && bore_depth.nil?
+        num_bore_holes = [min_num_boreholes, (UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
 
-      active_length = 5 # the active length starts about 5 ft below the surface
-      for _i in 0..50
-        if (bore_depth + active_length < min_bore_depth) || (num_bore_holes > 10)
-          num_bore_holes -= 1
-          bore_depth = (bore_length / num_bore_holes).floor
-        elsif (bore_depth + active_length > max_bore_depth)
-          num_bore_holes += 1
-          bore_depth = (bore_length / num_bore_holes).floor
-        end
+        # Divide length by number of boreholes for average bore depth
+        bore_depth = (bore_length / num_bore_holes).floor # ft
 
-        if ((num_bore_holes == 1) && (bore_depth < min_bore_depth)) || ((num_bore_holes == 10) && (bore_depth > max_bore_depth))
-          break # we can't do any better
+        # Adjust number of boreholes and bore depth to get within min/max constraints
+        for _i in 0..50
+          if (bore_depth < min_bore_depth) || (num_bore_holes > max_num_boreholes)
+            num_bore_holes -= 1
+            bore_depth = (bore_length / num_bore_holes).floor
+          elsif (bore_depth > max_bore_depth) || (num_bore_holes < min_num_boreholes)
+            num_bore_holes += 1
+            bore_depth = (bore_length / num_bore_holes).floor
+          end
+
+          if ((num_bore_holes == min_num_boreholes) && (bore_depth < min_bore_depth)) || ((num_bore_holes == max_num_boreholes) && (bore_depth > max_bore_depth))
+            break # we can't do any better
+          end
         end
+      elsif num_bore_holes.nil?
+        # Calculate number of boreholes to achieve total autosized length
+        num_bore_holes = (bore_length / bore_depth).floor
+        num_bore_holes = [num_bore_holes, max_num_boreholes].min
+        num_bore_holes = [num_bore_holes, min_num_boreholes].max
+      elsif bore_depth.nil?
+        # Calculate bore depth to achieve total autosized length
+        bore_depth = (bore_length / num_bore_holes).floor # ft
       end
-
-      bore_depth = (bore_length / num_bore_holes).floor + active_length
     end
 
     if bore_depth < min_bore_depth
       bore_depth = min_bore_depth
-      runner.registerWarning("Reached a minimum of 1 borehole; setting bore depth to the minimum (#{min_bore_depth} ft).")
+      runner.registerWarning("Reached a minimum of #{min_num_boreholes} borehole; setting bore depth to the minimum (#{min_bore_depth} ft).")
     end
 
     if bore_depth > max_bore_depth
       bore_depth = max_bore_depth
-      runner.registerWarning("Reached a maximum of 10 boreholes; setting bore depth to the maximum (#{max_bore_depth} ft).")
+      runner.registerWarning("Reached a maximum of #{max_num_boreholes} boreholes; setting bore depth to the maximum (#{max_bore_depth} ft).")
     end
 
     bore_config = geothermal_loop.bore_config
