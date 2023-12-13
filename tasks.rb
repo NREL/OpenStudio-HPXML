@@ -24,14 +24,6 @@ def create_hpxmls
   puts "Generating #{json_inputs.size} HPXML files..."
 
   json_inputs.keys.each_with_index do |hpxml_filename, i|
-    if !(
-      hpxml_filename.include?('base-atticroof-radiant-barrier.xml') ||
-      hpxml_filename.include?('base-atticwall-radiant-barrier.xml') ||
-      hpxml_filename.include?('base-atticfloor-radiant-barrier.xml')
-    )
-      next
-    end
-
     puts "[#{i + 1}/#{json_inputs.size}] Generating #{hpxml_filename}..."
     hpxml_path = File.join(workflow_dir, hpxml_filename)
     abs_hpxml_files << File.absolute_path(hpxml_path)

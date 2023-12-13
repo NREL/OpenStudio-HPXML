@@ -50,7 +50,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -132,7 +132,7 @@ class Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -231,7 +231,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -314,7 +314,7 @@ class Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -392,7 +392,7 @@ class Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -482,7 +482,7 @@ class Constructions
 
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -572,7 +572,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -708,7 +708,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -777,7 +777,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, false)
     end
 
     # Set paths
@@ -837,7 +837,7 @@ class Constructions
         end
         mat_rb = nil
         if has_radiant_barrier
-          mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+          mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
         end
         mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / cavity_r)
       end
@@ -933,7 +933,7 @@ class Constructions
         end
         mat_rb = nil
         if has_radiant_barrier
-          mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+          mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
         end
         mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / eR)
       end
@@ -1032,7 +1032,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
     end
 
     # Set paths
@@ -1117,7 +1117,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
     end
     # Set paths
     path_fracs = [1]

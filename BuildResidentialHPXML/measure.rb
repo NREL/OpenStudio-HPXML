@@ -661,7 +661,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
     arg.setDisplayName('Attic: Radiant Barrier Attic Location')
-    arg.setDescription('The location of the radiant barrier in the attic. Ignored if TODO.')
+    arg.setDescription('The location of the radiant barrier in the attic. Ignored if radiant barrier is set to false.')
     arg.setDefaultValue(HPXML::RadiantBarrierLocationAtticRoofOnly)
     args << arg
 
@@ -4535,7 +4535,7 @@ class HPXMLFile
           hpxml_bldg.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif hpxml_bldg.floors[-1].is_ceiling
           hpxml_bldg.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
-          if args[:radiant_barrier_attic_location].is_initialized && args[:radiant_barrier_attic_location].get == 'Attic floor'
+          if args[:radiant_barrier_attic_location].is_initialized && args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticFloor
             if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
               radiant_barrier_grade = args[:radiant_barrier_grade].get
             end
