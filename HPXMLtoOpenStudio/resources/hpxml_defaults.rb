@@ -1606,9 +1606,9 @@ class HPXMLDefaults
 
         if heat_pump.geothermal_loop.grout_conductivity.nil?
           if heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeStandard
-            heat_pump.geothermal_loop.grout_conductivity = 0.4 # Btu/h-ft-R
+            heat_pump.geothermal_loop.grout_conductivity = 0.75 # Btu/h-ft-R
           elsif heat_pump.geothermal_loop.grout_type == HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
-            heat_pump.geothermal_loop.grout_conductivity = 0.8 # Btu/h-ft-R
+            heat_pump.geothermal_loop.grout_conductivity = 1.2 # Btu/h-ft-R
           end
           heat_pump.geothermal_loop.grout_conductivity_isdefaulted = true
         end
