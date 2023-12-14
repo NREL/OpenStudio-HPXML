@@ -1365,8 +1365,8 @@ class HVACSizing
 
       cool_cap_rated = hvac_sizing_values.Cool_Load_Tot / total_cap_curve_value
 
-      hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
-      sens_cap_rated = cool_cap_rated * hvac_cooling_shr
+      @hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
+      sens_cap_rated = cool_cap_rated * @hvac_cooling_shr
 
       # Calculate the air flow rate required for design conditions
       hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Load_Sens, (@cool_setpoint - @leaving_air_temp), cool_cap_rated)
@@ -1384,7 +1384,7 @@ class HVACSizing
       # Adjust Sizing
       if hvac_cooling.is_a?(HPXML::HeatPump) && (@hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
         hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
 
         cool_load_sens_cap_design = hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value
 
@@ -1396,7 +1396,7 @@ class HVACSizing
         # solve the following for cool_cap_design: sens_cap_design = SHRRated * cool_cap_design / total_cap_curve_value * function(CFM/cool_cap_design, ODB)
         # substituting in CFM = cool_load_sens_cap_design / (1.1 * ACF * (cool_setpoint - LAT))
 
-        cool_load_sens_cap_design = hvac_sizing_values.Cool_Load_Lat / ((total_cap_curve_value / hvac_cooling_shr - \
+        cool_load_sens_cap_design = hvac_sizing_values.Cool_Load_Lat / ((total_cap_curve_value / @hvac_cooling_shr - \
                                   (b_sens + d_sens * entering_temp) / \
                                   (1.1 * @acf * (@cool_setpoint - @leaving_air_temp))) / \
                                   (a_sens + c_sens * entering_temp) - 1.0)
@@ -1420,7 +1420,7 @@ class HVACSizing
 
         # Determine rated capacities
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
 
         # Determine the final sensible capacity at design using the SHR
         cool_load_sens_cap_design = shr_design * cool_cap_design
@@ -1436,7 +1436,7 @@ class HVACSizing
         #                  = SHRRated * cool_cap_design / total_cap_curve_value * sensible_cap_curve_value
         #                  = SHRRated * cool_cap_design / total_cap_curve_value * function(CFM/cool_cap_design, ODB)
 
-        cool_cap_design = (sens_cap_design / (hvac_cooling_shr / total_cap_curve_value) - \
+        cool_cap_design = (sens_cap_design / (@hvac_cooling_shr / total_cap_curve_value) - \
                                            (b_sens * UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'ton', 'Btu/hr') + \
                                            d_sens * UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'ton', 'Btu/hr') * entering_temp)) / \
                           (a_sens + c_sens * entering_temp)
@@ -1445,14 +1445,14 @@ class HVACSizing
         cool_cap_design = [cool_cap_design, @oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
 
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
 
         # Recalculate the air flow rate in case the oversizing limit has been used
         cool_load_sens_cap_design = hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value
 
       else
         hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot / total_cap_curve_value
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
 
         cool_load_sens_cap_design = hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value
       end
@@ -1884,33 +1884,32 @@ class HVACSizing
 
     return if !@hpxml_bldg.header.use_maximum_airflow_rates
 
-    # Limit HVAC airflows if maximum values are provided
-    if not hvac_cooling.nil?
-      max_cooling_airflow_cfm = hvac_cooling.cooling_airflow_cfm
-    end
-    if not max_cooling_airflow_cfm.nil?
-      # Use maximum allowed airflow rate; proportionally adjust autosized capacity & sensible capacity
-      prev_airflow = hvac_sizing_values.Cool_Airflow
-      hvac_sizing_values.Cool_Airflow = [prev_airflow, max_cooling_airflow_cfm].min
-      hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / prev_airflow
-      hvac_sizing_values.Cool_Capacity_Sens *= hvac_sizing_values.Cool_Airflow / prev_airflow
-    end
-    if not hvac_heating.nil?
-      max_heating_airflow_cfm = hvac_heating.heating_airflow_cfm
-    end
-    if not max_heating_airflow_cfm.nil?
-      # Use maximum allowed airflow rate; proportionally adjust autosized capacity
-      prev_airflow = hvac_sizing_values.Heat_Airflow
-      hvac_sizing_values.Heat_Airflow = [prev_airflow, max_heating_airflow_cfm].min
-      hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / prev_airflow
-    end
+    # Maximum airflow rate allowed for the duct system
+    max_airflow_allowed = get_max_airflow(hvac_heating, hvac_cooling)
+    return if max_airflow_allowed.nil?
 
-    # FIXME: no clue if this is right; i feel like Heat_Capacity should equal Cool_Capacity (process_heat_pump_adjustment)?
-    if [HPXML::HVACTypeHeatPumpAirToAir,
-        HPXML::HVACTypeHeatPumpMiniSplit,
-        HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
-      hvac_sizing_values.Heat_Capacity = [hvac_sizing_values.Heat_Capacity, hvac_sizing_values.Cool_Capacity].max
-      hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
+    # Maximum airflow auto-sized for the upgraded building
+    max_airflow = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+
+    # Adjust heating or cooling system size for the upgraded buildings based on max allowed airflow rate
+    if max_airflow > max_airflow_allowed
+      if hvac_sizing_values.Cool_Airflow > hvac_sizing_values.Heat_Airflow
+        # Design cooling airflow rate exceeds max allowed, adjust cooling capacity
+        prev_airflow = hvac_sizing_values.Cool_Airflow
+        hvac_sizing_values.Cool_Airflow = max_airflow_allowed
+        hvac_sizing_values.Cool_Capacity *= prev_airflow / hvac_sizing_values.Cool_Airflow
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
+        hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
+        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (@supply_air_temp - @heat_setpoint), hvac_sizing_values.Heat_Capacity)
+      else
+        # Design heating airflow rate exceeds max allowed, adjust heating capacity
+        prev_airflow = hvac_sizing_values.Heat_Airflow
+        hvac_sizing_values.Heat_Airflow = max_airflow_allowed
+        hvac_sizing_values.Heat_Capacity *= prev_airflow / hvac_sizing_values.Heat_Airflow
+        hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
+        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Capacity_Sens, (@cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+      end
     end
   end
 
@@ -1919,26 +1918,25 @@ class HVACSizing
     Fan W/cfm adjustment
     '''
 
-    return if ![HPXML::HVACTypeHeatPumpAirToAir,
-                HPXML::HVACTypeHeatPumpMiniSplit,
-                HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
+    # return if ![HPXML::HVACTypeHeatPumpAirToAir,
+    # HPXML::HVACTypeHeatPumpMiniSplit,
+    # HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
     return if !hvac_heating.adjust_fan_watts_per_cfm
 
-    airflow_max = get_airflow_max(hvac_heating, hvac_cooling)
-    # TODO: are there values for airflow_max where an adjustment wouldn't make sense (e.g., some very small value)?
-    if !airflow_max.nil?
-      v_baseline = airflow_max
-      v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+    max_airflow = get_max_airflow(hvac_heating, hvac_cooling)
+    return if max_airflow.nil?
 
-      p_int = v_baseline * hvac_heating.fan_watts_per_cfm
-      p_upgrade = p_int * (v_upgrade / v_baseline)**3
-      adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
+    v_baseline = max_airflow
+    v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
 
-      hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
-    end
+    p_int = v_baseline * hvac_heating.fan_watts_per_cfm
+    p_upgrade = p_int * (v_upgrade / v_baseline)**3
+    adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
+
+    hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
   end
 
-  def self.get_airflow_max(htg_sys, clg_sys)
+  def self.get_max_airflow(htg_sys, clg_sys)
     if !htg_sys.nil? && !clg_sys.nil?
       if !htg_sys.heating_airflow_cfm.nil? && !clg_sys.cooling_airflow_cfm.nil?
         return [htg_sys.heating_airflow_cfm, clg_sys.cooling_airflow_cfm].max
@@ -1948,9 +1946,13 @@ class HVACSizing
         return clg_sys.cooling_airflow_cfm
       end
     elsif !htg_sys.nil?
-      return htg_sys.heating_airflow_cfm
+      if !htg_sys.heating_airflow_cfm.nil?
+        return htg_sys.heating_airflow_cfm
+      end
     elsif !clg_sys.nil?
-      return clg_sys.cooling_airflow_cfm
+      if !clg_sys.cooling_airflow_cfm.nil?
+        return clg_sys.cooling_airflow_cfm
+      end
     end
     return
   end
