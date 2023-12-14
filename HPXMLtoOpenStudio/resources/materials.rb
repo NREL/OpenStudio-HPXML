@@ -307,8 +307,10 @@ class Material
       gap_frac = 0.05
     end
     if is_attic_floor
+      # Assume reduced effectiveness due to accumulation of dust per https://web.ornl.gov/sci/buildings/tools/radiant/rb2/
       rb_emittance = 0.5
     else
+      # ASTM C1313 3.2.1 defines a radiant barrier as <= 0.1
       rb_emittance = 0.05
     end
     non_rb_emittance = 0.90
