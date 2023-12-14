@@ -656,16 +656,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.3)
     args << arg
 
-    radiant_barrier_grade_choices = OpenStudio::StringVector.new
-    radiant_barrier_grade_choices << '1'
-    radiant_barrier_grade_choices << '2'
-    radiant_barrier_grade_choices << '3'
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_grade', radiant_barrier_grade_choices, false)
-    arg.setDisplayName('Attic: Radiant Barrier Grade')
-    arg.setDescription("The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
-    args << arg
-
     radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
     radiant_barrier_attic_location_choices << 'none'
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
@@ -674,8 +664,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
     arg.setDisplayName('Attic: Radiant Barrier Location')
-    arg.setDescription('The location of the radiant barrier in the attic. Ignored if radiant barrier is set to false.')
-    arg.setDefaultValue(HPXML::RadiantBarrierLocationAtticRoofOnly)
+    arg.setDescription('The location of the radiant barrier in the attic.')
+    args << arg
+
+    radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    radiant_barrier_grade_choices << '1'
+    radiant_barrier_grade_choices << '2'
+    radiant_barrier_grade_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_grade', radiant_barrier_grade_choices, false)
+    arg.setDisplayName('Attic: Radiant Barrier Grade')
+    arg.setDescription("The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new
