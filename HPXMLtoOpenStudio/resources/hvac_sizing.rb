@@ -1918,9 +1918,9 @@ class HVACSizing
     Fan W/cfm adjustment
     '''
 
-    # return if ![HPXML::HVACTypeHeatPumpAirToAir,
-    # HPXML::HVACTypeHeatPumpMiniSplit,
-    # HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
+    return if ![HPXML::HVACTypeHeatPumpAirToAir,
+                HPXML::HVACTypeHeatPumpMiniSplit,
+                HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type # TODO: should this apply to any ducted system type?
     return if !hvac_heating.adjust_fan_watts_per_cfm
 
     max_airflow = get_max_airflow(hvac_heating, hvac_cooling)
