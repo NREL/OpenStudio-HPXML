@@ -44,9 +44,8 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 1.99,
-    "radiant_barrier": false,
     "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "Attic roof only",
+    "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -411,9 +410,8 @@
     "roof_material_type": "asphalt or fiberglass shingles",
     "roof_color": "medium",
     "roof_assembly_r": 2.3,
-    "radiant_barrier": false,
     "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "Attic roof only",
+    "radiant_barrier_attic_location": "none",
     "wall_type": "WoodStud",
     "wall_siding_type": "wood siding",
     "wall_color": "medium",
@@ -727,15 +725,10 @@
   "sample_files/base-atticroof-radiant-barrier.xml": {
     "parent_hpxml": "sample_files/base-location-dallas-tx.xml",
     "ceiling_assembly_r": 8.7,
-    "radiant_barrier": true,
     "radiant_barrier_grade": 2,
-    "radiant_barrier_attic_location": "Attic roof only"
-  },
-  "sample_files/base-atticwall-radiant-barrier.xml": {
-    "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
     "radiant_barrier_attic_location": "Attic roof and gable walls"
   },
-  "sample_files/base-atticfloor-radiant-barrier.xml": {
+  "sample_files/base-atticroof-radiant-barrier-ceiling.xml": {
     "parent_hpxml": "sample_files/base-atticroof-radiant-barrier.xml",
     "radiant_barrier_attic_location": "Attic floor"
   },

@@ -656,12 +656,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.3)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('radiant_barrier', true)
-    arg.setDisplayName('Attic: Has Radiant Barrier')
-    arg.setDescription('Presence of a radiant barrier in the attic.')
-    arg.setDefaultValue(false)
-    args << arg
-
     radiant_barrier_grade_choices = OpenStudio::StringVector.new
     radiant_barrier_grade_choices << '1'
     radiant_barrier_grade_choices << '2'
@@ -673,12 +667,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
+    radiant_barrier_attic_location_choices << 'none'
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
     radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
-    arg.setDisplayName('Attic: Radiant Barrier Attic Location')
+    arg.setDisplayName('Attic: Radiant Barrier Location')
     arg.setDescription('The location of the radiant barrier in the attic. Ignored if radiant barrier is set to false.')
     arg.setDefaultValue(HPXML::RadiantBarrierLocationAtticRoofOnly)
     args << arg
@@ -4349,15 +4344,14 @@ class HPXMLFile
                            pitch: args[:geometry_roof_pitch],
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
-      next unless args[:radiant_barrier] && args[:radiant_barrier_attic_location].is_initialized && (args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticRoofOnly || args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls)
 
-      next unless hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticVented
+      next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
 
-      next unless args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
-
-      radiant_barrier_grade = args[:radiant_barrier_grade].get
       hpxml_bldg.roofs[-1].radiant_barrier = true
-      hpxml_bldg.roofs[-1].radiant_barrier_grade = radiant_barrier_grade
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.roofs[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
+      end
     end
   end
 
@@ -4492,14 +4486,13 @@ class HPXMLFile
       else
         hpxml_bldg.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
       end
-      next unless args[:radiant_barrier] && hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:radiant_barrier_attic_location].is_initialized && args[:radiant_barrier_attic_location].get == 'Attic roof and gable walls'
 
+      next unless hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.walls[-1].interior_adjacent_to)
+
+      hpxml_bldg.walls[-1].radiant_barrier = true
       if args[:radiant_barrier_grade].is_initialized
-        radiant_barrier_grade = args[:radiant_barrier_grade].get
-      end
-      if hpxml_bldg.walls[-1].interior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.roofs[-1].interior_adjacent_to == HPXML::LocationAtticVented
-        hpxml_bldg.walls[-1].radiant_barrier = true
-        hpxml_bldg.walls[-1].radiant_barrier_grade = radiant_barrier_grade
+        hpxml_bldg.walls[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end
@@ -4643,15 +4636,6 @@ class HPXMLFile
           hpxml_bldg.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingFloor
         elsif hpxml_bldg.floors[-1].is_ceiling
           hpxml_bldg.floors[-1].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
-          if args[:radiant_barrier_attic_location].is_initialized && args[:radiant_barrier_attic_location].get == HPXML::RadiantBarrierLocationAtticFloor
-            if args[:radiant_barrier] && args[:radiant_barrier_grade].is_initialized
-              radiant_barrier_grade = args[:radiant_barrier_grade].get
-            end
-            if hpxml_bldg.floors[-1].exterior_adjacent_to == HPXML::LocationAtticUnvented || hpxml_bldg.floors[-1].exterior_adjacent_to == HPXML::LocationAtticVented && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
-              hpxml_bldg.floors[-1].radiant_barrier = true
-              hpxml_bldg.floors[-1].radiant_barrier_grade = radiant_barrier_grade
-            end
-          end
         end
       end
       @surface_ids[surface.name.to_s] = hpxml_bldg.floors[-1].id
@@ -4666,6 +4650,14 @@ class HPXMLFile
         end
       else
         hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+      end
+
+      next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.floors[-1].exterior_adjacent_to) && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
+
+      hpxml_bldg.floors[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.floors[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end

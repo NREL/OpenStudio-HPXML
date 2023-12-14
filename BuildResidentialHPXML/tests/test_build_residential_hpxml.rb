@@ -420,7 +420,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['roof_material_type'] = HPXML::RoofTypeAsphaltShingles
       args['roof_color'] = HPXML::ColorMedium
       args['roof_assembly_r'] = 2.3
-      args['radiant_barrier'] = false
+      args['radiant_barrier_attic_location'] = 'none'
       args['radiant_barrier_grade'] = 1
       args['neighbor_front_distance'] = 0
       args['neighbor_back_distance'] = 0

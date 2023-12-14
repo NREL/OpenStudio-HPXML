@@ -1063,7 +1063,7 @@ The grade of the radiant barrier in the attic. If not provided, the OS-HPXML def
 
 <br/>
 
-**Attic: Radiant Barrier Attic Location**
+**Attic: Radiant Barrier Location**
 
 The location of the radiant barrier in the attic. Ignored if radiant barrier is set to false.
 
@@ -1072,7 +1072,7 @@ The location of the radiant barrier in the attic. Ignored if radiant barrier is 
 
 - **Required:** ``false``
 
-- **Choices:** `Attic roof only`, `Attic roof and gable walls`, `Attic floor`
+- **Choices:** `none`, `Attic roof only`, `Attic roof and gable walls`, `Attic floor`
 
 <br/>
 
