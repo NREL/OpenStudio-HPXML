@@ -835,11 +835,12 @@ class Constructions
           addtl_thick_in = rigid_r / 3.0 # Assume roughly R-3 per inch of loose-fill above cavity
           mat_addtl_ins = Material.new(name: 'ceiling loosefill ins', thick_in: addtl_thick_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: addtl_thick_in / rigid_r)
         end
-        mat_rb = nil
-        if has_radiant_barrier
-          mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
-        end
+
         mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / cavity_r)
+      end
+      mat_rb = nil
+      if has_radiant_barrier
+        mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
       end
       mat_framing = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.Wood)
       mat_gap = Material.AirCavityOpen(joist_height_in)
@@ -851,15 +852,15 @@ class Constructions
       # Define construction
       constr = Construction.new(constr_name, path_fracs)
       constr.add_layer(outside_film)
+      if not mat_rb.nil?
+        constr.add_layer(mat_rb)
+      end
       if not mat_addtl_ins.nil?
         constr.add_layer(mat_addtl_ins)
       end
       constr.add_layer([mat_framing, mat_cavity, mat_gap], 'ceiling stud and cavity')
       if not mat_int_finish_or_covering.nil?
         constr.add_layer(mat_int_finish_or_covering)
-      end
-      if not mat_rb.nil?
-        constr.add_layer(mat_rb)
       end
       constr.add_layer(inside_film)
     else # floors
@@ -885,6 +886,9 @@ class Constructions
       # Define construction
       constr = Construction.new(constr_name, path_fracs)
       constr.add_layer(outside_film)
+      if not mat_rb.nil?
+        constr.add_layer(mat_rb)
+      end
       constr.add_layer([mat_framing, mat_cavity, mat_gap], 'floor stud and cavity')
       if not mat_rigid.nil?
         constr.add_layer(mat_rigid)
@@ -894,9 +898,6 @@ class Constructions
       end
       if not mat_int_finish_or_covering.nil?
         constr.add_layer(mat_int_finish_or_covering)
-      end
-      if not mat_rb.nil?
-        constr.add_layer(mat_rb)
       end
       constr.add_layer(inside_film)
     end
@@ -931,11 +932,11 @@ class Constructions
           addtl_thick_in = rigid_r / 3.0 # Assume roughly R-3 per inch of loose-fill above cavity
           mat_addtl_ins = Material.new(name: 'ceiling loosefill ins', thick_in: addtl_thick_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: addtl_thick_in / rigid_r)
         end
-        mat_rb = nil
-        if has_radiant_barrier
-          mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
-        end
         mat_cavity = Material.new(thick_in: joist_height_in, mat_base: BaseMaterial.InsulationGenericLoosefill, k_in: joist_height_in / eR)
+      end
+      mat_rb = nil
+      if has_radiant_barrier
+        mat_rb = Material.RadiantBarrier(radiant_barrier_grade, true)
       end
       mat_gap = Material.AirCavityOpen(joist_height_in)
 
@@ -946,15 +947,15 @@ class Constructions
       # Define construction
       constr = Construction.new(constr_name, path_fracs)
       constr.add_layer(outside_film)
+      if not mat_rb.nil?
+        constr.add_layer(mat_rb)
+      end
       if not mat_addtl_ins.nil?
         constr.add_layer(mat_addtl_ins)
       end
       constr.add_layer([mat_cavity, mat_gap], 'ceiling stud and cavity')
       if not mat_int_finish_or_covering.nil?
         constr.add_layer(mat_int_finish_or_covering)
-      end
-      if not mat_rb.nil?
-        constr.add_layer(mat_rb)
       end
       constr.add_layer(inside_film)
     else # floors
@@ -1046,6 +1047,9 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
+    if not mat_rb.nil?
+      constr.add_layer(mat_rb)
+    end
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
     constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], "#{constr_type} ins layer")
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], "#{constr_type} spline layer")
@@ -1057,9 +1061,6 @@ class Constructions
     end
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
-    end
-    if not mat_rb.nil?
-      constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
 
@@ -1128,6 +1129,9 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
+    if not mat_rb.nil?
+      constr.add_layer(mat_rb)
+    end
     mats.each do |mat|
       constr.add_layer(mat)
     end
@@ -1139,9 +1143,6 @@ class Constructions
     end
     if not mat_int_finish.nil?
       constr.add_layer(mat_int_finish)
-    end
-    if not mat_rb.nil?
-      constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
 
