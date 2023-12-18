@@ -1965,10 +1965,10 @@ class HVACSizing
 
         # Adjust number of boreholes and bore depth to get within min/max constraints
         for _i in 0..50
-          if (bore_depth < min_bore_depth) || (num_bore_holes > max_num_boreholes)
+          if ((bore_depth < min_bore_depth) || (num_bore_holes > max_num_boreholes)) && (num_bore_holes > min_num_boreholes)
             num_bore_holes -= 1
             bore_depth = (bore_length / num_bore_holes).floor
-          elsif (bore_depth > max_bore_depth) || (num_bore_holes < min_num_boreholes)
+          elsif ((bore_depth > max_bore_depth) || (num_bore_holes < min_num_boreholes)) && (num_bore_holes < max_num_boreholes)
             num_bore_holes += 1
             bore_depth = (bore_length / num_bore_holes).floor
           end
