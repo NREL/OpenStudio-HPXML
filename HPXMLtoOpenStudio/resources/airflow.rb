@@ -219,7 +219,7 @@ class Airflow
     sla, _ach50, _nach, _volume, height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
 
     nl = get_infiltration_NL_from_SLA(sla, height)
-    q_inf = nl * weather.data.WSF * cfa / 7.3 # Effective annual average infiltration rate, cfm, eq. 4.5a
+    q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
 
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
 
@@ -2011,6 +2011,11 @@ class Airflow
   def self.get_infiltration_ACH50_from_SLA(sla, n_i, floor_area, volume)
     # Returns the infiltration ACH50 given a SLA.
     return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0) / (0.283316478 * 4.0**n_i * volume))
+  end
+  
+  def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
+    # Returns the effective annual average infiltration rate in cfm
+    return nl * weather.data.WSF * cfa * 8.202 / 60.0
   end
 
   def self.calc_duct_leakage_at_diff_pressure(q_old, p_old, p_new)

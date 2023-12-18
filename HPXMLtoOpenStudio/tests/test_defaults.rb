@@ -2303,7 +2303,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.2, 77.3)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.1, 77.3)
 
     # Test defaults w/ MF building, compartmentalization test
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit.xml')
@@ -2328,7 +2328,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 21.6, 61.7)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 21.7, 61.9)
 
     # Test defaults w/ CFM50 infiltration
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-cfm50.xml')
@@ -2355,7 +2355,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.0, 77.1)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.0, 77.2)
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis.xml')
@@ -2396,7 +2396,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 149.4, 298.7, 1.0, HPXML::CFISModeAirHandler)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 149.4, 298.8, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
