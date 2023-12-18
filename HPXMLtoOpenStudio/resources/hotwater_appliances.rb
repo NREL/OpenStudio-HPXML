@@ -327,8 +327,7 @@ class HotWaterAndAppliances
 
     #create an array of peak flow to return
     shower_peak_flows = {}
-    num_wh = 0
-    hpxml.water_heating_systems.each do |water_heating_system|
+    hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
@@ -377,7 +376,6 @@ class HotWaterAndAppliances
             dist_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
         end
-        num_wh += 1
       end
 
       # Clothes washer
