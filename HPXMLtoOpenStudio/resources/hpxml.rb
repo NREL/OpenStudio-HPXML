@@ -5708,7 +5708,8 @@ class HPXML < Object
              :recirculation_pump_power, :dwhr_facilities_connected, :dwhr_equal_flow,
              :dwhr_efficiency, :has_shared_recirculation, :shared_recirculation_number_of_units_served,
              :shared_recirculation_pump_power, :shared_recirculation_control_type,
-             :shared_recirculation_motor_efficiency]
+             :shared_recirculation_motor_efficiency,
+             :recirculation_pump_weekday_fractions, :recirculation_pump_weekend_fractions, :recirculation_pump_monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -5760,6 +5761,9 @@ class HPXML < Object
         XMLHelper.add_element(shared_recirculation, 'MotorEfficiency', @shared_recirculation_motor_efficiency, :float) unless @shared_recirculation_motor_efficiency.nil?
         XMLHelper.add_element(shared_recirculation, 'ControlType', @shared_recirculation_control_type, :string) unless @shared_recirculation_control_type.nil?
       end
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpWeekdayScheduleFractions', @recirculation_pump_weekday_fractions, :string, @recirculation_pump_weekday_fractions_isdefaulted) unless @recirculation_pump_weekday_fractions.nil?
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpWeekendScheduleFractions', @recirculation_pump_weekend_fractions, :string, @recirculation_pump_weekend_fractions_isdefaulted) unless @recirculation_pump_weekend_fractions.nil?
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpMonthlyScheduleMultipliers', @recirculation_pump_monthly_multipliers, :string, @recirculation_pump_monthly_multipliers_isdefaulted) unless @recirculation_pump_monthly_multipliers.nil?
     end
 
     def from_doc(hot_water_distribution)
@@ -5786,6 +5790,9 @@ class HPXML < Object
         @shared_recirculation_motor_efficiency = XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/MotorEfficiency', :float)
         @shared_recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/ControlType', :string)
       end
+      @recirculation_pump_weekday_fractions = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpWeekdayScheduleFractions', :string)
+      @recirculation_pump_weekend_fractions = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpWeekendScheduleFractions', :string)
+      @recirculation_pump_monthly_multipliers = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpMonthlyScheduleMultipliers', :string)
     end
   end
 
