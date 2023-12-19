@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>cd003694-55bb-45d3-9bb1-7b5f67aa591c</version_id>
-  <version_modified>2023-12-19T20:41:56Z</version_modified>
+  <version_id>2531a74e-287d-4b83-83de-9bed4800f37b</version_id>
+  <version_modified>2023-12-19T22:51:17Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -298,19 +298,19 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D97838AA</checksum>
+      <checksum>64F14964</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2DAFF10F</checksum>
+      <checksum>DC39F427</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D6EEF4D4</checksum>
+      <checksum>65A4002C</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5C4B363E</checksum>
+      <checksum>DD859356</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -520,7 +520,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>032746CB</checksum>
+      <checksum>84FEE7DA</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

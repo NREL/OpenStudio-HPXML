@@ -336,25 +336,25 @@ class HotWaterAndAppliances
         if dist_pump_annual_kwh > 0
 
           # Create schedule
-          recirc_pump_schedule = nil
+          recirc_pump_sch = nil
           recirc_pump_col_name = SchedulesFile::ColumnHotWaterRecircPump
           recirc_pump_obj_name = Constants.ObjectNameHotWaterRecircPump
           if not schedules_file.nil?
             dist_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: dist_pump_annual_kwh / 365.0)
             recirc_pump_sch = schedules_file.create_schedule_file(model, col_name: recirc_pump_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
           end
-          if recirc_pump_schedule.nil?
+          if recirc_pump_sch.nil?
             recirc_pump_unavailable_periods = Schedule.get_unavailable_periods(runner, recirc_pump_col_name, unavailable_periods)
-            recirc_pump_weekday_sch = hpxml_bldg.water_heating.recirculation_pump_weekday_fractions
-            recirc_pump_weekend_sch = hpxml_bldg.water_heating.recirculation_pump_weekend_fractions
-            recirc_pump_monthly_sch = hpxml_bldg.water_heating.recirculation_pump_monthly_multipliers
+            recirc_pump_weekday_sch = hot_water_distribution.recirculation_pump_weekday_fractions
+            recirc_pump_weekend_sch = hot_water_distribution.recirculation_pump_weekend_fractions
+            recirc_pump_monthly_sch = hot_water_distribution.recirculation_pump_monthly_multipliers
             recirc_pump_sch = MonthWeekdayWeekendSchedule.new(model, recirc_pump_obj_name + ' schedule', recirc_pump_weekday_sch, recirc_pump_weekend_sch, recirc_pump_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: recirc_pump_unavailable_periods)
             dist_pump_design_level = recirc_pump_sch.calc_design_level_from_daily_kwh(dist_pump_annual_kwh / 365.0)
             recirc_pump_sch = recirc_pump_sch.schedule
           else
-            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.water_heating.recirc_pump_weekday_fractions.nil?
-            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.water_heating.recirc_pump_weekend_fractions.nil?
-            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.water_heating.recirc_pump_monthly_multipliers.nil?
+            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_weekday_fractions.nil?
+            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_weekend_fractions.nil?
+            runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_monthly_multipliers.nil?
           end
           if dist_pump_design_level * gpd_frac != 0
             cnt = model.getElectricEquipments.select { |e| e.endUseSubcategory.start_with? Constants.ObjectNameHotWaterRecircPump }.size # Ensure unique meter for each water heater

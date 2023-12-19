@@ -2100,6 +2100,30 @@ class HPXMLDefaults
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
         hot_water_distribution.recirculation_pump_power_isdefaulted = true
       end
+      schedules_file_includes_recirculation_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterRecirculationPump))
+      if hot_water_distribution.recirculation_control_type != HPXML::DHWRecirControlTypeTemperature
+        if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
+        end
+        if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
+        end
+      else
+        if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
+        end
+        if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
+        end
+      end
+      if hot_water_distribution.recirculation_pump_monthly_multipliers.nil? && !schedules_file_includes_recirculation_pump
+        hot_water_distribution.recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
+        hot_water_distribution.recirculation_pump_monthly_multipliers_isdefaulted = true
+      end
     end
 
     if hot_water_distribution.has_shared_recirculation
@@ -2107,31 +2131,6 @@ class HPXMLDefaults
         hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
         hot_water_distribution.shared_recirculation_pump_power_isdefaulted = true
       end
-    end
-
-    schedules_file_includes_recirculation_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterRecirculationPump))
-    if hot_water_distribution.recirculation_control_type != HPXML::DHWRecirControlTypeTemperature
-      if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
-        hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
-      end
-      if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
-        hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
-      end
-    else
-      if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
-        hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
-      end
-      if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
-        hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
-      end
-    end
-    if hot_water_distribution.recirculation_pump_monthly_multipliers.nil? && !schedules_file_includes_recirculation_pump
-      hot_water_distribution.recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
-      hot_water_distribution.recirculation_pump_monthly_multipliers_isdefaulted = true
     end
   end
 

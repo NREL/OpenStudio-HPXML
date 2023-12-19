@@ -1369,7 +1369,7 @@ class SchedulesFile
   ColumnHotWaterDishwasher = 'hot_water_dishwasher'
   ColumnHotWaterClothesWasher = 'hot_water_clothes_washer'
   ColumnHotWaterFixtures = 'hot_water_fixtures'
-  ColumnHotWaterRecirculationPump = 'hot_water_recirculation_pump'
+  ColumnHotWaterRecircPump = 'hot_water_recirculation_pump'
   ColumnSleeping = 'sleeping'
   ColumnHeatingSetpoint = 'heating_setpoint'
   ColumnCoolingSetpoint = 'cooling_setpoint'
