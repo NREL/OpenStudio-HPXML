@@ -139,9 +139,8 @@ class Airflow
     return 0.1 # Assumption
   end
 
-  def self.get_default_mech_vent_fan_power(vent_fan)
-    # 301-2019: Table 4.2.2(1b)
-    # Returns fan power in W/cfm
+  def self.get_default_mech_vent_fan_power(vent_fan, eri_version)
+    # Returns fan power in W/cfm, based on ANSI 301
     if vent_fan.is_shared_system
       return 1.00 # Table 4.2.2(1) Note (n)
     elsif [HPXML::MechVentTypeSupply, HPXML::MechVentTypeExhaust].include? vent_fan.fan_type
@@ -151,7 +150,11 @@ class Airflow
     elsif [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_fan.fan_type
       return 1.00
     elsif [HPXML::MechVentTypeCFIS].include? vent_fan.fan_type
-      return 0.50
+      if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2022')
+        return 0.58
+      else
+        return 0.50
+      end
     else
       fail "Unexpected fan_type: '#{fan_type}'."
     end
@@ -2012,7 +2015,7 @@ class Airflow
     # Returns the infiltration ACH50 given a SLA.
     return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0) / (0.283316478 * 4.0**n_i * volume))
   end
-  
+
   def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
     # Returns the effective annual average infiltration rate in cfm
     return nl * weather.data.WSF * cfa * 8.202 / 60.0
