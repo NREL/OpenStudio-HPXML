@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Lighting
-  def self.apply(runner, model, epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa,
+  def self.apply(runner, model, _epw_file, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa,
                  unavailable_periods, unit_multiplier)
     ltg_locns = [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage]
     ltg_types = [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED]
@@ -70,18 +70,8 @@ class Lighting
       end
       if interior_sch.nil?
         interior_unavailable_periods = Schedule.get_unavailable_periods(runner, interior_col_name, unavailable_periods)
-        if not lighting.interior_weekday_fractions.nil?
-          interior_sch = MonthWeekdayWeekendSchedule.new(model, interior_obj_name + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: interior_unavailable_periods)
-        else
-          lighting_sch = get_schedule(epw_file)
-          interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: interior_unavailable_periods)
-        end
-
-        if lighting.interior_weekday_fractions.nil?
-          design_level = interior_sch.calc_design_level(interior_sch.maxval * int_kwh)
-        else
-          design_level = interior_sch.calc_design_level_from_daily_kwh(int_kwh / 365.0)
-        end
+        interior_sch = MonthWeekdayWeekendSchedule.new(model, interior_obj_name + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: interior_unavailable_periods)
+        design_level = interior_sch.calc_design_level_from_daily_kwh(int_kwh / 365.0)
         interior_sch = interior_sch.schedule
       else
         runner.registerWarning("Both '#{interior_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !lighting.interior_weekday_fractions.nil?
