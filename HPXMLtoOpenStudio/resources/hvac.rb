@@ -1811,25 +1811,83 @@ class HVAC
     end
   end
 
-  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil = nil)
+  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil = nil, clg_coil, htg_coil)
     cap_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     cap_ratio_sensor.setName("#{air_loop_unitary.name} capacity_ratio")
     cap_ratio_sensor.setKeyName(max_cap_ratio_sch.name.to_s)
-    coil_speed_level_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
-    coil_speed_level_sensor.setName("#{air_loop_unitary.name} speed_level_ss")
-    coil_speed_level_sensor.setKeyName(air_loop_unitary.name.to_s)
-    coil_speed_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Ratio')
-    coil_speed_ratio_sensor.setName("#{air_loop_unitary.name} speed_ratio_ss")
-    coil_speed_ratio_sensor.setKeyName(air_loop_unitary.name.to_s)
-    coil_cyc_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Cycling Ratio')
-    coil_cyc_ratio_sensor.setName("#{air_loop_unitary.name} cyc_ratio_ss")
-    coil_cyc_ratio_sensor.setKeyName(air_loop_unitary.name.to_s)
+    outdoor_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    outdoor_db_sensor.setName("outdoor_db")
+    outdoor_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+    outdoor_w_sensor.setName("outdoor_w")
+    outdoor_bp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
+    outdoor_bp_sensor.setName("outdoor_bp")
     indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
     indoor_temp_sensor.setKeyName(control_zone.name.to_s)
-    setpoint_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
-    setpoint_temp_sensor.setName("#{control_zone.name} spt_temp")
-    setpoint_temp_sensor.setKeyName(control_zone.name.to_s)
+    spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
+    spt_sensor.setName("#{control_zone.name} spt_temp")
+    spt_sensor.setKeyName(control_zone.name.to_s)
+    
+    if clg_coil
+      clg_tot_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Rate')
+      clg_tot_sensor.setName("#{clg_coil.name} total cooling rate")
+      clg_tot_sensor.setKeyName(clg_coil.name.to_s)
+      clg_sens_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Sensible Cooling Rate')
+      clg_sens_sensor.setName("#{clg_coil.name} sens cooling rate")
+      clg_sens_sensor.setKeyName(clg_coil.name.to_s)
+      clg_pow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Rate')
+      clg_pow_sensor.setName("#{clg_coil.name} pow")
+      clg_pow_sensor.setKeyName(clg_coil.name.to_s)
+      clg_cap_stage_fff_sensors = []
+      clg_cap_stage_ft_sensors = []
+      clg_eir_stage_fff_sensors = []
+      clg_eir_stage_ft_sensors = []
+      clg_coil.CoilCoolingDXMultiSpeedStageData.each_with_index do |stage, i|
+        stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_cap_fff_sensor.setName("#{clg_coil.name} stage #{i} cap fff")
+        stage_cap_fff_sensor.setKeyName(stage.totalCoolingCapacityFunctionofFlowFractionCurve.name.to_s)
+        clg_cap_stage_fff_sensors << stage_cap_fff_sensor
+        stage_cap_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_cap_ft_sensor.setName("#{clg_coil.name} stage #{i} cap ft")
+        stage_cap_ft_sensor.setKeyName(stage.totalCoolingCapacityFunctionofTemperatureCurve.name.to_s)
+        clg_cap_stage_ft_sensors << stage_cap_ft_sensor
+        stage_eir_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_eir_fff_sensor.setName("#{clg_coil.name} stage #{i} eir fff")
+        stage_eir_fff_sensor.setKeyName(stage.energyInputRatioFunctionofFlowFractionCurve.name.to_s)
+        clg_eir_stage_fff_sensors << stage_eir_fff_sensor
+        stage_eir_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_eir_ft_sensor.setName("#{clg_coil.name} stage #{i} eir ft")
+        stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
+        clg_eir_stage_ft_sensors << stage_eir_ft_sensor
+      end
+    end
+    if htg_coil
+      htg_pow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Rate')
+      htg_pow_sensor.setName("#{htg_coil.name} pow")
+      htg_pow_sensor.setKeyName(htg_coil.name.to_s)
+      htg_cap_stage_fff_sensors = []
+      htg_cap_stage_ft_sensors = []
+      htg_eir_stage_fff_sensors = []
+      htg_eir_stage_ft_sensors = []
+      htg_coil.CoilHeatingDXMultiSpeedStageData.each_with_index do |stage, i|
+        stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_cap_fff_sensor.setName("#{htg_coil.name} stage #{i} fff")
+        stage_cap_fff_sensor.setKeyName(stage.heatingCapacityFunctionofFlowFractionCurve.name.to_s)
+        htg_cap_stage_fff_sensors << stage_cap_fff_sensor
+        stage_cap_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_cap_ft_sensor.setName("#{htg_coil.name} stage #{i} ft")
+        stage_cap_ft_sensor.setKeyName(stage.heatingCapacityFunctionofTemperatureCurve.name.to_s)
+        htg_cap_stage_ft_sensors << stage_cap_ft_sensor
+        stage_eir_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_eir_fff_sensor.setName("#{htg_coil.name} stage #{i} fff")
+        stage_eir_fff_sensor.setKeyName(stage.energyInputRatioFunctionofFlowFractionCurve.name.to_s)
+        htg_eir_stage_fff_sensors << stage_eir_fff_sensor
+        stage_eir_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_eir_ft_sensor.setName("#{htg_coil.name} stage #{i} ft")
+        stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
+        htg_eir_stage_ft_sensors << stage_eir_ft_sensor
+      end
+    end
 
     # actuator
     coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
@@ -1846,21 +1904,86 @@ class HVAC
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName("#{air_loop_unitary.name} max capacity program")
-    program.addLine("Set target_speed = #{num_speeds} * #{cap_ratio_sensor.name}")
-    program.addLine("If #{coil_speed_level_sensor.name} <= 1")
-    program.addLine("  Set current_speed = #{coil_cyc_ratio_sensor.name}")
-    program.addLine("ElseIf #{coil_speed_level_sensor.name} > 1")
-    program.addLine("  Set current_speed = (#{coil_speed_level_sensor.name} - 1) + #{coil_speed_ratio_sensor.name}")
-    program.addLine('Else')
-    program.addLine('  Set current_speed = 0')
-    program.addLine('EndIf')
+    program.addLine('Set clg_mode = 0')
+    program.addLine('Set htg_mode = 0')
+    program.addLine('Set target_power = 99999999')
+    program.addLine('Set target_speed_ratio = 4')
+    if htg_coil
+      program.addLine("If #{htg_pow_sensor} > 0")
+      program.addLine('  Set htg_mode = 1')
+      program.addLine('EndIf')
+      # Calculate capacity and eirs for later use of full-load power calculations at each stage
+      program.addLine('If htg_mode > 0')
+      program.addLine("  If #{outdoor_db_sensor} < 4.444444,")
+      program.addLine("    Set T_coil_out = 0.82 * #{outdoor_db_sensor} - 8.589")
+      program.addLine("    Set delta_humidity_ratio = @MAX 0 (#{outdoor_w_sensor} - (@WFnTdbRhPb T_coil_out 1.0 #{outdoor_bp_sensor}))")
+      program.addLine('    Set htg_frost_multiplier = 0.909 - 107.33 * delta_humidity_ratio')
+      program.addLine('  Else')
+      program.addLine('    Set htg_frost_multiplier = 1.0')
+      program.addLine('  EndIf')
+      i = 1
+      htg_coil.CoilHeatingDXMultiSpeedStageData.each do |stage|
+        program.addLine("  Set current_capacity_#{i} = #{stage.grossRatedHeatingCapacity} * #{htg_cap_stage_fff_sensors[i - 1]} * #{htg_cap_stage_ft_sensors[i - 1]} * htg_frost_multiplier")
+        program.addLine("  Set rated_eir_#{i} = 1 / #{stage.grossRatedHeatingCOP}")
+        program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{htg_eir_stage_ft_sensors[i - 1]} * #{htg_eir_stage_fff_sensors[i - 1]} * current_capacity_#{i}")
+        i += 1
+      end
+      program.addLine("  Set target_power = #{htg_coil.CoilHeatingDXMultiSpeedStageData[-1].grossRatedHeatingCapacity} * #{rated_eir_[i]} * #{cap_ratio_sensor[i]}")
+      program.addLine('EndIf')
+      (1 .. htg_coil.CoilHeatingDXMultiSpeedStageData.size).each do |i|
+        if i == 1
+          program.addLine("If target_power < current_power_#{i}")
+          program.addLine("  Set target_speed_ratio = target_power / current_power_#{i}")
+        else
+          program.addLine("ElseIf target_power < current_power_#{i}")
+          program.addLine("  Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i - 1}")
+        end
+      end
+      program.addLine("Else")
+      program.addLine("  Set target_speed_ratio = 4")
+      program.addLine("EndIf")
+    end
+    if clg_coil
+      program.addLine("If #{clg_pow_sensor} > 0")
+      program.addLine('  Set clg_mode = 1')
+      program.addLine('EndIf')
+      program.addLine('If clg_mode > 0')
+      program.addLine("  If #{clg_tot_sensor} > 0")
+      program.addLine("    Set shr = #{clg_sens_sensor} / #{clg_tot_sensor}")
+      program.addLine('  Else')
+      program.addLine('    Set shr = 0.0')
+      program.addLine('  EndIf')
+      program.addLine('EndIf')
+      i = 1
+      clg_coil.CoilCoolingDXMultiSpeedStageData.each do |stage|
+        program.addLine("  Set current_capacity_#{i} = #{stage.grossRatedTotalCoolingCapacity} * #{clg_cap_stage_fff_sensors[i - 1]} * #{clg_cap_stage_ft_sensors[i - 1]} * shr")
+        program.addLine("  Set rated_eir_#{i} = 1 / #{stage.grossRatedCoolingCOP}")
+        program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{clg_eir_stage_ft_sensors[i - 1]} * #{clg_eir_stage_fff_sensors[i - 1]} * current_capacity_#{i}")
+        i += 1
+      end
+      program.addLine("  Set target_power = #{clg_coil.CoilCoolingDXMultiSpeedStageData[-1].grossRatedTotalCoolingCapacity} * #{rated_eir_[i]} * #{cap_ratio_sensor[i]}")
+      program.addLine('EndIf')
+      (1 .. clg_coil.CoilCoolingDXMultiSpeedStageData.size).each do |i|
+        if i == 1
+          program.addLine("If target_power < current_power_#{i}")
+          program.addLine("  Set target_speed_ratio = target_power / current_power_#{i}")
+        else
+          program.addLine("ElseIf target_power < current_power_#{i}")
+          program.addLine("  Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i - 1}")
+        end
+      end
+      program.addLine("Else")
+      program.addLine("  Set target_speed_ratio = 4")
+      program.addLine("EndIf")
+    end
+
     program.addLine("If #{cap_ratio_sensor.name} > 0.7") # general curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{setpoint_temp_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
+    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{spt_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
     program.addLine("    Set #{coil_speed_act.name} = NULL")
     program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
     program.addLine('  Else')
-    program.addLine('    If current_speed >= target_speed') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
-    program.addLine("      Set #{coil_speed_act.name} = target_speed")
+    program.addLine("    If ((htg_mode > 0) && (#{htg_pow_sensor} >= target_power)) || ((clg_mode > 0) && (#{clg_pow_sensor} >= target_power))") # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine("      Set #{coil_speed_act.name} = target_speed_ratio")
     program.addLine("      Set #{supp_coil_avail_act.name} = 0") unless htg_supp_coil.nil?
     program.addLine('    Else')
     program.addLine("      Set #{coil_speed_act.name} = NULL")
@@ -1868,8 +1991,8 @@ class HVAC
     program.addLine('    EndIf')
     program.addLine('  EndIf')
     program.addLine('Else') # critical curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine('  If current_speed >= target_speed') # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
-    program.addLine("    Set #{coil_speed_act.name} = target_speed")
+    program.addLine("  If ((htg_mode > 0) && (#{htg_pow_sensor} >= target_power)) || ((clg_mode > 0) && (#{clg_pow_sensor} >= target_power))") # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine("    Set #{coil_speed_act.name} = target_speed_ratio")
     if not htg_supp_coil.nil?
       program.addLine("    If #{indoor_temp_sensor.name} < #{UnitConversions.convert(62, 'F', 'C')}")
       program.addLine("      Set #{supp_coil_avail_act.name} = 1")
