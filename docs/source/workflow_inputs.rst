@@ -3044,14 +3044,17 @@ Recirculation
 
 If the in-unit distribution system is specified as recirculation, additional information is entered in ``SystemType/Recirculation``.
 
-  =================================  =======  =====  ===========  ========  ========  =====================================
-  Element                            Type     Units  Constraints  Required  Default   Notes
-  =================================  =======  =====  ===========  ========  ========  =====================================
-  ``ControlType``                    string          See [#]_     Yes                 Recirculation control type
-  ``RecirculationPipingLoopLength``  double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
-  ``BranchPipingLength``             double   ft     > 0          No        10        Branch piping length [#]_
-  ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
-  =================================  =======  =====  ===========  ========  ========  =====================================
+  =========================================================  =======  =====  ===========  ========  ========  =====================================
+  Element                                                    Type     Units  Constraints  Required  Default   Notes
+  =========================================================  =======  =====  ===========  ========  ========  =====================================
+  ``ControlType``                                            string          See [#]_     Yes                 Recirculation control type
+  ``RecirculationPipingLoopLength``                          double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
+  ``BranchPipingLength``                                     double   ft     > 0          No        10        Branch piping length [#]_
+  ``PumpPower``                                              double   W      >= 0         No        50 [#]_   Recirculation pump power
+  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                        No        TODO      24 comma-separated weekday fractions
+  ``extension/RecirculationPumpWeekendScheduleFractions``    array                        No        TODO      24 comma-separated weekend fractions
+  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                        No        TODO      12 comma-separated monthly multipliers
+  =========================================================  =======  =====  ===========  ========  ========  =====================================
 
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
