@@ -1953,9 +1953,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_heating.water_fixtures_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc.xml'].include? hpxml_file
       hpxml_bldg.hot_water_distributions[0].has_shared_recirculation = true
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
@@ -2041,6 +2038,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_fixtures[1].low_flow = nil
       hpxml_bldg.water_fixtures[1].flow_rate = 2.0
       hpxml_bldg.water_fixtures[1].count = 3
+    end
+    if ['base-dhw-recirc-demand.xml'].include? hpxml_file
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
+    elsif ['base-dhw-recirc-temperature.xml'].include? hpxml_file
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
     end
 
     # -------------------- #

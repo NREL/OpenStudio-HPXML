@@ -414,6 +414,11 @@
                 <RecirculationPipingLoopLength>50.0</RecirculationPipingLoopLength>
                 <BranchPipingLength>50.0</BranchPipingLength>
                 <PumpPower>50.0</PumpPower>
+                <extension>
+                  <RecirculationPumpWeekdayScheduleFractions>0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055</RecirculationPumpWeekdayScheduleFractions>
+                  <RecirculationPumpWeekendScheduleFractions>0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055</RecirculationPumpWeekendScheduleFractions>
+                  <RecirculationPumpMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</RecirculationPumpMonthlyScheduleMultipliers>
+                </extension>
               </Recirculation>
             </SystemType>
             <PipeInsulation>
