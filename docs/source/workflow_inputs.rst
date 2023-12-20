@@ -2993,19 +2993,39 @@ HPXML Hot Water Distribution
 
 If any water heating systems are provided, a single hot water distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution``.
 
-  =================================  =======  ============  ===========  ========  ========  =======================================================================
-  Element                            Type     Units         Constraints  Required  Default   Notes
-  =================================  =======  ============  ===========  ========  ========  =======================================================================
-  ``SystemIdentifier``               id                                  Yes                 Unique identifier
-  ``SystemType``                     element                See [#]_     Yes                 Type of in-unit distribution system serving the dwelling unit
-  ``PipeInsulation/PipeRValue``      double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
-  ``DrainWaterHeatRecovery``         element                             No        <none>    Presence of drain water heat recovery device
-  ``extension/SharedRecirculation``  element                See [#]_     No        <none>    Presence of shared recirculation system serving multiple dwelling units
-  =================================  =======  ============  ===========  ========  ========  =======================================================================
+  =========================================================  =======  ============  ===========  ========  ========  =======================================================================
+  Element                                                    Type     Units         Constraints  Required  Default   Notes
+  =========================================================  =======  ============  ===========  ========  ========  =======================================================================
+  ``SystemIdentifier``                                       id                                  Yes                 Unique identifier
+  ``SystemType``                                             element                See [#]_     Yes                 Type of in-unit distribution system serving the dwelling unit
+  ``PipeInsulation/PipeRValue``                              double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
+  ``DrainWaterHeatRecovery``                                 element                             No        <none>    Presence of drain water heat recovery device
+  ``extension/SharedRecirculation``                          element                See [#]_     No        <none>    Presence of shared recirculation system serving multiple dwelling units
+  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                               No        See [#]_  24 comma-separated recirculation pump weekday fractions
+  ``extension/RecirculationPumpWeekendScheduleFractions``    array                               No        See [#]_  24 comma-separated recirculation pump weekend fractions
+  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                               No        See [#]_  12 comma-separated recirculation pump monthly multipliers
+  =========================================================  =======  ============  ===========  ========  ========  =======================================================================
 
   .. [#] SystemType child element choices are ``Standard`` and ``Recirculation``.
   .. [#] If SharedRecirculation is provided, SystemType must be ``Standard``.
          This is because a stacked recirculation system (i.e., shared recirculation loop plus an additional in-unit recirculation system) is more likely to indicate input errors than reflect an actual real-world scenario.
+  .. [#] If RecirculationPumpWeekdayScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
+         
+         \- **no control**, **timer**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         
+         \- **manual demand control**, **presence sensor demand control**: "0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026"
+                  
+         \- **temperature**: "0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055"
+
+  .. [#] If RecirculationPumpWeekendScheduleFractions not provided (and :ref:`detailedschedules` not used), defaults as:
+         
+         \- **no control**, **timer**: "0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042"
+         
+         \- **manual demand control**, **presence sensor demand control**: "0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026"
+                  
+         \- **temperature**: "0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055"
+
+  .. [#] If RecirculationPumpMonthlyScheduleMultipliers not provided (and :ref:`detailedschedules` not used), defaults to: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
 .. note::
 
@@ -3044,17 +3064,14 @@ Recirculation
 
 If the in-unit distribution system is specified as recirculation, additional information is entered in ``SystemType/Recirculation``.
 
-  =========================================================  =======  =====  ===========  ========  ========  =====================================
-  Element                                                    Type     Units  Constraints  Required  Default   Notes
-  =========================================================  =======  =====  ===========  ========  ========  =====================================
-  ``ControlType``                                            string          See [#]_     Yes                 Recirculation control type
-  ``RecirculationPipingLoopLength``                          double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
-  ``BranchPipingLength``                                     double   ft     > 0          No        10        Branch piping length [#]_
-  ``PumpPower``                                              double   W      >= 0         No        50 [#]_   Recirculation pump power
-  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                        No        TODO      24 comma-separated weekday fractions
-  ``extension/RecirculationPumpWeekendScheduleFractions``    array                        No        TODO      24 comma-separated weekend fractions
-  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                        No        TODO      12 comma-separated monthly multipliers
-  =========================================================  =======  =====  ===========  ========  ========  =====================================
+  =================================  =======  =====  ===========  ========  ========  =====================================
+  Element                            Type     Units  Constraints  Required  Default   Notes
+  =================================  =======  =====  ===========  ========  ========  =====================================
+  ``ControlType``                    string          See [#]_     Yes                 Recirculation control type
+  ``RecirculationPipingLoopLength``  double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
+  ``BranchPipingLength``             double   ft     > 0          No        10        Branch piping length [#]_
+  ``PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
+  =================================  =======  =====  ===========  ========  ========  =====================================
 
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
