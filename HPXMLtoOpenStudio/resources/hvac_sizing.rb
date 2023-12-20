@@ -2382,19 +2382,9 @@ class HVACSizing
           dse_A[duct_type] += duct_area
 
           # Calculate area-weighted values:
-
           duct_area_fraction = duct_area / total_area
-
-          # Assume rectangular ducts for effective R-value for better consistency
-          if duct.duct_insulation_r_value == 0
-            duct_effective_r_value = 1.5
-          else
-            duct_effective_r_value = duct.duct_insulation_r_value + 1.0
-          end
-          dse_Ufactor[duct_type] += 1.0 / duct_effective_r_value * duct_area_fraction
-
+          dse_Ufactor[duct_type] += 1.0 / duct.duct_effective_r_value * duct_area_fraction
           dse_Tamb[duct_type] += design_temps[duct.duct_location] * duct_area_fraction
-
           dse_Fregain[duct_type] += get_duct_regain_factor(duct) * duct_area_fraction
         end
       end

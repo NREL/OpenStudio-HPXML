@@ -328,14 +328,14 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>2.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
                   <DuctSurfaceArea>516.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctInsulationRValue>2.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
                   <DuctSurfaceArea>125.0</DuctSurfaceArea>
                 </Ducts>

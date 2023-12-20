@@ -296,14 +296,14 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>272.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>86.0</DuctSurfaceArea>
                 </Ducts>
