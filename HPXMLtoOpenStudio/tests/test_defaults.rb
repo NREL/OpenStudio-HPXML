@@ -2646,16 +2646,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-recirc-demand.xml')
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_power = 65.0
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = 2.5
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = ConstantDaySchedule
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 50.0, 50.0, 65.0, 2.5)
+    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 50.0, 50.0, 65.0, 2.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test inputs not overridden by defaults -- shared recirculation
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-water-heater-recirc.xml')
     hpxml_bldg.hot_water_distributions[0].shared_recirculation_pump_power = 333.0
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = ConstantDaySchedule
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_shared_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 333.0)
+    _test_default_shared_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 333.0, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults w/ conditioned basement
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -2687,36 +2693,42 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.hot_water_distributions[0].recirculation_branch_piping_length = nil
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_power = nil
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 166.96, 10.0, 50.0, 0.0)
+    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 166.96, 10.0, 50.0, 0.0, Schedule.RecirculationPumpDemandControlledWeekdayFractions, Schedule.RecirculationPumpDemandControlledWeekendFractions, Schedule.RecirculationPumpMonthlyMultipliers)
 
     # Test defaults w/ recirculation & unconditioned basement
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
     hpxml_bldg.hot_water_distributions.clear
     hpxml_bldg.hot_water_distributions.add(id: 'HotWaterDistribution',
                                            system_type: HPXML::DHWDistTypeRecirc,
-                                           recirculation_control_type: HPXML::DHWRecirControlTypeSensor)
+                                           recirculation_control_type: HPXML::DHWRecircControlTypeSensor)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 156.96, 10.0, 50.0, 0.0)
+    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 156.96, 10.0, 50.0, 0.0, Schedule.RecirculationPumpDemandControlledWeekdayFractions, Schedule.RecirculationPumpDemandControlledWeekendFractions, Schedule.RecirculationPumpMonthlyMultipliers)
 
     # Test defaults w/ recirculation & 2-story building
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories.xml')
     hpxml_bldg.hot_water_distributions.clear
     hpxml_bldg.hot_water_distributions.add(id: 'HotWaterDistribution',
                                            system_type: HPXML::DHWDistTypeRecirc,
-                                           recirculation_control_type: HPXML::DHWRecirControlTypeSensor)
+                                           recirculation_control_type: HPXML::DHWRecircControlTypeSensor)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 186.96, 10.0, 50.0, 0.0)
+    _test_default_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 186.96, 10.0, 50.0, 0.0, Schedule.RecirculationPumpDemandControlledWeekdayFractions, Schedule.RecirculationPumpDemandControlledWeekendFractions, Schedule.RecirculationPumpMonthlyMultipliers)
 
     # Test defaults w/ shared recirculation
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-water-heater-recirc.xml')
     hpxml_bldg.hot_water_distributions[0].shared_recirculation_pump_power = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_shared_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 220.0)
+    _test_default_shared_recirc_distribution_values(default_hpxml_bldg.hot_water_distributions[0], 220.0, Schedule.RecirculationPumpWithoutControlWeekdayFractions, Schedule.RecirculationPumpWithoutControlWeekendFractions, Schedule.RecirculationPumpMonthlyMultipliers)
   end
 
   def test_water_fixtures
@@ -4609,15 +4621,45 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)
   end
 
-  def _test_default_recirc_distribution_values(hot_water_distribution, piping_length, branch_piping_length, pump_power, pipe_r_value)
+  def _test_default_recirc_distribution_values(hot_water_distribution, piping_length, branch_piping_length, pump_power, pipe_r_value, weekday_sch, weekend_sch, monthly_mults)
     assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_length, 0.01)
     assert_in_epsilon(branch_piping_length, hot_water_distribution.recirculation_branch_piping_length, 0.01)
     assert_in_epsilon(pump_power, hot_water_distribution.recirculation_pump_power, 0.01)
     assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)
+    if weekday_sch.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_weekday_fractions)
+    else
+      assert_equal(weekday_sch, hot_water_distribution.recirculation_pump_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_weekend_fractions)
+    else
+      assert_equal(weekend_sch, hot_water_distribution.recirculation_pump_weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hot_water_distribution.recirculation_pump_monthly_multipliers)
+    end
   end
 
-  def _test_default_shared_recirc_distribution_values(hot_water_distribution, pump_power)
+  def _test_default_shared_recirc_distribution_values(hot_water_distribution, pump_power, weekday_sch, weekend_sch, monthly_mults)
     assert_in_epsilon(pump_power, hot_water_distribution.shared_recirculation_pump_power, 0.01)
+    if weekday_sch.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_weekday_fractions)
+    else
+      assert_equal(weekday_sch, hot_water_distribution.recirculation_pump_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_weekend_fractions)
+    else
+      assert_equal(weekend_sch, hot_water_distribution.recirculation_pump_weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hot_water_distribution.recirculation_pump_monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hot_water_distribution.recirculation_pump_monthly_multipliers)
+    end
   end
 
   def _test_default_water_fixture_values(hpxml_bldg, usage_multiplier, weekday_sch, weekend_sch, monthly_mults, low_flow1, low_flow2)
