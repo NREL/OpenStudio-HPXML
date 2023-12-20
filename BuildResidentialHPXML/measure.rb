@@ -3329,6 +3329,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
+    warning = (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (args[:geothermal_loop_configuration].is_initialized && args[:geothermal_loop_configuration].get != 'none')
+    warnings << 'Specified an attached geothermal loop but home has no ground source heat pump.' if warning
+
     return warnings
   end
 
@@ -5225,9 +5228,8 @@ class HPXMLFile
   end
 
   def self.set_geothermal_loop(hpxml_bldg, args)
+    return if hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size == 0
     return if !args[:geothermal_loop_configuration].is_initialized || args[:geothermal_loop_configuration].get == 'none'
-
-    loop_configuration = args[:geothermal_loop_configuration].get
 
     if args[:geothermal_loop_borefield_configuration].is_initialized
       bore_config = args[:geothermal_loop_borefield_configuration].get
@@ -5273,7 +5275,7 @@ class HPXMLFile
     end
 
     hpxml_bldg.geothermal_loops.add(id: "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}",
-                                    loop_configuration: loop_configuration,
+                                    loop_configuration: args[:geothermal_loop_configuration].get,
                                     loop_flow: loop_flow,
                                     bore_config: bore_config,
                                     num_bore_holes: num_bore_holes,
