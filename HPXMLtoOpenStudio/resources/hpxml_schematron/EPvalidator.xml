@@ -1845,6 +1845,9 @@
       <sch:assert role='ERROR' test='count(h:PipeInsulation/h:PipeRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PipeInsulation/PipeRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:DrainWaterHeatRecovery) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DrainWaterHeatRecovery</sch:assert> <!-- See [DrainWaterHeatRecovery] -->
       <sch:assert role='ERROR' test='count(h:extension/h:SharedRecirculation) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/SharedRecirculation</sch:assert> <!-- See [HotWaterDistributionType=SharedRecirculation] --> 
+      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpWeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/RecirculationPumpWeekdayScheduleFractions</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpWeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/RecirculationPumpWeekendScheduleFractions</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpMonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/RecirculationPumpMonthlyScheduleMultipliers</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1863,9 +1866,6 @@
       <sch:assert role='ERROR' test='count(h:RecirculationPipingLoopLength) &lt;= 1'>Expected 0 or 1 element(s) for xpath: RecirculationPipingLoopLength</sch:assert>
       <sch:assert role='ERROR' test='count(h:BranchPipingLength) &lt;= 1'>Expected 0 or 1 element(s) for xpath: BranchPipingLength</sch:assert>
       <sch:assert role='ERROR' test='count(h:PumpPower) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PumpPower</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpWeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../extension/RecirculationPumpWeekdayScheduleFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpWeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../extension/RecirculationPumpWeekendScheduleFractions</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:RecirculationPumpMonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ../extension/RecirculationPumpMonthlyScheduleMultipliers</sch:assert>
     </sch:rule>
   </sch:pattern>
 
