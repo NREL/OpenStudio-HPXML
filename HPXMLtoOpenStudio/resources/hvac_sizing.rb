@@ -271,9 +271,9 @@ class HVACSizing
 
           if location == HPXML::LocationAtticUnvented
             if not roof.radiant_barrier
-              cool_temp += (150.0 + (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
+              cool_temp += 150.0 * roof.net_area
             else
-              cool_temp += (130.0 + (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
+              cool_temp += 130.0 * roof.net_area
             end
           else
             if not roof.radiant_barrier
@@ -334,7 +334,7 @@ class HVACSizing
 
         cool_temp /= tot_roof_area
 
-        # Adjust base CLTD for cooling design temperature and daily range
+        # Adjust base CLTD for different CTD or DR
         cool_temp += (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + @daily_range_temp_adjust[@daily_range_num]
       end
 
@@ -370,45 +370,45 @@ class HVACSizing
     # Hourly cooling load factor (CLF) for windows/skylights WITHOUT an internal shade taken from
     # ASHRAE HOF Ch.26 Table 36 (subset of data in MJ8 Table A11-5)
     # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Hour = 8,9, ... ,19,20
-    clf_hr_nois = [[0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22],
+    clf_hr_nois = [[0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22], # South
                    [0.11, 0.15, 0.19, 0.27, 0.39, 0.52, 0.62, 0.67, 0.65, 0.58, 0.46, 0.36, 0.28],
                    [0.10, 0.12, 0.14, 0.16, 0.24, 0.36, 0.49, 0.60, 0.66, 0.66, 0.58, 0.43, 0.33],
                    [0.09, 0.10, 0.12, 0.13, 0.17, 0.26, 0.40, 0.52, 0.62, 0.66, 0.61, 0.44, 0.34],
-                   [0.08, 0.10, 0.11, 0.12, 0.14, 0.20, 0.32, 0.45, 0.57, 0.64, 0.61, 0.44, 0.34],
+                   [0.08, 0.10, 0.11, 0.12, 0.14, 0.20, 0.32, 0.45, 0.57, 0.64, 0.61, 0.44, 0.34], # West
                    [0.09, 0.10, 0.12, 0.13, 0.15, 0.17, 0.26, 0.40, 0.53, 0.63, 0.62, 0.44, 0.34],
                    [0.10, 0.12, 0.14, 0.16, 0.17, 0.19, 0.23, 0.33, 0.47, 0.59, 0.60, 0.43, 0.33],
                    [0.14, 0.18, 0.22, 0.25, 0.27, 0.29, 0.30, 0.33, 0.44, 0.57, 0.62, 0.44, 0.33],
-                   [0.48, 0.56, 0.63, 0.71, 0.76, 0.80, 0.82, 0.82, 0.79, 0.75, 0.69, 0.61, 0.48],
+                   [0.48, 0.56, 0.63, 0.71, 0.76, 0.80, 0.82, 0.82, 0.79, 0.75, 0.69, 0.61, 0.48], # North
                    [0.47, 0.44, 0.41, 0.40, 0.39, 0.39, 0.38, 0.36, 0.33, 0.30, 0.26, 0.20, 0.16],
                    [0.51, 0.51, 0.45, 0.39, 0.36, 0.33, 0.31, 0.28, 0.26, 0.23, 0.19, 0.15, 0.12],
                    [0.52, 0.57, 0.50, 0.45, 0.39, 0.34, 0.31, 0.28, 0.25, 0.22, 0.18, 0.14, 0.12],
-                   [0.51, 0.57, 0.57, 0.50, 0.42, 0.37, 0.32, 0.29, 0.25, 0.22, 0.19, 0.15, 0.12],
+                   [0.51, 0.57, 0.57, 0.50, 0.42, 0.37, 0.32, 0.29, 0.25, 0.22, 0.19, 0.15, 0.12], # East
                    [0.49, 0.58, 0.61, 0.57, 0.48, 0.41, 0.36, 0.32, 0.28, 0.24, 0.20, 0.16, 0.13],
                    [0.43, 0.55, 0.62, 0.63, 0.57, 0.48, 0.42, 0.37, 0.33, 0.28, 0.24, 0.19, 0.15],
                    [0.27, 0.43, 0.55, 0.63, 0.64, 0.60, 0.52, 0.45, 0.40, 0.35, 0.29, 0.23, 0.18],
-                   [0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22]]
+                   [0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22]] # South
     clf_hr_nois_horiz = [0.24, 0.36, 0.48, 0.58, 0.66, 0.72, 0.74, 0.73, 0.67, 0.59, 0.47, 0.37, 0.29]
 
     # Hourly cooling load factor (CLF) for windows/skylights WITH an internal shade taken from
     # ASHRAE HOF Ch.26 Table 39 (subset of data in MJ8 Table A11-6)
     # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Hour = 8,9, ... ,19,20
-    clf_hr_is = [[0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09],
+    clf_hr_is = [[0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09], # South
                  [0.18, 0.22, 0.27, 0.43, 0.63, 0.78, 0.84, 0.80, 0.66, 0.46, 0.25, 0.13, 0.11],
                  [0.14, 0.16, 0.19, 0.22, 0.38, 0.59, 0.75, 0.83, 0.81, 0.69, 0.45, 0.16, 0.12],
                  [0.12, 0.14, 0.16, 0.17, 0.23, 0.44, 0.64, 0.78, 0.84, 0.78, 0.55, 0.16, 0.12],
-                 [0.11, 0.13, 0.15, 0.16, 0.17, 0.31, 0.53, 0.72, 0.82, 0.81, 0.61, 0.16, 0.12],
+                 [0.11, 0.13, 0.15, 0.16, 0.17, 0.31, 0.53, 0.72, 0.82, 0.81, 0.61, 0.16, 0.12], # West
                  [0.12, 0.14, 0.16, 0.17, 0.18, 0.22, 0.43, 0.65, 0.80, 0.84, 0.66, 0.16, 0.12],
                  [0.14, 0.17, 0.19, 0.20, 0.21, 0.22, 0.30, 0.52, 0.73, 0.82, 0.69, 0.16, 0.12],
                  [0.22, 0.26, 0.30, 0.32, 0.33, 0.34, 0.34, 0.39, 0.61, 0.82, 0.76, 0.17, 0.12],
-                 [0.65, 0.73, 0.80, 0.86, 0.89, 0.89, 0.86, 0.82, 0.75, 0.78, 0.91, 0.24, 0.18],
+                 [0.65, 0.73, 0.80, 0.86, 0.89, 0.89, 0.86, 0.82, 0.75, 0.78, 0.91, 0.24, 0.18], # North
                  [0.62, 0.42, 0.37, 0.37, 0.37, 0.36, 0.35, 0.32, 0.28, 0.23, 0.17, 0.08, 0.07],
                  [0.74, 0.58, 0.37, 0.29, 0.27, 0.26, 0.24, 0.22, 0.20, 0.16, 0.12, 0.06, 0.05],
                  [0.80, 0.71, 0.52, 0.31, 0.26, 0.24, 0.22, 0.20, 0.18, 0.15, 0.11, 0.06, 0.05],
-                 [0.80, 0.76, 0.62, 0.41, 0.27, 0.24, 0.22, 0.20, 0.17, 0.14, 0.11, 0.06, 0.05],
+                 [0.80, 0.76, 0.62, 0.41, 0.27, 0.24, 0.22, 0.20, 0.17, 0.14, 0.11, 0.06, 0.05], # East
                  [0.79, 0.80, 0.72, 0.54, 0.34, 0.27, 0.24, 0.21, 0.19, 0.15, 0.12, 0.07, 0.06],
                  [0.74, 0.81, 0.79, 0.68, 0.49, 0.33, 0.28, 0.25, 0.22, 0.18, 0.13, 0.08, 0.07],
                  [0.54, 0.72, 0.81, 0.81, 0.71, 0.54, 0.38, 0.32, 0.27, 0.22, 0.16, 0.09, 0.08],
-                 [0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09]]
+                 [0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09]] # South
     clf_hr_is_horiz = [0.44, 0.59, 0.72, 0.81, 0.85, 0.85, 0.81, 0.71, 0.58, 0.42, 0.25, 0.14, 0.12]
 
     # Shade Line Multipliers (SLM) for shaded windows will be calculated using the procedure
@@ -425,23 +425,23 @@ class HVACSizing
     # Peak solar factor (PSF) (aka solar heat gain factor) taken from ASHRAE HOF 1989 Ch.26 Table 34
     # (subset of data in MJ8 Table 3D-2)
     # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Latitude = 20,24,28, ... ,60,64
-    psf = [[57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0],
+    psf = [[57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0], # South
            [88.0,  103.0, 120.0, 136.0, 151.0, 165.0, 177.0, 188.0, 197.0, 206.0, 213.0, 217.0],
            [152.0, 162.0, 172.0, 181.0, 189.0, 196.0, 202.0, 208.0, 212.0, 215.0, 217.0, 217.0],
            [200.0, 204.0, 207.0, 210.0, 212.0, 214.0, 215.0, 216.0, 216.0, 216.0, 214.0, 211.0],
-           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0],
+           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0], # East/West
            [206.0, 203.0, 199.0, 195.0, 190.0, 185.0, 180.0, 174.0, 169.0, 165.0, 161.0, 157.0],
            [162.0, 156.0, 149.0, 141.0, 138.0, 135.0, 132.0, 128.0, 124.0, 119.0, 114.0, 109.0],
            [91.0,  87.0,  83.0,  79.0,  75.0,  71.0,  66.0,  61.0,  56.0,  56.0,  57.0,  58.0],
-           [40.0,  38.0,  38.0,  37.0,  36.0,  35.0,  34.0,  33.0,  32.0,  30.0,  28.0,  27.0],
+           [40.0,  38.0,  38.0,  37.0,  36.0,  35.0,  34.0,  33.0,  32.0,  30.0,  28.0,  27.0], # North
            [91.0,  87.0,  83.0,  79.0,  75.0,  71.0,  66.0,  61.0,  56.0,  56.0,  57.0,  58.0],
            [162.0, 156.0, 149.0, 141.0, 138.0, 135.0, 132.0, 128.0, 124.0, 119.0, 114.0, 109.0],
            [206.0, 203.0, 199.0, 195.0, 190.0, 185.0, 180.0, 174.0, 169.0, 165.0, 161.0, 157.0],
-           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0],
+           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0], # East/West
            [200.0, 204.0, 207.0, 210.0, 212.0, 214.0, 215.0, 216.0, 216.0, 216.0, 214.0, 211.0],
            [152.0, 162.0, 172.0, 181.0, 189.0, 196.0, 202.0, 208.0, 212.0, 215.0, 217.0, 217.0],
            [88.0,  103.0, 120.0, 136.0, 151.0, 165.0, 177.0, 188.0, 197.0, 206.0, 213.0, 217.0],
-           [57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0]]
+           [57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0]] # South
     psf_horiz = [280.0, 277.0, 272.0, 265.0, 257.0, 247.0, 236.0, 223.0, 208.0, 193.0, 176.0, 159.0]
 
     # Hourly Temperature Adjustment Values (HTA_DR) (MJ8 Table A11-3)
@@ -477,10 +477,11 @@ class HVACSizing
       end
     end
 
+    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
+
     # Windows
     bldg_design_loads.Heat_Windows = 0.0
-    alp_load = 0.0 # Average Load Procedure (ALP) Load
-    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
+    bldg_design_loads.Cool_Windows = 0.0
 
     @hpxml_bldg.windows.each do |window|
       next unless window.wall.is_exterior_thermal_boundary
@@ -589,32 +590,17 @@ class HVACSizing
         end
 
         if hr == -1
-          alp_load += htm * window.area
+          # Average Load Procedure (ALP) load
+          bldg_design_loads.Cool_Windows += htm * window.area
         else
           afl_hr[hr] += htm * window.area
         end
       end
     end # window
 
-    # Daily Average Load (DAL)
-    dal = afl_hr.sum(0.0) / afl_hr.size
-
-    # Excursion Limit line (ELL)
-    ell = 1.3 * dal
-
-    # Peak Fenestration Load (PFL)
-    pfl = afl_hr.max
-
-    # Excursion Adjustment Load (EAL)
-    eal = [0.0, pfl - ell].max
-
-    # Window Cooling Load
-    bldg_design_loads.Cool_Windows = alp_load + eal
-
     # Skylights
     bldg_design_loads.Heat_Skylights = 0.0
-    alp_load = 0.0 # Average Load Procedure (ALP) Load
-    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
+    bldg_design_loads.Cool_Skylights = 0.0
 
     @hpxml_bldg.skylights.each do |skylight|
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
@@ -623,6 +609,9 @@ class HVACSizing
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
 
       skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
+      u_curb = 0.51 # default to wood (Table 2B-3)
+      ar_curb = 0.35 # default to small (Table 2B-3)
+      u_eff_skylight = skylight_ufactor + u_curb * ar_curb
 
       bldg_design_loads.Heat_Skylights += skylight_ufactor * skylight.area * @htd
 
@@ -632,7 +621,7 @@ class HVACSizing
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
 
         # clf_d: Average Cooling Load Factor for the given skylight direction
-        # clf_d: Average Cooling Load Factor for horizontal
+        # clf_horiz: Average Cooling Load Factor for horizontal
         if hr == -1
           if skylight_summer_sf < 1
             clf_d = clf_avg_is[cnt225]
@@ -661,18 +650,19 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given skylight Direction
-        u_curb = 0.51 # default to wood (Table 2B-3)
-        ar_curb = 0.35 # default to small (Table 2B-3)
-        u_eff_skylight = skylight_ufactor + u_curb * ar_curb
         htm = (sol_h + sol_v) * (skylight_shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
 
         if hr == -1
-          alp_load += htm * skylight.area
+          # Average Load Procedure (ALP) load
+          bldg_design_loads.Cool_Skylights += htm * skylight.area
         else
           afl_hr[hr] += htm * skylight.area
         end
       end
     end # skylight
+
+    # Check for Adequate Exposure Diversity (AED)
+    # If not adequate, add AED Excursion to windows cooling load
 
     # Daily Average Load (DAL)
     dal = afl_hr.sum(0.0) / afl_hr.size
@@ -686,8 +676,8 @@ class HVACSizing
     # Excursion Adjustment Load (EAL)
     eal = [0.0, pfl - ell].max
 
-    # Skylight Cooling Load
-    bldg_design_loads.Cool_Skylights = alp_load + eal
+    # TODO: Make a separate AED category instead of lumping into windows?
+    bldg_design_loads.Cool_Windows += eal
   end
 
   def self.process_load_doors(bldg_design_loads)
@@ -752,11 +742,11 @@ class HVACSizing
           # Adjust base Cooling Load Temperature Difference (CLTD)
           # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
           if wall.solar_absorptance <= 0.5
-            colorMultiplier = 0.65      # MJ8 Table 4B Notes, pg 348
+            color_multiplier = 0.65      # MJ8 Table 4B Notes, pg 348
           elsif wall.solar_absorptance <= 0.75
-            colorMultiplier = 0.83      # MJ8 Appendix 12, pg 519
+            color_multiplier = 0.83      # MJ8 Appendix 12, pg 519
           else
-            colorMultiplier = 1.0
+            color_multiplier = 1.0
           end
 
           true_azimuth = get_true_azimuth(azimuth)
@@ -768,20 +758,18 @@ class HVACSizing
           cltd_base_shade = [25.0, 22.5, 20.0, 18.45, 16.9, 15.45, 14.0, 13.55, 13.1, 12.85, 12.6]
 
           if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
-            cltd = cltd_base_shade[wall_group - 1] * colorMultiplier
+            cltd = cltd_base_shade[wall_group - 1] * color_multiplier
           else
-            cltd = cltd_base_sun[wall_group - 1] * colorMultiplier
+            cltd = cltd_base_sun[wall_group - 1] * color_multiplier
           end
 
           if @ctd >= 10.0
-            # Adjust the CLTD for different cooling design temperatures
-            cltd += (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0)
-            # Adjust the CLTD for daily temperature range
-            cltd += @daily_range_temp_adjust[@daily_range_num]
+            # Adjust base CLTD for different CTD or DR
+            cltd += (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + @daily_range_temp_adjust[@daily_range_num]
           else
             # Handling cases ctd < 10 is based on A12-18 in MJ8
             cltd_corr = @ctd - 20.0 - @daily_range_temp_adjust[@daily_range_num]
-            cltd = [cltd + cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
+            cltd = [cltd - cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
           end
 
           bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
@@ -796,10 +784,15 @@ class HVACSizing
 
     # Foundation walls
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
-      next unless foundation_wall.is_exterior_thermal_boundary
+      next unless foundation_wall.is_thermal_boundary
 
-      u_wall_with_soil, _u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
-      bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
+      u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
+      if foundation_wall.is_exterior
+        bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
+      else # Partition wall
+        adjacent_space = foundation_wall.exterior_adjacent_to
+        bldg_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      end
     end
   end
 
@@ -888,13 +881,18 @@ class HVACSizing
     bldg_design_loads.Heat_Floors = 0.0
     bldg_design_loads.Cool_Floors = 0.0
 
+    has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
+
     @hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
       next unless floor.is_thermal_boundary
 
       if floor.is_exterior
+        htd_adj = @htd
+        htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant floor over open crawlspace: HTM = U-Value × (HTD + 25)
+
         bldg_design_loads.Cool_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        bldg_design_loads.Heat_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * @htd
+        bldg_design_loads.Heat_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * htd_adj
       else # Partition floor
         adjacent_space = floor.exterior_adjacent_to
         if floor.is_floor && [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
@@ -920,16 +918,19 @@ class HVACSizing
 
           u_wall = sum_ua_wall / sum_a_wall
 
+          htd_adj = @htd
+          htd_adj += 25.0 if has_radiant_floor && HPXML::LocationCrawlspaceVented # Table 4A: Radiant floor over open crawlspace: HTM = U-Value × (HTD + 25)
+
           # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17
           # Calculate partition temperature different heating (PTDH) per Manual J Figure A12-6
           if [HPXML::LocationCrawlspaceVented].include? adjacent_space
             # Vented or Leaky
             ptdc_floor = @ctd / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
-            ptdh_floor = @htd / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
+            ptdh_floor = htd_adj / (1.0 + (4.0 * u_floor) / (u_wall + 0.11))
           elsif [HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include? adjacent_space
             # Sealed Tight
             ptdc_floor = u_wall * @ctd / (4.0 * u_floor + u_wall)
-            ptdh_floor = u_wall * @htd / (4.0 * u_floor + u_wall)
+            ptdh_floor = u_wall * htd_adj / (4.0 * u_floor + u_wall)
           end
 
           bldg_design_loads.Cool_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * ptdc_floor
@@ -949,14 +950,27 @@ class HVACSizing
 
     bldg_design_loads.Heat_Slabs = 0.0
 
+    has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
+
     @hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
 
+      htd_adj = @htd
+      htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant slab floor: HTM = F-Value × (HTD + 25)
+
       if slab.interior_adjacent_to == HPXML::LocationConditionedSpace # Slab-on-grade
         f_value = calc_slab_f_value(slab, @hpxml_bldg.site.ground_conductivity)
-        bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * @htd
+        bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * htd_adj
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
-        # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
+        ext_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.is_exterior }
+        z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum # Weighted-average (by length) below-grade depth
+
+        sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
+        length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
+        width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
+        w_b = [length, width].min
+        w_b = [w_b, 1.0].max # handle zero exposed perimeter
+
         slab_is_insulated = false
         if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
@@ -965,21 +979,9 @@ class HVACSizing
         elsif slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
         end
-        k_soil = 0.8 # Value from ASHRAE HoF, probably used by Manual J
-        r_other = 1.47 # Value from ASHRAE HoF, probably used by Manual J
-        ext_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.is_exterior }
-        z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum # Weighted-average (by length) below-grade depth
-        sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
-        length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
-        width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
-        w_b = [length, width].min
-        w_b = [w_b, 1.0].max # handle zero exposed perimeter
-        u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
-        u_value = 0.85 * u_avg_bf # To account for the storage effect of soil, multiply by 0.85
-        if slab_is_insulated
-          u_value *= 0.7 # U-values are multiplied y 0.70 to produce U-values for insulated floors
-        end
-        bldg_design_loads.Heat_Slabs += u_value * slab.area * @htd
+
+        u_value = calc_basement_effective_uvalue(slab_is_insulated, z_f, w_b, @hpxml_bldg.site.ground_conductivity)
+        bldg_design_loads.Heat_Slabs += u_value * slab.area * htd_adj
       end
     end
   end
@@ -995,6 +997,19 @@ class HVACSizing
 
     ncfl_ag = @hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
+    # Check for fireplace (for heating infiltration adjustment)
+    has_fireplace = false
+    if @hpxml_bldg.fuel_loads.count { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace } > 0
+      has_fireplace = true
+    end
+    if @hpxml_bldg.heating_systems.count { |htg| htg.heating_system_type == HPXML::HVACTypeFireplace } > 0
+      has_fireplace = true
+    end
+    q_fireplace = 0.0
+    if has_fireplace
+      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+    end
+
     # Set stack/wind coefficients from Tables 5D/5E
     c_s = 0.015 * ncfl_ag
     c_w_base = [0.0133 * @hpxml_bldg.site.additional_properties.aim2_shelter_coeff - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
@@ -1005,7 +1020,7 @@ class HVACSizing
     windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
 
     icfm_Cooling = ela_in2 * (c_s * @ctd + c_w * windspeed_cooling_mph**2)**0.5
-    icfm_Heating = ela_in2 * (c_s * @htd + c_w * windspeed_heating_mph**2)**0.5
+    icfm_Heating = ela_in2 * (c_s * @htd + c_w * windspeed_heating_mph**2)**0.5 + q_fireplace
 
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
@@ -2370,7 +2385,13 @@ class HVACSizing
 
           duct_area_fraction = duct_area / total_area
 
-          dse_Ufactor[duct_type] += 1.0 / duct.duct_effective_r_value * duct_area_fraction
+          # Assume rectangular ducts for effective R-value for better consistency
+          if duct.duct_insulation_r_value == 0
+            duct_effective_r_value = 1.5
+          else
+            duct_effective_r_value = duct.duct_insulation_r_value + 1.0
+          end
+          dse_Ufactor[duct_type] += 1.0 / duct_effective_r_value * duct_area_fraction
 
           dse_Tamb[duct_type] += design_temps[duct.duct_location] * duct_area_fraction
 
@@ -2459,8 +2480,9 @@ class HVACSizing
                   HPXML::LocationConditionedSpace => 0.0 }
 
     # Surface UAs
-    (@hpxml_bldg.roofs + @hpxml_bldg.floors + @hpxml_bldg.walls + @hpxml_bldg.foundation_walls).each do |surface|
-      next unless ((location == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
+    (@hpxml_bldg.roofs + @hpxml_bldg.floors + @hpxml_bldg.walls + @hpxml_bldg.foundation_walls + @hpxml_bldg.slabs + @hpxml_bldg.rim_joists).each do |surface|
+      next unless (surface.is_a? HPXML::Slab
+                   (location == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
                    (location == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
 
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
@@ -2471,6 +2493,14 @@ class HVACSizing
         if surface.is_a? HPXML::FoundationWall
           _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
           space_UAs[HPXML::LocationGround] += u_wall_without_soil * surface.area
+        elsif surface.is_a? HPXML::Slab
+          if surface.thickness == 0
+            # Dirt floor, assume R-0.1 per Walker (1998) "Technical background for default
+            # values used for forced air systems in proposed ASHRAE Std. 152"
+            space_UAs[HPXML::LocationGround] += 0.1 * surface.area
+          else
+            # TODO
+          end
         end
       end
     end
@@ -2497,14 +2527,8 @@ class HVACSizing
     volume = Geometry.calculate_zone_volume(@hpxml_bldg, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
-    space_UAs['infil'] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
+    space_UAs[HPXML::LocationOutside] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
 
-    # Total UA
-    total_UA = 0.0
-    space_UAs.values.each do |ua|
-      total_UA += ua
-    end
-    space_UAs['total'] = total_UA
     return space_UAs
   end
 
@@ -2515,21 +2539,27 @@ class HVACSizing
     design_temp = nil
     if not is_cooling_for_unvented_attic_roof_insulation
 
-      sum_uat = 0.0
+      sum_uat, sum_ua = 0.0, 0.0
       space_UAs.each do |ua_type, ua|
         if ua_type == HPXML::LocationGround
-          sum_uat += ua * ground_db
-        elsif (ua_type == HPXML::LocationOutside) || (ua_type == 'infil')
+          # Ground temperature is only used for basements, not crawlspaces
+          if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? location
+            sum_uat += ua * design_db
+          else
+            sum_uat += ua * ground_db
+          end
+          sum_ua += ua
+        elsif ua_type == HPXML::LocationOutside
           sum_uat += ua * design_db
+          sum_ua += ua
         elsif ua_type == HPXML::LocationConditionedSpace
           sum_uat += ua * conditioned_design_temp
-        elsif ua_type == 'total'
-        # skip
+          sum_ua += ua
         else
           fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
-      design_temp = sum_uat / space_UAs['total']
+      design_temp = sum_uat / sum_ua
 
     else
 
@@ -2551,11 +2581,11 @@ class HVACSizing
       ua_conditioned = 0.0
       ua_outside = 0.0
       space_UAs.each do |ua_type, ua|
-        if (ua_type == HPXML::LocationOutside) || (ua_type == 'infil')
+        if ua_type == HPXML::LocationOutside
           ua_outside += ua
         elsif ua_type == HPXML::LocationConditionedSpace
           ua_conditioned += ua
-        elsif not ((ua_type == 'total') || (ua_type == HPXML::LocationGround))
+        elsif ua_type != HPXML::LocationGround
           fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
@@ -2710,8 +2740,8 @@ class HVACSizing
         wall_group = 5 # E
       end
 
-    elsif [HPXML::WallTypeBrick, HPXML::WallTypeAdobe].include? wall_type
-      # Two Courses Brick
+    elsif [HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeConcrete].include? wall_type
+      # Two Courses Brick or 8 Inches Concrete
       if wall_ufactor >= (0.218 + 0.179) / 2
         wall_group = 7  # G
       elsif wall_ufactor >= (0.152 + 0.132) / 2
@@ -2738,7 +2768,7 @@ class HVACSizing
         wall_group = 11 # K
       end
 
-    elsif [HPXML::WallTypeICF, HPXML::WallTypeConcrete, HPXML::WallTypeStrawBale, HPXML::WallTypeStone].include? wall_type
+    elsif [HPXML::WallTypeICF, HPXML::WallTypeStrawBale, HPXML::WallTypeStone].include? wall_type
       wall_group = 11 # K
 
     end
@@ -2953,21 +2983,8 @@ class HVACSizing
     # Calculation for the F-values in Table 4A for slab foundations.
     # Important pages are the Table values (pg. 344-345) and the software protocols
     # in Appendix 12 (pg. 517-518).
-    ins_rvalue = slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
-    ins_rvalue_edge = slab.perimeter_insulation_r_value
-    if slab.under_slab_insulation_spans_entire_slab
-      ins_length = 1000.0
-    else
-      ins_length = 0
-      if slab.under_slab_insulation_r_value > 0
-        ins_length += slab.under_slab_insulation_width
-      end
-      if slab.perimeter_insulation_r_value > 0
-        ins_length += slab.perimeter_insulation_depth
-      end
-    end
+    soil_r_per_foot = 1.0 / ground_conductivity
 
-    soil_r_per_foot = ground_conductivity
     slab_r_gravel_per_inch = 0.65 # Based on calibration by Tony Fontanini
 
     # Because of uncertainty pertaining to the effective path radius, F-values are calculated
@@ -2982,12 +2999,22 @@ class HVACSizing
         if radius == 0
           r_concrete = 0.0
           r_gravel = 0.0 # No gravel on edge
-          r_ins = ins_rvalue_edge
+          if slab.perimeter_insulation_depth > 0
+            r_ins = slab.perimeter_insulation_r_value # Insulation on edge
+          else
+            r_ins = 0.0
+          end
         else
           r_concrete = Material.Concrete(slab.thickness).rvalue
           r_gravel = [slab_r_gravel_per_inch * (12.0 - slab.thickness), 0].max
-          if radius <= ins_length
-            r_ins = ins_rvalue
+          if slab.under_slab_insulation_spans_entire_slab
+            r_ins = slab.under_slab_insulation_r_value
+          elsif radius <= slab.under_slab_insulation_width && radius <= slab.perimeter_insulation_depth
+            r_ins = slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
+          elsif radius <= slab.under_slab_insulation_width
+            r_ins = slab.under_slab_insulation_r_value
+          elsif radius <= slab.perimeter_insulation_depth
+            r_ins = slab.perimeter_insulation_r_value
           else
             r_ins = 0.0
           end
@@ -3010,6 +3037,20 @@ class HVACSizing
     end
 
     return f_values.sum() / f_values.size
+  end
+
+  def self.calc_basement_effective_uvalue(slab_is_insulated, depth_below_grade, width_of_shortest_side, ground_conductivity)
+    # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
+    k_soil = ground_conductivity
+    r_other = 1.47 # Value from ASHRAE HoF, probably used by Manual J
+    z_f = depth_below_grade
+    w_b = width_of_shortest_side
+    u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
+    u_value = 0.85 * u_avg_bf # To account for the storage effect of soil, multiply by 0.85
+    if slab_is_insulated
+      u_value *= 0.7 # U-values are multiplied by 0.70 to produce U-values for insulated floors
+    end
+    return u_value
   end
 
   def self.set_hvac_types(hvac_heating, hvac_cooling)

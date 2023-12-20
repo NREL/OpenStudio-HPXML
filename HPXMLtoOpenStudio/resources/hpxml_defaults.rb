@@ -1284,6 +1284,15 @@ class HPXMLDefaults
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 
+    # Default electric resistance distribution
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeElectricResistance
+      next unless heating_system.electric_resistance_distribution.nil?
+
+      heating_system.electric_resistance_distribution = HPXML::ElectricResistanceDistributionBaseboard
+      heating_system.electric_resistance_distribution_isdefaulted = true
+    end
+
     # Default boiler EAE
     hpxml_bldg.heating_systems.each do |heating_system|
       next unless heating_system.electric_auxiliary_energy.nil?
