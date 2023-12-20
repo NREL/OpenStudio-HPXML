@@ -1384,10 +1384,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
     geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Configuration')
-    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.")
-    arg.setDefaultValue('none')
+    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
@@ -5226,9 +5225,9 @@ class HPXMLFile
   end
 
   def self.set_geothermal_loop(hpxml_bldg, args)
-    loop_configuration = args[:geothermal_loop_configuration]
+    return if !args[:geothermal_loop_configuration].is_initialized || args[:geothermal_loop_configuration].get == 'none'
 
-    return if loop_configuration == 'none'
+    loop_configuration = args[:geothermal_loop_configuration].get
 
     if args[:geothermal_loop_borefield_configuration].is_initialized
       bore_config = args[:geothermal_loop_borefield_configuration].get
