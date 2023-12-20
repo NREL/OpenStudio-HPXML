@@ -2100,8 +2100,27 @@ class HPXMLDefaults
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
         hot_water_distribution.recirculation_pump_power_isdefaulted = true
       end
+    end
+
+    if hot_water_distribution.has_shared_recirculation
+      if hot_water_distribution.shared_recirculation_pump_power.nil?
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
+        hot_water_distribution.shared_recirculation_pump_power_isdefaulted = true
+      end
+    end
+
+    if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc || hot_water_distribution.has_shared_recirculation
       schedules_file_includes_recirculation_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterRecirculationPump))
-      if hot_water_distribution.recirculation_control_type != HPXML::DHWRecirControlTypeTemperature
+      if [HPXML::DHWRecirControlTypeNone, HPXML::DHWRecirControlTypeTimer].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeNone, HPXML::DHWRecirControlTypeTimer].include?(hot_water_distribution.shared_recirculation_control_type)
+        if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
+        end
+        if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
+          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
+        end
+      elsif [HPXML::DHWRecirControlTypeSensor, HPXML::DHWRecirControlTypeManual].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeSensor, HPXML::DHWRecirControlTypeManual].include?(hot_water_distribution.shared_recirculation_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2110,7 +2129,7 @@ class HPXMLDefaults
           hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
-      else
+      elsif [HPXML::DHWRecirControlTypeTemperature].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeTemperature].include?(hot_water_distribution.shared_recirculation_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2123,13 +2142,6 @@ class HPXMLDefaults
       if hot_water_distribution.recirculation_pump_monthly_multipliers.nil? && !schedules_file_includes_recirculation_pump
         hot_water_distribution.recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
         hot_water_distribution.recirculation_pump_monthly_multipliers_isdefaulted = true
-      end
-    end
-
-    if hot_water_distribution.has_shared_recirculation
-      if hot_water_distribution.shared_recirculation_pump_power.nil?
-        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
-        hot_water_distribution.shared_recirculation_pump_power_isdefaulted = true
       end
     end
   end

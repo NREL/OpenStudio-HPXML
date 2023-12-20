@@ -3314,7 +3314,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
                                   { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
-                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
+                                    ext_month_mult: Schedule.LightingMonthlyMultipliers })
 
     # Test defaults w/ holiday lighting
     hpxml_bldg.lighting.holiday_exists = true
@@ -3330,7 +3330,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
                                   { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
-                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers,
+                                    ext_month_mult: Schedule.LightingMonthlyMultipliers,
                                     hol_kwh_per_day: 1.1,
                                     hol_begin_month: 11,
                                     hol_begin_day: 24,
@@ -3348,10 +3348,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
                                   { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
-                                    ext_month_mult: Schedule.LightingExteriorMonthlyMultipliers,
-                                    grg_wk_sch: Schedule.LightingExteriorWeekdayFractions,
-                                    grg_wknd_sch: Schedule.LightingExteriorWeekendFractions,
-                                    grg_month_mult: Schedule.LightingExteriorMonthlyMultipliers })
+                                    ext_month_mult: Schedule.LightingMonthlyMultipliers,
+                                    grg_wk_sch: Schedule.LightingGarageWeekdayFractions,
+                                    grg_wknd_sch: Schedule.LightingGarageWeekendFractions,
+                                    grg_month_mult: Schedule.LightingMonthlyMultipliers })
   end
 
   def test_ceiling_fans
