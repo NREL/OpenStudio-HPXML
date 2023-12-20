@@ -2049,16 +2049,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     recirculation_control_type_choices = OpenStudio::StringVector.new
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeNone
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeTimer
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeTemperature
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeSensor
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeManual
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeNone
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTimer
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTemperature
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeSensor
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeManual
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_recirc_control_type', recirculation_control_type_choices, false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Control Type')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the type of hot water recirculation control, if any.")
-    arg.setDefaultValue(HPXML::DHWRecirControlTypeNone)
+    arg.setDefaultValue(HPXML::DHWRecircControlTypeNone)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_piping_length', false)

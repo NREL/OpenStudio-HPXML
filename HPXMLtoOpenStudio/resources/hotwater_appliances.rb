@@ -935,14 +935,14 @@ class HotWaterAndAppliances
     # Annual electricity consumption factor for hot water recirculation system pumps
     # Assume the fixtures_usage_multiplier only applies for Sensor/Manual control type.
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
-      if [HPXML::DHWRecirControlTypeNone,
-          HPXML::DHWRecirControlTypeTimer].include? hot_water_distribution.recirculation_control_type
+      if [HPXML::DHWRecircControlTypeNone,
+          HPXML::DHWRecircControlTypeTimer].include? hot_water_distribution.recirculation_control_type
         dist_pump_annual_kwh += (8.76 * hot_water_distribution.recirculation_pump_power)
-      elsif [HPXML::DHWRecirControlTypeTemperature].include? hot_water_distribution.recirculation_control_type
+      elsif [HPXML::DHWRecircControlTypeTemperature].include? hot_water_distribution.recirculation_control_type
         dist_pump_annual_kwh += (1.46 * hot_water_distribution.recirculation_pump_power)
-      elsif [HPXML::DHWRecirControlTypeSensor].include? hot_water_distribution.recirculation_control_type
+      elsif [HPXML::DHWRecircControlTypeSensor].include? hot_water_distribution.recirculation_control_type
         dist_pump_annual_kwh += (0.15 * hot_water_distribution.recirculation_pump_power * fixtures_usage_multiplier)
-      elsif [HPXML::DHWRecirControlTypeManual].include? hot_water_distribution.recirculation_control_type
+      elsif [HPXML::DHWRecircControlTypeManual].include? hot_water_distribution.recirculation_control_type
         dist_pump_annual_kwh += (0.10 * hot_water_distribution.recirculation_pump_power * fixtures_usage_multiplier)
       else
         fail "Unexpected hot water distribution system recirculation type: '#{hot_water_distribution.recirculation_control_type}'."
@@ -957,12 +957,12 @@ class HotWaterAndAppliances
     # Assume the fixtures_usage_multiplier only applies for Sensor/Manual control type.
     if hot_water_distribution.has_shared_recirculation
       n_dweq = hot_water_distribution.shared_recirculation_number_of_units_served
-      if [HPXML::DHWRecirControlTypeNone,
-          HPXML::DHWRecirControlTypeTimer,
-          HPXML::DHWRecirControlTypeTemperature].include? hot_water_distribution.shared_recirculation_control_type
+      if [HPXML::DHWRecircControlTypeNone,
+          HPXML::DHWRecircControlTypeTimer,
+          HPXML::DHWRecircControlTypeTemperature].include? hot_water_distribution.shared_recirculation_control_type
         op_hrs = 8760.0
-      elsif [HPXML::DHWRecirControlTypeSensor,
-             HPXML::DHWRecirControlTypeManual].include? hot_water_distribution.shared_recirculation_control_type
+      elsif [HPXML::DHWRecircControlTypeSensor,
+             HPXML::DHWRecircControlTypeManual].include? hot_water_distribution.shared_recirculation_control_type
         op_hrs = 730.0 * fixtures_usage_multiplier
       else
         fail "Unexpected hot water distribution system shared recirculation type: '#{hot_water_distribution.shared_recirculation_control_type}'."
@@ -1061,26 +1061,26 @@ class HotWaterAndAppliances
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(6) Hot water distribution system relative annual energy waste factors
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
-      if (hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeNone) ||
-         (hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeTimer)
+      if (hot_water_distribution.recirculation_control_type == HPXML::DHWRecircControlTypeNone) ||
+         (hot_water_distribution.recirculation_control_type == HPXML::DHWRecircControlTypeTimer)
         if hot_water_distribution.pipe_r_value < 3.0
           return 500.0
         else
           return 250.0
         end
-      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeTemperature
+      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecircControlTypeTemperature
         if hot_water_distribution.pipe_r_value < 3.0
           return 375.0
         else
           return 187.5
         end
-      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeSensor
+      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecircControlTypeSensor
         if hot_water_distribution.pipe_r_value < 3.0
           return 64.8
         else
           return 43.2
         end
-      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeManual
+      elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecircControlTypeManual
         if hot_water_distribution.pipe_r_value < 3.0
           return 43.2
         else

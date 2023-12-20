@@ -2111,7 +2111,7 @@ class HPXMLDefaults
 
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc || hot_water_distribution.has_shared_recirculation
       schedules_file_includes_recirculation_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterRecirculationPump))
-      if [HPXML::DHWRecirControlTypeNone, HPXML::DHWRecirControlTypeTimer].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeNone, HPXML::DHWRecirControlTypeTimer].include?(hot_water_distribution.shared_recirculation_control_type)
+      if [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(hot_water_distribution.shared_recirculation_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2120,7 +2120,7 @@ class HPXMLDefaults
           hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
-      elsif [HPXML::DHWRecirControlTypeSensor, HPXML::DHWRecirControlTypeManual].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeSensor, HPXML::DHWRecirControlTypeManual].include?(hot_water_distribution.shared_recirculation_control_type)
+      elsif [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(hot_water_distribution.shared_recirculation_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2129,7 +2129,7 @@ class HPXMLDefaults
           hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
-      elsif [HPXML::DHWRecirControlTypeTemperature].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecirControlTypeTemperature].include?(hot_water_distribution.shared_recirculation_control_type)
+      elsif [HPXML::DHWRecircControlTypeTemperature].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeTemperature].include?(hot_water_distribution.shared_recirculation_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
