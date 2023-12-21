@@ -596,6 +596,11 @@ class Schedule
       return annual_flh
     end
 
+    if schedule.to_ScheduleConstant.is_initialized
+      annual_flh = schedule.to_ScheduleConstant.get.value * Constants.NumHoursInYear(modelYear)
+      return annual_flh
+    end
+
     if not schedule.to_ScheduleRuleset.is_initialized
       return
     end
