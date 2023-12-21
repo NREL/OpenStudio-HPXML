@@ -13,7 +13,7 @@ class HVAC
                                          control_zone, hvac_unavailable_periods, schedules_file)
     is_heatpump = false
     if not schedules_file.nil?
-      max_cap_ratio_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnMaximumCapacityRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      max_cap_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnMaximumCapacityRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
     end
 
     if not cooling_system.nil?
@@ -210,7 +210,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if not max_cap_ratio_sch.nil?
-      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil)
+      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, num_speeds, control_zone, htg_supp_coil, clg_coil, htg_coil)
     end
 
     return air_loop

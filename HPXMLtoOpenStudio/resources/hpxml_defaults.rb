@@ -1346,7 +1346,7 @@ class HPXMLDefaults
     schedules_file_includes_max_capacity_ratio = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnMaximumCapacityRatio))
     if schedules_file_includes_max_capacity_ratio
       is_var_speed_system = false
-      (hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_sys|
+      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_sys|
         next unless hvac_sys.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
 
         is_var_speed_system = true
