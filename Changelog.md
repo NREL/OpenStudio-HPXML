@@ -2,6 +2,7 @@
 
 __New Features__
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
+- Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
