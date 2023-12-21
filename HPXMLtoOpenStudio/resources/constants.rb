@@ -368,10 +368,6 @@ class Constants
     return 'water sensible'
   end
 
-  def self.ObjectNameWaterHeaterAdjustment
-    return 'water heater energy adjustment'
-  end
-
   def self.ObjectNameWaterLoopHeatPump
     return 'water loop heat pump'
   end
