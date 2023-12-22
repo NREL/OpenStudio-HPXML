@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b258a4f5-cbbb-48ad-a6d3-5ab6c23bc48d</version_id>
-  <version_modified>2023-12-20T17:56:07Z</version_modified>
+  <version_id>4f45f4fc-6ffd-4af8-9011-238830a9e890</version_id>
+  <version_modified>2023-12-22T15:38:43Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0EE40834</checksum>
+      <checksum>045BD8A9</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -166,7 +166,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D28BD90F</checksum>
+      <checksum>86823274</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -304,13 +304,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3FCFB12</checksum>
+      <checksum>826F3585</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3F85832</checksum>
+      <checksum>6E437CC2</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5C4B363E</checksum>
+      <checksum>07465552</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -364,7 +364,7 @@
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24DCB986</checksum>
+      <checksum>74EB5B1D</checksum>
     </file>
     <file>
       <filename>meta_measure.rb</filename>
@@ -598,7 +598,7 @@
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>833E46A5</checksum>
+      <checksum>427AA4EF</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>2B3C666D</checksum>
+      <checksum>5E426D14</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
