@@ -36,62 +36,63 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
+          <SystemIdentifier id='LongResidence'/>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
-              <SpaceName>laundry</SpaceName>
+              <SystemIdentifier id='laundry'/>
               <FloorArea>77</FloorArea>
             </Space>
             <Space>
-              <SpaceName>kitchen</SpaceName>
+              <SystemIdentifier id='kitchen'/>
               <FloorArea>121</FloorArea>
             </Space>
             <Space>
-              <SpaceName>bathroom_1</SpaceName>
+              <SystemIdentifier id='bathroom_1'/>
               <FloorArea>99</FloorArea>
             </Space>
             <Space>
-              <SpaceName>bedroom_3</SpaceName>
+              <SystemIdentifier id='bedroom_3'/>
               <FloorArea>110</FloorArea>
             </Space>
             <Space>
-              <SpaceName>bedroom_2</SpaceName>
+              <SystemIdentifier id='bedroom_2'/>
               <FloorArea>140</FloorArea>
             </Space>
             <Space>
-              <SpaceName>dining_room</SpaceName>
+              <SystemIdentifier id='dining_room'/>
               <FloorArea>126</FloorArea>
             </Space>
             <Space>
-              <SpaceName>living_room</SpaceName>
+              <SystemIdentifier id='living_room'/>
               <FloorArea>294</FloorArea>
             </Space>
             <Space>
-              <SpaceName>hall_1</SpaceName>
+              <SystemIdentifier id='hall_1'/>
               <FloorArea>112</FloorArea>
             </Space>
             <Space>
-              <SpaceName>hall_2</SpaceName>
+              <SystemIdentifier id='hall_2'/>
               <FloorArea>165</FloorArea>
             </Space>
             <Space>
-              <SpaceName>bedroom_1</SpaceName>
+              <SystemIdentifier id='bedroom_1'/>
               <FloorArea>210</FloorArea>
             </Space>
             <Space>
-              <SpaceName>bathroom_2</SpaceName>
+              <SystemIdentifier id='bathroom_2'/>
               <FloorArea>25</FloorArea>
             </Space>
             <Space>
-              <SpaceName>recroom</SpaceName>
+              <SystemIdentifier id='recroom'/>
               <FloorArea>783</FloorArea>
             </Space>
             <Space>
-              <SpaceName>workshop</SpaceName>
+              <SystemIdentifier id='workshop'/>
               <FloorArea>360</FloorArea>
             </Space>
             <Space>
-              <SpaceName>utility_room</SpaceName>
+              <SystemIdentifier id='utility_room'/>
               <FloorArea>336</FloorArea>
             </Space>
           </Spaces>
@@ -1007,7 +1008,6 @@
         <Windows>
           <Window>
             <SystemIdentifier id='WindowDiningRoomNorth'/>
-            <AttachedToSpace idref='dining_room'/>
             <Area>20.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.56</UFactor>
@@ -1020,7 +1020,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom1West'/>
-            <AttachedToSpace idref='bedroom_1'/>
             <Area>17.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
@@ -1033,7 +1032,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowRecRoomSouth'/>
-            <AttachedToSpace idref='recroom'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.87</UFactor>
@@ -1046,7 +1044,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWorkshopEast'/>
-            <AttachedToSpace idref='workshop'/>
             <Area>4.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.87</UFactor>
@@ -1059,7 +1056,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowRecRoomEast'/>
-            <AttachedToSpace idref='recroom'/>
             <Area>8.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.87</UFactor>
@@ -1072,7 +1068,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowKitchenEast'/>
-            <AttachedToSpace idref='kitchen'/>
             <Area>11.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1090,7 +1085,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom1East'/>
-            <AttachedToSpace idref='bathroom_1'/>
             <Area>8.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1108,7 +1102,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom3East'/>
-            <AttachedToSpace idref='bedroom_3'/>
             <Area>22.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1126,7 +1119,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2East'/>
-            <AttachedToSpace idref='bedroom_2'/>
             <Area>17.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1144,7 +1136,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2South'/>
-            <AttachedToSpace idref='bedroom_2'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1162,7 +1153,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom1South'/>
-            <AttachedToSpace idref='bedroom_1'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1180,7 +1170,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom2South'/>
-            <AttachedToSpace idref='bathroom_2'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1198,7 +1187,6 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowLivingRoomWest'/>
-            <AttachedToSpace idref='living_room'/>
             <Area>40.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.56</UFactor>
@@ -1218,7 +1206,6 @@
         <Doors>
           <Door>
             <SystemIdentifier id='DoorLaundryEast'/>
-            <AttachedToSpace idref='laundry'/>
             <AttachedToWall idref='WallLaundryEast'/>
             <Area>17.33</Area>
             <Orientation>east</Orientation>
@@ -1226,7 +1213,6 @@
           </Door>
           <Door>
             <SystemIdentifier id='DoorHall1West'/>
-            <AttachedToSpace idref='hall_1'/>
             <AttachedToWall idref='WallHall1West'/>
             <Area>21.0</Area>
             <Orientation>west</Orientation>
