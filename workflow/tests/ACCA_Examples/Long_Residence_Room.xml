@@ -36,7 +36,6 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <ZoneName>LongResidence</ZoneName>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
@@ -112,7 +111,7 @@
         <Roofs>
           <Roof>
             <SystemIdentifier id='RoofLaundry'/>
-            <AttachedToSpace>laundry</AttachedToSpace>
+            <AttachedToSpace idref='laundry'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>89.2</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -127,7 +126,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofKitchen'/>
-            <AttachedToSpace>kitchen</AttachedToSpace>
+            <AttachedToSpace idref='kitchen'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>140.1</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -142,7 +141,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofBathroom1'/>
-            <AttachedToSpace>bathroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>114.6</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -157,7 +156,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofBedroom3'/>
-            <AttachedToSpace>bedroom_3</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_3'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>127.4</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -172,7 +171,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofBedroom2'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>162.1</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -187,7 +186,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofDiningRoom'/>
-            <AttachedToSpace>dining_room</AttachedToSpace>
+            <AttachedToSpace idref='dining_room'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>145.9</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -202,7 +201,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofLivingRoom'/>
-            <AttachedToSpace>living_room</AttachedToSpace>
+            <AttachedToSpace idref='living_room'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>340.5</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -217,7 +216,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofHall1'/>
-            <AttachedToSpace>hall_1</AttachedToSpace>
+            <AttachedToSpace idref='hall_1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>129.7</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -232,7 +231,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofHall2'/>
-            <AttachedToSpace>hall_2</AttachedToSpace>
+            <AttachedToSpace idref='hall_2'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>191.1</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -247,7 +246,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofBedroom1'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>243.2</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -262,7 +261,7 @@
           </Roof>
           <Roof>
             <SystemIdentifier id='RoofBathroom2'/>
-            <AttachedToSpace>bathroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_2'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>29.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
@@ -279,7 +278,7 @@
         <Walls>
           <Wall>
             <SystemIdentifier id='WallLaundryEast'/>
-            <AttachedToSpace>laundry</AttachedToSpace>
+            <AttachedToSpace idref='laundry'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -295,7 +294,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallLaundryNorth'/>
-            <AttachedToSpace>laundry</AttachedToSpace>
+            <AttachedToSpace idref='laundry'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -311,7 +310,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallKitchenEast'/>
-            <AttachedToSpace>kitchen</AttachedToSpace>
+            <AttachedToSpace idref='kitchen'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -327,7 +326,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBathroom1East'/>
-            <AttachedToSpace>bathroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -343,7 +342,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBedroom3East'/>
-            <AttachedToSpace>bedroom_3</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_3'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -359,7 +358,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBedroom2East'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -375,7 +374,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBedroom2South'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -391,7 +390,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallDiningRoomNorth'/>
-            <AttachedToSpace>dining_room</AttachedToSpace>
+            <AttachedToSpace idref='dining_room'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -407,7 +406,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallDiningRoomWest'/>
-            <AttachedToSpace>dining_room</AttachedToSpace>
+            <AttachedToSpace idref='dining_room'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -423,7 +422,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallLivingRoomWest'/>
-            <AttachedToSpace>living_room</AttachedToSpace>
+            <AttachedToSpace idref='living_room'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -439,7 +438,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallHall1West'/>
-            <AttachedToSpace>hall_1</AttachedToSpace>
+            <AttachedToSpace idref='hall_1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -455,7 +454,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBedroom1West'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -471,7 +470,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBedroom1South'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -487,7 +486,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallBathroom2South'/>
-            <AttachedToSpace>bathroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -503,7 +502,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallWorkshopEast'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -519,7 +518,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallWorkshopNorth'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -535,7 +534,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallUtilityNorth'/>
-            <AttachedToSpace>utility_room</AttachedToSpace>
+            <AttachedToSpace idref='utility_room'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -551,7 +550,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallUtilityWest'/>
-            <AttachedToSpace>utility_room</AttachedToSpace>
+            <AttachedToSpace idref='utility_room'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -567,7 +566,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallRecRoomEast'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -583,7 +582,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallRecRoomWest'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -599,7 +598,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallRecRoomSouth'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <WallType>
@@ -617,7 +616,7 @@
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallWorkShopEast'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -641,7 +640,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallWorkShopNorth'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -665,7 +664,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallUtilityNorth'/>
-            <AttachedToSpace>utility_room</AttachedToSpace>
+            <AttachedToSpace idref='utility_room'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -689,7 +688,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallUtilityWest'/>
-            <AttachedToSpace>utility_room</AttachedToSpace>
+            <AttachedToSpace idref='utility_room'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -713,7 +712,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallRecRoomEast'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -737,7 +736,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallRecRoomWest'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -761,7 +760,7 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallRecRoomSouth'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block</Type>
@@ -787,7 +786,7 @@
         <Floors>
           <Floor>
             <SystemIdentifier id='FloorLaundry'/>
-            <AttachedToSpace>laundry</AttachedToSpace>
+            <AttachedToSpace idref='laundry'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -801,7 +800,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorKitchen'/>
-            <AttachedToSpace>kitchen</AttachedToSpace>
+            <AttachedToSpace idref='kitchen'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -815,7 +814,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorBathroom1'/>
-            <AttachedToSpace>bathroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -829,7 +828,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorBedroom3'/>
-            <AttachedToSpace>bedroom_3</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_3'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -843,7 +842,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorBedroom2'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -857,7 +856,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorDiningRoom'/>
-            <AttachedToSpace>dining_room</AttachedToSpace>
+            <AttachedToSpace idref='dining_room'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -871,7 +870,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorLivingRoom'/>
-            <AttachedToSpace>living_room</AttachedToSpace>
+            <AttachedToSpace idref='living_room'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -885,7 +884,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorHall1'/>
-            <AttachedToSpace>hall_1</AttachedToSpace>
+            <AttachedToSpace idref='hall_1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -899,7 +898,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorHall2'/>
-            <AttachedToSpace>hall_2</AttachedToSpace>
+            <AttachedToSpace idref='hall_2'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -913,7 +912,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorBedroom1'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -927,7 +926,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='FloorBathroom2'/>
-            <AttachedToSpace>bathroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_2'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorType>
@@ -943,7 +942,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='SlabWorkshop'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>360.0</Area>
             <ExposedPerimeter>39.0</ExposedPerimeter>
@@ -964,7 +963,7 @@
           </Slab>
           <Slab>
             <SystemIdentifier id='SlabUtility'/>
-            <AttachedToSpace>utility_room</AttachedToSpace>
+            <AttachedToSpace idref='utility_room'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>336.0</Area>
             <ExposedPerimeter>38.0</ExposedPerimeter>
@@ -985,7 +984,7 @@
           </Slab>
           <Slab>
             <SystemIdentifier id='SlabRecRoom'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>336.0</Area>
             <ExposedPerimeter>83.0</ExposedPerimeter>
@@ -1008,7 +1007,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='WindowDiningRoomNorth'/>
-            <AttachedToSpace>dining_room</AttachedToSpace>
+            <AttachedToSpace idref='dining_room'/>
             <Area>20.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.56</UFactor>
@@ -1021,7 +1020,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom1West'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <Area>17.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
@@ -1034,7 +1033,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowRecRoomSouth'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.87</UFactor>
@@ -1047,7 +1046,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWorkshopEast'/>
-            <AttachedToSpace>workshop</AttachedToSpace>
+            <AttachedToSpace idref='workshop'/>
             <Area>4.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.87</UFactor>
@@ -1060,7 +1059,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowRecRoomEast'/>
-            <AttachedToSpace>recroom</AttachedToSpace>
+            <AttachedToSpace idref='recroom'/>
             <Area>8.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.87</UFactor>
@@ -1073,7 +1072,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowKitchenEast'/>
-            <AttachedToSpace>kitchen</AttachedToSpace>
+            <AttachedToSpace idref='kitchen'/>
             <Area>11.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1091,7 +1090,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom1East'/>
-            <AttachedToSpace>bathroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_1'/>
             <Area>8.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1109,7 +1108,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom3East'/>
-            <AttachedToSpace>bedroom_3</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_3'/>
             <Area>22.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1127,7 +1126,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2East'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <Area>17.0</Area>
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
@@ -1145,7 +1144,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2South'/>
-            <AttachedToSpace>bedroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_2'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1163,7 +1162,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom1South'/>
-            <AttachedToSpace>bedroom_1</AttachedToSpace>
+            <AttachedToSpace idref='bedroom_1'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1181,7 +1180,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom2South'/>
-            <AttachedToSpace>bathroom_2</AttachedToSpace>
+            <AttachedToSpace idref='bathroom_2'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
@@ -1199,7 +1198,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowLivingRoomWest'/>
-            <AttachedToSpace>living_room</AttachedToSpace>
+            <AttachedToSpace idref='living_room'/>
             <Area>40.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.56</UFactor>
@@ -1219,7 +1218,7 @@
         <Doors>
           <Door>
             <SystemIdentifier id='DoorLaundryEast'/>
-            <AttachedToSpace>laundry</AttachedToSpace>
+            <AttachedToSpace idref='laundry'/>
             <AttachedToWall idref='WallLaundryEast'/>
             <Area>17.33</Area>
             <Orientation>east</Orientation>
@@ -1227,7 +1226,7 @@
           </Door>
           <Door>
             <SystemIdentifier id='DoorHall1West'/>
-            <AttachedToSpace>hall_1</AttachedToSpace>
+            <AttachedToSpace idref='hall_1'/>
             <AttachedToWall idref='WallHall1West'/>
             <Area>21.0</Area>
             <Orientation>west</Orientation>
