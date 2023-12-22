@@ -167,8 +167,8 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
-            <Area>8.0</Area>
-            <Azimuth>90</Azimuth>
+            <Area>17.0</Area>
+            <Azimuth>270</Azimuth>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -191,7 +191,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
-            <Area>4.0</Area>
+            <Area>12.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
@@ -203,7 +203,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window5'/>
-            <Area>11.0</Area>
+            <Area>58.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -220,29 +220,12 @@
           </Window>
           <Window>
             <SystemIdentifier id='Window6'/>
-            <Area>58.0</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.57</UFactor>
-            <SHGC>0.56</SHGC>
-            <InteriorShading>
-              <SystemIdentifier id='Window6InteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
-            </InteriorShading>
-            <Overhangs>
-              <Depth>1.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>5.0</DistanceToBottomOfWindow>
-            </Overhangs>
-            <AttachedToWall idref='Wall1'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='Window7'/>
             <Area>22.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window7InteriorShading'/>
+              <SystemIdentifier id='Window6InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
@@ -253,13 +236,13 @@
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window8'/>
+            <SystemIdentifier id='Window7'/>
             <Area>8.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window8InteriorShading'/>
+              <SystemIdentifier id='Window7InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
@@ -270,13 +253,13 @@
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window9'/>
+            <SystemIdentifier id='Window8'/>
             <Area>40.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='Window9InteriorShading'/>
+              <SystemIdentifier id='Window8InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
