@@ -353,96 +353,76 @@ class HVACSizing
     Heating and Cooling Loads: Windows & Skylights
     '''
 
-    # Average cooling load factors for windows/skylights WITHOUT internal shading for surface
-    # azimuths of 0,22.5,45, ... ,337.5,360
-    # Additional values (compared to values in MJ8 Table 3D-3) have been determined by
-    # linear interpolation to avoid interpolating
-    clf_avg_nois = [0.24, 0.295, 0.35, 0.365, 0.38, 0.39, 0.4, 0.44, 0.48, 0.44, 0.4, 0.39, 0.38, 0.365, 0.35, 0.295, 0.24]
+    # Average cooling load factors (CLF) for windows/skylights WITHOUT internal shading (MJ8 Table 3D-3)
+    clf_avg_nois = [0.24, 0.35, 0.38, 0.4, 0.48, 0.4, 0.38, 0.35, 0.24]
     clf_avg_nois_horiz = 0.68
 
-    # Average cooling load factors for windows/skylights WITH internal shading for surface
-    # azimuths of 0,22.5,45, ... ,337.5,360
-    # Additional values (compared to values in MJ8 Table 3D-3) have been determined
-    # by linear interpolation to avoid interpolating in BMI
-    clf_avg_is = [0.18, 0.235, 0.29, 0.305, 0.32, 0.32, 0.32, 0.305, 0.29, 0.305, 0.32, 0.32, 0.32, 0.305, 0.29, 0.235, 0.18]
+    # Average cooling load factors (CLF) for windows/skylights WITH internal shading (MJ8 Table 3D-3)
+    clf_avg_is = [0.18, 0.29, 0.32, 0.32, 0.29, 0.32, 0.32, 0.29, 0.18]
     clf_avg_is_horiz = 0.52
 
-    # Hourly cooling load factor (CLF) for windows/skylights WITHOUT an internal shade taken from
-    # ASHRAE HOF Ch.26 Table 36 (subset of data in MJ8 Table A11-5)
-    # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Hour = 8,9, ... ,19,20
-    clf_hr_nois = [[0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22], # South
-                   [0.11, 0.15, 0.19, 0.27, 0.39, 0.52, 0.62, 0.67, 0.65, 0.58, 0.46, 0.36, 0.28],
-                   [0.10, 0.12, 0.14, 0.16, 0.24, 0.36, 0.49, 0.60, 0.66, 0.66, 0.58, 0.43, 0.33],
-                   [0.09, 0.10, 0.12, 0.13, 0.17, 0.26, 0.40, 0.52, 0.62, 0.66, 0.61, 0.44, 0.34],
-                   [0.08, 0.10, 0.11, 0.12, 0.14, 0.20, 0.32, 0.45, 0.57, 0.64, 0.61, 0.44, 0.34], # West
-                   [0.09, 0.10, 0.12, 0.13, 0.15, 0.17, 0.26, 0.40, 0.53, 0.63, 0.62, 0.44, 0.34],
-                   [0.10, 0.12, 0.14, 0.16, 0.17, 0.19, 0.23, 0.33, 0.47, 0.59, 0.60, 0.43, 0.33],
-                   [0.14, 0.18, 0.22, 0.25, 0.27, 0.29, 0.30, 0.33, 0.44, 0.57, 0.62, 0.44, 0.33],
-                   [0.48, 0.56, 0.63, 0.71, 0.76, 0.80, 0.82, 0.82, 0.79, 0.75, 0.69, 0.61, 0.48], # North
-                   [0.47, 0.44, 0.41, 0.40, 0.39, 0.39, 0.38, 0.36, 0.33, 0.30, 0.26, 0.20, 0.16],
-                   [0.51, 0.51, 0.45, 0.39, 0.36, 0.33, 0.31, 0.28, 0.26, 0.23, 0.19, 0.15, 0.12],
-                   [0.52, 0.57, 0.50, 0.45, 0.39, 0.34, 0.31, 0.28, 0.25, 0.22, 0.18, 0.14, 0.12],
-                   [0.51, 0.57, 0.57, 0.50, 0.42, 0.37, 0.32, 0.29, 0.25, 0.22, 0.19, 0.15, 0.12], # East
-                   [0.49, 0.58, 0.61, 0.57, 0.48, 0.41, 0.36, 0.32, 0.28, 0.24, 0.20, 0.16, 0.13],
-                   [0.43, 0.55, 0.62, 0.63, 0.57, 0.48, 0.42, 0.37, 0.33, 0.28, 0.24, 0.19, 0.15],
-                   [0.27, 0.43, 0.55, 0.63, 0.64, 0.60, 0.52, 0.45, 0.40, 0.35, 0.29, 0.23, 0.18],
-                   [0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22]] # South
+    # Hourly cooling load factor (CLF) for windows/skylights WITHOUT internal shading (MJ8 Table A11-5)
+    # Applies to both mid-summer and October calculations
+    clf_hr_nois = [[0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22], # S
+                   [0.10, 0.12, 0.14, 0.16, 0.24, 0.36, 0.49, 0.60, 0.66, 0.66, 0.58, 0.43, 0.33], # SW
+                   [0.08, 0.10, 0.11, 0.12, 0.14, 0.20, 0.32, 0.45, 0.57, 0.64, 0.61, 0.44, 0.34], # W
+                   [0.10, 0.12, 0.14, 0.16, 0.17, 0.19, 0.23, 0.33, 0.47, 0.59, 0.60, 0.43, 0.33], # NW
+                   [0.48, 0.56, 0.63, 0.71, 0.76, 0.80, 0.82, 0.82, 0.79, 0.75, 0.69, 0.61, 0.48], # N
+                   [0.51, 0.51, 0.45, 0.39, 0.36, 0.33, 0.31, 0.28, 0.26, 0.23, 0.19, 0.15, 0.12], # NE
+                   [0.51, 0.57, 0.57, 0.50, 0.42, 0.37, 0.32, 0.29, 0.25, 0.22, 0.19, 0.15, 0.12], # E
+                   [0.43, 0.55, 0.62, 0.63, 0.57, 0.48, 0.42, 0.37, 0.33, 0.28, 0.24, 0.19, 0.15], # SE
+                   [0.14, 0.22, 0.34, 0.48, 0.59, 0.65, 0.65, 0.59, 0.50, 0.43, 0.36, 0.28, 0.22]] # S
     clf_hr_nois_horiz = [0.24, 0.36, 0.48, 0.58, 0.66, 0.72, 0.74, 0.73, 0.67, 0.59, 0.47, 0.37, 0.29]
 
-    # Hourly cooling load factor (CLF) for windows/skylights WITH an internal shade taken from
-    # ASHRAE HOF Ch.26 Table 39 (subset of data in MJ8 Table A11-6)
-    # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Hour = 8,9, ... ,19,20
-    clf_hr_is = [[0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09], # South
-                 [0.18, 0.22, 0.27, 0.43, 0.63, 0.78, 0.84, 0.80, 0.66, 0.46, 0.25, 0.13, 0.11],
-                 [0.14, 0.16, 0.19, 0.22, 0.38, 0.59, 0.75, 0.83, 0.81, 0.69, 0.45, 0.16, 0.12],
-                 [0.12, 0.14, 0.16, 0.17, 0.23, 0.44, 0.64, 0.78, 0.84, 0.78, 0.55, 0.16, 0.12],
-                 [0.11, 0.13, 0.15, 0.16, 0.17, 0.31, 0.53, 0.72, 0.82, 0.81, 0.61, 0.16, 0.12], # West
-                 [0.12, 0.14, 0.16, 0.17, 0.18, 0.22, 0.43, 0.65, 0.80, 0.84, 0.66, 0.16, 0.12],
-                 [0.14, 0.17, 0.19, 0.20, 0.21, 0.22, 0.30, 0.52, 0.73, 0.82, 0.69, 0.16, 0.12],
-                 [0.22, 0.26, 0.30, 0.32, 0.33, 0.34, 0.34, 0.39, 0.61, 0.82, 0.76, 0.17, 0.12],
-                 [0.65, 0.73, 0.80, 0.86, 0.89, 0.89, 0.86, 0.82, 0.75, 0.78, 0.91, 0.24, 0.18], # North
-                 [0.62, 0.42, 0.37, 0.37, 0.37, 0.36, 0.35, 0.32, 0.28, 0.23, 0.17, 0.08, 0.07],
-                 [0.74, 0.58, 0.37, 0.29, 0.27, 0.26, 0.24, 0.22, 0.20, 0.16, 0.12, 0.06, 0.05],
-                 [0.80, 0.71, 0.52, 0.31, 0.26, 0.24, 0.22, 0.20, 0.18, 0.15, 0.11, 0.06, 0.05],
-                 [0.80, 0.76, 0.62, 0.41, 0.27, 0.24, 0.22, 0.20, 0.17, 0.14, 0.11, 0.06, 0.05], # East
-                 [0.79, 0.80, 0.72, 0.54, 0.34, 0.27, 0.24, 0.21, 0.19, 0.15, 0.12, 0.07, 0.06],
-                 [0.74, 0.81, 0.79, 0.68, 0.49, 0.33, 0.28, 0.25, 0.22, 0.18, 0.13, 0.08, 0.07],
-                 [0.54, 0.72, 0.81, 0.81, 0.71, 0.54, 0.38, 0.32, 0.27, 0.22, 0.16, 0.09, 0.08],
-                 [0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09]] # South
+    # Hourly cooling load factor (CLF) for windows/skylights WITH internal shading (MJ8 Table A11-6)
+    # Applies to both mid-summer and October calculations
+    clf_hr_is = [[0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09], # S
+                 [0.14, 0.16, 0.19, 0.22, 0.38, 0.59, 0.75, 0.83, 0.81, 0.69, 0.45, 0.16, 0.12], # SW
+                 [0.11, 0.13, 0.15, 0.16, 0.17, 0.31, 0.53, 0.72, 0.82, 0.81, 0.61, 0.16, 0.12], # W
+                 [0.14, 0.17, 0.19, 0.20, 0.21, 0.22, 0.30, 0.52, 0.73, 0.82, 0.69, 0.16, 0.12], # NW
+                 [0.65, 0.73, 0.80, 0.86, 0.89, 0.89, 0.86, 0.82, 0.75, 0.78, 0.91, 0.24, 0.18], # N
+                 [0.74, 0.58, 0.37, 0.29, 0.27, 0.26, 0.24, 0.22, 0.20, 0.16, 0.12, 0.06, 0.05], # NE
+                 [0.80, 0.76, 0.62, 0.41, 0.27, 0.24, 0.22, 0.20, 0.17, 0.14, 0.11, 0.06, 0.05], # E
+                 [0.74, 0.81, 0.79, 0.68, 0.49, 0.33, 0.28, 0.25, 0.22, 0.18, 0.13, 0.08, 0.07], # SE
+                 [0.23, 0.38, 0.58, 0.75, 0.83, 0.80, 0.68, 0.50, 0.35, 0.27, 0.19, 0.11, 0.09]] # S
     clf_hr_is_horiz = [0.44, 0.59, 0.72, 0.81, 0.85, 0.85, 0.81, 0.71, 0.58, 0.42, 0.25, 0.14, 0.12]
 
-    # Shade Line Multipliers (SLM) for shaded windows will be calculated using the procedure
-    # described in ASHRAE HOF 1997 instead of using the SLM's from MJ8 Table 3E-1
+    # Mid summer Hourly Shade Line Multipliers (SLM) (MJ8 Table A11-7)
+    slm_hr_lats = [28.0, 34.0, 40.0, 46.0, 52.0, 60.0] # degrees
+    slm_hr = [[[5.3, 3.7, 5.3, 0.0], [3.2, 2.5, 3.2, 0.0], [2.2, 1.9, 2.2, 0.2], [1.8, 1.5, 1.8, 0.0], [1.4, 1.2, 1.4, 0.0], [1.1, 0.9, 1.1, 0.0]], # S
+              [[0.0, 5.0, 1.2, 0.2], [0.0, 3.4, 1.1, 0.2], [0.0, 2.6, 0.9, 0.1], [0.0, 2.1, 0.8, 0.2], [0.0, 1.7, 0.8, 0.3], [0.0, 1.3, 0.7, 0.3]], # SW
+              [[0.0, 0.0, 1.0, 0.1], [0.0, 0.0, 1.0, 0.1], [0.0, 0.0, 1.0, 0.1], [0.0, 0.0, 0.9, 0.2], [0.0, 0.0, 0.9, 0.2], [0.0, 0.0, 0.8, 0.2]], # W
+              [[0.0, 0.0, 1.9, 0.1], [0.0, 0.0, 2.1, 0.1], [0.0, 0.0, 2.4, 0.0], [0.0, 0.0, 2.6, 0.2], [0.0, 0.0, 3.1, 0.2], [0.0, 0.0, 3.9, 0.2]], # NW
+              [[0.0, 0.0, 0.0, 0.5], [0.0, 0.0, 0.0, 0.7], [0.0, 0.0, 0.0, 0.8], [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0, 1.3], [0.0, 0.0, 0.0, 1.8]], # N
+              [[1.9, 0.0, 0.0, 0.0], [2.1, 0.0, 0.0, 0.0], [2.4, 0.0, 0.0, 0.0], [2.6, 0.0, 0.0, 0.0], [3.1, 0.0, 0.0, 0.0], [3.9, 0.0, 0.0, 0.0]], # NE
+              [[1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.9, 0.0, 0.0, 0.0], [0.9, 0.0, 0.0, 0.0], [0.8, 0.0, 0.0, 0.0]], # E
+              [[1.2, 5.0, 0.0, 0.0], [1.1, 3.4, 0.0, 0.0], [0.9, 2.6, 0.0, 0.0], [0.8, 2.1, 0.0, 0.0], [0.8, 1.7, 0.0, 0.0], [0.7, 1.3, 0.0, 0.0]], # SE
+              [[5.3, 3.7, 5.3, 0.0], [3.2, 2.5, 3.2, 0.0], [2.2, 1.9, 2.2, 0.2], [1.8, 1.5, 1.8, 0.0], [1.4, 1.2, 1.4, 0.0], [1.1, 0.9, 1.1, 0.0]]] # S
 
-    # The time of day (assuming 24 hr clock) to calculate the SLM for the ALP for azimuths
-    # starting at 0 (South) in increments of 22.5 to 360
-    # Nil denotes directions not used in the shading calculation (Note: south direction is symmetrical around noon)
-    slm_alp_hr = [15.5, 14.75, 14.0, 14.75, 15.5, nil, nil, nil, nil, nil, nil, nil, 8.5, 9.75, 10.0, 9.75, 8.5]
+    # Mid summer Shade Line Multiplier (SLM) Values (MJ8 Table 3E-1)
+    alm_avg_lats = [25.0, 30.0, 35.0, 40.0, 45.0, 50.0]
+    slm_avg = [[10.1, 5.40, 3.53, 2.60, 2.05, 1.70], # S
+               [1.89, 1.63, 1.41, 1.25, 1.13, 1.01], # SW
+               [0.83, 0.83, 0.82, 0.81, 0.80, 0.79], # W
+               [0.0,  0.0,  0.0,  0.0,  0.0,  0.0], # NW
+               [0.0,  0.0,  0.0,  0.0,  0.0,  0.0], # N
+               [0.0,  0.0,  0.0,  0.0,  0.0,  0.0], # NE
+               [0.83, 0.83, 0.82, 0.81, 0.80, 0.79], # E
+               [1.89, 1.63, 1.41, 1.25, 1.13, 1.01], # SE
+               [10.1, 5.40, 3.53, 2.60, 2.05, 1.70]] # S
 
-    # Mid summer declination angle used for shading calculations
-    declination_angle = 12.1 # Mid August
-
-    # Peak solar factor (PSF) (aka solar heat gain factor) taken from ASHRAE HOF 1989 Ch.26 Table 34
-    # (subset of data in MJ8 Table 3D-2)
-    # Surface Azimuth = 0 (South), 22.5, 45.0, ... ,337.5,360 and Latitude = 20,24,28, ... ,60,64
-    psf = [[57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0], # South
-           [88.0,  103.0, 120.0, 136.0, 151.0, 165.0, 177.0, 188.0, 197.0, 206.0, 213.0, 217.0],
-           [152.0, 162.0, 172.0, 181.0, 189.0, 196.0, 202.0, 208.0, 212.0, 215.0, 217.0, 217.0],
-           [200.0, 204.0, 207.0, 210.0, 212.0, 214.0, 215.0, 216.0, 216.0, 216.0, 214.0, 211.0],
-           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0], # East/West
-           [206.0, 203.0, 199.0, 195.0, 190.0, 185.0, 180.0, 174.0, 169.0, 165.0, 161.0, 157.0],
-           [162.0, 156.0, 149.0, 141.0, 138.0, 135.0, 132.0, 128.0, 124.0, 119.0, 114.0, 109.0],
-           [91.0,  87.0,  83.0,  79.0,  75.0,  71.0,  66.0,  61.0,  56.0,  56.0,  57.0,  58.0],
-           [40.0,  38.0,  38.0,  37.0,  36.0,  35.0,  34.0,  33.0,  32.0,  30.0,  28.0,  27.0], # North
-           [91.0,  87.0,  83.0,  79.0,  75.0,  71.0,  66.0,  61.0,  56.0,  56.0,  57.0,  58.0],
-           [162.0, 156.0, 149.0, 141.0, 138.0, 135.0, 132.0, 128.0, 124.0, 119.0, 114.0, 109.0],
-           [206.0, 203.0, 199.0, 195.0, 190.0, 185.0, 180.0, 174.0, 169.0, 165.0, 161.0, 157.0],
-           [220.0, 220.0, 220.0, 219.0, 218.0, 216.0, 214.0, 211.0, 208.0, 203.0, 199.0, 193.0], # East/West
-           [200.0, 204.0, 207.0, 210.0, 212.0, 214.0, 215.0, 216.0, 216.0, 216.0, 214.0, 211.0],
-           [152.0, 162.0, 172.0, 181.0, 189.0, 196.0, 202.0, 208.0, 212.0, 215.0, 217.0, 217.0],
-           [88.0,  103.0, 120.0, 136.0, 151.0, 165.0, 177.0, 188.0, 197.0, 206.0, 213.0, 217.0],
-           [57.0,  72.0,  91.0,  111.0, 131.0, 149.0, 165.0, 180.0, 193.0, 203.0, 211.0, 217.0]] # South
-    psf_horiz = [280.0, 277.0, 272.0, 265.0, 257.0, 247.0, 236.0, 223.0, 208.0, 193.0, 176.0, 159.0]
+    # Mid summer Peak solar factor (PSF) (MJ8 Table 3D-2)
+    psf_lats = [28.0, 34.0, 40.0, 46.0, 52.0, 60.0] # degrees
+    psf = [[91.0, 121.0, 149.0, 173.0, 193.0, 211.0], # S
+           [172.0, 185.0, 196.0, 205.0, 212.0, 217.0], # SW
+           [220.0, 219.0, 216.0, 213.0, 208.0, 199.0], # W
+           [149.0, 140.0, 135.0, 130.0, 124.0, 114.0], # NW
+           [38.0,  37.0,  35.0,  34.0,  32.0,  28.0], # N
+           [149.0, 140.0, 135.0, 130.0, 124.0, 114.0], # NE
+           [220.0, 219.0, 216.0, 213.0, 208.0, 199.0], # E
+           [172.0, 185.0, 196.0, 205.0, 212.0, 217.0], # SE
+           [91.0,  121.0, 149.0, 173.0, 193.0, 211.0]] # S
+    psf_horiz = [272.0, 261.0, 247.0, 230.0, 208.0, 176.0]
 
     # Hourly Temperature Adjustment Values (HTA_DR) (MJ8 Table A11-3)
     # Low DR, Medium DR, High DR and Hour = 8,9, ... ,19,20
@@ -450,34 +430,53 @@ class HVACSizing
            [-12.6, -10.0, -7.4,  -5.0, -2.9, -1.3, -0.3, 0.0, -0.3, -1.3, -2.9, -5.0, -7.4], # Medium DR
            [-18.9, -15.0, -11.1, -7.5, -4.4, -2.0, -0.5, 0.0, -0.5, -2.0, -4.4, -7.5, -11.1]] # High DR
 
-    # Determine the PSF's for the building latitude
+    # Determine latitude-specific values (PSF, SLM)
     psf_lat = []
     psf_lat_horiz = nil
+    slm_hr_lat = []
+    slm_avg_lat = []
     latitude = weather.header.Latitude.to_f
-    for cnt in 0..16
-      if latitude < 20.0
+    for cnt in 0..8 # S/SW/W/NW/N/NE/E/SE/S
+      # psf/psf_horiz
+      if latitude <= psf_lats[0]
         psf_lat << psf[cnt][0]
-        if cnt == 0
-          psf_lat_horiz = psf_horiz[0]
-        end
-      elsif latitude >= 64.0
-        psf_lat << psf[cnt][11]
-        if cnt == 0
-          psf_lat_horiz = psf_horiz[11]
-        end
+        psf_lat_horiz = psf_horiz[0]
+      elsif latitude >= psf_lats[-1]
+        psf_lat << psf[cnt][-1]
+        psf_lat_horiz = psf_horiz[-1]
       else
-        cnt_lat_s = ((latitude - 20.0) / 4.0).to_i
-        cnt_lat_n = cnt_lat_s + 1.0
-        lat_s = 20.0 + 4.0 * cnt_lat_s
-        lat_n = lat_s + 4.0
-        psf_lat << MathTools.interp2(latitude, lat_s, lat_n, psf[cnt][cnt_lat_s], psf[cnt][cnt_lat_n])
-        if cnt == 0
-          psf_lat_horiz = MathTools.interp2(latitude, lat_s, lat_n, psf_horiz[cnt_lat_s], psf_horiz[cnt_lat_n])
+        cnt_lat_s = psf_lats.bsearch_index { |i| latitude < i } - 1
+        psf_lat << MathTools.interp2(latitude, psf_lats[cnt_lat_s], psf_lats[cnt_lat_s + 1], psf[cnt][cnt_lat_s], psf[cnt][cnt_lat_s + 1])
+        psf_lat_horiz = MathTools.interp2(latitude, psf_lats[cnt_lat_s], psf_lats[cnt_lat_s + 1], psf_horiz[cnt_lat_s], psf_horiz[cnt_lat_s + 1])
+      end
+
+      # slm_hr
+      if latitude <= slm_hr_lats[0]
+        slm_hr_lat << slm_hr[cnt][0]
+      elsif latitude >= slm_hr_lats[-1]
+        slm_hr_lat << slm_hr[cnt][-1]
+      else
+        cnt_lat_s = slm_hr_lats.bsearch_index { |i| latitude < i } - 1
+        inner_array = []
+        for i in 0..slm_hr[0][0].size - 1
+          inner_array << MathTools.interp2(latitude, slm_hr_lats[cnt_lat_s], slm_hr_lats[cnt_lat_s + 1], slm_hr[cnt][cnt_lat_s][i], slm_hr[cnt][cnt_lat_s + 1][i])
         end
+        slm_hr_lat << inner_array
+      end
+
+      # slm_avg
+      if latitude <= alm_avg_lats[0]
+        slm_avg_lat << slm_avg[cnt][0]
+      elsif latitude >= alm_avg_lats[-1]
+        slm_avg_lat << slm_avg[cnt][-1]
+      else
+        cnt_lat_s = alm_avg_lats.bsearch_index { |i| latitude < i } - 1
+        slm_avg_lat << MathTools.interp2(latitude, alm_avg_lats[cnt_lat_s], alm_avg_lats[cnt_lat_s + 1], slm_avg[cnt][cnt_lat_s], slm_avg[cnt][cnt_lat_s + 1])
       end
     end
 
-    afl_hr = [0.0] * 12 # Initialize Hourly Aggregate Fenestration Load (AFL)
+    # Initialize Hourly Aggregate Fenestration Load (AFL)
+    afl_hr = [0.0] * 12
 
     # Windows
     bldg_design_loads.Heat_Windows = 0.0
@@ -487,15 +486,13 @@ class HVACSizing
       next unless window.wall.is_exterior_thermal_boundary
 
       window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
-      window_true_azimuth = get_true_azimuth(window.azimuth)
-      cnt225 = (window_true_azimuth / 22.5).round.to_i
+      cnt45 = (get_true_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
 
       bldg_design_loads.Heat_Windows += window_ufactor * window.area * @htd
 
       for hr in -1..11
-
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
 
@@ -503,19 +500,19 @@ class HVACSizing
         # clf_n: Average Cooling Load Factor for a window facing North (fully shaded)
         if hr == -1
           if window_summer_sf < 1
-            clf_d = clf_avg_is[cnt225]
-            clf_n = clf_avg_is[8]
+            clf_d = clf_avg_is[cnt45]
+            clf_n = clf_avg_is[4]
           else
-            clf_d = clf_avg_nois[cnt225]
-            clf_n = clf_avg_nois[8]
+            clf_d = clf_avg_nois[cnt45]
+            clf_n = clf_avg_nois[4]
           end
         else
           if window_summer_sf < 1
-            clf_d = clf_hr_is[cnt225][hr]
-            clf_n = clf_hr_is[8][hr]
+            clf_d = clf_hr_is[cnt45][hr]
+            clf_n = clf_hr_is[4][hr]
           else
-            clf_d = clf_hr_nois[cnt225][hr]
-            clf_n = clf_hr_nois[8][hr]
+            clf_d = clf_hr_nois[cnt45][hr]
+            clf_n = clf_hr_nois[4][hr]
           end
         end
 
@@ -526,64 +523,35 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given window Direction
-        htm_d = psf_lat[cnt225] * clf_d * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
+        htm_d = psf_lat[cnt45] * clf_d * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
 
         # Hourly Heat Transfer Multiplier for a window facing North (fully shaded)
-        htm_n = psf_lat[8] * clf_n * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
+        htm_n = psf_lat[4] * clf_n * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
 
-        if window_true_azimuth < 180
-          surf_azimuth = window_true_azimuth
-        else
-          surf_azimuth = window_true_azimuth - 360.0
-        end
+        if window.overhangs_depth.to_f > 0
+          if hr == -1
+            slm = slm_avg_lat[cnt45]
+          elsif [0, 1, 2].include? hr # 8, 9, and 10 am: use 09:00 hours
+            slm = slm_hr_lat[cnt45][0]
+          elsif [3, 4, 5].include? hr # 11, 12, and 1 pm: use Noon
+            slm = slm_hr_lat[cnt45][1]
+          elsif [6, 7, 8].include? hr # 2, 3, and 4 pm: use 15:00 hours
+            slm = slm_hr_lat[cnt45][2]
+          elsif [9, 10, 11].include? hr # 2, 3, and 4 pm: use 15:00 hours
+            slm = slm_hr_lat[cnt45][3]
+          end
 
-        if (not window.overhangs_depth.nil?) && (window.overhangs_depth > 0)
-          if ((hr == -1) && (surf_azimuth.abs < 90.1)) || (hr > -1)
-            if hr == -1
-              actual_hr = slm_alp_hr[cnt225]
-            else
-              actual_hr = hr + 8 # start at hour 8
-            end
-            hour_angle = 0.25 * (actual_hr - 12.0) * 60.0 # ASHRAE HOF 1997 pg 29.19
-            altitude_angle = Math::asin((Math::cos(weather.header.Latitude.deg2rad) *
-                                          Math::cos(declination_angle.deg2rad) *
-                                          Math::cos(hour_angle.deg2rad) +
-                                          Math::sin(weather.header.Latitude.deg2rad) *
-                                          Math::sin(declination_angle.deg2rad))).rad2deg
-            temp_arg = [(Math::sin(altitude_angle.deg2rad) *
-                         Math::sin(weather.header.Latitude.deg2rad) -
-                         Math::sin(declination_angle.deg2rad)) /
-              (Math::cos(altitude_angle.deg2rad) *
-                 Math::cos(weather.header.Latitude.deg2rad)), 1.0].min
-            temp_arg = [temp_arg, -1.0].max
-            solar_azimuth = Math::acos(temp_arg).rad2deg
-            if actual_hr < 12
-              solar_azimuth = -1.0 * solar_azimuth
-            end
-
-            sol_surf_azimuth = solar_azimuth - surf_azimuth
-            if (sol_surf_azimuth.abs >= 90) && (sol_surf_azimuth.abs <= 270)
-              # Window is entirely in the shade if the solar surface azimuth is greater than 90 and less than 270
-              htm = htm_n
-            else
-              slm = Math::tan(altitude_angle.deg2rad) / Math::cos(sol_surf_azimuth.deg2rad)
-              z_sl = slm * window.overhangs_depth
-
-              window_height = window.overhangs_distance_to_bottom_of_window - window.overhangs_distance_to_top_of_window
-              if z_sl < window.overhangs_distance_to_top_of_window
-                # Overhang is too short to provide shade
-                htm = htm_d
-              elsif z_sl < window.overhangs_distance_to_bottom_of_window
-                percent_shaded = (z_sl - window.overhangs_distance_to_top_of_window) / window_height
-                htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
-              else
-                # Window is entirely in the shade since the shade line is below the windowsill
-                htm = htm_n
-              end
-            end
-          else
-            # Window is north of East and West azimuths. Shading calculations do not apply.
+          z_sl = slm * window.overhangs_depth
+          window_height = window.overhangs_distance_to_bottom_of_window - window.overhangs_distance_to_top_of_window
+          if z_sl < window.overhangs_distance_to_top_of_window
+            # Overhang is too short to provide shade or no adjustment for overhang shade required
             htm = htm_d
+          elsif z_sl < window.overhangs_distance_to_bottom_of_window
+            percent_shaded = (z_sl - window.overhangs_distance_to_top_of_window) / window_height
+            htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
+          else
+            # Window is entirely in the shade since the shade line is below the windowsill
+            htm = htm_n
           end
         else
           htm = htm_d
@@ -604,8 +572,7 @@ class HVACSizing
 
     @hpxml_bldg.skylights.each do |skylight|
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
-      skylight_true_azimuth = get_true_azimuth(skylight.azimuth)
-      cnt225 = (skylight_true_azimuth / 22.5).round.to_i
+      cnt45 = (get_true_azimuth(skylight.azimuth) / 45.0).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
 
       skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
@@ -616,7 +583,6 @@ class HVACSizing
       bldg_design_loads.Heat_Skylights += skylight_ufactor * skylight.area * @htd
 
       for hr in -1..11
-
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
 
@@ -624,24 +590,24 @@ class HVACSizing
         # clf_horiz: Average Cooling Load Factor for horizontal
         if hr == -1
           if skylight_summer_sf < 1
-            clf_d = clf_avg_is[cnt225]
+            clf_d = clf_avg_is[cnt45]
             clf_horiz = clf_avg_is_horiz
           else
-            clf_d = clf_avg_nois[cnt225]
+            clf_d = clf_avg_nois[cnt45]
             clf_horiz = clf_avg_nois_horiz
           end
         else
           if skylight_summer_sf < 1
-            clf_d = clf_hr_is[cnt225][hr]
+            clf_d = clf_hr_is[cnt45][hr]
             clf_horiz = clf_hr_is_horiz[hr]
           else
-            clf_d = clf_hr_nois[cnt225][hr]
+            clf_d = clf_hr_nois[cnt45][hr]
             clf_horiz = clf_hr_nois_horiz[hr]
           end
         end
 
-        sol_h = Math::cos(inclination_angle.deg2rad) * (psf_lat_horiz * clf_horiz)
-        sol_v = Math::sin(inclination_angle.deg2rad) * (psf_lat[cnt225] * clf_d)
+        sol_h = Math::cos(UnitConversions.convert(inclination_angle, 'deg', 'rad')) * (psf_lat_horiz * clf_horiz)
+        sol_v = Math::sin(UnitConversions.convert(inclination_angle, 'deg', 'rad')) * (psf_lat[cnt45] * clf_d)
 
         ctd_adj = @ctd
         if hr > -1
@@ -676,7 +642,6 @@ class HVACSizing
     # Excursion Adjustment Load (EAL)
     eal = [0.0, pfl - ell].max
 
-    # TODO: Make a separate AED category instead of lumping into windows?
     bldg_design_loads.Cool_Windows += eal
   end
 
@@ -2480,16 +2445,39 @@ class HVACSizing
       elsif HPXML::conditioned_locations.include?(surface.interior_adjacent_to) || HPXML::conditioned_locations.include?(surface.exterior_adjacent_to)
         space_UAs[HPXML::LocationConditionedSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
+        # Ground temperature is only used for basements, not crawlspaces, per Walker (1998)
+        # "Technical background for default values used for forced air systems in proposed ASHRAE Std. 152"
+        if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? location
+          ua_location = HPXML::LocationOutside
+        else
+          ua_location = HPXML::LocationGround
+        end
         if surface.is_a? HPXML::FoundationWall
           _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
-          space_UAs[HPXML::LocationGround] += u_wall_without_soil * surface.area
+          space_UAs[ua_location] += u_wall_without_soil * surface.area
         elsif surface.is_a? HPXML::Slab
           if surface.thickness == 0
-            # Dirt floor, assume R-0.1 per Walker (1998) "Technical background for default
+            # Dirt floor, assume U-value=0.1 per Walker (1998) "Technical background for default
             # values used for forced air systems in proposed ASHRAE Std. 152"
-            space_UAs[HPXML::LocationGround] += 0.1 * surface.area
+            space_UAs[ua_location] += 0.1 * surface.area
           else
-            # TODO
+            concrete_r = Material.Concrete(surface.thickness).rvalue
+            # Under Slab Insulation UA
+            horiz_insul_u = 1.0 / (concrete_r + surface.under_slab_insulation_r_value)
+            if surface.under_slab_insulation_spans_entire_slab
+              horiz_insul_a = surface.area
+            else
+              horiz_insul_a = surface.under_slab_insulation_width * surface.exposed_perimeter
+            end
+            space_UAs[ua_location] += horiz_insul_u * horiz_insul_a
+            # Perimeter Insulation UA (approximate as similar to under slab insulation)
+            vert_insul_u = 1.0 / (concrete_r + surface.perimeter_insulation_r_value)
+            vert_insul_a = surface.perimeter_insulation_depth * surface.exposed_perimeter
+            space_UAs[ua_location] += vert_insul_u * vert_insul_a
+            # Uninsulated slab UA
+            slab_u = 1.0 / concrete_r
+            slab_a = [surface.area - horiz_insul_a - vert_insul_a, 0.0].max
+            space_UAs[ua_location] += slab_u * slab_a
           end
         end
       end
@@ -2517,7 +2505,7 @@ class HVACSizing
     volume = Geometry.calculate_zone_volume(@hpxml_bldg, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
-    space_UAs[HPXML::LocationOutside] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
+    space_UAs[HPXML::LocationOutside] += infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
 
     return space_UAs
   end
@@ -2532,12 +2520,7 @@ class HVACSizing
       sum_uat, sum_ua = 0.0, 0.0
       space_UAs.each do |ua_type, ua|
         if ua_type == HPXML::LocationGround
-          # Ground temperature is only used for basements, not crawlspaces
-          if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? location
-            sum_uat += ua * design_db
-          else
-            sum_uat += ua * ground_db
-          end
+          sum_uat += ua * ground_db
           sum_ua += ua
         elsif ua_type == HPXML::LocationOutside
           sum_uat += ua * design_db
@@ -3096,14 +3079,4 @@ class HVACSizingValues
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
                 :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
-end
-
-class Numeric
-  def deg2rad
-    self * Math::PI / 180
-  end
-
-  def rad2deg
-    self * 180 / Math::PI
-  end
 end
