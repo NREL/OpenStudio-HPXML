@@ -26,6 +26,7 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
     args['hpxml_output_path'] = hpxml
     args['output_csv_path'] = File.join(rundir, 'stochastic.csv')
     args['debug'] = debug
+    args['building_id'] = building_id
     update_args_hash(measures, measure_subdir, args)
   end
 
@@ -59,6 +60,7 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
   args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
   args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
+  args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
   args['user_output_variables'] = timeseries_output_variables.join(', ') unless timeseries_output_variables.empty?
   update_args_hash(measures, measure_subdir, args)
 
@@ -77,7 +79,7 @@ end
 
 timeseries_types = ['ALL', 'total', 'fuels', 'enduses', 'systemuses', 'emissions', 'emissionfuels',
                     'emissionenduses', 'hotwater', 'loads', 'componentloads',
-                    'unmethours', 'temperatures', 'airflows', 'weather']
+                    'unmethours', 'temperatures', 'airflows', 'weather', 'resilience']
 
 options = {}
 OptionParser.new do |opts|
@@ -131,7 +133,7 @@ OptionParser.new do |opts|
   end
 
   options[:timeseries_output_variables] = []
-  opts.on('--add-timeseries-output-variable NAME', 'Add timeseries output variable; can be called multiple times') do |t|
+  opts.on('-t', '--add-timeseries-output-variable NAME', 'Add timeseries output variable; can be called multiple times') do |t|
     options[:timeseries_output_variables] << t
   end
 
@@ -140,7 +142,7 @@ OptionParser.new do |opts|
     options[:ep_input_format] = t
   end
 
-  opts.on('-b', '--building-id <ID>', 'ID of Building to simulate (required when multiple HPXML Building elements)') do |t|
+  opts.on('-b', '--building-id ID', 'ID of Building to simulate (required when multiple HPXML Building elements); use "ALL" to simulate a single whole MF building') do |t|
     options[:building_id] = t
   end
 

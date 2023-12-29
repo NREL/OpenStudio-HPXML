@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>279e9ac9-8a85-4425-9d87-6683d723e839</version_id>
-  <version_modified>2023-06-23T23:58:03Z</version_modified>
+  <version_id>00195856-fc00-4476-b601-ab53286b33cf</version_id>
+  <version_modified>2023-11-17T15:16:06Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -122,6 +122,18 @@
   </attributes>
   <files>
     <file>
+      <filename>README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>readme</usage_type>
+      <checksum>E137125B</checksum>
+    </file>
+    <file>
+      <filename>README.md.erb</filename>
+      <filetype>erb</filetype>
+      <usage_type>readmeerb</usage_type>
+      <checksum>513F28E9</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -130,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E7C1ABA5</checksum>
+      <checksum>4A038500</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -232,7 +244,7 @@
       <filename>simple_rates/Average_retail_price_of_electricity.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>37E30685</checksum>
+      <checksum>02EEEF39</checksum>
     </file>
     <file>
       <filename>simple_rates/HouseholdConsumption.csv</filename>
@@ -244,25 +256,25 @@
       <filename>simple_rates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2CE8192C</checksum>
+      <checksum>C5FFF659</checksum>
     </file>
     <file>
       <filename>simple_rates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6FEB427A</checksum>
+      <checksum>8C00508D</checksum>
     </file>
     <file>
       <filename>simple_rates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>22112EBB</checksum>
+      <checksum>614B155F</checksum>
     </file>
     <file>
       <filename>simple_rates/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D9D25D07</checksum>
+      <checksum>7832E08F</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
@@ -277,6 +289,12 @@
       <checksum>31A7BE3B</checksum>
     </file>
     <file>
+      <filename>Detailed Rate.json</filename>
+      <filetype>json</filetype>
+      <usage_type>test</usage_type>
+      <checksum>953EE2AC</checksum>
+    </file>
+    <file>
       <filename>Invalid Fixed Charge Units.json</filename>
       <filetype>json</filetype>
       <usage_type>test</usage_type>
@@ -287,12 +305,6 @@
       <filetype>json</filetype>
       <usage_type>test</usage_type>
       <checksum>32FB5BA8</checksum>
-    </file>
-    <file>
-      <filename>Jackson Electric Member Corp - A Residential Service Senior Citizen Low Income Assistance (Effective 2017-01-01).json</filename>
-      <filetype>json</filetype>
-      <usage_type>test</usage_type>
-      <checksum>953EE2AC</checksum>
     </file>
     <file>
       <filename>Missing Required Fields.json</filename>
@@ -307,10 +319,10 @@
       <checksum>F96CB80F</checksum>
     </file>
     <file>
-      <filename>utility_bills_test.rb</filename>
+      <filename>test_report_utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8AAE9CCC</checksum>
+      <checksum>07F2D0DB</checksum>
     </file>
   </files>
 </measure>
