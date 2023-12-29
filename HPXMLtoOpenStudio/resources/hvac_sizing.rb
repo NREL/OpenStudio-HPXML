@@ -167,9 +167,6 @@ class HVACSizing
     if location == HPXML::LocationConditionedSpace
       heat_temp = @heat_setpoint
 
-    elsif location == HPXML::LocationGarage
-      heat_temp = @hpxml_bldg.header.manualj_heating_design_temp + 13.0
-
     elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
 
       attic_floors = @hpxml_bldg.floors.select { |f| f.is_ceiling && [f.interior_adjacent_to, f.exterior_adjacent_to].include?(location) }
@@ -190,7 +187,10 @@ class HVACSizing
         heat_temp = @hpxml_bldg.header.manualj_heating_design_temp
       end
 
-    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+    elsif [HPXML::LocationGarage, HPXML::LocationBasementUnconditioned,
+           HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+      # Note: We use this approach for garages in case they are partially below grade,
+      # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
       heat_temp = calculate_space_design_temps(location, weather, @heat_setpoint, @hpxml_bldg.header.manualj_heating_design_temp, weather.data.ShallowGroundMonthlyTemps.min)
 
     end
@@ -203,43 +203,6 @@ class HVACSizing
   def self.process_design_temp_cooling(weather, location)
     if location == HPXML::LocationConditionedSpace
       cool_temp = @cool_setpoint
-
-    elsif location == HPXML::LocationGarage
-      # Calculate fraction of garage under conditioned space
-      area_total = 0.0
-      area_conditioned = 0.0
-      @hpxml_bldg.roofs.each do |roof|
-        next unless roof.interior_adjacent_to == location
-
-        area_total += roof.area
-      end
-      @hpxml_bldg.floors.each do |floor|
-        next unless [floor.interior_adjacent_to, floor.exterior_adjacent_to].include? location
-
-        area_total += floor.area
-        area_conditioned += floor.area if floor.is_thermal_boundary
-      end
-      if area_total == 0
-        garage_frac_under_conditioned = 0.5
-      else
-        garage_frac_under_conditioned = area_conditioned / area_total
-      end
-
-      # Calculate the garage cooling design temperature based on Table 4C
-      # Linearly interpolate between having conditioned space over the garage and not having conditioned space above the garage
-      if @daily_range_num == 0.0
-        cool_temp = (@hpxml_bldg.header.manualj_cooling_design_temp +
-                     (11.0 * garage_frac_under_conditioned) +
-                     (22.0 * (1.0 - garage_frac_under_conditioned)))
-      elsif @daily_range_num == 1.0
-        cool_temp = (@hpxml_bldg.header.manualj_cooling_design_temp +
-                     (6.0 * garage_frac_under_conditioned) +
-                     (17.0 * (1.0 - garage_frac_under_conditioned)))
-      elsif @daily_range_num == 2.0
-        cool_temp = (@hpxml_bldg.header.manualj_cooling_design_temp +
-                     (1.0 * garage_frac_under_conditioned) +
-                     (12.0 * (1.0 - garage_frac_under_conditioned)))
-      end
 
     elsif (location == HPXML::LocationAtticUnvented) || (location == HPXML::LocationAtticVented)
 
@@ -338,7 +301,10 @@ class HVACSizing
         cool_temp += (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + @daily_range_temp_adjust[@daily_range_num]
       end
 
-    elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+    elsif [HPXML::LocationGarage, HPXML::LocationBasementUnconditioned,
+           HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
+      # Note: We use this approach for garages in case they are partially below grade,
+      # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
       cool_temp = calculate_space_design_temps(location, weather, @cool_setpoint, @hpxml_bldg.header.manualj_cooling_design_temp, weather.data.ShallowGroundMonthlyTemps.max)
 
     end
@@ -734,7 +700,7 @@ class HVACSizing
           else
             # Handling cases ctd < 10 is based on A12-18 in MJ8
             cltd_corr = @ctd - 20.0 - @daily_range_temp_adjust[@daily_range_num]
-            cltd = [cltd - cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
+            cltd = [cltd + cltd_corr, 0.0].max # NOTE: The CLTD_Alt equation in A12-18 part 5 suggests CLTD - CLTD_corr, but A12-19 suggests it should be CLTD + CLTD_corr (where CLTD_corr is negative)
           end
 
           bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
@@ -2445,7 +2411,7 @@ class HVACSizing
       elsif HPXML::conditioned_locations.include?(surface.interior_adjacent_to) || HPXML::conditioned_locations.include?(surface.exterior_adjacent_to)
         space_UAs[HPXML::LocationConditionedSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
-        # Ground temperature is only used for basements, not crawlspaces, per Walker (1998)
+        # Ground temperature is used for basements, not crawlspaces, per Walker (1998)
         # "Technical background for default values used for forced air systems in proposed ASHRAE Std. 152"
         if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? location
           ua_location = HPXML::LocationOutside
