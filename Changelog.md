@@ -15,6 +15,7 @@ __New Features__
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
+- Mains temperature can not go below freezing (0 C)
 
 ## OpenStudio-HPXML v1.7.0
 
