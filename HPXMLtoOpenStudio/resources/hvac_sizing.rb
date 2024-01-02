@@ -717,11 +717,12 @@ class HVACSizing
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
 
-      u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       if foundation_wall.is_exterior
+        u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true)
         bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
+        u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
         bldg_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
@@ -834,8 +835,7 @@ class HVACSizing
           @hpxml_bldg.foundation_walls.each do |foundation_wall|
             next unless foundation_wall.is_exterior && foundation_wall.interior_adjacent_to == adjacent_space
 
-            _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
-
+            u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
             sum_a_wall += foundation_wall.net_area
             sum_ua_wall += (u_wall_without_soil * foundation_wall.net_area)
           end
@@ -2419,7 +2419,7 @@ class HVACSizing
           ua_location = HPXML::LocationGround
         end
         if surface.is_a? HPXML::FoundationWall
-          _u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(surface)
+          u_wall_without_soil = get_foundation_wall_ufactor(surface, false)
           space_UAs[ua_location] += u_wall_without_soil * surface.area
         elsif surface.is_a? HPXML::Slab
           if surface.thickness == 0
@@ -2867,7 +2867,7 @@ class HVACSizing
     return surfaces_a / surfaces_ua
   end
 
-  def self.get_foundation_wall_properties(foundation_wall)
+  def self.get_foundation_wall_ufactor(foundation_wall, include_soil)
     # Calculate effective U-factor
 
     if not foundation_wall.insulation_assembly_r_value.nil?
@@ -2887,8 +2887,7 @@ class HVACSizing
     k_soil = @hpxml_bldg.site.ground_conductivity
 
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
-    u_wall_with_soil = 0.0
-    u_wall_without_soil = 0.0
+    u_wall = 0.0
     wall_height = foundation_wall.height.ceil
     wall_depth_above_grade = foundation_wall.height - foundation_wall.depth_below_grade
     for distance_to_top in 1..wall_height
@@ -2909,13 +2908,18 @@ class HVACSizing
       if (distance_to_top > wall_ins_dist_to_top_ext) && (distance_to_top <= wall_ins_dist_to_bottom_ext)
         r_wall += wall_ins_rvalue_ext # Interior insulation at this depth, add R-value
       end
-      u_wall_with_soil += 1.0 / (r_soil + r_wall)
-      u_wall_without_soil += 1.0 / r_wall
+      if include_soil
+        u_wall += 1.0 / (r_soil + r_wall)
+      else
+        u_wall += 1.0 / r_wall
+      end
     end
-    u_wall_with_soil = (u_wall_with_soil / wall_height) * 0.85
-    u_wall_without_soil = (u_wall_without_soil / wall_height)
+    u_wall /= wall_height
+    if include_soil
+      u_wall *= 0.85
+    end
 
-    return u_wall_with_soil, u_wall_without_soil
+    return u_wall
   end
 
   def self.calc_slab_f_value(slab, ground_conductivity)
