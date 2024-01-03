@@ -1516,7 +1516,7 @@ class SchedulesFile
   def annual_equivalent_full_load_hrs(col_name:,
                                       schedules: nil)
     if schedules.nil?
-      schedules = @schedules # the schedules before vacancy is applied
+      schedules = @schedules # the schedules before unavailable periods are applied
     end
 
     if schedules[col_name].nil?
