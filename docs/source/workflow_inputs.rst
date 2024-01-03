@@ -441,13 +441,66 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
   ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
-  ``extension/GroundConductivity``  double    Btu/hr-ft-F  > 0          No        1.0       Thermal conductivity of the ground soil [#]_
+  ``Soil/SoilType``                 string                 See [#]_     No        unknown   Soil type
+  ``Soil/MoistureType``             string                 See [#]_     No        mixed     Soil moisture type
+  ``Soil/Conductivity``             double    Btu/hr-ft-F  > 0          No        See [#]_  Soil thermal conductivity
+  ``Soil/extension/Diffusivity``    double    ft2/hr       > 0          No        See [#]_  Soil thermal diffusivity
   ``extension/Neighbors``           element                             No        <none>    Presence of neighboring buildings for solar shading
   ================================  ========  ===========  ===========  ========  ========  ============================================================
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
-  .. [#] GroundConductivity used for foundation heat transfer and ground source heat pumps.
+  .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
+  .. [#] MoistureType choices are "dry", "wet", or "mixed".
+  .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType:
+  
+         \- **unknown, dry/wet/mixed**: 1.0000
+
+         \- **sand/gravel, dry**: 0.2311
+
+         \- **sand, wet**: 1.3865
+
+         \- **sand, mixed**: 0.8088
+
+         \- **silt/clay, dry**: 0.2889
+
+         \- **silt/clay, wet**: 0.9821
+
+         \- **silt/clay, mixed**: 0.6355
+
+         \- **loam, dry/wet/mixed**: 1.2132
+
+         \- **gravel, wet**: 1.0399
+
+         \- **gravel, mixed**: 0.6355
+
+  .. [#] If Diffusivity not provided, defaults to Conductivity * 0.0208 if Conductivity provided, otherwise defaults based on SoilType and MoistureType:
+  
+         \- **unknown, dry/wet/mixed**: 0.0208
+
+         \- **sand/gravel, dry**: 0.0097
+
+         \- **sand, wet**: 0.0322
+
+         \- **sand, mixed**: 0.0210
+
+         \- **silt/clay, dry**: 0.0120
+
+         \- **silt/clay, wet**: 0.0194
+
+         \- **silt/clay, mixed**: 0.0157
+
+         \- **loam, dry/wet/mixed**: 0.0353
+
+         \- **gravel, wet**: 0.0291
+
+         \- **gravel, mixed**: 0.0194
+
+.. note::
+
+  Default Conductivity and Diffusivity values based on SoilType/MoistureType provided by Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement. Application to very Low Enthalpy Geothermal Energy Systems <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
+  Conductivity is used for foundation heat transfer and ground source heat pumps.
+  Diffusivity is used for ground source heat pumps.
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -887,7 +940,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``InteriorFinish/Type``                 string                               See [#]_                  No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No         0.5                             Interior finish thickness
   ``Pitch``                               integer            ?:12              >= 0                      Yes                                        Pitch
-  ``RadiantBarrier``                      boolean                                                        No         false                           Presence of radiant barrier
+  ``RadiantBarrier``                      boolean                                                        No         false                           Presence of radiant barrier [#]_
   ``RadiantBarrierGrade``                 integer                              >= 1, <= 3                No         1                               Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                             Yes                                        Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                                        Assembly R-value [#]_
@@ -922,6 +975,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
+  .. [#] RadiantBarrier intended for attic roofs. Model assumes an emittance of 0.05.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Rim Joists
@@ -986,6 +1040,8 @@ Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/W
   ``Emittance``                           double                               >= 0, <= 1                No             0.90         Emittance
   ``InteriorFinish/Type``                 string                               See [#]_                  No             See [#]_     Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No             0.5          Interior finish thickness
+  ``RadiantBarrier``                      boolean                                                        No             false        Presence of radiant barrier [#]_
+  ``RadiantBarrierGrade``                 integer                              >= 1, <= 3                No             1            Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                             Yes                         Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                         Assembly R-value [#]_
   ======================================  =================  ================  ========================  =============  ===========  ====================================
@@ -1014,6 +1070,7 @@ Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/W
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "none".
+  .. [#] RadiantBarrier intended for attic gable walls. Model assumes an emittance of 0.05.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
 HPXML Foundation Walls
@@ -1090,6 +1147,8 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Area``                                double    ft2           > 0          Yes                 Gross area
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
   ``InteriorFinish/Thickness``            double    in            >= 0         No        0.5       Interior finish thickness
+  ``RadiantBarrier``                      boolean                              No        false     Presence of radiant barrier [#]_
+  ``RadiantBarrierGrade``                 integer                 >= 1, <= 3   No        1         Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                   Yes                 Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
@@ -1101,11 +1160,9 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space and the surface is a ceiling, otherwise "none".
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior
-    air films, and insulation installation grade. For a manufactured home belly
-    where the area of the belly wrap is different and usually greater than the
-    floor area, the AssemblyEffectiveRValue should be adjusted to account for
-    the surface area of the belly wrap and insulation.
+  .. [#] RadiantBarrier intended for attic floors. Model assumes an emittance of 0.5 (reduced effectiveness due to accumulation of dust) per `an ORNL article on radiant barriers <https://web.ornl.gov/sci/buildings/tools/radiant/rb2/>`_.
+  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+         For a manufactured home belly where the area of the belly wrap is different and usually greater than the floor area, the AssemblyEffectiveRValue should be adjusted to account for the surface area of the belly wrap and insulation.
 
 For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
 
@@ -2063,6 +2120,7 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0              Yes                       Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0              Yes                       Rated heating efficiency
   ``NumberofUnitsServed``                          integer           > 0              See [#]_                  Number of dwelling units served
+  ``AttachedToGeothermalLoop``                     idref             See [#]_         No [#]_                   ID of attached geothermal loop
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0             No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0             See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
@@ -2077,6 +2135,8 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] AttachedToGeothermalLoop must reference a ``GeothermalLoop``.
+  .. [#] If AttachedToGeothermalLoop not provided, the ground-to-air heat pump will be automatically attached to a geothermal loop that is entirely defaulted.
   .. [#] If PumpPowerWattsPerTon not provided, defaults to 30 W/ton per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
   .. [#] Pump power is calculated using PumpPowerWattsPerTon and the cooling capacity in tons, unless the system only provides heating, in which case the heating capacity in tons is used instead.
          Any pump power that is shared by multiple dwelling units should be included in SharedLoopWatts, *not* PumpPowerWattsPerTon, so that shared loop pump power attributed to the dwelling unit is calculated.
@@ -2226,6 +2286,78 @@ For air-source HVAC systems with detailed heating performance data, two or more 
 In addition, the parent object must provide the ``HeatingCapacity`` and the ``CompressorType`` must be set to "variable speed".
 For heat pumps, :ref:`clg_detailed_perf_data` must also be provided.
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
+
+.. _geothermal_loops:
+
+HPXML Geothermal Loops
+**********************
+
+Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
+
+  ========================================  ================  ===========  ==================  ========  ==============  ===============================================
+  Element                                   Type              Units        Constraints         Required  Default         Notes
+  ========================================  ================  ===========  ==================  ========  ==============  ===============================================
+  ``SystemIdentifier``                      id                                                 Yes                       Unique identifier
+  ``LoopConfiguration``                     string                         vertical            Yes                       Geothermal loop configuration
+  ``LoopFlow``                              double            gal/min      > 0                 No        See [#]_        Water flow rate through the geothermal loop
+  ``BoreholesOrTrenches/Count``             integer                        >= 1, <= 10         No [#]_   See [#]_        Number of boreholes
+  ``BoreholesOrTrenches/Length``            double            ft           >= 79, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
+  ``BoreholesOrTrenches/Spacing``           double            ft           > 0                 No        16.4            Distance between boreholes
+  ``BoreholesOrTrenches/Diameter``          double            in           > 0                 No        5.0             Borehole diameter
+  ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0     No        standard        Grout type or conductivity [#]_
+  ``Pipe/Type`` or ``Pipe/Conductivity``    string or double  Btu/hr-ft-F  See [#]_ or > 0     No        standard        Pipe type or conductivity [#]_
+  ``Pipe/Diameter``                         double            in           See [#]_            No        1.25            Pipe diameter
+  ``Pipe/ShankSpacing``                     double            in           > 0                 No        See [#]_        Center-to-center distance between two branches of a vertical U-tube
+  ``extension/BorefieldConfiguration``      string                         See [#]_            No        Rectangle       Configuration of boreholes
+  ========================================  ================  ===========  ==================  ========  ==============  ===============================================
+
+  .. [#] LoopFlow autosized by calculating 3 times the maximum of the ground source heat pump's heating/cooling capacity in tons, with a minimum of 3 gal/min.
+  .. [#] If extension/BorefieldConfiguration provided, and it is not **Rectangle**, a valid BoreholesOrTrenches/Count must also be provided:
+         
+         \- **Rectangle**: 1, 2, 3, 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **Open Rectangle**: 8 or 10
+         
+         \- **C**: 7 or 9
+         
+         \- **L**: 4, 5, 6, 7, 8, 9, or 10
+         
+         \- **U**: 7, 9, or 10
+         
+         \- **Lopsided U**: 6, 7, 8, 9, or 10
+
+  .. [#] BoreholesOrTrenches/Count calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by BoreholesOrTrenches/Length if BoreholesOrTrenches/Length is provided, otherwise autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
+  .. [#] 79 ft is the minimum depth in the g-function library.
+         500 ft is the maximum realistic depth to be used in residential applications.
+  .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
+  .. [#] Grout/Type choices are "standard" or "thermally enhanced".
+  .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
+         
+         \- **standard**: 0.75 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 1.2 Btu/hr-ft-F
+
+  .. [#] Pipe/Type choices are "standard" or "thermally enhanced".
+  .. [#] If Pipe/Conductivity not provided, defaults based on Pipe/Type:
+         
+         \- **standard**: 0.23 Btu/hr-ft-F
+         
+         \- **thermally enhanced**: 0.40 Btu/hr-ft-F
+
+  .. [#] Pipe diameter must be either 0.75, 1.0, or 1.25.
+  .. [#] ShankSpacing defaults to sum of U-tube spacing (assumed to be 0.9661 in) and pipe outer diameter, where pipe outer diameter is assumed to be:
+         
+         \- **0.75 in pipe**: 1.050 in
+         
+         \- **1.0 in pipe**: 1.315 in
+         
+         \- **1.25 in pipe**: 1.660 in
+
+  .. [#] extension/BorefieldConfiguration choices are "Rectangle", "Open Rectangle", "C", "L", "U", or "Lopsided U".
+
+.. note::
+
+  For a given combination of ``extension/BorefieldConfiguration``, ``BoreholesOrTrenches/Count``, ``BoreholesOrTrenches/Spacing``, ``BoreholesOrTrenches/Length``, and ``BoreholesOrTrenches/Diameter`` g-function values are determined using the `G-Function Library <https://gdr.openei.org/submissions/1325>`_ (from the Geothermal Data Repository).
 
 .. _hvac_control:
 
