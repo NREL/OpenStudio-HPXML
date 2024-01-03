@@ -434,6 +434,7 @@ class HPXML < Object
   WindowClassHeavyCommercial = 'heavy commercial'
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
+  ZoneTypeConditioned = 'conditioned'
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path

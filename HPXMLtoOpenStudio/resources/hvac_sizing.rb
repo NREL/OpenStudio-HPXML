@@ -10,6 +10,7 @@ class HVACSizing
     @cfa = cfa
 
     process_site_calcs_and_design_temps(weather)
+    process_zone_and_spaces()
 
     # Calculate loads for the conditioned thermal zone
     bldg_design_loads = DesignLoads.new
@@ -22,6 +23,8 @@ class HVACSizing
     process_load_slabs(bldg_design_loads)
     process_load_infiltration_ventilation(bldg_design_loads, weather)
     process_load_internal_gains(bldg_design_loads)
+    
+    puts @space_loads
 
     # Aggregate zone loads into initial loads
     aggregate_loads(bldg_design_loads)
@@ -312,6 +315,19 @@ class HVACSizing
     fail "Design temp cooling not calculated for #{location}." if cool_temp.nil?
 
     return cool_temp
+  end
+
+  def self.process_zone_and_spaces()
+    '''
+    Room loads set up based on spaces
+    '''
+    @space_loads = {}
+    @hpxml_bldg.zones.each do |zone|
+      next unless zone.zone_type == HPXML::ZoneTypeConditioned
+      zone.spaces.each do |space|
+        @space_loads[space.id] = DesignLoads.new
+      end
+    end
   end
 
   def self.process_load_windows_skylights(bldg_design_loads, weather)
@@ -666,6 +682,11 @@ class HVACSizing
       else
         wall_area = wall.net_area
       end
+      if not wall.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[wall.attached_to_space_idref]
+        space_design_loads.Heat_Walls = 0.0 if space_design_loads.Heat_Walls.nil?
+        space_design_loads.Cool_Walls = 0.0 if space_design_loads.Cool_Walls.nil?
+      end
 
       azimuths.each do |azimuth|
         if wall.is_exterior
@@ -705,10 +726,14 @@ class HVACSizing
 
           bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
           bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd
+          space_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd unless space_design_loads.nil?
+          space_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd unless space_design_loads.nil?
         else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
           bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
           bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
+          space_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint) unless space_design_loads.nil?
+          space_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space]) unless space_design_loads.nil?
         end
       end
     end
@@ -716,14 +741,20 @@ class HVACSizing
     # Foundation walls
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
+      if not foundation_wall.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[foundation_wall.attached_to_space_idref]
+        space_design_loads.Heat_Walls = 0.0 if space_design_loads.Heat_Walls.nil?
+      end
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true)
         bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
+        space_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd unless space_design_loads.nil?
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
         u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
         bldg_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        space_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space]) unless space_design_loads.nil?
       end
     end
   end
@@ -739,6 +770,12 @@ class HVACSizing
     # Roofs
     @hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
+      
+      if not roof.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[roof.attached_to_space_idref]
+        space_design_loads.Heat_Roofs = 0.0 if space_design_loads.Heat_Roofs.nil?
+        space_design_loads.Cool_Roofs = 0.0 if space_design_loads.Cool_Roofs.nil?
+      end
 
       # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
       if roof.insulation_assembly_r_value <= 6
@@ -779,6 +816,9 @@ class HVACSizing
 
       bldg_design_loads.Cool_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd
       bldg_design_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd
+      space_design_loads.Cool_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd unless space_design_loads.nil?
+      space_design_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd unless space_design_loads.nil?
+      puts space_design_loads
     end
   end
 
