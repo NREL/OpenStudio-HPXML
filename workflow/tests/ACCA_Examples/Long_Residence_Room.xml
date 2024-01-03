@@ -1074,7 +1074,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenEastInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1091,7 +1091,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom1EastInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1108,7 +1108,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3EastInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1125,7 +1125,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2EastInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1142,7 +1142,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2SouthInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1159,7 +1159,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1SouthInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -1176,7 +1176,7 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom2SouthInteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
