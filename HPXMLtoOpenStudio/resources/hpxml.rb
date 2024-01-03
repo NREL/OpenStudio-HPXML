@@ -1077,7 +1077,7 @@ class HPXML < Object
 
   class Building < BaseElement
     CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :header,
-                   :climate_and_risk_zones, :air_infiltration, :air_infiltration_measurements, :attics,
+                   :climate_and_risk_zones, :zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
                    :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_plant, :hvac_controls, :hvac_distributions,
@@ -1151,6 +1151,7 @@ class HPXML < Object
       @building_construction.to_doc(building)
       @header.to_doc(building)
       @climate_and_risk_zones.to_doc(building)
+      @zones.to_doc(building)
       @air_infiltration_measurements.to_doc(building)
       @air_infiltration.to_doc(building)
       @attics.to_doc(building)
@@ -1225,6 +1226,7 @@ class HPXML < Object
       @building_construction = BuildingConstruction.new(self, building)
       @header = BuildingHeader.new(self, building)
       @climate_and_risk_zones = ClimateandRiskZones.new(self, building)
+      @zones = Zones.new(self, building)
       @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, building)
       @air_infiltration = AirInfiltration.new(self, building)
       @attics = Attics.new(self, building)
@@ -2092,6 +2094,90 @@ class HPXML < Object
     end
   end
 
+  class Zones < BaseArrayElement
+    def add(**kwargs)
+      self << Zone.new(@parent_object, **kwargs)
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Zones/Zone').each do |zone|
+        self << Zone.new(@parent_object, zone)
+      end
+    end
+  end
+
+  class Zone < BaseElement
+    ATTRS = [:id, :zone_type, :spaces]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      zones = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Zones'])
+      zone = XMLHelper.add_element(zones, 'Zone')
+      sys_id = XMLHelper.add_element(zone, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(zone, 'ZoneType', @zone_type, :string) unless @zone_type.nil?
+      @spaces.to_doc(zone)
+    end
+
+    def from_doc(zone)
+      return if zone.nil?
+
+      @id = HPXML::get_id(zone)
+      @zone_type = XMLHelper.get_value(zone, 'ZoneType', :string)
+      @spaces = Spaces.new(self, zone)
+    end
+  end
+
+  class Spaces < BaseArrayElement
+    def add(**kwargs)
+      self << Space.new(@parent_object, **kwargs)
+    end
+
+    def from_doc(zone)
+      return if zone.nil?
+
+      XMLHelper.get_elements(zone, 'Spaces/Space').each do |space|
+        self << Space.new(@parent_object, space)
+      end
+    end
+  end
+
+  class Space < BaseElement
+    ATTRS = [:id, :floor_area]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(zone)
+      return if nil?
+
+      spaces = XMLHelper.create_elements_as_needed(zone, ['Spaces'])
+      space = XMLHelper.add_element(spaces, 'Space')
+      sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
+    end
+
+    def from_doc(space)
+      return if space.nil?
+
+      @id = HPXML::get_id(space)
+      @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
+    end
+  end
+
   class AirInfiltration < BaseElement
     ATTRS = [:has_flue_or_chimney_in_conditioned_space]
     attr_accessor(*ATTRS)
@@ -2625,7 +2711,7 @@ class HPXML < Object
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
              :insulation_continuous_r_value, :radiant_barrier_grade, :insulation_grade,
              :interior_finish_type, :interior_finish_thickness, :framing_factor,
-             :framing_size, :framing_spacing]
+             :framing_size, :framing_spacing, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -2733,6 +2819,10 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
       end
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(roof, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(roof)
@@ -2766,6 +2856,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(roof, 'AttachedToSpace')[0])
     end
   end
 
@@ -2786,7 +2877,7 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :orientation, :azimuth, :siding,
              :color, :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
-             :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size]
+             :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def is_exterior
@@ -2871,6 +2962,10 @@ class HPXML < Object
         floor_joists = XMLHelper.add_element(rim_joist, 'FloorJoists')
         XMLHelper.add_element(floor_joists, 'Size', @framing_size, :string) unless @framing_size.nil?
       end
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(rim_joist, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(rim_joist)
@@ -2894,6 +2989,7 @@ class HPXML < Object
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
       @framing_size = XMLHelper.get_value(rim_joist, 'FloorJoists/Size', :string)
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(rim_joist, 'AttachedToSpace')[0])
     end
   end
 
@@ -2916,7 +3012,7 @@ class HPXML < Object
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :radiant_barrier, :radiant_barrier_grade, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :interior_finish_type, :interior_finish_thickness, :attic_wall_type, :framing_factor,
-             :framing_size, :framing_spacing, :insulation_grade]
+             :framing_size, :framing_spacing, :insulation_grade, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def windows
@@ -3046,6 +3142,10 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
       end
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(wall, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(wall)
@@ -3084,6 +3184,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(wall, 'AttachedToSpace')[0])
     end
   end
 
@@ -3107,7 +3208,7 @@ class HPXML < Object
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
-             :insulation_continuous_r_value, :interior_finish_type, :interior_finish_thickness]
+             :insulation_continuous_r_value, :interior_finish_type, :interior_finish_thickness, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def windows
@@ -3244,6 +3345,10 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float, @insulation_interior_distance_to_top_isdefaulted) unless @insulation_interior_distance_to_top.nil?
         XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float, @insulation_interior_distance_to_bottom_isdefaulted) unless @insulation_interior_distance_to_bottom.nil?
       end
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(foundation_wall, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(foundation_wall)
@@ -3277,6 +3382,7 @@ class HPXML < Object
         @insulation_exterior_distance_to_top = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/DistanceToTopOfInsulation", :float)
         @insulation_exterior_distance_to_bottom = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/DistanceToBottomOfInsulation", :float)
       end
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(foundation_wall, 'AttachedToSpace')[0])
     end
   end
 
@@ -3298,7 +3404,8 @@ class HPXML < Object
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness, :insulation_grade,
-             :framing_factor, :framing_size, :framing_spacing, :radiant_barrier, :radiant_barrier_grade]
+             :framing_factor, :framing_size, :framing_spacing, :radiant_barrier, :radiant_barrier_grade,
+             :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -3410,6 +3517,10 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
       end
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(floor, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(floor)
@@ -3439,6 +3550,7 @@ class HPXML < Object
         @insulation_cavity_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue", :float)
         @insulation_continuous_r_value = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue", :float)
       end
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(floor, 'AttachedToSpace')[0])
     end
   end
 
@@ -3461,7 +3573,7 @@ class HPXML < Object
              :perimeter_insulation_depth, :under_slab_insulation_width,
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
              :carpet_r_value, :perimeter_insulation_id, :perimeter_insulation_r_value,
-             :under_slab_insulation_id, :under_slab_insulation_r_value]
+             :under_slab_insulation_id, :under_slab_insulation_r_value, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
     def exterior_adjacent_to
@@ -3539,6 +3651,10 @@ class HPXML < Object
       XMLHelper.add_element(layer, 'InsulationSpansEntireSlab', @under_slab_insulation_spans_entire_slab, :boolean) unless @under_slab_insulation_spans_entire_slab.nil?
       XMLHelper.add_extension(slab, 'CarpetFraction', @carpet_fraction, :float, @carpet_fraction_isdefaulted) unless @carpet_fraction.nil?
       XMLHelper.add_extension(slab, 'CarpetRValue', @carpet_r_value, :float, @carpet_r_value_isdefaulted) unless @carpet_r_value.nil?
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(slab, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
     end
 
     def from_doc(slab)
@@ -3565,6 +3681,7 @@ class HPXML < Object
       end
       @carpet_fraction = XMLHelper.get_value(slab, 'extension/CarpetFraction', :float)
       @carpet_r_value = XMLHelper.get_value(slab, 'extension/CarpetRValue', :float)
+      @attached_to_space_idref = HPXML::get_idref(XMLHelper.get_elements(slab, 'AttachedToSpace')[0])
     end
   end
 
