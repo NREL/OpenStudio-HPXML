@@ -656,20 +656,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.3)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('roof_radiant_barrier', true)
-    arg.setDisplayName('Roof: Has Radiant Barrier')
-    arg.setDescription('Presence of a radiant barrier in the attic.')
-    arg.setDefaultValue(false)
+    radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
+    radiant_barrier_attic_location_choices << 'none'
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
+    arg.setDisplayName('Attic: Radiant Barrier Location')
+    arg.setDescription('The location of the radiant barrier in the attic.')
     args << arg
 
-    roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
-    roof_radiant_barrier_grade_choices << '1'
-    roof_radiant_barrier_grade_choices << '2'
-    roof_radiant_barrier_grade_choices << '3'
+    radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    radiant_barrier_grade_choices << '1'
+    radiant_barrier_grade_choices << '2'
+    radiant_barrier_grade_choices << '3'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, false)
-    arg.setDisplayName('Roof: Radiant Barrier Grade')
-    arg.setDescription("The grade of the radiant barrier. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_grade', radiant_barrier_grade_choices, false)
+    arg.setDisplayName('Attic: Radiant Barrier Grade')
+    arg.setDescription("The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new
@@ -1384,10 +1389,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
     geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, false)
     arg.setDisplayName('Geothermal Loop: Configuration')
-    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type.")
-    arg.setDefaultValue('none')
+    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
@@ -3330,6 +3334,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
+    warning = (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (args[:geothermal_loop_configuration].is_initialized && args[:geothermal_loop_configuration].get != 'none')
+    warnings << 'Specified an attached geothermal loop but home has no ground source heat pump.' if warning
+
     return warnings
   end
 
@@ -4323,11 +4330,6 @@ class HPXMLFile
         roof_color = args[:roof_color].get
       end
 
-      radiant_barrier = args[:roof_radiant_barrier]
-      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
-        radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
-      end
-
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
         azimuth = nil
       else
@@ -4341,10 +4343,16 @@ class HPXMLFile
                            roof_type: roof_type,
                            roof_color: roof_color,
                            pitch: args[:geometry_roof_pitch],
-                           radiant_barrier: radiant_barrier,
-                           radiant_barrier_grade: radiant_barrier_grade,
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
+
+      next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
+
+      hpxml_bldg.roofs[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.roofs[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
+      end
     end
   end
 
@@ -4478,6 +4486,14 @@ class HPXMLFile
         hpxml_bldg.walls[-1].insulation_assembly_r_value = args[:wall_assembly_r]
       else
         hpxml_bldg.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
+      end
+
+      next unless hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.walls[-1].interior_adjacent_to)
+
+      hpxml_bldg.walls[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.walls[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end
@@ -4635,6 +4651,14 @@ class HPXMLFile
         end
       else
         hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+      end
+
+      next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.floors[-1].exterior_adjacent_to) && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
+
+      hpxml_bldg.floors[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.floors[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end
@@ -5226,9 +5250,8 @@ class HPXMLFile
   end
 
   def self.set_geothermal_loop(hpxml_bldg, args)
-    loop_configuration = args[:geothermal_loop_configuration]
-
-    return if loop_configuration == 'none'
+    return if hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size == 0
+    return if !args[:geothermal_loop_configuration].is_initialized || args[:geothermal_loop_configuration].get == 'none'
 
     if args[:geothermal_loop_borefield_configuration].is_initialized
       bore_config = args[:geothermal_loop_borefield_configuration].get
@@ -5274,7 +5297,7 @@ class HPXMLFile
     end
 
     hpxml_bldg.geothermal_loops.add(id: "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}",
-                                    loop_configuration: loop_configuration,
+                                    loop_configuration: args[:geothermal_loop_configuration].get,
                                     loop_flow: loop_flow,
                                     bore_config: bore_config,
                                     num_bore_holes: num_bore_holes,
