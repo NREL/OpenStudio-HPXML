@@ -1556,18 +1556,18 @@ class SchedulesFile
       if end_day_num >= begin_day_num
         start_ix = (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour)
         end_ix = (end_day_num - begin_day_num + 1) * steps_in_day - ((24 - end_hour + begin_hour) * steps_in_hour)
-        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].reduce(:+) / (60.0 / min_per_item)
+        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].sum / (60.0 / min_per_item)
       else # Wrap around year
         start_ix = (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour)
         end_ix = -1
-        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].reduce(:+) / (60.0 / min_per_item)
+        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].sum / (60.0 / min_per_item)
 
         start_ix = 0
         end_ix = (end_day_num - 1) * steps_in_day + (end_hour * steps_in_hour)
-        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].reduce(:+) / (60.0 / min_per_item)
+        equiv_full_load_hrs += schedules[col_name][start_ix..end_ix].sum / (60.0 / min_per_item)
       end
     else # Annual
-      equiv_full_load_hrs += schedules[col_name].reduce(:+) / (60.0 / min_per_item)
+      equiv_full_load_hrs += schedules[col_name].sum / (60.0 / min_per_item)
     end
 
     return equiv_full_load_hrs
