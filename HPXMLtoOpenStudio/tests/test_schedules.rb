@@ -6,7 +6,6 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
-require_relative '../../BuildResidentialScheduleFile/resources/constants.rb'
 
 class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
   def setup
