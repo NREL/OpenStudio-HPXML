@@ -806,7 +806,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     geothermal_loop = hpxml_bldg.geothermal_loops[0]
     bore_radius = UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm')
-    grout_conductivity = UnitConversions.convert(0.4, 'Btu/(hr*ft*R)', 'W/(m*K)')
+    grout_conductivity = UnitConversions.convert(0.75, 'Btu/(hr*ft*R)', 'W/(m*K)')
     pipe_conductivity = UnitConversions.convert(0.23, 'Btu/(hr*ft*R)', 'W/(m*K)')
     shank_spacing = UnitConversions.convert(geothermal_loop.shank_spacing, 'in', 'm')
 
