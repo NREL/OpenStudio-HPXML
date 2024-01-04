@@ -1974,6 +1974,74 @@ The heating load served by the heating system integrated into cooling system. On
 
 <br/>
 
+**Cooling System: Cooling Detailed Performance Data Capacity Type**
+
+Capacity type of heat pump cooling detailed performance data.
+
+- **Name:** ``cooling_system_perf_data_cooling_cap_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Capacity`
+
+<br/>
+
+**Cooling System: Cooling Detailed Performance Data Outdoor Temperatures**
+
+Outdoor temperatures of cooling system cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``cooling_system_perf_data_cooling_outdoor_temps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Cooling Detailed Performance Data Minimum Capacities**
+
+Minimum capacities of cooling system cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``cooling_system_perf_data_cooling_min_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Cooling Detailed Performance Data Maximum Capacities**
+
+Maximum capacities of cooling system cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``cooling_system_perf_data_cooling_max_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Cooling Detailed Performance Data Minimum Efficiency COP Values**
+
+Minimum efficiency COP of cooling system cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``cooling_system_perf_data_cooling_min_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Cooling Performance Data Maximum Efficiency COP Values**
+
+Maximum efficiency COP of cooling system cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``cooling_system_perf_data_cooling_max_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heat Pump: Type**
 
 The type of heat pump. Use 'none' if there is no heat pump.
@@ -2273,6 +2341,142 @@ Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-ai
 - **Type:** ``Double``
 
 - **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Heating Detailed Performance Data Capacity Type**
+
+Capacity type of heat pump heating detailed performance data.
+
+- **Name:** ``heat_pump_perf_data_heating_cap_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Capacity`
+
+<br/>
+
+**Heat Pump: Heating Detailed Performance Data Outdoor Temperatures**
+
+Outdoor temperatures of heat pump heating detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_heating_outdoor_temps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Heating Detailed Performance Data Minimum Capacities**
+
+Minimum capacities of heat pump heating detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_heating_min_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Heating Detailed Performance Data Maximum Capacities**
+
+Maximum capacities of heat pump heating detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_heating_max_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Heating Detailed Performance Data Minimum Efficiency COP Values**
+
+Minimum efficiency COP of heat pump heating detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_heating_min_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Heating Performance Data Maximum Efficiency COP Values**
+
+Maximum efficiency COP of heat pump heating detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_heating_max_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Detailed Performance Data Capacity Type**
+
+Capacity type of heat pump cooling detailed performance data.
+
+- **Name:** ``heat_pump_perf_data_cooling_cap_type``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `Capacity`
+
+<br/>
+
+**Heat Pump: Cooling Detailed Performance Data Outdoor Temperatures**
+
+Outdoor temperatures of heat pump cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_cooling_outdoor_temps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Detailed Performance Data Minimum Capacities**
+
+Minimum capacities of heat pump cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_cooling_min_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Detailed Performance Data Maximum Capacities**
+
+Maximum capacities of heat pump cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_cooling_max_caps``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Detailed Performance Data Minimum Efficiency COP Values**
+
+Minimum efficiency COP of heat pump cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_cooling_min_cops``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Performance Data Maximum Efficiency COP Values**
+
+Maximum efficiency COP of heat pump cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+
+- **Name:** ``heat_pump_perf_data_cooling_max_cops``
+- **Type:** ``String``
 
 - **Required:** ``false``
 
