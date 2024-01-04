@@ -1509,11 +1509,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('W/CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_adjust_blower_fan_efficiency', false)
-    arg.setDisplayName('HVAC Distribution: Adjust Blower Fan Efficiency')
-    arg.setDescription("Whether to adjust the blower fan efficiency based on the W/cfm and provided airflow rates, and autosized airflow rates. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_heating_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Heating Airflow Rate')
     arg.setDescription('The heating airflow rate. If not provided, the OS-HPXML default is used.')
@@ -1526,9 +1521,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_use_maximum_airflow_rates', false)
-    arg.setDisplayName('HVAC Distribution: Use Maximum Airflow Rates')
-    arg.setDescription('Whether to use specified heating/cooling airflow rates as the maximum allowed.')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_existing_ductwork_restriction', false)
+    arg.setDisplayName('HVAC Distribution: Existing Ductwork Restriction')
+    arg.setDescription('Whether to use specified heating/cooling airflow rates to (a) adjust blower fan efficiency and (b) set maximum allowed airflow rates.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)
@@ -4274,8 +4269,8 @@ class HPXMLFile
       hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
     end
 
-    if args[:hvac_distribution_use_maximum_airflow_rates].is_initialized
-      hpxml_bldg.header.use_maximum_airflow_rates = args[:hvac_distribution_use_maximum_airflow_rates].get
+    if args[:hvac_distribution_existing_ductwork_restriction].is_initialized
+      hpxml_bldg.header.existing_ductwork_restriction = args[:hvac_distribution_existing_ductwork_restriction].get
     end
 
     if args[:window_natvent_availability].is_initialized
@@ -5274,12 +5269,6 @@ class HPXMLFile
       end
     end
 
-    if args[:hvac_distribution_adjust_blower_fan_efficiency].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
-        adjust_fan_watts_per_cfm = args[:hvac_distribution_adjust_blower_fan_efficiency].get
-      end
-    end
-
     if args[:hvac_distribution_heating_airflow_cfm].is_initialized
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
         heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
@@ -5333,7 +5322,6 @@ class HPXMLFile
                               charge_defect_ratio: charge_defect_ratio,
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                               fan_watts_per_cfm: fan_watts_per_cfm,
-                              adjust_fan_watts_per_cfm: adjust_fan_watts_per_cfm,
                               heating_airflow_cfm: heating_airflow_cfm,
                               cooling_airflow_cfm: cooling_airflow_cfm,
                               primary_heating_system: primary_heating_system,

@@ -113,7 +113,6 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -348,10 +347,8 @@
                 <Value>7.7</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <FanPowerWattsPerCFM>0.375</FanPowerWattsPerCFM>
-                <AdjustFanPowerWattsPerCFM>true</AdjustFanPowerWattsPerCFM>
-                <HeatingAirflowCFM>900.0</HeatingAirflowCFM>
-                <CoolingAirflowCFM>1200.0</CoolingAirflowCFM>
+                <HeatingAirflowCFM>800.0</HeatingAirflowCFM>
+                <CoolingAirflowCFM>1000.0</CoolingAirflowCFM>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>

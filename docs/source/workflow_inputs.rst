@@ -660,20 +660,22 @@ HPXML HVAC Sizing Control
 
 HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl``.
 
-  =================================  ========  =====  ===========  ========  ========  =====================================================
+  =================================  ========  =====  ===========  ========  ========  ===========================================================
   Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  =====================================================
+  =================================  ========  =====  ===========  ========  ========  ===========================================================
   ``AllowIncreasedFixedCapacities``  boolean                       No        false     Logic for fixed capacity HVAC equipment [#]_
   ``HeatPumpSizingMethodology``      string           See [#]_     No        HERS      Logic for autosized heat pumps [#]_
-  ``UseMaximumAirflowRates``         boolean                       No        false     Logic for defining maximum allowed airflow rates [#]_
-  =================================  ========  =====  ===========  ========  ========  =====================================================
+  ``ExistingDuctworkRestriction``    boolean                       No        false     Logic for HVAC system upgrades using existing ductwork [#]_
+  =================================  ========  =====  ===========  ========  ========  ===========================================================
 
   .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
   .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
   .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
          If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
-  .. [#] If UseMaximumAirflowRates is true, the smaller of user-specified airflow rates and design load will be used.
+  .. [#] If ExistingDuctworkRestriction is true, user-specified airflow rates HeatingAirflowCFM and CoolingAirflowCFM must be provided.
+         An efficiency adjustment is made to the blower fan W/cfm.
+         The smaller of user-specified airflow rates and design load will be used.
 
 If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
@@ -1959,7 +1961,6 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double   frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AdjustFanPowerWattsPerCFM``                           boolean                                      No        false           Whether to adjust blower fan efficiency [#]_
   ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        autosized       Heating airflow rate [#]_
   ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        autosized       Cooling airflow rate [#]_
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
@@ -1991,7 +1992,6 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
-  .. [#] If AdjustFanPowerWattsPerCFM is true, adjust the blower fan W/cfm using provided HeatingAirflowCFM and CoolingAirflowCFM.
   .. [#] HeatingAirflowCFM can either be the maximum allowed heating airflow rate when UseMaximumAirflowRates is true in :ref:`hvac_sizing_control`, or can be used for blower fan efficiency adjustment.
   .. [#] CoolingAirflowCFM can either be the maximum allowed cooling airflow rate when UseMaximumAirflowRates is true in :ref:`hvac_sizing_control`, or can be used for blower fan efficiency adjustment.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
@@ -2023,7 +2023,6 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``HeatingDetailedPerformanceData``                                element                                       No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double    frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AdjustFanPowerWattsPerCFM``                           boolean                                       No        false
   ``extension/HeatingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
   ``extension/CoolingAirflowCFM``                                   double    cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
@@ -2144,7 +2143,6 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/PumpPowerWattsPerTon``               double    W/ton   >= 0             No        See [#]_        Pump power [#]_
   ``extension/SharedLoopWatts``                    double    W       >= 0             See [#]_                  Shared pump power [#]_
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/AdjustFanPowerWattsPerCFM``          boolean                            No        false
   ``extension/HeatingAirflowCFM``                  double    cfm     >= 0             No        autosized
   ``extension/CoolingAirflowCFM``                  double    cfm     >= 0             No        autosized
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_

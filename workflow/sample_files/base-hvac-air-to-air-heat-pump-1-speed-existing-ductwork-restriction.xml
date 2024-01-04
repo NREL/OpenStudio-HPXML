@@ -53,7 +53,7 @@
         </BuildingConstruction>
         <extension>
           <HVACSizingControl>
-            <UseMaximumAirflowRates>true</UseMaximumAirflowRates>
+            <ExistingDuctworkRestriction>true</ExistingDuctworkRestriction>
           </HVACSizingControl>
         </extension>
       </BuildingSummary>
@@ -118,7 +118,6 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -353,6 +352,7 @@
                 <Value>7.7</Value>
               </AnnualHeatingEfficiency>
               <extension>
+                <FanPowerWattsPerCFM>0.4</FanPowerWattsPerCFM>
                 <HeatingAirflowCFM>900.0</HeatingAirflowCFM>
                 <CoolingAirflowCFM>1200.0</CoolingAirflowCFM>
                 <HeatingCapacityRetention>

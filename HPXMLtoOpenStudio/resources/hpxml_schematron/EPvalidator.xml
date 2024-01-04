@@ -293,7 +293,7 @@
     <sch:title>[HVACSizingControl]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:extension/h:HVACSizingControl'>
       <sch:assert role='ERROR' test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AllowIncreasedFixedCapacities</sch:assert>
-      <sch:assert role='ERROR' test='count(h:UseMaximumAirflowRates) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UseMaximumAirflowRates</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExistingDuctworkRestriction) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExistingDuctworkRestriction</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpSizingMethodology) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatPumpSizingMethodology</sch:assert>
       <sch:assert role='ERROR' test='h:HeatPumpSizingMethodology[text()="ACCA" or text()="HERS" or text()="MaxLoad"] or not(h:HeatPumpSizingMethodology)'>Expected HeatPumpSizingMethodology to be 'ACCA' or 'HERS' or 'MaxLoad'</sch:assert>
       <sch:assert role='ERROR' test='count(h:ManualJInputs/h:HeatingDesignTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ManualJInputs/WinterDesignTemperature</sch:assert>
@@ -1182,7 +1182,6 @@
       <sch:assert role='ERROR' test='count(h:HeatingDetailedPerformanceData) + count(h:CoolingDetailedPerformanceData) = 0 or count(h:HeatingDetailedPerformanceData) + count(h:CoolingDetailedPerformanceData) = 2'>Expected 0 or 2 element(s) for xpath: HeatingDetailedPerformanceData | CoolingDetailedPerformanceData</sch:assert> <!-- See [HeatingDetailedPerformanceData] and [CoolingDetailedPerformanceData]-->
       <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:FanPowerWattsPerCFM) &gt;= 0 or not(h:extension/h:FanPowerWattsPerCFM)'>Expected extension/FanPowerWattsPerCFM to be greater than or equal to 0</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AdjustFanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AdjustFanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio</sch:assert> <!-- See [AirflowDefectRatio] -->
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &gt;= -0.9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be greater than or equal to -0.9</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &lt;= 9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be less than or equal to 9</sch:assert>
@@ -1222,7 +1221,6 @@
       <sch:assert role='ERROR' test='count(h:HeatingDetailedPerformanceData) + count(h:CoolingDetailedPerformanceData) = 0 or count(h:HeatingDetailedPerformanceData) + count(h:CoolingDetailedPerformanceData) = 2'>Expected 0 or 2 element(s) for xpath: HeatingDetailedPerformanceData | CoolingDetailedPerformanceData</sch:assert> <!-- See [HeatingDetailedPerformanceData] and [CoolingDetailedPerformanceData]-->
       <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:FanPowerWattsPerCFM) &gt;= 0 or not(h:extension/h:FanPowerWattsPerCFM)'>Expected extension/FanPowerWattsPerCFM to be greater than or equal to 0</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AdjustFanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AdjustFanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio</sch:assert> <!-- See [AirflowDefectRatio] -->
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &gt;= -0.9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be greater than or equal to -0.9</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &lt;= 9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be less than or equal to 9</sch:assert>
@@ -1261,7 +1259,6 @@
       <sch:assert role='ERROR' test='number(h:extension/h:PumpPowerWattsPerTon) &gt;= 0 or not(h:extension/h:PumpPowerWattsPerTon)'>Expected extension/PumpPowerWattsPerTon to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:FanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:FanPowerWattsPerCFM) &gt;= 0 or not(h:extension/h:FanPowerWattsPerCFM)'>Expected extension/FanPowerWattsPerCFM to be greater than or equal to 0</sch:assert>
-      <sch:assert role='ERROR' test='count(h:AdjustFanPowerWattsPerCFM) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AdjustFanPowerWattsPerCFM</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:AirflowDefectRatio) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/AirflowDefectRatio</sch:assert> <!-- See [AirflowDefectRatio] -->
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &gt;= -0.9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be greater than or equal to -0.9</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) &lt;= 9 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be less than or equal to 9</sch:assert>

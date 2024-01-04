@@ -227,9 +227,9 @@ class HPXMLDefaults
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
     end
 
-    if hpxml_bldg.header.use_maximum_airflow_rates.nil?
-      hpxml_bldg.header.use_maximum_airflow_rates = false
-      hpxml_bldg.header.use_maximum_airflow_rates_isdefaulted = true
+    if hpxml_bldg.header.existing_ductwork_restriction.nil?
+      hpxml_bldg.header.existing_ductwork_restriction = false
+      hpxml_bldg.header.existing_ductwork_restriction_isdefaulted = true
     end
 
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
@@ -1497,18 +1497,6 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = mini_split_ductless_watts_per_cfm
         end
         heat_pump.fan_watts_per_cfm_isdefaulted = true
-      end
-    end
-
-    # Fan power adjustment
-    hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless [HPXML::HVACTypeHeatPumpAirToAir,
-                   HPXML::HVACTypeHeatPumpGroundToAir,
-                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
-
-      if heat_pump.adjust_fan_watts_per_cfm.nil?
-        heat_pump.adjust_fan_watts_per_cfm = false
-        heat_pump.adjust_fan_watts_per_cfm_isdefaulted = true
       end
     end
 
@@ -3114,7 +3102,7 @@ class HPXMLDefaults
                 [HPXML::HVACTypeBoiler,
                  HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
           htg_sys.heating_airflow_cfm = Float(hvac_sizing_values.Heat_Airflow.round)
-          htg_sys.heating_airflow_cfm_isdefaulted = true
+          htg_sys.heating_airflow_cfm_isdefaulted = hvac_sizing_values.Heat_Airflow_isdefaulted
         end
 
         # Heating GSHP loop
@@ -3181,7 +3169,7 @@ class HPXMLDefaults
 
       # Cooling airflow
       clg_sys.cooling_airflow_cfm = Float(hvac_sizing_values.Cool_Airflow.round)
-      clg_sys.cooling_airflow_cfm_isdefaulted = true
+      clg_sys.cooling_airflow_cfm_isdefaulted = hvac_sizing_values.Cool_Airflow_isdefaulted
     end
   end
 

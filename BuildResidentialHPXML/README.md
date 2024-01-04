@@ -2486,17 +2486,6 @@ The blower fan efficiency at maximum fan speed. Applies only to Furnace heating 
 
 <br/>
 
-**HVAC Distribution: Adjust Blower Fan Efficiency**
-
-Whether to adjust the blower fan efficiency based on the W/cfm and provided airflow rates, and autosized airflow rates. Applies only to air-to-air, mini-split, and ground-to-air heat pumps.
-
-- **Name:** ``hvac_distribution_adjust_blower_fan_efficiency``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **HVAC Distribution: Heating Airflow Rate**
 
 The heating airflow rate. If not provided, the OS-HPXML default is used.
@@ -2523,11 +2512,11 @@ The cooling airflow rate. If not provided, the OS-HPXML default is used.
 
 <br/>
 
-**HVAC Distribution: Use Maximum Airflow Rates**
+**HVAC Distribution: Existing Ductwork Restriction**
 
-Whether to use specified heating/cooling airflow rates as the maximum allowed.
+Whether to use specified heating/cooling airflow rates to (a) adjust blower fan efficiency and (b) set maximum allowed airflow rates.
 
-- **Name:** ``hvac_distribution_use_maximum_airflow_rates``
+- **Name:** ``hvac_distribution_existing_ductwork_restriction``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
