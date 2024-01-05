@@ -1919,18 +1919,21 @@ class HPXMLDefaults
         vent_fan.is_shared_system = false
         vent_fan.is_shared_system_isdefaulted = true
       end
+
       if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan?
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
-      if vent_fan.rated_flow_rate.nil? && vent_fan.tested_flow_rate.nil? && vent_fan.calculated_flow_rate.nil? && vent_fan.delivered_ventilation.nil?
+
+      if vent_fan.flow_rate.nil?
         if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan? }.size > 1
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
-        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds).round(1)
+        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds, eri_version).round(1)
         vent_fan.rated_flow_rate_isdefaulted = true
       end
+
       if vent_fan.fan_power.nil?
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan, eri_version)).round(1)
         vent_fan.fan_power_isdefaulted = true
