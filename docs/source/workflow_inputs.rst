@@ -2674,7 +2674,7 @@ If not entered, the simulation will not include mechanical ventilation.
   .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
          For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
          For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
-  .. [#] If FanPower not provided, defaults based on ANSI/RESNET/ICC 301-2012:
+  .. [#] If FanPower not provided, defaults based on ANSI/RESNET/ICC 301-2022:
          
          \- **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
          
