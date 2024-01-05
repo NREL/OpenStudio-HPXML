@@ -376,7 +376,7 @@
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CDB0A906</checksum>
+      <checksum>923B05E5</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3DA658D5</checksum>
+      <checksum>5E426D14</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
