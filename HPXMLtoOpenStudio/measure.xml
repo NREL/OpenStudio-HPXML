@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e243907c-65af-4a7c-a24d-2b9e0f13493d</version_id>
-  <version_modified>2024-01-04T14:52:10Z</version_modified>
+  <version_id>1b7ac040-e1ca-46e0-984e-f448996d9df1</version_id>
+  <version_modified>2024-01-05T18:12:55Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -304,7 +304,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>861FA32E</checksum>
+      <checksum>52C0D5EC</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -352,7 +352,7 @@
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9B747FEE</checksum>
+      <checksum>4D3BB4E9</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -520,7 +520,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EB126F07</checksum>
+      <checksum>40FB1C8A</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -652,7 +652,7 @@
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>ECC4694C</checksum>
+      <checksum>76D882A7</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
