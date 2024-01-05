@@ -12,6 +12,9 @@ __New Features__
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
+- Updates per ANSI/RESNET/ICC 301-2022:
+  - Small change to default flow rate for imbalanced mechanical ventilation systems.
+  - Updates how imbalanced infiltration and mechanical ventilation are combined on an hourly basis.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 
 __Bugfixes__
