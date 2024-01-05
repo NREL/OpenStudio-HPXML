@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d23b69f2-58bf-4977-a424-0022dbbf30ab</version_id>
-  <version_modified>2024-01-05T19:08:46Z</version_modified>
+  <version_id>edea2f42-b057-42c3-9f95-72398941a680</version_id>
+  <version_modified>2024-01-05T21:26:00Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -577,12 +577,6 @@
       <checksum>84D0E4E1</checksum>
     </file>
     <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0CF02008</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -634,7 +628,7 @@
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6C3A766C</checksum>
+      <checksum>97039F15</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
