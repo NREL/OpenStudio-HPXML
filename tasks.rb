@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+
 Dir["#{File.dirname(__FILE__)}/HPXMLtoOpenStudio/resources/*.rb"].each do |resource_file|
   next if resource_file.include? 'minitest_helper.rb'
 
@@ -2594,7 +2596,6 @@ if ARGV[0].to_sym == :update_hpxmls
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
   # Create sample/test HPXMLs
-  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   t = Time.now
   create_hpxmls()
   puts "Completed in #{(Time.now - t).round(1)}s"
