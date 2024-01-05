@@ -165,6 +165,37 @@ class HotWaterAndAppliances
       rf_space = refrigerator.additional_properties.space
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
+
+      tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+      tin_sensor.setName('tin s')
+      tin_sensor.setKeyName(conditioned_space.thermalZone.get.name.to_s)
+
+      if fridge_schedule.is_a? OpenStudio::Model::ScheduleRuleset
+        fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleYearValue)
+      elsif fridge_schedule.is_a? OpenStudio::Model::ScheduleFile
+        fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleFileValue)
+      end
+      fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
+
+      fridge_constant_coefficients = Schedule.RefrigeratorConstantCoefficients.split(',').map { |i| i.to_f }
+      fridge_temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients.split(',').map { |i| i.to_f }
+
+      fridge_schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      fridge_schedule_program.setName("#{fridge_schedule.name} program")
+      fridge_schedule_program.addLine("Set Tin = #{tin_sensor.name}*(9.0/5.0)+32.0")
+      fridge_constant_coefficients.zip(fridge_temperature_coefficients).each_with_index do |constant_temperature, i|
+        a, b = constant_temperature
+        fridge_schedule_program.addLine("If (Hour == #{i})")
+        fridge_schedule_program.addLine("Set a = #{a}")
+        fridge_schedule_program.addLine("Set b = #{b}")
+        fridge_schedule_program.addLine("Set #{fridge_schedule_actuator.name} = (#{rf_annual_kwh}/8760)*(a+b*Tin)")
+        fridge_schedule_program.addLine('EndIf')
+      end
+
+      fridge_schedule_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      fridge_schedule_pcm.setName("#{fridge_schedule.name} program calling manager")
+      fridge_schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
+      fridge_schedule_pcm.addProgram(fridge_schedule_program)
     end
 
     # Freezer(s) energy
