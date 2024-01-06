@@ -2094,7 +2094,11 @@ class Airflow
         q_fan = q_tot - q_inf_eff
       else
         q_inf_eff = q_inf * a_ext
-        q_fan = ((frac_imbal**2.0 * q_tot**2.0 - 4.0 * frac_imbal * q_inf_eff**2.0 + 2.0 * frac_imbal * q_inf_eff * q_tot + q_inf_eff**2.0)**0.5 + frac_imbal * q_tot - q_inf_eff) / (2.0 * frac_imbal)
+        if q_inf_eff >= q_tot
+          q_fan = 0.0
+        else
+          q_fan = ((frac_imbal**2.0 * q_tot**2.0 - 4.0 * frac_imbal * q_inf_eff**2.0 + 2.0 * frac_imbal * q_inf_eff * q_tot + q_inf_eff**2.0)**0.5 + frac_imbal * q_tot - q_inf_eff) / (2.0 * frac_imbal)
+        end
       end
     elsif Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019')
       if is_balanced
