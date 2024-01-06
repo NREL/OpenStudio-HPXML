@@ -225,7 +225,11 @@ class Airflow
     nl = get_infiltration_NL_from_SLA(sla, height)
     q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
-    is_balanced, frac_imbal = get_mech_vent_imbal_properties([vent_fan])
+    if vent_fan.is_balanced?
+      is_balanced, frac_imbal = true, 0.0
+    else
+      is_balanced, frac_imbal = false, 1.0
+    end
     q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, a_ext, bldg_type, eri_version, vent_fan.hours_in_operation)
     return q_fan
   end
@@ -2118,62 +2122,6 @@ class Airflow
     end
 
     return [q_fan, 0.0].max
-  end
-
-  def self.get_mech_vent_imbal_properties(mech_vent_fans)
-    # Returns (is_imbalanced, frac_imbalanced)
-    whole_fans = mech_vent_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
-
-    if whole_fans.count { |f| !f.is_balanced? && f.hours_in_operation < 24 } > 1
-      return false, 1.0 # Multiple intermittent unbalanced fans, assume imbalanced per ANSI 301-2022
-    end
-
-    fans_without_flowrate = whole_fans.select { |f| f.flow_rate.nil? }
-    if fans_without_flowrate.size > 0
-      if fans_without_flowrate.all? { |f| f.is_balanced? }
-        return true, 0.0 # All types are balanced, assume balanced
-      else
-        return false, 1.0 # Some supply-only or exhaust-only systems, impossible to know, assume imbalanced
-      end
-    end
-
-    cfm_total_supply, cfm_total_exhaust = calc_mech_vent_supply_exhaust_cfms(mech_vent_fans, :total)
-    q_avg = (cfm_total_supply + cfm_total_exhaust) / 2.0
-    if (cfm_total_supply - q_avg).abs / q_avg <= 0.1
-      is_balanced = true # Supply/exhaust within 10% of average; balanced
-    else
-      is_balanced = false
-    end
-    if cfm_total_supply + cfm_total_exhaust > 0
-      frac_imbal = (cfm_total_supply - cfm_total_exhaust).abs / [cfm_total_supply, cfm_total_exhaust].max
-    else
-      frac_imbal = 1.0
-    end
-
-    return is_balanced, frac_imbal
-  end
-
-  def self.calc_mech_vent_supply_exhaust_cfms(mech_vent_fans, total_or_oa)
-    whole_fans = mech_vent_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
-    fans_with_flowrate = whole_fans.select { |f| f.flow_rate.nil? }
-
-    cfm_supply = 0.0
-    cfm_exhaust = 0.0
-    fans_with_flowrate.each do |vent_fan|
-      if total_or_oa == :total
-        unit_flow_rate = vent_fan.average_total_unit_flow_rate
-      elsif total_or_oa == :oa
-        unit_flow_rate = vent_fan.average_oa_unit_flow_rate
-      end
-
-      if vent_fan.includes_supply_air?
-        cfm_supply += unit_flow_rate
-      end
-      if vent_fan.includes_exhaust_air?
-        cfm_exhaust += unit_flow_rate
-      end
-    end
-    return cfm_supply, cfm_exhaust
   end
 end
 
