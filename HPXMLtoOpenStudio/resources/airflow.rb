@@ -426,8 +426,12 @@ class Airflow
       vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
     else
       # No HVAC system; use the average of defaulted heating/cooling setpoints.
-      default_htg_sp = UnitConversions.convert(HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)[0], 'F', 'C')
-      default_clg_sp = UnitConversions.convert(HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)[0], 'F', 'C')
+      htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+      clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+      htg_setpoints = (htg_weekday_setpoints.scan(/\d+/).map(&:to_f) << htg_weekend_setpoints.scan(/\d+/).map(&:to_f)).flatten!
+      clg_setpoints = (clg_weekday_setpoints.scan(/\d+/).map(&:to_f) << clg_weekend_setpoints.scan(/\d+/).map(&:to_f)).flatten!
+      default_htg_sp = htg_setpoints.sum / htg_setpoints.size
+      default_clg_sp = clg_setpoints.sum / clg_setpoints.size
       vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
