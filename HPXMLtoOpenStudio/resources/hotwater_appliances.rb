@@ -150,11 +150,17 @@ class HotWaterAndAppliances
       end
       if fridge_schedule.nil?
         fridge_unavailable_periods = Schedule.get_unavailable_periods(runner, fridge_col_name, unavailable_periods)
-        fridge_weekday_sch = refrigerator.weekday_fractions
-        fridge_weekend_sch = refrigerator.weekend_fractions
-        fridge_monthly_sch = refrigerator.monthly_multipliers
+        # fridge_weekday_sch = refrigerator.weekday_fractions
+        # fridge_weekend_sch = refrigerator.weekend_fractions
+        # fridge_monthly_sch = refrigerator.monthly_multipliers
+        # FIXME: the schedule that we enter here is arbitary, since the actuator overrides it anyway?
+        # FIXME: what about unavailable periods here?
+        fridge_weekday_sch = Schedule.PlugLoadsVehicleWeekdayFractions
+        fridge_weekend_sch = Schedule.PlugLoadsVehicleWeekdayFractions
+        fridge_monthly_sch = Schedule.PlugLoadsVehicleMonthlyMultipliers
         fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
-        fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
+        # fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
+        fridge_design_level = UnitConversions.convert(rf_annual_kwh, 'kW', 'W') / 8760.0
         fridge_schedule = fridge_schedule_obj.schedule
       else
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !refrigerator.weekday_fractions.nil?
@@ -165,10 +171,10 @@ class HotWaterAndAppliances
       rf_space = refrigerator.additional_properties.space
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
-
+      # =begin
       tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       tin_sensor.setName('tin s')
-      tin_sensor.setKeyName(conditioned_space.thermalZone.get.name.to_s)
+      tin_sensor.setKeyName(rf_space.thermalZone.get.name.to_s)
 
       if fridge_schedule.is_a? OpenStudio::Model::ScheduleRuleset
         fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleYearValue)
@@ -177,18 +183,18 @@ class HotWaterAndAppliances
       end
       fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
 
-      fridge_constant_coefficients = Schedule.RefrigeratorConstantCoefficients.split(',').map { |i| i.to_f }
-      fridge_temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients.split(',').map { |i| i.to_f }
+      fridge_constant_coefficients = refrigerator.constant_coeffcients.split(',').map { |i| i.to_f }
+      fridge_temperature_coefficients = refrigerator.temperature_coefficients.split(',').map { |i| i.to_f }
 
       fridge_schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       fridge_schedule_program.setName("#{fridge_schedule.name} program")
-      fridge_schedule_program.addLine("Set Tin = #{tin_sensor.name}*(9.0/5.0)+32.0")
+      fridge_schedule_program.addLine("Set Tin = #{tin_sensor.name}*(9.0/5.0)+32.0") # C to F
       fridge_constant_coefficients.zip(fridge_temperature_coefficients).each_with_index do |constant_temperature, i|
         a, b = constant_temperature
         fridge_schedule_program.addLine("If (Hour == #{i})")
         fridge_schedule_program.addLine("Set a = #{a}")
         fridge_schedule_program.addLine("Set b = #{b}")
-        fridge_schedule_program.addLine("Set #{fridge_schedule_actuator.name} = (#{rf_annual_kwh}/8760)*(a+b*Tin)")
+        fridge_schedule_program.addLine("Set #{fridge_schedule_actuator.name} = (a+b*Tin)")
         fridge_schedule_program.addLine('EndIf')
       end
 
@@ -196,6 +202,7 @@ class HotWaterAndAppliances
       fridge_schedule_pcm.setName("#{fridge_schedule.name} program calling manager")
       fridge_schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
       fridge_schedule_pcm.addProgram(fridge_schedule_program)
+      # =end
     end
 
     # Freezer(s) energy

@@ -2473,18 +2473,18 @@ class HPXMLDefaults
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
         schedules_file_includes_extrafridge = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnExtraRefrigerator))
-        if refrigerator.weekday_fractions.nil? && !schedules_file_includes_extrafridge
-          refrigerator.weekday_fractions = Schedule.ExtraRefrigeratorWeekdayFractions
-          refrigerator.weekday_fractions_isdefaulted = true
+        if refrigerator.constant_coeffcients.nil? && !schedules_file_includes_extrafridge
+          refrigerator.constant_coeffcients = Schedule.ExtraRefrigeratorConstantCoefficients
+          refrigerator.constant_coeffcients_isdefaulted = true
         end
-        if refrigerator.weekend_fractions.nil? && !schedules_file_includes_extrafridge
-          refrigerator.weekend_fractions = Schedule.ExtraRefrigeratorWeekendFractions
-          refrigerator.weekend_fractions_isdefaulted = true
+        if refrigerator.temperature_coefficients.nil? && !schedules_file_includes_extrafridge
+          refrigerator.temperature_coefficients = Schedule.ExtraRefrigeratorTemperatureCoefficients
+          refrigerator.temperature_coefficients_isdefaulted = true
         end
-        if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_extrafridge
-          refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
-          refrigerator.monthly_multipliers_isdefaulted = true
-        end
+        # if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_extrafridge
+        # refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
+        # refrigerator.monthly_multipliers_isdefaulted = true
+        # end
       else # primary refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HPXML::LocationConditionedSpace
@@ -2496,18 +2496,18 @@ class HPXMLDefaults
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
         schedules_file_includes_fridge = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnRefrigerator))
-        if refrigerator.weekday_fractions.nil? && !schedules_file_includes_fridge
-          refrigerator.weekday_fractions = Schedule.RefrigeratorWeekdayFractions
-          refrigerator.weekday_fractions_isdefaulted = true
+        if refrigerator.constant_coeffcients.nil? && !schedules_file_includes_fridge
+          refrigerator.constant_coeffcients = Schedule.RefrigeratorConstantCoefficients
+          refrigerator.constant_coeffcients_isdefaulted = true
         end
-        if refrigerator.weekend_fractions.nil? && !schedules_file_includes_fridge
-          refrigerator.weekend_fractions = Schedule.RefrigeratorWeekendFractions
-          refrigerator.weekend_fractions_isdefaulted = true
+        if refrigerator.temperature_coefficients.nil? && !schedules_file_includes_fridge
+          refrigerator.temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients
+          refrigerator.temperature_coefficients_isdefaulted = true
         end
-        if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_fridge
-          refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
-          refrigerator.monthly_multipliers_isdefaulted = true
-        end
+        # if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_fridge
+        # refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
+        # refrigerator.monthly_multipliers_isdefaulted = true
+        # end
       end
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0
