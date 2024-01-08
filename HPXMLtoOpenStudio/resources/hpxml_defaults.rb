@@ -2473,11 +2473,11 @@ class HPXMLDefaults
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
         schedules_file_includes_extrafridge = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnExtraRefrigerator))
-        if refrigerator.constant_coeffcients.nil? && !schedules_file_includes_extrafridge
+        if refrigerator.weekday_fractions.nil? && refrigerator.constant_coeffcients.nil? && !schedules_file_includes_extrafridge
           refrigerator.constant_coeffcients = Schedule.ExtraRefrigeratorConstantCoefficients
           refrigerator.constant_coeffcients_isdefaulted = true
         end
-        if refrigerator.temperature_coefficients.nil? && !schedules_file_includes_extrafridge
+        if refrigerator.weekend_fractions.nil? && refrigerator.temperature_coefficients.nil? && !schedules_file_includes_extrafridge
           refrigerator.temperature_coefficients = Schedule.ExtraRefrigeratorTemperatureCoefficients
           refrigerator.temperature_coefficients_isdefaulted = true
         end
@@ -2496,11 +2496,11 @@ class HPXMLDefaults
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
         schedules_file_includes_fridge = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnRefrigerator))
-        if refrigerator.constant_coeffcients.nil? && !schedules_file_includes_fridge
+        if refrigerator.weekday_fractions.nil? && refrigerator.constant_coeffcients.nil? && !schedules_file_includes_fridge
           refrigerator.constant_coeffcients = Schedule.RefrigeratorConstantCoefficients
           refrigerator.constant_coeffcients_isdefaulted = true
         end
-        if refrigerator.temperature_coefficients.nil? && !schedules_file_includes_fridge
+        if refrigerator.weekend_fractions.nil? && refrigerator.temperature_coefficients.nil? && !schedules_file_includes_fridge
           refrigerator.temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients
           refrigerator.temperature_coefficients_isdefaulted = true
         end
