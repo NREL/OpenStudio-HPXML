@@ -2481,10 +2481,6 @@ class HPXMLDefaults
           refrigerator.temperature_coefficients = Schedule.ExtraRefrigeratorTemperatureCoefficients
           refrigerator.temperature_coefficients_isdefaulted = true
         end
-        # if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_extrafridge
-        # refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
-        # refrigerator.monthly_multipliers_isdefaulted = true
-        # end
       else # primary refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HPXML::LocationConditionedSpace
@@ -2504,10 +2500,6 @@ class HPXMLDefaults
           refrigerator.temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients
           refrigerator.temperature_coefficients_isdefaulted = true
         end
-        # if refrigerator.monthly_multipliers.nil? && !schedules_file_includes_fridge
-        # refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
-        # refrigerator.monthly_multipliers_isdefaulted = true
-        # end
       end
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0

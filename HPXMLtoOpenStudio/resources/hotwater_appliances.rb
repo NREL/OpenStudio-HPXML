@@ -169,11 +169,21 @@ class HotWaterAndAppliances
 
         if !refrigerator.constant_coeffcients.nil? && !refrigerator.temperature_coefficients.nil?
           fridge_unavailable_schedule = fridge_schedule # we are actuating the fridge schedule, but we need the original schedule values
-          fridge_schedule = OpenStudio::Model::ScheduleRuleset.new(model) # this gets actuated, so schedule values aren't important here
+          fridge_unavailable_schedule.setName(fridge_schedule.name.to_s + ' unused')
 
-          fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-          fridge_temperature_sensor.setName('tin s')
-          fridge_temperature_sensor.setKeyName(rf_space.thermalZone.get.name.to_s)
+          fridge_schedule = OpenStudio::Model::ScheduleRuleset.new(model) # this gets actuated, so schedule values aren't important here
+          fridge_schedule.setName(fridge_obj_name + ' schedule')
+
+          loc_space, loc_schedule = SpaceOrSchedule.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
+          if not loc_space.nil?
+            fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+            fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
+            fridge_temperature_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
+          elsif not loc_schedule.nil?
+            fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+            fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
+            fridge_temperature_sensor.setKeyName(loc_schedule.name.to_s)
+          end
 
           fridge_unavailable_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
           fridge_unavailable_sensor.setName(fridge_unavailable_schedule.name.to_s + ' sensor')
