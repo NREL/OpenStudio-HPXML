@@ -1388,7 +1388,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_perf_data_capacity_type', perf_data_capacity_type_choices, false)
     arg.setDisplayName('HVAC Detailed Performance Data: Capacity Type')
-    arg.setDescription('Capacity type of detailed performance data if available.')
+    arg.setDescription('Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).')
     arg.setUnits('Absolute capacities')
     args << arg
 
@@ -1398,27 +1398,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_minimum_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Capacities')
-    arg.setDescription('Minimum capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed Capacities')
+    arg.setDescription('Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_maximum_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Capacities')
-    arg.setDescription('Maximum capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed Capacities')
+    arg.setDescription('Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_minimum_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Efficiency COP Values at Minimum Speed')
-    arg.setDescription('Efficiency COP values at minimum speed of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed COPs')
+    arg.setDescription('Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('W/W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_maximum_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Heating Efficiency COP Values at Maximum Speed')
-    arg.setDescription('Efficiency COP values at maximum speed of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed COPs')
+    arg.setDescription('Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('W/W')
     args << arg
 
@@ -1428,27 +1428,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_minimum_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Capacities')
-    arg.setDescription('Minimum capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed Capacities')
+    arg.setDescription('Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_maximum_capacities', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Capacities')
-    arg.setDescription('Maximum capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed Capacities')
+    arg.setDescription('Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('Btu/hr or Frac')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_minimum_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Efficiency COP Values at Minimum Speed')
-    arg.setDescription('Efficiency COP values at minimum speed of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed COPs')
+    arg.setDescription('Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('W/W')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_maximum_cops', false)
-    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Efficiency COP Values at Maximum Speed')
-    arg.setDescription('Efficiency COP values at maximum speed of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed COPs')
+    arg.setDescription('Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
     arg.setUnits('W/W')
     args << arg
 
@@ -3466,38 +3466,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
 
     hvac_perf_data_heating_args_initialized = [args[:hvac_perf_data_heating_outdoor_temperatures].is_initialized,
-                                               args[:hvac_perf_data_heating_minimum_capacities].is_initialized,
-                                               args[:hvac_perf_data_heating_maximum_capacities].is_initialized,
-                                               args[:hvac_perf_data_heating_minimum_cops].is_initialized,
-                                               args[:hvac_perf_data_heating_maximum_cops].is_initialized]
+                                               args[:hvac_perf_data_heating_min_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_heating_max_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_heating_min_speed_cops].is_initialized,
+                                               args[:hvac_perf_data_heating_max_speed_cops].is_initialized]
     error = (hvac_perf_data_heating_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required heating detailed performance data arguments.' if error
 
     if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
       heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].get.count(','),
-                                     args[:hvac_perf_data_heating_minimum_capacities].get.count(','),
-                                     args[:hvac_perf_data_heating_maximum_capacities].get.count(','),
-                                     args[:hvac_perf_data_heating_minimum_cops].get.count(','),
-                                     args[:hvac_perf_data_heating_maximum_cops].get.count(',')]
+                                     args[:hvac_perf_data_heating_min_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_heating_max_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_heating_min_speed_cops].get.count(','),
+                                     args[:hvac_perf_data_heating_max_speed_cops].get.count(',')]
 
       error = (heating_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
     end
 
     hvac_perf_data_cooling_args_initialized = [args[:hvac_perf_data_cooling_outdoor_temperatures].is_initialized,
-                                               args[:hvac_perf_data_cooling_minimum_capacities].is_initialized,
-                                               args[:hvac_perf_data_cooling_maximum_capacities].is_initialized,
-                                               args[:hvac_perf_data_cooling_minimum_cops].is_initialized,
-                                               args[:hvac_perf_data_cooling_maximum_cops].is_initialized]
+                                               args[:hvac_perf_data_cooling_min_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_cooling_max_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_cooling_min_speed_cops].is_initialized,
+                                               args[:hvac_perf_data_cooling_max_speed_cops].is_initialized]
     error = (hvac_perf_data_cooling_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required cooling detailed performance data arguments.' if error
 
     if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
       cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].get.count(','),
-                                     args[:hvac_perf_data_cooling_minimum_capacities].get.count(','),
-                                     args[:hvac_perf_data_cooling_maximum_capacities].get.count(','),
-                                     args[:hvac_perf_data_cooling_minimum_cops].get.count(','),
-                                     args[:hvac_perf_data_cooling_maximum_cops].get.count(',')]
+                                     args[:hvac_perf_data_cooling_min_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_cooling_min_speed_cops].get.count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_cops].get.count(',')]
 
       error = (cooling_data_points_lengths.uniq.size != 1)
       errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
@@ -5215,40 +5215,40 @@ class HPXMLFile
                                    integrated_heating_system_efficiency_percent: integrated_heating_system_efficiency_percent,
                                    integrated_heating_system_fraction_heat_load_served: integrated_heating_system_fraction_heat_load_served)
 
-    if args[:hvac_perf_data_capacity_type].is_initialized
+    if args[:hvac_perf_data_capacity_type].is_initialized && [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
       hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_minimum_capacities = args[:hvac_perf_data_cooling_minimum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_maximum_capacities = args[:hvac_perf_data_cooling_maximum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_minimum_cops = args[:hvac_perf_data_cooling_minimum_cops].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_maximum_cops = args[:hvac_perf_data_cooling_maximum_cops].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].get.split(',').map(&:strip)
 
       clg_perf_data = hpxml_bldg.cooling_systems[0].cooling_detailed_performance_data
-      cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_minimum_capacities,
-                                                                                      hvac_perf_data_cooling_maximum_capacities,
-                                                                                      hvac_perf_data_cooling_minimum_cops,
-                                                                                      hvac_perf_data_cooling_maximum_cops)
+      cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
+                                                                                      hvac_perf_data_cooling_max_speed_capacities,
+                                                                                      hvac_perf_data_cooling_min_speed_cops,
+                                                                                      hvac_perf_data_cooling_max_speed_cops)
       cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
-        outdoor_temperature, min_cap_or_frac, max_cap_or_frac, min_cop, max_cop = cooling_perf_data_data_point
+        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_capacity = min_cap_or_frac
-          max_capacity = max_cap_or_frac
+          min_speed_capacity = min_speed_cap_or_frac
+          max_speed_capacity = max_speed_cap_or_frac
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_capacity_fraction_of_nominal = min_cap_or_frac
-          max_capacity_fraction_of_nominal = max_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
+          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
         end
 
         clg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: min_capacity,
-                          capacity_fraction_of_nominal: min_capacity_fraction_of_nominal,
+                          capacity: min_speed_capacity,
+                          capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_cop)
+                          efficiency_cop: min_speed_cop)
         clg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: max_capacity,
-                          capacity_fraction_of_nominal: max_capacity_fraction_of_nominal,
+                          capacity: max_speed_capacity,
+                          capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_cop)
+                          efficiency_cop: max_speed_cop)
       end
     end
   end
@@ -5396,77 +5396,77 @@ class HPXMLFile
                               primary_heating_system: primary_heating_system,
                               primary_cooling_system: primary_cooling_system)
 
-    if args[:hvac_perf_data_capacity_type].is_initialized
+    if args[:hvac_perf_data_capacity_type].is_initialized && [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
       hvac_perf_data_heating_outdoor_temperatures = args[:hvac_perf_data_heating_outdoor_temperatures].get.split(',').map(&:strip)
-      hvac_perf_data_heating_minimum_capacities = args[:hvac_perf_data_heating_minimum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_heating_maximum_capacities = args[:hvac_perf_data_heating_maximum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_heating_minimum_cops = args[:hvac_perf_data_heating_minimum_cops].get.split(',').map(&:strip)
-      hvac_perf_data_heating_maximum_cops = args[:hvac_perf_data_heating_maximum_cops].get.split(',').map(&:strip)
+      hvac_perf_data_heating_min_speed_capacities = args[:hvac_perf_data_heating_min_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_heating_max_speed_capacities = args[:hvac_perf_data_heating_max_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_heating_min_speed_cops = args[:hvac_perf_data_heating_min_speed_cops].get.split(',').map(&:strip)
+      hvac_perf_data_heating_max_speed_cops = args[:hvac_perf_data_heating_max_speed_cops].get.split(',').map(&:strip)
 
       htg_perf_data = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data
-      heating_perf_data_data_points = hvac_perf_data_heating_outdoor_temperatures.zip(hvac_perf_data_heating_minimum_capacities,
-                                                                                      hvac_perf_data_heating_maximum_capacities,
-                                                                                      hvac_perf_data_heating_minimum_cops,
-                                                                                      hvac_perf_data_heating_maximum_cops)
+      heating_perf_data_data_points = hvac_perf_data_heating_outdoor_temperatures.zip(hvac_perf_data_heating_min_speed_capacities,
+                                                                                      hvac_perf_data_heating_max_speed_capacities,
+                                                                                      hvac_perf_data_heating_min_speed_cops,
+                                                                                      hvac_perf_data_heating_max_speed_cops)
       heating_perf_data_data_points.each do |heating_perf_data_data_point|
-        outdoor_temperature, min_cap_or_frac, max_cap_or_frac, min_cop, max_cop = heating_perf_data_data_point
+        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = heating_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_capacity = min_cap_or_frac
-          max_capacity = max_cap_or_frac
+          min_speed_capacity = min_speed_cap_or_frac
+          max_speed_capacity = max_speed_cap_or_frac
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_capacity_fraction_of_nominal = min_cap_or_frac
-          max_capacity_fraction_of_nominal = max_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
+          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
         end
 
         htg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: min_capacity,
-                          capacity_fraction_of_nominal: min_capacity_fraction_of_nominal,
+                          capacity: min_speed_capacity,
+                          capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_cop)
+                          efficiency_cop: min_speed_cop)
         htg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: max_capacity,
-                          capacity_fraction_of_nominal: max_capacity_fraction_of_nominal,
+                          capacity: max_speed_capacity,
+                          capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_cop)
+                          efficiency_cop: max_speed_cop)
       end
     end
 
     if args[:hvac_perf_data_capacity_type].is_initialized
       hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
       hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_minimum_capacities = args[:hvac_perf_data_cooling_minimum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_maximum_capacities = args[:hvac_perf_data_cooling_maximum_capacities].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_minimum_cops = args[:hvac_perf_data_cooling_minimum_cops].get.split(',').map(&:strip)
-      hvac_perf_data_cooling_maximum_cops = args[:hvac_perf_data_cooling_maximum_cops].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].get.split(',').map(&:strip)
 
       clg_perf_data = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data
-      cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_minimum_capacities,
-                                                                                      hvac_perf_data_cooling_maximum_capacities,
-                                                                                      hvac_perf_data_cooling_minimum_cops,
-                                                                                      hvac_perf_data_cooling_maximum_cops)
+      cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
+                                                                                      hvac_perf_data_cooling_max_speed_capacities,
+                                                                                      hvac_perf_data_cooling_min_speed_cops,
+                                                                                      hvac_perf_data_cooling_max_speed_cops)
       cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
-        outdoor_temperature, min_cap_or_frac, max_cap_or_frac, min_cop, max_cop = cooling_perf_data_data_point
+        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_capacity = min_cap_or_frac
-          max_capacity = max_cap_or_frac
+          min_speed_capacity = min_speed_cap_or_frac
+          max_speed_capacity = max_speed_cap_or_frac
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_capacity_fraction_of_nominal = min_cap_or_frac
-          max_capacity_fraction_of_nominal = max_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
+          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
         end
 
         clg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: min_capacity,
-                          capacity_fraction_of_nominal: min_capacity_fraction_of_nominal,
+                          capacity: min_speed_capacity,
+                          capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_cop)
+                          efficiency_cop: min_speed_cop)
         clg_perf_data.add(outdoor_temperature: outdoor_temperature,
-                          capacity: max_capacity,
-                          capacity_fraction_of_nominal: max_capacity_fraction_of_nominal,
+                          capacity: max_speed_capacity,
+                          capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_cop)
+                          efficiency_cop: max_speed_cop)
       end
     end
   end

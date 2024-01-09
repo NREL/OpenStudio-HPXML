@@ -1166,18 +1166,18 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_perf_data_heating_outdoor_temperatures'] = '47.0'
     elsif ['error-heating-perf-data-not-all-same-size.xml'].include? hpxml_file
       args['hvac_perf_data_heating_outdoor_temperatures'] = '47.0'
-      args['hvac_perf_data_heating_minimum_capacities'] = '10000, 4200'
-      args['hvac_perf_data_heating_maximum_capacities'] = '36000, 24800'
-      args['hvac_perf_data_heating_minimum_cops'] = '4.73, 1.84'
-      args['hvac_perf_data_heating_maximum_cops'] = '3.44, 2.66'
+      args['hvac_perf_data_heating_min_speed_capacities'] = '10000, 4200'
+      args['hvac_perf_data_heating_max_speed_capacities'] = '36000, 24800'
+      args['hvac_perf_data_heating_min_speed_cops'] = '4.73, 1.84'
+      args['hvac_perf_data_heating_max_speed_cops'] = '3.44, 2.66'
     elsif ['error-cooling-perf-data-not-all-specified.xml'].include? hpxml_file
       args['hvac_perf_data_cooling_outdoor_temperatures'] = '95.0'
     elsif ['error-cooling-perf-data-not-all-same-size.xml'].include? hpxml_file
       args['hvac_perf_data_cooling_outdoor_temperatures'] = '95.0'
-      args['hvac_perf_data_cooling_minimum_capacities'] = '11700, 13200'
-      args['hvac_perf_data_cooling_maximum_capacities'] = '36000, 40000'
-      args['hvac_perf_data_cooling_minimum_cops'] = '4.47, 6.34'
-      args['hvac_perf_data_cooling_maximum_cops'] = '2.71, 3.53'
+      args['hvac_perf_data_cooling_min_speed_capacities'] = '11700, 13200'
+      args['hvac_perf_data_cooling_max_speed_capacities'] = '36000, 40000'
+      args['hvac_perf_data_cooling_min_speed_cops'] = '4.47, 6.34'
+      args['hvac_perf_data_cooling_max_speed_cops'] = '2.71, 3.53'
     elsif ['error-emissions-args-not-all-specified.xml'].include? hpxml_file
       args['emissions_scenario_names'] = 'Scenario1'
     elsif ['error-emissions-args-not-all-same-size.xml'].include? hpxml_file
