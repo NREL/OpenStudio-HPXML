@@ -1870,19 +1870,19 @@ class HVAC
       htg_eir_stage_ft_sensors = []
       htg_coil.stages.each_with_index do |stage, i|
         stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_cap_fff_sensor.setName("#{htg_coil.name} stage #{i} fff")
+        stage_cap_fff_sensor.setName("#{htg_coil.name} cap stage #{i} fff")
         stage_cap_fff_sensor.setKeyName(stage.heatingCapacityFunctionofFlowFractionCurve.name.to_s)
         htg_cap_stage_fff_sensors << stage_cap_fff_sensor
         stage_cap_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_cap_ft_sensor.setName("#{htg_coil.name} stage #{i} ft")
+        stage_cap_ft_sensor.setName("#{htg_coil.name} cap stage #{i} ft")
         stage_cap_ft_sensor.setKeyName(stage.heatingCapacityFunctionofTemperatureCurve.name.to_s)
         htg_cap_stage_ft_sensors << stage_cap_ft_sensor
         stage_eir_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_eir_fff_sensor.setName("#{htg_coil.name} stage #{i} fff")
+        stage_eir_fff_sensor.setName("#{htg_coil.name} eir stage #{i} fff")
         stage_eir_fff_sensor.setKeyName(stage.energyInputRatioFunctionofFlowFractionCurve.name.to_s)
         htg_eir_stage_fff_sensors << stage_eir_fff_sensor
         stage_eir_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_eir_ft_sensor.setName("#{htg_coil.name} stage #{i} ft")
+        stage_eir_ft_sensor.setName("#{htg_coil.name} eir stage #{i} ft")
         stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
         htg_eir_stage_ft_sensors << stage_eir_ft_sensor
       end
