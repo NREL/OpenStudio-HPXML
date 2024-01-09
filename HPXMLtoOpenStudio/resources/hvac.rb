@@ -18,7 +18,7 @@ class HVAC
 
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
-      max_cap_ratio_sch = nil unless heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      max_cap_ratio_sch = nil unless cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
         if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
