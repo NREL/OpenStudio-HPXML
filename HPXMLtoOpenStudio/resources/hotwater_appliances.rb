@@ -195,7 +195,7 @@ class HotWaterAndAppliances
           fridge_unavailable_sensor.setName(fridge_unavailable_schedule.name.to_s + ' sensor')
           fridge_unavailable_sensor.setKeyName(fridge_unavailable_schedule.name.to_s)
 
-          fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleYearValue)
+          fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleConstantValue)
           fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
 
           fridge_constant_coefficients = refrigerator.constant_coefficients.split(',').map { |i| i.to_f }
