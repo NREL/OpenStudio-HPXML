@@ -2166,6 +2166,8 @@
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:ConstantCoefficients) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ConstantCoefficients</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:TemperatureCoefficients) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TemperatureCoefficients</sch:assert>
     </sch:rule>
   </sch:pattern>
 

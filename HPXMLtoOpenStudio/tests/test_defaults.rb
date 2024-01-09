@@ -3125,9 +3125,24 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.refrigerators[0].weekday_fractions = ConstantDaySchedule
     hpxml_bldg.refrigerators[0].weekend_fractions = ConstantDaySchedule
     hpxml_bldg.refrigerators[0].monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.refrigerators[0].constant_coefficients = ConstantDaySchedule
+    hpxml_bldg.refrigerators[0].temperature_coefficients = ConstantDaySchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 650.0, 1.2, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 650.0, 1.2, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule)
+
+    # Test inputs not overridden by defaults 2
+    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.refrigerators[0].location = HPXML::LocationBasementConditioned
+    hpxml_bldg.refrigerators[0].usage_multiplier = 1.2
+    hpxml_bldg.refrigerators[0].weekday_fractions = ConstantDaySchedule
+    hpxml_bldg.refrigerators[0].weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.refrigerators[0].monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.refrigerators[0].constant_coefficients = nil
+    hpxml_bldg.refrigerators[0].temperature_coefficients = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 650.0, 1.2, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, nil, nil)
 
     # Test defaults
     hpxml_bldg.refrigerators[0].location = nil
@@ -3136,22 +3151,24 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.refrigerators[0].weekday_fractions = nil
     hpxml_bldg.refrigerators[0].weekend_fractions = nil
     hpxml_bldg.refrigerators[0].monthly_multipliers = nil
+    hpxml_bldg.refrigerators[0].constant_coefficients = nil
+    hpxml_bldg.refrigerators[0].temperature_coefficients = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 691.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 691.0, 1.0, nil, nil, nil, Schedule.RefrigeratorConstantCoefficients, Schedule.RefrigeratorTemperatureCoefficients)
 
     # Test defaults w/ refrigerator in 5-bedroom house
     hpxml_bldg.building_construction.number_of_bedrooms = 5
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 727.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 727.0, 1.0, nil, nil, nil, Schedule.RefrigeratorConstantCoefficients, Schedule.RefrigeratorTemperatureCoefficients)
 
     # Test defaults before 301-2019 Addendum A
     hpxml.header.eri_calculation_version = '2019'
     hpxml_bldg.building_construction.number_of_bedrooms = 3
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 691.0, 1.0, Schedule.RefrigeratorWeekdayFractions, Schedule.RefrigeratorWeekendFractions, Schedule.RefrigeratorMonthlyMultipliers)
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 691.0, 1.0, nil, nil, nil, Schedule.RefrigeratorConstantCoefficients, Schedule.RefrigeratorTemperatureCoefficients)
   end
 
   def test_extra_refrigerators
@@ -3164,10 +3181,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       refrigerator.weekday_fractions = ConstantDaySchedule
       refrigerator.weekend_fractions = ConstantDaySchedule
       refrigerator.monthly_multipliers = ConstantMonthSchedule
+      refrigerator.constant_coefficients = ConstantDaySchedule
+      refrigerator.temperature_coefficients = ConstantDaySchedule
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 333.0, 1.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 333.0, 1.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule)
 
     # Test defaults
     hpxml_bldg.refrigerators.each do |refrigerator|
@@ -3177,10 +3196,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       refrigerator.weekday_fractions = nil
       refrigerator.weekend_fractions = nil
       refrigerator.monthly_multipliers = nil
+      refrigerator.constant_coefficients = nil
+      refrigerator.temperature_coefficients = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 244.0, 1.0, Schedule.ExtraRefrigeratorWeekdayFractions, Schedule.ExtraRefrigeratorWeekendFractions, Schedule.ExtraRefrigeratorMonthlyMultipliers)
+    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 244.0, 1.0, nil, nil, nil, Schedule.ExtraRefrigeratorConstantCoefficients, Schedule.ExtraRefrigeratorTemperatureCoefficients)
   end
 
   def test_freezers
@@ -4829,7 +4850,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_refrigerator_values(hpxml_bldg, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_refrigerator_values(hpxml_bldg, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults, constant_coeffs, temperature_coeffs)
     hpxml_bldg.refrigerators.each do |refrigerator|
       next unless refrigerator.primary_indicator
 
@@ -4851,10 +4872,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       else
         assert_equal(monthly_mults, refrigerator.monthly_multipliers)
       end
+      if constant_coeffs.nil?
+        assert_nil(refrigerator.constant_coefficients)
+      else
+        assert_equal(constant_coeffs, refrigerator.constant_coefficients)
+      end
+      if temperature_coeffs.nil?
+        assert_nil(refrigerator.temperature_coefficients)
+      else
+        assert_equal(temperature_coeffs, refrigerator.temperature_coefficients)
+      end
     end
   end
 
-  def _test_default_extra_refrigerators_values(hpxml_bldg, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_extra_refrigerators_values(hpxml_bldg, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults, constant_coeffs, temperature_coeffs)
     hpxml_bldg.refrigerators.each do |refrigerator|
       next if refrigerator.primary_indicator
 
@@ -4875,6 +4906,16 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
         assert_nil(refrigerator.monthly_multipliers)
       else
         assert_equal(monthly_mults, refrigerator.monthly_multipliers)
+      end
+      if constant_coeffs.nil?
+        assert_nil(refrigerator.constant_coefficients)
+      else
+        assert_equal(constant_coeffs, refrigerator.constant_coefficients)
+      end
+      if temperature_coeffs.nil?
+        assert_nil(refrigerator.temperature_coefficients)
+      else
+        assert_equal(temperature_coeffs, refrigerator.temperature_coefficients)
       end
     end
   end

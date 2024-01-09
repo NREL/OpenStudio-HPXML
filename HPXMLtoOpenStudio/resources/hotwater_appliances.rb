@@ -159,15 +159,21 @@ class HotWaterAndAppliances
           fridge_weekend_sch = refrigerator.weekend_fractions
           fridge_monthly_sch = refrigerator.monthly_multipliers
         else # to get design level for defaulted schedule
-          fridge_weekday_sch = Schedule.RefrigeratorWeekdayFractions
-          fridge_weekend_sch = Schedule.RefrigeratorWeekendFractions
-          fridge_monthly_sch = Schedule.RefrigeratorMonthlyMultipliers
+          if refrigerator.primary_indicator
+            fridge_weekday_sch = Schedule.RefrigeratorWeekdayFractions
+            fridge_weekend_sch = Schedule.RefrigeratorWeekendFractions
+            fridge_monthly_sch = Schedule.RefrigeratorMonthlyMultipliers
+          else
+            fridge_weekday_sch = Schedule.ExtraRefrigeratorWeekdayFractions
+            fridge_weekend_sch = Schedule.ExtraRefrigeratorWeekendFractions
+            fridge_monthly_sch = Schedule.ExtraRefrigeratorMonthlyMultipliers
+          end
         end
         fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
         fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
         fridge_schedule = fridge_schedule_obj.schedule
 
-        if !refrigerator.constant_coeffcients.nil? && !refrigerator.temperature_coefficients.nil?
+        if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           fridge_unavailable_schedule = fridge_schedule # we are actuating the fridge schedule, but we need the original schedule values
           fridge_unavailable_schedule.setName(fridge_schedule.name.to_s + ' unused')
 
@@ -192,7 +198,7 @@ class HotWaterAndAppliances
           fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleYearValue)
           fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
 
-          fridge_constant_coefficients = refrigerator.constant_coeffcients.split(',').map { |i| i.to_f }
+          fridge_constant_coefficients = refrigerator.constant_coefficients.split(',').map { |i| i.to_f }
           fridge_temperature_coefficients = refrigerator.temperature_coefficients.split(',').map { |i| i.to_f }
 
           fridge_schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
