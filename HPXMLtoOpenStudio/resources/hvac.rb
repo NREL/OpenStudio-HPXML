@@ -1815,18 +1815,18 @@ class HVAC
     cap_ratio_sensor.setName("#{air_loop_unitary.name} capacity_ratio")
     cap_ratio_sensor.setKeyName(max_cap_ratio_sch.name.to_s)
     outdoor_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-    outdoor_db_sensor.setName("outdoor_db")
+    outdoor_db_sensor.setName('outdoor_db')
     outdoor_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-    outdoor_w_sensor.setName("outdoor_w")
+    outdoor_w_sensor.setName('outdoor_w')
     outdoor_bp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
-    outdoor_bp_sensor.setName("outdoor_bp")
+    outdoor_bp_sensor.setName('outdoor_bp')
     indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
     indoor_temp_sensor.setKeyName(control_zone.name.to_s)
     spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
     spt_sensor.setName("#{control_zone.name} spt_temp")
     spt_sensor.setKeyName(control_zone.name.to_s)
-    
+
     if clg_coil
       clg_tot_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Rate')
       clg_tot_sensor.setName("#{clg_coil.name} total cooling rate")
@@ -1925,8 +1925,8 @@ class HVAC
         program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{htg_eir_stage_ft_sensors[i - 1].name} * #{htg_eir_stage_fff_sensors[i - 1].name} * current_capacity_#{i}")
         i += 1
       end
-      program.addLine("  Set target_power = #{htg_coil.stages[-1].grossRatedHeatingCapacity} * rated_eir_#{i-1} * #{cap_ratio_sensor.name}")
-      (1 .. htg_coil.stages.size).each do |i|
+      program.addLine("  Set target_power = #{htg_coil.stages[-1].grossRatedHeatingCapacity} * rated_eir_#{i - 1} * #{cap_ratio_sensor.name}")
+      (1..htg_coil.stages.size).each do |i|
         if i == 1
           program.addLine("  If target_power < current_power_#{i}")
           program.addLine("    Set target_speed_ratio = target_power / current_power_#{i}")
@@ -1935,9 +1935,9 @@ class HVAC
           program.addLine("    Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i - 1}")
         end
       end
-      program.addLine("  Else")
+      program.addLine('  Else')
       program.addLine("    Set target_speed_ratio = #{htg_coil.stages.size}")
-      program.addLine("  EndIf")
+      program.addLine('  EndIf')
       program.addLine('EndIf')
     end
     if clg_coil
@@ -1957,8 +1957,8 @@ class HVAC
         program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{clg_eir_stage_ft_sensors[i - 1].name} * #{clg_eir_stage_fff_sensors[i - 1].name} * current_capacity_#{i}")
         i += 1
       end
-      program.addLine("  Set target_power = #{clg_coil.stages[-1].grossRatedTotalCoolingCapacity} * rated_eir_#{i-1} * #{cap_ratio_sensor.name}")
-      (1 .. clg_coil.stages.size).each do |i|
+      program.addLine("  Set target_power = #{clg_coil.stages[-1].grossRatedTotalCoolingCapacity} * rated_eir_#{i - 1} * #{cap_ratio_sensor.name}")
+      (1..clg_coil.stages.size).each do |i|
         if i == 1
           program.addLine("  If target_power < current_power_#{i}")
           program.addLine("    Set target_speed_ratio = target_power / current_power_#{i}")
@@ -1967,13 +1967,13 @@ class HVAC
           program.addLine("    Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i - 1}")
         end
       end
-      program.addLine("  Else")
+      program.addLine('  Else')
       program.addLine("    Set target_speed_ratio = #{clg_coil.stages.size}")
-      program.addLine("  EndIf")
+      program.addLine('  EndIf')
       program.addLine('EndIf')
     end
 
-    program.addLine('If htg_mode > 0 || clg_mode > 0' )
+    program.addLine('If htg_mode > 0 || clg_mode > 0')
     program.addLine("  If #{cap_ratio_sensor.name} > 0.7") # general curtailment, operation refers to AHRI Standard 1380 2019
     program.addLine("    If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{spt_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
     program.addLine("      Set #{coil_speed_act.name} = NULL")
