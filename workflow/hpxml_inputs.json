@@ -991,6 +991,14 @@
     "pv_system_system_losses_fraction": 0.14,
     "pv_system_num_bedrooms_served": 18
   },
+  "sample_files/base-bldgtype-mf-unit-shared-pv-battery.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-pv.xml",
+    "battery_present": true,
+    "battery_power": 36000,
+    "battery_capacity": 120,
+    "battery_usable_capacity": 108,
+    "battery_num_bedrooms_served": 18
+  },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "water_heater_fuel_type": "natural gas",
