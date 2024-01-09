@@ -177,7 +177,7 @@ class HotWaterAndAppliances
           fridge_unavailable_schedule = fridge_schedule # we are actuating the fridge schedule, but we need the original schedule values
           fridge_unavailable_schedule.setName(fridge_schedule.name.to_s + ' unused')
 
-          fridge_schedule = OpenStudio::Model::ScheduleRuleset.new(model) # this gets actuated, so schedule values aren't important here
+          fridge_schedule = OpenStudio::Model::ScheduleConstant.new(model) # this gets actuated, so schedule values aren't important here
           fridge_schedule.setName(fridge_obj_name + ' schedule')
 
           loc_space, loc_schedule = SpaceOrSchedule.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
