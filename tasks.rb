@@ -260,10 +260,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml_bldg.header.manualj_internal_loads_latent = 200
     hpxml_bldg.header.manualj_num_occupants = 5
   end
-  if ['base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml'].include? hpxml_file
-    hpxml_bldg.heat_pumps[0].airflow_defect_ratio = -0.25
-    hpxml_bldg.heat_pumps[0].charge_defect_ratio = -0.25
-  end
 
   hpxml.buildings.each do |hpxml_bldg|
     # Logic that can only be applied based on the file name

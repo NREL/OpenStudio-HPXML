@@ -2278,123 +2278,123 @@ Heat Pump crankcase heater power consumption in Watts. Applies only to air-to-ai
 
 <br/>
 
-**Detailed Performance Data: Capacity Type**
+**HVAC Detailed Performance Data: Capacity Type**
 
-Capacity type of detailed performance data.
+Capacity type of detailed performance data if available.
 
-- **Name:** ``perf_data_capacity_type``
+- **Name:** ``hvac_perf_data_capacity_type``
 - **Type:** ``Choice``
 
 - **Required:** ``false``
 
-- **Choices:** `Capacity`
+- **Choices:** `Absolute capacities`
 
 <br/>
 
-**Detailed Performance Data: Heating Outdoor Temperatures**
+**HVAC Detailed Performance Data: Heating Outdoor Temperatures**
 
-Outdoor temperatures of heating detailed performance data. If multiple performance data points, use a comma-separated list.
+Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 deg-F. At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``heating_perf_data_outdoor_temperatures``
+- **Name:** ``hvac_perf_data_heating_outdoor_temperatures``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Heating Minimum Capacities**
+**HVAC Detailed Performance Data: Heating Minimum Capacities**
 
-Minimum capacities of heating detailed performance data. If multiple performance data points, use a comma-separated list.
+Minimum capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``heating_perf_data_minimum_capacities``
+- **Name:** ``hvac_perf_data_heating_minimum_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Heating Maximum Capacities**
+**HVAC Detailed Performance Data: Heating Maximum Capacities**
 
-Maximum capacities of heating detailed performance data. If multiple performance data points, use a comma-separated list.
+Maximum capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``heating_perf_data_maximum_capacities``
+- **Name:** ``hvac_perf_data_heating_maximum_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Heating Minimum Efficiency COP Values**
+**HVAC Detailed Performance Data: Heating Efficiency COP Values at Minimum Speed**
 
-Minimum efficiency COP of heating detailed performance data. If multiple performance data points, use a comma-separated list.
+Efficiency COP values at minimum speed of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``heating_perf_data_minimum_cops``
+- **Name:** ``hvac_perf_data_heating_minimum_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Heating Maximum Efficiency COP Values**
+**HVAC Detailed Performance Data: Heating Efficiency COP Values at Maximum Speed**
 
-Maximum efficiency COP of heating detailed performance data. If multiple performance data points, use a comma-separated list.
+Efficiency COP values at maximum speed of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``heating_perf_data_maximum_cops``
+- **Name:** ``hvac_perf_data_heating_maximum_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Cooling Outdoor Temperatures**
+**HVAC Detailed Performance Data: Cooling Outdoor Temperatures**
 
-Outdoor temperatures of cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 deg-F. At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``cooling_perf_data_outdoor_temperatures``
+- **Name:** ``hvac_perf_data_cooling_outdoor_temperatures``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Cooling Minimum Capacities**
+**HVAC Detailed Performance Data: Cooling Minimum Capacities**
 
-Minimum capacities of cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+Minimum capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``cooling_perf_data_minimum_capacities``
+- **Name:** ``hvac_perf_data_cooling_minimum_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Cooling Maximum Capacities**
+**HVAC Detailed Performance Data: Cooling Maximum Capacities**
 
-Maximum capacities of cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+Maximum capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``cooling_perf_data_maximum_capacities``
+- **Name:** ``hvac_perf_data_cooling_maximum_capacities``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Cooling Minimum Efficiency COP Values**
+**HVAC Detailed Performance Data: Cooling Efficiency COP Values at Minimum Speed**
 
-Minimum efficiency COP of cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+Efficiency COP values at minimum speed of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``cooling_perf_data_minimum_cops``
+- **Name:** ``hvac_perf_data_cooling_minimum_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Detailed Performance Data: Cooling Maximum Efficiency COP Values**
+**HVAC Detailed Performance Data: Cooling Efficiency COP Values at Maximum Speed**
 
-Maximum efficiency COP of cooling detailed performance data. If multiple performance data points, use a comma-separated list.
+Efficiency COP values at maximum speed of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.
 
-- **Name:** ``cooling_perf_data_maximum_cops``
+- **Name:** ``hvac_perf_data_cooling_maximum_cops``
 - **Type:** ``String``
 
 - **Required:** ``false``
