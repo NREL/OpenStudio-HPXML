@@ -1494,6 +1494,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'hot_water_fixtures' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'hot_water_fixtures' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'hot_water_fixtures' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_recirculation_pump' schedule file and weekday fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_recirculation_pump' schedule file and weekend fractions provided; the latter will be ignored.",
+                                                                                  "Both 'hot_water_recirculation_pump' schedule file and monthly multipliers provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_tv' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_tv' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'plug_loads_tv' schedule file and monthly multipliers provided; the latter will be ignored.",
@@ -1600,6 +1603,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-non-stochastic.csv')
+        hpxml_bldg.hot_water_distributions[0].system_type = HPXML::DHWDistTypeRecirc
+        hpxml_bldg.hot_water_distributions[0].recirculation_control_type = HPXML::DHWRecircControlTypeNone
+        hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
+        hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
+        hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
       elsif ['schedule-file-and-setpoints'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/setpoints.csv')

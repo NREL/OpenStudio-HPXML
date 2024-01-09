@@ -400,10 +400,10 @@ class HotWaterAndAppliances
 
           # Create schedule
           recirc_pump_sch = nil
-          recirc_pump_col_name = SchedulesFile::ColumnHotWaterRecircPump
+          recirc_pump_col_name = SchedulesFile::ColumnHotWaterRecirculationPump
           recirc_pump_obj_name = Constants.ObjectNameHotWaterRecircPump
           if not schedules_file.nil?
-            dist_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_kwh: dist_pump_annual_kwh / 365.0)
+            dist_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: recirc_pump_col_name, daily_kwh: dist_pump_annual_kwh / 365.0)
             recirc_pump_sch = schedules_file.create_schedule_file(model, col_name: recirc_pump_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
           end
           if recirc_pump_sch.nil?

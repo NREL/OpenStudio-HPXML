@@ -2041,15 +2041,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_fixtures[1].flow_rate = 2.0
       hpxml_bldg.water_fixtures[1].count = 3
     end
-    if ['base-dhw-recirc-demand.xml'].include? hpxml_file
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
-    elsif ['base-dhw-recirc-temperature.xml'].include? hpxml_file
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
-      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
-    end
 
     # -------------------- #
     # HPXML VentilationFan #
