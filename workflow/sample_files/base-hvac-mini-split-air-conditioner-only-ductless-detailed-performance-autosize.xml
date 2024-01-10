@@ -333,7 +333,7 @@
               <CoolingDetailedPerformanceData>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <Capacity>0.29</Capacity>
+                  <CapacityFractionOfNominal>0.29</CapacityFractionOfNominal>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -342,7 +342,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>95.0</OutdoorTemperature>
-                  <Capacity>1.18</Capacity>
+                  <CapacityFractionOfNominal>1.18</CapacityFractionOfNominal>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -351,7 +351,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <Capacity>0.54</Capacity>
+                  <CapacityFractionOfNominal>0.54</CapacityFractionOfNominal>
                   <CapacityDescription>minimum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
@@ -360,7 +360,7 @@
                 </PerformanceDataPoint>
                 <PerformanceDataPoint>
                   <OutdoorTemperature>82.0</OutdoorTemperature>
-                  <Capacity>1.11</Capacity>
+                  <CapacityFractionOfNominal>1.11</CapacityFractionOfNominal>
                   <CapacityDescription>maximum</CapacityDescription>
                   <Efficiency>
                     <Units>COP</Units>
