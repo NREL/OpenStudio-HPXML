@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5228cf4d-3a13-4bfe-bca6-fa7f994008e1</version_id>
-  <version_modified>2024-01-06T02:18:46Z</version_modified>
+  <version_id>84752f39-818c-42fa-a75c-239e9ae36e16</version_id>
+  <version_modified>2024-01-10T20:32:20Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -148,7 +148,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>956E8BC4</checksum>
+      <checksum>BAC68282</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -346,7 +346,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>94E05F98</checksum>
+      <checksum>68FACE30</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>

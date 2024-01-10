@@ -103,19 +103,22 @@ class Airflow
     vented_attic = hpxml_bldg.attics.find { |attic| attic.attic_type == HPXML::AtticTypeVented }
     vented_crawl = hpxml_bldg.foundations.find { |foundation| foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
 
-    _sla, conditioned_ach50, nach, infil_volume, infil_height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+    infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     if @apply_ashrae140_assumptions
-      conditioned_const_ach = nach
+      conditioned_const_ach = infil_values[:nach]
       conditioned_ach50 = nil
+    else
+      conditioned_ach50 = infil_values[:ach50]
+      conditioned_const_ach = nil
     end
-    conditioned_const_ach *= a_ext unless conditioned_const_ach.nil?
-    conditioned_ach50 *= a_ext unless conditioned_ach50.nil?
+    conditioned_const_ach *= infil_values[:a_ext] unless conditioned_const_ach.nil?
+    conditioned_ach50 *= infil_values[:a_ext] unless conditioned_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_bldg.header.natvent_days_per_week,
-                                                  infil_volume, infil_height, unavailable_periods)
+                                                  infil_values[:volume], infil_values[:height], unavailable_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml_bldg.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                            has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height,
+                                            has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_values[:volume], infil_values[:height],
                                             vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
   end
 
@@ -214,15 +217,15 @@ class Airflow
     end
     a_ext = 1.0 if a_ext.nil?
 
-    return sla, ach50, nach, volume, height, a_ext
+    return { sla: sla, ach50: ach50, nach: nach, volume: volume, height: height, a_ext: a_ext }
   end
 
   def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds, eri_version)
     # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
-    sla, _ach50, _nach, _volume, height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+    infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     bldg_type = hpxml_bldg.building_construction.residential_facility_type
 
-    nl = get_infiltration_NL_from_SLA(sla, height)
+    nl = get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
     q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
     if vent_fan.is_balanced?
@@ -230,7 +233,7 @@ class Airflow
     else
       is_balanced, frac_imbal = false, 1.0
     end
-    q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, a_ext, bldg_type, eri_version, vent_fan.hours_in_operation)
+    q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, infil_values[:a_ext], bldg_type, eri_version, vent_fan.hours_in_operation)
     return q_fan
   end
 
