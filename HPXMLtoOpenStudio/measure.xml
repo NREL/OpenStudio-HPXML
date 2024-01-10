@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>63e6bf7b-325c-4241-baab-97825cbd9bcd</version_id>
-  <version_modified>2024-01-05T21:39:53Z</version_modified>
+  <version_id>7c2a3e02-0145-4fcb-964b-292222ddeb48</version_id>
+  <version_modified>2024-01-10T16:24:44Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>045BD8A9</checksum>
+      <checksum>33BD466A</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -160,7 +160,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0A8AFBD2</checksum>
+      <checksum>6AF22916</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -298,7 +298,13 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>668B8044</checksum>
+      <checksum>3A3028B3</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>879FE7B0</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -388,7 +394,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7AC7F779</checksum>
+      <checksum>726CB664</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -520,7 +526,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8D557A2A</checksum>
+      <checksum>E37D4FC0</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -556,7 +562,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73019632</checksum>
+      <checksum>B9BA4440</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>

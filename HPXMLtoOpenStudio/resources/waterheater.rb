@@ -1840,13 +1840,11 @@ class Waterheater
   end
 
   def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flow)
-   
     water_heating_systems.each do |water_heating_system|
       # Get the water storage tanks for the outlet temp sensor
       num_tanks = 0
       tank = nil
       hw_plant_loop = plantloop_map[water_heating_system.id]
-      puts("plantloop_map = #{plantloop_map}")
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterMixed.is_initialized
 
@@ -1932,8 +1930,6 @@ class Waterheater
       # shower_unmet_time_output_var.setUpdateFrequency('SystemTimestep')
       # shower_unmet_time_output_var.setEMSProgramOrSubroutineName(unmet_wh_loads_program)
       # shower_unmet_time_output_var.setUnits('hr')
-
     end
   end
-
 end

@@ -304,12 +304,12 @@ class HotWaterAndAppliances
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil?
       end
 
-      #Create shower schedule, used only for unmet load calculations
+      # Create shower schedule, used only for unmet load calculations
       # Create separate shower schedule: Only used for calculating unmet loads. Shower hot water usage is part of the fixtures usage.
       showers_schedule = nil
       showers_col_name = SchedulesFile::ColumnHotWaterShowers
       if not schedules_file.nil?
-        showers_schedule = schedules_file.create_schedule_file(model,col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
       if showers_schedule.nil?
         showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
@@ -325,7 +325,7 @@ class HotWaterAndAppliances
       end
     end
 
-    #create an array of peak flow to return
+    # create an array of peak flow to return
     shower_peak_flows = {}
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
@@ -333,7 +333,7 @@ class HotWaterAndAppliances
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
       if gpd_frac > 0
 
-        #For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads
+        # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
         shower_gpd = get_showers_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
@@ -352,7 +352,7 @@ class HotWaterAndAppliances
         end
 
         id = water_heating_system.id
-        shower_peak_flows = {id => shower_peak_flow}
+        shower_peak_flows = { id => shower_peak_flow }
 
         # Fixtures (showers, sinks, baths)
         add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)

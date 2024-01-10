@@ -1551,10 +1551,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Hot water fixtures and appliances
-    showers_peak_flow = nil #used for unmet wh load calculations
+    showers_peak_flow = nil # used for unmet wh load calculations
     showers_peak_flow = HotWaterAndAppliances.apply(model, runner, @hpxml_header, @hpxml_bldg, weather, spaces, hot_water_distribution,
-                                solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
+                                                    solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
+                                                    @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1563,10 +1563,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Add combi-system EMS program with water use equipment information
     Waterheater.apply_combi_system_EMS(model, @hpxml_bldg.water_heating_systems, plantloop_map)
-    
+
     # Add unmet wh loads calculation
     Waterheater.unmet_wh_loads_program(model, @hpxml_bldg.water_heating_systems, plantloop_map, showers_peak_flow)
-  
   end
 
   def add_cooling_system(model, weather, spaces, airloop_map)
