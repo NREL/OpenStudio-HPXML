@@ -11,12 +11,6 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <ShadingControl>
-        <SummerBeginMonth>5</SummerBeginMonth>
-        <SummerBeginDayOfMonth>1</SummerBeginDayOfMonth>
-        <SummerEndMonth>9</SummerEndMonth>
-        <SummerEndDayOfMonth>30</SummerEndDayOfMonth>
-      </ShadingControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
           <Name>Bills</Name>
@@ -57,6 +51,14 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <ShadingControl>
+            <SummerBeginMonth>5</SummerBeginMonth>
+            <SummerBeginDayOfMonth>1</SummerBeginDayOfMonth>
+            <SummerEndMonth>9</SummerEndMonth>
+            <SummerEndDayOfMonth>30</SummerEndDayOfMonth>
+          </ShadingControl>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -119,7 +121,6 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
