@@ -1848,6 +1848,7 @@ class HVAC
     s = []
     [htg_coil, clg_coil].each do |coil|
       next if coil.nil?
+
       coil_cap_stage_fff_sensors = []
       coil_cap_stage_ft_sensors = []
       coil_eir_stage_fff_sensors = []
@@ -1896,7 +1897,7 @@ class HVAC
         clg_pow_sensor.setName("#{coil.name} pow")
         clg_pow_sensor.setKeyName(coil.name.to_s)
         s << "((clg_mode > 0) && (#{clg_pow_sensor.name} >= target_power))"
-        
+
         program.addLine("If #{clg_pow_sensor.name} > 0")
         program.addLine('  Set clg_mode = 1')
         program.addLine('EndIf')
@@ -1933,7 +1934,7 @@ class HVAC
         program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name} * current_capacity_#{i}")
       end
       program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
-      (0..coil.stages.size-1).each do |i|
+      (0..coil.stages.size - 1).each do |i|
         if i == 0
           program.addLine("  If target_power < current_power_#{i}")
           program.addLine("    Set target_speed_ratio = target_power / current_power_#{i}")
