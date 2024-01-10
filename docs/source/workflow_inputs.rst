@@ -2250,13 +2250,17 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Cooling capacity at the specified outdoor temperature
+  ``Capacity``                       double    Btu/hr  >= 0         No [#]_              Cooling capacity at the specified outdoor temperature
+  ``CapacityFractionOfNominal``      double    frac    > 0, <= 1    No                   Cooling capacity fraction of nominal at the specified outdoor temperature
   ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Cooling efficiency at the specified outdoor temperature
   =================================  ========  ======  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
+  .. [#] If Capacity is provided, the nominal capacity specified at CoolingSystem/CoolingCapacity or HeatPump/CoolingCapacity must be provided; 
+         If Capacity is not provided, CapacityFractionOfNominal must be provided, but the nominal capacity is optional. 
+         If nominal capacity is not provided, the system will be autosized.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
 In addition, the parent object must provide the ``CoolingCapacity`` and the ``CompressorType`` must be set to "variable speed".
@@ -2274,13 +2278,17 @@ For air-source HVAC systems with detailed heating performance data, two or more 
   Element                            Type      Units   Constraints  Required  Default    Notes
   =================================  ========  ======  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Heating capacity at the specified outdoor temperature
+  ``Capacity``                       double    Btu/hr  >= 0         No [#]_              Heating capacity at the specified outdoor temperature
+  ``CapacityFractionOfNominal``      double    frac    > 0, <= 1    No                   Heating capacity fraction of nominal at the specified outdoor temperature
   ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Heating efficiency at the specified outdoor temperature
   =================================  ========  ======  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
+  .. [#] If Capacity is provided, the nominal capacity specified at HeatPump/HeatingCapacity must be provided; 
+         If Capacity is not provided, CapacityFractionOfNominal must be provided, but the nominal capacity is optional. 
+         If nominal capacity is not provided, the system will be autosized.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
 In addition, the parent object must provide the ``HeatingCapacity`` and the ``CompressorType`` must be set to "variable speed".
