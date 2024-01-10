@@ -1566,7 +1566,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     # Test that fractions are used when capacities are missing
     _test_default_detailed_performance_capacities(default_hpxml_bldg.heat_pumps[0], 36000, 36000, heating_capacities, cooling_capacities)
-    
   end
 
   def test_pthp
