@@ -1900,18 +1900,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = 77.5
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 71.5, 77.5, nil, nil, nil, nil)
+    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 71.5, 77.5)
 
     # Test defaults
     hpxml_bldg.hvac_controls[0].heating_setpoint_temp = nil
     hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], nil, nil, 
-                                               "68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68",
-                                               "68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68",
-                                               "78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78",
-                                               "78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78")
+    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78)
 
     # Test inputs not overridden by defaults (w/ setbacks)
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')
@@ -4444,7 +4440,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(location, hvac_system.location)
   end
 
-  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp, weekday_heating_setpoints, weekend_heating_setpoints, weekday_cooling_setpoints, weekend_cooling_setpoints)
+  def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp)
     if heating_setpoint_temp.nil?
       assert_nil(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
     else
@@ -4454,26 +4450,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       assert_nil(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
     else
       assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
-    end
-    if weekday_heating_setpoints.nil?
-      assert_nil(weekday_heating_setpoints, hvac_control.weekday_heating_setpoints)
-    else
-      assert_equal(weekday_heating_setpoints, hvac_control.weekday_heating_setpoints)
-    end
-    if weekend_heating_setpoints.nil?
-      assert_nil(weekend_heating_setpoints, hvac_control.weekend_heating_setpoints)
-    else
-      assert_equal(weekend_heating_setpoints, hvac_control.weekend_heating_setpoints)
-    end
-    if weekday_cooling_setpoints.nil?
-      assert_nil(weekday_cooling_setpoints, hvac_control.weekday_cooling_setpoints)
-    else
-      assert_equal(weekday_cooling_setpoints, hvac_control.weekday_cooling_setpoints)
-    end
-    if weekend_cooling_setpoints.nil?
-      assert_nil(weekend_cooling_setpoints, hvac_control.weekend_cooling_setpoints)
-    else
-      assert_equal(weekend_cooling_setpoints, hvac_control.weekend_cooling_setpoints)
     end
   end
 
