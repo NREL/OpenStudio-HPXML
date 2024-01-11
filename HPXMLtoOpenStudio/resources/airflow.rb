@@ -428,10 +428,16 @@ class Airflow
       # No HVAC system; use the average of defaulted heating/cooling setpoints.
       htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
       clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
-      htg_setpoints = (htg_weekday_setpoints.scan(/\d+/).map(&:to_f) << htg_weekend_setpoints.scan(/\d+/).map(&:to_f)).flatten!
-      clg_setpoints = (clg_weekday_setpoints.scan(/\d+/).map(&:to_f) << clg_weekend_setpoints.scan(/\d+/).map(&:to_f)).flatten!
-      default_htg_sp = htg_setpoints.sum / htg_setpoints.size
-      default_clg_sp = clg_setpoints.sum / clg_setpoints.size
+      if htg_weekday_setpoints.split(',').uniq.size == 1 && htg_weekend_setpoints.split(',').uniq.size == 1 && htg_weekday_setpoints.split(',').uniq == htg_weekend_setpoints.split(',').uniq
+        default_htg_sp = htg_weekend_setpoints
+      else
+        fail 'Unexpected heating setpoints.'
+      end
+      if clg_weekday_setpoints.split(',').uniq.size == 1 && clg_weekend_setpoints.split(',').uniq.size == 1 && clg_weekday_setpoints.split(',').uniq == clg_weekend_setpoints.split(',').uniq
+        default_clg_sp = clg_weekend_setpoints
+      else
+        fail 'Unexpected cooling setpoints.'
+      end
       vent_program.addLine("Set Tnvsp = (#{default_htg_sp} + #{default_clg_sp}) / 2")
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
