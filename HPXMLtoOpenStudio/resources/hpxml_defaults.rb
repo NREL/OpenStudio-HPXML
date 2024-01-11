@@ -1700,8 +1700,11 @@ class HPXMLDefaults
       if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil? && !schedules_file_includes_heating_setpoint_temp
         # No heating setpoints; set a default heating setpoint for, e.g., natural ventilation
         htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, eri_version)
-        hvac_control.weekday_heating_setpoints = htg_weekday_setpoints
-        hvac_control.weekend_heating_setpoints = htg_weekend_setpoints
+        if htg_weekday_setpoints.split(',').uniq.size == 1 && htg_weekend_setpoints.split(',').uniq.size == 1 && htg_weekday_setpoints.split(',').uniq == htg_weekend_setpoints.split(',').uniq
+          hvac_control.heating_setpoint_temp = htg_weekend_setpoints
+        else
+          fail 'Unexpected heating setpoints.'
+        end
         hvac_control.heating_setpoint_temp_isdefaulted = true
       end
 
