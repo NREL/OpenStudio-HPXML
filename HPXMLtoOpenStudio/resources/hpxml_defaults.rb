@@ -28,9 +28,9 @@ class HPXMLDefaults
     apply_building_occupancy(hpxml_bldg, schedules_file)
     apply_building_construction(hpxml_bldg, cfa, nbeds, infil_measurement)
     apply_climate_and_risk_zones(hpxml_bldg, epw_file)
-    apply_infiltration(hpxml_bldg, infil_measurement)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
+    apply_infiltration(hpxml_bldg, infil_measurement)
     apply_roofs(hpxml_bldg)
     apply_rim_joists(hpxml_bldg)
     apply_walls(hpxml_bldg)
@@ -646,26 +646,16 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_infiltration(hpxml_bldg, infil_measurement)
-    if infil_measurement.infiltration_volume.nil?
-      infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
-      infil_measurement.infiltration_volume_isdefaulted = true
-    end
-    if infil_measurement.infiltration_height.nil?
-      infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
-      infil_measurement.infiltration_height_isdefaulted = true
-    end
-    if infil_measurement.a_ext.nil?
-      if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
-         [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
-        tot_cb_area, ext_cb_area = hpxml_bldg.compartmentalization_boundary_areas()
-        infil_measurement.a_ext = (ext_cb_area / tot_cb_area).round(5)
-        infil_measurement.a_ext_isdefaulted = true
+  def self.apply_attics(hpxml_bldg)
+    hpxml_bldg.attics.each do |attic|
+      next unless attic.within_infiltration_volume.nil?
+
+      if [HPXML::AtticTypeUnvented].include? attic.attic_type
+        attic.within_infiltration_volume = false
+        attic.within_infiltration_volume_isdefaulted = true
       end
     end
-  end
 
-  def self.apply_attics(hpxml_bldg)
     return unless hpxml_bldg.has_location(HPXML::LocationAtticVented)
 
     vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
@@ -684,6 +674,16 @@ class HPXMLDefaults
   end
 
   def self.apply_foundations(hpxml_bldg)
+    hpxml_bldg.foundations.each do |foundation|
+      next unless foundation.within_infiltration_volume.nil?
+
+      next unless [HPXML::FoundationTypeBasementUnconditioned,
+                   HPXML::FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+
+      foundation.within_infiltration_volume = false
+      foundation.within_infiltration_volume_isdefaulted = true
+    end
+
     if hpxml_bldg.has_location(HPXML::LocationCrawlspaceVented)
       vented_crawls = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
       if vented_crawls.empty?
@@ -713,6 +713,25 @@ class HPXMLDefaults
         foundation.belly_wing_skirt_present_isdefaulted = true
         foundation.belly_wing_skirt_present = true
         break
+      end
+    end
+  end
+
+  def self.apply_infiltration(hpxml_bldg, infil_measurement)
+    if infil_measurement.infiltration_volume.nil?
+      infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
+      infil_measurement.infiltration_volume_isdefaulted = true
+    end
+    if infil_measurement.infiltration_height.nil?
+      infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
+      infil_measurement.infiltration_height_isdefaulted = true
+    end
+    if infil_measurement.a_ext.nil?
+      if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
+         [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        tot_cb_area, ext_cb_area = hpxml_bldg.compartmentalization_boundary_areas()
+        infil_measurement.a_ext = (ext_cb_area / tot_cb_area).round(5)
+        infil_measurement.a_ext_isdefaulted = true
       end
     end
   end

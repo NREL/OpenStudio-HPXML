@@ -887,14 +887,22 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
-If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
+If the dwelling unit has an unvented attic, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
 
-  =================  ======  =====  ===========  ========  ==========  ==========================
-  Element            Type    Units  Constraints  Required  Default     Notes
-  =================  ======  =====  ===========  ========  ==========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
-  =================  ======  =====  ===========  ========  ==========  ==========================
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    Included in the air infiltration measurement?
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+If the dwelling unit has a vented attic, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]``.
+
+  =================================  ======  =====  ===========  ========  ==========  ==========================
+  Element                            Type    Units  Constraints  Required  Default     Notes
+  =================================  ======  =====  ===========  ========  ==========  ==========================
+  ``VentilationRate/UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
+  ``VentilationRate/Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
+  =================================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure choices are "SLA" (specific leakage area) or "ACHnatural" (natural air changes per hour).
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -902,23 +910,43 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
 HPXML Foundations
 *****************
 
-If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
+If the dwelling unit has an unconditioned basement, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]``.
 
-  =================  ======  =====  ===========  ========  ==========  ==========================
-  Element            Type    Units  Constraints  Required  Default     Notes
-  =================  ======  =====  ===========  ========  ==========  ==========================
-  ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/150 [#]_  Value for ventilation rate
-  =================  ======  =====  ===========  ========  ==========  ==========================
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    Included in the air infiltration measurement?
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+If the dwelling unit has an unvented crawlspace, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='false']]``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    Included in the air infiltration measurement?
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+If the dwelling unit has a vented crawlspace, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]``.
+
+  =================================  =======  =====  ===========  ========  ==========  ==========================
+  Element                            Type     Units  Constraints  Required  Default     Notes
+  =================================  =======  =====  ===========  ========  ==========  ==========================
+  ``VentilationRate/UnitofMeasure``  string          See [#]_     No        SLA         Units for ventilation rate
+  ``VentilationRate/Value``          double          > 0          No        1/150 [#]_  Value for ventilation rate
+  =================================  =======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-If the dwelling has a manufactured home belly-and-wing foundation, whether a
-skirt is present can be optionally entered in
-``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing/SkirtPresent``.
-The default, if that value is missing, is to assume there is a skirt present and
-the floors above that foundation do not have exposure to the wind. 
+If the dwelling has a manufactured home belly-and-wing foundation, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
+
+  =================================  =======  =====  ===========  ========  ==========  ==========================
+  Element                            Type     Units  Constraints  Required  Default     Notes
+  =================================  =======  =====  ===========  ========  ==========  ==========================
+  ``SkirtPresent``                   boolean                      No        true        Presence of foundation skirt [#]_
+  =================================  =======  =====  ===========  ========  ==========  ==========================
+
+  .. [#] When a skirt is present, the floors above that foundation are modeled without exposure to wind. 
 
 HPXML Roofs
 ***********
