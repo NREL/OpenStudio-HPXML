@@ -2760,7 +2760,7 @@ If the specified system is a shared system (i.e., serving multiple dwelling unit
   .. [#] PreHeating not allowed for exhaust only systems.
   .. [#] PreCooling not allowed for exhaust only systems.
 
-If pre-heating is specified, additional information is entered in ``extension/PreHeating``.
+If pre-heating is specified for the shared system, additional information is entered in ``extension/PreHeating``.
 
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
@@ -2772,7 +2772,7 @@ If pre-heating is specified, additional information is entered in ``extension/Pr
 
   .. [#] Fuel choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
 
-If pre-cooling is specified, additional information is entered in ``extension/PreCooling``.
+If pre-cooling is specified for the shared system, additional information is entered in ``extension/PreCooling``.
 
   ==============================================  =======  =====  ===========  ========  =======  ====================================================================
   Element                                         Type     Units  Constraints  Required  Default  Notes
