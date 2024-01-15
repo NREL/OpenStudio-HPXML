@@ -429,12 +429,12 @@ class Airflow
       htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
       clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
       if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
-        default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f
+        default_htg_sp = UnitConversions.convert(htg_weekend_setpoints.split(', ').uniq[0].to_f, 'F', 'C')
       else
         fail 'Unexpected heating setpoints.'
       end
       if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
-        default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f
+        default_clg_sp = UnitConversions.convert(clg_weekend_setpoints.split(', ').uniq[0].to_f, 'F', 'C')
       else
         fail 'Unexpected cooling setpoints.'
       end
