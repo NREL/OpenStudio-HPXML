@@ -4441,16 +4441,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_hvac_control_setpoint_values(hvac_control, heating_setpoint_temp, cooling_setpoint_temp)
-    if heating_setpoint_temp.nil?
-      assert_nil(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
-    else
-      assert_equal(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
-    end
-    if cooling_setpoint_temp.nil?
-      assert_nil(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
-    else
-      assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
-    end
+    assert_equal(heating_setpoint_temp, hvac_control.heating_setpoint_temp)
+    assert_equal(cooling_setpoint_temp, hvac_control.cooling_setpoint_temp)
   end
 
   def _test_default_hvac_control_setback_values(hvac_control, htg_setback_start_hr, clg_setup_start_hr)
