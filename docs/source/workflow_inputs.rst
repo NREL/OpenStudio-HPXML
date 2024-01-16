@@ -1510,7 +1510,7 @@ Each electric resistance heating system is entered as an ``/HPXML/Building/Build
 Furnace
 ~~~~~~~
 
-Each central furnace heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each central furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
   Element                                                 Type     Units      Constraints      Required  Default         Notes
@@ -1552,7 +1552,7 @@ Each central furnace heating system is entered as an ``/HPXML/Building/BuildingD
 Wall Furnace
 ~~~~~~~~~~~~
 
-Each wall furnace heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each wall furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ==========================================================  =======  ======  ===============  ========  ==============  ================
   Element                                                     Type     Units   Constraints      Required  Default         Notes
@@ -1579,7 +1579,7 @@ Each wall furnace heating system is entered as an ``/HPXML/Building/BuildingDeta
 Floor Furnace
 ~~~~~~~~~~~~~
 
-Each floor furnace heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each floor furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ===========================================================  =======  ======  ===============  ========  ==============  ================
   Element                                                      Type     Units   Constraints      Required  Default         Notes
@@ -1606,7 +1606,7 @@ Each floor furnace heating system is entered as an ``/HPXML/Building/BuildingDet
 Boiler (In-Unit)
 ~~~~~~~~~~~~~~~~
 
-Each in-unit boiler heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each in-unit boiler is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
   Element                                                Type     Units      Constraints      Required  Default         Notes
@@ -1649,7 +1649,7 @@ Each in-unit boiler heating system is entered as an ``/HPXML/Building/BuildingDe
 Boiler (Shared)
 ~~~~~~~~~~~~~~~
 
-Each shared boiler heating system (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each shared boiler (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ============================================================  =======  ===========  ===============  ========  ==============  =========================================
   Element                                                       Type     Units        Constraints      Required  Default         Notes
@@ -1677,7 +1677,7 @@ Each shared boiler heating system (serving multiple dwelling units) is entered a
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
          
   .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`air_distribution` (type: "fan coil").
-         If the shared boiler has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
+         If the shared boiler has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
          Note: The choice of hydronic distribution type does not currently affect simulation results; it is currently only used to know if there's an attached water loop heat pump or not.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1725,7 +1725,7 @@ Each stove heating system is entered as an ``/HPXML/Building/BuildingDetails/Sys
 Space Heater
 ~~~~~~~~~~~~
 
-Each space heater heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each space heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ==================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                             Type     Units   Constraints      Required  Default         Notes
@@ -1792,7 +1792,7 @@ The following cooling system types can be modeled:
 Central Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each central air conditioner cooling system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each central air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
   Element                                                           Type     Units        Constraints              Required  Default         Notes
@@ -1842,7 +1842,7 @@ Each central air conditioner cooling system is entered as an ``/HPXML/Building/B
 Room Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~
 
-Each room air conditioner cooling system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each room air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==============================================================  ======  ======  ====================  ========  ==============  ============================================
   Element                                                         Type    Units   Constraints           Required  Default         Notes
@@ -1863,7 +1863,7 @@ Each room air conditioner cooling system is entered as an ``/HPXML/Building/Buil
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the room air conditioner has integrated heating, additional information is entered in ``CoolingSystem``.
-Note that a room air conditioner with reverse cycle heating should be entered as a heat pump; see :ref:`room_ac_reverse_cycle`.
+Note that a room air conditioner with reverse cycle heating should be entered as a heat pump; see :ref:`hvac_hp_room_ac_reverse_cycle`.
 
   ==================================================================  ======  ======  ===============  ========  ==============  ============================================
   Element                                                             Type    Units   Constraints      Required  Default         Notes
@@ -1881,7 +1881,7 @@ Note that a room air conditioner with reverse cycle heating should be entered as
 Packaged Terminal Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each PTAC cooling system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each packaged terminal air conditioner (PTAC) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==============================================================  ======  ======  =================================  ========  ==============  ==========================================
   Element                                                         Type    Units   Constraints                        Required  Default         Notes
@@ -1902,7 +1902,7 @@ Each PTAC cooling system is entered as an ``/HPXML/Building/BuildingDetails/Syst
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
 
 If the PTAC has integrated heating, additional information is entered in ``CoolingSystem``.
-Note that a packaged terminal heat pump should be entered as a heat pump; see :ref:`pthp`.
+Note that a packaged terminal heat pump should be entered as a heat pump; see :ref:`hvac_hp_pthp`.
 
   ==================================================================  ======  ======  ===============  ========  ==============  ============================================
   Element                                                             Type    Units   Constraints      Required  Default         Notes
@@ -1920,7 +1920,7 @@ Note that a packaged terminal heat pump should be entered as a heat pump; see :r
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
 
-Each evaporative cooler cooling system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each evaporative cooler is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==========================  ========  ======  ==================  ========  ==============  ==================================
   Element                     Type      Units   Constraints         Required  Default         Notes
@@ -1942,7 +1942,7 @@ Each evaporative cooler cooling system is entered as an ``/HPXML/Building/Buildi
 Mini-Split Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each mini-split air conditioner cooling system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each mini-split air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
   Element                                                           Type      Units   Constraints      Required  Default         Notes
@@ -1990,7 +1990,7 @@ Each mini-split air conditioner cooling system is entered as an ``/HPXML/Buildin
 Chiller (Shared)
 ~~~~~~~~~~~~~~~~
 
-Each shared chiller cooling system (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each shared chiller (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   =================================================  ========  ======  ===============  ========  =========  =========================================
   Element                                            Type      Units   Constraints      Required  Default    Notes
@@ -2009,7 +2009,7 @@ Each shared chiller cooling system (serving multiple dwelling units) is entered 
   =================================================  ========  ======  ===============  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`air_distribution` (type: "fan coil").
-         If the chiller has "water loop" distribution, a :ref:`hvac_heatpump_wlhp` must also be specified.
+         If the chiller has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FanCoilWatts only required if chiller connected to fan coil.
   
@@ -2022,7 +2022,7 @@ Each shared chiller cooling system (serving multiple dwelling units) is entered 
 Cooling Tower (Shared)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Each shared cooling tower cooling system (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each shared cooling tower (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   =============================  ========  ======  ===============  ========  =========  =========================================
   Element                        Type      Units   Constraints      Required  Default    Notes
@@ -2038,7 +2038,7 @@ Each shared cooling tower cooling system (serving multiple dwelling units) is en
   =============================  ========  ======  ===============  ========  =========  =========================================
 
   .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "water loop").
-         A :ref:`hvac_heatpump_wlhp` must also be specified.
+         A :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   
 .. note::
@@ -2050,49 +2050,37 @@ Each shared cooling tower cooling system (serving multiple dwelling units) is en
 HPXML Heat Pumps
 ****************
 
-Each heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+The following heat pump types can be modeled:
 
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ===============================================
-  ``SystemIdentifier``               id                             Yes                  Unique identifier
-  ``UnitLocation``                   string            See [#]_     No        See [#]_   Location of heat pump
-  ``HeatPumpType``                   string            See [#]_     Yes                  Type of heat pump
-  ``HeatPumpFuel``                   string            See [#]_     Yes                  Fuel type
-  ``BackupType``                     string            See [#]_     No        <none>     Type of backup heating
-  =================================  ========  ======  ===========  ========  =========  ===============================================
+- :ref:`hvac_hp_air_to_air`
+- :ref:`hvac_hp_mini_split`
+- :ref:`hvac_hp_pthp`
+- :ref:`hvac_hp_room_ac_reverse_cycle`
+- :ref:`hvac_hp_ground_to_air`
+- :ref:`hvac_hp_water_loop`
 
-  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
-  .. [#] If UnitLocation not provided, defaults based on the distribution system:
-         
-         \- **Air**: supply duct location with the largest area, otherwise "conditioned space"
-         
-         \- **Hydronic**: same default logic as :ref:`waterheatingsystems`
-         
-         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
-         
-  .. [#] HeatPumpType choices are "air-to-air", "mini-split", "ground-to-air", "water-loop-to-air", "packaged terminal heat pump", or "room air conditioner with reverse cycle".
-  .. [#] HeatPumpFuel only choice is "electricity".
-  .. [#] BackupType choices are "integrated" or "separate".
-         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
-         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
-         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+.. _hvac_hp_air_to_air:
 
 Air-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
-If an air-to-air heat pump is specified, additional information is entered in ``HeatPump``.
+Each air-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
   Element                                                           Type     Units     Constraints               Required  Default         Notes
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
+  ``SystemIdentifier``                                              id                                           Yes                       Unique identifier
+  ``UnitLocation``                                                  string             See [#]_                  No        See [#]_        Location of heat pump
   ``DistributionSystem``                                            idref              See [#]_                  Yes                       ID of attached distribution system
+  ``HeatPumpType``                                                  string             air-to-air                Yes                       Type of heat pump
+  ``HeatPumpFuel``                                                  string             electricity               Yes                       Fuel type
   ``HeatingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``HeatingCapacity17F``                                            double   Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
   ``CoolingCapacity``                                               double   Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string             See [#]_                  No        See [#]_        Type of compressor
   ``CompressorLockoutTemperature``                                  double   F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
   ``CoolingSensibleHeatFraction``                                   double   frac      > 0.5, <= 1               No        See [#]_        Sensible heat fraction
+  ``BackupType``                                                    string             See [#]_                  No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double   frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double   Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
@@ -2106,6 +2094,13 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        50.0            Crankcase heater power
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
 
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **Air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         
   .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
@@ -2113,6 +2108,11 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
   .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
@@ -2136,21 +2136,29 @@ If an air-to-air heat pump is specified, additional information is entered in ``
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
+.. _hvac_hp_mini_split:
+
 Mini-Split Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
-If a mini-split heat pump is specified, additional information is entered in ``HeatPump``. Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
+Each mini-split heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
 
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
   Element                                                           Type      Units     Constraints               Required  Default         Notes
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
+  ``SystemIdentifier``                                              id                                            Yes                       Unique identifier
+  ``UnitLocation``                                                  string              See [#]_                  No        See [#]_        Location of heat pump
   ``DistributionSystem``                                            idref               See [#]_                  No                        ID of attached distribution system, if present
+  ``HeatPumpType``                                                  string              mini-split                Yes                       Type of heat pump
+  ``HeatPumpFuel``                                                  string              electricity               Yes                       Fuel type
   ``HeatingCapacity``                                               double    Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``HeatingCapacity17F``                                            double    Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
   ``CoolingCapacity``                                               double    Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
   ``CompressorType``                                                string              See [#]_                  No        variable speed  Type of compressor
   ``CompressorLockoutTemperature``                                  double    F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
   ``CoolingSensibleHeatFraction``                                   double    frac      > 0.5, <= 1               No        0.73            Sensible heat fraction
+  ``BackupType``                                                    string              See [#]_                  No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                                        double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="SEER" or Units="SEER2"]/Value``  double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency [#]_
@@ -2164,11 +2172,23 @@ If a mini-split heat pump is specified, additional information is entered in ``H
   ``extension/CrankcaseHeaterPowerWatts``                           double    W         >= 0                      No        50.0            Crankcase heater power
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
 
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **Air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] CompressorType only choice is "variable speed" (i.e., they are assumed to be inverter driven).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise -20F.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
@@ -2193,81 +2213,107 @@ If a mini-split heat pump is specified, additional information is entered in ``H
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
-.. _pthp:
+.. _hvac_hp_pthp:
 
 Packaged Terminal Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a packaged terminal heat pump is specified, additional information is entered in ``HeatPump``.
+Each packaged terminal heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
-  Element                                                          Type      Units     Constraints               Required  Default         Notes
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
-  ``HeatingCapacity``                                              double    Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
-  ``CoolingCapacity``                                              double    Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
-  ``CompressorLockoutTemperature``                                 double    F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
-  ``CoolingSensibleHeatFraction``                                  double    frac      > 0.5, <= 1               No        0.65            Sensible heat fraction
-  ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
-  ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                       Yes                       Rated heating efficiency
-  ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17         No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
-  ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                      No        0.0             Crankcase heater power
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
+  ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
+  Element                                                          Type      Units     Constraints                  Required  Default         Notes
+  ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
+  ``SystemIdentifier``                                             id                                               Yes                       Unique identifier
+  ``HeatPumpType``                                                 string              packaged terminal heat pump  Yes                       Type of heat pump
+  ``HeatPumpFuel``                                                 string              electricity                  Yes                       Fuel type
+  ``HeatingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity     No                        Heating output capacity at 17F, if available
+  ``CoolingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Cooling output capacity
+  ``CompressorLockoutTemperature``                                 double    F                                      No        See [#]_        Minimum outdoor temperature for compressor operation
+  ``CoolingSensibleHeatFraction``                                  double    frac      > 0.5, <= 1                  No        0.65            Sensible heat fraction
+  ``BackupType``                                                   string              See [#]_                     No        <none>          Type of backup heating
+  ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_              Yes                       Fraction of heating load served
+  ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_              Yes                       Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                          Yes                       Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                          Yes                       Rated heating efficiency
+  ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17            No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
+  ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                         No        0.0             Crankcase heater power
+  ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
 
+  .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
 
-.. _room_ac_reverse_cycle:
+.. _hvac_hp_room_ac_reverse_cycle:
   
 Room Air Conditioner w/ Reverse Cycle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a room air conditioner with reverse cycle is specified, additional information is entered in ``HeatPump``.
+Each room air conditioner with reverse cycle is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
-  Element                                                          Type      Units     Constraints               Required  Default         Notes
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
-  ``HeatingCapacity``                                              double    Btu/hr    >= 0                      No        autosized [#]_  Heating output capacity (excluding any backup heating)
-  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity  No                        Heating output capacity at 17F, if available
-  ``CoolingCapacity``                                              double    Btu/hr    >= 0                      No        autosized [#]_  Cooling output capacity
-  ``CompressorLockoutTemperature``                                 double    F                                   No        See [#]_        Minimum outdoor temperature for compressor operation
-  ``CoolingSensibleHeatFraction``                                  double    frac      > 0.5, <= 1               No        0.65            Sensible heat fraction
-  ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of heating load served
-  ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_           Yes                       Fraction of cooling load served
-  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                       Yes                       Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                       Yes                       Rated heating efficiency
-  ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17         No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
-  ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                      No        0.0             Crankcase heater power
-  ===============================================================  ========  ========  ========================  ========  ==============  ==============================================
+  ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
+  Element                                                          Type      Units     Constraints                              Required  Default         Notes
+  ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
+  ``SystemIdentifier``                                             id                                                           Yes                       Unique identifier
+  ``HeatPumpType``                                                 string              room air conditioner with reverse cycle  Yes                       Type of heat pump
+  ``HeatPumpFuel``                                                 string              electricity                              Yes                       Fuel type
+  ``HeatingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Heating output capacity (excluding any backup heating)
+  ``HeatingCapacity17F``                                           double    Btu/hr    >= 0, <= HeatingCapacity                 No                        Heating output capacity at 17F, if available
+  ``CoolingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Cooling output capacity
+  ``CompressorLockoutTemperature``                                 double    F                                                  No        See [#]_        Minimum outdoor temperature for compressor operation
+  ``CoolingSensibleHeatFraction``                                  double    frac      > 0.5, <= 1                              No        0.65            Sensible heat fraction
+  ``BackupType``                                                   string              See [#]_                                 No        <none>          Type of backup heating
+  ``FractionHeatLoadServed``                                       double    frac      >= 0, <= 1 [#]_                          Yes                       Fraction of heating load served
+  ``FractionCoolLoadServed``                                       double    frac      >= 0, <= 1 [#]_                          Yes                       Fraction of cooling load served
+  ``AnnualCoolingEfficiency[Units="EER" or Units="CEER"]/Value``   double    Btu/Wh    > 0                                      Yes                       Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                                      Yes                       Rated heating efficiency
+  ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17                        No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
+  ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                                     No        0.0             Crankcase heater power
+  ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
 
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
 
+.. _hvac_hp_ground_to_air:
+
 Ground-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-If a ground-to-air heat pump is specified, additional information is entered in ``HeatPump``.
+Each ground-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   Element                                          Type      Units   Constraints      Required  Default         Notes
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
-  ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
+  ``SystemIdentifier``                             id                                 Yes                       Unique identifier
+  ``UnitLocation``                                 string            ground-to-air    No        See [#]_        Location of heat pump
   ``DistributionSystem``                           idref             See [#]_         Yes                       ID of attached distribution system
+  ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
+  ``HeatPumpType``                                 string            See [#]_         Yes                       Type of heat pump
+  ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
   ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
   ``CoolingSensibleHeatFraction``                  double    frac    > 0.5, <= 1      No        0.73            Sensible heat fraction
+  ``BackupType``                                   string            See [#]_         No        <none>          Type of backup heating
   ``FractionHeatLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of heating load served
   ``FractionCoolLoadServed``                       double    frac    >= 0, <= 1 [#]_  Yes                       Fraction of cooling load served
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0              Yes                       Rated cooling efficiency
@@ -2281,10 +2327,22 @@ If a ground-to-air heat pump is specified, additional information is entered in 
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
 
-  .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **Air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         
   .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
@@ -2302,32 +2360,51 @@ If a ground-to-air heat pump is specified, additional information is entered in 
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
 
-.. _hvac_heatpump_wlhp:
+.. _hvac_hp_water_loop:
 
 Water-Loop-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a water-loop-to-air heat pump is specified, additional information is entered in ``HeatPump``.
+Each water-loop-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
-  Element                                          Type      Units   Constraints  Required  Default         Notes
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
-  ``DistributionSystem``                           idref             See [#]_     Yes                       ID of attached distribution system
-  ``HeatingCapacity``                              double    Btu/hr  > 0          No        autosized [#]_  Heating output capacity
-  ``CoolingCapacity``                              double    Btu/hr  > 0          See [#]_                  Cooling output capacity
-  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0          See [#]_                  Rated cooling efficiency
-  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0          See [#]_                  Rated heating efficiency
-  ===============================================  ========  ======  ===========  ========  ==============  ==============================================
+  ===============================================  ========  ======  =================  ========  ==============  ==============================================
+  Element                                          Type      Units   Constraints        Required  Default         Notes
+  ===============================================  ========  ======  =================  ========  ==============  ==============================================
+  ``SystemIdentifier``                             id                                   Yes                       Unique identifier
+  ``UnitLocation``                                 string            See [#]_           No        See [#]_        Location of heat pump
+  ``DistributionSystem``                           idref             See [#]_           Yes                       ID of attached distribution system
+  ``HeatPumpType``                                 string            water-loop-to-air  Yes                       Type of heat pump
+  ``HeatPumpFuel``                                 string            electricity        Yes                       Fuel type
+  ``HeatingCapacity``                              double    Btu/hr  > 0                No        autosized [#]_  Heating output capacity
+  ``CoolingCapacity``                              double    Btu/hr  > 0                See [#]_                  Cooling output capacity
+  ``BackupType``                                   string            See [#]_           No        <none>          Type of backup heating
+  ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0                See [#]_                  Rated cooling efficiency
+  ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0                See [#]_                  Rated heating efficiency
+  ===============================================  ========  ======  =================  ========  ==============  ==============================================
 
+  .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
+  .. [#] If UnitLocation not provided, defaults based on the distribution system:
+         
+         \- **Air**: supply duct location with the largest area, otherwise "conditioned space"
+         
+         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
+         
   .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] CoolingCapacity required if there is a shared chiller or cooling tower with water loop distribution.
+  .. [#] BackupType choices are "integrated" or "separate".
+         Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
+         Use "integrated" if the heat pump's distribution system and blower fan power applies to the backup heating (e.g., built-in electric strip heat or an integrated backup furnace, i.e., a dual-fuel heat pump).
+         Use "separate" if the backup system has its own distribution system (e.g., electric baseboard or a boiler).
+         Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] AnnualCoolingEfficiency required if there is a shared chiller or cooling tower with water loop distribution.
   .. [#] AnnualHeatingEfficiency required if there is a shared boiler with water loop distribution.
 
 .. note::
 
   If a water loop heat pump is specified, there must be at least one shared heating system (i.e., :ref:`hvac_heating_shared_boiler`) and/or one shared cooling system (i.e., :ref:`hvac_cooling_shared_chiller` or :ref:`hvac_cooling_shared_tower`) specified with water loop distribution.
+
+.. _hvac_hp_backup:
 
 Backup
 ~~~~~~
