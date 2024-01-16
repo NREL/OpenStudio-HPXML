@@ -2044,7 +2044,7 @@ class HVACSizing
     end
     if (not fixed_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity > 0)
       if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Heat_Capacity > fixed_heating_capacity)
-        # Use fixed size; proportionally adjust autosized airflow
+        # Use fixed size; proportionally adjust autosized airflow & sensible capacity
         prev_capacity = hvac_sizing_values.Heat_Capacity
         hvac_sizing_values.Heat_Capacity = fixed_heating_capacity
         hvac_sizing_values.Heat_Airflow *= hvac_sizing_values.Heat_Capacity / prev_capacity

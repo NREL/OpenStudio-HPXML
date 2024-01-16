@@ -1961,8 +1961,8 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   ``HeatingDetailedPerformanceData``                                element                                      No        <none>          Heating detailed performance data [#]_
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``    double   frac | F  >= 0, < 1 | <= 17         No        See [#]_        Heating output capacity retention at cold temperature [#]_
   ``extension/FanPowerWattsPerCFM``                                 double   W/cfm     >= 0                      No        See [#]_        Blower fan efficiency at maximum fan speed
-  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        autosized       Heating airflow rate [#]_
-  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        autosized       Cooling airflow rate [#]_
+  ``extension/HeatingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
+  ``extension/CoolingAirflowCFM``                                   double   cfm       >= 0                      No        autosized
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        50.0            Crankcase heater power
@@ -1992,8 +1992,6 @@ If an air-to-air heat pump is specified, additional information is entered in ``
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
   .. [#] If FanPowerWattsPerCFM not provided, defaulted to 0.5 W/cfm if HSPF <= 8.75, else 0.375 W/cfm.
-  .. [#] HeatingAirflowCFM can either be the maximum allowed heating airflow rate when UseMaximumAirflowRates is true in :ref:`hvac_sizing_control`, or can be used for blower fan efficiency adjustment.
-  .. [#] CoolingAirflowCFM can either be the maximum allowed cooling airflow rate when UseMaximumAirflowRates is true in :ref:`hvac_sizing_control`, or can be used for blower fan efficiency adjustment.
   .. [#] AirflowDefectRatio is defined as (InstalledAirflow - DesignAirflow) / DesignAirflow; a value of zero means no airflow defect.
          See ANSI/RESNET/ACCA 310-2020 Standard for Grading the Installation of HVAC Systems for more information.
   .. [#] ChargeDefectRatio is defined as (InstalledCharge - DesignCharge) / DesignCharge; a value of zero means no refrigerant charge defect.
