@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b3f82f6a-21d3-47a9-bc66-f493b2ac38e7</version_id>
-  <version_modified>2024-01-16T20:52:10Z</version_modified>
+  <version_id>d72ca34b-2096-4faa-8ef2-ea287f59790d</version_id>
+  <version_modified>2024-01-16T23:52:33Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -298,7 +298,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>66C6D32F</checksum>
+      <checksum>1CF7B45D</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -520,7 +520,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2AF224C3</checksum>
+      <checksum>BD52A92C</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

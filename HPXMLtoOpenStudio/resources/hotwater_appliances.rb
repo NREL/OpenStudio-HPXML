@@ -140,9 +140,6 @@ class HotWaterAndAppliances
     hpxml_bldg.refrigerators.each do |refrigerator|
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
 
-      rf_space = refrigerator.additional_properties.space
-      rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-
       # Create schedule
       fridge_schedule = nil
       fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::ColumnRefrigerator : SchedulesFile::ColumnExtraRefrigerator
@@ -158,26 +155,25 @@ class HotWaterAndAppliances
           fridge_weekday_sch = refrigerator.weekday_fractions
           fridge_weekend_sch = refrigerator.weekend_fractions
           fridge_monthly_sch = refrigerator.monthly_multipliers
-        else # to get design level for defaulted schedule
-          if refrigerator.primary_indicator
-            fridge_weekday_sch = Schedule.RefrigeratorWeekdayFractions
-            fridge_weekend_sch = Schedule.RefrigeratorWeekendFractions
-            fridge_monthly_sch = Schedule.RefrigeratorMonthlyMultipliers
-          else
-            fridge_weekday_sch = Schedule.ExtraRefrigeratorWeekdayFractions
-            fridge_weekend_sch = Schedule.ExtraRefrigeratorWeekendFractions
-            fridge_monthly_sch = Schedule.ExtraRefrigeratorMonthlyMultipliers
-          end
+
+          fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
+          fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
+          fridge_schedule = fridge_schedule_obj.schedule
         end
-        fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
-        fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
-        fridge_schedule = fridge_schedule_obj.schedule
 
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
-          fridge_unavailable_schedule = fridge_schedule # we are actuating the fridge schedule, but we need the original schedule values
-          fridge_unavailable_schedule.setName(fridge_schedule.name.to_s + ' unused')
+          fridge_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
 
-          fridge_schedule = OpenStudio::Model::ScheduleConstant.new(model) # this gets actuated, so schedule values aren't important here
+          # Create fridge availability sensor
+          if not fridge_unavailable_periods.empty?
+            avail_sch = ScheduleConstant.new(model, fridge_col_name, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
+
+            fridge_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+            fridge_availability_sensor.setName('fridge availability s')
+            fridge_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
+          end
+
+          fridge_schedule = OpenStudio::Model::ScheduleConstant.new(model)
           fridge_schedule.setName(fridge_obj_name + ' schedule')
 
           loc_space, loc_schedule = SpaceOrSchedule.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
@@ -191,10 +187,6 @@ class HotWaterAndAppliances
             fridge_temperature_sensor.setKeyName(loc_schedule.name.to_s)
           end
 
-          fridge_unavailable_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-          fridge_unavailable_sensor.setName(fridge_unavailable_schedule.name.to_s + ' sensor')
-          fridge_unavailable_sensor.setKeyName(fridge_unavailable_schedule.name.to_s)
-
           fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleConstantValue)
           fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
 
@@ -204,15 +196,13 @@ class HotWaterAndAppliances
           fridge_schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
           fridge_schedule_program.setName("#{fridge_schedule.name} program")
           fridge_schedule_program.addLine("Set Tin = #{fridge_temperature_sensor.name}*(9.0/5.0)+32.0") # C to F
-          fridge_schedule_program.addLine("Set Outage = #{fridge_unavailable_sensor.name}")
+          fridge_schedule_program.addLine("Set #{fridge_schedule_actuator.name} = 0")
           fridge_constant_coefficients.zip(fridge_temperature_coefficients).each_with_index do |constant_temperature, i|
             a, b = constant_temperature
-            fridge_schedule_program.addLine("If (Hour == #{i})")
-            fridge_schedule_program.addLine('  If (Outage == 0)')
-            fridge_schedule_program.addLine("    Set #{fridge_schedule_actuator.name} = 0")
-            fridge_schedule_program.addLine('  Else')
-            fridge_schedule_program.addLine("    Set #{fridge_schedule_actuator.name} = (#{b}*Tin+(#{a}))")
-            fridge_schedule_program.addLine('  EndIf')
+            line = "If (Hour == #{i})"
+            line += " && (#{fridge_availability_sensor.name} == 1)" if not fridge_availability_sensor.nil?
+            fridge_schedule_program.addLine(line)
+            fridge_schedule_program.addLine("  Set #{fridge_schedule_actuator.name} = (#{b}*Tin+(#{a}))")
             fridge_schedule_program.addLine('EndIf')
           end
 
@@ -226,6 +216,9 @@ class HotWaterAndAppliances
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !refrigerator.weekend_fractions.nil?
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !refrigerator.monthly_multipliers.nil?
       end
+
+      rf_space = refrigerator.additional_properties.space
+      rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
       add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
     end
