@@ -1946,12 +1946,12 @@ class HVACSizing
     hvac_sizing_values.Heat_Airflow_isdefaulted = true
     hvac_sizing_values.Cool_Airflow_isdefaulted = true
 
-    if !@hpxml_bldg.header.existing_ductwork_restriction
-      if !hvac_heating.heating_airflow_cfm.nil?
+    if not @hpxml_bldg.header.existing_ductwork_restriction
+      if (not hvac_heating.nil?) && (not hvac_heating.heating_airflow_cfm.nil?)
         hvac_sizing_values.Heat_Airflow = hvac_heating.heating_airflow_cfm
         hvac_sizing_values.Heat_Airflow_isdefaulted = false
       end
-      if !hvac_cooling.cooling_airflow_cfm.nil?
+      if (not hvac_cooling.nil?) && (not hvac_cooling.cooling_airflow_cfm.nil?)
         hvac_sizing_values.Cool_Airflow = hvac_cooling.cooling_airflow_cfm
         hvac_sizing_values.Cool_Airflow_isdefaulted = false
       end
