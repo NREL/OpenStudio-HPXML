@@ -1516,7 +1516,7 @@ Each central furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/
   Element                                                 Type     Units      Constraints      Required  Default         Notes
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
   ``SystemIdentifier``                                    id                                   Yes                       Unique identifier
-  ``UnitLocation``                                        string              See [#]_         No        See [#]_        Location of heating system
+  ``UnitLocation``                                        string              See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                                  idref    See [#]_                    Yes                       ID of attached distribution system
   ``HeatingSystemType/Furnace``                           element                              Yes                       Type of heating system
   ``HeatingSystemType/Furnace/PilotLight``                boolean                              No        false           Presence of standing pilot light (older systems)
@@ -1612,7 +1612,7 @@ Each in-unit boiler is entered as an ``/HPXML/Building/BuildingDetails/Systems/H
   Element                                                Type     Units      Constraints      Required  Default         Notes
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
   ``SystemIdentifier``                                   id                                   Yes                       Unique identifier
-  ``UnitLocation``                                       string              See [#]_         No        See [#]_        Location of heating system
+  ``UnitLocation``                                       string              See [#]_         No        See [#]_        Location of boiler
   ``DistributionSystem``                                 idref    See [#]_   Yes                                        ID of attached distribution system
   ``HeatingSystemType/Boiler``                           element                              Yes                       Type of heating system
   ``HeatingSystemType/Boiler/PilotLight``                boolean                              No        false           Presence of standing pilot light (older systems)
@@ -1655,7 +1655,7 @@ Each shared boiler (serving multiple dwelling units) is entered as an ``/HPXML/B
   Element                                                       Type     Units        Constraints      Required  Default         Notes
   ============================================================  =======  ===========  ===============  ========  ==============  =========================================
   ``SystemIdentifier``                                          id                                     Yes                       Unique identifier
-  ``UnitLocation``                                              string                See [#]_         No        See [#]_        Location of heating system
+  ``UnitLocation``                                              string                See [#]_         No        See [#]_        Location of boiler
   ``DistributionSystem``                                        idref    See [#]_     Yes                                        ID of attached distribution system
   ``IsSharedSystem``                                            boolean               true             Yes                       Whether it serves multiple dwelling units
   ``NumberofUnitsServed``                                       integer               > 1              Yes                       Number of dwelling units served
@@ -1798,7 +1798,7 @@ Each central air conditioner is entered as an ``/HPXML/Building/BuildingDetails/
   Element                                                           Type     Units        Constraints              Required  Default         Notes
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
   ``SystemIdentifier``                                              id                                             Yes                       Unique identifier
-  ``UnitLocation``                                                  string                See [#]_                 No        See [#]_        Location of cooling system
+  ``UnitLocation``                                                  string                See [#]_                 No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref                 See [#]_                 Yes                       ID of attached distribution system
   ``CoolingSystemType``                                             string                central air conditioner  Yes                       Type of cooling system
   ``CoolingSystemFuel``                                             string                electricity              Yes                       Fuel type
@@ -1948,7 +1948,7 @@ Each mini-split air conditioner is entered as an ``/HPXML/Building/BuildingDetai
   Element                                                           Type      Units   Constraints      Required  Default         Notes
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
   ``SystemIdentifier``                                              id                                 Yes                       Unique identifier
-  ``UnitLocation``                                                  string            See [#]_         No        See [#]_        Location of cooling system
+  ``UnitLocation``                                                  string            See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref             See [#]_         No                        ID of attached distribution system
   ``CoolingSystemType``                                             string            mini-split       Yes                       Type of cooling system
   ``CoolingSystemFuel``                                             string            electricity      Yes                       Fuel type
@@ -2070,7 +2070,7 @@ Each air-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Sys
   Element                                                           Type     Units     Constraints               Required  Default         Notes
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
   ``SystemIdentifier``                                              id                                           Yes                       Unique identifier
-  ``UnitLocation``                                                  string             See [#]_                  No        See [#]_        Location of heat pump
+  ``UnitLocation``                                                  string             See [#]_                  No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref              See [#]_                  Yes                       ID of attached distribution system
   ``HeatPumpType``                                                  string             air-to-air                Yes                       Type of heat pump
   ``HeatPumpFuel``                                                  string             electricity               Yes                       Fuel type
@@ -2148,7 +2148,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   Element                                                           Type      Units     Constraints               Required  Default         Notes
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
   ``SystemIdentifier``                                              id                                            Yes                       Unique identifier
-  ``UnitLocation``                                                  string              See [#]_                  No        See [#]_        Location of heat pump
+  ``UnitLocation``                                                  string              See [#]_                  No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref               See [#]_                  No                        ID of attached distribution system, if present
   ``HeatPumpType``                                                  string              mini-split                Yes                       Type of heat pump
   ``HeatPumpFuel``                                                  string              electricity               Yes                       Fuel type
@@ -2240,7 +2240,6 @@ Each packaged terminal heat pump is entered as an ``/HPXML/Building/BuildingDeta
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                         No        0.0             Crankcase heater power
   ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
 
-  .. [#] HeatPumpFuel only choice is "electricity".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
@@ -2305,7 +2304,7 @@ Each ground-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/
   Element                                          Type      Units   Constraints      Required  Default         Notes
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   ``SystemIdentifier``                             id                                 Yes                       Unique identifier
-  ``UnitLocation``                                 string            ground-to-air    No        See [#]_        Location of heat pump
+  ``UnitLocation``                                 string            ground-to-air    No        See [#]_        Location of air handler
   ``DistributionSystem``                           idref             See [#]_         Yes                       ID of attached distribution system
   ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
   ``HeatPumpType``                                 string            See [#]_         Yes                       Type of heat pump
@@ -2371,7 +2370,7 @@ Each water-loop-to-air heat pump is entered as an ``/HPXML/Building/BuildingDeta
   Element                                          Type      Units   Constraints        Required  Default         Notes
   ===============================================  ========  ======  =================  ========  ==============  ==============================================
   ``SystemIdentifier``                             id                                   Yes                       Unique identifier
-  ``UnitLocation``                                 string            See [#]_           No        See [#]_        Location of heat pump
+  ``UnitLocation``                                 string            See [#]_           No        See [#]_        Location of air handler
   ``DistributionSystem``                           idref             See [#]_           Yes                       ID of attached distribution system
   ``HeatPumpType``                                 string            water-loop-to-air  Yes                       Type of heat pump
   ``HeatPumpFuel``                                 string            electricity        Yes                       Fuel type
@@ -3071,23 +3070,45 @@ If not entered, the simulation will not include whole house fans.
 HPXML Water Heating Systems
 ***************************
 
-Each water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+The following water heater types can be modeled:
+
+- :ref:`water_heater_storage`
+- :ref:`water_heater_tankless`
+- :ref:`water_heater_heat_pump`
+- :ref:`water_heater_combi_storage`
+- :ref:`water_heater_combi_tankless_coil`
+
 If not entered, the simulation will not include water heating.
 
-  =========================  =======  =======  ===============  ========  ========  ================================================================
-  Element                    Type     Units    Constraints      Required  Default   Notes
-  =========================  =======  =======  ===============  ========  ========  ================================================================
-  ``SystemIdentifier``       id                                 Yes                 Unique identifier
-  ``IsSharedSystem``         boolean                            No        false     Whether it serves multiple dwelling units or shared laundry room
-  ``WaterHeaterType``        string            See [#]_         Yes                 Type of water heater
-  ``Location``               string            See [#]_         No        See [#]_  Water heater location
-  ``FractionDHWLoadServed``  double   frac     >= 0, <= 1 [#]_  Yes                 Fraction of hot water load served [#]_
-  ``HotWaterTemperature``    double   F        > 0              No        125       Water heater setpoint [#]_
-  ``UsesDesuperheater``      boolean                            No        false     Presence of desuperheater?
-  ``NumberofUnitsServed``    integer           > 0              See [#]_            Number of dwelling units served directly or indirectly
-  =========================  =======  =======  ===============  ========  ========  ================================================================
+.. _water_heater_storage:
 
-  .. [#] WaterHeaterType choices are "storage water heater", "instantaneous water heater", "heat pump water heater", "space-heating boiler with storage tank", or "space-heating boiler with tankless coil".
+Conventional Storage
+~~~~~~~~~~~~~~~~~~~~
+
+Each conventional storage water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+
+  =============================================  =================  =============  ====================  ========  ========  =============================================
+  Element                                        Type               Units          Constraints           Required  Default   Notes
+  =============================================  =================  =============  ====================  ========  ========  =============================================
+  ``SystemIdentifier``                           id                                                      Yes                 Unique identifier
+  ``FuelType``                                   string                            See [#]_              Yes                 Fuel type
+  ``WaterHeaterType``                            string                            storage water heater  Yes                 Type of water heater
+  ``Location``                                   string                            See [#]_              No        See [#]_  Water heater location
+  ``IsSharedSystem``                             boolean                                                 No        false     Whether it serves multiple dwelling units or shared laundry room
+  ``NumberofUnitsServed``                        integer                           > 0                   See [#]_            Number of dwelling units served directly or indirectly
+  ``TankVolume``                                 double             gal            > 0                   No        See [#]_  Nominal tank volume
+  ``FractionDHWLoadServed``                      double             frac           >= 0, <= 1 [#]_       Yes                 Fraction of hot water load served [#]_
+  ``HeatingCapacity``                            double             Btu/hr         > 0                   No        See [#]_  Heating capacity
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double             frac           < 1                   Yes                 EnergyGuide label rated efficiency
+  ``UsageBin`` or ``FirstHourRating``            string or double   str or gal/hr  See [#]_ or > 0       No        See [#]_  EnergyGuide label usage bin/first hour rating
+  ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_        No        See [#]_  Recovery efficiency
+  ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                  No        0         R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
+  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
+  ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
+  =============================================  =================  =============  ====================  ========  ========  =============================================
+
+  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Location not provided, defaults to the first present space type:
@@ -3096,32 +3117,11 @@ If not entered, the simulation will not include water heating.
          
          \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
          
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
-  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
-
-Conventional Storage
-~~~~~~~~~~~~~~~~~~~~
-
-If a conventional storage water heater is specified, additional information is entered in ``WaterHeatingSystem``.
-
-  =============================================  =================  =============  ===============  ========  ========  =============================================
-  Element                                        Type               Units          Constraints      Required  Default   Notes
-  =============================================  =================  =============  ===============  ========  ========  =============================================
-  ``FuelType``                                   string                            See [#]_         Yes                 Fuel type
-  ``TankVolume``                                 double             gal            > 0              No        See [#]_  Nominal tank volume
-  ``HeatingCapacity``                            double             Btu/hr         > 0              No        See [#]_  Heating capacity
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double             frac           < 1              Yes                 EnergyGuide label rated efficiency
-  ``UsageBin`` or ``FirstHourRating``            string or double   str or gal/hr  See [#]_ or > 0  No        See [#]_  EnergyGuide label usage bin/first hour rating
-  ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_   No        See [#]_  Recovery efficiency
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0             No        0         R-value of additional tank insulation wrap
-  ``extension/TankModelType``                    string                            See [#]_         No        mixed     Tank model type
-  =============================================  =================  =============  ===============  ========  ========  =============================================
-  
-  .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
-  .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] If HeatingCapacity not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
@@ -3136,77 +3136,172 @@ If a conventional storage water heater is specified, additional information is e
          
          \- **Non-electric, EnergyFactor >= 0.75**: 0.561 * EnergyFactor + 0.439
          
+  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
+  .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] TankModelType choices are "mixed" or "stratified".
+
+.. _water_heater_tankless:
 
 Tankless
 ~~~~~~~~
 
-If an instantaneous tankless water heater is specified, additional information is entered in ``WaterHeatingSystem``.
+Each instantaneous tankless water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
-  Element                                      Type     Units         Constraints  Required      Default   Notes
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
-  ``FuelType``                                 string                 See [#]_     Yes                     Fuel type
-  ``PerformanceAdjustment``                    double   frac          >= 0, <= 1   No            See [#]_  Multiplier on efficiency, typically to account for cycling
-  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1          Yes                     EnergyGuide label rated efficiency
-  ===========================================  =======  ============  ===========  ============  ========  ==========================================================
-  
+  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
+  Element                                      Type     Units         Constraints                 Required      Default   Notes
+  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
+  ``SystemIdentifier``                         id                                                 Yes                     Unique identifier
+  ``FuelType``                                 string                 See [#]_                    Yes                     Fuel type
+  ``WaterHeaterType``                          string                 instantaneous water heater  Yes                     Type of water heater
+  ``Location``                                 string                 See [#]_                    No            See [#]_  Water heater location
+  ``IsSharedSystem``                           boolean                                            No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``NumberofUnitsServed``                      integer                > 0                         See [#]_                Number of dwelling units served directly or indirectly
+  ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                  No            See [#]_  Multiplier on efficiency, typically to account for cycling
+  ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
+  ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
+  ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
+  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
+  ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
+
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
+  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] If Location not provided, defaults to the first present space type:
+         
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
+  .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
+         Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
+  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
+  .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+
+.. _water_heater_heat_pump:
 
 Heat Pump
 ~~~~~~~~~
 
-If a heat pump water heater is specified, additional information is entered in ``WaterHeatingSystem``.
+Each heat pump water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  ================  =============  ===============  ========  ===========  =============================================
-  Element                                        Type              Units          Constraints      Required  Default      Notes
-  =============================================  ================  =============  ===============  ========  ===========  =============================================
-  ``FuelType``                                   string                           See [#]_         Yes                    Fuel type
-  ``TankVolume``                                 double            gal            > 0              Yes                    Nominal tank volume
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5        Yes                    EnergyGuide label rated efficiency
-  ``HPWHOperatingMode``                          string                           See [#]_         No        hybrid/auto  Operating mode [#]_
-  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0  No        See [#]_     EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0             No        0            R-value of additional tank insulation wrap
-  =============================================  ================  =============  ===============  ========  ===========  =============================================
+  =============================================  ================  =============  ======================  ========  ===========  =============================================
+  Element                                        Type              Units          Constraints             Required  Default      Notes
+  =============================================  ================  =============  ======================  ========  ===========  =============================================
+  ``SystemIdentifier``                           id                                                       Yes                    Unique identifier
+  ``FuelType``                                   string                           electricity             Yes                    Fuel type
+  ``WaterHeaterType``                            string                           heat pump water heater  Yes                    Type of water heater
+  ``Location``                                   string                           See [#]_                No        See [#]_     Water heater location
+  ``IsSharedSystem``                             boolean                                                  No        false        Whether it serves multiple dwelling units or shared laundry room
+  ``NumberofUnitsServed``                        integer                          > 0                     See [#]_               Number of dwelling units served directly or indirectly
+  ``TankVolume``                                 double            gal            > 0                     Yes                    Nominal tank volume
+  ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                    Fraction of hot water load served [#]_
+  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                    EnergyGuide label rated efficiency
+  ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto  Operating mode [#]_
+  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_     EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0            R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                        double            F              > 0                     No        125          Water heater setpoint [#]_
+  ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater? [#]_
+  =============================================  ================  =============  ======================  ========  ===========  =============================================
 
-  .. [#] FuelType only choice is "electricity".
+  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] If Location not provided, defaults to the first present space type:
+         
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
+  .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
+         Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only".
   .. [#] The heat pump water heater operating mode can alternatively be defined using :ref:`detailedschedules`.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
   .. [#] UsageBin/FirstHourRating are only used for water heaters that use UniformEnergyFactor.
          If neither UsageBin nor FirstHourRating provided, UsageBin defaults to "medium".
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
+  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
+  .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+
+.. _water_heater_combi_storage:
 
 Combi Boiler w/ Storage
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-If a combination boiler w/ storage tank (sometimes referred to as an indirect water heater) is specified, additional information is entered in ``WaterHeatingSystem``.
+Each combination boiler w/ storage tank (sometimes referred to as an indirect water heater) is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
-  Element                                        Type     Units         Constraints  Required      Default   Notes
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
-  ``RelatedHVACSystem``                          idref                  See [#]_     Yes                     ID of boiler
-  ``TankVolume``                                 double   gal           > 0          Yes                     Nominal volume of the storage tank
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0         No            0         R-value of additional storage tank insulation wrap
-  ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0          No            See [#]_  Storage tank standby losses
-  =============================================  =======  ============  ===========  ============  ========  ==================================================
+  =============================================  =======  ============  ======================================  ============  ========  ==================================================
+  Element                                        Type     Units         Constraints                             Required      Default   Notes
+  =============================================  =======  ============  ======================================  ============  ========  ==================================================
+  ``SystemIdentifier``                           id                                                             Yes                     Unique identifier
+  ``WaterHeaterType``                            string                 space-heating boiler with storage tank  Yes                     Type of water heater
+  ``Location``                                   string                 See [#]_                                No            See [#]_  Water heater location
+  ``IsSharedSystem``                             boolean                                                        No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``NumberofUnitsServed``                        integer                > 0                                     See [#]_                Number of dwelling units served directly or indirectly
+  ``TankVolume``                                 double   gal           > 0                                     Yes                     Nominal volume of the storage tank
+  ``FractionDHWLoadServed``                      double   frac          >= 0, <= 1 [#]_                         Yes                     Fraction of hot water load served [#]_
+  ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
+  ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
+  ``HotWaterTemperature``                        double   F             > 0                                     No            125       Water heater setpoint [#]_
+  ``RelatedHVACSystem``                          idref                  See [#]_                                Yes                     ID of boiler
+  =============================================  =======  ============  ======================================  ============  ========  ==================================================
 
-  .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] If Location not provided, defaults to the first present space type:
+         
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
+  .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
+         Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If StandbyLoss not provided, defaults based on a regression analysis of `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_.
+  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
+  .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+
+.. _water_heater_combi_tankless_coil:
 
 Combi Boiler w/ Tankless Coil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a combination boiler w/ tankless coil is specified, additional information is entered in ``WaterHeatingSystem``.
+Each combination boiler w/ tankless coil is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =====================  =======  ============  ===========  ============  ========  ==================================================
-  Element                Type     Units         Constraints  Required      Default   Notes
-  =====================  =======  ============  ===========  ============  ========  ==================================================
-  ``RelatedHVACSystem``  idref                  See [#]_     Yes                     ID of boiler
-  =====================  =======  ============  ===========  ============  ========  ==================================================
+  =========================  =======  =====  =======================================  ============  ========  ==================================================
+  Element                    Type     Units  Constraints                              Required      Default   Notes
+  =========================  =======  =====  =======================================  ============  ========  ==================================================
+  ``SystemIdentifier``       id                                                       Yes                     Unique identifier
+  ``WaterHeaterType``        string          space-heating boiler with tankless coil  Yes                     Type of water heater
+  ``Location``               string          See [#]_                                 No            See [#]_  Water heater location
+  ``IsSharedSystem``         boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``NumberofUnitsServed``    integer         > 0                                      See [#]_                Number of dwelling units served directly or indirectly
+  ``FractionDHWLoadServed``  double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
+  ``HotWaterTemperature``    double   F      > 0                                      No            125       Water heater setpoint [#]_
+  ``RelatedHVACSystem``      idref           See [#]_                                 Yes                     ID of boiler
+  =========================  =======  =====  =======================================  ============  ========  ==================================================
 
+  .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
+         See :ref:`hpxmllocations` for descriptions.
+  .. [#] If Location not provided, defaults to the first present space type:
+         
+         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         
+         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         
+  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
+  .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
+  .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
+         Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
+  .. [#] The water heater setpoint can alternatively be defined using :ref:`detailedschedules`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+
+.. _water_heater_desuperheater:
 
 Desuperheater
 ~~~~~~~~~~~~~
