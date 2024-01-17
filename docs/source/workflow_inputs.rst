@@ -1536,7 +1536,7 @@ Each central furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
 
-  .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity" or "gravity") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity" or "gravity") or :ref:`hvac_distribution_dse`.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1631,7 +1631,7 @@ Each in-unit boiler is entered as an ``/HPXML/Building/BuildingDetails/Systems/H
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or :ref:`hvac_distribution_dse`.
          Note: The choice of hydronic distribution type does not currently affect simulation results.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
@@ -1676,7 +1676,7 @@ Each shared boiler (serving multiple dwelling units) is entered as an ``/HPXML/B
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`air_distribution` (type: "fan coil").
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
          Note: The choice of hydronic distribution type does not currently affect simulation results; it is currently only used to know if there's an attached water loop heat pump or not.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -1821,7 +1821,7 @@ Each central air conditioner is entered as an ``/HPXML/Building/BuildingDetails/
          
          \- **DSE**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
@@ -1933,7 +1933,7 @@ Each evaporative cooler is entered as an ``/HPXML/Building/BuildingDetails/Syste
   ``FractionCoolLoadServed``  double    frac    >= 0, <= 1 [#]_     Yes                       Fraction of cooling load served
   ==========================  ========  ======  ==================  ========  ==============  ==================================
 
-  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
 
@@ -1971,7 +1971,7 @@ Each mini-split air conditioner is entered as an ``/HPXML/Building/BuildingDetai
          
          \- **DSE**: "conditioned space" if ``FractionCoolLoadServed`` is 1, otherwise "unconditioned space"
          
-  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] CompressorType only choices is "variable speed" (i.e., they are assumed to be inverter driven).
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2008,7 +2008,7 @@ Each shared chiller (serving multiple dwelling units) is entered as an ``/HPXML/
   ``extension/FanCoilWatts``                         double    W       >= 0             See [#]_             Fan coil power
   =================================================  ========  ======  ===============  ========  =========  =========================================
 
-  .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`air_distribution` (type: "fan coil").
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the chiller has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FanCoilWatts only required if chiller connected to fan coil.
@@ -2037,7 +2037,7 @@ Each shared cooling tower (serving multiple dwelling units) is entered as an ``/
   ``extension/SharedLoopWatts``  double    W       >= 0             Yes                  Pumping and fan power serving the system
   =============================  ========  ======  ===============  ========  =========  =========================================
 
-  .. [#] HVACDistribution type must be :ref:`hydronic_distribution` (type: "water loop").
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "water loop").
          A :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   
@@ -2101,7 +2101,7 @@ Each air-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Sys
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
@@ -2179,7 +2179,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
          
-  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] CompressorType only choice is "variable speed" (i.e., they are assumed to be inverter driven).
@@ -2333,7 +2333,7 @@ Each ground-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] IsSharedSystem should be true if the SFA/MF building has multiple ground source heat pumps connected to a shared hydronic circulation loop.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
@@ -2388,7 +2388,7 @@ Each water-loop-to-air heat pump is entered as an ``/HPXML/Building/BuildingDeta
          
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed``/``FractionCoolLoadServed`` are 1, otherwise "unconditioned space"
          
-  .. [#] HVACDistribution type must be :ref:`air_distribution` (type: "regular velocity") or :ref:`dse_distribution`.
+  .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] CoolingCapacity required if there is a shared chiller or cooling tower with water loop distribution.
   .. [#] BackupType choices are "integrated" or "separate".
@@ -2681,47 +2681,44 @@ To define hourly thermostat setpoints, additional information is entered in ``HV
 HPXML HVAC Distribution
 ***********************
 
-Each separate HVAC distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
+The following distribution system types can be modeled:
 
-  ==============================  =======  =======  ===========  ========  =========  =============================
-  Element                         Type     Units    Constraints  Required  Default    Notes
-  ==============================  =======  =======  ===========  ========  =========  =============================
-  ``SystemIdentifier``            id                             Yes                  Unique identifier
-  ``DistributionSystemType``      element           See [#]_     Yes                  Type of distribution system
-  ``ConditionedFloorAreaServed``  double   ft2      > 0          See [#]_             Conditioned floor area served
-  ==============================  =======  =======  ===========  ========  =========  =============================
-
-  .. [#] DistributionSystemType child element choices are ``AirDistribution``, ``HydronicDistribution``, or ``Other=DSE``.
-  .. [#] ConditionedFloorAreaServed required only when DistributionSystemType is AirDistribution and duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
+- :ref:`hvac_distribution_air`
+- :ref:`hvac_distribution_hydronic`
+- :ref:`hvac_distribution_dse`
 
 .. note::
   
-  There should be at most one heating system and one cooling system attached to a distribution system.
-  See :ref:`hvac_heating`, :ref:`hvac_cooling`, and :ref:`hvac_heatpump` for information on which DistributionSystemType is allowed for which HVAC system.
+  There can be at most one heating system and one cooling system attached to a distribution system.
+  See :ref:`hvac_heating`, :ref:`hvac_cooling`, and :ref:`hvac_heatpump` for information on which distribution system type is allowed for which HVAC system.
   Also note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
 
-.. _air_distribution:
+.. _hvac_distribution_air:
 
 Air Distribution
 ~~~~~~~~~~~~~~~~
 
-To define an air distribution system, additional information is entered in ``HVACDistribution/DistributionSystemType/AirDistribution``.
+Each air distribution system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  =============================================  =======  =======  ===========  ========  =========  ==========================
-  Element                                        Type     Units    Constraints  Required  Default    Notes
-  =============================================  =======  =======  ===========  ========  =========  ==========================
-  ``AirDistributionType``                        string            See [#]_     Yes                  Type of air distribution
-  ``DuctLeakageMeasurement[DuctType="supply"]``  element                        See [#]_             Supply duct leakage value
-  ``DuctLeakageMeasurement[DuctType="return"]``  element                        See [#]_             Return duct leakage value
-  ``Ducts``                                      element                        No                   Supply/return ducts; multiple are allowed [#]_
-  ``NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
-  =============================================  =======  =======  ===========  ========  =========  ==========================
+  ====================================================================================  =======  =======  ===========  ========  =========  ==========================
+  Element                                                                               Type     Units    Constraints  Required  Default    Notes
+  ====================================================================================  =======  =======  ===========  ========  =========  ==========================
+  ``SystemIdentifier``                                                                  id                             Yes                  Unique identifier
+  ``DistributionSystemType/AirDistribution``                                            element                        Yes                  Type of distribution system
+  ``DistributionSystemType/AirDistribution/AirDistributionType``                        string            See [#]_     Yes                  Type of air distribution
+  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="supply"]``  element                        See [#]_             Supply duct leakage value
+  ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``  element                        See [#]_             Return duct leakage value
+  ``DistributionSystemType/AirDistribution/Ducts``                                      element                        No                   Supply/return ducts; multiple are allowed [#]_
+  ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
+  ``ConditionedFloorAreaServed``                                                        double   ft2      > 0          See [#]_             Conditioned floor area served
+  ====================================================================================  =======  =======  ===========  ========  =========  ==========================
   
   .. [#] AirDistributionType choices are "regular velocity", "gravity", or "fan coil" and are further restricted based on attached HVAC system type (e.g., only "regular velocity" or "gravity" for a furnace, only "fan coil" for a shared boiler, etc.).
   .. [#] Supply duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Return duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
   .. [#] If NumberofReturnRegisters not provided and return ducts are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
+  .. [#] ConditionedFloorAreaServed required only when duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
 
 Additional information is entered in each ``DuctLeakageMeasurement``.
 
@@ -2806,22 +2803,24 @@ Additional information is entered in each ``Ducts``.
          
          If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
 
-.. _hydronic_distribution:
+.. _hvac_distribution_hydronic:
 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-To define a hydronic distribution system, additional information is entered in ``HVACDistribution/DistributionSystemType/HydronicDistribution``.
+Each hydronic distribution system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  ============================  =======  =======  ===========  ========  =========  ====================================
-  Element                       Type     Units    Constraints  Required  Default    Notes
-  ============================  =======  =======  ===========  ========  =========  ====================================
-  ``HydronicDistributionType``  string            See [#]_     Yes                  Type of hydronic distribution system
-  ============================  =======  =======  ===========  ========  =========  ====================================
+  ========================================================================  =======  =======  ===========  ========  =========  ====================================
+  Element                                                                   Type     Units    Constraints  Required  Default    Notes
+  ========================================================================  =======  =======  ===========  ========  =========  ====================================
+  ``SystemIdentifier``                                                      id                             Yes                  Unique identifier
+  ``DistributionSystemType/HydronicDistribution``                           element                        Yes                  Type of distribution system
+  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``  string            See [#]_     Yes                  Type of hydronic distribution system
+  ========================================================================  =======  =======  ===========  ========  =========  ====================================
 
   .. [#] HydronicDistributionType choices are "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop".
 
-.. _dse_distribution:
+.. _hvac_distribution_dse:
 
 Distribution System Efficiency (DSE)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2830,13 +2829,14 @@ Distribution System Efficiency (DSE)
 
   A simplified DSE model is provided for flexibility, but it is **strongly** recommended to use one of the other detailed distribution system types for better accuracy.
   The DSE input is simply applied to heating/cooling energy use for every hour of the year.
-  Note that when specifying a DSE, its effect is reflected in the :ref:`workflow_outputs` but is **not** reflected in the raw EnergyPlus simulation outputs.
 
-To define a DSE, additional information is entered in ``HVACDistribution``.
+Each distribution system using DSE is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
   =============================================  =======  =======  ===========  ========  =========  ===================================================
   Element                                        Type     Units    Constraints  Required  Default    Notes
   =============================================  =======  =======  ===========  ========  =========  ===================================================
+  ``SystemIdentifier``                           id                             Yes                  Unique identifier
+  ``DistributionSystemType/Other``               string            DSE          Yes                  Type of distribution system
   ``AnnualHeatingDistributionSystemEfficiency``  double   frac     > 0, <= 1    Yes                  Seasonal distribution system efficiency for heating
   ``AnnualCoolingDistributionSystemEfficiency``  double   frac     > 0, <= 1    Yes                  Seasonal distribution system efficiency for cooling
   =============================================  =======  =======  ===========  ========  =========  ===================================================
@@ -2963,7 +2963,7 @@ If a central fan integrated supply (CFIS) system is specified, additional inform
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
-  .. [#] HVACDistribution type cannot be :ref:`hydronic_distribution`.
+  .. [#] HVACDistribution type cannot be :ref:`hvac_distribution_hydronic`.
   .. [#] Blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.
          This value will depend on whether the blower fan can operate at reduced airflow rates during ventilation only operation.
          It is used to determine how much conditioned air is recirculated through ducts during ventilation only operation, resulting in additional duct losses.
