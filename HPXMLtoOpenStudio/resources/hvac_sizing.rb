@@ -47,14 +47,10 @@ class HVACSizing
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
       apply_hvac_equipment_adjustments(runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
       apply_hvac_installation_quality(hvac_sizing_values, hvac_heating, hvac_cooling)
-      # apply_hvac_maximum_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      # apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
-      # apply_hvac_blower_fan_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling) # <= FIXME should this be before apply_hvac_fixed_capacities?
+      apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
 
@@ -1877,65 +1873,6 @@ class HVACSizing
         hvac_sizing_values.Heat_Airflow = 0.0
       end
     end
-  end
-
-  def self.apply_hvac_maximum_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-    '''
-    Maximum Allowed Airflow Rates
-    '''
-
-    return if !@hpxml_bldg.header.use_maximum_airflow_rates
-
-    # Maximum airflow rate allowed for the duct system
-    max_airflow_allowed = get_max_airflow(hvac_heating, hvac_cooling)
-    return if max_airflow_allowed.nil?
-
-    # Maximum airflow auto-sized for the upgraded building
-    max_airflow = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-
-    # Adjust heating or cooling system size for the upgraded buildings based on max allowed airflow rate
-    if max_airflow > max_airflow_allowed
-      if hvac_sizing_values.Cool_Airflow > hvac_sizing_values.Heat_Airflow
-        # Design cooling airflow rate exceeds max allowed, adjust cooling capacity
-        prev_airflow = hvac_sizing_values.Cool_Airflow
-        hvac_sizing_values.Cool_Airflow = max_airflow_allowed
-        hvac_sizing_values.Cool_Capacity *= prev_airflow / hvac_sizing_values.Cool_Airflow
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
-        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (@supply_air_temp - @heat_setpoint), hvac_sizing_values.Heat_Capacity)
-      else
-        # Design heating airflow rate exceeds max allowed, adjust heating capacity
-        prev_airflow = hvac_sizing_values.Heat_Airflow
-        hvac_sizing_values.Heat_Airflow = max_airflow_allowed
-        hvac_sizing_values.Heat_Capacity *= prev_airflow / hvac_sizing_values.Heat_Airflow
-        hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Capacity_Sens, (@cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
-      end
-    end
-  end
-
-  def self.apply_hvac_blower_fan_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
-    '''
-    Fan W/cfm adjustment
-    '''
-
-    return if ![HPXML::HVACTypeHeatPumpAirToAir,
-                HPXML::HVACTypeHeatPumpMiniSplit,
-                HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type # TODO: should this apply to any ducted system type?
-    return if !hvac_heating.adjust_fan_watts_per_cfm
-
-    max_airflow = get_max_airflow(hvac_heating, hvac_cooling)
-    return if max_airflow.nil?
-
-    v_baseline = max_airflow
-    v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-
-    p_int = v_baseline * hvac_heating.fan_watts_per_cfm
-    p_upgrade = p_int * (v_upgrade / v_baseline)**3
-    adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
-
-    hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
   end
 
   def self.apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
