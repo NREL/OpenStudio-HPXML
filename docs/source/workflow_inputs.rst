@@ -2843,48 +2843,42 @@ Each distribution system using DSE is entered as an ``/HPXML/Building/BuildingDe
 
   DSE values can be calculated using, e.g., `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_.
 
-HPXML Ventilation Fan
-*********************
+HPXML Mechanical Ventilation Fans
+*********************************
 
-Each ventilation fan system is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+The following mechanical ventilation fan types that provide ventilation to the whole dwelling unit can be modeled:
 
-  =============================================================================================================================================  ========  =======  ===========  ========  =========  ========================
-  Element                                                                                                                                        Type      Units    Constraints  Required  Default    Notes
-  =============================================================================================================================================  ========  =======  ===========  ========  =========  ========================
-  ``SystemIdentifier``                                                                                                                           id                              Yes                  Unique identifier
-  ``UsedForWholeBuildingVentilation`` or ``UsedForLocalVentilation`` or ``UsedForSeasonalCoolingLoadReduction`` or ``UsedForGarageVentilation``  boolean            See [#]_     See [#]_             Ventilation fan use case
-  =============================================================================================================================================  ========  =======  ===========  ========  =========  ========================
-  
-  .. [#] One (and only one) of the ``UsedFor...`` elements must have a value of true.
-         If UsedForWholeBuildingVentilation is true, see :ref:`wholeventilation`.
-         If UsedForLocalVentilation is true, see :ref:`localventilation`.
-         If UsedForSeasonalCoolingLoadReduction is true, see :ref:`wholehousefan`.
-         If UsedForGarageVentilation is true, garage ventilation is currently ignored.
-  .. [#] Only the ``UsedFor...`` element that is true is required.
+- :ref:`vent_fan_exhaust_only`
+- :ref:`vent_fan_supply_only`
+- :ref:`vent_fan_balanced`
+- :ref:`vent_fan_hrv`
+- :ref:`vent_fan_erv`
+- :ref:`vent_fan_cfis`
 
-.. _wholeventilation:
+.. _vent_fan_exhaust_only:
 
-Whole Ventilation Fan
-~~~~~~~~~~~~~~~~~~~~~
+Exhaust Only
+~~~~~~~~~~~~
 
-Each mechanical ventilation system that provides ventilation to the whole dwelling unit is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true]``.
-If not entered, the simulation will not include mechanical ventilation.
+Each exhaust only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
-  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
-  Element                                                                                        Type      Units    Constraints  Required  Default    Notes
-  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
-  ``IsSharedSystem``                                                                             boolean            See [#]_     No        false      Whether it serves multiple dwelling units
-  ``FanType``                                                                                    string             See [#]_     Yes                  Type of ventilation system
-  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate [#]_
-  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24  See [#]_  See [#]_   Hours per day of operation
-  ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
-  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  =============================================================================================  ========  =======  ============  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints   Required  Default    Notes
+  =============================================================================================  ========  =======  ============  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                               Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true          Yes                  Ventilation fan use case [#]_
+  ``IsSharedSystem``                                                                             boolean                          No        false      Whether it serves multiple dwelling units [#]_
+  ``FanType``                                                                                    string             exhaust only  Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0          No        See [#]_   Flow rate
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24   See [#]_  24         Hours per day of operation
+  ``FanPower``                                                                                   double    W        >= 0          No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ============  ========  =========  =========================================
 
-  .. [#] For central fan integrated supply systems, IsSharedSystem must be false.
-  .. [#] FanType choices are "energy recovery ventilator", "heat recovery ventilator", "exhaust only", "supply only", "balanced", or "central fan integrated supply".
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
+  .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
   .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
          
-         Qfan = Qtot - Φ*(Qinf * Aext)
+         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
          
          where
          
@@ -2896,73 +2890,207 @@ If not entered, the simulation will not include mechanical ventilation.
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
          
-         Φ = 1 for balanced ventilation systems, and Qinf/Qtot otherwise
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
+  .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+.. _vent_fan_supply_only:
+
+Supply Only
+~~~~~~~~~~~
+
+Each supply only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints  Required  Default    Notes
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                              Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true         Yes                  Ventilation fan use case [#]_
+  ``IsSharedSystem``                                                                             boolean                         No        false      Whether it serves multiple dwelling units [#]_
+  ``FanType``                                                                                    string             supply only  Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24  See [#]_  24         Hours per day of operation
+  ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
+  .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
          
-  .. [#] For a central fan integrated supply system, the flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
-  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a CFIS system, in which case it is not allowed.
-  .. [#] If HoursInOperation not provided, defaults to 24 (i.e., running continuously) for all system types other than central fan integrated supply (CFIS), and 8.0 (i.e., running intermittently) for CFIS systems.
-         For a CFIS system, the HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
-         For a CFIS system with a supplemental fan, the supplemental fan's runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
-  .. [#] If FanPower not provided, defaults based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
          
-         \- **energy recovery ventilator, heat recovery ventilator, or shared system**: 1.0 W/cfm
+         where
          
-         \- **balanced**: 0.7 W/cfm
+         Qfan = required mechanical ventilation rate (cfm)
          
-         \- **central fan integrated supply**: 0.5 W/cfm
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
          
-         \- **exhaust only" or "supply only**: 0.35 W/cfm
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+  .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
+  .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-**Exhaust/Supply Only**
+.. _vent_fan_balanced:
 
-If a supply only or exhaust only system is specified, no additional information is entered.
+Balanced
+~~~~~~~~
 
-**Balanced**
+Each balanced (supply and exhaust) fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
-If a balanced system is specified, no additional information is entered.
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints  Required  Default    Notes
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                              Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true         Yes                  Ventilation fan use case [#]_
+  ``IsSharedSystem``                                                                             boolean                         No        false      Whether it serves multiple dwelling units [#]_
+  ``FanType``                                                                                    string             balanced     Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0         No        See [#]_   Flow rate
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24  No        24         Hours per day of operation
+  ``FanPower``                                                                                   double    W        >= 0         No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ===========  ========  =========  =========================================
 
-**Heat Recovery Ventilator**
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
+  .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         
+         Qfan = Qtot - (Qinf * Aext)
+         
+         where
+         
+         Qfan = required mechanical ventilation rate (cfm)
+         
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+  .. [#] If FanPower not provided, defaults to 0.7 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-If a heat recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
+.. _vent_fan_hrv:
 
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
-  Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
-  ``AdjustedSensibleRecoveryEfficiency`` or ``SensibleRecoveryEfficiency``  double  frac   > 0, <= 1    Yes                (Adjusted) Sensible recovery efficiency [#]_
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+Heat Recovery Ventilator (HRV)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Each heat recovery ventilator (HRV) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+
+  =============================================================================================  ========  =======  ========================  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints               Required  Default    Notes
+  =============================================================================================  ========  =======  ========================  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                                           Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true                      Yes                  Ventilation fan use case [#]_
+  ``IsSharedSystem``                                                                             boolean                                      No        false      Whether it serves multiple dwelling units [#]_
+  ``FanType``                                                                                    string             heat recovery ventilator  Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                      No        See [#]_   Flow rate
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24               No        24         Hours per day of operation
+  ``AdjustedSensibleRecoveryEfficiency`` or ``SensibleRecoveryEfficiency``                       double    frac     > 0, <= 1                 Yes                  (Adjusted) Sensible recovery efficiency [#]_
+  ``FanPower``                                                                                   double    W        >= 0                      No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ========================  ========  =========  =========================================
+
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
+  .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         
+         Qfan = Qtot - (Qinf * Aext)
+         
+         where
+         
+         Qfan = required mechanical ventilation rate (cfm)
+         
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
+  .. [#] If FanPower not provided, defaults to 1.0 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-**Energy Recovery Ventilator**
+.. _vent_fan_erv:
 
-If an energy recovery ventilator system is specified, additional information is entered in ``VentilationFan``.
+Energy Recovery Ventilator (ERV)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
-  Element                                                                   Type    Units  Constraints  Required  Default  Notes
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
-  ``AdjustedTotalRecoveryEfficiency`` or ``TotalRecoveryEfficiency``        double  frac   > 0, <= 1    Yes                (Adjusted) Total recovery efficiency [#]_
-  ``AdjustedSensibleRecoveryEfficiency`` or ``SensibleRecoveryEfficiency``  double  frac   > 0, <= 1    Yes                (Adjusted) Sensible recovery efficiency [#]_
-  ========================================================================  ======  =====  ===========  ========  =======  =======================================
+Each energy recovery ventilator (ERV) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
+  =============================================================================================  ========  =======  ==========================  ========  =========  =========================================
+  Element                                                                                        Type      Units    Constraints                 Required  Default    Notes
+  =============================================================================================  ========  =======  ==========================  ========  =========  =========================================
+  ``SystemIdentifier``                                                                           id                                             Yes                  Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true                        Yes                  Ventilation fan use case [#]_
+  ``IsSharedSystem``                                                                             boolean                                        No        false      Whether it serves multiple dwelling units [#]_
+  ``FanType``                                                                                    string             energy recovery ventilator  Yes                  Type of ventilation system
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                        No        See [#]_   Flow rate
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24                 No        24         Hours per day of operation
+  ``AdjustedTotalRecoveryEfficiency`` or ``TotalRecoveryEfficiency``                             double    frac     > 0, <= 1                   Yes                  (Adjusted) Total recovery efficiency [#]_
+  ``AdjustedSensibleRecoveryEfficiency`` or ``SensibleRecoveryEfficiency``                       double    frac     > 0, <= 1                   Yes                  (Adjusted) Sensible recovery efficiency [#]_
+  ``FanPower``                                                                                   double    W        >= 0                        No        See [#]_   Fan power
+  =============================================================================================  ========  =======  ==========================  ========  =========  =========================================
+
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
+  .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         
+         Qfan = Qtot - (Qinf * Aext)
+         
+         where
+         
+         Qfan = required mechanical ventilation rate (cfm)
+         
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
   .. [#] Providing AdjustedTotalRecoveryEfficiency (ATRE) is preferable to TotalRecoveryEfficiency (TRE).
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
+  .. [#] If FanPower not provided, defaults to 1.0 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-**Central Fan Integrated Supply**
+.. _vent_fan_cfis:
 
-If a central fan integrated supply (CFIS) system is specified, additional information is entered in ``VentilationFan``.
+Central Fan Integrated Supply (CFIS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ================================================  ======  =====  ===========  ========  ===============  ==================================
-  Element                                           Type    Units  Constraints  Required  Default          Notes
-  ================================================  ======  =====  ===========  ========  ===============  ==================================
-  ``CFISControls/AdditionalRuntimeOperatingMode``   string         See [#]_     No        air handler fan  How additional ventilation is provided (beyond when the HVAC system is running)
-  ``CFISControls/SupplementalFan``                  idref          See [#]_     See [#]_                   The supplemental fan providing additional ventilation
-  ``AttachedToHVACDistributionSystem``              idref          See [#]_     Yes                        ID of attached distribution system
-  ``extension/VentilationOnlyModeAirflowFraction``  double         >= 0, <= 1   No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
-  ================================================  ======  =====  ===========  ========  ===============  ==================================
+Each central fan integrated supply (CFIS) system is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
+  =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
+  Element                                                                                        Type      Units    Constraints                    Required  Default          Notes
+  =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
+  ``SystemIdentifier``                                                                           id                                                Yes                        Unique identifier
+  ``UsedForWholeBuildingVentilation``                                                            boolean            true                           Yes                        Ventilation fan use case [#]_
+  ``FanType``                                                                                    string             central fan integrated supply  Yes                        Type of ventilation system
+  ``CFISControls/AdditionalRuntimeOperatingMode``                                                string             See [#]_                       No        air handler fan  How additional ventilation is provided (beyond HVAC system operation)
+  ``CFISControls/SupplementalFan``                                                               idref              See [#]_                       See [#]_                   The supplemental fan providing additional ventilation
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                           No        See [#]_         Flow rate [#]_
+  ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24                    false     8                Hours per day of operation
+  ``FanPower``                                                                                   double    W        >= 0                           No        See [#]_         Fan power
+  ``AttachedToHVACDistributionSystem``                                                           idref              See [#]_                       Yes                        ID of attached distribution system
+  ``extension/VentilationOnlyModeAirflowFraction``                                               double             >= 0, <= 1                     No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
+  =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
+
+  .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+         
+         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         
+         where
+         
+         Qfan = required mechanical ventilation rate (cfm)
+         
+         Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf = infiltration rate (cfm)
+         
+         Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+  .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
+  .. [#] The HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
+  .. [#] If FanPower not provided, defaults to 0.5 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] HVACDistribution type cannot be :ref:`hvac_distribution_hydronic`.
   .. [#] Blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.
          This value will depend on whether the blower fan can operate at reduced airflow rates during ventilation only operation.
@@ -2974,7 +3102,10 @@ If a central fan integrated supply (CFIS) system is specified, additional inform
   CFIS systems are automated controllers that use the HVAC system's air handler fan to draw in outdoor air to meet an hourly ventilation target.
   CFIS systems are modeled as assuming they A) maximize the use of normal heating/cooling runtime operation to meet the hourly ventilation target, B) block the flow of outdoor air when the hourly ventilation target has been met, and C) provide additional runtime operation (via air handler fan or supplemental fan) to meet the remainder of the hourly ventilation target when space heating/cooling runtime alone is not sufficient.
 
-**Shared System**
+.. _vent_fan_shared:
+
+Shared System
+~~~~~~~~~~~~~
 
 If the specified system is a shared system (i.e., serving multiple dwelling units), additional information is entered in ``VentilationFan``.
 
@@ -3017,17 +3148,16 @@ If pre-cooling is specified for the shared system, additional information is ent
 
   .. [#] Fuel only choice is "electricity".
 
-.. _localventilation:
+HPXML Local Ventilation Fans
+****************************
 
-Local Ventilation Fan
-~~~~~~~~~~~~~~~~~~~~~
-
-Each kitchen range fan or bathroom fan that provides local ventilation is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation=true]``.
-If not entered, the simulation will not include kitchen/bathroom fans.
+Each fan that provides local ventilation (e.g., kitchen range fan or bathroom fan) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  =======  =======  ===========  ========  ========  =============================
   Element                                                                                        Type     Units    Constraints  Required  Default   Notes
   =============================================================================================  =======  =======  ===========  ========  ========  =============================
+  ``SystemIdentifier``                                                                           id                             Yes                 Unique identifier
+  ``UsedForLocalVentilation``                                                                    boolean           true         Yes                 Ventilation fan use case [#]_
   ``Count``                                                                                      integer           >= 0         No        See [#]_  Number of identical fans
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double   cfm      >= 0         No        See [#]_  Flow rate to outside [#]_
   ``HoursInOperation``                                                                           double   hrs/day  >= 0, <= 24  No        See [#]_  Hours per day of operation
@@ -3036,6 +3166,7 @@ If not entered, the simulation will not include kitchen/bathroom fans.
   ``extension/StartHour``                                                                        integer           >= 0, <= 23  No        See [#]_  Daily start hour of operation
   =============================================================================================  =======  =======  ===========  ========  ========  =============================
 
+  .. [#] All other UsedFor... elements (i.e., ``UsedForWholeBuildingVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] If Count not provided, defaults to 1 for kitchen fans and NumberofBathrooms for bath fans based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If flow rate not provided, defaults to 100 cfm for kitchen fans and 50 cfm for bath fans based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If the kitchen range fan is a recirculating fan, the flow rate should be described as zero.
@@ -3044,21 +3175,21 @@ If not entered, the simulation will not include kitchen/bathroom fans.
   .. [#] If FanPower not provided, defaults to 0.3 W/cfm based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If StartHour not provided, defaults to 18 (6pm) for kitchen fans and 7 (7am) for bath fans  based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
-.. _wholehousefan:
+HPXML Whole House Fans
+**********************
 
-Whole House Fan
-~~~~~~~~~~~~~~~
-
-Each whole house fan that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction=true]``.
-If not entered, the simulation will not include whole house fans.
+Each whole house fan that provides cooling load reduction is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
   Element                                                                                        Type     Units    Constraints  Required  Default                 Notes
   =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
-  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double   cfm      >= 0         No        ConditionedFloorArea*2  Flow rate
+  ``SystemIdentifier``                                                                           id                             Yes                               Unique identifier
+  ``UsedForSeasonalCoolingLoadReduction``                                                        boolean           true         Yes                               Ventilation fan use case [#]_
+  ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double   cfm      >= 0         No        2*ConditionedFloorArea  Flow rate
   ``FanPower``                                                                                   double   W        >= 0         No        See [#]_                Fan power
   =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
 
+  .. [#] All other UsedFor... elements (i.e., ``UsedForWholeBuildingVentilation``, ``UsedForLocalVentilation``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] If FanPower not provided, defaults to 0.1 W/cfm.
 
 .. note::
