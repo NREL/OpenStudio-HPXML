@@ -1698,7 +1698,7 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
 Stove
 ~~~~~
 
-Each stove heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ====================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                               Type     Units   Constraints      Required  Default         Notes
@@ -1750,7 +1750,8 @@ Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
 Fireplace
 ~~~~~~~~~
 
-Each fireplace heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each fireplace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Instead of modeling fireplaces as serving a fraction of the heating load, fireplaces can be assigned a therm/year usage using :ref:`fuel_loads`.
 
   ========================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                                   Type     Units   Constraints      Required  Default         Notes
@@ -2620,7 +2621,13 @@ If a heating and/or cooling season is defined, additional information is entered
   ===================  ========  =====  ===========  ========  =======  ===========
 
 Thermostat setpoints are additionally entered using either simple inputs or hourly inputs.
+
+- :ref:`hvac_control_simple`
+- :ref:`hvac_control_hourly`
+
 Alternatively, setpoints can be defined using :ref:`detailedschedules`.
+
+.. _hvac_control_simple:
 
 Simple Inputs
 ~~~~~~~~~~~~~
@@ -2660,6 +2667,8 @@ If there is a cooling temperature setup, additional information is entered in ``
   =====================================  ========  ========  ===========  ========  =========  =========================================
 
   .. [#] TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
+
+.. _hvac_control_hourly:
 
 Hourly Inputs
 ~~~~~~~~~~~~~~~
@@ -3619,33 +3628,29 @@ Water fixture hot water use is calculated per the Energy Rating Rated Home in `A
 HPXML Solar Thermal
 *******************
 
-A single solar hot water system can be entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
-If not entered, the simulation will not include solar hot water.
+A single solar hot water system can be described with either simple or detailed inputs.
 
-  ====================  =======  =====  ===========  ========  ========  ============================
-  Element               Type     Units  Constraints  Required  Default   Notes
-  ====================  =======  =====  ===========  ========  ========  ============================
-  ``SystemIdentifier``  id                           Yes                 Unique identifier
-  ``SystemType``        string          See [#]_     Yes                 Type of solar thermal system
-  ====================  =======  =====  ===========  ========  ========  ============================
+- :ref:`solar_thermal_simple`
+- :ref:`solar_thermal_detailed`
 
-  .. [#] SystemType only choice is "hot water".
-
-Solar hot water systems can be described with either simple or detailed inputs.
 It is recommended to use detailed inputs and allow EnergyPlus to calculate the solar contribution to the hot water load;
 the simple inputs are provided if equivalent calculations are performed in another software tool.
+
+.. _solar_thermal_simple:
 
 Simple Inputs
 ~~~~~~~~~~~~~
 
-To define a simple solar hot water system, additional information is entered in ``SolarThermalSystem``.
+A simple solar hot water system is entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
 
-  =================  =======  =====  ===========  ========  ========  ======================
-  Element            Type     Units  Constraints  Required  Default   Notes
-  =================  =======  =====  ===========  ========  ========  ======================
-  ``SolarFraction``  double   frac   > 0, <= 1    Yes                 Solar fraction [#]_
-  ``ConnectedTo``    idref           See [#]_     No [#]_   <none>    Connected water heater
-  =================  =======  =====  ===========  ========  ========  ======================
+  ====================  =======  =====  ===========  ========  ========  ======================
+  Element               Type     Units  Constraints  Required  Default   Notes
+  ====================  =======  =====  ===========  ========  ========  ======================
+  ``SystemIdentifier``  id                           Yes                 Unique identifier
+  ``SystemType``        string          hot water    Yes                 Type of solar thermal system
+  ``SolarFraction``     double   frac   > 0, <= 1    Yes                 Solar fraction [#]_
+  ``ConnectedTo``       idref           See [#]_     No [#]_   <none>    Connected water heater
+  ====================  =======  =====  ===========  ========  ========  ======================
   
   .. [#] Portion of total conventional hot water heating load (delivered energy plus tank standby losses).
          Can be obtained from `Directory of SRCC OG-300 Solar Water Heating System Ratings <https://solar-rating.org/programs/og-300-program/>`_ or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
@@ -3655,16 +3660,20 @@ To define a simple solar hot water system, additional information is entered in 
 
 .. warning::
 
-  The solar fraction will reduce the hot water load equally for every EnergyPlus timestep (even during nights and cloudy events).
+  The solar fraction will reduce the hot water load equally for every EnergyPlus timestep.
+
+.. _solar_thermal_detailed:
 
 Detailed Inputs
 ~~~~~~~~~~~~~~~
 
-To define a detailed solar hot water system, additional information is entered in ``SolarThermalSystem``.
+A detailed solar hot water system is entered as a ``/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem``.
 
   ================================================  =================  ================  ========================  ========  ========  ==============================
   Element                                           Type               Units             Constraints               Required  Default   Notes
   ================================================  =================  ================  ========================  ========  ========  ==============================
+  ``SystemIdentifier``                              id                                                             Yes                 Unique identifier
+  ``SystemType``                                    string                               hot water                 Yes                 Type of solar thermal system
   ``CollectorArea``                                 double             ft2               > 0                       Yes                 Area
   ``CollectorLoopType``                             string                               See [#]_                  Yes                 Loop type
   ``CollectorType``                                 string                               See [#]_                  Yes                 System type
@@ -4357,6 +4366,8 @@ HPXML Misc Loads
 
 Miscellaneous loads are entered in ``/HPXML/Building/BuildingDetails/MiscLoads``.
 
+.. _plug_loads:
+
 HPXML Plug Loads
 ****************
 
@@ -4444,6 +4455,8 @@ If not entered, the simulation will not include that type of plug load.
          \- **well pump**: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154" (based on Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
          \- **electric vehicle charging**: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+
+.. _fuel_loads:
 
 HPXML Fuel Loads
 ****************
