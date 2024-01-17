@@ -3103,6 +3103,12 @@ class HPXMLDefaults
                  HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
           htg_sys.heating_airflow_cfm = Float(hvac_sizing_values.Heat_Airflow.round)
           htg_sys.heating_airflow_cfm_isdefaulted = hvac_sizing_values.Heat_Airflow_isdefaulted
+
+          # Blower fan adjustment
+          if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
+            htg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
+            htg_sys.fan_watts_per_cfm_isdefaulted = true
+          end
         end
 
         # Heating GSHP loop
@@ -3128,12 +3134,6 @@ class HPXMLDefaults
               geothermal_loop.bore_config_isdefaulted = true
             end
           end
-        end
-
-        # Blower fan adjustment
-        if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
-          htg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
-          htg_sys.fan_watts_per_cfm_isdefaulted = true
         end
       end
 
@@ -3170,6 +3170,12 @@ class HPXMLDefaults
       # Cooling airflow
       clg_sys.cooling_airflow_cfm = Float(hvac_sizing_values.Cool_Airflow.round)
       clg_sys.cooling_airflow_cfm_isdefaulted = hvac_sizing_values.Cool_Airflow_isdefaulted
+
+      # Blower fan adjustment
+      if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
+        clg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
+        clg_sys.fan_watts_per_cfm_isdefaulted = true
+      end
     end
   end
 

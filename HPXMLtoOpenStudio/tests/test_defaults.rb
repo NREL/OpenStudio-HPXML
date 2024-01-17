@@ -1171,7 +1171,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 780, -0.11, -0.22, 12345, 12.0, 40.0)
 
+    # Test defaults - ductwork restriction
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 400, -0.11, -0.22, 12345, 12.0, 40.0)
+
+    # Test defaults - ductwork restriction 2
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.cooling_systems[0].cooling_airflow_cfm = 100
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.025, 78, -0.11, -0.22, 63373, 12.0, 40.0)
+
+    # Test defaults - ductwork restriction 3
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.008, 78, -0.11, -0.22, 188808, 12.0, 40.0)
+
     # Test defaults
+    hpxml_bldg.header.existing_ductwork_restriction = nil
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
     hpxml_bldg.cooling_systems[0].compressor_type = nil
     hpxml_bldg.cooling_systems[0].fan_watts_per_cfm = nil
@@ -1299,7 +1320,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 780, -0.22, 12345, true, 999)
 
+    # Test defaults - ductwork restriction
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 213, -0.22, 12345, true, 999)
+
+    # Test defaults - ductwork restriction 2
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.heating_systems[0].heating_airflow_cfm = 100
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 18.533, 4125, -0.22, 239520, true, 999)
+
+    # Test defaults - ductwork restriction 3
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.heating_systems[0].heating_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 18.533, 4125, -0.22, 239520, true, 999)
+
     # Test defaults
+    hpxml_bldg.header.existing_ductwork_restriction = nil
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = nil
     hpxml_bldg.heating_systems[0].heating_airflow_cfm = nil
     hpxml_bldg.heating_systems[0].airflow_defect_ratio = nil
@@ -1519,6 +1561,29 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 780, 936, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, nil, nil, 40.0)
+
+    # Test defaults - ductwork restriction
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 577, 400, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, nil, nil, 40.0)
+
+    # Test defaults - ductwork restriction 2
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.heat_pumps[0].heating_airflow_cfm = 100
+    hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = 120
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 43.604, 94, 4691, -0.11, -0.22, 144618, 144618, 60890, 34567, 14.0, 8.0, nil, nil, 40.0)
+
+    # Test defaults - ductwork restriction 3
+    hpxml_bldg.header.existing_ductwork_restriction = true
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 50.545, 9450, 94, -0.11, -0.22, 384098, 384098, nil, 34567, 14.0, 8.0, 0.5282, 5.0, 40.0)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
