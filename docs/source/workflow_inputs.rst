@@ -923,7 +923,7 @@ the floors above that foundation do not have exposure to the wind.
 HPXML Roofs
 ***********
 
-Each pitched or flat roof surface that is exposed to ambient conditions is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof``.
+Each pitched or flat roof surface that is exposed to ambient conditions is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof``.
 
 For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``Floor`` and not a ``Roof``.
 
@@ -981,7 +981,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
 HPXML Rim Joists
 ****************
 
-Each rim joist surface (i.e., the perimeter of floor joists typically found between stories of a building or on top of a foundation wall) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist``.
+Each rim joist surface (i.e., the perimeter of floor joists typically found between stories of a building or on top of a foundation wall) is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist``.
 
   ======================================  =================  ================  ========================  ========  ===========  ==============================
   Element                                 Type               Units             Constraints               Required  Default      Notes
@@ -1024,7 +1024,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
 HPXML Walls
 ***********
 
-Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
+Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall``.
 
   ======================================  =================  ================  ========================  =============  ===========  ====================================
   Element                                 Type               Units             Constraints               Required       Default      Notes
@@ -1076,7 +1076,7 @@ Each wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/W
 HPXML Foundation Walls
 **********************
 
-Each foundation wall surface is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
+Each foundation wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall``.
 Any wall surface in contact with the ground is considered a foundation wall.
 
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
@@ -1135,7 +1135,7 @@ If insulation layers are provided, additional information is entered in each ``F
 HPXML Floors
 ************
 
-Each floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor``.
+Each floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor``.
 
   ======================================  ========  ============  ===========  ========  ========  ============================
   Element                                 Type      Units         Constraints  Required  Default   Notes
@@ -1217,7 +1217,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
 HPXML Windows
 *************
 
-Each window or glass door area is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
+Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
 
   ============================================  =================  ================  ========================  ========  =========  =============================================================
   Element                                       Type               Units             Constraints               Required  Default    Notes
@@ -1329,7 +1329,7 @@ If overhangs are specified, additional information is entered in ``Overhangs``.
 HPXML Skylights
 ***************
 
-Each skylight is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
+Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
 
   ============================================  =================  ================  ========================  ========  =========  =============================================================
   Element                                       Type               Units             Constraints               Required  Default    Notes
@@ -1411,7 +1411,7 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 HPXML Doors
 ***********
 
-Each opaque door is entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
+Each opaque door is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Doors/Door``.
 
   ============================================  =================  ============  ========================  ========  =========  ==============================
   Element                                       Type               Units         Constraints               Required  Default    Notes
@@ -1487,7 +1487,7 @@ The following heating system types can be modeled:
 Electric Resistance
 ~~~~~~~~~~~~~~~~~~~
 
-Each electric resistance heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each electric resistance heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ==================================================  =======  ======  ==================  ========  ==============  ==========
   Element                                             Type     Units   Constraints         Required  Default         Notes
@@ -1510,7 +1510,7 @@ Each electric resistance heating system is entered as an ``/HPXML/Building/Build
 Furnace
 ~~~~~~~
 
-Each central furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
   Element                                                 Type     Units      Constraints      Required  Default         Notes
@@ -1552,7 +1552,7 @@ Each central furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/
 Wall Furnace
 ~~~~~~~~~~~~
 
-Each wall furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ==========================================================  =======  ======  ===============  ========  ==============  ================
   Element                                                     Type     Units   Constraints      Required  Default         Notes
@@ -1579,7 +1579,7 @@ Each wall furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVA
 Floor Furnace
 ~~~~~~~~~~~~~
 
-Each floor furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ===========================================================  =======  ======  ===============  ========  ==============  ================
   Element                                                      Type     Units   Constraints      Required  Default         Notes
@@ -1606,7 +1606,7 @@ Each floor furnace is entered as an ``/HPXML/Building/BuildingDetails/Systems/HV
 Boiler (In-Unit)
 ~~~~~~~~~~~~~~~~
 
-Each in-unit boiler is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
   Element                                                Type     Units      Constraints      Required  Default         Notes
@@ -1649,7 +1649,7 @@ Each in-unit boiler is entered as an ``/HPXML/Building/BuildingDetails/Systems/H
 Boiler (Shared)
 ~~~~~~~~~~~~~~~
 
-Each shared boiler (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ============================================================  =======  ===========  ===============  ========  ==============  =========================================
   Element                                                       Type     Units        Constraints      Required  Default         Notes
@@ -1698,7 +1698,7 @@ Each shared boiler (serving multiple dwelling units) is entered as an ``/HPXML/B
 Stove
 ~~~~~
 
-Each stove heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each stove heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ====================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                               Type     Units   Constraints      Required  Default         Notes
@@ -1725,7 +1725,7 @@ Each stove heating system is entered as an ``/HPXML/Building/BuildingDetails/Sys
 Space Heater
 ~~~~~~~~~~~~
 
-Each space heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ==================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                             Type     Units   Constraints      Required  Default         Notes
@@ -1750,7 +1750,7 @@ Each space heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVA
 Fireplace
 ~~~~~~~~~
 
-Each fireplace heating system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
+Each fireplace heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
   ========================================================  =======  ======  ===============  ========  ==============  ===================
   Element                                                   Type     Units   Constraints      Required  Default         Notes
@@ -1792,7 +1792,7 @@ The following cooling system types can be modeled:
 Central Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each central air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
   Element                                                           Type     Units        Constraints              Required  Default         Notes
@@ -1842,7 +1842,7 @@ Each central air conditioner is entered as an ``/HPXML/Building/BuildingDetails/
 Room Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~
 
-Each room air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==============================================================  ======  ======  ====================  ========  ==============  ============================================
   Element                                                         Type    Units   Constraints           Required  Default         Notes
@@ -1881,7 +1881,7 @@ Note that a room air conditioner with reverse cycle heating should be entered as
 Packaged Terminal Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each packaged terminal air conditioner (PTAC) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==============================================================  ======  ======  =================================  ========  ==============  ==========================================
   Element                                                         Type    Units   Constraints                        Required  Default         Notes
@@ -1920,7 +1920,7 @@ Note that a packaged terminal heat pump should be entered as a heat pump; see :r
 Evaporative Cooler
 ~~~~~~~~~~~~~~~~~~
 
-Each evaporative cooler is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each evaporative cooler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ==========================  ========  ======  ==================  ========  ==============  ==================================
   Element                     Type      Units   Constraints         Required  Default         Notes
@@ -1942,7 +1942,7 @@ Each evaporative cooler is entered as an ``/HPXML/Building/BuildingDetails/Syste
 Mini-Split Air Conditioner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each mini-split air conditioner is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
   Element                                                           Type      Units   Constraints      Required  Default         Notes
@@ -1990,7 +1990,7 @@ Each mini-split air conditioner is entered as an ``/HPXML/Building/BuildingDetai
 Chiller (Shared)
 ~~~~~~~~~~~~~~~~
 
-Each shared chiller (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each shared chiller (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   =================================================  ========  ======  ===============  ========  =========  =========================================
   Element                                            Type      Units   Constraints      Required  Default    Notes
@@ -2022,7 +2022,7 @@ Each shared chiller (serving multiple dwelling units) is entered as an ``/HPXML/
 Cooling Tower (Shared)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Each shared cooling tower (serving multiple dwelling units) is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
+Each shared cooling tower (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
   =============================  ========  ======  ===============  ========  =========  =========================================
   Element                        Type      Units   Constraints      Required  Default    Notes
@@ -2064,7 +2064,7 @@ The following heat pump types can be modeled:
 Air-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
-Each air-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
   Element                                                           Type     Units     Constraints               Required  Default         Notes
@@ -2141,7 +2141,7 @@ Each air-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Sys
 Mini-Split Heat Pump
 ~~~~~~~~~~~~~~~~~~~~
 
-Each mini-split heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each mini-split heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 Each ``HeatPump`` is expected to represent a single outdoor unit, whether connected to one indoor head or multiple indoor heads.
 
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
@@ -2218,7 +2218,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
 Packaged Terminal Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each packaged terminal heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
   Element                                                          Type      Units     Constraints                  Required  Default         Notes
@@ -2258,7 +2258,7 @@ Each packaged terminal heat pump is entered as an ``/HPXML/Building/BuildingDeta
 Room Air Conditioner w/ Reverse Cycle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each room air conditioner with reverse cycle is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
   Element                                                          Type      Units     Constraints                              Required  Default         Notes
@@ -2298,7 +2298,7 @@ Each room air conditioner with reverse cycle is entered as an ``/HPXML/Building/
 Ground-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each ground-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   Element                                          Type      Units   Constraints      Required  Default         Notes
@@ -2364,7 +2364,7 @@ Each ground-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/
 Water-Loop-to-Air Heat Pump
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each water-loop-to-air heat pump is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
+Each water-loop-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump``.
 
   ===============================================  ========  ======  =================  ========  ==============  ==============================================
   Element                                          Type      Units   Constraints        Required  Default         Notes
@@ -2521,7 +2521,7 @@ Note that when detailed cooling performance data is provided, some other inputs 
 HPXML Geothermal Loops
 **********************
 
-Each geothermal loop is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
+Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop``.
 
   ========================================  ================  ===========  ==================  ========  ==============  ===============================================
   Element                                   Type              Units        Constraints         Required  Default         Notes
@@ -2698,7 +2698,7 @@ The following distribution system types can be modeled:
 Air Distribution
 ~~~~~~~~~~~~~~~~
 
-Each air distribution system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
+Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
   ====================================================================================  =======  =======  ===========  ========  =========  ==========================
   Element                                                                               Type     Units    Constraints  Required  Default    Notes
@@ -2808,7 +2808,7 @@ Additional information is entered in each ``Ducts``.
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-Each hydronic distribution system is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
+Each hydronic distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
   ========================================================================  =======  =======  ===========  ========  =========  ====================================
   Element                                                                   Type     Units    Constraints  Required  Default    Notes
@@ -2830,7 +2830,7 @@ Distribution System Efficiency (DSE)
   A simplified DSE model is provided for flexibility, but it is **strongly** recommended to use one of the other detailed distribution system types for better accuracy.
   The DSE input is simply applied to heating/cooling energy use for every hour of the year.
 
-Each distribution system using DSE is entered as an ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
+Each distribution system using DSE is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
   =============================================  =======  =======  ===========  ========  =========  ===================================================
   Element                                        Type     Units    Constraints  Required  Default    Notes
@@ -2860,7 +2860,7 @@ The following mechanical ventilation fan types that provide ventilation to the w
 Exhaust Only
 ~~~~~~~~~~~~
 
-Each exhaust only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each exhaust only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  ============  ========  =========  =========================================
   Element                                                                                        Type      Units    Constraints   Required  Default    Notes
@@ -2898,7 +2898,7 @@ Each exhaust only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems
 Supply Only
 ~~~~~~~~~~~
 
-Each supply only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each supply only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  ===========  ========  =========  =========================================
   Element                                                                                        Type      Units    Constraints  Required  Default    Notes
@@ -2936,7 +2936,7 @@ Each supply only fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/
 Balanced
 ~~~~~~~~
 
-Each balanced (supply and exhaust) fan is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each balanced (supply and exhaust) fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  ===========  ========  =========  =========================================
   Element                                                                                        Type      Units    Constraints  Required  Default    Notes
@@ -2973,7 +2973,7 @@ Each balanced (supply and exhaust) fan is entered as an ``/HPXML/Building/Buildi
 Heat Recovery Ventilator (HRV)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each heat recovery ventilator (HRV) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each heat recovery ventilator (HRV) is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  ========================  ========  =========  =========================================
   Element                                                                                        Type      Units    Constraints               Required  Default    Notes
@@ -3012,7 +3012,7 @@ Each heat recovery ventilator (HRV) is entered as an ``/HPXML/Building/BuildingD
 Energy Recovery Ventilator (ERV)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each energy recovery ventilator (ERV) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each energy recovery ventilator (ERV) is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  ==========================  ========  =========  =========================================
   Element                                                                                        Type      Units    Constraints                 Required  Default    Notes
@@ -3053,7 +3053,7 @@ Each energy recovery ventilator (ERV) is entered as an ``/HPXML/Building/Buildin
 Central Fan Integrated Supply (CFIS)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each central fan integrated supply (CFIS) system is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
   Element                                                                                        Type      Units    Constraints                    Required  Default          Notes
@@ -3151,7 +3151,7 @@ If pre-cooling is specified for the shared system, additional information is ent
 HPXML Local Ventilation Fans
 ****************************
 
-Each fan that provides local ventilation (e.g., kitchen range fan or bathroom fan) is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each fan that provides local ventilation (e.g., kitchen range fan or bathroom fan) is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  =======  =======  ===========  ========  ========  =============================
   Element                                                                                        Type     Units    Constraints  Required  Default   Notes
@@ -3178,7 +3178,7 @@ Each fan that provides local ventilation (e.g., kitchen range fan or bathroom fa
 HPXML Whole House Fans
 **********************
 
-Each whole house fan that provides cooling load reduction is entered as an ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
+Each whole house fan that provides cooling load reduction is entered as a ``/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan``.
 
   =============================================================================================  =======  =======  ===========  ========  ======================  ==========================
   Element                                                                                        Type     Units    Constraints  Required  Default                 Notes
@@ -3216,7 +3216,7 @@ If not entered, the simulation will not include water heating.
 Conventional Storage
 ~~~~~~~~~~~~~~~~~~~~
 
-Each conventional storage water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each conventional storage water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   =============================================  =================  =============  ====================  ========  ========  =============================================
   Element                                        Type               Units          Constraints           Required  Default   Notes
@@ -3276,7 +3276,7 @@ Each conventional storage water heater is entered as an ``/HPXML/Building/Buildi
 Tankless
 ~~~~~~~~
 
-Each instantaneous tankless water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each instantaneous tankless water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
   Element                                      Type     Units         Constraints                 Required      Default   Notes
@@ -3316,7 +3316,7 @@ Each instantaneous tankless water heater is entered as an ``/HPXML/Building/Buil
 Heat Pump
 ~~~~~~~~~
 
-Each heat pump water heater is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   =============================================  ================  =============  ======================  ========  ===========  =============================================
   Element                                        Type              Units          Constraints             Required  Default      Notes
@@ -3363,7 +3363,7 @@ Each heat pump water heater is entered as an ``/HPXML/Building/BuildingDetails/S
 Combi Boiler w/ Storage
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each combination boiler w/ storage tank (sometimes referred to as an indirect water heater) is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each combination boiler w/ storage tank (sometimes referred to as an indirect water heater) is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   =============================================  =======  ============  ======================================  ============  ========  ==================================================
   Element                                        Type     Units         Constraints                             Required      Default   Notes
@@ -3402,7 +3402,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
 Combi Boiler w/ Tankless Coil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each combination boiler w/ tankless coil is entered as an ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
+Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
   =========================  =======  =====  =======================================  ============  ========  ==================================================
   Element                    Type     Units  Constraints                              Required      Default   Notes
