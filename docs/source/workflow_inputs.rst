@@ -2209,8 +2209,6 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
          CoolingDetailedPerformanceData must also be provided.
   .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity retention defaults based on CompressorType:
          
-         \- **single/two stage**: 0.425 (at 5F)
-         
          \- **variable speed**: 0.0461 * HSPF + 0.1594 (at 5F)
          
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
@@ -3499,7 +3497,7 @@ A standard hot water distribution system is entered as a ``/HPXML/Building/Build
   ``SystemType/Standard``               element                             Yes                 Type of distribution system
   ``SystemType/Standard/PipingLength``  double   ft            > 0          No        See [#]_  Length of piping [#]_
   ``PipeInsulation/PipeRValue``         double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
-  ``DrainWaterHeatRecovery``            element                             No        <none>    Presence of drain water heat recovery device
+  ``DrainWaterHeatRecovery``            element                             No        <none>    Presence of drain water heat recovery device [#]_
   ====================================  =======  ============  ===========  ========  ========  =====================
 
   .. [#] If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
@@ -3515,6 +3513,7 @@ A standard hot water distribution system is entered as a ``/HPXML/Building/Build
          Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
          
   .. [#] PipingLength is the length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
+  .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
 
 .. _hot_water_dist_recirc:
 
@@ -3523,16 +3522,18 @@ Recirculation (In-Unit)
 
 An in-unit recirculation hot water distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution``.
 
-  ==========================================================  =======  =====  ===========  ========  ========  =====================================
-  Element                                                     Type     Units  Constraints  Required  Default   Notes
-  ==========================================================  =======  =====  ===========  ========  ========  =====================================
-  ``SystemIdentifier``                                        id                           Yes                 Unique identifier
-  ``SystemType/Recirculation``                                element                      Yes                 Type of distribution system
-  ``SystemType/Recirculation/ControlType``                    string          See [#]_     Yes                 Recirculation control type
-  ``SystemType/Recirculation/RecirculationPipingLoopLength``  double   ft     > 0          No        See [#]_  Recirculation piping loop length [#]_
-  ``SystemType/Recirculation/BranchPipingLength``             double   ft     > 0          No        10        Branch piping length [#]_
-  ``SystemType/Recirculation/PumpPower``                      double   W      >= 0         No        50 [#]_   Recirculation pump power
-  ==========================================================  =======  =====  ===========  ========  ========  =====================================
+  ==========================================================  =======  ============  ===========  ========  ========  =====================================
+  Element                                                     Type     Units         Constraints  Required  Default   Notes
+  ==========================================================  =======  ============  ===========  ========  ========  =====================================
+  ``SystemIdentifier``                                        id                                  Yes                 Unique identifier
+  ``SystemType/Recirculation``                                element                             Yes                 Type of distribution system
+  ``SystemType/Recirculation/ControlType``                    string                 See [#]_     Yes                 Recirculation control type
+  ``SystemType/Recirculation/RecirculationPipingLoopLength``  double   ft            > 0          No        See [#]_  Recirculation piping loop length [#]_
+  ``SystemType/Recirculation/BranchPipingLength``             double   ft            > 0          No        10        Branch piping length [#]_
+  ``SystemType/Recirculation/PumpPower``                      double   W             >= 0         No        50 [#]_   Recirculation pump power
+  ``PipeInsulation/PipeRValue``                               double   F-ft2-hr/Btu  >= 0         Yes                 Pipe insulation R-value
+  ``DrainWaterHeatRecovery``                                  element                             No        <none>    Presence of drain water heat recovery device [#]_
+  ==========================================================  =======  ============  ===========  ========  ========  =====================================
 
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
@@ -3561,6 +3562,7 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
   .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
 
 .. _hot_water_dist_recirc_shared:
 
@@ -3576,7 +3578,7 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
   ``SystemType/Standard``                                element                             Yes                 Type of distribution system
   ``SystemType/Standard/PipingLength``                   double   ft            > 0          No        See [#]_  Length of piping [#]_
   ``PipeInsulation/PipeRValue``                          double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
-  ``DrainWaterHeatRecovery``                             element                             No        <none>    Presence of drain water heat recovery device
+  ``DrainWaterHeatRecovery``                             element                             No        <none>    Presence of drain water heat recovery device [#]_
   ``extension/SharedRecirculation/NumberofUnitsServed``  integer                > 1          Yes                 Number of dwelling units served
   ``extension/SharedRecirculation/PumpPower``            double   W             >= 0         No        220 [#]_  Shared recirculation pump power
   ``extension/SharedRecirculation/ControlType``          string                 See [#]_     Yes                 Shared recirculation control type
@@ -3594,7 +3596,8 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
          
          Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
          
-  .. [#] PipingLength is the length of hot water piping from the hot water heater to the shared recirculation loop, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
+  .. [#] PipingLength is the length of hot water piping from the shared recirculation loop to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
+  .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
 
@@ -3602,6 +3605,8 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
 
   The shared recirculation system is required to have a standard in-unit hot water distribution system;
   stacked recirculation systems (i.e., shared recirculation loop plus an additional in-unit recirculation system) are more likely to indicate input errors than reflect an actual real-world scenario.
+
+.. _water_heater_dwhr:
 
 Drain Water Heat Recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~
