@@ -697,9 +697,9 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 
 - ``unmet_loads_hot_water_shower_time_hr``
 
-- ``unmet_loads_hot_water_shower_e_j``
+- ``unmet_loads_hot_water_shower_energy_j``
 
-- ``unmet_loads_hot_water_shower_sag_time_hr``
+- ``unmet_loads_hot_water_shower_unmet_time_hr``
 
 - ``peak_electricity_winter_total_w``
 

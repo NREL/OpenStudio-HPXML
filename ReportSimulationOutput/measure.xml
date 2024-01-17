@@ -1562,16 +1562,16 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>unmet_loads_hot_water_shower_e_j</name>
-      <display_name>unmet_loads_hot_water_shower_e_j</display_name>
-      <short_name>unmet_loads_hot_water_shower_e_j</short_name>
+      <name>unmet_loads_hot_water_shower_energy_j</name>
+      <display_name>unmet_loads_hot_water_shower_energy_j</display_name>
+      <short_name>unmet_loads_hot_water_shower_energy_j</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>unmet_loads_hot_water_shower_sag_time_hr</name>
-      <display_name>unmet_loads_hot_water_shower_sag_time_hr</display_name>
-      <short_name>unmet_loads_hot_water_shower_sag_time_hr</short_name>
+      <name>unmet_loads_hot_water_shower_unmet_time_hr</name>
+      <display_name>unmet_loads_hot_water_shower_unmet_time_hr</display_name>
+      <short_name>unmet_loads_hot_water_shower_unmet_time_hr</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
