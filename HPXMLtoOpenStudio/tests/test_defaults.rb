@@ -3149,6 +3149,19 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.refrigerators[0].rated_annual_kwh = nil
     hpxml_bldg.refrigerators[0].usage_multiplier = nil
     hpxml_bldg.refrigerators[0].weekday_fractions = nil
+    hpxml_bldg.refrigerators[0].weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.refrigerators[0].monthly_multipliers = nil
+    hpxml_bldg.refrigerators[0].constant_coefficients = nil
+    hpxml_bldg.refrigerators[0].temperature_coefficients = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 691.0, 1.0, Schedule.RefrigeratorWeekdayFractions, ConstantDaySchedule, Schedule.RefrigeratorMonthlyMultipliers, nil, nil)
+
+    # Test defaults 2
+    hpxml_bldg.refrigerators[0].location = nil
+    hpxml_bldg.refrigerators[0].rated_annual_kwh = nil
+    hpxml_bldg.refrigerators[0].usage_multiplier = nil
+    hpxml_bldg.refrigerators[0].weekday_fractions = nil
     hpxml_bldg.refrigerators[0].weekend_fractions = nil
     hpxml_bldg.refrigerators[0].monthly_multipliers = nil
     hpxml_bldg.refrigerators[0].constant_coefficients = nil
