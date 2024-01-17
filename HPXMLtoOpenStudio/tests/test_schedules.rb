@@ -52,7 +52,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 12
-    schedule_rulesets = 17
+    schedule_rulesets = 16
     schedule_fixed_intervals = 1
     schedule_files = 0
 
