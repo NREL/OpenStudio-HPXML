@@ -377,10 +377,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-detailed-performance-not-variable-speed'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
-      elsif ['hvac-distribution-airflow-and-max-airflow'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-airflow-cfm.xml')
-        hpxml_bldg.heat_pumps[0].max_heating_airflow_cfm = 1000
-        hpxml_bldg.heat_pumps[0].max_cooling_airflow_cfm = 1200
       elsif ['hvac-distribution-return-duct-leakage-missing'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-evap-cooler-only-ducted.xml')
         hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[-1].delete

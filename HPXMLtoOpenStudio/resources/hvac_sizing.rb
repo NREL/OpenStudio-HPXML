@@ -1937,7 +1937,7 @@ class HVACSizing
     end
     if not hvac_heating.nil?
       fixed_heating_airflow = hvac_heating.heating_airflow_cfm
-      max_heating_airflow = hvac_heating.max_heating_airflow
+      max_heating_airflow = hvac_heating.max_heating_airflow_cfm
     end
     if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && max_heating_airflow.nil?
       hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
