@@ -1575,19 +1575,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_fan_watts_per_cfm', false)
     arg.setDisplayName('HVAC Distribution: Blower Fan Efficiency')
-    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to #{HPXML::HVACTypeFurnace} heating system, #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} cooling systems, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default is used.")
+    arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to #{HPXML::HVACTypeFurnace} heating system, #{HPXML::HVACTypeCentralAirConditioner} and #{HPXML::HVACTypeMiniSplitAirConditioner} cooling systems, and #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, and #{HPXML::HVACTypeHeatPumpGroundToAir} heat pumps. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
     arg.setUnits('W/CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_heating_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Heating Airflow Rate')
-    arg.setDescription('The heating airflow rate. If not provided, the OS-HPXML autosized default is used.')
+    arg.setDescription("The heating airflow rate. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_cooling_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Cooling Airflow Rate')
-    arg.setDescription('The cooling airflow rate. If not provided, the OS-HPXML autosized default is used.')
+    arg.setDescription("The cooling airflow rate. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 

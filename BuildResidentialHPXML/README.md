@@ -2598,7 +2598,7 @@ The heat load served fraction of the second heating system. Ignored if this heat
 
 **HVAC Distribution: Blower Fan Efficiency**
 
-The blower fan efficiency at maximum fan speed. Applies only to Furnace heating system, central air conditioner and mini-split cooling systems, and air-to-air, mini-split, and ground-to-air heat pumps. If not provided, the OS-HPXML default is used.
+The blower fan efficiency at maximum fan speed. Applies only to Furnace heating system, central air conditioner and mini-split cooling systems, and air-to-air, mini-split, and ground-to-air heat pumps. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
 
 - **Name:** ``hvac_distribution_fan_watts_per_cfm``
 - **Type:** ``Double``
@@ -2611,7 +2611,7 @@ The blower fan efficiency at maximum fan speed. Applies only to Furnace heating 
 
 **HVAC Distribution: Heating Airflow Rate**
 
-The heating airflow rate. If not provided, the OS-HPXML autosized default is used.
+The heating airflow rate. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
 
 - **Name:** ``hvac_distribution_heating_airflow_cfm``
 - **Type:** ``Double``
@@ -2624,7 +2624,7 @@ The heating airflow rate. If not provided, the OS-HPXML autosized default is use
 
 **HVAC Distribution: Cooling Airflow Rate**
 
-The cooling airflow rate. If not provided, the OS-HPXML autosized default is used.
+The cooling airflow rate. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
 
 - **Name:** ``hvac_distribution_cooling_airflow_cfm``
 - **Type:** ``Double``
