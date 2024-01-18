@@ -110,6 +110,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-detailed-performance-not-variable-speed' => ['Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]',
                                                                                'Expected 1 element(s) for xpath: ../CompressorType[text()="variable speed"]'],
+                            'hvac-distribution-airflow-and-max-airflow' => ['Expected 0 or 1 element(s) for xpath: extension/HeatingAirflowCFM | extension/MaxHeatingAirflowCFM [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]',
+                                                                            'Expected 0 or 1 element(s) for xpath: extension/CoolingAirflowCFM | extension/MaxCoolingAirflowCFM [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"], id: "HeatPump1"]'],
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
@@ -377,6 +379,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-detailed-performance-not-variable-speed'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
+      elsif ['hvac-distribution-airflow-and-max-airflow'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-airflow-cfm.xml')
+        hpxml_bldg.heat_pumps[0].max_heating_airflow_cfm = 1000
+        hpxml_bldg.heat_pumps[0].max_cooling_airflow_cfm = 1200
       elsif ['hvac-distribution-return-duct-leakage-missing'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-evap-cooler-only-ducted.xml')
         hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[-1].delete

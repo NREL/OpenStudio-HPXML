@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9ad48f7c-46b3-4760-9c27-a037a2d1246e</version_id>
-  <version_modified>2024-01-18T18:09:17Z</version_modified>
+  <version_id>35f61d5b-4c3a-4ae9-b44b-6fa5b0322180</version_id>
+  <version_modified>2024-01-18T19:17:32Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C7C17ADC</checksum>
+      <checksum>A667E706</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3B854F22</checksum>
+      <checksum>EE8C12BA</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
