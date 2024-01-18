@@ -1929,15 +1929,17 @@ class HVACSizing
 
     if not hvac_cooling.nil?
       fixed_cooling_airflow = hvac_cooling.cooling_airflow_cfm
+      max_cooling_airflow = hvac_cooling.max_cooling_airflow_cfm
     end
-    if (not fixed_cooling_airflow.nil?) && (hvac_sizing_values.Cool_Airflow > 0)
+    if (not fixed_cooling_airflow.nil?) && (hvac_sizing_values.Cool_Airflow > 0) && max_cooling_airflow.nil?
       hvac_sizing_values.Cool_Airflow = fixed_cooling_airflow
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
     end
     if not hvac_heating.nil?
       fixed_heating_airflow = hvac_heating.heating_airflow_cfm
+      max_heating_airflow = hvac_heating.max_heating_airflow
     end
-    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0)
+    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && max_heating_airflow.nil?
       hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
       hvac_sizing_values.Heat_Airflow_isdefaulted = false
     end
