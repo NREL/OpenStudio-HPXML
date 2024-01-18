@@ -436,6 +436,35 @@ class HPXML < Object
   WindowClassLightCommercial = 'light commercial'
   ZoneTypeConditioned = 'conditioned'
 
+  # Heating/cooling design load attributes
+  HDL_ATTRS = { hdl_total: 'Total',
+                hdl_ducts: 'Ducts',
+                hdl_windows: 'Windows',
+                hdl_skylights: 'Skylights',
+                hdl_doors: 'Doors',
+                hdl_walls: 'Walls',
+                hdl_roofs: 'Roofs',
+                hdl_floors: 'Floors',
+                hdl_slabs: 'Slabs',
+                hdl_ceilings: 'Ceilings',
+                hdl_infilvent: 'InfilVent' }
+  CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
+                     cdl_sens_ducts: 'Ducts',
+                     cdl_sens_windows: 'Windows',
+                     cdl_sens_skylights: 'Skylights',
+                     cdl_sens_doors: 'Doors',
+                     cdl_sens_walls: 'Walls',
+                     cdl_sens_roofs: 'Roofs',
+                     cdl_sens_floors: 'Floors',
+                     cdl_sens_slabs: 'Slabs',
+                     cdl_sens_ceilings: 'Ceilings',
+                     cdl_sens_infilvent: 'InfilVent',
+                     cdl_sens_intgains: 'InternalLoads' }
+  CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
+                    cdl_lat_ducts: 'Ducts',
+                    cdl_lat_infilvent: 'InfilVent',
+                    cdl_lat_intgains: 'InternalLoads' }
+
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
     @errors = []
@@ -2155,7 +2184,7 @@ class HPXML < Object
   end
 
   class Space < BaseElement
-    ATTRS = [:id, :floor_area]
+    ATTRS = [:id, :floor_area] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2171,6 +2200,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
+      HPXML.design_loads_to_doc(self, space)
     end
 
     def from_doc(space)
@@ -2178,6 +2208,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(space)
       @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
+      HPXML.design_loads_from_doc(self, space)
     end
   end
 
@@ -4956,33 +4987,6 @@ class HPXML < Object
   end
 
   class HVACPlant < BaseElement
-    HDL_ATTRS = { hdl_total: 'Total',
-                  hdl_ducts: 'Ducts',
-                  hdl_windows: 'Windows',
-                  hdl_skylights: 'Skylights',
-                  hdl_doors: 'Doors',
-                  hdl_walls: 'Walls',
-                  hdl_roofs: 'Roofs',
-                  hdl_floors: 'Floors',
-                  hdl_slabs: 'Slabs',
-                  hdl_ceilings: 'Ceilings',
-                  hdl_infilvent: 'InfilVent' }
-    CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
-                       cdl_sens_ducts: 'Ducts',
-                       cdl_sens_windows: 'Windows',
-                       cdl_sens_skylights: 'Skylights',
-                       cdl_sens_doors: 'Doors',
-                       cdl_sens_walls: 'Walls',
-                       cdl_sens_roofs: 'Roofs',
-                       cdl_sens_floors: 'Floors',
-                       cdl_sens_slabs: 'Slabs',
-                       cdl_sens_ceilings: 'Ceilings',
-                       cdl_sens_infilvent: 'InfilVent',
-                       cdl_sens_intgains: 'InternalLoads' }
-    CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
-                      cdl_lat_ducts: 'Ducts',
-                      cdl_lat_infilvent: 'InfilVent',
-                      cdl_lat_intgains: 'InternalLoads' }
     ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
@@ -4995,22 +4999,7 @@ class HPXML < Object
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      if not @hdl_total.nil?
-        dl_extension = XMLHelper.create_elements_as_needed(hvac_plant, ['extension', 'DesignLoads'])
-        XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
-        hdl = XMLHelper.add_element(dl_extension, 'Heating')
-        HDL_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(hdl, element_name, send(attr), :float)
-        end
-        cdl_sens = XMLHelper.add_element(dl_extension, 'CoolingSensible')
-        CDL_SENS_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(cdl_sens, element_name, send(attr), :float)
-        end
-        cdl_lat = XMLHelper.add_element(dl_extension, 'CoolingLatent')
-        CDL_LAT_ATTRS.each do |attr, element_name|
-          XMLHelper.add_element(cdl_lat, element_name, send(attr), :float)
-        end
-      end
+      HPXML.design_loads_to_doc(self, hvac_plant)
     end
 
     def from_doc(building)
@@ -5019,15 +5008,7 @@ class HPXML < Object
       hvac_plant = XMLHelper.get_element(building, 'BuildingDetails/Systems/HVAC/HVACPlant')
       return if hvac_plant.nil?
 
-      HDL_ATTRS.each do |attr, element_name|
-        send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/Heating/#{element_name}", :float))
-      end
-      CDL_SENS_ATTRS.each do |attr, element_name|
-        send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/CoolingSensible/#{element_name}", :float))
-      end
-      CDL_LAT_ATTRS.each do |attr, element_name|
-        send("#{attr}=", XMLHelper.get_value(hvac_plant, "extension/DesignLoads/CoolingLatent/#{element_name}", :float))
-      end
+      HPXML.design_loads_from_doc(self, hvac_plant)
     end
   end
 
@@ -7765,5 +7746,30 @@ class HPXML < Object
     end
 
     return errors
+  end
+
+  def self.design_loads_to_doc(hpxml_object, hpxml_element)
+    { HDL_ATTRS => 'Heating',
+      CDL_SENS_ATTRS => 'CoolingSensible',
+      CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
+      next if dl_child_name == 'CoolingLatent' && hpxml_object.is_a?(HPXML::Space) # Latent loads are not calculated for spaces
+
+      dl_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'DesignLoads'])
+      XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
+      dl_child = XMLHelper.add_element(dl_extension, dl_child_name)
+      attrs.each do |attr, element_name|
+        XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :float)
+      end
+    end
+  end
+
+  def self.design_loads_from_doc(hpxml_object, hpxml_element)
+    { HDL_ATTRS => 'Heating',
+      CDL_SENS_ATTRS => 'CoolingSensible',
+      CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
+      attrs.each do |attr, element_name|
+        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
+      end
+    end
   end
 end

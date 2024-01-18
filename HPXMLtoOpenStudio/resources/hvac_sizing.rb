@@ -23,7 +23,7 @@ class HVACSizing
     process_load_slabs(bldg_design_loads)
     process_load_infiltration_ventilation(bldg_design_loads, weather)
     process_load_internal_gains(bldg_design_loads)
-    
+
     puts @space_loads
 
     # Aggregate zone loads into initial loads
@@ -65,6 +65,10 @@ class HVACSizing
     if update_hpxml
       # Assign building design loads to HPXML object for output
       assign_to_hpxml_bldg(hpxml_bldg.hvac_plant, bldg_design_loads)
+      @space_loads.each do |space_id, space_design_loads|
+        space = hpxml_bldg.zones.map { |z| z.spaces }.flatten.find { |s| s.id == space_id }
+        assign_to_hpxml_bldg(space, space_design_loads)
+      end
     end
 
     return all_hvac_sizing_values
@@ -334,6 +338,7 @@ class HVACSizing
     @space_loads = {}
     @hpxml_bldg.zones.each do |zone|
       next unless zone.zone_type == HPXML::ZoneTypeConditioned
+
       zone.spaces.each do |space|
         @space_loads[space.id] = DesignLoads.new
       end
@@ -471,9 +476,6 @@ class HVACSizing
     afl_hr = [0.0] * 12
 
     # Windows
-    bldg_design_loads.Heat_Windows = 0.0
-    bldg_design_loads.Cool_Windows = 0.0
-
     @hpxml_bldg.windows.each do |window|
       next unless window.wall.is_exterior_thermal_boundary
 
@@ -559,9 +561,6 @@ class HVACSizing
     end # window
 
     # Skylights
-    bldg_design_loads.Heat_Skylights = 0.0
-    bldg_design_loads.Cool_Skylights = 0.0
-
     @hpxml_bldg.skylights.each do |skylight|
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(skylight.azimuth) / 45.0).round.to_i
@@ -650,9 +649,6 @@ class HVACSizing
       cltd = @ctd + 6.0
     end
 
-    bldg_design_loads.Heat_Doors = 0.0
-    bldg_design_loads.Cool_Doors = 0.0
-
     @hpxml_bldg.doors.each do |door|
       next unless door.is_thermal_boundary
 
@@ -671,9 +667,6 @@ class HVACSizing
     '''
     Heating and Cooling Loads: Walls
     '''
-
-    bldg_design_loads.Heat_Walls = 0.0
-    bldg_design_loads.Cool_Walls = 0.0
 
     # Above-Grade Walls
     (@hpxml_bldg.walls + @hpxml_bldg.rim_joists).each do |wall|
@@ -694,8 +687,6 @@ class HVACSizing
       end
       if not wall.attached_to_space_idref.nil?
         space_design_loads = @space_loads[wall.attached_to_space_idref]
-        space_design_loads.Heat_Walls = 0.0 if space_design_loads.Heat_Walls.nil?
-        space_design_loads.Cool_Walls = 0.0 if space_design_loads.Cool_Walls.nil?
       end
 
       azimuths.each do |azimuth|
@@ -751,9 +742,9 @@ class HVACSizing
     # Foundation walls
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
+
       if not foundation_wall.attached_to_space_idref.nil?
         space_design_loads = @space_loads[foundation_wall.attached_to_space_idref]
-        space_design_loads.Heat_Walls = 0.0 if space_design_loads.Heat_Walls.nil?
       end
 
       if foundation_wall.is_exterior
@@ -774,17 +765,12 @@ class HVACSizing
     Heating and Cooling Loads: Roofs
     '''
 
-    bldg_design_loads.Heat_Roofs = 0.0
-    bldg_design_loads.Cool_Roofs = 0.0
-
     # Roofs
     @hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
-      
+
       if not roof.attached_to_space_idref.nil?
         space_design_loads = @space_loads[roof.attached_to_space_idref]
-        space_design_loads.Heat_Roofs = 0.0 if space_design_loads.Heat_Roofs.nil?
-        space_design_loads.Cool_Roofs = 0.0 if space_design_loads.Cool_Roofs.nil?
       end
 
       # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
@@ -837,9 +823,6 @@ class HVACSizing
     Heating and Cooling Loads: Ceilings
     '''
 
-    bldg_design_loads.Heat_Ceilings = 0.0
-    bldg_design_loads.Cool_Ceilings = 0.0
-
     @hpxml_bldg.floors.each do |floor|
       next unless floor.is_ceiling
       next unless floor.is_thermal_boundary
@@ -859,9 +842,6 @@ class HVACSizing
     '''
     Heating and Cooling Loads: Floors
     '''
-
-    bldg_design_loads.Heat_Floors = 0.0
-    bldg_design_loads.Cool_Floors = 0.0
 
     has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
 
@@ -928,8 +908,6 @@ class HVACSizing
     '''
     Heating and Cooling Loads: Floors
     '''
-
-    bldg_design_loads.Heat_Slabs = 0.0
 
     has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
 
@@ -1042,7 +1020,7 @@ class HVACSizing
                                   bldg_design_loads.Cool_Doors + bldg_design_loads.Cool_Walls +
                                   bldg_design_loads.Cool_Floors + bldg_design_loads.Cool_Ceilings +
                                   bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_InfilVent_Sens +
-                                  bldg_design_loads.Cool_IntGains_Sens
+                                  bldg_design_loads.Cool_IntGains_Sens + bldg_design_loads.Cool_Slabs
     bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_InfilVent_Lat + bldg_design_loads.Cool_IntGains_Lat
     if bldg_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
       bldg_design_loads.Cool_Lat = 0.0
@@ -1050,11 +1028,6 @@ class HVACSizing
       bldg_design_loads.Cool_IntGains_Lat = 0.0
     end
     bldg_design_loads.Cool_Tot = bldg_design_loads.Cool_Sens + bldg_design_loads.Cool_Lat
-
-    # Initialize ducts
-    bldg_design_loads.Heat_Ducts = 0.0
-    bldg_design_loads.Cool_Ducts_Sens = 0.0
-    bldg_design_loads.Cool_Ducts_Lat = 0.0
   end
 
   def self.apply_hvac_temperatures(system_design_loads, hvac_heating, hvac_cooling)
@@ -3196,79 +3169,118 @@ class HVACSizing
     end
   end
 
-  def self.assign_to_hpxml_bldg(hvacpl, bldg_design_loads)
+  def self.assign_to_hpxml_bldg(hpxml_object, design_loads)
     tol = 10 # Btuh
 
     # Assign heating design loads to HPXML object
-    hvacpl.hdl_total = Float(bldg_design_loads.Heat_Tot.round)
-    hvacpl.hdl_walls = Float(bldg_design_loads.Heat_Walls.round)
-    hvacpl.hdl_ceilings = Float(bldg_design_loads.Heat_Ceilings.round)
-    hvacpl.hdl_roofs = Float(bldg_design_loads.Heat_Roofs.round)
-    hvacpl.hdl_floors = Float(bldg_design_loads.Heat_Floors.round)
-    hvacpl.hdl_slabs = Float(bldg_design_loads.Heat_Slabs.round)
-    hvacpl.hdl_windows = Float(bldg_design_loads.Heat_Windows.round)
-    hvacpl.hdl_skylights = Float(bldg_design_loads.Heat_Skylights.round)
-    hvacpl.hdl_doors = Float(bldg_design_loads.Heat_Doors.round)
-    hvacpl.hdl_infilvent = Float(bldg_design_loads.Heat_InfilVent.round)
-    hvacpl.hdl_ducts = Float(bldg_design_loads.Heat_Ducts.round)
-    hdl_sum = (hvacpl.hdl_walls + hvacpl.hdl_ceilings + hvacpl.hdl_roofs +
-               hvacpl.hdl_floors + hvacpl.hdl_slabs + hvacpl.hdl_windows +
-               hvacpl.hdl_skylights + hvacpl.hdl_doors + hvacpl.hdl_infilvent +
-               hvacpl.hdl_ducts)
-    if (hdl_sum - hvacpl.hdl_total).abs > tol
-      fail 'Heating design loads do not sum to total.'
+    hpxml_object.hdl_total = Float(design_loads.Heat_Tot.round)
+    hpxml_object.hdl_walls = Float(design_loads.Heat_Walls.round)
+    hpxml_object.hdl_ceilings = Float(design_loads.Heat_Ceilings.round)
+    hpxml_object.hdl_roofs = Float(design_loads.Heat_Roofs.round)
+    hpxml_object.hdl_floors = Float(design_loads.Heat_Floors.round)
+    hpxml_object.hdl_slabs = Float(design_loads.Heat_Slabs.round)
+    hpxml_object.hdl_windows = Float(design_loads.Heat_Windows.round)
+    hpxml_object.hdl_skylights = Float(design_loads.Heat_Skylights.round)
+    hpxml_object.hdl_doors = Float(design_loads.Heat_Doors.round)
+    hpxml_object.hdl_infilvent = Float(design_loads.Heat_InfilVent.round)
+    hpxml_object.hdl_ducts = Float(design_loads.Heat_Ducts.round)
+    if hpxml_object.hdl_total != 0
+      # Error-checking to ensure we captured all the design load components
+      hdl_sum = (hpxml_object.hdl_walls + hpxml_object.hdl_ceilings + hpxml_object.hdl_roofs +
+                 hpxml_object.hdl_floors + hpxml_object.hdl_slabs + hpxml_object.hdl_windows +
+                 hpxml_object.hdl_skylights + hpxml_object.hdl_doors + hpxml_object.hdl_infilvent +
+                 hpxml_object.hdl_ducts)
+      if (hdl_sum - hpxml_object.hdl_total).abs > tol
+        fail 'Heating design loads do not sum to total.'
+      end
     end
 
     # Assign cooling sensible design loads to HPXML object
-    hvacpl.cdl_sens_total = Float(bldg_design_loads.Cool_Sens.round)
-    hvacpl.cdl_sens_walls = Float(bldg_design_loads.Cool_Walls.round)
-    hvacpl.cdl_sens_ceilings = Float(bldg_design_loads.Cool_Ceilings.round)
-    hvacpl.cdl_sens_roofs = Float(bldg_design_loads.Cool_Roofs.round)
-    hvacpl.cdl_sens_floors = Float(bldg_design_loads.Cool_Floors.round)
-    hvacpl.cdl_sens_slabs = 0.0
-    hvacpl.cdl_sens_windows = Float(bldg_design_loads.Cool_Windows.round)
-    hvacpl.cdl_sens_skylights = Float(bldg_design_loads.Cool_Skylights.round)
-    hvacpl.cdl_sens_doors = Float(bldg_design_loads.Cool_Doors.round)
-    hvacpl.cdl_sens_infilvent = Float(bldg_design_loads.Cool_InfilVent_Sens.round)
-    hvacpl.cdl_sens_ducts = Float(bldg_design_loads.Cool_Ducts_Sens.round)
-    hvacpl.cdl_sens_intgains = Float(bldg_design_loads.Cool_IntGains_Sens.round)
-    cdl_sens_sum = (hvacpl.cdl_sens_walls + hvacpl.cdl_sens_ceilings +
-                    hvacpl.cdl_sens_roofs + hvacpl.cdl_sens_floors +
-                    hvacpl.cdl_sens_slabs + hvacpl.cdl_sens_windows +
-                    hvacpl.cdl_sens_skylights + hvacpl.cdl_sens_doors +
-                    hvacpl.cdl_sens_infilvent + hvacpl.cdl_sens_ducts +
-                    hvacpl.cdl_sens_intgains)
-    if (cdl_sens_sum - hvacpl.cdl_sens_total).abs > tol
-      fail 'Cooling sensible design loads do not sum to total.'
+    hpxml_object.cdl_sens_total = Float(design_loads.Cool_Sens.round)
+    hpxml_object.cdl_sens_walls = Float(design_loads.Cool_Walls.round)
+    hpxml_object.cdl_sens_ceilings = Float(design_loads.Cool_Ceilings.round)
+    hpxml_object.cdl_sens_roofs = Float(design_loads.Cool_Roofs.round)
+    hpxml_object.cdl_sens_floors = Float(design_loads.Cool_Floors.round)
+    hpxml_object.cdl_sens_slabs = Float(design_loads.Cool_Slabs.round)
+    hpxml_object.cdl_sens_windows = Float(design_loads.Cool_Windows.round)
+    hpxml_object.cdl_sens_skylights = Float(design_loads.Cool_Skylights.round)
+    hpxml_object.cdl_sens_doors = Float(design_loads.Cool_Doors.round)
+    hpxml_object.cdl_sens_infilvent = Float(design_loads.Cool_InfilVent_Sens.round)
+    hpxml_object.cdl_sens_ducts = Float(design_loads.Cool_Ducts_Sens.round)
+    hpxml_object.cdl_sens_intgains = Float(design_loads.Cool_IntGains_Sens.round)
+    if hpxml_object.cdl_sens_total != 0
+      # Error-checking to ensure we captured all the design load components
+      cdl_sens_sum = (hpxml_object.cdl_sens_walls + hpxml_object.cdl_sens_ceilings +
+                      hpxml_object.cdl_sens_roofs + hpxml_object.cdl_sens_floors +
+                      hpxml_object.cdl_sens_slabs + hpxml_object.cdl_sens_windows +
+                      hpxml_object.cdl_sens_skylights + hpxml_object.cdl_sens_doors +
+                      hpxml_object.cdl_sens_infilvent + hpxml_object.cdl_sens_ducts +
+                      hpxml_object.cdl_sens_intgains)
+      if (cdl_sens_sum - hpxml_object.cdl_sens_total).abs > tol
+        fail 'Cooling sensible design loads do not sum to total.'
+      end
     end
 
     # Assign cooling latent design loads to HPXML object
-    hvacpl.cdl_lat_total = Float(bldg_design_loads.Cool_Lat.round)
-    hvacpl.cdl_lat_ducts = Float(bldg_design_loads.Cool_Ducts_Lat.round)
-    hvacpl.cdl_lat_infilvent = Float(bldg_design_loads.Cool_InfilVent_Lat.round)
-    hvacpl.cdl_lat_intgains = Float(bldg_design_loads.Cool_IntGains_Lat.round)
-    cdl_lat_sum = (hvacpl.cdl_lat_ducts + hvacpl.cdl_lat_infilvent +
-                   hvacpl.cdl_lat_intgains)
-    if (cdl_lat_sum - hvacpl.cdl_lat_total).abs > tol
-      fail 'Cooling latent design loads do not sum to total.'
+    hpxml_object.cdl_lat_total = Float(design_loads.Cool_Lat.round)
+    hpxml_object.cdl_lat_ducts = Float(design_loads.Cool_Ducts_Lat.round)
+    hpxml_object.cdl_lat_infilvent = Float(design_loads.Cool_InfilVent_Lat.round)
+    hpxml_object.cdl_lat_intgains = Float(design_loads.Cool_IntGains_Lat.round)
+    if hpxml_object.cdl_lat_total != 0
+      # Error-checking to ensure we captured all the design load components
+      cdl_lat_sum = (hpxml_object.cdl_lat_ducts + hpxml_object.cdl_lat_infilvent +
+                     hpxml_object.cdl_lat_intgains)
+      if (cdl_lat_sum - hpxml_object.cdl_lat_total).abs > tol
+        fail 'Cooling latent design loads do not sum to total.'
+      end
     end
   end
 end
 
 class DesignLoads
-  def initialize
-  end
   attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
-                :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors,
+                :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors, :Cool_Slabs,
                 :Cool_Ceilings, :Cool_InfilVent_Sens, :Cool_InfilVent_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
                 :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent)
+
+  def initialize
+    @Cool_Sens = 0.0
+    @Cool_Lat = 0.0
+    @Cool_Tot = 0.0
+    @Heat_Tot = 0.0
+    @Heat_Ducts = 0.0
+    @Cool_Ducts_Sens = 0.0
+    @Cool_Ducts_Lat = 0.0
+    @Cool_Windows = 0.0
+    @Cool_Skylights = 0.0
+    @Cool_Doors = 0.0
+    @Cool_Walls = 0.0
+    @Cool_Roofs = 0.0
+    @Cool_Floors = 0.0
+    @Cool_Slabs = 0.0
+    @Cool_Ceilings = 0.0
+    @Cool_InfilVent_Sens = 0.0
+    @Cool_InfilVent_Lat = 0.0
+    @Cool_IntGains_Sens = 0.0
+    @Cool_IntGains_Lat = 0.0
+    @Heat_Windows = 0.0
+    @Heat_Skylights = 0.0
+    @Heat_Doors = 0.0
+    @Heat_Walls = 0.0
+    @Heat_Roofs = 0.0
+    @Heat_Floors = 0.0
+    @Heat_Slabs = 0.0
+    @Heat_Ceilings = 0.0
+    @Heat_InfilVent = 0.0
+  end
 end
 
 class HVACSizingValues
-  def initialize
-  end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
                 :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
+
+  def initialize
+  end
 end
