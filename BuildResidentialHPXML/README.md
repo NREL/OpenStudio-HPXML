@@ -2611,7 +2611,7 @@ The blower fan efficiency at maximum fan speed. Applies only to Furnace heating 
 
 **HVAC Distribution: Heating Airflow Rate**
 
-The heating airflow rate. If not provided, the OS-HPXML default is used.
+The heating airflow rate. If not provided, the OS-HPXML autosized default is used.
 
 - **Name:** ``hvac_distribution_heating_airflow_cfm``
 - **Type:** ``Double``
@@ -2624,7 +2624,7 @@ The heating airflow rate. If not provided, the OS-HPXML default is used.
 
 **HVAC Distribution: Cooling Airflow Rate**
 
-The cooling airflow rate. If not provided, the OS-HPXML default is used.
+The cooling airflow rate. If not provided, the OS-HPXML autosized default is used.
 
 - **Name:** ``hvac_distribution_cooling_airflow_cfm``
 - **Type:** ``Double``
@@ -2635,12 +2635,27 @@ The cooling airflow rate. If not provided, the OS-HPXML default is used.
 
 <br/>
 
-**HVAC Distribution: Existing Ductwork Restriction**
+**HVAC Distribution: Maximum Heating Airflow Rate**
 
-Whether to use specified heating/cooling airflow rates to (a) adjust blower fan efficiency and (b) set maximum allowed airflow rates.
+The heating airflow rate used to (a) set the maximum allowed heating airflow rate and (b) adjust blower fan efficiency.
 
-- **Name:** ``hvac_distribution_existing_ductwork_restriction``
-- **Type:** ``Boolean``
+- **Name:** ``hvac_distribution_max_heating_airflow_cfm``
+- **Type:** ``Double``
+
+- **Units:** ``CFM``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC Distribution: Maximum Cooling Airflow Rate**
+
+The cooling airflow rate used to (a) set the maximum allowed cooling airflow rate and (b) adjust blower fan efficiency.
+
+- **Name:** ``hvac_distribution_max_cooling_airflow_cfm``
+- **Type:** ``Double``
+
+- **Units:** ``CFM``
 
 - **Required:** ``false``
 

@@ -51,11 +51,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <HVACSizingControl>
-            <ExistingDuctworkRestriction>true</ExistingDuctworkRestriction>
-          </HVACSizingControl>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -353,8 +348,8 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <FanPowerWattsPerCFM>0.4</FanPowerWattsPerCFM>
-                <HeatingAirflowCFM>900.0</HeatingAirflowCFM>
-                <CoolingAirflowCFM>1200.0</CoolingAirflowCFM>
+                <MaxHeatingAirflowCFM>900.0</MaxHeatingAirflowCFM>
+                <MaxCoolingAirflowCFM>1200.0</MaxCoolingAirflowCFM>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>

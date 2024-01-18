@@ -1924,8 +1924,6 @@ class HVACSizing
   end
 
   def self.apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-    return if @hpxml_bldg.header.existing_ductwork_restriction
-
     hvac_sizing_values.Heat_Airflow_isdefaulted = true
     hvac_sizing_values.Cool_Airflow_isdefaulted = true
 
@@ -1949,8 +1947,6 @@ class HVACSizing
     '''
     Airflow Adjustments
     '''
-
-    return if not @hpxml_bldg.header.existing_ductwork_restriction
 
     # Maximum airflow rate allowed for the duct system
     max_airflow_allowed = get_max_airflow(hvac_heating, hvac_cooling)
@@ -1998,20 +1994,20 @@ class HVACSizing
 
   def self.get_max_airflow(htg_sys, clg_sys)
     if !htg_sys.nil? && !clg_sys.nil?
-      if !htg_sys.heating_airflow_cfm.nil? && !clg_sys.cooling_airflow_cfm.nil?
-        return [htg_sys.heating_airflow_cfm, clg_sys.cooling_airflow_cfm].max
-      elsif !htg_sys.heating_airflow_cfm.nil?
-        return htg_sys.heating_airflow_cfm
-      elsif !clg_sys.cooling_airflow_cfm.nil?
-        return clg_sys.cooling_airflow_cfm
+      if !htg_sys.max_heating_airflow_cfm.nil? && !clg_sys.max_cooling_airflow_cfm.nil?
+        return [htg_sys.max_heating_airflow_cfm, clg_sys.max_cooling_airflow_cfm].max
+      elsif !htg_sys.max_heating_airflow_cfm.nil?
+        return htg_sys.max_heating_airflow_cfm
+      elsif !clg_sys.max_cooling_airflow_cfm.nil?
+        return clg_sys.max_cooling_airflow_cfm
       end
     elsif !htg_sys.nil?
-      if !htg_sys.heating_airflow_cfm.nil?
-        return htg_sys.heating_airflow_cfm
+      if !htg_sys.max_heating_airflow_cfm.nil?
+        return htg_sys.max_heating_airflow_cfm
       end
     elsif !clg_sys.nil?
-      if !clg_sys.cooling_airflow_cfm.nil?
-        return clg_sys.cooling_airflow_cfm
+      if !clg_sys.max_cooling_airflow_cfm.nil?
+        return clg_sys.max_cooling_airflow_cfm
       end
     end
     return

@@ -1581,19 +1581,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_heating_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Heating Airflow Rate')
-    arg.setDescription('The heating airflow rate. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('The heating airflow rate. If not provided, the OS-HPXML autosized default is used.')
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_cooling_airflow_cfm', false)
     arg.setDisplayName('HVAC Distribution: Cooling Airflow Rate')
-    arg.setDescription('The cooling airflow rate. If not provided, the OS-HPXML default is used.')
+    arg.setDescription('The cooling airflow rate. If not provided, the OS-HPXML autosized default is used.')
     arg.setUnits('CFM')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('hvac_distribution_existing_ductwork_restriction', false)
-    arg.setDisplayName('HVAC Distribution: Existing Ductwork Restriction')
-    arg.setDescription('Whether to use specified heating/cooling airflow rates to (a) adjust blower fan efficiency and (b) set maximum allowed airflow rates.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_max_heating_airflow_cfm', false)
+    arg.setDisplayName('HVAC Distribution: Maximum Heating Airflow Rate')
+    arg.setDescription('The heating airflow rate used to (a) set the maximum allowed heating airflow rate and (b) adjust blower fan efficiency.')
+    arg.setUnits('CFM')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_distribution_max_cooling_airflow_cfm', false)
+    arg.setDisplayName('HVAC Distribution: Maximum Cooling Airflow Rate')
+    arg.setDescription('The cooling airflow rate used to (a) set the maximum allowed cooling airflow rate and (b) adjust blower fan efficiency.')
+    arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)
@@ -4377,10 +4384,6 @@ class HPXMLFile
       hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
     end
 
-    if args[:hvac_distribution_existing_ductwork_restriction].is_initialized
-      hpxml_bldg.header.existing_ductwork_restriction = args[:hvac_distribution_existing_ductwork_restriction].get
-    end
-
     if args[:window_natvent_availability].is_initialized
       hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability].get
     end
@@ -5138,6 +5141,12 @@ class HPXMLFile
       end
     end
 
+    if args[:hvac_distribution_max_heating_airflow_cfm].is_initialized
+      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
+        max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
+      end
+    end
+
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
 
     if heating_system_type.include?('Shared')
@@ -5162,6 +5171,7 @@ class HPXMLFile
                                    pilot_light_btuh: pilot_light_btuh,
                                    fan_watts_per_cfm: fan_watts_per_cfm,
                                    heating_airflow_cfm: heating_airflow_cfm,
+                                   max_heating_airflow_cfm: max_heating_airflow_cfm,
                                    is_shared_system: is_shared_system,
                                    number_of_units_served: number_of_units_served,
                                    primary_system: true)
@@ -5230,6 +5240,12 @@ class HPXMLFile
       end
     end
 
+    if args[:hvac_distribution_max_cooling_airflow_cfm].is_initialized
+      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
+        max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
+      end
+    end
+
     if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type)
       if args[:cooling_system_integrated_heating_system_fuel].is_initialized
         integrated_heating_system_fuel = args[:cooling_system_integrated_heating_system_fuel].get
@@ -5264,6 +5280,7 @@ class HPXMLFile
                                    crankcase_heater_watts: cooling_system_crankcase_heater_watts,
                                    fan_watts_per_cfm: fan_watts_per_cfm,
                                    cooling_airflow_cfm: cooling_airflow_cfm,
+                                   max_cooling_airflow_cfm: max_cooling_airflow_cfm,
                                    primary_system: true,
                                    integrated_heating_system_fuel: integrated_heating_system_fuel,
                                    integrated_heating_system_capacity: integrated_heating_system_capacity,
@@ -5426,6 +5443,18 @@ class HPXMLFile
       end
     end
 
+    if args[:hvac_distribution_max_heating_airflow_cfm].is_initialized
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
+        max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
+      end
+    end
+
+    if args[:hvac_distribution_max_cooling_airflow_cfm].is_initialized
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
+        max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
+      end
+    end
+
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
     fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
 
@@ -5469,6 +5498,8 @@ class HPXMLFile
                               fan_watts_per_cfm: fan_watts_per_cfm,
                               heating_airflow_cfm: heating_airflow_cfm,
                               cooling_airflow_cfm: cooling_airflow_cfm,
+                              max_heating_airflow_cfm: max_heating_airflow_cfm,
+                              max_cooling_airflow_cfm: max_cooling_airflow_cfm,
                               primary_heating_system: primary_heating_system,
                               primary_cooling_system: primary_cooling_system)
 
