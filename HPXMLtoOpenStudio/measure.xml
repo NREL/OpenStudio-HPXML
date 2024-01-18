@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0046e785-7c56-4c04-8246-dac55e869ce2</version_id>
-  <version_modified>2024-01-02T20:27:22Z</version_modified>
+  <version_id>643c7183-2fcf-44a6-942b-8aed7bc2deb5</version_id>
+  <version_modified>2024-01-18T15:49:56Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -304,7 +304,7 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>826F3585</checksum>
+      <checksum>FB500527</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07465552</checksum>
+      <checksum>C4F99B75</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -352,7 +352,7 @@
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A109B2B5</checksum>
+      <checksum>4D3BB4E9</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -370,7 +370,7 @@
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>17DD9336</checksum>
+      <checksum>3FCE13DD</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
@@ -520,7 +520,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>62152E07</checksum>
+      <checksum>8D557A2A</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -562,7 +562,7 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6E12B2EB</checksum>
+      <checksum>6A61B98A</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -574,7 +574,7 @@
       <filename>xmlvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>84D0E4E1</checksum>
+      <checksum>87937B84</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
@@ -652,7 +652,7 @@
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>19948562</checksum>
+      <checksum>76D882A7</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5E426D14</checksum>
+      <checksum>3B854F22</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
