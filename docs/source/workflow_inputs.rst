@@ -1784,7 +1784,7 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                                double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                               double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAirflowCFM``                           double   cfm     >= 0         No        autosized
+  ``extension/HeatingAirflowCFM``                           double   cfm     >= 0             No        autosized
   ``extension/MaxHeatingAirflowCFM``                        double   cfm     >= 0             No
   ========================================================  =======  ======  ===============  ========  ==============  ===================
 
@@ -1984,7 +1984,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``CoolingDetailedPerformanceData``                                element                            No        <none>          Cooling detailed performance data [#]_
   ``extension/FanPowerWattsPerCFM``                                 double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/CoolingAirflowCFM``                                   double    cfm     >= 0             No        autosized
-  ``extension/MaxCoolingAirflowCFM``                                double   cfm      >= 0             No
+  ``extension/MaxCoolingAirflowCFM``                                double    cfm     >= 0             No
   ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0             No        50.0            Crankcase heater power
@@ -2356,8 +2356,8 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/HeatingAirflowCFM``                  double    cfm     >= 0             No        autosized
   ``extension/CoolingAirflowCFM``                  double    cfm     >= 0             No        autosized
-  ``extension/MaxHeatingAirflowCFM``               double   cfm      >= 0             No
-  ``extension/MaxCoolingAirflowCFM``               double   cfm      >= 0             No
+  ``extension/MaxHeatingAirflowCFM``               double    cfm     >= 0             No
+  ``extension/MaxCoolingAirflowCFM``               double    cfm     >= 0             No
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
