@@ -2,6 +2,9 @@
 
 __New Features__
 - Updates to HPXML v4.0-rc3.
+- Updates per ANSI/RESNET/ICC 301-2022:
+  - Updated default CFIS fan power to 0.58 W/cfm.
+  - Removed natural ventilation availability RH constraint; HR constraint remains.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Ground source heat pump enhancements:
