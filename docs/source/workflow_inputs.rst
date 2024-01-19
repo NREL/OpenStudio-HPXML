@@ -4079,7 +4079,7 @@ If not entered, the simulation will not include a refrigerator.
 
 .. note::
 
-  Refrigerator energy use is not currently affected by the ambient temperature where it is located.
+  Refrigerator energy use is only affected by the ambient temperature where it is located when ConstantCoefficients and TemperatureCoefficients are used.
 
 HPXML Freezers
 **************

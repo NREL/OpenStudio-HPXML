@@ -1481,6 +1481,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'refrigerator' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'refrigerator' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'refrigerator' schedule file and monthly multipliers provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
+                                                                                  "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
                                                                                   "Both 'extra_refrigerator' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'extra_refrigerator' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'extra_refrigerator' schedule file and monthly multipliers provided; the latter will be ignored.",
@@ -1602,6 +1604,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-non-stochastic.csv')
+        hpxml_bldg.refrigerators[0].constant_coefficients = '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544'
+        hpxml_bldg.refrigerators[0].temperature_coefficients = '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020'
         hpxml_bldg.hot_water_distributions[0].system_type = HPXML::DHWDistTypeRecirc
         hpxml_bldg.hot_water_distributions[0].recirculation_control_type = HPXML::DHWRecircControlTypeNone
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions

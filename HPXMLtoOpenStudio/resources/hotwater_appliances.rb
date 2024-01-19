@@ -151,16 +151,7 @@ class HotWaterAndAppliances
       if fridge_schedule.nil?
         fridge_unavailable_periods = Schedule.get_unavailable_periods(runner, fridge_col_name, unavailable_periods)
 
-        if !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
-          fridge_weekday_sch = refrigerator.weekday_fractions
-          fridge_weekend_sch = refrigerator.weekend_fractions
-          fridge_monthly_sch = refrigerator.monthly_multipliers
-
-          fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
-          fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
-          fridge_schedule = fridge_schedule_obj.schedule
-        end
-
+        # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           fridge_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
 
@@ -210,11 +201,22 @@ class HotWaterAndAppliances
           fridge_schedule_pcm.setName("#{fridge_schedule.name} program calling manager")
           fridge_schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
           fridge_schedule_pcm.addProgram(fridge_schedule_program)
+
+        elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
+          fridge_weekday_sch = refrigerator.weekday_fractions
+          fridge_weekend_sch = refrigerator.weekend_fractions
+          fridge_monthly_sch = refrigerator.monthly_multipliers
+
+          fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
+          fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
+          fridge_schedule = fridge_schedule_obj.schedule
         end
       else
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !refrigerator.weekday_fractions.nil?
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !refrigerator.weekend_fractions.nil?
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !refrigerator.monthly_multipliers.nil?
+        runner.registerWarning("Both '#{fridge_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !refrigerator.constant_coefficients.nil?
+        runner.registerWarning("Both '#{fridge_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !refrigerator.temperature_coefficients.nil?
       end
 
       rf_space = refrigerator.additional_properties.space
