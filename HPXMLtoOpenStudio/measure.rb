@@ -2046,7 +2046,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @hpxml_bldg.batteries.each do |battery|
       # Assign space
       battery.additional_properties.space = SpaceOrSchedule.get_space_from_location(battery.location, spaces)
-      Battery.apply(runner, model, @hpxml_bldg.pv_systems, battery, @schedules_file, @hpxml_bldg.building_construction.number_of_units)
+      Battery.apply(runner, model, @nbeds, @hpxml_bldg.pv_systems, battery, @schedules_file, @hpxml_bldg.building_construction.number_of_units)
     end
   end
 

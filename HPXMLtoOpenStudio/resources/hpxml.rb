@@ -6187,9 +6187,9 @@ class HPXML < Object
   end
 
   class Battery < BaseElement
-    ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output,
-             :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
-             :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah]
+    ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output, :nominal_capacity_kwh, :nominal_capacity_ah,
+             :nominal_voltage, :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah, :is_shared_system,
+             :number_of_bedrooms_served]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6208,6 +6208,7 @@ class HPXML < Object
       battery = XMLHelper.add_element(batteries, 'Battery')
       sys_id = XMLHelper.add_element(battery, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(battery, 'IsSharedSystem', @is_shared_system, :boolean, @is_shared_system_isdefaulted) unless @is_shared_system.nil?
       XMLHelper.add_element(battery, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(battery, 'BatteryType', @type, :string) unless @type.nil?
       if not @nominal_capacity_kwh.nil?
@@ -6234,12 +6235,14 @@ class HPXML < Object
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
       XMLHelper.add_element(battery, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+      XMLHelper.add_extension(battery, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer) unless @number_of_bedrooms_served.nil?
     end
 
     def from_doc(battery)
       return if battery.nil?
 
       @id = HPXML::get_id(battery)
+      @is_shared_system = XMLHelper.get_value(battery, 'IsSharedSystem', :boolean)
       @location = XMLHelper.get_value(battery, 'Location', :string)
       @type = XMLHelper.get_value(battery, 'BatteryType', :string)
       @nominal_capacity_kwh = XMLHelper.get_value(battery, "NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
@@ -6250,6 +6253,7 @@ class HPXML < Object
       @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @round_trip_efficiency = XMLHelper.get_value(battery, 'RoundTripEFficiency', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
+      @number_of_bedrooms_served = XMLHelper.get_value(battery, 'extension/NumberofBedroomsServed', :integer)
     end
   end
 
