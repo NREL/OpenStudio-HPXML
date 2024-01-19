@@ -2155,6 +2155,12 @@
 									<xs:element minOccurs="0" name="ModelNumber" type="Model"/>
 									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="IsSharedSystem" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>Does the system serve multiple building/dwelling units?</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="NumberofUnitsServed" type="HPXMLInteger"/>
 									<xs:element minOccurs="0" name="YearInstalled" type="Year"/>
 									<xs:element minOccurs="0" name="Count" type="IntegerGreaterThanZero">
 										<xs:annotation>
