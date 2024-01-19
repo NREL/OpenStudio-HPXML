@@ -2237,6 +2237,10 @@ class HPXMLDefaults
         battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
+      if battery.is_shared_system.nil?
+        battery.is_shared_system = false
+        battery.is_shared_system_isdefaulted = true
+      end
       # if battery.lifetime_model.nil?
       # battery.lifetime_model = default_values[:lifetime_model]
       # battery.lifetime_model_isdefaulted = true
