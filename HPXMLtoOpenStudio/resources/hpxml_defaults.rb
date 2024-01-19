@@ -2642,19 +2642,19 @@ class HPXMLDefaults
       hpxml_bldg.lighting.exterior_usage_multiplier_isdefaulted = true
     end
     default_lighting_monthly_multipliers = Schedule.LightingMonthlyMultipliers
-    schedules_file_includes_lighting_interior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnLightingInterior))
-    if hpxml_bldg.lighting.interior_weekday_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekday_fractions = Schedule.LightingInteriorWeekdayFractions
-      hpxml_bldg.lighting.interior_weekday_fractions_isdefaulted = true
-    end
-    if hpxml_bldg.lighting.interior_weekend_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekend_fractions = Schedule.LightingInteriorWeekendFractions
-      hpxml_bldg.lighting.interior_weekend_fractions_isdefaulted = true
-    end
-    if hpxml_bldg.lighting.interior_monthly_multipliers.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_monthly_multipliers = default_lighting_monthly_multipliers
-      hpxml_bldg.lighting.interior_monthly_multipliers_isdefaulted = true
-    end
+    # schedules_file_includes_lighting_interior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnLightingInterior))
+    # if hpxml_bldg.lighting.interior_weekday_fractions.nil? && !schedules_file_includes_lighting_interior
+    # hpxml_bldg.lighting.interior_weekday_fractions = Schedule.LightingInteriorWeekdayFractions
+    # hpxml_bldg.lighting.interior_weekday_fractions_isdefaulted = true
+    # end
+    # if hpxml_bldg.lighting.interior_weekend_fractions.nil? && !schedules_file_includes_lighting_interior
+    # hpxml_bldg.lighting.interior_weekend_fractions = Schedule.LightingInteriorWeekendFractions
+    # hpxml_bldg.lighting.interior_weekend_fractions_isdefaulted = true
+    # end
+    # if hpxml_bldg.lighting.interior_monthly_multipliers.nil? && !schedules_file_includes_lighting_interior
+    # hpxml_bldg.lighting.interior_monthly_multipliers = default_lighting_monthly_multipliers
+    # hpxml_bldg.lighting.interior_monthly_multipliers_isdefaulted = true
+    # end
     if hpxml_bldg.has_location(HPXML::LocationGarage)
       schedules_file_includes_lighting_garage = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnLightingGarage))
       if hpxml_bldg.lighting.garage_weekday_fractions.nil? && !schedules_file_includes_lighting_garage

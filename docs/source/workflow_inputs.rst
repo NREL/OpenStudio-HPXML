@@ -4231,15 +4231,17 @@ With either lighting specification, additional information can be entered in ``/
   ``extension/InteriorMonthlyScheduleMultipliers``  array                         No                  12 comma-separated interior monthly multipliers
   ``extension/GarageWeekdayScheduleFractions``      array                         No        See [#]_  24 comma-separated garage weekday fractions
   ``extension/GarageWeekendScheduleFractions``      array                         No                  24 comma-separated garage weekend fractions
-  ``extension/GarageMonthlyScheduleMultipliers``    array                         No                  12 comma-separated garage monthly multipliers
+  ``extension/GarageMonthlyScheduleMultipliers``    array                         No        See [#]_  12 comma-separated garage monthly multipliers
   ``extension/ExteriorWeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated exterior weekday fractions
   ``extension/ExteriorWeekendScheduleFractions``    array                         No                  24 comma-separated exterior weekend fractions
-  ``extension/ExteriorMonthlyScheduleMultipliers``  array                         No                  12 comma-separated exterior monthly multipliers
+  ``extension/ExteriorMonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated exterior monthly multipliers
   ================================================  =======  ======  ===========  ========  ========  ===============================================
 
-  .. [#] If *interior* schedule values not provided (and :ref:`schedules_detailed` not used), they will be defaulted TODO.
-  .. [#] If *garage* schedule values not provided (and :ref:`schedules_detailed` not used), they will be defaulted TODO.
-  .. [#] If *exterior* schedule values not provided (and :ref:`schedules_detailed` not used), they will be defaulted TODO.
+  .. [#] If *interior* schedule values not provided (and :ref:`schedules_detailed` not used), they will be calculated using Lighting Calculation Option 2 (location-dependent lighting profile) of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ and default monthly multipliers from Table C.3(4) of ANSI/RESNET/ICC 301-2022: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
+  .. [#] If GarageWeekdayScheduleFractions or GarageWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(3) of ANSI/RESNET/ICC 301-2022 are used: "0.023, 0.019, 0.015, 0.017, 0.021, 0.031, 0.042, 0.041, 0.034, 0.029, 0.027, 0.025, 0.021, 0.021, 0.021, 0.026, 0.031, 0.044, 0.084, 0.117, 0.113, 0.096, 0.063, 0.039".
+  .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
+  .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(3) of ANSI/RESNET/ICC 301-2022 are used: "0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.165, 0.056, 0.047".
+  .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
 
 If exterior holiday lighting is specified, additional information is entered in ``/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting``.
 
