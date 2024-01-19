@@ -3414,7 +3414,19 @@ class HVAC
 
       applied = true
       distribution_system = heating_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
       hydronic_type = distribution_system.hydronic_type
+
+      if heating_system.heating_system_type == HPXML::HVACTypeBoiler
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+        if distribution_system.air_type == HPXML::AirTypeFanCoil
+          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+        else
+          aux_in = 0.0
+        end
+        heating_system.electric_auxiliary_energy = (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
+      end
 
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_type.to_s == HPXML::HydronicTypeWaterLoop
 
