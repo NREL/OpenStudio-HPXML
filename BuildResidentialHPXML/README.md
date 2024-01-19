@@ -4075,6 +4075,19 @@ The round trip efficiency of the lithium ion battery. If not provided, the OS-HP
 
 <br/>
 
+**Battery: Number of Bedrooms Served**
+
+Number of bedrooms served by the lithium ion battery. Required if single-family attached or apartment unit. Used to apportion battery charging/discharging to the unit of a SFA/MF building.
+
+- **Name:** ``battery_num_bedrooms_served``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
+
+- **Required:** ``false``
+
+<br/>
+
 **Lighting: Present**
 
 Whether there is lighting energy use.

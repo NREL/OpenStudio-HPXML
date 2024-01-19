@@ -3765,7 +3765,7 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   ``MaxPowerOutput``                                       double             W                 >= 0                      Yes                  Peak power
   ``SystemLossesFraction`` or ``YearModulesManufactured``  double or integer  frac or #         >= 0, <= 1 or > 1600      No        0.14 [#]_  System losses [#]_
   ``AttachedToInverter``                                   idref                                See [#]_                  Yes                  ID of attached inverter
-  ``extension/NumberofBedroomsServed``                     integer                              > 1                       See [#]_             Number of bedrooms served
+  ``extension/NumberofBedroomsServed``                     integer                              > NumberofBedrooms        See [#]_             Number of bedrooms served
   =======================================================  =================  ================  ========================  ========  =========  ============================================
   
   .. [#] Location choices are "ground" or "roof" mounted.
@@ -3801,8 +3801,8 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
          
   .. [#] System losses due to soiling, shading, snow, mismatch, wiring, degradation, etc.
   .. [#] AttachedToInverter must reference an ``Inverter``.
-  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
-         PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 In addition, an inverter must be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
@@ -3825,6 +3825,7 @@ If not entered, the simulation will not include batteries.
   Element                                               Type     Units      Constraints              Required  Default   Notes
   ====================================================  =======  =========  =======================  ========  ========  ============================================
   ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
+  ``IsSharedSystem``                                    boolean                                      No        false     Whether it serves multiple dwelling units
   ``Location``                                          string              See [#]_                 No        See [#]_  Location
   ``BatteryType``                                       string              See [#]_                 Yes                 Battery type
   ``NominalCapacity[Units="kWh" or Units="Ah"]/Value``  double   kWh or Ah  >= 0                     No        See [#]_  Nominal (total) capacity
@@ -3832,6 +3833,7 @@ If not entered, the simulation will not include batteries.
   ``RatedPowerOutput``                                  double   W          >= 0                     No        See [#]_  Power output under non-peak conditions
   ``NominalVoltage``                                    double   V          >= 0                     No        50        Nominal voltage
   ``RoundTripEfficiency``                               double   frac       > 0, <= 1                No        0.925     Round trip efficiency
+  ``extension/NumberofBedroomsServed``                  integer             > NumberofBedrooms       See [#]_            Number of bedrooms served
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "attic - vented", "attic - unvented", "garage", or "outside".
@@ -3840,12 +3842,19 @@ If not entered, the simulation will not include batteries.
   .. [#] If NominalCapacity not provided, defaults to UsableCapacity / 0.9 if UsableCapacity provided, else (RatedPowerOutput / 1000) / 0.5 if RatedPowerOutput provided, else 10 kWh.
   .. [#] If UsableCapacity not provided, defaults to 0.9 * NominalCapacity.
   .. [#] If RatedPowerOutput not provided, defaults to 0.5 * NominalCapacity * 1000.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Battery charging/discharging will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the battery per ANSI/RESNET/ICC 301-2022 Addendum C.
 
  .. note::
 
-  An unscheduled battery in a home with photovoltaics (PV) will be controlled using a simple control strategy designed to maximize on site consumption of energy. The battery will charge if PV production is greater than the building load and the battery is below its maximum capacity, while the battery will discharge if the building load is greater than PV production and the battery is above its minimum capacity.
+  An unscheduled battery in a home with photovoltaics (PV) will be controlled using a simple control strategy designed to maximize on site consumption of energy.
+  The battery will charge if PV production is greater than the building electrical load and the battery is below its maximum capacity, while the battery will discharge if the building electrical load is greater than PV production and the battery is above its minimum capacity.
 
-  A battery can alternatively be controlled using :ref:`schedules_detailed`, where charging and discharging schedules are defined. Positive schedule values control timing and magnitude of charging storage. Negative schedule values control timing and magnitude of discharging storage. Simultaneous charging and discharging of the battery is not allowed. The round trip efficiency affects charging and discharging; the reported charging and discharging rates will be larger than the schedule value by an amount equal to the losses due to the round trip efficiency.
+  A battery can alternatively be controlled using :ref:`schedules_detailed`, where charging and discharging schedules are defined.
+  Positive schedule values control timing and magnitude of charging storage.
+  Negative schedule values control timing and magnitude of discharging storage.
+  Simultaneous charging and discharging of the battery is not allowed.
+  The round trip efficiency affects charging and discharging; the reported charging and discharging rates will be larger than the schedule value by an amount equal to the losses due to the round trip efficiency.
 
   A battery in a home without PV or charging/discharging schedules is assumed to operate as backup and is not modeled.
 
@@ -3855,21 +3864,21 @@ HPXML Generators
 Each generator that provides on-site power is entered as a ``/HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator``.
 If not entered, the simulation will not include generators.
 
-  ==========================  =======  =======  ===========  ========  =======  ============================================
-  Element                     Type     Units    Constraints  Required  Default  Notes
-  ==========================  =======  =======  ===========  ========  =======  ============================================
-  ``SystemIdentifier``        id                             Yes                Unique identifier
-  ``IsSharedSystem``          boolean                        No        false    Whether it serves multiple dwelling units
-  ``FuelType``                string            See [#]_     Yes                Fuel type
-  ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0          Yes                Annual fuel consumed
-  ``AnnualOutputkWh``         double   kWh/yr   > 0 [#]_     Yes                Annual electricity produced
-  ``NumberofBedroomsServed``  integer           > 1          See [#]_           Number of bedrooms served
-  ==========================  =======  =======  ===========  ========  =======  ============================================
+  ==========================  =======  =======  ==================  ========  =======  ============================================
+  Element                     Type     Units    Constraints         Required  Default  Notes
+  ==========================  =======  =======  ==================  ========  =======  ============================================
+  ``SystemIdentifier``        id                                    Yes                Unique identifier
+  ``IsSharedSystem``          boolean                               No        false    Whether it serves multiple dwelling units
+  ``FuelType``                string            See [#]_            Yes                Fuel type
+  ``AnnualConsumptionkBtu``   double   kBtu/yr  > 0                 Yes                Annual fuel consumed
+  ``AnnualOutputkWh``         double   kWh/yr   > 0 [#]_            Yes                Annual electricity produced
+  ``NumberofBedroomsServed``  integer           > NumberofBedrooms  See [#]_           Number of bedrooms served
+  ==========================  =======  =======  ==================  ========  =======  ============================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] AnnualOutputkWh must also be < AnnualConsumptionkBtu*3.412 (i.e., the generator must consume more energy than it produces).
-  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true, in which case it must be > NumberofBedrooms.
-         Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Annual consumption and annual production will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the generator per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. note::
 

@@ -2447,6 +2447,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
+    arg.setDisplayName('Battery: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served by the lithium ion battery. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
+    arg.setUnits('#')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
     arg.setDisplayName('Lighting: Present')
     arg.setDescription('Whether there is lighting energy use.')
@@ -6390,13 +6396,22 @@ class HPXMLFile
       round_trip_efficiency = args[:battery_round_trip_efficiency].get
     end
 
+    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+      if args[:battery_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+        is_shared_system = true
+        number_of_bedrooms_served = args[:battery_num_bedrooms_served].get
+      end
+    end
+
     hpxml_bldg.batteries.add(id: "Battery#{hpxml_bldg.batteries.size + 1}",
                              type: HPXML::BatteryTypeLithiumIon,
                              location: location,
                              rated_power_output: rated_power_output,
                              nominal_capacity_kwh: nominal_capacity_kwh,
                              usable_capacity_kwh: usable_capacity_kwh,
-                             round_trip_efficiency: round_trip_efficiency)
+                             round_trip_efficiency: round_trip_efficiency,
+                             is_shared_system: is_shared_system,
+                             number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
   def self.set_lighting(hpxml_bldg, args)
