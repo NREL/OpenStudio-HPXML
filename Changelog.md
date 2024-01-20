@@ -3,6 +3,8 @@
 __New Features__
 - Updates to HPXML v4.0-rc3.
 - Updates per ANSI/RESNET/ICC 301-2022:
+  - **Breaking change**: Shared boilers require `SharedLoopWatts` (and `FanCoilWatts` if a fan coil system) inputs; removed EAE input/defaults.
+  - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
@@ -12,7 +14,6 @@ __New Features__
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
-- Allows shared batteries (batteries serving multiple dwelling units).
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
