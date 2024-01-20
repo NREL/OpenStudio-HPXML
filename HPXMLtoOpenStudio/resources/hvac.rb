@@ -2001,31 +2001,16 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_in_unit_boiler_eae(heating_system)
+  def self.get_default_in_unit_boiler_eae(boiler_fuel)
     # Electric auxiliary energy, from ANSI/RESNET/ICC 301-2022 Addendum C Standard
-    if heating_system.heating_system_type != HPXML::HVACTypeBoiler
-      return
-    end
-    if heating_system.is_shared_system
-      return
-    end
-
-    fuel = heating_system.heating_system_fuel
-    if fuel == HPXML::FuelTypeElectricity
-      return
-    end
-
-    if not heating_system.electric_auxiliary_energy.nil?
-      return heating_system.electric_auxiliary_energy
-    end
-
     if [HPXML::FuelTypeNaturalGas,
         HPXML::FuelTypePropane,
+        HPXML::FuelTypeElectricity,
         HPXML::FuelTypeWoodCord,
-        HPXML::FuelTypeWoodPellets].include? fuel
-      return 170.0 # Gas, kWh/yr
+        HPXML::FuelTypeWoodPellets].include? boiler_fuel
+      return 170.0 # kWh/yr
     else
-      return 330.0 # Oil, kWh/yr
+      return 330.0 # kWh/yr
     end
   end
 
