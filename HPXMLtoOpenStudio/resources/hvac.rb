@@ -3414,7 +3414,6 @@ class HVAC
 
       applied = true
       distribution_system = heating_system.distribution_system
-      distribution_type = distribution_system.distribution_system_type
       hydronic_type = distribution_system.hydronic_type
 
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler
