@@ -455,39 +455,38 @@ class HPXML < Object
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml_doc, 'schemaVersion'))
 
       # Get value of WholeSFAorMFBuildingSimulation element
-      if not building_id.nil?
-        whole_sfa_or_mf_building_sim = false # Overrides WholeSFAorMFBuildingSimulation element
-      else
-        whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
-        whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
+      whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
+      has_mult_building_elements = XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
+      if has_mult_building_elements
+        if whole_sfa_or_mf_building_sim && (not building_id.nil?)
+          @errors << 'Multiple Building elements defined in HPXML file and WholeSFAorMFBuildingSimulation=true; Building ID argument cannot be provided.'
+          return unless @errors.empty?
+        elsif building_id.nil? && !whole_sfa_or_mf_building_sim
+          @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided or set WholeSFAorMFBuildingSimulation=true.'
+          return unless @errors.empty?
+        end
       end
 
       # Handle multiple buildings
       # Do this before schematron validation so that:
       # 1. We don't give schematron warnings for Building elements that are not of interest.
       # 2. The schematron validation occurs faster (as we're only validating one Building).
-      if XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
-        if building_id.nil? && !whole_sfa_or_mf_building_sim
-          @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.'
+      if has_mult_building_elements && (not building_id.nil?)
+        # Discard all Building elements except the one of interest
+        XMLHelper.get_elements(hpxml_doc, 'Building').reverse_each do |building|
+          next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
+
+          building.remove
+        end
+        if XMLHelper.get_elements(hpxml_doc, 'Building').size == 0
+          @errors << "Could not find Building element with ID '#{building_id}'."
           return unless @errors.empty?
         end
 
-        if not building_id.nil?
-          # Discard all Building elements except the one of interest
-          XMLHelper.get_elements(hpxml_doc, 'Building').reverse_each do |building|
-            next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
-
-            building.remove
-          end
-          if XMLHelper.get_elements(hpxml_doc, 'Building').size == 0
-            @errors << "Could not find Building element with ID '#{building_id}'."
-            return unless @errors.empty?
-          end
-
-          # Write new HPXML file with all other Building elements removed
-          hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
-          XMLHelper.write_file(hpxml_doc, hpxml_path)
-        end
+        # Write new HPXML file with all other Building elements removed
+        hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
+        XMLHelper.write_file(hpxml_doc, hpxml_path)
       end
 
       # Validate against Schematron
