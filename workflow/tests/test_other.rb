@@ -231,7 +231,7 @@ class WorkflowOtherTest < Minitest::Test
     end
   end
 
-  def test_whole_mf_building_simulation
+  def test_mf_building_simulations
     dryer_warning_msg = 'Warning: No clothes dryer specified, the model will not include clothes dryer energy use.'
 
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base-bldgtype-mf-whole-building.xml')

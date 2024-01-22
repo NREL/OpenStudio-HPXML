@@ -5,7 +5,7 @@ def run_simulation_tests(xmls)
   puts "Running #{xmls.size} HPXML files..."
   all_results = {}
   all_results_bills = {}
-  Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+  Parallel.map(xmls, in_threads: 1) do |xml|
     next if xml.end_with? '-10x.xml'
     next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
 
@@ -36,7 +36,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
 
     # Create copy of the HPXML where the number of Building elements is doubled
     # and each Building is assigned a unit multiplier of 5 (2x5=10).
-    n_units = 0
     n_bldgs = hpxml.buildings.size
     for i in 0..n_bldgs - 1
       hpxml_bldg = hpxml.buildings[i]
@@ -54,9 +53,8 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
         hpxml_bldg.building_construction.number_of_units *= 5
       end
       hpxml.buildings << hpxml_bldg.dup
-      n_units += hpxml_bldg.building_construction.number_of_units
     end
-    unit_multiplier = n_units / orig_multiplier
+    unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
     if unit_multiplier > 1
       hpxml.header.whole_sfa_or_mf_building_sim = true
     end
@@ -64,7 +62,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
     hpxml_doc = hpxml.to_doc()
     hpxml.set_unique_hpxml_ids(hpxml_doc)
     XMLHelper.write_file(hpxml_doc, xml)
-    unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
   end
 
   print "Testing #{File.basename(xml)}...\n"
