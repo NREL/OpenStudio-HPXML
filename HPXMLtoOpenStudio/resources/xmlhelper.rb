@@ -28,12 +28,16 @@ class XMLHelper
         # If value provided, datatype required
         fail 'Unexpected datatype.'
       end
-      added.inner_text = value.to_s
+      set_value(added, value)
     end
     if defaulted
       XMLHelper.add_attribute(added, 'dataSource', 'software')
     end
     return added
+  end
+
+  def self.set_value(element, value)
+    element.inner_text = value.to_s
   end
 
   # Adds the child element with 'element_name' to a single extension element and

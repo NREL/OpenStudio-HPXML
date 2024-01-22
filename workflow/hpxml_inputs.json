@@ -2900,11 +2900,7 @@
     "permanent_spa_heater_annual_kwh": 1300,
     "permanent_spa_heater_usage_multiplier": 0.9
   },
-  "sample_files/base-multiple-sfd-buildings.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "clothes_dryer_present": false
-  },
-  "sample_files/base-multiple-mf-units.xml": {
+  "sample_files/base-bldgtype-mf-whole-building.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_type": "apartment unit",
     "geometry_unit_right_wall_is_adiabatic": true,
@@ -2931,7 +2927,8 @@
     "heating_system_type": "ElectricResistance",
     "heating_system_fuel": "electricity",
     "heating_system_heating_efficiency": 1,
-    "heating_system_heating_capacity": 12000
+    "heating_system_heating_capacity": 12000,
+    "clothes_dryer_present": false
   },
   "sample_files/base-pv.xml": {
     "parent_hpxml": "sample_files/base.xml",

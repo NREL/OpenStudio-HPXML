@@ -169,7 +169,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     @hpxml_buildings = hpxml.buildings
     if @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
       uses_unit_multipliers = @hpxml_buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
-      if uses_unit_multipliers || (@hpxml_buildings.size > 1 && building_id == 'ALL')
+      if uses_unit_multipliers || (@hpxml_buildings.size > 1 && !hpxml.header.whole_sfa_or_mf_building_sim)
         return result
       end
     end

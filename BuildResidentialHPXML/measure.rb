@@ -3608,7 +3608,7 @@ class HPXMLFile
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
 
-    hpxml = HPXML.new(hpxml_path: existing_hpxml_path, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: existing_hpxml_path)
 
     if not set_header(runner, hpxml, args)
       return false
@@ -4219,6 +4219,10 @@ class HPXMLFile
                         dst_begin_day: dst_begin_day,
                         dst_end_month: dst_end_month,
                         dst_end_day: dst_end_day)
+
+    if hpxml.buildings.size > 1 && hpxml.header.whole_sfa_or_mf_building_sim.nil?
+      hpxml.header.whole_sfa_or_mf_building_sim = true
+    end
 
     return hpxml.buildings[-1]
   end

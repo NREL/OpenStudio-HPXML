@@ -280,14 +280,13 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_multiple_buildings
-    hpxml = _create_hpxml('base-multiple-sfd-buildings.xml')
+    hpxml = _create_hpxml('base-bldgtype-mf-whole-building.xml')
     hpxml.buildings.each do |hpxml_bldg|
       hpxml_bldg.header.schedules_filepaths = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
-    @args_hash['building_id'] = 'ALL'
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
@@ -359,7 +358,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_multiple_buildings_id
-    hpxml = _create_hpxml('base-multiple-sfd-buildings.xml')
+    hpxml = _create_hpxml('base-bldgtype-mf-whole-building.xml')
     hpxml.buildings.each do |hpxml_bldg|
       hpxml_bldg.header.schedules_filepaths = nil
     end
@@ -440,12 +439,12 @@ class BuildResidentialScheduleFileTest < Minitest::Test
       assert_equal('Success', result.value.valueName)
     end
 
-    hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path)
 
     return hpxml, result
   end
 
   def _create_hpxml(hpxml_name)
-    return HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name), building_id: 'ALL')
+    return HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
   end
 end

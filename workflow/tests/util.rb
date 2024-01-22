@@ -7,7 +7,6 @@ def run_simulation_tests(xmls)
   all_results_bills = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next if xml.include? 'base-multiple-sfd-buildings' # Separate tests cover this
     next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
 
     xml_name = File.basename(xml)
@@ -27,7 +26,7 @@ end
 def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
   unit_multiplier = 1
   if apply_unit_multiplier
-    hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: xml)
     hpxml.buildings.each do |hpxml_bldg|
       next unless hpxml_bldg.building_construction.number_of_units.nil?
 
@@ -37,6 +36,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
 
     # Create copy of the HPXML where the number of Building elements is doubled
     # and each Building is assigned a unit multiplier of 5 (2x5=10).
+    n_units = 0
     n_bldgs = hpxml.buildings.size
     for i in 0..n_bldgs - 1
       hpxml_bldg = hpxml.buildings[i]
@@ -54,6 +54,11 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
         hpxml_bldg.building_construction.number_of_units *= 5
       end
       hpxml.buildings << hpxml_bldg.dup
+      n_units += hpxml_bldg.building_construction.number_of_units
+    end
+    unit_multiplier = n_units / orig_multiplier
+    if unit_multiplier > 1
+      hpxml.header.whole_sfa_or_mf_building_sim = true
     end
     xml.gsub!('.xml', '-10x.xml')
     hpxml_doc = hpxml.to_doc()
@@ -69,9 +74,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
   # inside the ReportSimulationOutput measure.
   cli_path = OpenStudio.getOpenStudioCLI
   command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
-  if unit_multiplier > 1
-    command += ' -b ALL'
-  end
   success = system(command)
 
   if unit_multiplier > 1
@@ -97,7 +99,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
   hpxml_defaults_path = File.join(rundir, 'in.xml')
   schema_validator = XMLValidator.get_schema_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
   schematron_validator = XMLValidator.get_schematron_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml'))
-  hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: 'ALL') # Validate in.xml to ensure it can be run back through OS-HPXML
+  hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
   if not hpxml.errors.empty?
     puts 'ERRORS:'
     hpxml.errors.each do |error|

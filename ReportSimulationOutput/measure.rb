@@ -605,7 +605,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Retrieve outputs
-    outputs = get_outputs(runner, args, building_id)
+    outputs = get_outputs(runner, args)
 
     if not check_for_errors(runner, outputs)
       return false
@@ -709,7 +709,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return ts_output
   end
 
-  def get_outputs(runner, args, building_id)
+  def get_outputs(runner, args)
     outputs = {}
 
     args = setup_timeseries_includes(@emissions, args)
@@ -1105,7 +1105,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       heated_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
       heated_zones.each do |heated_zone|
         var_name = 'Temperature: Heating Setpoint'
-        if building_id == 'ALL'
+        if @hpxml_header.whole_sfa_or_mf_building_sim
           unit_num = @model.getThermalZones.find { |z| z.name.to_s == heated_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsInteger('unit_num').get
           var_name = "Temperature: Unit#{unit_num} Heating Setpoint"
         end
@@ -1119,7 +1119,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       cooled_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
       cooled_zones.each do |cooled_zone|
         var_name = 'Temperature: Cooling Setpoint'
-        if building_id == 'ALL'
+        if @hpxml_header.whole_sfa_or_mf_building_sim
           unit_num = @model.getThermalZones.find { |z| z.name.to_s == cooled_zone }.spaces[0].buildingUnit.get.additionalProperties.getFeatureAsInteger('unit_num').get
           var_name = "Temperature: Unit#{unit_num} Cooling Setpoint"
         end

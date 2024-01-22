@@ -99,6 +99,19 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
 
+HPXML Whole SFA/MF Building
+***************************
+
+WRITE TEXT HERE; COMBINE WITH "Whole SFA/MF Buildings" Section.
+
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
+  Element                             Type      Units  Constraints  Required  Default   Notes
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
+  ``WholeSFAorMFBuildingSimulation``  boolean                       No        false     Whether to run an individual dwelling unit or whole building for SFA/MF [#]_
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
+
+  .. [#] WholeSFAorMFBuildingSimulation is only used if ResidentialFacilityType is "apartment unit" or "single-family detached".
+
 HPXML Emissions Scenarios
 *************************
 
@@ -380,7 +393,7 @@ As of OpenStudio-HPXML v1.7.0, a new capability was added for modeling whole SFA
 For these simulations:
 
 - Each dwelling unit is described by a separate ``Building`` element in the HPXML file.
-- To run the single combined simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
+- FIXME: To run the single combined simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
 - Unit multipliers (using the ``NumberofUnits`` element) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
 - Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones.
 - Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit.

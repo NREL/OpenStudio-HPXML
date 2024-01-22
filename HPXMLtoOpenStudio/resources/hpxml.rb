@@ -436,6 +436,7 @@ class HPXML < Object
     @hpxml_path = hpxml_path
     @errors = []
     @warnings = []
+    building_id = nil if building_id.to_s.empty?
 
     hpxml_doc = nil
     if not hpxml_path.nil?
@@ -453,30 +454,43 @@ class HPXML < Object
       hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
       Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml_doc, 'schemaVersion'))
 
+      # Get value of WholeSFAorMFBuildingSimulation element
+      if not building_id.nil?
+        # Override WholeSFAorMFBuildingSimulation element
+        whole_el = XMLHelper.get_element(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation')
+        if not whole_el.nil?
+          XMLHelper.set_value(whole_el, false)
+        end
+      end
+      whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
+
       # Handle multiple buildings
       # Do this before schematron validation so that:
       # 1. We don't give schematron warnings for Building elements that are not of interest.
       # 2. The schematron validation occurs faster (as we're only validating one Building).
-      if (XMLHelper.get_elements(hpxml_doc, 'Building').size > 1) && (building_id.to_s.downcase != 'all')
-        if building_id.nil?
+      if XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
+        if building_id.nil? && !whole_sfa_or_mf_building_sim
           @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided.'
           return unless @errors.empty?
         end
 
-        # Discard all Building elements except the one of interest
-        XMLHelper.get_elements(hpxml_doc, 'Building').reverse_each do |building|
-          next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
+        if not building_id.nil?
+          # Discard all Building elements except the one of interest
+          XMLHelper.get_elements(hpxml_doc, 'Building').reverse_each do |building|
+            next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
 
-          building.remove
-        end
-        if XMLHelper.get_elements(hpxml_doc, 'Building').size == 0
-          @errors << "Could not find Building element with ID '#{building_id}'."
-          return unless @errors.empty?
-        end
+            building.remove
+          end
+          if XMLHelper.get_elements(hpxml_doc, 'Building').size == 0
+            @errors << "Could not find Building element with ID '#{building_id}'."
+            return unless @errors.empty?
+          end
 
-        # Write new HPXML file with all other Building elements removed
-        hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
-        XMLHelper.write_file(hpxml_doc, hpxml_path)
+          # Write new HPXML file with all other Building elements removed
+          hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
+          XMLHelper.write_file(hpxml_doc, hpxml_path)
+        end
       end
 
       # Validate against Schematron
@@ -680,7 +694,7 @@ class HPXML < Object
              :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
-             :iecc_eri_calculation_version, :zerh_calculation_version]
+             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -728,6 +742,7 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramUsed', @software_program_used, :string) unless @software_program_used.nil?
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
+      XMLHelper.add_extension(software_info, 'WholeSFAorMFBuildingSimulation', @whole_sfa_or_mf_building_sim, :boolean) unless @whole_sfa_or_mf_building_sim.nil?
       { 'ERICalculation' => @eri_calculation_version,
         'CO2IndexCalculation' => @co2index_calculation_version,
         'EnergyStarCalculation' => @energystar_calculation_version,
@@ -777,6 +792,7 @@ class HPXML < Object
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
+      @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @utility_bill_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @unavailable_periods.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
