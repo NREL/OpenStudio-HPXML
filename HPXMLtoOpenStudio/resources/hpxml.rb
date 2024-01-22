@@ -456,14 +456,11 @@ class HPXML < Object
 
       # Get value of WholeSFAorMFBuildingSimulation element
       if not building_id.nil?
-        # Override WholeSFAorMFBuildingSimulation element
-        whole_el = XMLHelper.get_element(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation')
-        if not whole_el.nil?
-          XMLHelper.set_value(whole_el, false)
-        end
+        whole_sfa_or_mf_building_sim = false # Overrides WholeSFAorMFBuildingSimulation element
+      else
+        whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+        whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
       end
-      whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
-      whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
 
       # Handle multiple buildings
       # Do this before schematron validation so that:
