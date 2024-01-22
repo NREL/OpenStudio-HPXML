@@ -680,6 +680,9 @@
     "refrigerator_present": false,
     "cooking_range_oven_present": false
   },
+  "sample_files/base-appliances-refrigerator-temperature-dependent-schedule.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
