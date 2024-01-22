@@ -7,7 +7,7 @@ def run_simulation_tests(xmls)
   all_results_bills = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
+    next if xml.include? 'base-bldgtype-mf-whole-building' # Separate tests cover this
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)

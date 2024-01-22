@@ -287,6 +287,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    @args_hash['building_id'] = 'ALL'
     hpxml, result = _test_measure()
 
     info_msgs = result.info.map { |x| x.logMessage }
