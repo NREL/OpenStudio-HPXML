@@ -4072,6 +4072,11 @@ If not entered, the simulation will not include a refrigerator.
 .. note::
 
   Refrigerator energy use is only affected by the ambient temperature where it is located when ConstantCoefficients and TemperatureCoefficients are used.
+  When ConstantCoefficients and TemperatureCoefficients are used, hourly energy for refrigerators is determined following Equation 4.2-X2 of ANSI/RESNET/ICC 301-2022:
+  
+  ((RatedAnnualkWh / 8760) * (ConstantCoefficients[hr] + TemperatureCoefficients[hr] * T_space)
+  
+  where T_space is the ambient temperature (F) where the refrigerator is located and hr is the hour of the day.
 
 HPXML Freezers
 **************
