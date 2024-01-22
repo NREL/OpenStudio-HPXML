@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
+- Updates to HPXML v4.0-rc3.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Ground source heat pump enhancements:
@@ -10,6 +11,7 @@ __New Features__
   - Updated heating/cooling performance curves to reflect newer equipment.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
+  - Adds detailed performance data inputs for variable-speed air source HVAC systems.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
