@@ -5,7 +5,7 @@ def run_simulation_tests(xmls)
   puts "Running #{xmls.size} HPXML files..."
   all_results = {}
   all_results_bills = {}
-  Parallel.map(xmls, in_threads: 1) do |xml|
+  Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
     next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
 
