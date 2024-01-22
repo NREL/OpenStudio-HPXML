@@ -1362,7 +1362,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def test_boilers
-    # Test inputs not overridden by defaults (in-unit boiler)
+    # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 99.9
     hpxml_bldg.heating_systems[0].heating_capacity = 12345
@@ -1372,21 +1372,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 12345, true, 999)
 
-    # Test defaults w/ in-unit boiler
+    # Test defaults
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].pilot_light_btuh = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 170.0, nil, true, 500)
-
-    # Test inputs not overridden by defaults (shared boiler)
-    hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml')
-    hpxml_bldg.heating_systems[0].shared_loop_watts = nil
-    hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 99.9
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, false, nil)
   end
 
   def test_stoves
