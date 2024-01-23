@@ -2902,6 +2902,7 @@
   },
   "sample_files/base-bldgtype-mf-whole-building.xml": {
     "parent_hpxml": "sample_files/base.xml",
+    "whole_sfa_or_mf_building_sim": true,
     "geometry_unit_type": "apartment unit",
     "geometry_unit_right_wall_is_adiabatic": true,
     "geometry_unit_cfa": 1200,
