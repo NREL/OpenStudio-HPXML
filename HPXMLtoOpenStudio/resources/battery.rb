@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(runner, model, pv_systems, battery, schedules_file, unit_multiplier)
+  def self.apply(runner, model, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
     charging_schedule = nil
     discharging_schedule = nil
-    if battery.is_ev
+    if is_ev
       charging_col = SchedulesFile::ColumnEVBatteryCharging
       discharging_col = SchedulesFile::ColumnEVBatteryDischarging
     else
@@ -17,10 +17,10 @@ class Battery
       discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
     end
 
-    if !battery.is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
+    if !is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
       return
-    elsif battery.is_ev && charging_schedule.nil? && discharging_schedule.nil?
+    elsif is_ev && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
       return
     end
@@ -120,7 +120,11 @@ class Battery
     elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
     elcd.setElectricalStorage(elcs)
     elcd.setDesignStorageControlDischargePower(rated_power_output)
-    elcd.setDesignStorageControlChargePower(rated_power_output)
+    if not ev_charger.nil?
+      elcd.setDesignStorageControlChargePower(ev_charger.charging_power)
+    else
+      elcd.setDesignStorageControlChargePower(rated_power_output)
+    end
 
     if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
@@ -196,15 +200,6 @@ class Battery
              nominal_capacity_kwh: 10.0,
              nominal_voltage: 50.0,
              round_trip_efficiency: 0.925, # Based on Tesla Powerwall round trip efficiency (new)
-             usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
-  end
-
-  def self.get_ev_battery_default_values
-    # FIXME: update values
-    return { lifetime_model: HPXML::BatteryLifetimeModelNone,
-             nominal_capacity_kwh: 10.0,
-             nominal_voltage: 50.0,
-             round_trip_efficiency: 0.925,
              usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
   end
 

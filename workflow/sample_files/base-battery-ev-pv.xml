@@ -456,25 +456,31 @@
             <InverterEfficiency>0.96</InverterEfficiency>
           </Inverter>
         </Photovoltaics>
-        <Batteries>
-          <Battery>
-            <SystemIdentifier id='EVBattery1'/>
-            <Location>outside</Location>
+        <Vehicles>
+          <ElectricVehicle>
+            <SystemIdentifier id='ElectricVehicle1'/>
             <BatteryType>Li-ion</BatteryType>
             <NominalCapacity>
               <Units>kWh</Units>
-              <Value>20.0</Value>
+              <Value>40.0</Value>
             </NominalCapacity>
             <UsableCapacity>
               <Units>kWh</Units>
-              <Value>18.0</Value>
+              <Value>38.0</Value>
             </UsableCapacity>
-            <RatedPowerOutput>6000.0</RatedPowerOutput>
-            <extension>
-              <IsEV>true</IsEV>
-            </extension>
-          </Battery>
-        </Batteries>
+            <RatedPowerOutput>10000.0</RatedPowerOutput>
+            <RoundTripEfficiency>0.92</RoundTripEfficiency>
+            <ElectricVehicleCharger idref='EVCharger1'/>
+          </ElectricVehicle>
+        </Vehicles>
+        <ElectricVehicleChargers>
+          <ElectricVehicleCharger>
+            <SystemIdentifier id='EVCharger1'/>
+            <Location>garage</Location>
+            <ChargingLevel>2</ChargingLevel>
+            <ChargingPower>15000.0</ChargingPower>
+          </ElectricVehicleCharger>
+        </ElectricVehicleChargers>
       </Systems>
       <Appliances>
         <ClothesWasher>

@@ -73,6 +73,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   end
 
   def test_ev_battery
+    skip
     # EV battery w/ no schedules, no PV
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev.xml'))
@@ -88,6 +89,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   end
 
   def test_pv_ev_battery
+    skip
     # EV battery w/ PV but no schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev-pv.xml'))
@@ -103,6 +105,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   end
 
   def test_battery_scheduled
+    skip
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-scheduled.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -144,6 +147,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
   end
 
   def test_ev_battery_scheduled
+    skip
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev-scheduled.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)

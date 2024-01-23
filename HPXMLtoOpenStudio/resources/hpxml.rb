@@ -1080,7 +1080,7 @@ class HPXML < Object
                    :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_plant, :hvac_controls, :hvac_distributions,
                    :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
                    :water_heating, :solar_thermal_systems, :pv_systems, :inverters, :generators,
-                   :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
+                   :batteries, :vehicles, :ev_chargers, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                    :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                    :ceiling_fans, :pools, :permanent_spas, :portable_spas, :plug_loads, :fuel_loads]
     ATTRS = [:building_id, :site_id, :state_code, :zip_code, :time_zone_utc_offset, :egrid_region,
@@ -1179,6 +1179,8 @@ class HPXML < Object
       @pv_systems.to_doc(building)
       @inverters.to_doc(building)
       @batteries.to_doc(building)
+      @vehicles.to_doc(building)
+      @ev_chargers.to_doc(building)
       @generators.to_doc(building)
       @clothes_washers.to_doc(building)
       @clothes_dryers.to_doc(building)
@@ -1253,6 +1255,8 @@ class HPXML < Object
       @pv_systems = PVSystems.new(self, building)
       @inverters = Inverters.new(self, building)
       @batteries = Batteries.new(self, building)
+      @vehicles = Vehicles.new(self, building)
+      @ev_chargers = ElectricVehicleChargers.new(self, building)
       @generators = Generators.new(self, building)
       @clothes_washers = ClothesWashers.new(self, building)
       @clothes_dryers = ClothesDryers.new(self, building)
@@ -6162,6 +6166,140 @@ class HPXML < Object
       @annual_consumption_kbtu = XMLHelper.get_value(generator, 'AnnualConsumptionkBtu', :float)
       @annual_output_kwh = XMLHelper.get_value(generator, 'AnnualOutputkWh', :float)
       @number_of_bedrooms_served = XMLHelper.get_value(generator, 'NumberofBedroomsServed', :integer)
+    end
+  end
+
+  class ElectricVehicleChargers < BaseArrayElement
+    def add(**kwargs)
+      self << ElectricVehicleCharger.new(@parent_object, **kwargs)
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger').each do |charger|
+        self << ElectricVehicleCharger.new(@parent_object, charger)
+      end
+    end
+  end
+
+  class ElectricVehicleCharger < BaseElement
+    ATTRS = [:id, :charging_level, :location, :charging_power]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @parent_object.ev_chargers.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      chargers = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'ElectricVehicleChargers'])
+      charger = XMLHelper.add_element(chargers, 'ElectricVehicleCharger')
+      sys_id = XMLHelper.add_element(charger, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(charger, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
+      XMLHelper.add_element(charger, 'ChargingLevel', @charging_level, :integer, @charging_level_isdefaulted) unless @charging_level.nil?
+      XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
+    end
+
+    def from_doc(charger)
+      return if charger.nil?
+
+      @id = HPXML::get_id(charger)
+      @location = XMLHelper.get_value(charger, 'Location', :string)
+      @charging_level = XMLHelper.get_value(charger, 'ChargingLevel', :integer)
+      @charging_power = XMLHelper.get_value(charger, 'ChargingPower', :float)
+    end
+  end
+
+  class Vehicles < BaseArrayElement
+    def add(**kwargs)
+      self << ElectricVehicle.new(@parent_object, **kwargs)
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/Vehicles/ElectricVehicle').each do |vehicle|
+        self << ElectricVehicle.new(@parent_object, vehicle)
+      end
+    end
+  end
+
+  class ElectricVehicle < BaseElement
+    ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
+             :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
+             :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah, :ev_charger_idref]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @parent_object.vehicles.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      vehicles = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Vehicles'])
+      electric_vehicle = XMLHelper.add_element(vehicles, 'ElectricVehicle')
+      sys_id = XMLHelper.add_element(electric_vehicle, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(electric_vehicle, 'BatteryType', @type, :string) unless @type.nil?
+      if not @nominal_capacity_kwh.nil?
+        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'NominalCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
+      end
+      if not @nominal_capacity_ah.nil?
+        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'NominalCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
+      end
+      if not @usable_capacity_kwh.nil?
+        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'UsableCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+      end
+      if not @usable_capacity_ah.nil?
+        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'UsableCapacity')
+        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
+        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+      end
+      XMLHelper.add_element(electric_vehicle, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
+      XMLHelper.add_element(electric_vehicle, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+      XMLHelper.add_element(electric_vehicle, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
+      if not @ev_charger_idref.nil?
+        charger = XMLHelper.add_element(electric_vehicle, 'ElectricVehicleCharger')
+        XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
+      end
+      XMLHelper.add_extension(electric_vehicle, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+    end
+
+    def from_doc(electric_vehicle)
+      return if electric_vehicle.nil?
+
+      @id = HPXML::get_id(electric_vehicle)
+      @location = XMLHelper.get_value(electric_vehicle, 'Location', :string)
+      @type = XMLHelper.get_value(electric_vehicle, 'BatteryType', :string)
+      @nominal_capacity_kwh = XMLHelper.get_value(electric_vehicle, "NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @nominal_capacity_ah = XMLHelper.get_value(electric_vehicle, "NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+      @usable_capacity_kwh = XMLHelper.get_value(electric_vehicle, "UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @usable_capacity_ah = XMLHelper.get_value(electric_vehicle, "UsableCapacity[Units='#{UnitsAh}']/Value", :float)
+      @rated_power_output = XMLHelper.get_value(electric_vehicle, 'RatedPowerOutput', :float)
+      @nominal_voltage = XMLHelper.get_value(electric_vehicle, 'NominalVoltage', :float)
+      @round_trip_efficiency = XMLHelper.get_value(electric_vehicle, 'RoundTripEFficiency', :float)
+      @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(electric_vehicle, 'ElectricVehicleCharger'))
+      @lifetime_model = XMLHelper.get_value(electric_vehicle, 'extension/LifetimeModel', :string)
     end
   end
 

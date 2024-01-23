@@ -61,6 +61,7 @@ class HPXMLDefaults
     apply_pv_systems(hpxml_bldg)
     apply_generators(hpxml_bldg)
     apply_batteries(hpxml_bldg)
+    apply_vehicles(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
@@ -2222,31 +2223,60 @@ class HPXMLDefaults
     end
   end
 
+  def self.apply_vehicles(hpxml_bldg)
+    hpxml_bldg.vehicles.each do |vehicle|
+      next unless vehicle.id.include?("ElectricVehicle")
+      default_values = ElectricVehicle.get_ev_battery_default_values()
+      apply_battery(vehicle, default_values)
+
+      ev_charger = nil
+      if not vehicle.ev_charger_idref.nil?
+        hpxml_bldg.ev_chargers.each do |charger|
+          next unless vehicle.ev_charger_idref == charger.id
+          ev_charger = charger
+        end
+      end
+      next if ev_charger.nil?
+      default_values = ElectricVehicle.get_ev_charger_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
+      apply_ev_charger(ev_charger, default_values)
+    end
+  end
+
+  def self.apply_ev_charger(ev_charger, default_values)
+    if ev_charger.location.nil?
+      ev_charger.location = default_values[:location]
+      ev_charger.location_isdefaulted = true
+    end
+    if ev_charger.charging_power.nil?
+      ev_charger.charging_power = default_values[:charging_power]
+      ev_charger.charging_power_is_defaulted = true
+    end
+    if ev_charger.charging_level.nil?
+      ev_charger.charging_level = default_values[:charging_level]
+      ev_charger.charging_level_is_defaulted = true
+    end
+  end
+
   def self.apply_batteries(hpxml_bldg)
     hpxml_bldg.batteries.each do |battery|
-      if battery.is_ev == true
-        default_values = Battery.get_ev_battery_default_values()
-        apply_battery(battery, default_values)
-      else
-        default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
-        if battery.location.nil?
-          battery.location = default_values[:location]
-          battery.location_isdefaulted = true
-        end
-        if battery.is_ev.nil?
-          battery.is_ev = false
-          battery.is_ev_isdefaulted = true
-        end
-        apply_battery(battery, default_values)
+      default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
+      if battery.location.nil?
+        battery.location = default_values[:location]
+        battery.location_isdefaulted = true
       end
+      if battery.is_ev.nil?
+        battery.is_ev = false
+        battery.is_ev_isdefaulted = true
+      end
+      apply_battery(battery, default_values)
     end
   end
 
   def self.apply_battery(battery, default_values)
-    # if battery.lifetime_model.nil?
-    # battery.lifetime_model = default_values[:lifetime_model]
-    # battery.lifetime_model_isdefaulted = true
-    # end
+    if battery.lifetime_model.nil?
+      battery.lifetime_model = default_values[:lifetime_model]
+      battery.lifetime_model_isdefaulted = true
+    end
     if battery.nominal_voltage.nil?
       battery.nominal_voltage = default_values[:nominal_voltage] # V
       battery.nominal_voltage_isdefaulted = true
