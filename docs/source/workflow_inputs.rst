@@ -3260,9 +3260,9 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Location not provided, defaults to the first present space type:
          
-         \- **IECC zones 1-3, excluding 3A**: "garage", "conditioned space"
+         \- **IECC zones 1-3**: "garage", "conditioned space"
          
-         \- **IECC zones 3A, 4-8, unknown**: "basement - conditioned", "basement - unconditioned", "conditioned space"
+         \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
   .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
