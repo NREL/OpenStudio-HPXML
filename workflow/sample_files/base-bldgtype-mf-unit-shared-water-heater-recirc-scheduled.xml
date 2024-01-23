@@ -327,6 +327,11 @@
               <PipeRValue>0.0</PipeRValue>
             </PipeInsulation>
             <extension>
+              <SharedRecirculation>
+                <NumberofUnitsServed>6</NumberofUnitsServed>
+                <PumpPower>220.0</PumpPower>
+                <ControlType>timer</ControlType>
+              </SharedRecirculation>
               <RecirculationPumpWeekdayScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekdayScheduleFractions>
               <RecirculationPumpWeekendScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekendScheduleFractions>
               <RecirculationPumpMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</RecirculationPumpMonthlyScheduleMultipliers>
