@@ -290,6 +290,9 @@ class WorkflowOtherTest < Minitest::Test
       assert_equal(false, File.exist?(csv_output_path))
       assert_equal(false, File.exist?(bills_csv_path))
       assert_equal(1, File.readlines(run_log).select { |l| l.include? "Could not find Building element with ID 'MyFoo'." }.size)
+      
+      # Cleanup
+      File.delete(tmp_hpxml_path) if File.exist? tmp_hpxml_path
     end
   end
 
