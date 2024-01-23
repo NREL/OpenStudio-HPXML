@@ -459,12 +459,12 @@ class HPXML < Object
       whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
       has_mult_building_elements = XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
       if has_mult_building_elements
-        if whole_sfa_or_mf_building_sim && (not building_id.nil?)
-          @errors << 'Multiple Building elements defined in HPXML file and WholeSFAorMFBuildingSimulation=true; Building ID argument cannot be provided.'
+        if building_id.nil? && !whole_sfa_or_mf_building_sim
+          @errors << 'Multiple Building elements defined in HPXML file; provide Building ID argument or set WholeSFAorMFBuildingSimulation=true.'
           return unless @errors.empty?
-        elsif building_id.nil? && !whole_sfa_or_mf_building_sim
-          @errors << 'Multiple Building elements defined in HPXML file; Building ID argument must be provided or set WholeSFAorMFBuildingSimulation=true.'
-          return unless @errors.empty?
+        elsif whole_sfa_or_mf_building_sim && (not building_id.nil?)
+          @warnings << 'Multiple Building elements defined in HPXML file and WholeSFAorMFBuildingSimulation=true; Building ID argument will be ignored.'
+          building_id = nil
         end
       end
 

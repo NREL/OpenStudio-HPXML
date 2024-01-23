@@ -259,19 +259,19 @@ class WorkflowOtherTest < Minitest::Test
         # Simulation should be unsuccessful (building_id or WholeSFAorMFBuildingSimulation=true is required)
         assert_equal(false, File.exist?(csv_output_path))
         assert_equal(false, File.exist?(bills_csv_path))
-        assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; Building ID argument must be provided or set WholeSFAorMFBuildingSimulation=true.' }.size)
+        assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file; provide Building ID argument or set WholeSFAorMFBuildingSimulation=true.' }.size)
       end
 
       # Check for when building-id argument is provided
       command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{tmp_hpxml_path}\" --building-id MyBuilding_2"
       system(command, err: File::NULL)
       if whole_sfa_or_mf_building_sim
-        # Simulation should be unsuccessful simulation if trying to run single dwelling unit while WholeSFAorMFBuildingSimulation is true.
-        # We don't want to override WholeSFAorMFBuildingSimulation because we may have Schematron validation based on it, and it would be wrong to
+        # Simulation should be successful (WholeSFAorMFBuildingSimulation is true, so building-id argument is ignored)
+        # Note: We don't want to override WholeSFAorMFBuildingSimulation because we may have Schematron validation based on it, and it would be wrong to
         # validate the HPXML for one use case (whole building model) while running it for a different unit case (individual dwelling unit model).
-        assert_equal(false, File.exist?(csv_output_path))
-        assert_equal(false, File.exist?(bills_csv_path))
-        assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file and WholeSFAorMFBuildingSimulation=true; Building ID argument cannot be provided.' }.size)
+        assert_equal(true, File.exist?(csv_output_path))
+        assert_equal(true, File.exist?(bills_csv_path))
+        assert_equal(1, File.readlines(run_log).select { |l| l.include? 'Multiple Building elements defined in HPXML file and WholeSFAorMFBuildingSimulation=true; Building ID argument will be ignored.' }.size)
       else
         # Simulation should be successful
         assert_equal(true, File.exist?(csv_output_path))

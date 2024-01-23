@@ -7,13 +7,13 @@ def run_simulation_tests(xmls)
   all_results_bills = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next if xml.include? 'base-bldgtype-mf-whole-building' # Separate tests cover this
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
     all_results[xml_name], all_results_bills[xml_name], timeseries_results = results
 
     next unless xml.include?('sample_files') || xml.include?('real_homes')
+    next if xml.include? 'base-bldgtype-mf-whole-building'
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
@@ -378,6 +378,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     # TODO: Check why this house produces this warning
     if hpxml_path.include? 'house044.xml'
       next if message.include? 'FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone'
+    end
+    # TODO: Check why this warning occurs
+    if hpxml_path.include? 'base-bldgtype-mf-whole-building'
+      next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
