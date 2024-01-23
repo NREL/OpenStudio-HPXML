@@ -176,7 +176,7 @@ If EmissionsType is "CO2e", "NOx" or "SO2" and a given fuel's emissions factor i
   wood pellets  --              --             --
   ============  ==============  =============  =============
 
-Default values in lb/MBtu (million Btu) are from *Table 5.1.2(1) National Average Emission Factors for Household Fuels* from *ANSI/RESNET/ICC 301 Standard for the Calculation and Labeling of the Energy Performance of Dwelling and Sleeping Units using an Energy Rating Index* and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
+Default values in lb/MBtu (million Btu) are from ANSI/RESNET/ICC 301-2022 Addendum B and include both combustion and pre-combustion (e.g., methane leakage for natural gas) emissions.
 
 If no default value is available, a warning will be issued.
 
