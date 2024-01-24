@@ -3372,7 +3372,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
-                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                  { int_wk_sch: Schedule.LightingInteriorWeekdayFractions,
+                                    int_wknd_sch: Schedule.LightingInteriorWeekendFractions,
+                                    int_month_mult: Schedule.LightingMonthlyMultipliers,
+                                    ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
                                     ext_month_mult: Schedule.LightingMonthlyMultipliers })
 
@@ -3388,7 +3391,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
-                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                  { int_wk_sch: Schedule.LightingInteriorWeekdayFractions,
+                                    int_wknd_sch: Schedule.LightingInteriorWeekendFractions,
+                                    int_month_mult: Schedule.LightingMonthlyMultipliers,
+                                    ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
                                     ext_month_mult: Schedule.LightingMonthlyMultipliers,
                                     hol_kwh_per_day: 1.1,
@@ -3406,7 +3412,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_lighting_values(default_hpxml_bldg, 1.0, 1.0, 1.0,
-                                  { ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
+                                  { int_wk_sch: Schedule.LightingInteriorWeekdayFractions,
+                                    int_wknd_sch: Schedule.LightingInteriorWeekendFractions,
+                                    int_month_mult: Schedule.LightingMonthlyMultipliers,
+                                    ext_wk_sch: Schedule.LightingExteriorWeekdayFractions,
                                     ext_wknd_sch: Schedule.LightingExteriorWeekendFractions,
                                     ext_month_mult: Schedule.LightingMonthlyMultipliers,
                                     grg_wk_sch: Schedule.LightingGarageWeekdayFractions,

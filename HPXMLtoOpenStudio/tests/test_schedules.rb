@@ -52,7 +52,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 12
-    schedule_rulesets = 16
+    schedule_rulesets = 17
     schedule_fixed_intervals = 1
     schedule_files = 0
 
@@ -63,7 +63,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
 
     assert_in_epsilon(4451, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), @tol)
-    assert_in_epsilon(2992, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
+    assert_in_epsilon(2764, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
     assert_in_epsilon(2027, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(2482, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'), @tol)
     assert_in_epsilon(2994, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'), @tol)
@@ -81,7 +81,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     schedule_constants = 11
-    schedule_rulesets = 17
+    schedule_rulesets = 18
     schedule_fixed_intervals = 1
     schedule_files = 0
 
@@ -182,7 +182,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     model.getScheduleFiles.each do |schedule_file|
       schedule_file_names << "#{schedule_file.name}"
     end
-    assert_equal(11, schedule_file_names.size)
+    assert_equal(12, schedule_file_names.size)
 
     schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,

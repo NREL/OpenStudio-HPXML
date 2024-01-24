@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c114223d-d7b7-4107-91fd-673313219cda</version_id>
-  <version_modified>2024-01-24T23:00:03Z</version_modified>
+  <version_id>dba9cdfa-c3a2-461a-8ad8-e78882483bfc</version_id>
+  <version_modified>2024-01-24T23:19:51Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>369F102B</checksum>
+      <checksum>10DFEF09</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -310,7 +310,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>01A2BD04</checksum>
+      <checksum>B624E602</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -352,7 +352,7 @@
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D82C971E</checksum>
+      <checksum>4540554D</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -577,6 +577,12 @@
       <checksum>87937B84</checksum>
     </file>
     <file>
+      <filename>in.schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>394A2791</checksum>
+    </file>
+    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -592,7 +598,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E8332039</checksum>
+      <checksum>198071C5</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -628,7 +634,7 @@
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6C3A766C</checksum>
+      <checksum>5FDDE1AD</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
@@ -652,7 +658,7 @@
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>05E5E976</checksum>
+      <checksum>7A8D1457</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>

@@ -460,7 +460,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Plug Loads & Fuel Loads & Lighting
     add_mels(runner, model, spaces)
     add_mfls(runner, model, spaces)
-    add_lighting(runner, model, epw_file, spaces)
+    add_lighting(runner, model, spaces)
 
     # Pools & Permanent Spas
     add_pools_and_permanent_spas(runner, model, spaces)
@@ -1856,8 +1856,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_lighting(runner, model, epw_file, spaces)
-    Lighting.apply(runner, model, epw_file, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
+  def add_lighting(runner, model, spaces)
+    Lighting.apply(runner, model, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
                    @schedules_file, @cfa, @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
   end
 
