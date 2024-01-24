@@ -4053,8 +4053,8 @@ If not entered, the simulation will not include a refrigerator.
   ``extension/WeekdayScheduleFractions``                 array                         No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``                 array                         No                  24 comma-separated weekend fractions
   ``extension/MonthlyScheduleMultipliers``               array                         No        See [#]_  12 comma-separated monthly multipliers
-  ``extension/ConstantCoefficients``                     array                         No        See [#]_  24 comma-separated constant coefficients
-  ``extension/TemperatureCoefficients``                  array                         No        See [#]_  24 comma-separated temperature coefficients
+  ``extension/ConstantScheduleCoefficients``             array                         No        See [#]_  24 comma-separated constant coefficients
+  ``extension/TemperatureScheduleCoefficients``          array                         No        See [#]_  24 comma-separated temperature coefficients
   =====================================================  =======  ======  ===========  ========  ========  ======================================
 
   .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -4064,17 +4064,17 @@ If not entered, the simulation will not include a refrigerator.
   .. [#] If RatedAnnualkWh not provided, it will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_:
          RatedAnnualkWh = 637.0 + 18.0 * NumberofBedrooms.
   .. [#] If multiple refrigerators are specified, there must be exactly one refrigerator described with PrimaryIndicator=true.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or ConstantCoefficients/TemperatureCoefficients not used), default values from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or ConstantCoefficients/TemperatureCoefficients not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
-  .. [#] If ConstantCoefficients not provided (and :ref:`schedules_detailed` or WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 are used: "-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544".
-  .. [#] If TemperatureCoefficients not provided (and :ref:`schedules_detailed` or WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 are used: "0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020". 
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or ConstantScheduleCoefficients/TemperatureScheduleCoefficients not used), default values from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or ConstantScheduleCoefficients/TemperatureScheduleCoefficients not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
+  .. [#] If ConstantScheduleCoefficients not provided (and :ref:`schedules_detailed` or WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 are used: "-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544".
+  .. [#] If TemperatureScheduleCoefficients not provided (and :ref:`schedules_detailed` or WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 are used: "0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020". 
 
 .. note::
 
-  Refrigerator energy use is only affected by the ambient temperature where it is located when ConstantCoefficients and TemperatureCoefficients are used.
-  When ConstantCoefficients and TemperatureCoefficients are used, hourly energy for refrigerators is determined following Equation 4.2-X2 of ANSI/RESNET/ICC 301-2022:
+  Refrigerator energy use is only affected by the ambient temperature where it is located when ConstantScheduleCoefficients and TemperatureScheduleCoefficients are used.
+  When ConstantScheduleCoefficients and TemperatureScheduleCoefficients are used, hourly energy for refrigerators is determined following Equation 4.2-X2 of ANSI/RESNET/ICC 301-2022:
   
-  ((RatedAnnualkWh / 8760) * (ConstantCoefficients[hr] + TemperatureCoefficients[hr] * T_space)
+  ((RatedAnnualkWh / 8760) * (ConstantScheduleCoefficients[hr] + TemperatureScheduleCoefficients[hr] * T_space)
   
   where T_space is the ambient temperature (F) where the refrigerator is located and hr is the hour of the day.
 

@@ -6592,8 +6592,8 @@ class HPXML < Object
       XMLHelper.add_extension(refrigerator, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(refrigerator, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(refrigerator, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
-      XMLHelper.add_extension(refrigerator, 'ConstantCoefficients', @constant_coefficients, :string, @constant_coefficients_isdefaulted) unless @constant_coefficients.nil?
-      XMLHelper.add_extension(refrigerator, 'TemperatureCoefficients', @temperature_coefficients, :string, @temperature_coefficients_isdefaulted) unless @temperature_coefficients.nil?
+      XMLHelper.add_extension(refrigerator, 'ConstantScheduleCoefficients', @constant_coefficients, :string, @constant_coefficients_isdefaulted) unless @constant_coefficients.nil?
+      XMLHelper.add_extension(refrigerator, 'TemperatureScheduleCoefficients', @temperature_coefficients, :string, @temperature_coefficients_isdefaulted) unless @temperature_coefficients.nil?
     end
 
     def from_doc(refrigerator)
@@ -6607,8 +6607,8 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekendScheduleFractions', :string)
       @monthly_multipliers = XMLHelper.get_value(refrigerator, 'extension/MonthlyScheduleMultipliers', :string)
-      @constant_coefficients = XMLHelper.get_value(refrigerator, 'extension/ConstantCoefficients', :string)
-      @temperature_coefficients = XMLHelper.get_value(refrigerator, 'extension/TemperatureCoefficients', :string)
+      @constant_coefficients = XMLHelper.get_value(refrigerator, 'extension/ConstantScheduleCoefficients', :string)
+      @temperature_coefficients = XMLHelper.get_value(refrigerator, 'extension/TemperatureScheduleCoefficients', :string)
     end
   end
 

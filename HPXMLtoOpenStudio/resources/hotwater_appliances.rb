@@ -138,7 +138,7 @@ class HotWaterAndAppliances
 
     # Refrigerator(s) energy
     hpxml_bldg.refrigerators.each do |refrigerator|
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
+      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.loc_space.nil?)
 
       # Create schedule
       fridge_schedule = nil
@@ -167,15 +167,14 @@ class HotWaterAndAppliances
           fridge_schedule = OpenStudio::Model::ScheduleConstant.new(model)
           fridge_schedule.setName(fridge_obj_name + ' schedule')
 
-          loc_space, loc_schedule = SpaceOrSchedule.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
-          if not loc_space.nil?
+          if not refrigerator.additional_properties.loc_space.nil?
             fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
             fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
-            fridge_temperature_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
-          elsif not loc_schedule.nil?
+            fridge_temperature_sensor.setKeyName(refrigerator.additional_properties.loc_space.thermalZone.get.name.to_s)
+          elsif not refrigerator.additional_properties.loc_schedule.nil?
             fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
             fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
-            fridge_temperature_sensor.setKeyName(loc_schedule.name.to_s)
+            fridge_temperature_sensor.setKeyName(refrigerator.additional_properties.loc_schedule.name.to_s)
           end
 
           fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleConstantValue)
@@ -219,7 +218,7 @@ class HotWaterAndAppliances
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !refrigerator.temperature_coefficients.nil?
       end
 
-      rf_space = refrigerator.additional_properties.space
+      rf_space = refrigerator.additional_properties.loc_space
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
       add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
@@ -390,15 +389,15 @@ class HotWaterAndAppliances
         add_water_use_equipment(model, waste_obj_name, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
 
         # Recirculation pump
-        dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier)
-        if dist_pump_annual_kwh > 0
+        recirc_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier)
+        if recirc_pump_annual_kwh > 0
 
           # Create schedule
           recirc_pump_sch = nil
           recirc_pump_col_name = SchedulesFile::ColumnHotWaterRecirculationPump
           recirc_pump_obj_name = Constants.ObjectNameHotWaterRecircPump
           if not schedules_file.nil?
-            dist_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: recirc_pump_col_name, daily_kwh: dist_pump_annual_kwh / 365.0)
+            recirc_pump_design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: recirc_pump_col_name, daily_kwh: recirc_pump_annual_kwh / 365.0)
             recirc_pump_sch = schedules_file.create_schedule_file(model, col_name: recirc_pump_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
           end
           if recirc_pump_sch.nil?
@@ -407,17 +406,17 @@ class HotWaterAndAppliances
             recirc_pump_weekend_sch = hot_water_distribution.recirculation_pump_weekend_fractions
             recirc_pump_monthly_sch = hot_water_distribution.recirculation_pump_monthly_multipliers
             recirc_pump_sch = MonthWeekdayWeekendSchedule.new(model, recirc_pump_obj_name + ' schedule', recirc_pump_weekday_sch, recirc_pump_weekend_sch, recirc_pump_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: recirc_pump_unavailable_periods)
-            dist_pump_design_level = recirc_pump_sch.calc_design_level_from_daily_kwh(dist_pump_annual_kwh / 365.0)
+            recirc_pump_design_level = recirc_pump_sch.calc_design_level_from_daily_kwh(recirc_pump_annual_kwh / 365.0)
             recirc_pump_sch = recirc_pump_sch.schedule
           else
             runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_weekday_fractions.nil?
             runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_weekend_fractions.nil?
             runner.registerWarning("Both '#{recirc_pump_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hot_water_distribution.recirculation_pump_monthly_multipliers.nil?
           end
-          if dist_pump_design_level * gpd_frac != 0
+          if recirc_pump_design_level * gpd_frac != 0
             cnt = model.getElectricEquipments.select { |e| e.endUseSubcategory.start_with? Constants.ObjectNameHotWaterRecircPump }.size # Ensure unique meter for each water heater
-            dist_pump = add_electric_equipment(model, "#{Constants.ObjectNameHotWaterRecircPump}#{cnt + 1}", conditioned_space, dist_pump_design_level * gpd_frac, 0.0, 0.0, recirc_pump_sch)
-            dist_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+            recirc_pump = add_electric_equipment(model, "#{Constants.ObjectNameHotWaterRecircPump}#{cnt + 1}", conditioned_space, recirc_pump_design_level * gpd_frac, 0.0, 0.0, recirc_pump_sch)
+            recirc_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
         end
       end

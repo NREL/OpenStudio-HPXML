@@ -2134,7 +2134,8 @@ class HPXMLDefaults
 
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc || hot_water_distribution.has_shared_recirculation
       schedules_file_includes_recirculation_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHotWaterRecirculationPump))
-      if [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(hot_water_distribution.shared_recirculation_control_type)
+      recirc_control_type = hot_water_distribution.has_shared_recirculation ? hot_water_distribution.shared_recirculation_control_type : hot_water_distribution.recirculation_control_type
+      if [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2143,7 +2144,7 @@ class HPXMLDefaults
           hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
-      elsif [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(hot_water_distribution.shared_recirculation_control_type)
+      elsif [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2152,7 +2153,7 @@ class HPXMLDefaults
           hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
-      elsif [HPXML::DHWRecircControlTypeTemperature].include?(hot_water_distribution.recirculation_control_type) || [HPXML::DHWRecircControlTypeTemperature].include?(hot_water_distribution.shared_recirculation_control_type)
+      elsif [HPXML::DHWRecircControlTypeTemperature].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
           hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
@@ -2641,19 +2642,6 @@ class HPXMLDefaults
       hpxml_bldg.lighting.exterior_usage_multiplier_isdefaulted = true
     end
     default_lighting_monthly_multipliers = Schedule.LightingMonthlyMultipliers
-    # schedules_file_includes_lighting_interior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnLightingInterior))
-    # if hpxml_bldg.lighting.interior_weekday_fractions.nil? && !schedules_file_includes_lighting_interior
-    # hpxml_bldg.lighting.interior_weekday_fractions = Schedule.LightingInteriorWeekdayFractions
-    # hpxml_bldg.lighting.interior_weekday_fractions_isdefaulted = true
-    # end
-    # if hpxml_bldg.lighting.interior_weekend_fractions.nil? && !schedules_file_includes_lighting_interior
-    # hpxml_bldg.lighting.interior_weekend_fractions = Schedule.LightingInteriorWeekendFractions
-    # hpxml_bldg.lighting.interior_weekend_fractions_isdefaulted = true
-    # end
-    # if hpxml_bldg.lighting.interior_monthly_multipliers.nil? && !schedules_file_includes_lighting_interior
-    # hpxml_bldg.lighting.interior_monthly_multipliers = default_lighting_monthly_multipliers
-    # hpxml_bldg.lighting.interior_monthly_multipliers_isdefaulted = true
-    # end
     if hpxml_bldg.has_location(HPXML::LocationGarage)
       schedules_file_includes_lighting_garage = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnLightingGarage))
       if hpxml_bldg.lighting.garage_weekday_fractions.nil? && !schedules_file_includes_lighting_garage
