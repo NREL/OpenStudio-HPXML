@@ -1944,7 +1944,7 @@ class HVAC
       program.addLine('  Else')
       program.addLine("    Set target_speed_ratio = #{coil.stages.size}")
       program.addLine('  EndIf')
-    
+
       # Calculate the current power that needs to meet zone loads
       (0..coil.stages.size - 1).each do |i|
         if i == 0
@@ -1952,11 +1952,11 @@ class HVAC
           program.addLine("    Set current_power = sens_load * current_eir_#{i}")
         else
           program.addLine("  ElseIf sens_load < current_capacity_#{i}")
-          program.addLine("    Set current_power = (@Max current_capacity_#{i} (sens_load - current_capacity_#{i-1})) * current_eir_#{i} + current_power_#{i-1}")
+          program.addLine("    Set current_power = (@Max current_capacity_#{i} (sens_load - current_capacity_#{i - 1})) * current_eir_#{i} + current_power_#{i - 1}")
         end
       end
       program.addLine('  EndIf')
-    program.addLine('EndIf')
+      program.addLine('EndIf')
     end
 
     program.addLine('If htg_mode > 0 || clg_mode > 0')
