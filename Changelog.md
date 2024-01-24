@@ -2,12 +2,15 @@
 
 __New Features__
 - Updates to HPXML v4.0-rc3.
-- Updates per ANSI/RESNET/ICC 301-2022:
+- Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
   - **Breaking change**: Shared boilers require `SharedLoopWatts` (and `FanCoilWatts` if a fan coil system) inputs; removed EAE input/defaults.
   - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
-- Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
+  - Refrigerator default schedule now based on ambient temperature using new `TemperatureScheduleCoefficients` and `ConstantScheduleCoefficients` inputs.
+  - Default schedules updated for cooking ranges, lighting, plug loads, televisions, hot water recirculation pumps, and occupant heat gains.
+  - Adds schedule inputs for hot water recirculation pumps.
+- **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
