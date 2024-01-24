@@ -1826,6 +1826,9 @@ class HVAC
     spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
     spt_sensor.setName("#{control_zone.name} spt_temp")
     spt_sensor.setKeyName(control_zone.name.to_s)
+    load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Predicted Sensible Load to Setpoint Heat Transfer Rate')
+    load_sensor.setName("#{air_loop_unitary.name} sens load")
+    load_sensor.setKeyName(air_loop_unitary.name.to_s)
 
     # actuator
     coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
@@ -1844,6 +1847,12 @@ class HVAC
     program.setName("#{air_loop_unitary.name} max capacity program")
     program.addLine('Set clg_mode = 0')
     program.addLine('Set htg_mode = 0')
+    program.addLine("If #{load_sensor.name} > 0")
+    program.addLine('  Set htg_mode = 1')
+    program.addLine('Else,')
+    program.addLine('  Set clg_mode = 1')
+    program.addLine('EndIf')
+    program.addLine("Set sens_load = @Abs #{load_sensor.name}")
 
     s = []
     [htg_coil, clg_coil].each do |coil|
@@ -1853,6 +1862,7 @@ class HVAC
       coil_cap_stage_ft_sensors = []
       coil_eir_stage_fff_sensors = []
       coil_eir_stage_ft_sensors = []
+      # Heating/Cooling specific calculations and names
       if coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
         cap_fff_curve_name = 'heatingCapacityFunctionofFlowFractionCurve'
         cap_ft_curve_name = 'heatingCapacityFunctionofTemperatureCurve'
@@ -1861,14 +1871,6 @@ class HVAC
         cap_multiplier = 'htg_frost_multiplier'
         mode_s = 'If htg_mode > 0'
 
-        htg_pow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Rate')
-        htg_pow_sensor.setName("#{coil.name} pow")
-        htg_pow_sensor.setKeyName(coil.name.to_s)
-        s << "((htg_mode > 0) && (#{htg_pow_sensor.name} >= target_power))"
-
-        program.addLine("If #{htg_pow_sensor.name} > 0")
-        program.addLine('  Set htg_mode = 1')
-        program.addLine('EndIf')
         # Calculate capacity and eirs for later use of full-load power calculations at each stage
         program.addLine('If htg_mode > 0')
         program.addLine("  If #{outdoor_db_sensor.name} < 4.444444,")
@@ -1893,14 +1895,7 @@ class HVAC
         clg_sens_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Sensible Cooling Rate')
         clg_sens_sensor.setName("#{coil.name} sens cooling rate")
         clg_sens_sensor.setKeyName(coil.name.to_s)
-        clg_pow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Rate')
-        clg_pow_sensor.setName("#{coil.name} pow")
-        clg_pow_sensor.setKeyName(coil.name.to_s)
-        s << "((clg_mode > 0) && (#{clg_pow_sensor.name} >= target_power))"
 
-        program.addLine("If #{clg_pow_sensor.name} > 0")
-        program.addLine('  Set clg_mode = 1')
-        program.addLine('EndIf')
         program.addLine('If clg_mode > 0')
         program.addLine("  If #{clg_tot_sensor.name} > 0")
         program.addLine("    Set shr = #{clg_sens_sensor.name} / #{clg_tot_sensor.name}")
@@ -1909,6 +1904,7 @@ class HVAC
         program.addLine('  EndIf')
         program.addLine('EndIf')
       end
+      # Heating and cooling sensors that need to be added
       coil.stages.each_with_index do |stage, i|
         stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
         stage_cap_fff_sensor.setName("#{coil.name} cap stage #{i} fff")
@@ -1927,11 +1923,13 @@ class HVAC
         stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
         coil_eir_stage_ft_sensors << stage_eir_ft_sensor
       end
+      # Calculate the target speed ratio that operates at the target power output
       program.addLine(mode_s)
       coil.stages.each_with_index do |stage, i|
         program.addLine("  Set current_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name} * #{cap_multiplier}")
         program.addLine("  Set rated_eir_#{i} = 1 / #{stage.send(cop_name)}")
-        program.addLine("  Set current_power_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name} * current_capacity_#{i}")
+        program.addLine("  Set current_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name}")
+        program.addLine("  Set current_power_#{i} = current_eir_#{i} * current_capacity_#{i}")
       end
       program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
       (0..coil.stages.size - 1).each do |i|
@@ -1940,39 +1938,36 @@ class HVAC
           program.addLine("    Set target_speed_ratio = target_power / current_power_#{i}")
         else
           program.addLine("  ElseIf target_power < current_power_#{i}")
-          program.addLine("    Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i - 1}")
+          program.addLine("    Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i}")
         end
       end
       program.addLine('  Else')
       program.addLine("    Set target_speed_ratio = #{coil.stages.size}")
       program.addLine('  EndIf')
-      program.addLine('EndIf')
+    
+      # Calculate the current power that needs to meet zone loads
+      (0..coil.stages.size - 1).each do |i|
+        if i == 0
+          program.addLine("  If sens_load < current_capacity_#{i}")
+          program.addLine("    Set current_power = sens_load * current_eir_#{i}")
+        else
+          program.addLine("  ElseIf sens_load < current_capacity_#{i}")
+          program.addLine("    Set current_power = (@Max current_capacity_#{i} (sens_load - current_capacity_#{i-1})) * current_eir_#{i} + current_power_#{i-1}")
+        end
+      end
+      program.addLine('  EndIf')
+    program.addLine('EndIf')
     end
 
     program.addLine('If htg_mode > 0 || clg_mode > 0')
-    program.addLine("  If #{cap_ratio_sensor.name} > 0.7") # general curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine("    If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{spt_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
-    program.addLine("      Set #{coil_speed_act.name} = NULL")
-    program.addLine("      Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
-    program.addLine('    Else')
-    program.addLine("      If #{s.join(' || ')}") # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
-    program.addLine("        Set #{coil_speed_act.name} = target_speed_ratio")
-    program.addLine("        Set #{supp_coil_avail_act.name} = 0") unless htg_supp_coil.nil?
-    program.addLine('      Else')
-    program.addLine("        Set #{coil_speed_act.name} = NULL")
-    program.addLine("        Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
-    program.addLine('      EndIf')
-    program.addLine('    EndIf')
-    program.addLine('  Else') # critical curtailment, operation refers to AHRI Standard 1380 2019
-    program.addLine("    If #{s.join(' || ')}") # allow some tolerance for assignment, keep assigning it if assigned in iteration, otherwise if NULL, will be recalculated by E+
+    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{spt_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
+    program.addLine("    Set #{coil_speed_act.name} = NULL")
+    program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
+    program.addLine('  Else')
+    # general & critical curtailment, operation refers to AHRI Standard 1380 2019
+    program.addLine('    If current_power >= target_power')
     program.addLine("      Set #{coil_speed_act.name} = target_speed_ratio")
-    if not htg_supp_coil.nil?
-      program.addLine("      If #{indoor_temp_sensor.name} < #{UnitConversions.convert(62, 'F', 'C')}")
-      program.addLine("        Set #{supp_coil_avail_act.name} = 1")
-      program.addLine('      Else')
-      program.addLine("        Set #{supp_coil_avail_act.name} = 0")
-      program.addLine('      EndIf')
-    end
+    program.addLine("      Set #{supp_coil_avail_act.name} = 0") unless htg_supp_coil.nil?
     program.addLine('    Else')
     program.addLine("      Set #{coil_speed_act.name} = NULL")
     program.addLine("      Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
@@ -1981,7 +1976,7 @@ class HVAC
     program.addLine('EndIf')
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName(program.name.to_s + 'calling manager')
+    program_calling_manager.setName(program.name.to_s + ' calling manager')
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(program)
   end
