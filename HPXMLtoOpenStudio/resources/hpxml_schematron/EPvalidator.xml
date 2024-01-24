@@ -2284,7 +2284,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ConstantScheduleCoefficients) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ConstantScheduleCoefficients</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:TemperatureScheduleCoefficients) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TemperatureScheduleCoefficients</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions | h:extension/h:WeekendScheduleFractions | h:extension/h:MonthlyScheduleMultipliers) + count(h:extension/h:ConstantScheduleCoefficients | h:extension/h:TemperatureScheduleCoefficients) &lt;= 1'>Expected ......</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension[h:WeekdayScheduleFractions | h:WeekendScheduleFractions | h:MonthlyScheduleMultipliers]) + count(h:extension[h:ConstantScheduleCoefficients | h:TemperatureScheduleCoefficients]) &lt;= 1'>Expected either schedule fractions/multipliers or schedule coefficients but not both.</sch:assert>
     </sch:rule>
   </sch:pattern>
 
