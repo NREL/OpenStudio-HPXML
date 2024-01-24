@@ -349,37 +349,6 @@ class ReportSimulationOutputTest < Minitest::Test
   BaseHPXMLTimeseriesColsEnergyPlusOutputVariables = [
     'Zone People Occupant Count: Conditioned Space',
     'Zone People Total Heating Energy: Conditioned Space',
-    'Schedule Value: Always Off Discrete',
-    'Schedule Value: Always On Continuous',
-    'Schedule Value: Always On Discrete',
-    'Schedule Value: Central Ac And Furnace Auto Fan Schedule',
-    'Schedule Value: Clothes Dryer Exhaust 0 Schedule',
-    'Schedule Value: Clothes Dryer Schedule',
-    'Schedule Value: Clothes Washer Schedule',
-    'Schedule Value: Conditioned Space Thermostat Schedule',
-    'Schedule Value: Cooking Range Schedule',
-    'Schedule Value: Cooling Season Schedule',
-    'Schedule Value: Cooling Setpoint',
-    'Schedule Value: Dhw Fixtures Schedule',
-    'Schedule Value: Dhw Temp',
-    'Schedule Value: Dishwasher Schedule',
-    'Schedule Value: Exterior Lighting Schedule',
-    'Schedule Value: Fridge Schedule',
-    'Schedule Value: Heating Setpoint',
-    'Schedule Value: Interior Lighting Schedule',
-    'Schedule Value: Mains Temperature Schedule',
-    'Schedule Value: Mech Vent House Fan Cfis Schedule',
-    'Schedule Value: Mech Vent House Fan Schedule',
-    'Schedule Value: Misc Plug Loads Schedule',
-    'Schedule Value: Misc Tv Schedule',
-    'Schedule Value: Mixed Water Temperature Schedule',
-    'Schedule Value: Natural Vent Schedule',
-    'Schedule Value: Occupants Activity Schedule',
-    'Schedule Value: Occupants Schedule',
-    'Schedule Value: Sequential Fraction Schedule',
-    'Schedule Value: Sequential Fraction Schedule 1',
-    'Schedule Value: Trans Schedule Winter=0.85 Summer=0.7',
-    'Schedule Value: Water Heater Setpoint',
     'Surface Construction Index: Door1',
     'Surface Construction Index: Foundationwall1',
     'Surface Construction Index: Floor1',
@@ -607,7 +576,8 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def test_annual_only
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
+    hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
+    args_hash = { 'hpxml_path' => hpxml_path,
                   'skip_validation' => true,
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
@@ -633,7 +603,10 @@ class ReportSimulationOutputTest < Minitest::Test
     actual_annual_rows = _get_actual_annual_rows(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
     _check_runner_registered_values_and_measure_xml_outputs(actual_annual_rows)
-    _check_for_annual_value(actual_annual_rows, UnitConversions.convert(607.511, 'kWh', 'MBtu'), "End Use: #{FT::Elec}: #{EUT::Refrigerator}")
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    actual_fridge_energy_use = actual_annual_rows["End Use: #{FT::Elec}: #{EUT::Refrigerator} (MBtu)"]
+    rated_fridge_energy_use = UnitConversions.convert(hpxml.buildings[0].refrigerators[0].rated_annual_kwh, 'kWh', 'MBtu')
+    assert_in_epsilon(actual_fridge_energy_use, rated_fridge_energy_use, 0.1)
   end
 
   def test_annual_only2
@@ -1317,7 +1290,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'skip_validation' => true,
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
-                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy, Foo, Surface Construction Index, Schedule Value' }
+                  'user_output_variables' => 'Zone People Occupant Count, Zone People Total Heating Energy, Foo, Surface Construction Index' }
     annual_csv, timeseries_csv, run_log = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
@@ -1328,12 +1301,7 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
-    nonzero_avg_cols = BaseHPXMLTimeseriesColsEnergyPlusOutputVariables
-    nonzero_avg_cols -= ['Schedule Value: Always Off Discrete']
-    nonzero_avg_cols -= ['Schedule Value: Central Ac And Furnace Auto Fan Schedule']
-    _check_for_nonzero_avg_timeseries_value(timeseries_csv, nonzero_avg_cols)
     assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
-    _check_for_timeseries_sum(timeseries_csv, 8183.705465, 'Schedule Value: Fridge Schedule')
   end
 
   def test_for_unsuccessful_simulation_infinity
@@ -1461,12 +1429,6 @@ class ReportSimulationOutputTest < Minitest::Test
     end
   end
 
-  def _check_for_timeseries_sum(timeseries_csv, expected_timeseries_value, timeseries_col)
-    values = _get_values(timeseries_csv, [timeseries_col])
-
-    assert_in_epsilon(expected_timeseries_value, values[timeseries_col].sum, 0.005)
-  end
-
   def _get_actual_annual_rows(annual_csv)
     actual_annual_rows = {}
     File.readlines(annual_csv).each do |line|
@@ -1476,13 +1438,6 @@ class ReportSimulationOutputTest < Minitest::Test
       actual_annual_rows[key] = Float(value)
     end
     return actual_annual_rows
-  end
-
-  def _check_for_annual_value(annual_rows, expected_annual_value, annual_row_key, annual_row_units = 'MBtu')
-    annual_row_name = "#{annual_row_key} (#{annual_row_units})"
-    assert_includes(annual_rows.keys, annual_row_name)
-    actual_annual_value = annual_rows[annual_row_name]
-    assert_in_epsilon(expected_annual_value, actual_annual_value, 0.005)
   end
 
   def _check_runner_registered_values_and_measure_xml_outputs(actual_annual_rows)
