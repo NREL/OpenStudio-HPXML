@@ -648,6 +648,7 @@ class ReportSimulationOutputTest < Minitest::Test
                   'include_annual_emission_end_uses' => false,
                   'include_annual_total_loads' => false,
                   'include_annual_unmet_hours' => false,
+                  'include_annual_unmet_loads' => false,
                   'include_annual_peak_fuels' => false,
                   'include_annual_peak_loads' => false,
                   'include_annual_component_loads' => false,

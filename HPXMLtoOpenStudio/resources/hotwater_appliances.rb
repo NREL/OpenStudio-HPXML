@@ -313,11 +313,10 @@ class HotWaterAndAppliances
       end
       if showers_schedule.nil?
         showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
-        showers_weekday_sch = Schedule.ShowersWeekdayFractions
+        showers_weekday_sch = Schedule.ShowersWeekdayFractions # FIXME: should we expose HPXML elements for these? sounds like maybe not.
         showers_weekend_sch = Schedule.ShowersWeekendFractions
         showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
-        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
-        showers_schedule = showers_schedule_obj.schedule
+        _showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
       else
         runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekdayFractions.nil?
         runner.registerWarning("Both '#{showers_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekendFractions.nil?
@@ -326,7 +325,7 @@ class HotWaterAndAppliances
     end
 
     # create an array of peak flow to return
-    shower_peak_flows = {}
+    shower_peak_flows = {} # used for unmet wh load calculations
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
@@ -352,7 +351,7 @@ class HotWaterAndAppliances
         end
 
         id = water_heating_system.id
-        shower_peak_flows = { id => shower_peak_flow }
+        shower_peak_flows[id] = shower_peak_flow
 
         # Fixtures (showers, sinks, baths)
         add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)

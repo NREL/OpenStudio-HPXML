@@ -1839,7 +1839,7 @@ class Waterheater
     end
   end
 
-  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flow)
+  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flows)
     water_heating_systems.each do |water_heating_system|
       # Get the water storage tanks for the outlet temp sensor
       num_tanks = 0
@@ -1870,7 +1870,7 @@ class Waterheater
 
       shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       shower_flow_sensor.setName('Shower Volume')
-      shower_flow_sensor.setKeyName('hot_water_showers')
+      shower_flow_sensor.setKeyName('hot_water_showers') # FIXME: use constant name here
 
       # We'll only need these if we want to calculate unmet WH loads for all end uses, not just showers
       # cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
@@ -1886,6 +1886,7 @@ class Waterheater
       # fx_flow_sensor.setKeyName('dhw fixtures')
 
       # EMS program
+      # FIXME: we want one program where the lines are extensible based on number of water heaters?
       unmet_wh_loads_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       unmet_wh_loads_program.setName(Constants.ObjectNameUnmetLoadsProgram)
       unmet_wh_loads_program.addLine("If #{shower_flow_sensor.name} > 0")
@@ -1895,7 +1896,7 @@ class Waterheater
       unmet_wh_loads_program.addLine('EndIf')
       unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine('Set ShowerSagTime=SystemTimeStep')
-      unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{showers_peak_flow[water_heating_system.id]} * 4141170 * (#{wh_temp_sensor.name} - #{mixed_setpoint_sensor.name})")
+      unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 4141170 * (#{wh_temp_sensor.name} - #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine('Else')
       unmet_wh_loads_program.addLine('Set ShowerSagTime=0')
       unmet_wh_loads_program.addLine('Set ShowerE=0')
