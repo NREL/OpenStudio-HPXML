@@ -1831,7 +1831,8 @@ class HPXML < Object
   end
 
   class BuildingOccupancy < BaseElement
-    ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+    ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers,
+             :water_weekday_fractions, :water_weekend_fractions, :water_monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1847,6 +1848,9 @@ class HPXML < Object
       XMLHelper.add_extension(building_occupancy, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(building_occupancy, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(building_occupancy, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
+      XMLHelper.add_extension(building_occupancy, 'WaterWeekdayScheduleFractions', @water_weekday_fractions, :string, @water_weekday_fractions_isdefaulted) unless @water_weekday_fractions.nil?
+      XMLHelper.add_extension(building_occupancy, 'WaterWeekendScheduleFractions', @water_weekend_fractions, :string, @water_weekend_fractions_isdefaulted) unless @water_weekend_fractions.nil?
+      XMLHelper.add_extension(building_occupancy, 'WaterMonthlyScheduleMultipliers', @water_monthly_multipliers, :string, @water_monthly_multipliers_isdefaulted) unless @water_monthly_multipliers.nil?
     end
 
     def from_doc(building)
@@ -1859,6 +1863,9 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(building_occupancy, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(building_occupancy, 'extension/WeekendScheduleFractions', :string)
       @monthly_multipliers = XMLHelper.get_value(building_occupancy, 'extension/MonthlyScheduleMultipliers', :string)
+      @water_weekday_fractions = XMLHelper.get_value(building_occupancy, 'extension/WaterWeekdayScheduleFractions', :string)
+      @water_weekend_fractions = XMLHelper.get_value(building_occupancy, 'extension/WaterWeekendScheduleFractions', :string)
+      @water_monthly_multipliers = XMLHelper.get_value(building_occupancy, 'extension/WaterMonthlyScheduleMultipliers', :string)
     end
   end
 

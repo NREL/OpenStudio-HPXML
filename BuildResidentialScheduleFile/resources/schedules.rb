@@ -46,7 +46,8 @@ class ScheduleGenerator
             SchedulesFile::ColumnPlugLoadsTV,
             SchedulesFile::ColumnHotWaterDishwasher,
             SchedulesFile::ColumnHotWaterClothesWasher,
-            SchedulesFile::ColumnHotWaterFixtures]
+            SchedulesFile::ColumnHotWaterFixtures,
+            SchedulesFile::ColumnGeneralWaterUse]
   end
 
   def schedules
@@ -588,6 +589,7 @@ class ScheduleGenerator
     @schedules[SchedulesFile::ColumnHotWaterFixtures] = [showers, sinks, baths].transpose.map { |flow| flow.reduce(:+) }
     fixtures_peak_flow = @schedules[SchedulesFile::ColumnHotWaterFixtures].max
     @schedules[SchedulesFile::ColumnHotWaterFixtures] = @schedules[SchedulesFile::ColumnHotWaterFixtures].map { |flow| flow / fixtures_peak_flow }
+    @schedules[SchedulesFile::ColumnGeneralWaterUse] = @schedules[SchedulesFile::ColumnHotWaterFixtures]
 
     return true
   end

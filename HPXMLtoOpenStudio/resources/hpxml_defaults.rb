@@ -604,6 +604,19 @@ class HPXMLDefaults
       hpxml_bldg.building_occupancy.monthly_multipliers = Schedule.OccupantsMonthlyMultipliers
       hpxml_bldg.building_occupancy.monthly_multipliers_isdefaulted = true
     end
+    schedules_file_includes_water = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnGeneralWaterUse))
+    if hpxml_bldg.building_occupancy.water_weekday_fractions.nil? && !schedules_file_includes_water
+      hpxml_bldg.building_occupancy.water_weekday_fractions = Schedule.GeneralWaterUseWeekdayFractions
+      hpxml_bldg.building_occupancy.water_weekday_fractions_isdefaulted = true
+    end
+    if hpxml_bldg.building_occupancy.water_weekend_fractions.nil? && !schedules_file_includes_water
+      hpxml_bldg.building_occupancy.water_weekend_fractions = Schedule.GeneralWaterUseWeekendFractions
+      hpxml_bldg.building_occupancy.water_weekend_fractions_isdefaulted = true
+    end
+    if hpxml_bldg.building_occupancy.water_monthly_multipliers.nil? && !schedules_file_includes_water
+      hpxml_bldg.building_occupancy.water_monthly_multipliers = Schedule.GeneralWaterUseMonthlyMultipliers
+      hpxml_bldg.building_occupancy.water_monthly_multipliers_isdefaulted = true
+    end
   end
 
   def self.apply_building_construction(hpxml_bldg, cfa, nbeds, infil_measurement)

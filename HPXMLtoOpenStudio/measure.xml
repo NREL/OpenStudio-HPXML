@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>023b3204-89da-45ca-a787-d7a50282375a</version_id>
-  <version_modified>2024-01-24T18:02:40Z</version_modified>
+  <version_id>c114223d-d7b7-4107-91fd-673313219cda</version_id>
+  <version_modified>2024-01-24T23:00:03Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -160,7 +160,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1223FDEB</checksum>
+      <checksum>1BF5AF51</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -274,7 +274,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1E3D66E6</checksum>
+      <checksum>24CC1590</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -298,19 +298,19 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5121D914</checksum>
+      <checksum>710CCDF7</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D3364C95</checksum>
+      <checksum>17ED7F14</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>383FDD40</checksum>
+      <checksum>01A2BD04</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -418,49 +418,49 @@
       <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>18834EE1</checksum>
+      <checksum>4E0463EA</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-30-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>18834EE1</checksum>
+      <checksum>4E0463EA</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>20F9E3E8</checksum>
+      <checksum>3F6EFDC9</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic_2.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C827E838</checksum>
+      <checksum>E5AA5885</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic_3.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>67960B83</checksum>
+      <checksum>4BC2EF68</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic_4.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>94B07836</checksum>
+      <checksum>C510A864</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic_5.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>69EC6033</checksum>
+      <checksum>7B38D7ED</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic_6.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D87AB0DF</checksum>
+      <checksum>EFCB74AE</checksum>
     </file>
     <file>
       <filename>schedule_files/setpoints-10-mins.csv</filename>
@@ -520,7 +520,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BD52A92C</checksum>
+      <checksum>7F3A83B6</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>906B605E</checksum>
+      <checksum>E8332039</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1E65C0AF</checksum>
+      <checksum>4597D3BB</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

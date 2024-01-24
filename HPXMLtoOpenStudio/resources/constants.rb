@@ -172,6 +172,10 @@ class Constants
     return 'dhw fixtures'
   end
 
+  def self.ObjectNameWater
+    return 'dhw general'
+  end
+
   def self.ObjectNameFreezer
     return 'freezer'
   end
