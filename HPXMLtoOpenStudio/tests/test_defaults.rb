@@ -3114,14 +3114,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
     hpxml_bldg.refrigerators[0].location = HPXML::LocationBasementConditioned
     hpxml_bldg.refrigerators[0].usage_multiplier = 1.2
-    hpxml_bldg.refrigerators[0].weekday_fractions = ConstantDaySchedule
-    hpxml_bldg.refrigerators[0].weekend_fractions = ConstantDaySchedule
-    hpxml_bldg.refrigerators[0].monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.refrigerators[0].weekday_fractions = nil
+    hpxml_bldg.refrigerators[0].weekend_fractions = nil
+    hpxml_bldg.refrigerators[0].monthly_multipliers = nil
     hpxml_bldg.refrigerators[0].constant_coefficients = ConstantDaySchedule
     hpxml_bldg.refrigerators[0].temperature_coefficients = ConstantDaySchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 650.0, 1.2, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule)
+    _test_default_refrigerator_values(default_hpxml_bldg, HPXML::LocationBasementConditioned, 650.0, 1.2, nil, nil, nil, ConstantDaySchedule, ConstantDaySchedule)
 
     # Test inputs not overridden by defaults 2
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -3183,15 +3183,31 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       refrigerator.location = HPXML::LocationConditionedSpace
       refrigerator.rated_annual_kwh = 333.0
       refrigerator.usage_multiplier = 1.5
-      refrigerator.weekday_fractions = ConstantDaySchedule
-      refrigerator.weekend_fractions = ConstantDaySchedule
-      refrigerator.monthly_multipliers = ConstantMonthSchedule
+      refrigerator.weekday_fractions = nil
+      refrigerator.weekend_fractions = nil
+      refrigerator.monthly_multipliers = nil
       refrigerator.constant_coefficients = ConstantDaySchedule
       refrigerator.temperature_coefficients = ConstantDaySchedule
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 333.0, 1.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule)
+    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 333.0, 1.5, nil, nil, nil, ConstantDaySchedule, ConstantDaySchedule)
+
+    # Test inputs not overridden by defaults 2
+    hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
+    hpxml_bldg.refrigerators.each do |refrigerator|
+      refrigerator.location = HPXML::LocationConditionedSpace
+      refrigerator.rated_annual_kwh = 333.0
+      refrigerator.usage_multiplier = 1.5
+      refrigerator.weekday_fractions = ConstantDaySchedule
+      refrigerator.weekend_fractions = ConstantDaySchedule
+      refrigerator.monthly_multipliers = ConstantMonthSchedule
+      refrigerator.constant_coefficients = nil
+      refrigerator.temperature_coefficients = nil
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_extra_refrigerators_values(default_hpxml_bldg, HPXML::LocationConditionedSpace, 333.0, 1.5, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, nil, nil)
 
     # Test defaults
     hpxml_bldg.refrigerators.each do |refrigerator|
