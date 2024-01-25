@@ -53,6 +53,7 @@ base-bldgtype-mf-unit-shared-pv.xml,355.63,144.0,958.12,-897.25,204.88,144.0,6.7
 base-bldgtype-mf-unit-shared-water-heater-recirc.xml,1071.77,144.0,644.87,0.0,788.87,144.0,138.9,282.9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-water-heater.xml,1031.55,144.0,604.65,0.0,748.65,144.0,138.9,282.9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit.xml,1252.87,144.0,958.12,0.0,1102.12,144.0,6.75,150.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-bldgtype-mf-whole-building.xml,8889.8,864.0,8025.8,0.0,8889.8,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-sfa-unit-2stories.xml,1725.28,144.0,1263.51,0.0,1407.51,144.0,173.77,317.77,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-sfa-unit-atticroof-cathedral.xml,2288.6,144.0,1361.28,0.0,1505.28,144.0,639.32,783.32,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-sfa-unit-infil-compartmentalization-test.xml,1511.73,144.0,1092.09,0.0,1236.09,144.0,131.64,275.64,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -179,6 +180,8 @@ base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml,1863.84,
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml,1865.72,144.0,1375.89,0.0,1519.89,144.0,201.83,345.83,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml,1867.55,144.0,1421.4,0.0,1565.4,144.0,158.15,302.15,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml,1870.91,144.0,1426.46,0.0,1570.46,144.0,156.45,300.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,1712.59,144.0,1568.59,0.0,1712.59,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,1698.16,144.0,1554.16,0.0,1698.16,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml,1977.24,144.0,1833.24,0.0,1977.24,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,1696.64,144.0,1552.64,0.0,1696.64,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,1643.22,144.0,1499.22,0.0,1643.22,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -195,6 +198,7 @@ base-hvac-boiler-wood-only.xml,1545.44,144.0,1115.47,0.0,1259.47,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-1-speed-seer2.xml,1452.99,144.0,1308.99,0.0,1452.99,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-1-speed.xml,1453.45,144.0,1309.45,0.0,1453.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-2-speed.xml,1395.13,144.0,1251.13,0.0,1395.13,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,1421.45,144.0,1277.45,0.0,1421.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance.xml,1378.61,144.0,1234.61,0.0,1378.61,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-var-speed.xml,1365.54,144.0,1221.54,0.0,1365.54,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml,1883.25,144.0,1739.25,0.0,1883.25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -246,9 +250,11 @@ base-hvac-install-quality-ground-to-air-heat-pump.xml,1698.18,144.0,1554.18,0.0,
 base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml,1384.08,144.0,1240.08,0.0,1384.08,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-install-quality-mini-split-heat-pump-ducted.xml,1660.19,144.0,1516.19,0.0,1660.19,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-air-conditioner-only-ducted.xml,1360.38,144.0,1216.38,0.0,1360.38,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance-autosize.xml,1375.72,144.0,1231.72,0.0,1375.72,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-air-conditioner-only-ductless-detailed-performance.xml,1350.91,144.0,1206.91,0.0,1350.91,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-air-conditioner-only-ductless.xml,1363.75,144.0,1219.75,0.0,1363.75,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-cooling-only.xml,1333.41,144.0,1189.41,0.0,1333.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml,1646.68,144.0,1502.68,0.0,1646.68,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml,1624.97,144.0,1480.97,0.0,1624.97,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,1502.63,144.0,1358.63,0.0,1502.63,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,1582.11,144.0,1438.11,0.0,1582.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -256,6 +262,7 @@ base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,1569.52,144.0,1425.
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,1719.59,144.0,1336.17,0.0,1480.17,144.0,95.42,239.42,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml,1711.44,144.0,1329.07,0.0,1473.07,144.0,94.37,238.37,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-stove.xml,1899.61,144.0,1326.69,0.0,1470.69,0.0,0.0,0.0,0.0,428.92,428.92,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-mini-split-heat-pump-ductless-detailed-performance-autosize.xml,1564.63,144.0,1420.63,0.0,1564.63,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml,1572.7,144.0,1428.7,0.0,1572.7,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-heating-capacity-17f.xml,1544.05,144.0,1400.05,0.0,1544.05,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless.xml,1544.05,144.0,1400.05,0.0,1544.05,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
