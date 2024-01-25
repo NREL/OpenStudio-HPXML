@@ -1555,7 +1555,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml_header, @hpxml_bldg, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
+                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units,
+                                @apply_ashrae140_assumptions)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
