@@ -576,8 +576,7 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def test_annual_only
-    hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
-    args_hash = { 'hpxml_path' => hpxml_path,
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml'),
                   'skip_validation' => true,
                   'add_component_loads' => true,
                   'timeseries_frequency' => 'hourly',
@@ -605,7 +604,7 @@ class ReportSimulationOutputTest < Minitest::Test
     _check_runner_registered_values_and_measure_xml_outputs(actual_annual_rows)
 
     # Verify refrigerator energy use correctly impacted by ambient temperature
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
     actual_fridge_energy_use = actual_annual_rows["End Use: #{FT::Elec}: #{EUT::Refrigerator} (MBtu)"]
     rated_fridge_energy_use = UnitConversions.convert(hpxml.buildings[0].refrigerators[0].rated_annual_kwh, 'kWh', 'MBtu')
     assert_in_epsilon(0.93, actual_fridge_energy_use / rated_fridge_energy_use, 0.1)
@@ -1303,6 +1302,7 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(8760, timeseries_rows.size - 2)
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
+    _check_for_nonzero_avg_timeseries_value(timeseries_csv, BaseHPXMLTimeseriesColsEnergyPlusOutputVariables)
     assert(File.readlines(run_log).any? { |line| line.include?("Request for output variable 'Foo'") })
   end
 
