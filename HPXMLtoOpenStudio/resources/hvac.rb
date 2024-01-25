@@ -1853,6 +1853,8 @@ class HVAC
     program.addLine('  Set clg_mode = 1')
     program.addLine('EndIf')
     program.addLine("Set sens_load = @Abs #{load_sensor.name}")
+    program.addLine('Set clg_mode = 0') if clg_coil.nil?
+    program.addLine('Set htg_mode = 0') if htg_coil.nil?
 
     s = []
     [htg_coil, clg_coil].each do |coil|
@@ -1926,19 +1928,19 @@ class HVAC
       # Calculate the target speed ratio that operates at the target power output
       program.addLine(mode_s)
       coil.stages.each_with_index do |stage, i|
-        program.addLine("  Set current_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name} * #{cap_multiplier}")
+        program.addLine("  Set rt_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name} * #{cap_multiplier}")
         program.addLine("  Set rated_eir_#{i} = 1 / #{stage.send(cop_name)}")
-        program.addLine("  Set current_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name}")
-        program.addLine("  Set current_power_#{i} = current_eir_#{i} * current_capacity_#{i}")
+        program.addLine("  Set rt_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name}")
+        program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i}")
       end
       program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
       (0..coil.stages.size - 1).each do |i|
         if i == 0
-          program.addLine("  If target_power < current_power_#{i}")
-          program.addLine("    Set target_speed_ratio = target_power / current_power_#{i}")
+          program.addLine("  If target_power < rt_power_#{i}")
+          program.addLine("    Set target_speed_ratio = target_power / rt_power_#{i}")
         else
-          program.addLine("  ElseIf target_power < current_power_#{i}")
-          program.addLine("    Set target_speed_ratio = (target_power - current_power_#{i - 1}) / (current_power_#{i} - current_power_#{i - 1}) + #{i}")
+          program.addLine("  ElseIf target_power < rt_power_#{i}")
+          program.addLine("    Set target_speed_ratio = (target_power - rt_power_#{i - 1}) / (rt_power_#{i} - rt_power_#{i - 1}) + #{i}")
         end
       end
       program.addLine('  Else')
@@ -1948,11 +1950,16 @@ class HVAC
       # Calculate the current power that needs to meet zone loads
       (0..coil.stages.size - 1).each do |i|
         if i == 0
-          program.addLine("  If sens_load < current_capacity_#{i}")
-          program.addLine("    Set current_power = sens_load * current_eir_#{i}")
+          program.addLine("  If sens_load <= rt_capacity_#{i}")
+          program.addLine("    Set current_power = sens_load * rt_eir_#{i}")
+        elsif i == coil.stages.size - 1
+          program.addLine("  Else,")
+          program.addLine("    Set current_power = rt_power_#{i}")
         else
-          program.addLine("  ElseIf sens_load < current_capacity_#{i}")
-          program.addLine("    Set current_power = (@Max current_capacity_#{i} (sens_load - current_capacity_#{i - 1})) * current_eir_#{i} + current_power_#{i - 1}")
+          program.addLine("  ElseIf sens_load <= rt_capacity_#{i}")
+          program.addLine("    Set hs_speed_ratio = (sens_load - rt_capacity_#{i - 1}) / (rt_capacity_#{i} - rt_capacity_#{i - 1})")
+          program.addLine("    Set ls_speed_ratio = 1 - hs_speed_ratio")
+          program.addLine("    Set current_power = hs_speed_ratio * rt_power_#{i} + ls_speed_ratio * rt_power_#{i - 1}")
         end
       end
       program.addLine('  EndIf')
