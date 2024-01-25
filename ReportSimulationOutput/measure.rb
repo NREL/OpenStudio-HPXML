@@ -679,9 +679,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return timestamps, timestamps_dst, timestamps_utc
   end
 
-  def get_n_hours_per_period(timeseries_frequency, sim_start_day_of_year, sim_end_day_of_year, year)
+  def get_n_hours_per_period(timeseries_frequency, sim_start_day, sim_end_day, year)
     if timeseries_frequency == 'daily'
-      n_hours_per_period = [24] * (sim_end_day_of_year - sim_start_day_of_year + 1)
+      n_hours_per_period = [24] * (sim_end_day - sim_start_day + 1)
     elsif timeseries_frequency == 'monthly'
       n_days_per_month = Constants.NumDaysInMonths(year)
       n_days_per_period = n_days_per_month[@hpxml_header.sim_begin_month - 1..@hpxml_header.sim_end_month - 1]
@@ -694,8 +694,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   def rollup_timeseries_output_to_daily_or_monthly(timeseries_output, timeseries_frequency, average = false)
     year = @hpxml_header.sim_calendar_year
-    sim_start_day_of_year, sim_end_day_of_year, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
-    n_hours_per_period = get_n_hours_per_period(timeseries_frequency, sim_start_day_of_year, sim_end_day_of_year, year)
+    sim_start_day, sim_end_day, _sim_start_hour, _sim_end_hour = get_sim_times_of_year(year)
+    n_hours_per_period = get_n_hours_per_period(timeseries_frequency, sim_start_day, sim_end_day, year)
     fail 'Unexpected failure for n_hours_per_period calculations.' if n_hours_per_period.sum != timeseries_output.size
 
     ts_output = []
@@ -1199,11 +1199,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           # Use annual value for all hours
           hourly_elec_factors = [scenario.elec_value] * 8760
         end
-        year = 1999 # Try non-leap year for calculations
-        sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
-        hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
 
         # Calculate annual/timeseries emissions for each end use
+        do_trim = true
         @end_uses.each do |eu_key, end_use|
           fuel_type, _end_use_type = eu_key
           next unless fuel_type == FT::Elec
@@ -1211,14 +1209,21 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
           hourly_elec = end_use.hourly_output
 
-          if hourly_elec.size == hourly_elec_factors[sim_start_hour..sim_end_hour].size + 24
-            # Use leap-year for calculations
-            year = 2000
-            sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
-            # Duplicate Feb 28 Cambium values for Feb 29
-            hourly_elec_factors = hourly_elec_factors[0..1415] + hourly_elec_factors[1392..1415] + hourly_elec_factors[1416..8759]
+          # Trim hourly electricity factors to the run period; do once.
+          if do_trim
+            do_trim = false
+
+            year = 1999 # Try non-leap year for calculations
+            _sim_start_day, _sim_end_day, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
+            if hourly_elec.size == hourly_elec_factors[sim_start_hour..sim_end_hour].size + 24
+              # Duplicate Feb 28 Cambium values for Feb 29
+              hourly_elec_factors = hourly_elec_factors[0..1415] + hourly_elec_factors[1392..1415] + hourly_elec_factors[1416..8759]
+              # Use leap-year for calculations
+              year = 2000
+              _sim_start_day, _sim_end_day, sim_start_hour, sim_end_hour = get_sim_times_of_year(year)
+            end
+            hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour]
           end
-          hourly_elec_factors = hourly_elec_factors[sim_start_hour..sim_end_hour] # Trim to sim period
 
           fail 'Unexpected failure for emissions calculations.' if hourly_elec_factors.size != hourly_elec.size
 
@@ -1329,11 +1334,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_sim_times_of_year(year)
-    sim_start_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
-    sim_end_day_of_year = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_end_month, @hpxml_header.sim_end_day)
-    sim_start_hour = (sim_start_day_of_year - 1) * 24
-    sim_end_hour = sim_end_day_of_year * 24 - 1
-    return sim_start_day_of_year, sim_end_day_of_year, sim_start_hour, sim_end_hour
+    sim_start_day = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
+    sim_end_day = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_end_month, @hpxml_header.sim_end_day)
+    sim_start_hour = (sim_start_day - 1) * 24
+    sim_end_hour = sim_end_day * 24 - 1
+    return sim_start_day, sim_end_day, sim_start_hour, sim_end_hour
   end
 
   def check_for_errors(runner, outputs)

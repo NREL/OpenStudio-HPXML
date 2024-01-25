@@ -3157,7 +3157,14 @@
   },
   "sample_files/base-simcontrol-runperiod-1-month.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "simulation_control_run_period": "Feb 1 - Feb 28"
+    "weather_station_epw_filepath": "US_CO_Boulder_AMY_2012.epw",
+    "simulation_control_run_period": "Feb 15 - Mar 15",
+    "emissions_scenario_names": "Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA",
+    "emissions_types": "CO2e, CO2e, CO2e, SO2, NOx",
+    "emissions_electricity_units": "kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh",
+    "emissions_electricity_values_or_filepaths": "../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_MidCase.csv, ../../HPXMLtoOpenStudio/resources/data/cambium/LRMER_LowRECosts.csv, 392.6, 0.384, 0.67",
+    "emissions_electricity_number_of_header_rows": "1, 1, , , ",
+    "emissions_electricity_column_numbers": "17, 17, , , "
   },
   "sample_files/base-simcontrol-temperature-capacitance-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
