@@ -372,6 +372,8 @@
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:GeneralWaterUseUsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GeneralWaterUseUsageMultiplier</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:GeneralWaterUseUsageMultiplier) &gt;= 0 or not(h:extension/h:GeneralWaterUseUsageMultiplier)'>Expected extension/GeneralWaterUseUsageMultiplier to be greater than or equal to 0</sch:assert>      
       <sch:assert role='ERROR' test='count(h:extension/h:GeneralWaterUseWeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GeneralWaterUseWeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:GeneralWaterUseWeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GeneralWaterUseWeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:GeneralWaterUseMonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/GeneralWaterUseMonthlyScheduleMultipliers</sch:assert>

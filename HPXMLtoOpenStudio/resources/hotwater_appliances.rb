@@ -10,6 +10,7 @@ class HotWaterAndAppliances
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
     fixtures_usage_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier
+    general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
 
@@ -474,7 +475,7 @@ class HotWaterAndAppliances
 
     # General water use internal gains
     # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
-    water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds, fixtures_usage_multiplier)
+    water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier)
 
     # Create schedule
     water_schedule = nil
