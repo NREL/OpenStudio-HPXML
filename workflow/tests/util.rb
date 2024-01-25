@@ -239,7 +239,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
       next if message.include? 'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'
     end
-    if hpxml_path.include? 'base-location-AMY-2012.xml'
+    if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
       next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
     end
     if hpxml_bldg.building_construction.number_of_units > 1
@@ -1032,6 +1032,10 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
+    elsif key.include?('Emissions:')
+      # Check that the emissions difference is less than 100 lb or less than 5%
+      abs_delta_tol = 100
+      abs_frac_tol = 0.05
     else
       fail "Unexpected results key: #{key}."
     end
