@@ -41,6 +41,11 @@
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
         </Site>
+        <BuildingOccupancy>
+          <extension>
+            <GeneralWaterUseUsageMultiplier>0.9</GeneralWaterUseUsageMultiplier>
+          </extension>
+        </BuildingOccupancy>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>2.0</NumberofConditionedFloors>

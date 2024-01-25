@@ -2925,6 +2925,7 @@
   },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
+    "general_water_use_usage_multiplier": 0.9,
     "water_fixtures_usage_multiplier": 0.9,
     "lighting_interior_usage_multiplier": 0.9,
     "lighting_exterior_usage_multiplier": 0.9,
