@@ -2774,6 +2774,10 @@
     "emissions_electricity_number_of_header_rows": "1, 1, , , ",
     "emissions_electricity_column_numbers": "17, 17, , , "
   },
+  "sample_files/base-misc-emissions-runperiod.xml": {
+    "parent_hpxml": "sample_files/base-misc-emissions.xml",
+    "simulation_control_run_period": "Feb 15 - Mar 15"
+  },
   "sample_files/base-misc-generators.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
