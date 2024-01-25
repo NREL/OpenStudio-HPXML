@@ -2787,7 +2787,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
         return { [FT::Elec, EUT::HotWater] => ["Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Energy"] }
 
       elsif object.to_FanSystemModel.is_initialized
-        if object_type == Constants.ObjectNameWaterHeater
+        if object_type == Constants.ObjectNameGeneralWaterUseHeater
           return { [FT::Elec, EUT::HotWater] => ["Fan #{EPlus::FuelTypeElectricity} Energy"] }
         end
 
@@ -2881,7 +2881,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants.ObjectNameMiscPermanentSpaHeater => EUT::PermanentSpaHeater,
           Constants.ObjectNameMechanicalVentilationPreheating => EUT::MechVentPreheat,
           Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool,
-          Constants.ObjectNameWaterHeaterAdjustment => EUT::HotWater,
+          Constants.ObjectNameGeneralWaterUseHeaterAdjustment => EUT::HotWater,
           Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
           fail 'Unepected error: multiple matches.' unless end_use.nil?

@@ -383,9 +383,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_occupancy.weekday_fractions = ConstantDaySchedule
     hpxml_bldg.building_occupancy.weekend_fractions = ConstantDaySchedule
     hpxml_bldg.building_occupancy.monthly_multipliers = ConstantMonthSchedule
-    hpxml_bldg.building_occupancy.water_weekday_fractions = ConstantDaySchedule
-    hpxml_bldg.building_occupancy.water_weekend_fractions = ConstantDaySchedule
-    hpxml_bldg.building_occupancy.water_monthly_multipliers = ConstantMonthSchedule
+    hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = ConstantDaySchedule
+    hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = ConstantDaySchedule
+    hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_occupancy_values(default_hpxml_bldg, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
@@ -394,9 +394,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_occupancy.weekday_fractions = nil
     hpxml_bldg.building_occupancy.weekend_fractions = nil
     hpxml_bldg.building_occupancy.monthly_multipliers = nil
-    hpxml_bldg.building_occupancy.water_weekday_fractions = nil
-    hpxml_bldg.building_occupancy.water_weekend_fractions = nil
-    hpxml_bldg.building_occupancy.water_monthly_multipliers = nil
+    hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = nil
+    hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = nil
+    hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_occupancy_values(default_hpxml_bldg, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers, Schedule.GeneralWaterUseWeekdayFractions, Schedule.GeneralWaterUseWeekendFractions, Schedule.GeneralWaterUseMonthlyMultipliers)
@@ -3991,19 +3991,19 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       assert_equal(monthly_mults, hpxml_bldg.building_occupancy.monthly_multipliers)
     end
     if water_weekday_sch.nil?
-      assert_nil(hpxml_bldg.building_occupancy.water_weekday_fractions)
+      assert_nil(hpxml_bldg.building_occupancy.general_water_use_weekday_fractions)
     else
-      assert_equal(water_weekday_sch, hpxml_bldg.building_occupancy.water_weekday_fractions)
+      assert_equal(water_weekday_sch, hpxml_bldg.building_occupancy.general_water_use_weekday_fractions)
     end
     if water_weekend_sch.nil?
-      assert_nil(hpxml_bldg.building_occupancy.water_weekend_fractions)
+      assert_nil(hpxml_bldg.building_occupancy.general_water_use_weekend_fractions)
     else
-      assert_equal(water_weekend_sch, hpxml_bldg.building_occupancy.water_weekend_fractions)
+      assert_equal(water_weekend_sch, hpxml_bldg.building_occupancy.general_water_use_weekend_fractions)
     end
     if water_monthly_mults.nil?
-      assert_nil(hpxml_bldg.building_occupancy.water_monthly_multipliers)
+      assert_nil(hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers)
     else
-      assert_equal(water_monthly_mults, hpxml_bldg.building_occupancy.water_monthly_multipliers)
+      assert_equal(water_monthly_mults, hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers)
     end
   end
 

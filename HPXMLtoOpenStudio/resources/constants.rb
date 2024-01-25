@@ -172,8 +172,8 @@ class Constants
     return 'dhw fixtures'
   end
 
-  def self.ObjectNameWater
-    return 'dhw general'
+  def self.ObjectNameGeneralWaterUse
+    return 'general water use'
   end
 
   def self.ObjectNameFreezer
@@ -356,27 +356,27 @@ class Constants
     return 'unmet hours program'
   end
 
-  def self.ObjectNameWaterHeater
+  def self.ObjectNameGeneralWaterUseHeater
     return 'water heater'
   end
 
-  def self.ObjectNameWaterHeaterSetpoint
+  def self.ObjectNameGeneralWaterUseHeaterSetpoint
     return 'water heater setpoint'
   end
 
-  def self.ObjectNameWaterLatent
+  def self.ObjectNameGeneralWaterUseLatent
     return 'water latent'
   end
 
-  def self.ObjectNameWaterSensible
+  def self.ObjectNameGeneralWaterUseSensible
     return 'water sensible'
   end
 
-  def self.ObjectNameWaterHeaterAdjustment
+  def self.ObjectNameGeneralWaterUseHeaterAdjustment
     return 'water heater energy adjustment'
   end
 
-  def self.ObjectNameWaterLoopHeatPump
+  def self.ObjectNameGeneralWaterUseLoopHeatPump
     return 'water loop heat pump'
   end
 

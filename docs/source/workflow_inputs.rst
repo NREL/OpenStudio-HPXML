@@ -527,17 +527,17 @@ HPXML Building Occupancy
 
 Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy``.
 
-  =============================================  ========  =====  ===========  ========  ========  ========================
-  Element                                        Type      Units  Constraints  Required  Default   Notes
-  =============================================  ========  =====  ===========  ========  ========  ========================
-  ``NumberofResidents``                          double           >= 0         No        See [#]_  Number of occupants
-  ``extension/WeekdayScheduleFractions``         array                         No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``         array                         No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``       array                         No        See [#]_  12 comma-separated monthly multipliers
-  ``extension/WaterWeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WaterWeekendScheduleFractions``    array                         No                  24 comma-separated weekend fractions
-  ``extension/WaterMonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated monthly multipliers
-  =============================================  ========  =====  ===========  ========  ========  ========================
+  =======================================================  ========  =====  ===========  ========  ========  ========================
+  Element                                                  Type      Units  Constraints  Required  Default   Notes
+  =======================================================  ========  =====  ===========  ========  ========  ========================
+  ``NumberofResidents``                                    double           >= 0         No        See [#]_  Number of occupants
+  ``extension/WeekdayScheduleFractions``                   array                         No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``                   array                         No                  24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``                 array                         No        See [#]_  12 comma-separated monthly multipliers
+  ``extension/GeneralWaterUseWeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated weekday fractions
+  ``extension/GeneralWaterUseWeekendScheduleFractions``    array                         No                  24 comma-separated weekend fractions
+  ``extension/GeneralWaterUseMonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated monthly multipliers
+  =======================================================  ========  =====  ===========  ========  ========  ========================
 
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
          If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
@@ -548,8 +548,8 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
 
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
-  .. [#] If WaterWeekdayScheduleFractions or WaterWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034".
-  .. [#] If WaterMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
+  .. [#] If GeneralWaterUseWeekdayScheduleFractions or GeneralWaterUseWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034".
+  .. [#] If GeneralWaterUseMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
 HPXML Building Construction
 ***************************

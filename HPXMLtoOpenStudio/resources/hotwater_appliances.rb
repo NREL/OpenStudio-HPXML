@@ -479,7 +479,7 @@ class HotWaterAndAppliances
     # Create schedule
     water_schedule = nil
     water_col_name = SchedulesFile::ColumnGeneralWaterUse
-    water_obj_name = Constants.ObjectNameWater
+    water_obj_name = Constants.ObjectNameGeneralWaterUse
     if not schedules_file.nil?
       water_design_level_sens = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnGeneralWaterUse, daily_kwh: UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
       water_design_level_lat = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::ColumnGeneralWaterUse, daily_kwh: UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
@@ -487,20 +487,20 @@ class HotWaterAndAppliances
     end
     if water_schedule.nil?
       water_unavailable_periods = Schedule.get_unavailable_periods(runner, water_col_name, unavailable_periods)
-      water_weekday_sch = hpxml_bldg.building_occupancy.water_weekday_fractions
-      water_weekend_sch = hpxml_bldg.building_occupancy.water_weekend_fractions
-      water_monthly_sch = hpxml_bldg.building_occupancy.water_monthly_multipliers
+      water_weekday_sch = hpxml_bldg.building_occupancy.general_water_use_weekday_fractions
+      water_weekend_sch = hpxml_bldg.building_occupancy.general_water_use_weekend_fractions
+      water_monthly_sch = hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers
       water_schedule_obj = MonthWeekdayWeekendSchedule.new(model, water_obj_name + ' schedule', water_weekday_sch, water_weekend_sch, water_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: water_unavailable_periods)
       water_design_level_sens = water_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
       water_design_level_lat = water_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       water_schedule = water_schedule_obj.schedule
     else
-      runner.registerWarning("Both '#{water_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.water_weekday_fractions.nil?
-      runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.water_weekend_fractions.nil?
-      runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.water_monthly_multipliers.nil?
+      runner.registerWarning("Both '#{water_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekday_fractions.nil?
+      runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil?
+      runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
     end
-    add_other_equipment(model, Constants.ObjectNameWaterSensible, conditioned_space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
-    add_other_equipment(model, Constants.ObjectNameWaterLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)
+    add_other_equipment(model, Constants.ObjectNameGeneralWaterUseSensible, conditioned_space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
+    add_other_equipment(model, Constants.ObjectNameGeneralWaterUseLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)
   end
 
   def self.get_range_oven_default_values()

@@ -153,13 +153,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     # mains temperature
     avg_tmains = 57.58
@@ -218,13 +218,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def test_dhw_shared_water_heater_recirc
@@ -279,13 +279,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     # recirc
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
@@ -345,13 +345,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def test_dhw_low_flow_fixtures
@@ -465,13 +465,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def test_appliances_modified
@@ -522,13 +522,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def test_appliances_oil
@@ -579,13 +579,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -648,13 +648,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -717,13 +717,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -786,13 +786,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -855,13 +855,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507
     water_lat = 266.358
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh(model, Constants.ObjectNameClothesDryer), 0.001)
@@ -928,13 +928,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -262.507 * 0.9
     water_lat = 266.358 * 0.9
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def test_operational
@@ -989,13 +989,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     # other equipment
     water_sens = -140.879
     water_lat = 142.945
-    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameWaterSensible), 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[0], 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterSensible)[1], 0.001)
+    assert_in_epsilon(water_sens, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseSensible), 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[0], 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseSensible)[1], 0.001)
 
-    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameWaterLatent), 0.001)
-    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[0], 0.001)
-    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWaterLatent)[1], 0.001)
+    assert_in_epsilon(water_lat, get_oe_kwh(model, Constants.ObjectNameGeneralWaterUseLatent), 0.001)
+    assert_in_epsilon(0.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[0], 0.001)
+    assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameGeneralWaterUseLatent)[1], 0.001)
   end
 
   def _test_measure(args_hash)

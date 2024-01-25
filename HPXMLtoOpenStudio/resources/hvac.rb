@@ -460,7 +460,7 @@ class HVAC
       fail 'WLHP model should only be called for central boilers.'
     end
 
-    obj_name = Constants.ObjectNameWaterLoopHeatPump
+    obj_name = Constants.ObjectNameGeneralWaterUseLoopHeatPump
 
     htg_cfm = heat_pump.heating_airflow_cfm
 
