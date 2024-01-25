@@ -1389,7 +1389,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
     perf_data_capacity_type_choices << 'Absolute capacities'
-    # perf_data_capacity_type_choices << 'Normalized capacity fractions'
+    perf_data_capacity_type_choices << 'Normalized capacity fractions'
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_perf_data_capacity_type', perf_data_capacity_type_choices, false)
     arg.setDisplayName('HVAC Detailed Performance Data: Capacity Type')
@@ -5241,23 +5241,23 @@ class HPXMLFile
         outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_speed_capacity = min_speed_cap_or_frac
-          max_speed_capacity = max_speed_cap_or_frac
+          min_speed_capacity = Float(min_speed_cap_or_frac)
+          max_speed_capacity = Float(max_speed_cap_or_frac)
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
-          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
         end
 
-        clg_perf_data.add(outdoor_temperature: outdoor_temperature,
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: min_speed_capacity,
                           capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_speed_cop)
-        clg_perf_data.add(outdoor_temperature: outdoor_temperature,
+                          efficiency_cop: Float(min_speed_cop))
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: max_speed_capacity,
                           capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_speed_cop)
+                          efficiency_cop: Float(max_speed_cop))
       end
     end
   end
@@ -5422,28 +5422,25 @@ class HPXMLFile
         outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = heating_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_speed_capacity = min_speed_cap_or_frac
-          max_speed_capacity = max_speed_cap_or_frac
+          min_speed_capacity = Float(min_speed_cap_or_frac)
+          max_speed_capacity = Float(max_speed_cap_or_frac)
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
-          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
         end
 
-        htg_perf_data.add(outdoor_temperature: outdoor_temperature,
+        htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: min_speed_capacity,
                           capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_speed_cop)
-        htg_perf_data.add(outdoor_temperature: outdoor_temperature,
+                          efficiency_cop: Float(min_speed_cop))
+        htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: max_speed_capacity,
                           capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_speed_cop)
+                          efficiency_cop: Float(max_speed_cop))
       end
-    end
 
-    if args[:hvac_perf_data_capacity_type].is_initialized
-      hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
       hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
       hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
       hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
@@ -5459,23 +5456,23 @@ class HPXMLFile
         outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
 
         if hvac_perf_data_capacity_type == 'Absolute capacities'
-          min_speed_capacity = min_speed_cap_or_frac
-          max_speed_capacity = max_speed_cap_or_frac
+          min_speed_capacity = Float(min_speed_cap_or_frac)
+          max_speed_capacity = Float(max_speed_cap_or_frac)
         elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
-          min_speed_capacity_fraction_of_nominal = min_speed_cap_or_frac
-          max_speed_capacity_fraction_of_nominal = max_speed_cap_or_frac
+          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
         end
 
-        clg_perf_data.add(outdoor_temperature: outdoor_temperature,
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: min_speed_capacity,
                           capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMinimum,
-                          efficiency_cop: min_speed_cop)
-        clg_perf_data.add(outdoor_temperature: outdoor_temperature,
+                          efficiency_cop: Float(min_speed_cop))
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
                           capacity: max_speed_capacity,
                           capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
                           capacity_description: HPXML::CapacityDescriptionMaximum,
-                          efficiency_cop: max_speed_cop)
+                          efficiency_cop: Float(max_speed_cop))
       end
     end
   end
