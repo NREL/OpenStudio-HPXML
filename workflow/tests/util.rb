@@ -12,8 +12,8 @@ def run_simulation_tests(xmls)
     results = _run_xml(xml, Parallel.worker_number)
     all_results[xml_name], all_results_bills[xml_name], timeseries_results = results
 
-    next unless xml.include?('sample_files') || xml.include?('real_homes')
-    next if xml.include? 'base-bldgtype-mf-whole-building'
+    next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
+    next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
@@ -178,7 +178,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   hpxml_bldg.collapse_enclosure_surfaces()
   hpxml_bldg.delete_adiabatic_subsurfaces()
 
-  # Check run.log warnings
+  # Check for unexpected run.log messages
   File.readlines(File.join(rundir, 'run.log')).each do |message|
     next if message.strip.empty?
     next if message.start_with? 'Info: '
@@ -253,7 +253,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
       uses_unit_multipliers = hpxml.buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
       if uses_unit_multipliers || hpxml.buildings.size > 1
-        next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements'
+        next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers.'
       end
     end
 
