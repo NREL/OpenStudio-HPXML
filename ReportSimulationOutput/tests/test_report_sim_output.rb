@@ -924,8 +924,7 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def test_timeseries_hourly_zone_temperatures_whole_mf_building
-    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-multiple-mf-units.xml'),
-                  'building_id' => 'ALL',
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-bldgtype-mf-whole-building.xml'),
                   'skip_validation' => true,
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => true }

@@ -2,6 +2,7 @@
 
 __New Features__
 - Updates to HPXML v4.0-rc3.
+- **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Allows autosizing with detailed performance data inputs for variable-speed air source HVAC systems using `CapacityFractionOfNominal`.
