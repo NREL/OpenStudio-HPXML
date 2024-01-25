@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>bd1a7efb-d662-4948-ac8d-ca4876b763bf</version_id>
-  <version_modified>2024-01-25T14:12:12Z</version_modified>
+  <version_id>0d5b20ca-1c7f-4c69-bcbb-76c656573b2c</version_id>
+  <version_modified>2024-01-25T16:31:30Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -310,7 +310,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>916525C3</checksum>
+      <checksum>932395EE</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>85D88CDE</checksum>
+      <checksum>7EE89A2E</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -340,13 +340,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4CEA3B45</checksum>
+      <checksum>A060839F</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>94E05F98</checksum>
+      <checksum>7CE7B6AB</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EF0F0416</checksum>
+      <checksum>75775259</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C564EC22</checksum>
+      <checksum>D799B100</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
