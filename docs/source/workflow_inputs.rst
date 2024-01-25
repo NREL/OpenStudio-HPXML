@@ -2487,16 +2487,14 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity or Cooling capacity fraction of nominal at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity or capacity fraction at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
-  .. [#] If Capacity is provided, the nominal capacity specified at CoolingSystem/CoolingCapacity or HeatPump/CoolingCapacity must be provided; 
-         If Capacity is not provided, CapacityFractionOfNominal must be provided, but the nominal capacity is optional. 
-         If nominal capacity is not provided, the system will be autosized.
+  .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
 In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
@@ -2514,16 +2512,14 @@ For air-source HVAC systems with detailed heating performance data, two or more 
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity or Heating capacity fraction of nominal at the specified outdoor temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity or capacity fraction at the specified outdoor temperature
   ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
   ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
-  .. [#] If Capacity is provided, the nominal capacity specified at HeatPump/HeatingCapacity must be provided; 
-         If Capacity is not provided, CapacityFractionOfNominal must be provided, but the nominal capacity is optional. 
-         If nominal capacity is not provided, the system will be autosized.
+  .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
 In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
