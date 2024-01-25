@@ -399,7 +399,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_occupancy.water_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_occupancy_values(default_hpxml_bldg, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers, Schedules.GeneralWaterUseWeekdayFractions, Schedule.GeneralWaterUseWeekendFractions, Schedule.GeneralWaterUseMonthlyMultipliers)
+    _test_default_occupancy_values(default_hpxml_bldg, Schedule.OccupantsWeekdayFractions, Schedule.OccupantsWeekendFractions, Schedule.OccupantsMonthlyMultipliers, Schedule.GeneralWaterUseWeekdayFractions, Schedule.GeneralWaterUseWeekendFractions, Schedule.GeneralWaterUseMonthlyMultipliers)
   end
 
   def test_building_construction
