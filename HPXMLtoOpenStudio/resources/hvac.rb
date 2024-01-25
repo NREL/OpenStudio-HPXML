@@ -1952,9 +1952,6 @@ class HVAC
         if i == 0
           program.addLine("  If sens_load <= rt_capacity_#{i}")
           program.addLine("    Set current_power = sens_load * rt_eir_#{i}")
-        elsif i == coil.stages.size - 1
-          program.addLine("  Else,")
-          program.addLine("    Set current_power = rt_power_#{i}")
         else
           program.addLine("  ElseIf sens_load <= rt_capacity_#{i}")
           program.addLine("    Set hs_speed_ratio = (sens_load - rt_capacity_#{i - 1}) / (rt_capacity_#{i} - rt_capacity_#{i - 1})")
@@ -1962,6 +1959,8 @@ class HVAC
           program.addLine("    Set current_power = hs_speed_ratio * rt_power_#{i} + ls_speed_ratio * rt_power_#{i - 1}")
         end
       end
+      program.addLine("  Else,")
+      program.addLine("    Set current_power = rt_power_#{coil.stages.size - 1}")
       program.addLine('  EndIf')
       program.addLine('EndIf')
     end
