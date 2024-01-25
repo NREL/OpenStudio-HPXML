@@ -523,17 +523,17 @@ HPXML Building Occupancy
 
 Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy``.
 
-  ============================================  ========  =====  ===========  ========  ========  ========================
-  Element                                       Type      Units  Constraints  Required  Default   Notes
-  ============================================  ========  =====  ===========  ========  ========  ========================
-  ``NumberofResidents``                         double           >= 0         No        See [#]_  Number of occupants
-  ``extension/WeekdayScheduleFractions``        array                         No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``        array                         No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``      array                         No        See [#]_  12 comma-separated monthly multipliers
-  ``extension/WaterWeekdayScheduleFractions``   array                         No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WaterWeekendScheduleFractions``   array                         No                  24 comma-separated weekend fractions
-  ``extension/WaterMonthlyScheduleMultipliers`` array                         No        See [#]_  12 comma-separated monthly multipliers
-  ============================================  ========  =====  ===========  ========  ========  ========================
+  =============================================  ========  =====  ===========  ========  ========  ========================
+  Element                                        Type      Units  Constraints  Required  Default   Notes
+  =============================================  ========  =====  ===========  ========  ========  ========================
+  ``NumberofResidents``                          double           >= 0         No        See [#]_  Number of occupants
+  ``extension/WeekdayScheduleFractions``         array                         No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``         array                         No                  24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``       array                         No        See [#]_  12 comma-separated monthly multipliers
+  ``extension/WaterWeekdayScheduleFractions``    array                         No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WaterWeekendScheduleFractions``    array                         No                  24 comma-separated weekend fractions
+  ``extension/WaterMonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated monthly multipliers
+  =============================================  ========  =====  ===========  ========  ========  ========================
 
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
          If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
