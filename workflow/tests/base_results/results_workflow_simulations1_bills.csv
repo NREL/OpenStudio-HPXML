@@ -183,7 +183,7 @@ base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,1715.
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,1700.74,144.0,1556.74,0.0,1700.74,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml,1980.54,144.0,1836.54,0.0,1980.54,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,1699.22,144.0,1555.22,0.0,1699.22,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-air-to-air-heat-pump-var-speed-max-capacity-schedule.xml,1637.9,144.0,1493.9,0.0,1637.9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-var-speed-max-capacity-schedule.xml,1638.7,144.0,1494.7,0.0,1638.7,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,1645.35,144.0,1501.35,0.0,1645.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-sizing-controls.xml,1926.22,144.0,1569.04,0.0,1713.04,144.0,69.18,213.18,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize.xml,1851.63,144.0,1320.19,0.0,1464.19,144.0,243.44,387.44,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -200,7 +200,7 @@ base-hvac-central-ac-only-1-speed.xml,1458.56,144.0,1314.56,0.0,1458.56,0.0,0.0,
 base-hvac-central-ac-only-2-speed.xml,1398.66,144.0,1254.66,0.0,1398.66,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,1424.95,144.0,1280.95,0.0,1424.95,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance.xml,1381.34,144.0,1237.34,0.0,1381.34,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-central-ac-only-var-speed-max-capacity-schedule.xml,1367.12,144.0,1223.12,0.0,1367.12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-central-ac-only-var-speed-max-capacity-schedule.xml,1368.2,144.0,1224.2,0.0,1368.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-only-var-speed.xml,1367.86,144.0,1223.86,0.0,1367.86,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml,1888.27,144.0,1744.27,0.0,1888.27,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-dse.xml,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -258,7 +258,7 @@ base-hvac-mini-split-heat-pump-ducted-cooling-only.xml,1335.72,144.0,1191.72,0.0
 base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml,1650.41,144.0,1506.41,0.0,1650.41,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml,1628.54,144.0,1484.54,0.0,1628.54,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,1502.06,144.0,1358.06,0.0,1502.06,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-hvac-mini-split-heat-pump-ducted-max-capacity-schedule.xml,1581.68,144.0,1437.68,0.0,1581.68,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-mini-split-heat-pump-ducted-max-capacity-schedule.xml,1582.07,144.0,1438.07,0.0,1582.07,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,1584.35,144.0,1440.35,0.0,1584.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,1572.03,144.0,1428.03,0.0,1572.03,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,1722.04,144.0,1338.69,0.0,1482.69,144.0,95.35,239.35,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
