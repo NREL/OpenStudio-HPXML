@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ff222527-3f44-4549-b979-63d2ea6302a6</version_id>
-  <version_modified>2024-01-24T23:33:11Z</version_modified>
+  <version_id>63970565-f6e8-4693-b138-1ddc6213af73</version_id>
+  <version_modified>2024-01-25T03:14:36Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -298,7 +298,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>710CCDF7</checksum>
+      <checksum>FF2DFA25</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
