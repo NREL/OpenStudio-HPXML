@@ -26,6 +26,11 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     results_out = File.join(@results_dir, 'results_sizing.csv')
     File.delete(results_out) if File.exist? results_out
 
+    air_source_hp_types = [HPXML::HVACTypeHeatPumpAirToAir,
+                           HPXML::HVACTypeHeatPumpMiniSplit,
+                           HPXML::HVACTypeHeatPumpPTHP,
+                           HPXML::HVACTypeHeatPumpRoom]
+
     sizing_results = {}
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
@@ -45,20 +50,25 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           hp_sizing_methodologies = [HPXML::HeatPumpSizingACCA,
                                      HPXML::HeatPumpSizingHERS,
                                      HPXML::HeatPumpSizingMaxLoad]
+          hp_backup_sizing_methodologies = [HPXML::HeatPumpBackupSizingEmergency,
+                                            HPXML::HeatPumpBackupSizingSupplemental]
         else
           hp_sizing_methodologies = [nil]
+          hp_backup_sizing_methodologies = [nil]
         end
 
-        hp_capacity_acca, hp_capacity_maxload = nil, nil
-        hp_sizing_methodologies.each do |hp_sizing_methodology|
+        hp_capacity_acca, hp_capacity_maxload = {}, {}
+        hp_backup_capacity_emergency, hp_backup_capacity_supplemental = {}, {}
+        hp_sizing_methodologies.product(hp_backup_sizing_methodologies).each do |hp_sizing_methodology, hp_backup_sizing_methodology|
           test_name = hvac_hpxml.gsub('base-hvac-', "#{location}-hvac-autosize-")
           if not hp_sizing_methodology.nil?
-            test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}.xml")
+            test_name = test_name.gsub('.xml', "-sizing-methodology-#{hp_sizing_methodology}-backup-#{hp_backup_sizing_methodology}.xml")
           end
 
           puts "Testing #{test_name}..."
 
           hpxml_bldg.header.heat_pump_sizing_methodology = hp_sizing_methodology
+          hpxml_bldg.header.heat_pump_backup_sizing_methodology = hp_backup_sizing_methodology
 
           XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
           _autosized_model, _autosized_hpxml, autosized_bldg = _test_measure(args_hash)
@@ -77,12 +87,25 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           clg_load = autosized_bldg.hvac_plant.cdl_sens_total + autosized_bldg.hvac_plant.cdl_lat_total
           hp = autosized_bldg.heat_pumps[0]
           htg_cap = hp.heating_capacity
+          if hp.backup_type == HPXML::HeatPumpBackupTypeIntegrated
+            htg_backup_cap = hp.backup_heating_capacity
+          else
+            # FIXME: Currently only works for integrated backup
+            # htg_backup_cap = hp.backup_system.heating_capacity
+          end
           clg_cap = hp.cooling_capacity
           charge_defect_ratio = hp.charge_defect_ratio.to_f
           airflow_defect_ratio = hp.airflow_defect_ratio.to_f
+          if not hp.backup_heating_switchover_temp.nil?
+            min_compressor_temp = hp.backup_heating_switchover_temp
+          elsif not hp.compressor_lockout_temp.nil?
+            min_compressor_temp = hp.compressor_lockout_temp
+          end
 
           if hp_sizing_methodology == HPXML::HeatPumpSizingACCA
-            hp_capacity_acca = htg_cap
+            hp_capacity_acca[hp_backup_sizing_methodology] = htg_cap
+          elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
+            hp_capacity_maxload[hp_backup_sizing_methodology] = htg_cap
           elsif hp_sizing_methodology == HPXML::HeatPumpSizingHERS
             next if hp.is_dual_fuel
 
@@ -107,15 +130,44 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
                 assert_in_delta(clg_cap, [htg_load, clg_load].max, 1.0)
               end
             end
-          elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
-            hp_capacity_maxload = htg_cap
+          end
+          
+          if location == 'denver' && air_source_hp_types.include?(hp.heat_pump_type) && !htg_backup_cap.nil?
+            if hp_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
+              hp_backup_capacity_emergency[hp_sizing_methodology] = htg_backup_cap
+              if hp.fraction_heat_load_served == 0
+                assert_equal(0, htg_backup_cap)
+              else
+                assert_operator(htg_backup_cap, :>, 0)
+              end
+            elsif hp_backup_sizing_methodology == HPXML::HeatPumpBackupSizingSupplemental
+              hp_backup_capacity_supplemental[hp_sizing_methodology] = htg_backup_cap
+              if hp.fraction_heat_load_served == 0
+                assert_equal(0, htg_backup_cap)
+              elsif hp_sizing_methodology == HPXML::HeatPumpSizingMaxLoad && min_compressor_temp <= autosized_bldg.header.manualj_heating_design_temp
+                assert_equal(0, htg_backup_cap)
+              else
+                assert_operator(htg_backup_cap, :>, 0)
+              end
+            end
           end
         end
 
         next unless hpxml_bldg.heat_pumps.size == 1
 
-        # Check that MaxLoad >= >= ACCA for heat pump heating capacity
-        assert_operator(hp_capacity_maxload, :>=, hp_capacity_acca)
+        # Check that MaxLoad >= ACCA for heat pump heating capacity
+        hp_capacity_maxload.keys.each do |hp_backup_sizing_methodology|
+          cap_maxload = hp_capacity_maxload[hp_backup_sizing_methodology]
+          cap_acca = hp_capacity_acca[hp_backup_sizing_methodology]
+          assert_operator(cap_maxload, :>=, cap_acca)
+        end
+        
+        # Check that Emergency >= Supplemental for heat pump backup heating capacity
+        hp_backup_capacity_emergency.keys.each do |hp_sizing_methodology|
+          cap_emergency = hp_backup_capacity_emergency[hp_sizing_methodology]
+          cap_supplemental = hp_backup_capacity_supplemental[hp_sizing_methodology]
+          assert_operator(cap_emergency, :>=, cap_supplemental)
+        end
       end
     end
 

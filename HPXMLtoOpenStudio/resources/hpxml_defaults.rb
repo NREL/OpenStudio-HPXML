@@ -222,6 +222,11 @@ class HPXMLDefaults
       hpxml_bldg.header.heat_pump_sizing_methodology_isdefaulted = true
     end
 
+    if hpxml_bldg.header.heat_pump_backup_sizing_methodology.nil? && (hpxml_bldg.heat_pumps.size > 0)
+      hpxml_bldg.header.heat_pump_backup_sizing_methodology = HPXML::HeatPumpBackupSizingEmergency
+      hpxml_bldg.header.heat_pump_backup_sizing_methodology_isdefaulted = true
+    end
+
     if hpxml_bldg.header.allow_increased_fixed_capacities.nil?
       hpxml_bldg.header.allow_increased_fixed_capacities = false
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
