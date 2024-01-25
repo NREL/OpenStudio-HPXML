@@ -2483,15 +2483,14 @@ Detailed Cooling Performance Data
 
 For air-source HVAC systems with detailed cooling performance data, two or more pairs of minimum/maximum capacity data are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
 
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         No [#]_              Cooling capacity at the specified outdoor temperature
-  ``CapacityFractionOfNominal``      double    frac    > 0, <= 1    No                   Cooling capacity fraction of nominal at the specified outdoor temperature
-  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Cooling efficiency at the specified outdoor temperature
-  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity or Cooling capacity fraction of nominal at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
@@ -2500,7 +2499,7 @@ For air-source HVAC systems with detailed cooling performance data, two or more 
          If nominal capacity is not provided, the system will be autosized.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must provide the ``CoolingCapacity`` and the ``CompressorType`` must be set to "variable speed".
+In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 For heat pumps, :ref:`htg_detailed_perf_data` must also be provided.
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
@@ -2511,15 +2510,14 @@ Detailed Heating Performance Data
 
 For air-source HVAC systems with detailed heating performance data, two or more pairs of minimum/maximum capacity data are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
 
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         No [#]_              Heating capacity at the specified outdoor temperature
-  ``CapacityFractionOfNominal``      double    frac    > 0, <= 1    No                   Heating capacity fraction of nominal at the specified outdoor temperature
-  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Heating efficiency at the specified outdoor temperature
-  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity or Heating capacity fraction of nominal at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
@@ -2528,7 +2526,7 @@ For air-source HVAC systems with detailed heating performance data, two or more 
          If nominal capacity is not provided, the system will be autosized.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must provide the ``HeatingCapacity`` and the ``CompressorType`` must be set to "variable speed".
+In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 For heat pumps, :ref:`clg_detailed_perf_data` must also be provided.
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
 

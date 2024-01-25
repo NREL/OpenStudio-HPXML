@@ -4,6 +4,7 @@ __New Features__
 - Updates to HPXML v4.0-rc3.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
+- Allows autosizing with detailed performance data inputs for variable-speed air source HVAC systems using `CapacityFractionOfNominal`.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
@@ -12,7 +13,6 @@ __New Features__
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
-  - Allows autosizing with detailed performance data inputs for variable-speed air source HVAC systems using `CapacityFractionOfNominal`.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
 - Updated water heater installation location defaulting to match ANSI 301-2022
