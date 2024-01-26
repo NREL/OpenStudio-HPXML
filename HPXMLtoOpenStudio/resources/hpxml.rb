@@ -92,11 +92,11 @@ class HPXML < Object
   DuctBuriedInsulationPartial = 'partially buried'
   DuctBuriedInsulationFull = 'fully buried'
   DuctBuriedInsulationDeep = 'deeply buried'
-  DHWRecirControlTypeManual = 'manual demand control'
-  DHWRecirControlTypeNone = 'no control'
-  DHWRecirControlTypeSensor = 'presence sensor demand control'
-  DHWRecirControlTypeTemperature = 'temperature'
-  DHWRecirControlTypeTimer = 'timer'
+  DHWRecircControlTypeManual = 'manual demand control'
+  DHWRecircControlTypeNone = 'no control'
+  DHWRecircControlTypeSensor = 'presence sensor demand control'
+  DHWRecircControlTypeTemperature = 'temperature'
+  DHWRecircControlTypeTimer = 'timer'
   DHWDistTypeRecirc = 'Recirculation'
   DHWDistTypeStandard = 'Standard'
   DuctInsulationMaterialUnknown = 'Unknown'
@@ -1843,7 +1843,8 @@ class HPXML < Object
   end
 
   class BuildingOccupancy < BaseElement
-    ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+    ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers, :general_water_use_usage_multiplier,
+             :general_water_use_weekday_fractions, :general_water_use_weekend_fractions, :general_water_use_monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1859,6 +1860,10 @@ class HPXML < Object
       XMLHelper.add_extension(building_occupancy, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(building_occupancy, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(building_occupancy, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
+      XMLHelper.add_extension(building_occupancy, 'GeneralWaterUseUsageMultiplier', @general_water_use_usage_multiplier, :float, @general_water_use_usage_multiplier_isdefaulted) unless @general_water_use_usage_multiplier.nil?
+      XMLHelper.add_extension(building_occupancy, 'GeneralWaterUseWeekdayScheduleFractions', @general_water_use_weekday_fractions, :string, @general_water_use_weekday_fractions_isdefaulted) unless @general_water_use_weekday_fractions.nil?
+      XMLHelper.add_extension(building_occupancy, 'GeneralWaterUseWeekendScheduleFractions', @general_water_use_weekend_fractions, :string, @general_water_use_weekend_fractions_isdefaulted) unless @general_water_use_weekend_fractions.nil?
+      XMLHelper.add_extension(building_occupancy, 'GeneralWaterUseMonthlyScheduleMultipliers', @general_water_use_monthly_multipliers, :string, @general_water_use_monthly_multipliers_isdefaulted) unless @general_water_use_monthly_multipliers.nil?
     end
 
     def from_doc(building)
@@ -1871,6 +1876,10 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(building_occupancy, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(building_occupancy, 'extension/WeekendScheduleFractions', :string)
       @monthly_multipliers = XMLHelper.get_value(building_occupancy, 'extension/MonthlyScheduleMultipliers', :string)
+      @general_water_use_usage_multiplier = XMLHelper.get_value(building_occupancy, 'extension/GeneralWaterUseUsageMultiplier', :float)
+      @general_water_use_weekday_fractions = XMLHelper.get_value(building_occupancy, 'extension/GeneralWaterUseWeekdayScheduleFractions', :string)
+      @general_water_use_weekend_fractions = XMLHelper.get_value(building_occupancy, 'extension/GeneralWaterUseWeekendScheduleFractions', :string)
+      @general_water_use_monthly_multipliers = XMLHelper.get_value(building_occupancy, 'extension/GeneralWaterUseMonthlyScheduleMultipliers', :string)
     end
   end
 
@@ -5733,7 +5742,8 @@ class HPXML < Object
              :recirculation_pump_power, :dwhr_facilities_connected, :dwhr_equal_flow,
              :dwhr_efficiency, :has_shared_recirculation, :shared_recirculation_number_of_units_served,
              :shared_recirculation_pump_power, :shared_recirculation_control_type,
-             :shared_recirculation_motor_efficiency]
+             :shared_recirculation_motor_efficiency,
+             :recirculation_pump_weekday_fractions, :recirculation_pump_weekend_fractions, :recirculation_pump_monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -5785,6 +5795,9 @@ class HPXML < Object
         XMLHelper.add_element(shared_recirculation, 'MotorEfficiency', @shared_recirculation_motor_efficiency, :float) unless @shared_recirculation_motor_efficiency.nil?
         XMLHelper.add_element(shared_recirculation, 'ControlType', @shared_recirculation_control_type, :string) unless @shared_recirculation_control_type.nil?
       end
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpWeekdayScheduleFractions', @recirculation_pump_weekday_fractions, :string, @recirculation_pump_weekday_fractions_isdefaulted) unless @recirculation_pump_weekday_fractions.nil?
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpWeekendScheduleFractions', @recirculation_pump_weekend_fractions, :string, @recirculation_pump_weekend_fractions_isdefaulted) unless @recirculation_pump_weekend_fractions.nil?
+      XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpMonthlyScheduleMultipliers', @recirculation_pump_monthly_multipliers, :string, @recirculation_pump_monthly_multipliers_isdefaulted) unless @recirculation_pump_monthly_multipliers.nil?
     end
 
     def from_doc(hot_water_distribution)
@@ -5811,6 +5824,9 @@ class HPXML < Object
         @shared_recirculation_motor_efficiency = XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/MotorEfficiency', :float)
         @shared_recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/ControlType', :string)
       end
+      @recirculation_pump_weekday_fractions = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpWeekdayScheduleFractions', :string)
+      @recirculation_pump_weekend_fractions = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpWeekendScheduleFractions', :string)
+      @recirculation_pump_monthly_multipliers = XMLHelper.get_value(hot_water_distribution, 'extension/RecirculationPumpMonthlyScheduleMultipliers', :string)
     end
   end
 
@@ -6570,7 +6586,8 @@ class HPXML < Object
 
   class Refrigerator < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :usage_multiplier, :primary_indicator,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers,
+             :constant_coefficients, :temperature_coefficients]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6596,6 +6613,8 @@ class HPXML < Object
       XMLHelper.add_extension(refrigerator, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(refrigerator, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(refrigerator, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
+      XMLHelper.add_extension(refrigerator, 'ConstantScheduleCoefficients', @constant_coefficients, :string, @constant_coefficients_isdefaulted) unless @constant_coefficients.nil?
+      XMLHelper.add_extension(refrigerator, 'TemperatureScheduleCoefficients', @temperature_coefficients, :string, @temperature_coefficients_isdefaulted) unless @temperature_coefficients.nil?
     end
 
     def from_doc(refrigerator)
@@ -6609,6 +6628,8 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekendScheduleFractions', :string)
       @monthly_multipliers = XMLHelper.get_value(refrigerator, 'extension/MonthlyScheduleMultipliers', :string)
+      @constant_coefficients = XMLHelper.get_value(refrigerator, 'extension/ConstantScheduleCoefficients', :string)
+      @temperature_coefficients = XMLHelper.get_value(refrigerator, 'extension/TemperatureScheduleCoefficients', :string)
     end
   end
 

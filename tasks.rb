@@ -281,6 +281,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.building_occupancy.weekday_fractions = '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
       hpxml_bldg.building_occupancy.weekend_fractions = '0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.061, 0.053, 0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.018, 0.033, 0.054, 0.054, 0.054, 0.061, 0.061, 0.061'
       hpxml_bldg.building_occupancy.monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+      hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
+      hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
+      hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.building_construction.average_ceiling_height = nil
       hpxml_bldg.building_construction.conditioned_building_volume = nil
@@ -1687,11 +1690,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_heating.water_fixtures_weekday_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-    elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc.xml'].include? hpxml_file
+    elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc.xml',
+           'base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml'].include? hpxml_file
       hpxml_bldg.hot_water_distributions[0].has_shared_recirculation = true
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_pump_power = 220
-      hpxml_bldg.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecirControlTypeTimer
+      hpxml_bldg.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecircControlTypeTimer
     elsif ['base-bldgtype-mf-unit-shared-laundry-room.xml',
            'base-bldgtype-mf-unit-shared-laundry-room-multiple-water-heaters.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems.reverse_each do |water_heating_system|
@@ -1772,6 +1776,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_fixtures[1].low_flow = nil
       hpxml_bldg.water_fixtures[1].flow_rate = 2.0
       hpxml_bldg.water_fixtures[1].count = 3
+    end
+    if ['base-dhw-recirc-demand-scheduled.xml'].include? hpxml_file
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
+    elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml'].include? hpxml_file
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
+      hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
     end
 
     # -------------------- #
@@ -2084,6 +2097,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif ['base-misc-defaults.xml'].include? hpxml_file
       hpxml_bldg.refrigerators[0].primary_indicator = nil
     end
+    if ['base-appliances-refrigerator-temperature-dependent-schedule.xml'].include? hpxml_file
+      hpxml_bldg.refrigerators[0].constant_coefficients = '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544'
+      hpxml_bldg.refrigerators[0].temperature_coefficients = '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020'
+    end
 
     # -------------- #
     # HPXML Lighting #
@@ -2104,13 +2121,13 @@ def apply_hpxml_modification(hpxml_file, hpxml)
            'base-misc-loads-large-uncommon2.xml'].include? hpxml_file
       hpxml_bldg.lighting.interior_weekday_fractions = '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249'
       hpxml_bldg.lighting.interior_weekend_fractions = '0.124, 0.074, 0.050, 0.050, 0.053, 0.140, 0.330, 0.420, 0.430, 0.424, 0.411, 0.394, 0.382, 0.378, 0.378, 0.379, 0.386, 0.412, 0.484, 0.619, 0.783, 0.880, 0.597, 0.249'
-      hpxml_bldg.lighting.interior_monthly_multipliers = '1.075, 1.064951905, 1.0375, 1.0, 0.9625, 0.935048095, 0.925, 0.935048095, 0.9625, 1.0, 1.0375, 1.064951905'
+      hpxml_bldg.lighting.interior_monthly_multipliers = '1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20'
       hpxml_bldg.lighting.exterior_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
       hpxml_bldg.lighting.exterior_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-      hpxml_bldg.lighting.exterior_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      hpxml_bldg.lighting.exterior_monthly_multipliers = '1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20'
       hpxml_bldg.lighting.garage_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
       hpxml_bldg.lighting.garage_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-      hpxml_bldg.lighting.garage_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      hpxml_bldg.lighting.garage_monthly_multipliers = '1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20'
     elsif ['base-lighting-kwh-per-year.xml'].include? hpxml_file
       ltg_kwhs_per_year = { HPXML::LocationInterior => 1500,
                             HPXML::LocationExterior => 150,

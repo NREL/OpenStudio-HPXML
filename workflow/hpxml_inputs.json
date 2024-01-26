@@ -680,6 +680,9 @@
     "refrigerator_present": false,
     "cooking_range_oven_present": false
   },
+  "sample_files/base-appliances-refrigerator-temperature-dependent-schedule.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-atticroof-cathedral.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
@@ -1008,6 +1011,9 @@
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml"
   },
+  "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml"
+  },
   "sample_files/base-dhw-combi-tankless.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
     "water_heater_type": "space-heating boiler with tankless coil"
@@ -1106,6 +1112,9 @@
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
     "hot_water_distribution_recirc_control_type": "presence sensor demand control",
     "hot_water_distribution_pipe_r": 3
+  },
+  "sample_files/base-dhw-recirc-demand-scheduled.xml": {
+    "parent_hpxml": "sample_files/base-dhw-recirc-demand.xml"
   },
   "sample_files/base-dhw-recirc-manual.xml": {
     "parent_hpxml": "sample_files/base-dhw-recirc-nocontrol.xml",
@@ -2916,6 +2925,7 @@
   },
   "sample_files/base-misc-usage-multiplier.xml": {
     "parent_hpxml": "sample_files/base.xml",
+    "general_water_use_usage_multiplier": 0.9,
     "water_fixtures_usage_multiplier": 0.9,
     "lighting_interior_usage_multiplier": 0.9,
     "lighting_exterior_usage_multiplier": 0.9,

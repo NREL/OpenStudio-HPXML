@@ -180,6 +180,18 @@ class Constants
     return 'furnace'
   end
 
+  def self.ObjectNameGeneralWaterUse
+    return 'general water use'
+  end
+
+  def self.ObjectNameGeneralWaterUseLatent
+    return 'general water use latent'
+  end
+
+  def self.ObjectNameGeneralWaterUseSensible
+    return 'general water use sensible'
+  end
+
   def self.ObjectNameGroundSourceHeatPump
     return 'ground source heat pump'
   end
@@ -358,14 +370,6 @@ class Constants
 
   def self.ObjectNameWaterHeaterSetpoint
     return 'water heater setpoint'
-  end
-
-  def self.ObjectNameWaterLatent
-    return 'water latent'
-  end
-
-  def self.ObjectNameWaterSensible
-    return 'water sensible'
   end
 
   def self.ObjectNameWaterHeaterAdjustment

@@ -460,7 +460,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Plug Loads & Fuel Loads & Lighting
     add_mels(runner, model, spaces)
     add_mfls(runner, model, spaces)
-    add_lighting(runner, model, epw_file, spaces)
+    add_lighting(runner, model, spaces)
 
     # Pools & Permanent Spas
     add_pools_and_permanent_spas(runner, model, spaces)
@@ -1505,7 +1505,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
     end
     @hpxml_bldg.refrigerators.each do |refrigerator|
-      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(refrigerator.location, model, spaces)
+      refrigerator.additional_properties.loc_space = loc_space
+      refrigerator.additional_properties.loc_schedule = loc_schedule
     end
     @hpxml_bldg.freezers.each do |freezer|
       freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
@@ -1553,7 +1555,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml_header, @hpxml_bldg, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
+                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units,
+                                @apply_ashrae140_assumptions)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1854,8 +1857,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_lighting(runner, model, epw_file, spaces)
-    Lighting.apply(runner, model, epw_file, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
+  def add_lighting(runner, model, spaces)
+    Lighting.apply(runner, model, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
                    @schedules_file, @cfa, @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
   end
 
@@ -2806,7 +2809,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
   # Should be called when the object's energy use is sensitive to ambient temperature
-  # (e.g., water heaters and ducts).
+  # (e.g., water heaters, ducts, and refrigerators).
   def get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
                HPXML::LocationOutside,
