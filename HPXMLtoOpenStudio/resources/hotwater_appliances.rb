@@ -1072,11 +1072,10 @@ class HotWaterAndAppliances
     return f_eff * ref_f_gpd * fixtures_usage_multiplier
   end
 
-  def self.get_water_gains_sens_lat(nbeds, fixtures_usage_multiplier)
+  def self.get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier = 1.0)
     # Table 4.2.2(3). Internal Gains for Reference Homes
-    fixtures_usage_multiplier = 1.0 if fixtures_usage_multiplier.nil?
-    sens_gains = (-1227.0 - 409.0 * nbeds) * fixtures_usage_multiplier # Btu/day
-    lat_gains = (1245.0 + 415.0 * nbeds) * fixtures_usage_multiplier # Btu/day
+    sens_gains = (-1227.0 - 409.0 * nbeds) * general_water_use_usage_multiplier # Btu/day
+    lat_gains = (1245.0 + 415.0 * nbeds) * general_water_use_usage_multiplier # Btu/day
     return sens_gains * 365.0, lat_gains * 365.0
   end
 
