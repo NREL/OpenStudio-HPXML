@@ -3674,6 +3674,7 @@ class HPXMLFile
     collapse_surfaces(hpxml_bldg, args)
     renumber_hpxml_ids(hpxml_bldg)
 
+    set_sameas_for_shared_elements(hpxml)
     hpxml_doc = hpxml.to_doc()
     hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
     XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -7072,6 +7073,36 @@ class HPXMLFile
         end
         if surf.respond_to? :under_slab_insulation_id
           surf.under_slab_insulation_id = "#{surf_name}#{i + 1}UnderSlabInsulation"
+        end
+      end
+    end
+  end
+
+  def self.set_sameas_for_shared_elements(hpxml)
+    # Applies to the last building only
+    return if hpxml.buildings.size == 1
+    return if !hpxml.header.whole_sfa_or_mf_building_sim
+
+    hpxml_elements_with_sameas = ['heating_systems',
+                                  'cooling_systems',
+                                  'heat_pumps']
+
+    last_building = hpxml.buildings[-1]
+    hpxml.buildings[0..-2].each do |building|
+      hpxml_elements_with_sameas.each do |hpxml_el|
+        last_building.send(hpxml_el).each do |last_obj|
+          next unless last_obj.is_shared_system
+
+          building.send(hpxml_el).each do |obj|
+            next unless obj.is_shared_system
+            next if last_obj.to_s != obj.to_s
+
+            last_obj.sameas = obj.id
+
+            if last_obj.respond_to? :distribution_system
+              last_obj.distribution_system.sameas = obj.distribution_system.id
+            end
+          end
         end
       end
     end

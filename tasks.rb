@@ -56,13 +56,13 @@ def create_hpxmls
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
     num_apply_measures = 1
-    if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+    if hpxml_path.include?('base-bldgtype-mf-whole-building')
       num_apply_measures = 6
     end
 
     for i in 1..num_apply_measures
       measures['BuildResidentialHPXML'][0]['existing_hpxml_path'] = hpxml_path if i > 1
-      if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
+      if hpxml_path.include?('base-bldgtype-mf-whole-building')
         suffix = "_#{i}" if i > 1
         measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
         measures['BuildResidentialHPXML'][0]['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
@@ -2322,10 +2322,10 @@ if ARGV[0].to_sym == :update_hpxmls
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
-  # Create sample/test HPXMLs
   t = Time.now
+
+  # Create sample/test HPXMLs
   create_hpxmls()
-  puts "Completed in #{(Time.now - t).round(1)}s"
 
   # Reformat real_homes HPXMLs
   puts 'Reformatting real_homes HPXMLs...'
@@ -2333,6 +2333,8 @@ if ARGV[0].to_sym == :update_hpxmls
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end
+
+  puts "Completed in #{(Time.now - t).round(1)}s"
 end
 
 if ARGV[0].to_sym == :download_utility_rates
