@@ -1427,7 +1427,7 @@ class SchedulesFile
 
         if min_value_neg_one[col_name]
           if values.min < -1
-            fail "Schedule min value for column '#{col_name}' must be greater than or equal to -1. [context: #{schedules_path}]"
+            fail "Schedule value for column '#{col_name}' must be greater than or equal to -1. [context: #{schedules_path}]"
           end
         end
 

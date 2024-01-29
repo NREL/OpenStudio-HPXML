@@ -914,7 +914,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
   def test_ruby_error_messages
     # Test case => Error message
     all_expected_errors = { 'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery' must be 1."],
-                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be greater than or equal to -1."],
+                            'battery-bad-values-min-less-than-neg-one' => ["Schedule value for column 'battery' must be greater than or equal to -1."],
                             'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
                             'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],
@@ -1016,7 +1016,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         csv_data[1][0] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-bad-values-min-not-neg-one'].include? error_case
+      elsif ['battery-bad-values-min-less-than-neg-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         csv_data[1][0] = -1.1
