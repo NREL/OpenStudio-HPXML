@@ -121,10 +121,20 @@ jobs:
           tar -xzf Windows.tar.gz
           & .\OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows\bin\openstudio.exe workflow\run_simulation.rb -x workflow\sample_files\base.xml --hourly ALL --add-component-loads --add-stochastic-schedules
 
+  merge:
+    runs-on: ubuntu-latest
+    needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: results
+          pattern: results-*
+
   compare-results:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
+    needs: merge
     steps:
       - uses: actions/checkout@v4
         with:
@@ -150,8 +160,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: results
-          pattern: results-*
-          merge-multiple: true
+          name: results
 
       - name: Compare results
         run: |
@@ -175,7 +184,7 @@ jobs:
 
   update-results:
     runs-on: ubuntu-latest
-    needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
+    needs: merge
     steps:
       - uses: actions/checkout@v4
         with:
@@ -185,8 +194,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: results
-          pattern: results-*
-          merge-multiple: true
+          name: results
 
       - name: Commit latest results
         shell: bash        
