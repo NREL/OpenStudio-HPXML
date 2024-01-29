@@ -13,7 +13,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.7.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
@@ -38,13 +38,13 @@ jobs:
           bundle exec rake test_measures
 
       - name: Store code coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: coverage
           name: coverage
 
       - name: Store results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
           name: results
@@ -55,7 +55,7 @@ jobs:
           make html SPHINXOPTS="-W --keep-going -n"
 
       - name: Save Docs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation
           path: docs/_build/html/
@@ -65,7 +65,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.7.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
@@ -78,7 +78,7 @@ jobs:
           bundle exec rake test_workflow1
 
       - name: Store results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
           name: results
@@ -88,7 +88,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.7.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
@@ -101,7 +101,7 @@ jobs:
           bundle exec rake test_workflow2
 
       - name: Store results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
           name: results
@@ -109,7 +109,7 @@ jobs:
   run-windows-tests:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
       - name: Install software and run test
@@ -126,29 +126,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Store base results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/base_results
           name: base_results
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Download base results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: |
             base_results
           name: base_results
 
       - name: Download feature results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: |
             results
@@ -169,7 +169,7 @@ jobs:
           python workflow/tests/compare.py -a visualize
 
       - name: Store comparisons
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/comparisons
           name: comparisons
@@ -178,12 +178,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [run-workflow1-tests, run-workflow2-tests, run-unit-tests]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
       - name: Download feature results
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: |
             results
