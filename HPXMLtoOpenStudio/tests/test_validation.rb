@@ -914,7 +914,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
   def test_ruby_error_messages
     # Test case => Error message
     all_expected_errors = { 'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery' must be 1."],
-                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be -1."],
+                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be greater than or equal to -1."],
                             'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
                             'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],

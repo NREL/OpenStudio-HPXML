@@ -1414,7 +1414,7 @@ class SchedulesFile
         end
 
         if max_value_one[col_name]
-          if values.max > 1
+          if values.max > 1.01 || values.max < 0.99 # Allow some imprecision
             fail "Schedule max value for column '#{col_name}' must be 1. [context: #{schedules_path}]"
           end
         end
@@ -1427,7 +1427,7 @@ class SchedulesFile
 
         if min_value_neg_one[col_name]
           if values.min < -1
-            fail "Schedule min value for column '#{col_name}' must be -1. [context: #{schedules_path}]"
+            fail "Schedule min value for column '#{col_name}' must be greater than or equal to -1. [context: #{schedules_path}]"
           end
         end
 
