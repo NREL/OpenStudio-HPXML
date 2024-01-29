@@ -2984,6 +2984,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def is_adjacent_to_common_spaces
+      return (HPXML::is_conditioned(self) && HPXML::common_space_locations.include? @exterior_adjacent_to)
+    end
+
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -7637,13 +7641,6 @@ class HPXML < Object
     interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
     exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
-  end
-
-  def self.adjacent_to_common_spaces(surface)
-    # Returns true if the surface is between conditioned space and common space.
-    interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
-    exterior_adjacent_to_common_space = common_space_locations.include? surface.exterior_adjacent_to
-    return (interior_conditioned && exterior_adjacent_to_common_space)
   end
 
   def self.get_id(parent, element_name = 'SystemIdentifier')
