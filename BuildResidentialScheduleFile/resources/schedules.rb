@@ -151,12 +151,12 @@ class ScheduleGenerator
       all_simulated_values << Matrix[*simulated_values]
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    plugload_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
-    plugload_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekendFractions, 24, 'weekend')
-    plugload_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    plugload_weekday_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
+    plugload_weekend_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekendFractions, 24, 'weekend')
+    plugload_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
     ceiling_fan_weekday_sch = Schedule.validate_values(Constants.CeilingFanWeekdayFractions, 24, 'weekday')
     ceiling_fan_weekend_sch = Schedule.validate_values(Constants.CeilingFanWeekendFractions, 24, 'weekend')
-    ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    ceiling_fan_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
 
     sch = get_building_america_lighting_schedule(@epw_file)
     interior_lighting_schedule = []
@@ -852,7 +852,7 @@ class ScheduleGenerator
     end
 
     june_kws = [0.060, 0.040, 0.035, 0.025, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.025, 0.030, 0.030, 0.025, 0.020, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.020, 0.020, 0.020, 0.025, 0.025, 0.030, 0.030, 0.035, 0.045, 0.060, 0.085, 0.125, 0.145, 0.130, 0.105, 0.080]
-    lighting_seasonal_multiplier = Schedule.LightingMonthlyMultipliers.split(',').map { |v| v.to_f }
+    lighting_seasonal_multiplier = Constants.LightingInteriorMonthlyMultipliers.split(',').map { |v| v.to_f }
     amplConst1 = 0.929707907917098
     sunsetLag1 = 2.45016230615269
     stdDevCons1 = 1.58679810983444
