@@ -130,6 +130,7 @@ jobs:
         with:
           name: results
           pattern: results-*
+          delete-merged: true
 
   compare-results:
     if: github.event_name == 'pull_request'
