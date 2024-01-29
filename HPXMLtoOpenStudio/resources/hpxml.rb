@@ -2985,7 +2985,7 @@ class HPXML < Object
     end
 
     def is_adjacent_to_common_spaces
-      return (HPXML::is_conditioned(self) && HPXML::common_space_locations.include? @exterior_adjacent_to)
+      return (HPXML::is_conditioned(self) && (HPXML::common_space_locations.include? @exterior_adjacent_to))
     end
 
     def is_conditioned
