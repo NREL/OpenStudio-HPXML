@@ -618,8 +618,7 @@ class Schedule
     # Get a 365-value array of which schedule is used on each day of the year,
     day_schs_used_each_day = schedule.getActiveRuleIndices(year_start_date, year_end_date)
     if !day_schs_used_each_day.length == 365
-      OpenStudio::logFree(OpenStudio::Error, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} does not have 365 daily schedules accounted for, cannot accurately calculate annual EFLH.")
-      return 0
+      fail "#{schedule.name} does not have 365 daily schedules accounted for, cannot accurately calculate annual EFLH."
     end
 
     # Create a map that shows how many days each schedule is used
@@ -672,11 +671,11 @@ class Schedule
       annual_flh += daily_flh * number_of_days_sch_used
     end
 
-    # Warn if the max daily EFLH is more than 24,
+    # Check if the max daily EFLH is more than 24,
     # which would indicate that this isn't a
     # fractional schedule.
     if max_daily_flh > 24
-      OpenStudio::logFree(OpenStudio::Warn, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} has more than 24 EFLH in one day schedule, indicating that it is not a fractional schedule.")
+      fail "#{schedule.name} has more than 24 EFLH in one day schedule, indicating that it is not a fractional schedule."
     end
 
     return annual_flh
