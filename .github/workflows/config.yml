@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
-          name: results
+          name: results-unit-tests
 
       - name: Build documentation
         run: |
@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
-          name: results
+          name: results-workflow1-tests
 
   run-workflow2-tests:
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: workflow/tests/results
-          name: results
+          name: results-workflow2-tests
 
   run-windows-tests:
     runs-on: windows-latest
@@ -143,16 +143,16 @@ jobs:
       - name: Download base results
         uses: actions/download-artifact@v4
         with:
-          path: |
-            base_results
+          path: base_results
           name: base_results
 
       - name: Download feature results
         uses: actions/download-artifact@v4
         with:
-          path: |
-            results
+          path: results
           name: results
+          pattern: results-*
+          merge-multiple: true
 
       - name: Compare results
         run: |
@@ -185,9 +185,10 @@ jobs:
       - name: Download feature results
         uses: actions/download-artifact@v4
         with:
-          path: |
-            results
+          path: results
           name: results
+          pattern: results-*
+          merge-multiple: true
 
       - name: Commit latest results
         shell: bash        
