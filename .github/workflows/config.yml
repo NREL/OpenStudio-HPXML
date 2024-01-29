@@ -150,7 +150,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: results
-          name: results
           pattern: results-*
           merge-multiple: true
 
@@ -186,7 +185,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: results
-          name: results
           pattern: results-*
           merge-multiple: true
 
