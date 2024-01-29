@@ -1222,124 +1222,126 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     end
 
     # Logic that can only be applied based on the file name
-    if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
-      # Handle chiller/cooling tower
-      if hpxml_file.include? 'chiller'
-        hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
-                                       cooling_system_type: HPXML::HVACTypeChiller,
-                                       cooling_system_fuel: HPXML::FuelTypeElectricity,
-                                       is_shared_system: true,
-                                       number_of_units_served: 6,
-                                       cooling_capacity: 24000 * 6,
-                                       cooling_efficiency_kw_per_ton: 0.9,
-                                       fraction_cool_load_served: 1.0,
-                                       primary_system: true)
-      elsif hpxml_file.include? 'cooling-tower'
-        hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
-                                       cooling_system_type: HPXML::HVACTypeCoolingTower,
-                                       cooling_system_fuel: HPXML::FuelTypeElectricity,
-                                       is_shared_system: true,
-                                       number_of_units_served: 6,
-                                       fraction_cool_load_served: 1.0,
-                                       primary_system: true)
+    if !hpxml.header.whole_sfa_or_mf_building_sim
+      # Inputs for shared systems when modeling individual dwelling units
+      if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
+        if hpxml_file.include? 'chiller'
+          hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
+                                         cooling_system_type: HPXML::HVACTypeChiller,
+                                         cooling_system_fuel: HPXML::FuelTypeElectricity,
+                                         is_shared_system: true,
+                                         number_of_units_served: 6,
+                                         cooling_capacity: 24000 * 6,
+                                         cooling_efficiency_kw_per_ton: 0.9,
+                                         fraction_cool_load_served: 1.0,
+                                         primary_system: true)
+        elsif hpxml_file.include? 'cooling-tower'
+          hpxml_bldg.cooling_systems.add(id: "CoolingSystem#{hpxml_bldg.cooling_systems.size + 1}",
+                                         cooling_system_type: HPXML::HVACTypeCoolingTower,
+                                         cooling_system_fuel: HPXML::FuelTypeElectricity,
+                                         is_shared_system: true,
+                                         number_of_units_served: 6,
+                                         fraction_cool_load_served: 1.0,
+                                         primary_system: true)
+        end
+        if hpxml_file.include? 'boiler'
+          hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = 78.0
+          hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+        else
+          hpxml_bldg.hvac_controls.add(id: "HVACControl#{hpxml_bldg.hvac_controls.size + 1}",
+                                       control_type: HPXML::HVACControlTypeManual,
+                                       cooling_setpoint_temp: 78.0)
+          if hpxml_file.include? 'baseboard'
+            hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                              distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                              hydronic_type: HPXML::HydronicTypeBaseboard)
+            hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
+        end
       end
-      if hpxml_file.include? 'boiler'
-        hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = 78.0
-        hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-      else
-        hpxml_bldg.hvac_controls.add(id: "HVACControl#{hpxml_bldg.hvac_controls.size + 1}",
-                                     control_type: HPXML::HVACControlTypeManual,
-                                     cooling_setpoint_temp: 78.0)
-        if hpxml_file.include? 'baseboard'
+      if hpxml_file.include?('water-loop-heat-pump') || (hpxml_file.include?('fan-coil') && !hpxml_file.include?('fireplace-elec'))
+        # Handle WLHP/ducted fan coil
+        hpxml_bldg.hvac_distributions.reverse_each do |hvac_distribution|
+          hvac_distribution.delete
+        end
+        if hpxml_file.include? 'water-loop-heat-pump'
           hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                             distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                            hydronic_type: HPXML::HydronicTypeBaseboard)
-          hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-        end
-      end
-    end
-    if hpxml_file.include?('water-loop-heat-pump') || (hpxml_file.include?('fan-coil') && !hpxml_file.include?('fireplace-elec'))
-      # Handle WLHP/ducted fan coil
-      hpxml_bldg.hvac_distributions.reverse_each do |hvac_distribution|
-        hvac_distribution.delete
-      end
-      if hpxml_file.include? 'water-loop-heat-pump'
-        hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                          distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                          hydronic_type: HPXML::HydronicTypeWaterLoop)
-        hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
-                                  heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
-                                  heat_pump_fuel: HPXML::FuelTypeElectricity)
-        if hpxml_file.include? 'boiler'
-          hpxml_bldg.heat_pumps[-1].heating_capacity = 24000
-          hpxml_bldg.heat_pumps[-1].heating_efficiency_cop = 4.4
-          hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-        end
-        if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
-          hpxml_bldg.heat_pumps[-1].cooling_capacity = 24000
-          hpxml_bldg.heat_pumps[-1].cooling_efficiency_eer = 12.8
-          hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-        end
-        hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                          distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                          air_type: HPXML::AirTypeRegularVelocity)
-        hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
-      elsif hpxml_file.include? 'fan-coil'
-        hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
-                                          distribution_system_type: HPXML::HVACDistributionTypeAir,
-                                          air_type: HPXML::AirTypeFanCoil)
+                                            hydronic_type: HPXML::HydronicTypeWaterLoop)
+          hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
+                                    heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
+                                    heat_pump_fuel: HPXML::FuelTypeElectricity)
+          if hpxml_file.include? 'boiler'
+            hpxml_bldg.heat_pumps[-1].heating_capacity = 24000
+            hpxml_bldg.heat_pumps[-1].heating_efficiency_cop = 4.4
+            hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
+          if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
+            hpxml_bldg.heat_pumps[-1].cooling_capacity = 24000
+            hpxml_bldg.heat_pumps[-1].cooling_efficiency_eer = 12.8
+            hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
+          hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                            distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                            air_type: HPXML::AirTypeRegularVelocity)
+          hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+        elsif hpxml_file.include? 'fan-coil'
+          hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                            distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                            air_type: HPXML::AirTypeFanCoil)
 
-        if hpxml_file.include? 'boiler'
-          hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          if hpxml_file.include? 'boiler'
+            hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
+          if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
+            hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+          end
         end
-        if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
-          hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+        if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil-ducted')
+          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                          duct_leakage_units: HPXML::UnitsCFM25,
+                                                                          duct_leakage_value: 15,
+                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+          hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                          duct_leakage_units: HPXML::UnitsCFM25,
+                                                                          duct_leakage_value: 10,
+                                                                          duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+          hpxml_bldg.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[-1].ducts.size + 1}",
+                                                      duct_type: HPXML::DuctTypeSupply,
+                                                      duct_insulation_r_value: 0,
+                                                      duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                                      duct_surface_area: 50)
+          hpxml_bldg.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[-1].ducts.size + 1}",
+                                                      duct_type: HPXML::DuctTypeReturn,
+                                                      duct_insulation_r_value: 0,
+                                                      duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                                      duct_surface_area: 20)
         end
-      end
-      if hpxml_file.include?('water-loop-heat-pump') || hpxml_file.include?('fan-coil-ducted')
-        hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                                        duct_leakage_units: HPXML::UnitsCFM25,
-                                                                        duct_leakage_value: 15,
-                                                                        duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-        hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                        duct_leakage_units: HPXML::UnitsCFM25,
-                                                                        duct_leakage_value: 10,
-                                                                        duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-        hpxml_bldg.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[-1].ducts.size + 1}",
-                                                    duct_type: HPXML::DuctTypeSupply,
-                                                    duct_insulation_r_value: 0,
-                                                    duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                                    duct_surface_area: 50)
-        hpxml_bldg.hvac_distributions[-1].ducts.add(id: "Ducts#{hpxml_bldg.hvac_distributions[-1].ducts.size + 1}",
-                                                    duct_type: HPXML::DuctTypeReturn,
-                                                    duct_insulation_r_value: 0,
-                                                    duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
-                                                    duct_surface_area: 20)
-      end
-    end
-    if hpxml_file.include? 'shared-ground-loop'
-      hpxml_bldg.heat_pumps[0].is_shared_system = true
-      hpxml_bldg.heat_pumps[0].number_of_units_served = 6
-      hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
-    end
-    if hpxml_file.include? 'eae'
-      hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 500.0
-    else
-      if hpxml_file.include? 'shared-boiler'
-        hpxml_bldg.heating_systems[0].shared_loop_watts = 600
-      end
-      if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
-        hpxml_bldg.cooling_systems[0].shared_loop_watts = 600
       end
       if hpxml_file.include? 'shared-ground-loop'
-        hpxml_bldg.heat_pumps[0].shared_loop_watts = 600
+        hpxml_bldg.heat_pumps[0].is_shared_system = true
+        hpxml_bldg.heat_pumps[0].number_of_units_served = 6
+        hpxml_bldg.heat_pumps[0].pump_watts_per_ton = 0.0
       end
-      if hpxml_file.include? 'fan-coil'
-        if hpxml_file.include? 'boiler'
-          hpxml_bldg.heating_systems[0].fan_coil_watts = 150
+      if hpxml_file.include? 'eae'
+        hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 500.0
+      else
+        if hpxml_file.include? 'shared-boiler'
+          hpxml_bldg.heating_systems[0].shared_loop_watts = 600
         end
-        if hpxml_file.include? 'chiller'
-          hpxml_bldg.cooling_systems[0].fan_coil_watts = 150
+        if hpxml_file.include?('chiller') || hpxml_file.include?('cooling-tower')
+          hpxml_bldg.cooling_systems[0].shared_loop_watts = 600
+        end
+        if hpxml_file.include? 'shared-ground-loop'
+          hpxml_bldg.heat_pumps[0].shared_loop_watts = 600
+        end
+        if hpxml_file.include? 'fan-coil'
+          if hpxml_file.include? 'boiler'
+            hpxml_bldg.heating_systems[0].fan_coil_watts = 150
+          end
+          if hpxml_file.include? 'chiller'
+            hpxml_bldg.cooling_systems[0].fan_coil_watts = 150
+          end
         end
       end
     end

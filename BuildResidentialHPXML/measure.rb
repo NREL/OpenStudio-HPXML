@@ -7097,15 +7097,29 @@ class HPXMLFile
             next unless obj.is_shared_system
             next if last_obj.to_s != obj.to_s
 
-            last_obj.sameas = obj.id
-
-            if last_obj.respond_to? :distribution_system
-              last_obj.distribution_system.sameas = obj.distribution_system.id
+            if last_obj.respond_to?(:distribution_system) && !last_obj.distribution_system.nil?
+              set_sameas_id_for_object(last_obj.distribution_system, obj.distribution_system.id)
             end
+            set_sameas_id_for_object(last_obj, obj.id)
           end
         end
       end
     end
+  end
+
+  def self.set_sameas_id_for_object(obj, sameas_id)
+    # Sets the sameas id and also sets all other attributes (other than IDrefs)
+    # to nil.
+    obj.class::ATTRS.each do |attribute|
+      next if [:id,
+               :primary_system,
+               :primary_heating_system,
+               :primary_cooling_system,
+               :distribution_system_idref].include?(attribute)
+
+      obj.send("#{attribute}=", nil)
+    end
+    obj.sameas_id = sameas_id
   end
 end
 

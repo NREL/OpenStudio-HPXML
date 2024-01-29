@@ -4047,8 +4047,6 @@ class HPXML < Object
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem').each do |heating_system|
-        next if HPXML::from_sameas(self, heating_system, HeatingSystem, @parent_object, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem')
-
         self << HeatingSystem.new(@parent_object, heating_system)
       end
     end
@@ -4063,7 +4061,7 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :sameas, :distribution_system_idref, :year_installed, :heating_system_type,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
@@ -4072,6 +4070,10 @@ class HPXML < Object
              :pilot_light, :pilot_light_btuh]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4149,8 +4151,7 @@ class HPXML < Object
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      return if HPXML::to_sameas(self, heating_system, sys_id)
-
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(heating_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heating_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heating_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4204,6 +4205,7 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
+      @sameas_id = HPXML::get_sameas_id(heating_system)
       @location = XMLHelper.get_value(heating_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heating_system, 'ThirdPartyCertification', :string)
@@ -4243,8 +4245,6 @@ class HPXML < Object
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem').each do |cooling_system|
-        next if HPXML::from_sameas(self, cooling_system, CoolingSystem, @parent_object, 'BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem')
-
         self << CoolingSystem.new(@parent_object, cooling_system)
       end
     end
@@ -4263,7 +4263,7 @@ class HPXML < Object
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :sameas, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
              :cooling_capacity, :compressor_type, :fraction_cool_load_served, :cooling_efficiency_seer,
              :cooling_efficiency_seer2, :cooling_efficiency_eer, :cooling_efficiency_ceer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :third_party_certification, :clg_seed_id, :is_shared_system, :number_of_units_served,
@@ -4273,6 +4273,10 @@ class HPXML < Object
              :integrated_heating_system_fraction_heat_load_served, :integrated_heating_system_airflow_cfm, :htg_seed_id, :crankcase_heater_watts]
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4332,8 +4336,7 @@ class HPXML < Object
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      return if HPXML::to_sameas(self, cooling_system, sys_id)
-
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(cooling_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(cooling_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(cooling_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4400,6 +4403,7 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
+      @sameas_id = HPXML::get_sameas_id(cooling_system)
       @location = XMLHelper.get_value(cooling_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(cooling_system, 'ThirdPartyCertification', :string)
@@ -4551,8 +4555,6 @@ class HPXML < Object
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatPump').each do |heat_pump|
-        next if HPXML::from_sameas(self, heat_pump, HeatPump, @parent_object, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatPump')
-
         self << HeatPump.new(@parent_object, heat_pump)
       end
     end
@@ -4572,7 +4574,7 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :sameas, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type, :compressor_lockout_temp,
              :cooling_shr, :backup_type, :backup_system_idref, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue, :backup_heating_lockout_temp,
@@ -4587,6 +4589,10 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4677,8 +4683,7 @@ class HPXML < Object
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      return if HPXML::to_sameas(self, heat_pump, sys_id)
-
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(heat_pump, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heat_pump, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heat_pump, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4780,6 +4785,7 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
+      @sameas_id = HPXML::get_sameas_id(heat_pump)
       @location = XMLHelper.get_value(heat_pump, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heat_pump, 'ThirdPartyCertification', :string)
@@ -5021,8 +5027,6 @@ class HPXML < Object
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACDistribution').each do |hvac_distribution|
-        next if HPXML::from_sameas(self, hvac_distribution, HVACDistribution, @parent_object, 'BuildingDetails/Systems/HVAC/HVACDistribution')
-
         self << HVACDistribution.new(@parent_object, hvac_distribution)
       end
     end
@@ -5034,10 +5038,14 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_bldg)
       super(hpxml_bldg, *args)
     end
-    ATTRS = [:id, :sameas, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
+    ATTRS = [:id, :sameas_id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
              :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def hvac_systems
       list = []
@@ -5103,18 +5111,16 @@ class HPXML < Object
       hvac_distribution = XMLHelper.add_element(hvac, 'HVACDistribution')
       sys_id = XMLHelper.add_element(hvac_distribution, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      return if HPXML::to_sameas(self, hvac_distribution, sys_id)
-
-      distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
+        distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
         XMLHelper.add_element(distribution_system_type_el, @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', @conditioned_floor_area_served, :float) unless @conditioned_floor_area_served.nil?
       elsif [HVACDistributionTypeDSE].include? @distribution_system_type
+        distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
         XMLHelper.add_element(distribution_system_type_el, 'Other', @distribution_system_type, :string)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', @annual_heating_dse, :float) unless @annual_heating_dse.nil?
         XMLHelper.add_element(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency', @annual_cooling_dse, :float) unless @annual_cooling_dse.nil?
-      else
-        fail "Unexpected distribution_system_type '#{@distribution_system_type}'."
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
@@ -5139,6 +5145,7 @@ class HPXML < Object
       return if hvac_distribution.nil?
 
       @id = HPXML::get_id(hvac_distribution)
+      @sameas_id = HPXML::get_sameas_id(hvac_distribution)
       @distribution_system_type = XMLHelper.get_child_name(hvac_distribution, 'DistributionSystemType')
       if @distribution_system_type == 'Other'
         @distribution_system_type = XMLHelper.get_value(XMLHelper.get_element(hvac_distribution, 'DistributionSystemType'), 'Other', :string)
@@ -7608,12 +7615,30 @@ class HPXML < Object
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
-  def self.get_sameas(parent, element_name = 'SystemIdentifier')
+  def self.get_sameas_id(parent, element_name = 'SystemIdentifier')
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'sameas')
   end
 
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  def self.get_sameas_obj(hpxml, sameas_id)
+    # Returns the sameas obj (from another Building) with the specified sameas_id.
+    hpxml.buildings.each do |building|
+      building.class::CLASS_ATTRS.each do |attr|
+        building_child = building.send(attr)
+        next unless building_child.is_a? HPXML::BaseArrayElement
+
+        building_child.each do |obj|
+          next unless obj.class == self.class
+          next unless obj.id == sameas_id
+
+          return obj
+        end
+      end
+    end
+    return
   end
 
   def self.check_dates(str, begin_month, begin_day, end_month, end_day)
@@ -7650,40 +7675,5 @@ class HPXML < Object
     end
 
     return errors
-  end
-
-  def self.to_sameas(self_object, hpxml_element, sys_id)
-    return false if self_object.sameas.nil?
-
-    XMLHelper.add_attribute(sys_id, 'sameas', self_object.sameas)
-
-    if self_object.respond_to? :distribution_system_idref
-      if not self_object.distribution_system_idref.nil?
-        distribution_system = XMLHelper.add_element(hpxml_element, 'DistributionSystem')
-        XMLHelper.add_attribute(distribution_system, 'idref', self_object.distribution_system_idref)
-      end
-    end
-
-    return true
-  end
-
-  def self.from_sameas(self_object_array, hpxml_element, hpxml_class, building_object, xpath_str)
-    sameas = HPXML::get_sameas(hpxml_element)
-    return false if sameas.nil?
-
-    sameas_element = XMLHelper.get_element(building_object.parent_object.hpxml_doc, "Building/#{xpath_str}[SystemIdentifier/@id='#{sameas}']")
-    if sameas_element.nil?
-      fail "Could not find #{xpath_str.split('/')[-1]} with sameas id=#{sameas}."
-    end
-
-    self_object_array << hpxml_class.new(building_object, sameas_element)
-    self_object_array[-1].id = HPXML::get_id(hpxml_element)
-    self_object_array[-1].sameas = sameas
-
-    if XMLHelper.has_element(hpxml_element, 'DistributionSystem')
-      self_object_array[-1].distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(hpxml_element, 'DistributionSystem'))
-    end
-
-    return true
   end
 end
