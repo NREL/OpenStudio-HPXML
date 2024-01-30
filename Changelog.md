@@ -2,8 +2,10 @@
 
 __New Features__
 - Updates to HPXML v4.0-rc3.
+- **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
 - Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
+- Allows autosizing with detailed performance data inputs for variable-speed air source HVAC systems using `CapacityFractionOfNominal`.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
@@ -20,6 +22,8 @@ __New Features__
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
 - Prevents mains water temperature from going below freezing (0 C).
+- Fixes error if HPXML has emissions scenario and abbreviated run period.
+- Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
 
 ## OpenStudio-HPXML v1.7.0
 
