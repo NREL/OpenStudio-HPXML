@@ -1424,9 +1424,12 @@ class SchedulesFile
           end
         end
 
-        if min_value_neg_one[col_name]
+        if value_neg_one_to_one[col_name]
           if values.min < -1
             fail "Schedule value for column '#{col_name}' must be greater than or equal to -1. [context: #{schedules_path}]"
+          end
+          if values.max > 1
+            fail "Schedule value for column '#{col_name}' must be less than or equal to 1. [context: #{schedules_path}]"
           end
         end
 
@@ -1824,7 +1827,7 @@ class SchedulesFile
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
       max_value_one[column_name] = true
-      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name)
+      if SchedulesFile.SetpointColumnNames.include?(column_name) || SchedulesFile.OperatingModeColumnNames.include?(column_name) || SchedulesFile.BatteryColumnNames.include?(column_name)
         max_value_one[column_name] = false
       end
     end
@@ -1843,16 +1846,16 @@ class SchedulesFile
     return min_value_zero
   end
 
-  def min_value_neg_one
-    min_value_neg_one = {}
+  def value_neg_one_to_one
+    value_neg_one_to_one = {}
     column_names = SchedulesFile.ColumnNames
     column_names.each do |column_name|
-      min_value_neg_one[column_name] = false
+      value_neg_one_to_one[column_name] = false
       if column_name == SchedulesFile::ColumnBattery
-        min_value_neg_one[column_name] = true
+        value_neg_one_to_one[column_name] = true
       end
     end
-    return min_value_neg_one
+    return value_neg_one_to_one
   end
 
   def only_zeros_and_ones
