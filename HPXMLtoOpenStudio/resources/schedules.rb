@@ -887,7 +887,7 @@ class Schedule
   end
 
   def self.CookingRangeMonthlyMultipliers
-    return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.DishwasherWeekdayFractions
@@ -899,7 +899,7 @@ class Schedule
   end
 
   def self.DishwasherMonthlyMultipliers
-    return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.ClothesWasherWeekdayFractions
@@ -911,7 +911,7 @@ class Schedule
   end
 
   def self.ClothesWasherMonthlyMultipliers
-    return '1.011, 1.002, 1.022, 1.020, 1.022, 0.996, 0.999, 0.999, 0.996, 0.964, 0.959, 1.011'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.ClothesDryerWeekdayFractions
@@ -1051,7 +1051,7 @@ class Schedule
   end
 
   def self.PlugLoadsOtherMonthlyMultipliers
-    return '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.PlugLoadsTVWeekdayFractions
@@ -1063,7 +1063,7 @@ class Schedule
   end
 
   def self.PlugLoadsTVMonthlyMultipliers
-    return '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.PlugLoadsVehicleWeekdayFractions
@@ -1087,7 +1087,7 @@ class Schedule
   end
 
   def self.PlugLoadsWellPumpMonthlyMultipliers
-    return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.FuelLoadsGrillWeekdayFractions
@@ -1099,7 +1099,7 @@ class Schedule
   end
 
   def self.FuelLoadsGrillMonthlyMultipliers
-    return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.FuelLoadsLightingWeekdayFractions
@@ -1111,7 +1111,7 @@ class Schedule
   end
 
   def self.FuelLoadsLightingMonthlyMultipliers
-    return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.FuelLoadsFireplaceWeekdayFractions
@@ -1123,7 +1123,7 @@ class Schedule
   end
 
   def self.FuelLoadsFireplaceMonthlyMultipliers
-    return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
+    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   def self.PoolPumpWeekdayFractions
