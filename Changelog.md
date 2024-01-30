@@ -23,6 +23,7 @@ __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
 - Prevents mains water temperature from going below freezing (0 C).
 - Fixes error if HPXML has emissions scenario and abbreviated run period.
+- Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
 
 ## OpenStudio-HPXML v1.7.0
 
