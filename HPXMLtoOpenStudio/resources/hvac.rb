@@ -1824,12 +1824,28 @@ class HVAC
     indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
     indoor_temp_sensor.setKeyName(control_zone.name.to_s)
-    spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Air Temperature')
-    spt_sensor.setName("#{control_zone.name} spt_temp")
-    spt_sensor.setKeyName(control_zone.name.to_s)
+    htg_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
+    htg_spt_sensor.setName("#{control_zone.name} htg_spt_temp")
+    htg_spt_sensor.setKeyName(control_zone.name.to_s)
+    clg_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Cooling Setpoint Temperature')
+    clg_spt_sensor.setName("#{control_zone.name} clg_spt_temp")
+    clg_spt_sensor.setKeyName(control_zone.name.to_s)
     load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Predicted Sensible Load to Setpoint Heat Transfer Rate')
     load_sensor.setName("#{air_loop_unitary.name} sens load")
     load_sensor.setKeyName(air_loop_unitary.name.to_s)
+    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, 'temp_offset_signal')
+    # Temp offset Initialization Program
+    temp_offset_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    temp_offset_program.setName("#{air_loop_unitary.name} temp offset init program")
+    temp_offset_program.addLine("Set #{temp_offset_signal.name} = 0")
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{temp_offset_program.name} calling manager")
+    manager.setCallingPoint('BeginNewEnvironment')
+    manager.addProgram(temp_offset_program)
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{temp_offset_program.name} calling manager2")
+    manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
+    manager.addProgram(temp_offset_program)
 
     # actuator
     coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
@@ -1850,8 +1866,10 @@ class HVAC
     program.addLine('Set htg_mode = 0')
     program.addLine("If #{load_sensor.name} > 0")
     program.addLine('  Set htg_mode = 1')
-    program.addLine('Else,')
+    program.addLine("  Set setpoint = #{htg_spt_sensor.name}")
+    program.addLine("ElseIf #{load_sensor.name} < 0")
     program.addLine('  Set clg_mode = 1')
+    program.addLine("  Set setpoint = #{clg_spt_sensor.name}")
     program.addLine('EndIf')
     program.addLine("Set sens_load = @Abs #{load_sensor.name}")
     program.addLine('Set clg_mode = 0') if clg_coil.nil?
@@ -1865,13 +1883,15 @@ class HVAC
       coil_cap_stage_ft_sensors = []
       coil_eir_stage_fff_sensors = []
       coil_eir_stage_ft_sensors = []
+      coil_eir_stage_plf_sensors = []
       # Heating/Cooling specific calculations and names
       if coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
         cap_fff_curve_name = 'heatingCapacityFunctionofFlowFractionCurve'
         cap_ft_curve_name = 'heatingCapacityFunctionofTemperatureCurve'
         capacity_name = 'grossRatedHeatingCapacity'
         cop_name = 'grossRatedHeatingCOP'
-        cap_multiplier = 'htg_frost_multiplier'
+        cap_multiplier = 'htg_frost_multiplier_cap'
+        pow_multiplier = 'htg_frost_multiplier_pow'
         mode_s = 'If htg_mode > 0'
 
         # Calculate capacity and eirs for later use of full-load power calculations at each stage
@@ -1879,9 +1899,11 @@ class HVAC
         program.addLine("  If #{outdoor_db_sensor.name} < 4.444444,")
         program.addLine("    Set T_coil_out = 0.82 * #{outdoor_db_sensor.name} - 8.589")
         program.addLine("    Set delta_humidity_ratio = @MAX 0 (#{outdoor_w_sensor.name} - (@WFnTdbRhPb T_coil_out 1.0 #{outdoor_bp_sensor.name}))")
-        program.addLine('    Set htg_frost_multiplier = 0.909 - 107.33 * delta_humidity_ratio')
+        program.addLine('    Set htg_frost_multiplier_cap = 0.909 - 107.33 * delta_humidity_ratio')
+        program.addLine('    Set htg_frost_multiplier_pow = 0.90 - 36.45 * delta_humidity_ratio')
         program.addLine('  Else')
-        program.addLine('    Set htg_frost_multiplier = 1.0')
+        program.addLine('    Set htg_frost_multiplier_cap = 1.0')
+        program.addLine('    Set htg_frost_multiplier_pow = 1.0')
         program.addLine('  EndIf')
         program.addLine('EndIf')
       elsif coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
@@ -1890,6 +1912,7 @@ class HVAC
         capacity_name = 'grossRatedTotalCoolingCapacity'
         cop_name = 'grossRatedCoolingCOP'
         cap_multiplier = 'shr'
+        pow_multiplier = '1.0'
         mode_s = 'If clg_mode > 0'
 
         clg_tot_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Rate')
@@ -1925,14 +1948,24 @@ class HVAC
         stage_eir_ft_sensor.setName("#{coil.name} eir stage #{i} ft")
         stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
         coil_eir_stage_ft_sensors << stage_eir_ft_sensor
+        stage_eir_plf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
+        stage_eir_plf_sensor.setName("#{coil.name} eir stage #{i} fplr")
+        stage_eir_plf_sensor.setKeyName(stage.partLoadFractionCorrelationCurve.name.to_s)
+        coil_eir_stage_plf_sensors << stage_eir_plf_sensor
       end
       # Calculate the target speed ratio that operates at the target power output
       program.addLine(mode_s)
       coil.stages.each_with_index do |stage, i|
-        program.addLine("  Set rt_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name} * #{cap_multiplier}")
+        program.addLine("  Set rt_capacity_#{i} = #{stage.send(capacity_name)} * #{coil_cap_stage_fff_sensors[i].name} * #{coil_cap_stage_ft_sensors[i].name}")
+        program.addLine("  Set rt_capacity_#{i}_adj = rt_capacity_#{i} * #{cap_multiplier}")
         program.addLine("  Set rated_eir_#{i} = 1 / #{stage.send(cop_name)}")
-        program.addLine("  Set rt_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name}")
-        program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i}")
+        program.addLine("  Set plf = #{coil_eir_stage_plf_sensors[i].name}")
+        program.addLine("  If #{coil_eir_stage_plf_sensors[i].name} > 0.0")
+        program.addLine("    Set rt_eir_#{i} = rated_eir_#{i} * #{coil_eir_stage_ft_sensors[i].name} * #{coil_eir_stage_fff_sensors[i].name} / #{coil_eir_stage_plf_sensors[i].name}")
+        program.addLine('  Else')
+        program.addLine("    Set rt_eir_#{i} = 0")
+        program.addLine('  EndIf')
+        program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i} * #{pow_multiplier}")  # use unadjusted capacity value in pow calculations
       end
       program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
       (0..coil.stages.size - 1).each do |i|
@@ -1951,25 +1984,30 @@ class HVAC
       # Calculate the current power that needs to meet zone loads
       (0..coil.stages.size - 1).each do |i|
         if i == 0
-          program.addLine("  If sens_load <= rt_capacity_#{i}")
-          program.addLine("    Set current_power = sens_load * rt_eir_#{i}")
+          program.addLine("  If sens_load <= rt_capacity_#{i}_adj")
+          program.addLine("    Set current_power = sens_load / rt_capacity_#{i}_adj * rt_power_#{i}")
         else
-          program.addLine("  ElseIf sens_load <= rt_capacity_#{i}")
-          program.addLine("    Set hs_speed_ratio = (sens_load - rt_capacity_#{i - 1}) / (rt_capacity_#{i} - rt_capacity_#{i - 1})")
+          program.addLine("  ElseIf sens_load <= rt_capacity_#{i}_adj")
+          program.addLine("    Set hs_speed_ratio = (sens_load - rt_capacity_#{i - 1}_adj) / (rt_capacity_#{i}_adj - rt_capacity_#{i - 1}_adj)")
           program.addLine("    Set ls_speed_ratio = 1 - hs_speed_ratio")
           program.addLine("    Set current_power = hs_speed_ratio * rt_power_#{i} + ls_speed_ratio * rt_power_#{i - 1}")
         end
       end
-      program.addLine("  Else,")
+      program.addLine("  Else")
       program.addLine("    Set current_power = rt_power_#{coil.stages.size - 1}")
       program.addLine('  EndIf')
       program.addLine('EndIf')
     end
 
     program.addLine('If htg_mode > 0 || clg_mode > 0')
-    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - #{spt_sensor.name})) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
+    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}) || #{temp_offset_signal.name} == 1")
     program.addLine("    Set #{coil_speed_act.name} = NULL")
     program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
+    program.addLine("    If ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")
+    program.addLine("      Set #{temp_offset_signal.name} = 1")
+    program.addLine("    ElseIf (@Abs (#{indoor_temp_sensor.name} - setpoint)) < 0.001") # Temperature recovered
+    program.addLine("      Set #{temp_offset_signal.name} = 0")
+    program.addLine('    EndIf')
     program.addLine('  Else')
     # general & critical curtailment, operation refers to AHRI Standard 1380 2019
     program.addLine('    If current_power >= target_power')
