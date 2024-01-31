@@ -634,7 +634,7 @@ The column names available in the schedule CSV files are:
   ``hot_water_fixtures``           frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
   ``heating_setpoint``             F        Thermostat heating setpoint schedule.                                              No
   ``cooling_setpoint``             F        Thermostat cooling setpoint schedule.                                              No
-  ``maximum_capacity_ratio``       frac   Variable speed system maximum capacity ratio schedule.                               No
+  ``maximum_capacity_ratio``       frac     Variable speed system maximum capacity ratio schedule.                             No
   ``water_heater_setpoint``        F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``  0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                      -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
