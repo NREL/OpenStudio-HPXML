@@ -1965,7 +1965,7 @@ class HVAC
         program.addLine('  Else')
         program.addLine("    Set rt_eir_#{i} = 0")
         program.addLine('  EndIf')
-        program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i} * #{pow_multiplier}")  # use unadjusted capacity value in pow calculations
+        program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i} * #{pow_multiplier}") # use unadjusted capacity value in pow calculations
       end
       program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
       (0..coil.stages.size - 1).each do |i|
@@ -1989,11 +1989,11 @@ class HVAC
         else
           program.addLine("  ElseIf sens_load <= rt_capacity_#{i}_adj")
           program.addLine("    Set hs_speed_ratio = (sens_load - rt_capacity_#{i - 1}_adj) / (rt_capacity_#{i}_adj - rt_capacity_#{i - 1}_adj)")
-          program.addLine("    Set ls_speed_ratio = 1 - hs_speed_ratio")
+          program.addLine('    Set ls_speed_ratio = 1 - hs_speed_ratio')
           program.addLine("    Set current_power = hs_speed_ratio * rt_power_#{i} + ls_speed_ratio * rt_power_#{i - 1}")
         end
       end
-      program.addLine("  Else")
+      program.addLine('  Else')
       program.addLine("    Set current_power = rt_power_#{coil.stages.size - 1}")
       program.addLine('  EndIf')
       program.addLine('EndIf')
