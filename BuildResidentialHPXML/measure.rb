@@ -5444,6 +5444,7 @@ class HPXMLFile
       end
 
       if args[:hvac_perf_data_cooling_outdoor_temperatures].is_initialized
+        hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
         hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
         hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
         hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
