@@ -1035,8 +1035,15 @@ class HPXMLDefaults
       end
       if window.gas_fill.nil?
         if window.glass_layers == HPXML::WindowLayersDoublePane
-          window.gas_fill = HPXML::WindowGasAir
-          window.gas_fill_isdefaulted = true
+          if [HPXML::WindowGlassTypeLowE,
+              HPXML::WindowGlassTypeLowEHighSolarGain,
+              HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+            window.gas_fill = HPXML::WindowGasArgon
+            window.gas_fill_isdefaulted = true
+          else
+            window.gas_fill = HPXML::WindowGasAir
+            window.gas_fill_isdefaulted = true
+          end
         elsif window.glass_layers == HPXML::WindowLayersTriplePane
           window.gas_fill = HPXML::WindowGasArgon
           window.gas_fill_isdefaulted = true
@@ -1099,8 +1106,15 @@ class HPXMLDefaults
       end
       if skylight.gas_fill.nil?
         if skylight.glass_layers == HPXML::WindowLayersDoublePane
-          skylight.gas_fill = HPXML::WindowGasAir
-          skylight.gas_fill_isdefaulted = true
+          if [HPXML::WindowGlassTypeLowE,
+              HPXML::WindowGlassTypeLowEHighSolarGain,
+              HPXML::WindowGlassTypeLowELowSolarGain].include? skylight.glass_type
+            skylight.gas_fill = HPXML::WindowGasArgon
+            skylight.gas_fill_isdefaulted = true
+          else
+            skylight.gas_fill = HPXML::WindowGasAir
+            skylight.gas_fill_isdefaulted = true
+          end
         elsif skylight.glass_layers == HPXML::WindowLayersTriplePane
           skylight.gas_fill = HPXML::WindowGasArgon
           skylight.gas_fill_isdefaulted = true
@@ -1241,17 +1255,9 @@ class HPXMLDefaults
       next unless heat_pump.heating_capacity_retention_fraction.nil?
       next unless heat_pump.heating_capacity_17F.nil?
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
+      next unless heat_pump.heating_detailed_performance_data.empty? # set after hvac sizing
 
-      if not heat_pump.heating_detailed_performance_data.empty?
-        # Calculate heating capacity retention at 5F outdoor drybulb
-        target_odb = 5.0
-        max_capacity_47 = heat_pump.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
-        heat_pump.heating_capacity_retention_fraction = (HVAC.interpolate_to_odb_table_point(heat_pump.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
-        heat_pump.heating_capacity_retention_fraction = 0.0 if heat_pump.heating_capacity_retention_fraction < 0
-        heat_pump.heating_capacity_retention_temp = target_odb
-      else
-        heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
-      end
+      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
@@ -1681,6 +1687,14 @@ class HPXMLDefaults
       if hvac_system.cooling_detailed_performance_data.empty?
         HVAC.set_cool_detailed_performance_data(hvac_system)
       else
+        # process capacity fraction of nominal
+        hvac_system.cooling_detailed_performance_data.each do |dp|
+          next unless dp.capacity.nil?
+
+          dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.cooling_capacity).round(3)
+          dp.capacity_isdefaulted = true
+        end
+
         # override some properties based on detailed performance data
         cool_rated_capacity = [hvac_system.cooling_capacity, 1.0].max
         cool_max_capacity = [hvac_system.cooling_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceCoolRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
@@ -1692,6 +1706,24 @@ class HPXMLDefaults
         if hvac_system.heating_detailed_performance_data.empty?
           HVAC.set_heat_detailed_performance_data(hvac_system)
         else
+          # process capacity fraction of nominal
+          hvac_system.heating_detailed_performance_data.each do |dp|
+            next unless dp.capacity.nil?
+
+            dp.capacity = (dp.capacity_fraction_of_nominal * hvac_system.heating_capacity).round(3)
+            dp.capacity_isdefaulted = true
+          end
+
+          if hvac_system.heating_capacity_retention_fraction.nil? && hvac_system.heating_capacity_17F.nil?
+            # Calculate heating capacity retention at 5F outdoor drybulb
+            target_odb = 5.0
+            max_capacity_47 = hvac_system.heating_detailed_performance_data.find { |dp| dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.capacity
+            hvac_system.heating_capacity_retention_fraction = (HVAC.interpolate_to_odb_table_point(hvac_system.heating_detailed_performance_data, HPXML::CapacityDescriptionMaximum, target_odb, :capacity) / max_capacity_47).round(5)
+            hvac_system.heating_capacity_retention_fraction = 0.0 if hvac_system.heating_capacity_retention_fraction < 0
+            hvac_system.heating_capacity_retention_temp = target_odb
+            hvac_system.heating_capacity_retention_fraction_isdefaulted = true
+            hvac_system.heating_capacity_retention_temp_isdefaulted = true
+          end
           # override some properties based on detailed performance data
           heat_rated_capacity = [hvac_system.heating_capacity, 1.0].max
           heat_max_capacity = [hvac_system.heating_detailed_performance_data.find { |dp| (dp.outdoor_temperature == HVAC::AirSourceHeatRatedODB) && (dp.capacity_description == HPXML::CapacityDescriptionMaximum) }.capacity, 1.0].max
