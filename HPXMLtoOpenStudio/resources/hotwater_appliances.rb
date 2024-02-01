@@ -538,9 +538,7 @@ class HotWaterAndAppliances
       if cooking_range.fuel_type == HPXML::FuelTypeElectricity
         frac_sens = (1.0 - frac_lost) * 0.90
       else
-        elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
-        gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
-        frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.7942 * gas_btu) / (elec_btu + gas_btu))
+        frac_sens = (1.0 - frac_lost) * 0.80
       end
       frac_lat = 1.0 - frac_sens - frac_lost
     else # Internal gains outside unit
@@ -703,13 +701,7 @@ class HotWaterAndAppliances
       if clothes_dryer.is_vented
         frac_lost = 0.85
       end
-      if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
-        frac_sens = (1.0 - frac_lost) * 0.90
-      else
-        elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
-        gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
-        frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.8894 * gas_btu) / (elec_btu + gas_btu))
-      end
+      frac_sens = (1.0 - frac_lost) * 0.90
       frac_lat = 1.0 - frac_sens - frac_lost
     else # Internal gains outside unit
       frac_sens = 0.0
