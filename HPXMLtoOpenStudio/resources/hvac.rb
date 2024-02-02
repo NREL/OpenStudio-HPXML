@@ -13,18 +13,19 @@ class HVAC
                                          control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
     is_heatpump = false
     if not schedules_file.nil?
-      max_cap_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnMaximumCapacityRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
-      if not max_cap_ratio_sch.nil?
-        fail 'Maximum capacity schedules of variable speed hvac systems are only supported if NumberofUnits is 1.' if hpxml_bldg.building_construction.number_of_units > 1
+      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnMaximumPowerRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      # Not allowed with unit multiplier for now
+      if not max_pow_ratio_sch.nil?
+        fail 'Maximum power ratio schedules of variable speed hvac systems are only supported if NumberofUnits is 1.' if hpxml_bldg.building_construction.number_of_units > 1
       end
     end
 
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
-      # Check variable system maximum capacity ratio schedules
-      if cooling_system.compressor_type != HPXML::HVACCompressorTypeVariableSpeed && (not max_cap_ratio_sch.nil?)
-        max_cap_ratio_sch = nil
-        runner.registerWarning("Maximum capacity ratio schedule is only attached to variable speed systems. Ignored for compressor type: #{cooling_system.compressor_type}")
+      # Check maximum power ratio schedules only used in var speed systems
+      if cooling_system.compressor_type != HPXML::HVACCompressorTypeVariableSpeed && (not max_pow_ratio_sch.nil?)
+        max_pow_ratio_sch = nil
+        runner.registerWarning("Maximum power ratio schedule is only attached to variable speed systems. Ignored for compressor type: #{cooling_system.compressor_type}")
       end
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
@@ -67,7 +68,7 @@ class HVAC
       end
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
-      max_cap_ratio_sch = nil
+      max_pow_ratio_sch = nil
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
@@ -215,10 +216,10 @@ class HVAC
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
-    if not max_cap_ratio_sch.nil?
+    if not max_pow_ratio_sch.nil?
       htg_coil = nil unless is_heatpump
       htg_supp_coil = nil unless is_heatpump
-      apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil, clg_coil, htg_coil)
+      apply_max_power_EMS(model, max_pow_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil, clg_coil, htg_coil)
     end
 
     return air_loop
@@ -1820,16 +1821,10 @@ class HVAC
     end
   end
 
-  def self.apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil = nil, clg_coil, htg_coil)
-    cap_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    cap_ratio_sensor.setName("#{air_loop_unitary.name} capacity_ratio")
-    cap_ratio_sensor.setKeyName(max_cap_ratio_sch.name.to_s)
-    outdoor_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-    outdoor_db_sensor.setName('outdoor_db')
-    outdoor_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-    outdoor_w_sensor.setName('outdoor_w')
-    outdoor_bp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
-    outdoor_bp_sensor.setName('outdoor_bp')
+  def self.apply_max_power_EMS(model, max_pow_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil = nil, clg_coil, htg_coil)
+    pow_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    pow_ratio_sensor.setName("#{air_loop_unitary.name} power_ratio")
+    pow_ratio_sensor.setKeyName(max_pow_ratio_sch.name.to_s)
     indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
     indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
     indoor_temp_sensor.setKeyName(control_zone.name.to_s)
@@ -1844,6 +1839,8 @@ class HVAC
     load_sensor.setKeyName(air_loop_unitary.name.to_s)
     temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, 'temp_offset_signal')
     # Temp offset Initialization Program
+    # Temperature offset signal used to see if the hvac is recovering temperature to setpoint.
+    # If abs (indoor temperature - setpoint) > offset, then hvac and backup is allowed to operate without cap to recover temperature until it reaches setpoint
     temp_offset_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     temp_offset_program.setName("#{air_loop_unitary.name} temp offset init program")
     temp_offset_program.addLine("Set #{temp_offset_signal.name} = 0")
@@ -1870,7 +1867,7 @@ class HVAC
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{air_loop_unitary.name} max capacity program")
+    program.setName("#{air_loop_unitary.name} max power ratio program")
     program.addLine('Set clg_mode = 0')
     program.addLine('Set htg_mode = 0')
     program.addLine("If #{load_sensor.name} > 0")
@@ -1902,6 +1899,14 @@ class HVAC
         pow_multiplier = 'htg_frost_multiplier_pow'
         mode_s = 'If htg_mode > 0'
 
+        # Outdoor sensors added to calculate defrost adjustment for heating
+        outdoor_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+        outdoor_db_sensor.setName('outdoor_db')
+        outdoor_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+        outdoor_w_sensor.setName('outdoor_w')
+        outdoor_bp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
+        outdoor_bp_sensor.setName('outdoor_bp')
+
         # Calculate capacity and eirs for later use of full-load power calculations at each stage
         program.addLine('If htg_mode > 0')
         program.addLine("  If #{outdoor_db_sensor.name} < 4.444444,")
@@ -1923,6 +1928,7 @@ class HVAC
         pow_multiplier = '1.0'
         mode_s = 'If clg_mode > 0'
 
+        # cooling coil cooling rate sensors to calculate real time SHR
         clg_tot_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Rate')
         clg_tot_sensor.setName("#{coil.name} total cooling rate")
         clg_tot_sensor.setKeyName(coil.name.to_s)
@@ -1938,7 +1944,7 @@ class HVAC
         program.addLine('  EndIf')
         program.addLine('EndIf')
       end
-      # Heating and cooling sensors that need to be added
+      # Heating and cooling performance curve sensors that need to be added
       coil.stages.each_with_index do |stage, i|
         stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
         stage_cap_fff_sensor.setName("#{coil.name} cap stage #{i} fff")
@@ -1975,7 +1981,7 @@ class HVAC
         program.addLine('  EndIf')
         program.addLine("  Set rt_power_#{i} = rt_eir_#{i} * rt_capacity_#{i} * #{pow_multiplier}") # use unadjusted capacity value in pow calculations
       end
-      program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{cap_ratio_sensor.name}")
+      program.addLine("  Set target_power = #{coil.stages[-1].send(capacity_name)} * rated_eir_#{coil.stages.size - 1} * #{pow_ratio_sensor.name}")
       (0..coil.stages.size - 1).each do |i|
         if i == 0
           program.addLine("  If target_power < rt_power_#{i}")
@@ -2008,7 +2014,7 @@ class HVAC
     end
 
     program.addLine('If htg_mode > 0 || clg_mode > 0')
-    program.addLine("  If (#{cap_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}) || #{temp_offset_signal.name} == 1")
+    program.addLine("  If (#{pow_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}) || #{temp_offset_signal.name} == 1")
     program.addLine("    Set #{coil_speed_act.name} = NULL")
     program.addLine("    Set #{supp_coil_avail_act.name} = 1") unless htg_supp_coil.nil?
     program.addLine("    If ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')})")

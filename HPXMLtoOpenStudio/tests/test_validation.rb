@@ -982,7 +982,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
-                            'schedule-file-max-capacity-with-unit-multiplier' => ['Maximum capacity schedules of variable speed hvac systems are only supported if NumberofUnits is 1.'],
+                            'schedule-file-max-power-ratio-with-unit-multiplier' => ['Maximum power ratio schedules of variable speed hvac systems are only supported if NumberofUnits is 1.'],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
@@ -1319,8 +1319,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['schedule-file-max-capacity-with-unit-multiplier'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted-max-capacity-schedule.xml')
+      elsif ['schedule-file-max-power-ratio-with-unit-multiplier'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml')
         hpxml_bldg.building_construction.number_of_units = 2
       elsif ['solar-thermal-system-with-combi-tankless'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-combi-tankless.xml')
@@ -1536,7 +1536,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                 "Both 'cooling_setpoint' schedule file and cooling setpoint temperature provided; the latter will be ignored.",
                                                                 "Both 'water_heater_setpoint' schedule file and setpoint temperature provided; the latter will be ignored."],
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
-                              'schedule-file-max-capacity-with-single-speed-system' => ['Maximum capacity ratio schedule is only attached to variable speed systems. Ignored for compressor type: '] }
+                              'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only attached to variable speed systems. Ignored for compressor type: '] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -1607,9 +1607,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['schedule-file-and-operating-mode'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-heat-pump-operating-mode-heat-pump-only.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
-      elsif ['schedule-file-max-capacity-with-single-speed-system'].include? warning_case
+      elsif ['schedule-file-max-power-ratio-with-single-speed-system'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-speed-ratios-varied.csv')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
       else
         fail "Unhandled case: #{warning_case}."
       end

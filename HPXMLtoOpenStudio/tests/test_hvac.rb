@@ -86,9 +86,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
-  def test_central_air_conditioner_var_speed_max_capacity
+  def test_central_air_conditioner_var_speed_max_power_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-central-ac-only-var-speed-max-capacity-schedule.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml'))
     model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
@@ -104,7 +104,29 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_capacity_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+  end
+
+  def test_central_air_conditioner_furnace_var_speed_max_power_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+
+    # Check heating coil
+    assert_equal(0, model.getCoilHeatingDXMultiSpeeds.size)
+    assert_equal(1, model.getCoilHeatingGass.size)
+
+    # Check supp heating coil
+    assert_equal(0, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
   end
 
   def test_room_air_conditioner
@@ -669,9 +691,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
-  def test_air_to_air_heat_pump_var_speed_max_capacity
+  def test_air_to_air_heat_pump_var_speed_max_power_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-capacity-schedule.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml'))
     model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
@@ -689,7 +711,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_capacity_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
   end
 
   def test_mini_split_heat_pump
@@ -766,9 +788,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
-  def test_mini_split_heat_pump_max_capacity
+  def test_mini_split_heat_pump_max_power_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ducted-max-capacity-schedule.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml'))
     model, _hpxml = _test_measure(args_hash)
 
     # Check cooling coil
@@ -786,7 +808,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_capacity_multispeed(model, 3304.36, 4.55, 10634.05, 3.88, 4169.30, 4.64, 10752.98, 4.07)
+    _check_max_power_ratio_EMS_multispeed(model, 3304.36, 4.55, 10634.05, 3.88, 4169.30, 4.64, 10752.98, 4.07)
   end
 
   def test_mini_split_air_conditioner
@@ -1457,21 +1479,26 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_max_capacity_multispeed(model, htg_speed1_capacity, htg_speed1_cop, htg_speed2_capacity, htg_speed2_cop, clg_speed1_capacity, clg_speed1_cop, clg_speed2_capacity, clg_speed2_cop)
+  def _check_max_power_ratio_EMS_multispeed(model, htg_speed1_capacity, htg_speed1_cop, htg_speed2_capacity, htg_speed2_cop, clg_speed1_capacity, clg_speed1_cop, clg_speed2_capacity, clg_speed2_cop)
     # model objects:
     # Unitary system
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
 
-    # Check max capacity EMS
+    # Check max power ratio EMS
     index = 0
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} max capacity program")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} max power ratio program", true)
     if not htg_speed1_capacity.nil?
       assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / htg_speed1_cop, 0.01) unless htg_speed1_cop.nil?
       assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / htg_speed2_cop, 0.01) unless htg_speed2_cop.nil?
       assert_in_epsilon(program_values['rt_capacity_0'][index], htg_speed1_capacity, 0.01) unless htg_speed1_capacity.nil?
       assert_in_epsilon(program_values['rt_capacity_1'][index], htg_speed2_capacity, 0.01) unless htg_speed2_capacity.nil?
       index += 1
+    else
+      assert_equal(1, program_values['rated_eir_0'].size)
+      assert_equal(1, program_values['rated_eir_1'].size)
+      assert_equal(1, program_values['rt_capacity_0'].size)
+      assert_equal(1, program_values['rt_capacity_1'].size)
     end
     assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / clg_speed1_cop, 0.01) unless clg_speed1_cop.nil?
     assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / clg_speed2_cop, 0.01) unless clg_speed2_cop.nil?

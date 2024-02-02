@@ -396,7 +396,7 @@ Notes/caveats about this approach:
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
 - Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
 - Utility bill calculations using detailed rates are not supported.
-- Maximum capacity schedules of variable speed hvac systems are only supported if ``NumberofUnits`` is 1.
+- Maximum power ratio schedules of variable speed hvac systems are only supported if ``NumberofUnits`` is 1.
 
 .. _buildingsite:
 
@@ -635,7 +635,7 @@ The column names available in the schedule CSV files are:
   ``hot_water_fixtures``           frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
   ``heating_setpoint``             F        Thermostat heating setpoint schedule.                                              No
   ``cooling_setpoint``             F        Thermostat cooling setpoint schedule.                                              No
-  ``maximum_capacity_ratio``       frac     Variable speed system maximum capacity ratio schedule.                             No
+  ``maximum_power_ratio``          frac     Variable speed system maximum power ratio schedule.                                No
   ``water_heater_setpoint``        F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``  0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                      -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No

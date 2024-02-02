@@ -1350,7 +1350,7 @@ class SchedulesFile
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
-  ColumnMaximumCapacityRatio = 'maximum_capacity_ratio'
+  ColumnMaximumPowerRatio = 'maximum_power_ratio'
   ColumnHVAC = 'hvac'
   ColumnWaterHeater = 'water_heater'
   ColumnDehumidifier = 'dehumidifier'
