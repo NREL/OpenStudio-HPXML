@@ -1,16 +1,16 @@
 HPXML,Bills: Total (USD),Bills: Electricity: Fixed (USD),Bills: Electricity: Energy (USD),Bills: Electricity: PV Credit (USD),Bills: Electricity: Total (USD),Bills: Natural Gas: Fixed (USD),Bills: Natural Gas: Energy (USD),Bills: Natural Gas: Total (USD),Bills: Fuel Oil: Fixed (USD),Bills: Fuel Oil: Energy (USD),Bills: Fuel Oil: Total (USD),Bills: Propane: Fixed (USD),Bills: Propane: Energy (USD),Bills: Propane: Total (USD),Bills: Wood Cord: Fixed (USD),Bills: Wood Cord: Energy (USD),Bills: Wood Cord: Total (USD),Bills: Wood Pellets: Fixed (USD),Bills: Wood Pellets: Energy (USD),Bills: Wood Pellets: Total (USD),Bills: Coal: Fixed (USD),Bills: Coal: Energy (USD),Bills: Coal: Total (USD)
-base-appliances-coal.xml,1812.09,144.0,1207.48,0.0,1351.48,144.0,243.6,387.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,73.01,73.01
+base-appliances-coal.xml,1812.07,144.0,1207.51,0.0,1351.51,144.0,243.55,387.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,73.01,73.01
 base-appliances-dehumidifier-ief-portable.xml,1507.23,144.0,1201.13,0.0,1345.13,144.0,18.1,162.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-dehumidifier-ief-whole-home.xml,1508.15,144.0,1202.19,0.0,1346.19,144.0,17.96,161.96,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-dehumidifier-multiple.xml,1505.44,144.0,1198.92,0.0,1342.92,144.0,18.52,162.52,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-dehumidifier.xml,1506.03,144.0,1200.05,0.0,1344.05,144.0,17.98,161.98,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-appliances-gas.xml,1790.64,144.0,1207.48,0.0,1351.48,144.0,295.16,439.16,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-appliances-gas.xml,1790.62,144.0,1207.51,0.0,1351.51,144.0,295.11,439.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-modified.xml,1871.4,144.0,1342.21,0.0,1486.21,144.0,241.19,385.19,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-none.xml,1592.6,144.0,1035.12,0.0,1179.12,144.0,269.48,413.48,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-appliances-oil.xml,1909.31,144.0,1207.48,0.0,1351.48,144.0,243.6,387.6,0.0,170.23,170.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-appliances-propane.xml,1871.2,144.0,1207.48,0.0,1351.48,144.0,243.6,387.6,0.0,0.0,0.0,0.0,132.12,132.12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-appliances-oil.xml,1909.29,144.0,1207.51,0.0,1351.51,144.0,243.55,387.55,0.0,170.23,170.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-appliances-propane.xml,1871.18,144.0,1207.51,0.0,1351.51,144.0,243.55,387.55,0.0,0.0,0.0,0.0,132.12,132.12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-appliances-refrigerator-temperature-dependent-schedule.xml,1844.59,144.0,1306.32,0.0,1450.32,144.0,250.27,394.27,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-base-appliances-wood.xml,1812.09,144.0,1207.48,0.0,1351.48,144.0,243.6,387.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,73.01,73.01,0.0,0.0,0.0,0.0,0.0,0.0
+base-appliances-wood.xml,1812.07,144.0,1207.51,0.0,1351.51,144.0,243.55,387.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,73.01,73.01,0.0,0.0,0.0,0.0,0.0,0.0
 base-atticroof-cathedral.xml,1872.94,144.0,1301.87,0.0,1445.87,144.0,283.07,427.07,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-atticroof-conditioned.xml,2017.14,144.0,1476.82,0.0,1620.82,144.0,252.32,396.32,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-atticroof-flat.xml,1781.53,144.0,1275.89,0.0,1419.89,144.0,217.64,361.64,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -184,6 +184,7 @@ base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xm
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml,1877.96,144.0,1427.05,0.0,1571.05,144.0,162.91,306.91,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml,1882.36,144.0,1432.84,0.0,1576.84,144.0,161.52,305.52,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml,1723.76,144.0,1579.76,0.0,1723.76,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-heating-only.xml,1709.95,144.0,1565.95,0.0,1709.95,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacities.xml,1708.37,144.0,1564.37,0.0,1708.37,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml,1997.34,144.0,1853.34,0.0,1997.34,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,1706.9,144.0,1562.9,0.0,1706.9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
