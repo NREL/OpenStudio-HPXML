@@ -1489,6 +1489,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     index = 0
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} max power ratio program", true)
     if not htg_speed1_capacity.nil?
+      # two coils, two sets of values
+      assert_equal(2, program_values['rated_eir_0'].size)
+      assert_equal(2, program_values['rated_eir_1'].size)
+      assert_equal(2, program_values['rt_capacity_0'].size)
+      assert_equal(2, program_values['rt_capacity_1'].size)
       assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / htg_speed1_cop, 0.01) unless htg_speed1_cop.nil?
       assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / htg_speed2_cop, 0.01) unless htg_speed2_cop.nil?
       assert_in_epsilon(program_values['rt_capacity_0'][index], htg_speed1_capacity, 0.01) unless htg_speed1_capacity.nil?

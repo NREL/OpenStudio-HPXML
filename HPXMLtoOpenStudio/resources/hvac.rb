@@ -217,6 +217,7 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if not max_pow_ratio_sch.nil?
+      # Only apply heating control when it's a heat pump
       htg_coil = nil unless is_heatpump
       htg_supp_coil = nil unless is_heatpump
       apply_max_power_EMS(model, max_pow_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil, clg_coil, htg_coil)
