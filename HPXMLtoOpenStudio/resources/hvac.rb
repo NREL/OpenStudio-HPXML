@@ -7,18 +7,25 @@ class HVAC
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
   CrankcaseHeaterTemp = 50.0 # degF
 
-  def self.apply_air_source_hvac_systems(model, cooling_system, heating_system,
+  def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-                                         control_zone, hvac_unavailable_periods, schedules_file)
+                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
     is_heatpump = false
     if not schedules_file.nil?
       max_cap_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnMaximumCapacityRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      if not max_cap_ratio_sch.nil?
+        fail 'Maximum capacity schedules of variable speed hvac systems are only supported if NumberofUnits is 1.' if hpxml_bldg.building_construction.number_of_units > 1
+      end
     end
 
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
-      max_cap_ratio_sch = nil unless cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      # Check variable system maximum capacity ratio schedules
+      if cooling_system.compressor_type != HPXML::HVACCompressorTypeVariableSpeed && (not max_cap_ratio_sch.nil?)
+        max_cap_ratio_sch = nil
+        runner.registerWarning("Maximum capacity ratio schedule is only attached to variable speed systems. Ignored for compressor type: #{cooling_system.compressor_type}")
+      end
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
         if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
@@ -209,6 +216,8 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     if not max_cap_ratio_sch.nil?
+      htg_coil = nil unless is_heatpump
+      htg_supp_coil = nil unless is_heatpump
       apply_max_capacity_EMS(model, max_cap_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil, clg_coil, htg_coil)
     end
 
@@ -1875,7 +1884,6 @@ class HVAC
     program.addLine('Set clg_mode = 0') if clg_coil.nil?
     program.addLine('Set htg_mode = 0') if htg_coil.nil?
 
-    s = []
     [htg_coil, clg_coil].each do |coil|
       next if coil.nil?
 

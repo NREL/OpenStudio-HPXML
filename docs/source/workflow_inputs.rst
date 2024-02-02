@@ -396,6 +396,7 @@ Notes/caveats about this approach:
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
 - Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
 - Utility bill calculations using detailed rates are not supported.
+- Maximum capacity schedules of variable speed hvac systems are only supported if ``NumberofUnits`` is 1.
 
 .. _buildingsite:
 

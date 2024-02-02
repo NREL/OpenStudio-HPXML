@@ -1182,7 +1182,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems, schedules_file)
+  def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems, _schedules_file)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml_bldg)
     end
@@ -1361,21 +1361,6 @@ class HPXMLDefaults
             heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpRoom
         heat_pump.cooling_shr = 0.65
         heat_pump.cooling_shr_isdefaulted = true
-      end
-    end
-
-    # variable system maximum capacity ratio schedules_file
-    schedules_file_includes_max_capacity_ratio = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnMaximumCapacityRatio))
-    if schedules_file_includes_max_capacity_ratio
-      is_var_speed_system = false
-      (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_sys|
-        next unless hvac_sys.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-        is_var_speed_system = true
-      end
-      if not is_var_speed_system
-        schedules_file.remove_col_name(SchedulesFile::ColumnMaximumCapacityRatio)
-        runner.registerWarning('Maximum capacity ratio schedule can only be attached to variable speed systems. Schedule ignored to continue simulation.')
       end
     end
 

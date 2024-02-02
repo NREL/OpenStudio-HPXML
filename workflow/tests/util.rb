@@ -14,6 +14,7 @@ def run_simulation_tests(xmls)
 
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
+    next if xml.include? 'max-capacity-schedule' # Unit multiplier not supported yet
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run

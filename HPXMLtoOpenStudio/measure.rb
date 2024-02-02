@@ -448,7 +448,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnHVAC, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
-    add_cooling_system(model, weather, spaces, airloop_map)
+    add_cooling_system(model, runner, weather, spaces, airloop_map)
     add_heating_system(runner, model, weather, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
@@ -1564,7 +1564,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Waterheater.apply_combi_system_EMS(model, @hpxml_bldg.water_heating_systems, plantloop_map)
   end
 
-  def add_cooling_system(model, weather, spaces, airloop_map)
+  def add_cooling_system(model, runner, weather, spaces, airloop_map)
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
@@ -1597,9 +1597,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           HPXML::HVACTypeMiniSplitAirConditioner,
           HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type
 
-        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, cooling_system, heating_system, sequential_cool_load_fracs, sequential_heat_load_fracs,
+        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file)
+                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
@@ -1642,9 +1642,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       sys_id = heating_system.id
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
 
-        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, nil, heating_system, [0], sequential_heat_load_fracs,
+        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system, [0], sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file)
+                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
@@ -1705,9 +1705,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
              HPXML::HVACTypeHeatPumpPTHP,
              HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
 
-        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, heat_pump, heat_pump, sequential_cool_load_fracs, sequential_heat_load_fracs,
+        airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, heat_pump, heat_pump, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file)
+                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg)
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
