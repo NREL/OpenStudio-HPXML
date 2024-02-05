@@ -376,6 +376,19 @@
             <BatteryType>Li-ion</BatteryType>
           </Battery>
         </Batteries>
+        <Vehicles>
+          <ElectricVehicle>
+            <SystemIdentifier id='ElectricVehicle1'/>
+            <BatteryType>Li-ion</BatteryType>
+            <ElectricVehicleCharger idref='EVCharger1'/>
+          </ElectricVehicle>
+        </Vehicles>
+        <ElectricVehicleChargers>
+          <ElectricVehicleCharger>
+            <SystemIdentifier id='EVCharger1'/>
+            <Location>outside</Location>
+          </ElectricVehicleCharger>
+        </ElectricVehicleChargers>
       </Systems>
       <Appliances>
         <ClothesWasher>

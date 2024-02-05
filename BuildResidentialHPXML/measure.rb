@@ -2471,21 +2471,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_round_trip_efficiency', false)
-    arg.setDisplayName('Electric Vehicle: Round Trip Battery Efficiency')
-    arg.setDescription('The round trip efficiency of the EV battery. If not provided, the OS-HPXML default is used.')
-    arg.setUnits('Frac')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
     arg.setDisplayName('Electric Vehicle Charger: Present')
     arg.setDescription('Whether there is an electric vehicle charger present.')
     arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ev_charger_level', false)
-    arg.setDisplayName('Electric Vehicle Charger: Charging Level')
-    arg.setDescription('The EV charging level.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
@@ -6475,10 +6464,6 @@ class HPXMLFile
       usable_capacity_kwh = args[:ev_battery_usable_capacity].get
     end
 
-    if args[:ev_battery_round_trip_efficiency].is_initialized
-      round_trip_efficiency = args[:ev_battery_round_trip_efficiency].get
-    end
-
     if args[:ev_charger_present].is_initialized
       ev_charger_present = args[:ev_charger_present].get
     else
@@ -6487,10 +6472,6 @@ class HPXMLFile
 
     if args[:ev_charger_power].is_initialized
       ev_charger_power = args[:ev_charger_power].get
-    end
-
-    if args[:ev_charger_level].is_initialized
-      ev_charger_level = args[:ev_charger_level].get
     end
 
     if args[:ev_charger_location].is_initialized
@@ -6502,7 +6483,6 @@ class HPXMLFile
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
                                 location: location,
-                                charging_level: ev_charger_level,
                                 charging_power: ev_charger_power)
     end
 
@@ -6512,7 +6492,6 @@ class HPXMLFile
                             rated_power_output: rated_power_output,
                             nominal_capacity_kwh: nominal_capacity_kwh,
                             usable_capacity_kwh: usable_capacity_kwh,
-                            round_trip_efficiency: round_trip_efficiency,
                             ev_charger_idref: charger_id) 
   end
 

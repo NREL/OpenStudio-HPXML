@@ -6184,7 +6184,7 @@ class HPXML < Object
   end
 
   class ElectricVehicleCharger < BaseElement
-    ATTRS = [:id, :charging_level, :location, :charging_power]
+    ATTRS = [:id, :location, :charging_power]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6204,7 +6204,6 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(charger, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(charger, 'Location', @location, :string, @location_isdefaulted) unless @location.nil?
-      XMLHelper.add_element(charger, 'ChargingLevel', @charging_level, :integer, @charging_level_isdefaulted) unless @charging_level.nil?
       XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
     end
 
@@ -6213,7 +6212,6 @@ class HPXML < Object
 
       @id = HPXML::get_id(charger)
       @location = XMLHelper.get_value(charger, 'Location', :string)
-      @charging_level = XMLHelper.get_value(charger, 'ChargingLevel', :integer)
       @charging_power = XMLHelper.get_value(charger, 'ChargingPower', :float)
     end
   end
@@ -6318,7 +6316,7 @@ class HPXML < Object
   end
 
   class Battery < BaseElement
-    ATTRS = [:id, :type, :is_ev, :location, :lifetime_model, :rated_power_output,
+    ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
              :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah]
     attr_accessor(*ATTRS)
@@ -6365,7 +6363,6 @@ class HPXML < Object
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
       XMLHelper.add_element(battery, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
       XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
-      XMLHelper.add_extension(battery, 'IsEV', @is_ev, :boolean, @is_ev_isdefaulted) unless @is_ev.nil?
     end
 
     def from_doc(battery)
@@ -6382,7 +6379,6 @@ class HPXML < Object
       @nominal_voltage = XMLHelper.get_value(battery, 'NominalVoltage', :float)
       @round_trip_efficiency = XMLHelper.get_value(battery, 'RoundTripEFficiency', :float)
       @lifetime_model = XMLHelper.get_value(battery, 'extension/LifetimeModel', :string)
-      @is_ev = XMLHelper.get_value(battery, 'extension/IsEV', :boolean)
     end
   end
 

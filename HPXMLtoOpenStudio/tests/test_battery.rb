@@ -72,38 +72,6 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     assert_equal(0, elcds.size)
   end
 
-  def test_ev_battery
-    skip
-    # EV battery w/ no schedules, no PV
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    hpxml_bldg.batteries.each do |hpxml_battery|
-      battery = get_battery(model, hpxml_battery.id)
-      assert_empty(battery)
-    end
-
-    elcds = model.getElectricLoadCenterDistributions
-    assert_equal(0, elcds.size)
-  end
-
-  def test_pv_ev_battery
-    skip
-    # EV battery w/ PV but no schedules
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev-pv.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    hpxml_bldg.batteries.each do |hpxml_battery|
-      battery = get_battery(model, hpxml_battery.id)
-      assert_empty(battery)
-    end
-
-    elcds = model.getElectricLoadCenterDistributions
-    assert_equal(1, elcds.size)
-  end
-
   def test_battery_scheduled
     skip
     args_hash = {}
@@ -114,46 +82,6 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       battery = get_battery(model, hpxml_battery.id)
 
       # Check object
-      assert(!battery.thermalZone.is_initialized)
-      assert_equal(0, battery.radiativeFraction)
-      assert_equal(0.95, battery.dctoDCChargingEfficiency)
-      assert_equal(HPXML::BatteryLifetimeModelNone, battery.lifetimeModel)
-      assert_in_epsilon(15, battery.numberofCellsinSeries, 0.01)
-      assert_in_epsilon(125, battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(0.0, battery.initialFractionalStateofCharge, 0.01)
-      assert_in_epsilon(198.0, battery.batteryMass, 0.01)
-      assert_in_epsilon(2.25, battery.batterySurfaceArea, 0.01)
-      assert_in_epsilon(20000, calc_nom_capacity(battery), 0.01)
-
-      elcds = model.getElectricLoadCenterDistributions
-      assert_equal(1, elcds.size)
-      elcd = elcds[0]
-      assert_equal('AlternatingCurrentWithStorage', elcd.electricalBussType)
-      assert_equal(0.075, elcd.minimumStorageStateofChargeFraction)
-      assert_equal(0.975, elcd.maximumStorageStateofChargeFraction)
-      assert_equal(6000.0, elcd.designStorageControlChargePower.get)
-      assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
-      assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackChargeDischargeSchedules', elcd.storageOperationScheme)
-      assert(elcd.storageChargePowerFractionSchedule.is_initialized)
-      assert(elcd.storageDischargePowerFractionSchedule.is_initialized)
-      assert(elcd.storageConverter.is_initialized)
-
-      elcscs = model.getElectricLoadCenterStorageConverters
-      assert_equal(1, elcscs.size)
-      elcsc = elcscs[0]
-      assert_equal(1.0, elcsc.simpleFixedEfficiency.get)
-    end
-  end
-
-  def test_ev_battery_scheduled
-    skip
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-battery-ev-scheduled.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-
-    hpxml_bldg.batteries.each do |hpxml_battery|
-      battery = get_battery(model, hpxml_battery.id)
       assert(!battery.thermalZone.is_initialized)
       assert_equal(0, battery.radiativeFraction)
       assert_equal(0.95, battery.dctoDCChargingEfficiency)

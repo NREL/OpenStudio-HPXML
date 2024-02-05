@@ -2249,11 +2249,7 @@ class HPXMLDefaults
     end
     if ev_charger.charging_power.nil?
       ev_charger.charging_power = default_values[:charging_power]
-      ev_charger.charging_power_is_defaulted = true
-    end
-    if ev_charger.charging_level.nil?
-      ev_charger.charging_level = default_values[:charging_level]
-      ev_charger.charging_level_is_defaulted = true
+      ev_charger.charging_power_isdefaulted = true
     end
   end
 
@@ -2264,19 +2260,15 @@ class HPXMLDefaults
         battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
-      if battery.is_ev.nil?
-        battery.is_ev = false
-        battery.is_ev_isdefaulted = true
-      end
       apply_battery(battery, default_values)
     end
   end
 
   def self.apply_battery(battery, default_values)
-    if battery.lifetime_model.nil?
-      battery.lifetime_model = default_values[:lifetime_model]
-      battery.lifetime_model_isdefaulted = true
-    end
+    # if battery.lifetime_model.nil?
+    #   battery.lifetime_model = default_values[:lifetime_model]
+    #   battery.lifetime_model_isdefaulted = true
+    # end
     if battery.nominal_voltage.nil?
       battery.nominal_voltage = default_values[:nominal_voltage] # V
       battery.nominal_voltage_isdefaulted = true

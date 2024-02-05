@@ -2254,11 +2254,6 @@
 											<xs:documentation>[W] The amount of power the battery typically generates under non-peak conditions.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element name="PeakPowerOutput" type="Power" minOccurs="0">
-										<xs:annotation>
-											<xs:documentation>[W] The peak power that the battery can generate for a short period of time.</xs:documentation>
-										</xs:annotation>
-									</xs:element>
 									<xs:element minOccurs="0" name="NominalVoltage" type="HPXMLDecimal">
 										<xs:annotation>
 											<xs:documentation>[V] The nominal voltage is the battery voltage when the state of charge is 0.5 (midway between being fully charged, and fully discharged)
