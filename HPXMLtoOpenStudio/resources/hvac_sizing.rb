@@ -332,7 +332,6 @@ class HVACSizing
     return cool_temp
   end
 
-<<<<<<< HEAD
   def self.process_zone_and_spaces()
     '''
     Room loads set up based on spaces
@@ -347,10 +346,7 @@ class HVACSizing
     end
   end
 
-  def self.process_load_windows_skylights(bldg_design_loads, weather)
-=======
   def self.process_load_windows_skylights(mj, bldg_design_loads, weather)
->>>>>>> 241cae4b4725f0bd771820d412abca568500bc55
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -730,24 +726,20 @@ class HVACSizing
             cltd = [cltd + cltd_corr, 0.0].max # NOTE: The CLTD_Alt equation in A12-18 part 5 suggests CLTD - CLTD_corr, but A12-19 suggests it should be CLTD + CLTD_corr (where CLTD_corr is negative)
           end
 
-          bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
-<<<<<<< HEAD
-          bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd
-          space_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd unless space_design_loads.nil?
-          space_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd unless space_design_loads.nil?
+          clg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
+          htg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * mj.htd
+          bldg_design_loads.Cool_Walls += clg_loads
+          bldg_design_loads.Heat_Walls += htg_loads
+          space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
+          space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
         else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
-          bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-          bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
-          space_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint) unless space_design_loads.nil?
-          space_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space]) unless space_design_loads.nil?
-=======
-          bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * mj.htd
-        else # Partition wall
-          adjacent_space = wall.exterior_adjacent_to
-          bldg_design_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-          bldg_design_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
->>>>>>> 241cae4b4725f0bd771820d412abca568500bc55
+          clg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
+          htg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+          bldg_design_loads.Cool_Walls += clg_loads
+          bldg_design_loads.Heat_Walls += htg_loads
+          space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
+          space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
         end
       end
     end
@@ -762,21 +754,15 @@ class HVACSizing
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true)
-<<<<<<< HEAD
-        bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
-        space_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd unless space_design_loads.nil?
+        htg_loads = u_wall_with_soil * foundation_wall.net_area * mj.htd
+        bldg_design_loads.Heat_Walls += htg_loads
+        space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
         u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
-        bldg_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space])
-        space_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (@heat_setpoint - @heat_design_temps[adjacent_space]) unless space_design_loads.nil?
-=======
-        bldg_design_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * mj.htd
-      else # Partition wall
-        adjacent_space = foundation_wall.exterior_adjacent_to
-        u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
-        bldg_design_loads.Heat_Walls += u_wall_without_soil * foundation_wall.net_area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
->>>>>>> 241cae4b4725f0bd771820d412abca568500bc55
+        htg_loads = u_wall_without_soil * foundation_wall.net_area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        bldg_design_loads.Heat_Walls += htg_loads
+        space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       end
     end
   end
@@ -831,15 +817,12 @@ class HVACSizing
       # Adjust base CLTD for different CTD or DR
       cltd += (@hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + mj.daily_range_temp_adjust[mj.daily_range_num]
 
-      bldg_design_loads.Cool_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd
-<<<<<<< HEAD
-      bldg_design_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd
-      space_design_loads.Cool_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd unless space_design_loads.nil?
-      space_design_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd unless space_design_loads.nil?
-      puts space_design_loads
-=======
-      bldg_design_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * mj.htd
->>>>>>> 241cae4b4725f0bd771820d412abca568500bc55
+      clg_loads = (1.0 / roof.insulation_assembly_r_value) * roof.net_area * cltd
+      htg_loads = (1.0 / roof.insulation_assembly_r_value) * roof.net_area * mj.htd
+      bldg_design_loads.Cool_Roofs += clg_loads
+      bldg_design_loads.Heat_Roofs += htg_loads
+      space_design_loads.Cool_Roofs += clg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Roofs += htg_loads unless space_design_loads.nil?
     end
   end
 
