@@ -736,7 +736,7 @@ class HotWaterAndAppliances
     return annual_kwh, frac_sens, frac_lat
   end
 
-  def self.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, cfa, ncfl,
+  def self.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl,
                                                   water_heating_system, hot_water_distribution)
 
     if water_heating_system.fraction_dhw_load_served <= 0
@@ -752,7 +752,7 @@ class HotWaterAndAppliances
     oew_fact = ew_fact * o_frac # standard operating condition portion of hot water energy waste
     ocd_eff = 0.0
     sew_fact = ew_fact - oew_fact
-    ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
+    ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
       pe_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
@@ -763,10 +763,14 @@ class HotWaterAndAppliances
     return (e_waste + 128.0) / 160.0
   end
 
-  def self.get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
+  def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
-    bsmnt = has_uncond_bsmnt ? 1 : 0
+    bsmnt = 0
+    if has_uncond_bsmnt and not has_cond_bsmnt
+      bsmnt = 1
+    end
+
     return 2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt # Eq. 4.2-13 (refPipeL)
   end
 
