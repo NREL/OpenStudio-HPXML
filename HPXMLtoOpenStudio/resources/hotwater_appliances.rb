@@ -9,6 +9,7 @@ class HotWaterAndAppliances
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
     fixtures_usage_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
@@ -312,7 +313,7 @@ class HotWaterAndAppliances
       if gpd_frac > 0
 
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
-        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
+        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
         if not schedules_file.nil?
@@ -994,7 +995,7 @@ class HotWaterAndAppliances
     return sens_gains * 365.0, lat_gains * 365.0
   end
 
-  def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution,
+  def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution,
                               frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0)
     if (Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')) || (nbeds < 0.0)
       return 0.0
@@ -1023,7 +1024,7 @@ class HotWaterAndAppliances
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       p_ratio = hot_water_distribution.recirculation_branch_piping_length / 10.0
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
-      ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
+      ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
       p_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     end
 
