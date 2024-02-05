@@ -205,8 +205,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                            "Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'manufactured-home-reference-floor' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
                                                                     'There must be at least one ceiling adjacent to "crawlspace - vented".'],
-                            'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../CoolingCapacity',
-                                                                        'Expected 1 element(s) for xpath: ../HeatingCapacity'],
+                            'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
+                                                                        'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
                             'missing-distribution-cfa-served' => ['Expected 1 element(s) for xpath: ../../../ConditionedFloorAreaServed [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctSurfaceArea)], id: "Ducts2"]'],
                             'missing-duct-area' => ['Expected 1 or more element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctLocation], id: "Ducts2"]'],
@@ -913,8 +913,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
   def test_ruby_error_messages
     # Test case => Error message
-    all_expected_errors = { 'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery' must be 1."],
-                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be -1."],
+    all_expected_errors = { 'battery-bad-values-max-greater-than-one' => ["Schedule value for column 'battery' must be less than or equal to 1."],
+                            'battery-bad-values-min-less-than-neg-one' => ["Schedule value for column 'battery' must be greater than or equal to -1."],
                             'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
                             'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],
@@ -1010,13 +1010,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       building_id = nil
       # Create HPXML object
-      if ['battery-bad-values-max-not-one'].include? error_case
+      if ['battery-bad-values-max-greater-than-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         csv_data[1][0] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-bad-values-min-not-neg-one'].include? error_case
+      elsif ['battery-bad-values-min-less-than-neg-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         csv_data[1][0] = -1.1
@@ -1404,25 +1404,21 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-vacancy.xml')
         hpxml.header.unavailable_periods[0].column_name = 'foobar'
       elsif ['unique-objects-vary-across-units-epw'].include? error_case
-        building_id = 'ALL'
-        hpxml, hpxml_bldg = _create_hpxml('base-multiple-sfd-buildings.xml', building_id: building_id)
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building.xml', building_id: building_id)
         hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = 'USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw'
       elsif ['unique-objects-vary-across-units-dst'].include? error_case
-        building_id = 'ALL'
-        hpxml, hpxml_bldg = _create_hpxml('base-multiple-sfd-buildings.xml', building_id: building_id)
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building.xml', building_id: building_id)
         hpxml_bldg.dst_begin_month = 3
         hpxml_bldg.dst_begin_day = 15
         hpxml_bldg.dst_end_month = 10
         hpxml_bldg.dst_end_day = 15
       elsif ['unique-objects-vary-across-units-tmains'].include? error_case
-        building_id = 'ALL'
-        hpxml, hpxml_bldg = _create_hpxml('base-multiple-sfd-buildings.xml', building_id: building_id)
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building.xml', building_id: building_id)
         hpxml_bldg.hot_water_distributions[0].dwhr_facilities_connected = HPXML::DWHRFacilitiesConnectedOne
         hpxml_bldg.hot_water_distributions[0].dwhr_equal_flow = true
         hpxml_bldg.hot_water_distributions[0].dwhr_efficiency = 0.55
       elsif ['whole-mf-building-batteries'].include? error_case
-        building_id = 'ALL'
-        hpxml, hpxml_bldg = _create_hpxml('base-multiple-sfd-buildings.xml', building_id: building_id)
+        hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-whole-building.xml', building_id: building_id)
         hpxml_bldg.batteries.add(id: 'Battery1',
                                  type: HPXML::BatteryTypeLithiumIon)
       elsif ['whole-mf-building-dehumidifiers-unit-multiplier'].include? error_case
