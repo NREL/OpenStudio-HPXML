@@ -25,8 +25,6 @@ class HVACSizing
     process_load_infiltration_ventilation(mj, bldg_design_loads, weather)
     process_load_internal_gains(bldg_design_loads)
 
-    puts @space_loads
-
     # Aggregate zone loads into initial loads
     aggregate_loads(bldg_design_loads)
 
