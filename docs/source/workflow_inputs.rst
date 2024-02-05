@@ -343,7 +343,7 @@ HPXML Building
 
 OpenStudio-HPXML can be used to model either individual residential :ref:`bldg_type_units` or :ref:`bldg_type_bldgs`.
 
-Each residential dwelling unit is entered in ``/HPXML/Building``.
+In either case, each residential dwelling unit is entered as a ``/HPXML/Building``.
 
   =========================  ======  =======  ===========  ========  =======  ==============================================
   Element                    Type    Units    Constraints  Required  Default  Notes
@@ -356,42 +356,46 @@ Each residential dwelling unit is entered in ``/HPXML/Building``.
 Dwelling Units
 **************
 
-The OpenStudio-HPXML workflow was originally developed to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
+OpenStudio-HPXML was originally developed to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
 This approach:
 
 - Is required/desired for certain applications (e.g., a Home Energy Score or an Energy Rating Index calculation).
 - Improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
 
-When modeling individual units of SFA/MF buildings, current capabilities include:
+For these simulations:
 
-- Defining surfaces adjacent to generic SFA/MF spaces (e.g., "other housing unit" or "other multifamily buffer space"), in which temperature profiles will be assumed (see :ref:`hpxmllocations`).
-- Locating various building components (e.g., ducts, water heaters, appliances) in these SFA/MF spaces.
-- Defining shared systems (HVAC, water heating, mechanical ventilation, etc.), in which individual systems are modeled with adjustments to approximate their energy use attributed to the unit.
-
-Note that only the energy use attributed to each dwelling unit is calculated.
+- Surfaces can be defined adjacent to generic SFA/MF spaces (e.g., "other housing unit" or "other multifamily buffer space") with assumed temperature profiles (see :ref:`hpxmllocations`).
+- Various building components (e.g., ducts, water heaters, appliances) can be located in these SFA/MF spaces.
+- Shared systems (HVAC, water heating, mechanical ventilation, etc.) serving multiple dwelling units can be defined, in which these systems are approximated as individual systems with efficiency adjustments to estimate the energy use attributed to the unit.
+- Energy use attributed only to the dwelling unit is calculated.
 
 .. _bldg_type_bldgs:
 
 Whole SFA/MF Buildings
 **********************
 
-As of OpenStudio-HPXML v1.7.0, a new capability was added for modeling whole SFA/MF buildings in a single combined simulation.
+As of v1.7.0, OpenStudio-HPXML can model whole SFA/MF buildings in a single combined simulation.
+
+Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``.
+
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
+  Element                             Type      Units  Constraints  Required  Default   Notes
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
+  ``WholeSFAorMFBuildingSimulation``  boolean                       No        false     Whether to run an individual dwelling unit or whole building for SFA/MF
+  ==================================  ========  =====  ===========  ========  ========  ========================================================
 
 For these simulations:
 
-- Each dwelling unit is described by a separate ``Building`` element in the HPXML file.
-- To run the single combined simulation, specify the Building ID as 'ALL' in the run_simulation.rb script or OpenStudio workflow.
 - Unit multipliers (using the ``NumberofUnits`` element) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
 - Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones.
 - Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit.
+- Energy use for the entire building is calculated.
 
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
 - Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
 - Utility bill calculations using detailed rates are not supported.
-
-Note that only the energy use for the entire building is calculated.
 
 .. _buildingsite:
 
@@ -598,44 +602,44 @@ They can be used to reflect real-world or stochastic occupancy.
 Detailed schedule inputs are provided via one or more CSV file that should be referenced in the HPXML file as ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/SchedulesFilePath`` elements.
 The column names available in the schedule CSV files are:
 
-  ===============================  =====  =================================================================================  ===============================
-  Column Name                      Units  Description                                                                        Can Be Stochastically Generated
-  ===============================  =====  =================================================================================  ===============================
-  ``occupants``                    frac   Occupant heat gain schedule.                                                       Yes
-  ``lighting_interior``            frac   Interior lighting energy use schedule.                                             Yes
-  ``lighting_exterior``            frac   Exterior lighting energy use schedule.                                             No
-  ``lighting_garage``              frac   Garage lighting energy use schedule.                                               Yes
-  ``lighting_exterior_holiday``    frac   Exterior holiday lighting energy use schedule.                                     No
-  ``cooking_range``                frac   Cooking range & oven energy use schedule.                                          Yes
-  ``refrigerator``                 frac   Primary refrigerator energy use schedule.                                          No
-  ``extra_refrigerator``           frac   Non-primary refrigerator energy use schedule.                                      No
-  ``freezer``                      frac   Freezer energy use schedule.                                                       No
-  ``dishwasher``                   frac   Dishwasher energy use schedule.                                                    Yes
-  ``clothes_washer``               frac   Clothes washer energy use schedule.                                                Yes
-  ``clothes_dryer``                frac   Clothes dryer energy use schedule.                                                 Yes
-  ``ceiling_fan``                  frac   Ceiling fan energy use schedule.                                                   Yes
-  ``plug_loads_other``             frac   Other plug load energy use schedule.                                               Yes
-  ``plug_loads_tv``                frac   Television plug load energy use schedule.                                          Yes
-  ``plug_loads_vehicle``           frac   Electric vehicle plug load energy use schedule.                                    No
-  ``plug_loads_well_pump``         frac   Well pump plug load energy use schedule.                                           No
-  ``fuel_loads_grill``             frac   Grill fuel load energy use schedule.                                               No
-  ``fuel_loads_lighting``          frac   Lighting fuel load energy use schedule.                                            No
-  ``fuel_loads_fireplace``         frac   Fireplace fuel load energy use schedule.                                           No
-  ``pool_pump``                    frac   Pool pump energy use schedule.                                                     No
-  ``pool_heater``                  frac   Pool heater energy use schedule.                                                   No
-  ``permanent_spa_pump``           frac   Permanent spa pump energy use schedule.                                            No
-  ``permanent_spa_heater``         frac   Permanent spa heater energy use schedule.                                          No
-  ``hot_water_dishwasher``         frac   Dishwasher hot water use schedule.                                                 Yes
-  ``hot_water_clothes_washer``     frac   Clothes washer hot water use schedule.                                             Yes
-  ``hot_water_fixtures``           frac   Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
-  ``heating_setpoint``             F      Thermostat heating setpoint schedule.                                              No
-  ``cooling_setpoint``             F      Thermostat cooling setpoint schedule.                                              No
-  ``water_heater_setpoint``        F      Water heater setpoint schedule.                                                    No
-  ``water_heater_operating_mode``  0/1    Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
-  ``battery``                      frac   Battery schedule. Positive for charging, negative for discharging.                 No
-  ``vacancy``                      0/1    Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
-  ``outage``                       0/1    Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
-  ===============================  =====  =================================================================================  ===============================
+  ===============================  =======  =================================================================================  ===============================
+  Column Name                      Units    Description                                                                        Can Be Stochastically Generated
+  ===============================  =======  =================================================================================  ===============================
+  ``occupants``                    frac     Occupant heat gain schedule.                                                       Yes
+  ``lighting_interior``            frac     Interior lighting energy use schedule.                                             Yes
+  ``lighting_exterior``            frac     Exterior lighting energy use schedule.                                             No
+  ``lighting_garage``              frac     Garage lighting energy use schedule.                                               Yes
+  ``lighting_exterior_holiday``    frac     Exterior holiday lighting energy use schedule.                                     No
+  ``cooking_range``                frac     Cooking range & oven energy use schedule.                                          Yes
+  ``refrigerator``                 frac     Primary refrigerator energy use schedule.                                          No
+  ``extra_refrigerator``           frac     Non-primary refrigerator energy use schedule.                                      No
+  ``freezer``                      frac     Freezer energy use schedule.                                                       No
+  ``dishwasher``                   frac     Dishwasher energy use schedule.                                                    Yes
+  ``clothes_washer``               frac     Clothes washer energy use schedule.                                                Yes
+  ``clothes_dryer``                frac     Clothes dryer energy use schedule.                                                 Yes
+  ``ceiling_fan``                  frac     Ceiling fan energy use schedule.                                                   Yes
+  ``plug_loads_other``             frac     Other plug load energy use schedule.                                               Yes
+  ``plug_loads_tv``                frac     Television plug load energy use schedule.                                          Yes
+  ``plug_loads_vehicle``           frac     Electric vehicle plug load energy use schedule.                                    No
+  ``plug_loads_well_pump``         frac     Well pump plug load energy use schedule.                                           No
+  ``fuel_loads_grill``             frac     Grill fuel load energy use schedule.                                               No
+  ``fuel_loads_lighting``          frac     Lighting fuel load energy use schedule.                                            No
+  ``fuel_loads_fireplace``         frac     Fireplace fuel load energy use schedule.                                           No
+  ``pool_pump``                    frac     Pool pump energy use schedule.                                                     No
+  ``pool_heater``                  frac     Pool heater energy use schedule.                                                   No
+  ``permanent_spa_pump``           frac     Permanent spa pump energy use schedule.                                            No
+  ``permanent_spa_heater``         frac     Permanent spa heater energy use schedule.                                          No
+  ``hot_water_dishwasher``         frac     Dishwasher hot water use schedule.                                                 Yes
+  ``hot_water_clothes_washer``     frac     Clothes washer hot water use schedule.                                             Yes
+  ``hot_water_fixtures``           frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
+  ``heating_setpoint``             F        Thermostat heating setpoint schedule.                                              No
+  ``cooling_setpoint``             F        Thermostat cooling setpoint schedule.                                              No
+  ``water_heater_setpoint``        F        Water heater setpoint schedule.                                                    No
+  ``water_heater_operating_mode``  0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
+  ``battery``                      -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
+  ``vacancy``                      0/1      Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
+  ``outage``                       0/1      Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
+  ===============================  =======  =================================================================================  ===============================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -1288,35 +1292,35 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
-  .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
+  .. [#] GlassType choices are "clear", "low-e", "low-e, high-solar-gain", "low-e, low-solar-gain", "tinted", "tinted/reflective", or "reflective".
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
-  .. [#] If GasFill not provided, defaults to "air" for double-pane windows and "argon" for triple-pane windows.
+  .. [#] If GasFill not provided, defaults to "air" for double-pane, non-low-e windows and "argon" for double-pane, low-e or triple-pane windows.
 
 If UFactor and SHGC are not provided, they are defaulted as follows:
   
-  ===========  =======================  ============  =========================  =============  =======  ====
-  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill        UFactor  SHGC
-  ===========  =======================  ============  =========================  =============  =======  ====
-  single-pane  Aluminum, Metal          false         clear                      --             1.27     0.75
-  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --             0.89     0.64
-  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --             1.27     0.64
-  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --             0.89     0.54
-  double-pane  Aluminum, Metal          false         clear                      air            0.81     0.67
-  double-pane  Aluminum, Metal          true          clear                      air            0.60     0.67
-  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air            0.51     0.56
-  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air            0.81     0.55
-  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air            0.60     0.55
-  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air            0.51     0.46
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air            0.42     0.52
-  double-pane  Aluminum, Metal          true          low-e                      <any but air>  0.47     0.62
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.39     0.52
-  double-pane  Aluminum, Metal          false         reflective                 air            0.67     0.37
-  double-pane  Aluminum, Metal          true          reflective                 air            0.47     0.37
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air            0.39     0.31
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 <any but air>  0.36     0.31
-  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.27     0.31
-  glass block  --                       --            --                         --             0.60     0.60
-  ===========  =======================  ============  =========================  =============  =======  ====
+  ===========  =======================  ============  =================================  =============  =======  ====
+  GlassLayers  FrameType                ThermalBreak  GlassType                          GasFill        UFactor  SHGC
+  ===========  =======================  ============  =================================  =============  =======  ====
+  single-pane  Aluminum, Metal          false         "clear", "reflective"              --             1.27     0.75
+  single-pane  Fiberglass, Vinyl, Wood  --            "clear", "reflective"              --             0.89     0.64
+  single-pane  Aluminum, Metal          false         "tinted", "tinted/reflective"      --             1.27     0.64
+  single-pane  Fiberglass, Vinyl, Wood  --            "tinted", "tinted/reflective"      --             0.89     0.54
+  double-pane  Aluminum, Metal          false         "clear", "reflective"              air            0.81     0.67
+  double-pane  Aluminum, Metal          true          "clear", "reflective"              air            0.60     0.67
+  double-pane  Fiberglass, Vinyl, Wood  --            "clear", "reflective"              air            0.51     0.56
+  double-pane  Aluminum, Metal          false         "tinted", "tinted/reflective"      air            0.81     0.55
+  double-pane  Aluminum, Metal          true          "tinted", "tinted/reflective"      air            0.60     0.55
+  double-pane  Fiberglass, Vinyl, Wood  --            "tinted", "tinted/reflective"      air            0.51     0.46
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  air            0.42     0.52
+  double-pane  Aluminum, Metal          true          "low-e", "low-e, high-solar-gain"  <any but air>  0.47     0.62
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  <any but air>  0.39     0.52
+  double-pane  Aluminum, Metal          false         "low-e, low-solar-gain"            air            0.67     0.37
+  double-pane  Aluminum, Metal          true          "low-e, low-solar-gain"            air            0.47     0.37
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e, low-solar-gain"            air            0.39     0.31
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e, low-solar-gain"            <any but air>  0.36     0.31
+  triple-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  <any but air>  0.27     0.31
+  glass block  --                       --            --                                 --             0.60     0.60
+  ===========  =======================  ============  =================================  =============  =======  ====
 
 .. warning::
 
@@ -1382,36 +1386,35 @@ If UFactor and SHGC are not provided and GlassLayers is not "glass block", addit
   
   .. [#] FrameType child element choices are ``Aluminum``, ``Fiberglass``, ``Metal``, ``Vinyl``, or ``Wood``.
   .. [#] ThermalBreak is only valid if FrameType is ``Aluminum`` or ``Metal``.
-  .. [#] GlassType choices are "clear", "low-e", "tinted", "tinted/reflective", or "reflective".
-         Do not specify this element if the skylight has clear glass.
+  .. [#] GlassType choices are "clear", "low-e", "low-e, high-solar-gain", "low-e, low-solar-gain", "tinted", "tinted/reflective", or "reflective".
   .. [#] GasFill choices are "air", "argon", "krypton", "xenon", "nitrogen", or "other".
-  .. [#] If GasFill not provided, defaults to "air" for double-pane skylights and "argon" for triple-pane skylights.
+  .. [#] If GasFill not provided, defaults to "air" for double-pane, non-low-e skylights and "argon" for double-pane, low-e or triple-pane skylights.
 
 If UFactor and SHGC are not provided, they are defaulted as follows:
   
-  ===========  =======================  ============  =========================  =============  =======  ====
-  GlassLayers  FrameType                ThermalBreak  GlassType                  GasFill        UFactor  SHGC
-  ===========  =======================  ============  =========================  =============  =======  ====
-  single-pane  Aluminum, Metal          false         clear                      --             1.98     0.75
-  single-pane  Fiberglass, Vinyl, Wood  --            clear                      --             1.47     0.64
-  single-pane  Aluminum, Metal          false         tinted, tinted/reflective  --             1.98     0.64
-  single-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  --             1.47     0.54
-  double-pane  Aluminum, Metal          false         clear                      air            1.30     0.67
-  double-pane  Aluminum, Metal          true          clear                      air            1.10     0.67
-  double-pane  Fiberglass, Vinyl, Wood  --            clear                      air            0.84     0.56
-  double-pane  Aluminum, Metal          false         tinted, tinted/reflective  air            1.30     0.55
-  double-pane  Aluminum, Metal          true          tinted, tinted/reflective  air            1.10     0.55
-  double-pane  Fiberglass, Vinyl, Wood  --            tinted, tinted/reflective  air            0.84     0.46
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      air            0.74     0.52
-  double-pane  Aluminum, Metal          true          low-e                      <any but air>  0.95     0.62
-  double-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.68     0.52
-  double-pane  Aluminum, Metal          false         reflective                 air            1.17     0.37
-  double-pane  Aluminum, Metal          true          reflective                 air            0.98     0.37
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 air            0.71     0.31
-  double-pane  Fiberglass, Vinyl, Wood  --            reflective                 <any but air>  0.65     0.31
-  triple-pane  Fiberglass, Vinyl, Wood  --            low-e                      <any but air>  0.47     0.31
-  glass block  --                       --            --                         --             0.60     0.60
-  ===========  =======================  ============  =========================  =============  =======  ====
+  ===========  =======================  ============  =================================  =============  =======  ====
+  GlassLayers  FrameType                ThermalBreak  GlassType                          GasFill        UFactor  SHGC
+  ===========  =======================  ============  =================================  =============  =======  ====
+  single-pane  Aluminum, Metal          false         "clear", "reflective"              --             1.98     0.75
+  single-pane  Fiberglass, Vinyl, Wood  --            "clear", "reflective"              --             1.47     0.64
+  single-pane  Aluminum, Metal          false         "tinted", "tinted/reflective"      --             1.98     0.64
+  single-pane  Fiberglass, Vinyl, Wood  --            "tinted", "tinted/reflective"      --             1.47     0.54
+  double-pane  Aluminum, Metal          false         "clear", "reflective"              air            1.30     0.67
+  double-pane  Aluminum, Metal          true          "clear", "reflective"              air            1.10     0.67
+  double-pane  Fiberglass, Vinyl, Wood  --            "clear", "reflective"              air            0.84     0.56
+  double-pane  Aluminum, Metal          false         "tinted", "tinted/reflective"      air            1.30     0.55
+  double-pane  Aluminum, Metal          true          "tinted", "tinted/reflective"      air            1.10     0.55
+  double-pane  Fiberglass, Vinyl, Wood  --            "tinted", "tinted/reflective"      air            0.84     0.46
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  air            0.74     0.52
+  double-pane  Aluminum, Metal          true          "low-e", "low-e, high-solar-gain"  <any but air>  0.95     0.62
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  <any but air>  0.68     0.52
+  double-pane  Aluminum, Metal          false         "low-e, low-solar-gain"            air            1.17     0.37
+  double-pane  Aluminum, Metal          true          "low-e, low-solar-gain"            air            0.98     0.37
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e, low-solar-gain"            air            0.71     0.31
+  double-pane  Fiberglass, Vinyl, Wood  --            "low-e, low-solar-gain"            <any but air>  0.65     0.31
+  triple-pane  Fiberglass, Vinyl, Wood  --            "low-e", "low-e, high-solar-gain"  <any but air>  0.47     0.31
+  glass block  --                       --            --                                 --             0.60     0.60
+  ===========  =======================  ============  =================================  =============  =======  ====
 
 .. warning::
 
@@ -2128,9 +2131,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 (assumed to be a split system).
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 (assumed to be a split system).
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
-         HeatingDetailedPerformanceData must also be provided.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
-         CoolingDetailedPerformanceData must also be provided.
   .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity retention defaults based on CompressorType:
          
          \- **single/two stage**: 0.425 (at 5F)
@@ -2204,13 +2205,8 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   .. [#] If SEER2 provided, converted to SEER using ANSI/RESNET/ICC 301-2022 Addendum C, where SEER = SEER2 / 0.95 if ducted and SEER = SEER2 if ductless.
   .. [#] If HSPF2 provided, converted to HSPF using ANSI/RESNET/ICC 301-2022 Addendum C, where HSPF = HSPF2 / 0.85 if ducted and HSPF = HSPF2 / 0.90 if ductless.
   .. [#] If CoolingDetailedPerformanceData is provided, see :ref:`clg_detailed_perf_data`.
-         HeatingDetailedPerformanceData must also be provided.
   .. [#] If HeatingDetailedPerformanceData is provided, see :ref:`htg_detailed_perf_data`.
-         CoolingDetailedPerformanceData must also be provided.
-  .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity retention defaults based on CompressorType:
-         
-         \- **variable speed**: 0.0461 * HSPF + 0.1594 (at 5F)
-         
+  .. [#] If neither extension/HeatingCapacityRetention nor HeatingCapacity17F nor HeatingDetailedPerformanceData provided, heating capacity retention defaults to 0.0461 * HSPF + 0.1594 (at 5F).
   .. [#] The extension/HeatingCapacityRetention input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems and allows the heating capacity retention to be defined at a user-specified temperature (instead of 17F).
          Either input approach can be used, but not both.
   .. [#] FanPowerWattsPerCFM defaults to 0.07 W/cfm for ductless systems and 0.18 W/cfm for ducted systems.
@@ -2483,21 +2479,21 @@ Detailed Cooling Performance Data
 
 For air-source HVAC systems with detailed cooling performance data, two or more pairs of minimum/maximum capacity data are entered in ``CoolingDetailedPerformanceData/PerformanceDataPoint``.
 
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Cooling capacity at the specified outdoor temperature
-  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Cooling efficiency at the specified outdoor temperature
-  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Cooling capacity or capacity fraction at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Cooling efficiency at the specified outdoor temperature
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 95F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
+  .. [#] If Capacity is provided, the nominal capacity (``CoolingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must provide the ``CoolingCapacity`` and the ``CompressorType`` must be set to "variable speed".
-For heat pumps, :ref:`htg_detailed_perf_data` must also be provided.
+In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 Note that when detailed cooling performance data is provided, some other inputs (like SEER) are ignored.
 
 .. _htg_detailed_perf_data:
@@ -2507,21 +2503,21 @@ Detailed Heating Performance Data
 
 For air-source HVAC systems with detailed heating performance data, two or more pairs of minimum/maximum capacity data are entered in ``HeatingDetailedPerformanceData/PerformanceDataPoint``.
 
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  Element                            Type      Units   Constraints  Required  Default    Notes
-  =================================  ========  ======  ===========  ========  =========  ==========================================
-  ``OutdoorTemperature``             double    F       See [#]_     Yes                  Outdoor drybulb temperature
-  ``Capacity``                       double    Btu/hr  >= 0         Yes                  Heating capacity at the specified outdoor temperature
-  ``CapacityDescription``            string            See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
-  ``Efficiency[Units="COP"]/Value``  double    W/W     > 0          Yes                  Heating efficiency at the specified outdoor temperature
-  =================================  ========  ======  ===========  ========  =========  ==========================================
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``OutdoorTemperature``                          double    F               See [#]_     Yes                  Outdoor drybulb temperature
+  ``Capacity`` or ``CapacityFractionOfNominal``   double    Btu/hr or frac  >= 0         Yes [#]_             Heating capacity or capacity fraction at the specified outdoor temperature
+  ``CapacityDescription``                         string                    See [#]_     Yes                  Whether the datapoint corresponds to minimum or maximum capacity
+  ``Efficiency[Units="COP"]/Value``               double    W/W             > 0          Yes                  Heating efficiency at the specified outdoor temperature
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] One of the minimum/maximum datapoint pairs must occur at the 47F rated outdoor temperature condition.
          The other datapoint pairs can be at any temperature.
+  .. [#] If Capacity is provided, the nominal capacity (``HeatingCapacity``) must also be set in the parent object.
   .. [#] CapacityDescription choices are "minimum" and "maximum".
 
-In addition, the parent object must provide the ``HeatingCapacity`` and the ``CompressorType`` must be set to "variable speed".
-For heat pumps, :ref:`clg_detailed_perf_data` must also be provided.
+In addition, the ``CompressorType`` must be set to "variable speed" in the parent object.
 Note that when detailed cooling performance data is provided, some other inputs (like HSPF and HeatingCapacityRetention) are ignored.
 
 .. _geothermal_loops:
