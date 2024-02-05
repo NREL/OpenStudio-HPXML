@@ -652,14 +652,26 @@ class HVACSizing
 
     @hpxml_bldg.doors.each do |door|
       next unless door.is_thermal_boundary
+      
+      if not door.wall.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[door.wall.attached_to_space_idref]
+      end
 
       if door.wall.is_exterior
-        bldg_design_loads.Heat_Doors += (1.0 / door.r_value) * door.area * mj.htd
-        bldg_design_loads.Cool_Doors += (1.0 / door.r_value) * door.area * cltd
+        htg_loads = (1.0 / door.r_value) * door.area * mj.htd
+        clg_loads = (1.0 / door.r_value) * door.area * cltd
+        bldg_design_loads.Heat_Doors += htg_loads
+        bldg_design_loads.Cool_Doors += clg_loads
+        space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
+        space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
       else # Partition door
         adjacent_space = door.wall.exterior_adjacent_to
-        bldg_design_loads.Cool_Doors += (1.0 / door.r_value) * door.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-        bldg_design_loads.Heat_Doors += (1.0 / door.r_value) * door.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        htg_loads = (1.0 / door.r_value) * door.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        clg_loads = (1.0 / door.r_value) * door.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
+        bldg_design_loads.Heat_Doors += htg_loads
+        bldg_design_loads.Cool_Doors += clg_loads
+        space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
+        space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
       end
     end
   end
