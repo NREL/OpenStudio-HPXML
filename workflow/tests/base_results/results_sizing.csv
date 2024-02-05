@@ -153,9 +153,9 @@ denver-hvac-autosize-mini-split-heat-pump-ductless-heating-capacity-17f-sizing-m
 denver-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-ACCA.xml,18957.0,18957.0,0.0,632.0,632.0
 denver-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-HERS.xml,24098.0,24098.0,0.0,803.0,803.0
 denver-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-MaxLoad.xml,37850.0,37850.0,0.0,1262.0,1262.0
-denver-hvac-autosize-multiple-sizing-methodology-ACCA.xml,43776.0,31700.0,12742.0,1032.0,1049.0
-denver-hvac-autosize-multiple-sizing-methodology-HERS.xml,37870.0,25794.0,12742.0,844.0,885.0
-denver-hvac-autosize-multiple-sizing-methodology-MaxLoad.xml,49172.0,37096.0,12742.0,1203.0,1269.0
+denver-hvac-autosize-multiple-sizing-methodology-ACCA.xml,43776.0,31700.0,6235.0,1032.0,1049.0
+denver-hvac-autosize-multiple-sizing-methodology-HERS.xml,37870.0,25794.0,6235.0,844.0,885.0
+denver-hvac-autosize-multiple-sizing-methodology-MaxLoad.xml,49172.0,37096.0,6235.0,1203.0,1269.0
 denver-hvac-autosize-none.xml,0.0,0.0,0.0,0.0,0.0
 denver-hvac-autosize-ptac-with-heating-electricity.xml,24098.0,14572.0,0.0,532.0,379.0
 denver-hvac-autosize-ptac-with-heating-natural-gas.xml,24098.0,14572.0,0.0,532.0,379.0
@@ -337,9 +337,9 @@ houston-hvac-autosize-mini-split-heat-pump-ductless-heating-capacity-17f-sizing-
 houston-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-ACCA.xml,17972.0,17972.0,0.0,599.0,599.0
 houston-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-HERS.xml,16944.0,16944.0,0.0,565.0,565.0
 houston-hvac-autosize-mini-split-heat-pump-ductless-sizing-methodology-MaxLoad.xml,19418.0,19418.0,0.0,647.0,647.0
-houston-hvac-autosize-multiple-sizing-methodology-ACCA.xml,57183.0,53026.0,12913.0,1324.0,1681.0
-houston-hvac-autosize-multiple-sizing-methodology-HERS.xml,49152.0,44995.0,12913.0,1113.0,1490.0
-houston-hvac-autosize-multiple-sizing-methodology-MaxLoad.xml,59306.0,55149.0,12913.0,1380.0,1766.0
+houston-hvac-autosize-multiple-sizing-methodology-ACCA.xml,57183.0,53026.0,9037.0,1324.0,1681.0
+houston-hvac-autosize-multiple-sizing-methodology-HERS.xml,49152.0,44995.0,9037.0,1113.0,1490.0
+houston-hvac-autosize-multiple-sizing-methodology-MaxLoad.xml,59306.0,55149.0,9037.0,1380.0,1766.0
 houston-hvac-autosize-none.xml,0.0,0.0,0.0,0.0,0.0
 houston-hvac-autosize-ptac-with-heating-electricity.xml,14346.0,18125.0,0.0,262.0,471.0
 houston-hvac-autosize-ptac-with-heating-natural-gas.xml,14346.0,18125.0,0.0,262.0,471.0
