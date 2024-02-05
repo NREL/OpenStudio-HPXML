@@ -767,7 +767,7 @@ class HotWaterAndAppliances
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     bsmnt = 0
-    if has_uncond_bsmnt and not has_cond_bsmnt
+    if has_uncond_bsmnt && (not has_cond_bsmnt)
       bsmnt = 1
     end
 
