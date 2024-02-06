@@ -169,6 +169,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hpxml_defaults_path = File.join(output_dir, 'in.xml')
       XMLHelper.write_file(hpxml.to_doc, hpxml_defaults_path)
 
+      # When modeling whole SFA/MF buildings, remove shared systems upfront
+      # from the HPXML object; handle them at the end once the full model
+      # has been created.
+      shared_systems_map = {}
+      if hpxml.header.whole_sfa_or_mf_building_sim
+        shared_systems_map = hpxml.delete_shared_systems()
+      end
+
       # Create OpenStudio model
       hpxml_osm_map = {}
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
@@ -186,7 +194,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Merge unit models into final model
       if hpxml.buildings.size > 1
-        add_unit_model_to_model(model, hpxml_osm_map)
+        add_unit_models_to_model(model, hpxml_osm_map)
+        if not shared_systems_map.empty?
+          HVAC.apply_shared_boilers_for_whole_building_model(model, runner, hpxml, shared_systems_map, @hvac_unavailable_periods)
+        end
       end
 
       # Output
@@ -215,7 +226,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def add_unit_model_to_model(model, hpxml_osm_map)
+  def add_unit_models_to_model(model, hpxml_osm_map)
+    # Note: ZoneCapacitanceMultiplierResearchSpecial is not actually unique, but we don't assign it to
+    # individual thermal zones, so we'll treat it as unique here.
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
                        'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
                        'OS:OutputControl:Files' => 'OutputControlFiles',
@@ -232,7 +245,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                        'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
                        'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
                        'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
-                       'OS:Timestep' => 'Timestep' }
+                       'OS:Timestep' => 'Timestep',
+                       'OS:ZoneCapacitanceMultiplier:ResearchSpecial' => 'ZoneCapacitanceMultiplierResearchSpecial' }
 
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
@@ -570,7 +584,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units)
+      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units, @hpxml_bldg.building_id)
     end
     return spaces[location]
   end

@@ -17,7 +17,7 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
-    apply_header(hpxml.header, epw_file)
+    apply_header(hpxml.header, hpxml_bldg, epw_file)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
@@ -63,7 +63,7 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+    apply_hvac_sizing(runner, hpxml.header, hpxml_bldg, weather, cfa)
 
     # default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
@@ -107,7 +107,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml_header, epw_file)
+  def self.apply_header(hpxml_header, hpxml_bldg, epw_file)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -158,6 +158,13 @@ class HPXMLDefaults
       if unavailable_period.natvent_availability.nil?
         unavailable_period.natvent_availability = HPXML::ScheduleRegular
         unavailable_period.natvent_availability_isdefaulted = true
+      end
+    end
+
+    if hpxml_header.shared_boiler_operation.nil? && hpxml_header.whole_sfa_or_mf_building_sim
+      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system }.size > 0
+        hpxml_header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+        hpxml_header.shared_boiler_operation_isdefaulted = true
       end
     end
   end
@@ -1169,7 +1176,7 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
-    if convert_shared_systems
+    if convert_shared_systems && !hpxml.header.whole_sfa_or_mf_building_sim
       HVAC.apply_shared_systems(hpxml_bldg)
     end
 
@@ -3001,11 +3008,11 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+  def self.apply_hvac_sizing(runner, hpxml_header, hpxml_bldg, weather, cfa)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
 
     # Calculate building design loads and equipment capacities/airflows
-    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems)
+    bldg_design_loads, all_hvac_sizing_values = HVACSizing.calculate(runner, weather, hpxml_header, hpxml_bldg, cfa, hvac_systems)
 
     hvacpl = hpxml_bldg.hvac_plant
     tol = 10 # Btuh

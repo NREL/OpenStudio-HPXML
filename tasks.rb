@@ -1344,6 +1344,25 @@ def apply_hpxml_modification(hpxml_file, hpxml)
           end
         end
       end
+    else
+      # Inputs for shared systems when modeling whole SFA/MF buildings
+      if ['base-bldgtype-mf-whole-building-shared-boilers-simultaneous-operation.xml',
+          'base-bldgtype-mf-whole-building-shared-boilers-sequenced-operation.xml'].include? hpxml_file
+        hpxml_bldg.heating_systems << hpxml_bldg.heating_systems[0].dup
+        hpxml_bldg.heating_systems[-1].primary_system = false
+        hpxml_bldg.heating_systems[-1].id = hpxml_bldg.heating_systems[-1].id.gsub('HeatingSystem1', 'HeatingSystem2')
+        if not hpxml_bldg.heating_systems[-1].sameas_id.nil?
+          hpxml_bldg.heating_systems[-1].sameas_id = hpxml_bldg.heating_systems[-1].sameas_id.gsub('HeatingSystem1', 'HeatingSystem2')
+        else
+          hpxml_bldg.heating_systems[0].heating_capacity = 50000
+          hpxml_bldg.heating_systems[1].heating_capacity = 40000
+          hpxml_bldg.heating_systems[1].heating_efficiency_afue = 0.77
+          hpxml_bldg.heating_systems[0].fraction_heat_load_served = nil
+          hpxml_bldg.heating_systems[1].fraction_heat_load_served = nil
+          hpxml_bldg.heating_systems[0].number_of_units_served = nil
+          hpxml_bldg.heating_systems[1].number_of_units_served = nil
+        end
+      end
     end
     if hpxml_file.include? 'install-quality'
       hpxml_bldg.hvac_systems.each do |hvac_system|

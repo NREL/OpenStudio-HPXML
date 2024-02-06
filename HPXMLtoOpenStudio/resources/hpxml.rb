@@ -305,6 +305,8 @@ class HPXML < Object
   ScheduleRegular = 'regular schedule'
   ScheduleAvailable = 'always available'
   ScheduleUnavailable = 'always unavailable'
+  SharedBoilerOperationSequenced = 'sequenced'
+  SharedBoilerOperationSimultaneous = 'simultaneous'
   ShieldingExposed = 'exposed'
   ShieldingNormal = 'normal'
   ShieldingWellShielded = 'well-shielded'
@@ -568,6 +570,27 @@ class HPXML < Object
     return has_fuels
   end
 
+  def delete_shared_systems()
+    # Delete any shared HVAC systems; returns a map of HPXML Building => [deleted_systems]
+    deleted_systems_map = {}
+    buildings.each do |hpxml_bldg|
+      deleted_systems_map[hpxml_bldg] = []
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        if hvac_system.is_shared_system
+          deleted_systems_map[hpxml_bldg] << hvac_system
+        elsif !hvac_system.sameas_id.nil? && hvac_system.sameas.is_shared_system
+          deleted_systems_map[hpxml_bldg] << hvac_system
+        end
+      end
+    end
+    deleted_systems_map.values.each do |deleted_systems|
+      deleted_systems.reverse_each do |deleted_system|
+        deleted_system.delete
+      end
+    end
+    return deleted_systems_map
+  end
+
   # Class to store additional properties on an HPXML object that are not intended
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
@@ -690,7 +713,8 @@ class HPXML < Object
              :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
-             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim]
+             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim,
+             :shared_boiler_operation]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -739,6 +763,10 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
       XMLHelper.add_extension(software_info, 'WholeSFAorMFBuildingSimulation', @whole_sfa_or_mf_building_sim, :boolean) unless @whole_sfa_or_mf_building_sim.nil?
+      if not @shared_boiler_operation.nil?
+        hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SharedHVACSizingControl'])
+        XMLHelper.add_element(hvac_sizing_control, 'SharedBoilerOperation', @shared_boiler_operation, :string, @shared_boiler_operation_isdefaulted)
+      end
       { 'ERICalculation' => @eri_calculation_version,
         'CO2IndexCalculation' => @co2index_calculation_version,
         'EnergyStarCalculation' => @energystar_calculation_version,
@@ -789,6 +817,7 @@ class HPXML < Object
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      @shared_boiler_operation = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SharedHVACSizingControl/SharedBoilerOperation', :string)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @utility_bill_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @unavailable_periods.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
@@ -1618,24 +1647,26 @@ class HPXML < Object
         errors << 'More than one cooling system designated as the primary.'
       end
 
-      # Check for at most 1 shared heating system and 1 shared cooling system
-      num_htg_shared = 0
-      num_clg_shared = 0
-      (@heating_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+      if not @parent_object.header.whole_sfa_or_mf_building_sim
+        # Check for at most 1 shared heating system and 1 shared cooling system
+        num_htg_shared = 0
+        num_clg_shared = 0
+        (@heating_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_htg_shared += 1
-      end
-      (@cooling_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+          num_htg_shared += 1
+        end
+        (@cooling_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_clg_shared += 1
-      end
-      if num_htg_shared > 1
-        errors << 'More than one shared heating system found.'
-      end
-      if num_clg_shared > 1
-        errors << 'More than one shared cooling system found.'
+          num_clg_shared += 1
+        end
+        if num_htg_shared > 1
+          errors << 'More than one shared heating system found.'
+        end
+        if num_clg_shared > 1
+          errors << 'More than one shared cooling system found.'
+        end
       end
 
       return errors
@@ -5071,11 +5102,13 @@ class HPXML < Object
         end
       end
 
-      if num_clg > 1
-        fail "Multiple cooling systems found attached to distribution system '#{@id}'."
-      end
-      if num_htg > 1
-        fail "Multiple heating systems found attached to distribution system '#{@id}'."
+      if not @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        if num_clg > 1
+          fail "Multiple cooling systems found attached to distribution system '#{@id}'."
+        end
+        if num_htg > 1
+          fail "Multiple heating systems found attached to distribution system '#{@id}'."
+        end
       end
 
       return list
@@ -7631,7 +7664,6 @@ class HPXML < Object
         next unless building_child.is_a? HPXML::BaseArrayElement
 
         building_child.each do |obj|
-          next unless obj.class == self.class
           next unless obj.id == sameas_id
 
           return obj

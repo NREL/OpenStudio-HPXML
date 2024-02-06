@@ -347,16 +347,29 @@
               <SystemIdentifier id='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <IsSharedSystem>true</IsSharedSystem>
-              <NumberofUnitsServed>6</NumberofUnitsServed>
               <HeatingSystemType>
                 <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>50000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>1.0</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution1'/>
+              <IsSharedSystem>true</IsSharedSystem>
+              <HeatingSystemType>
+                <Boiler/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>40000.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.77</Value>
+              </AnnualHeatingEfficiency>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
@@ -861,6 +874,10 @@
               <SystemIdentifier id='HeatingSystem1_2' sameas='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1_2'/>
             </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2_2' sameas='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution1_2'/>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1_2'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
@@ -1247,6 +1264,10 @@
               <SystemIdentifier id='HeatingSystem1_3' sameas='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1_3'/>
             </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2_3' sameas='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution1_3'/>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1_3'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
@@ -1631,6 +1652,10 @@
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1_4' sameas='HeatingSystem1'/>
+              <DistributionSystem idref='HVACDistribution1_4'/>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2_4' sameas='HeatingSystem2'/>
               <DistributionSystem idref='HVACDistribution1_4'/>
             </HeatingSystem>
             <CoolingSystem>
@@ -2076,6 +2101,10 @@
               <SystemIdentifier id='HeatingSystem1_5' sameas='HeatingSystem1'/>
               <DistributionSystem idref='HVACDistribution1_5'/>
             </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2_5' sameas='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution1_5'/>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1_5'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
@@ -2517,6 +2546,10 @@
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1_6' sameas='HeatingSystem1'/>
+              <DistributionSystem idref='HVACDistribution1_6'/>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2_6' sameas='HeatingSystem2'/>
               <DistributionSystem idref='HVACDistribution1_6'/>
             </HeatingSystem>
             <CoolingSystem>
