@@ -1364,6 +1364,11 @@ def apply_hpxml_modification(hpxml_file, hpxml)
           hpxml_bldg.heating_systems[0].number_of_units_served = nil
           hpxml_bldg.heating_systems[1].number_of_units_served = nil
         end
+        if hpxml_file.include? 'simultaneous-operation'
+          hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSimultaneous
+        elsif hpxml_file.include? 'sequenced-operation'
+          hpxml.header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+        end
       end
     end
     if hpxml_file.include? 'install-quality'

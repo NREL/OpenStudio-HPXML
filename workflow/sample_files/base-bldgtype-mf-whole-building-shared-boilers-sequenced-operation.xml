@@ -9,6 +9,9 @@
   <SoftwareInfo>
     <extension>
       <WholeSFAorMFBuildingSimulation>true</WholeSFAorMFBuildingSimulation>
+      <SharedHVACSizingControl>
+        <SharedBoilerOperation>sequenced</SharedBoilerOperation>
+      </SharedHVACSizingControl>
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
