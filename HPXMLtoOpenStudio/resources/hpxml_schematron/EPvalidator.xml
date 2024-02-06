@@ -1650,6 +1650,7 @@
       <sch:assert role='ERROR' test='h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"] or not(h:HydronicDistributionType)'>Expected HydronicDistributionType to be 'radiator' or 'baseboard' or 'radiant floor' or 'radiant ceiling' or 'water loop'</sch:assert>
       <sch:assert role='ERROR' test='count(h:SupplyTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SupplyTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:ReturnTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ReturnTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:ReturnTemperature) &lt; number(h:SupplyTemperature) or not(h:ReturnTemperature) or not(h:SupplyTemperature)'>Expected ReturnTemperature to be less than SupplyTemperature</sch:assert>
     </sch:rule>
   </sch:pattern>
 

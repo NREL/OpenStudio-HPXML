@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4774faab-ea12-48ea-85af-d5886cd4aed6</version_id>
-  <version_modified>2024-02-06T17:46:32Z</version_modified>
+  <version_id>4681d3bc-f7d2-43ce-be3e-e7a39e2c3a21</version_id>
+  <version_modified>2024-02-06T19:29:34Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>60AA0D98</checksum>
+      <checksum>70A1956F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -304,13 +304,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>428FF1D0</checksum>
+      <checksum>7A21C15D</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AB91A5C8</checksum>
+      <checksum>7DBA8D87</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3C9BAC54</checksum>
+      <checksum>F8B6EE55</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -340,13 +340,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E92E1262</checksum>
+      <checksum>5857E3DA</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EED2F8EC</checksum>
+      <checksum>244630A1</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -575,6 +575,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>87937B84</checksum>
+    </file>
+    <file>
+      <filename>in.schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6244F711</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>

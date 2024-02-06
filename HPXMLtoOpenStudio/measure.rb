@@ -1587,7 +1587,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      HVAC.check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1633,7 +1633,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
+      HVAC.check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
@@ -1696,7 +1696,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       heat_pump = hvac_system[:cooling]
 
-      check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
+      HVAC.check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
@@ -1805,24 +1805,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationConditionedSpace], @hpxml_header.unavailable_periods,
                              @hpxml_bldg.building_construction.number_of_units)
-  end
-
-  def check_distribution_system(hvac_distribution, system_type)
-    return if hvac_distribution.nil?
-
-    hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
-
-    if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
-    end
   end
 
   def add_mels(runner, model, spaces)

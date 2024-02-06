@@ -7,6 +7,7 @@ class HVACSizing
     # Calculations generally follow ACCA Manual J/S.
 
     @hpxml_bldg = hpxml_bldg
+    @hpxml_header = hpxml_header
     @cfa = cfa
 
     mj = MJ.new
@@ -33,7 +34,7 @@ class HVACSizing
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       set_hvac_types(hvac_heating, hvac_cooling)
-      next if is_system_to_skip(hpxml_header, hvac_heating)
+      next if is_system_to_skip(hvac_heating)
 
       # Apply duct loads as needed
       set_fractions_load_served(hvac_heating, hvac_cooling)
@@ -60,7 +61,7 @@ class HVACSizing
 
   private
 
-  def self.is_system_to_skip(hpxml_header, hvac_heating)
+  def self.is_system_to_skip(hvac_heating)
     # These shared systems should be converted to other equivalent
     # systems before being autosized
     if [HPXML::HVACTypeChiller,
@@ -72,7 +73,7 @@ class HVACSizing
       return true
     end
 
-    if hpxml_header.whole_sfa_or_mf_building_sim
+    if @hpxml_header.whole_sfa_or_mf_building_sim
       if !hvac_heating.nil? && @heating_type == HPXML::HVACTypeBoiler && (hvac_heating.is_shared_system || !hvac_heating.sameas_id.nil?)
         return true
       end
@@ -2107,7 +2108,7 @@ class HVACSizing
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = @hpxml_bldg.header.manualj_heating_design_temp
       @hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
-      _alternate_bldg_design_loads, alternate_all_hvac_sizing_values = calculate(runner, weather, @hpxml_bldg, @cfa, [hvac_system])
+      _alternate_bldg_design_loads, alternate_all_hvac_sizing_values = calculate(runner, weather, @hpxml_header, @hpxml_bldg, @cfa, [hvac_system])
       heating_load = alternate_all_hvac_sizing_values[hvac_system].Heat_Load
       heating_db = min_compressor_temp
       @hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp

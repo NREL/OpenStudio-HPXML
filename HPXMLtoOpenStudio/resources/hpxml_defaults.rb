@@ -1799,10 +1799,10 @@ class HPXMLDefaults
   def self.apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
     # Hydronic distribution
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+      next unless hvac_distribution.hvac_systems.any? { |h| h.is_a?(HPXML::HeatingSystem) && h.heating_system_type == HPXML::HVACTypeBoiler }
 
+      # Supply/return loop temperatures
       default_delta_t = 20.0 # deg-F
-
       if hvac_distribution.hydronic_supply_temp.nil?
         if not hvac_distribution.hydronic_return_temp.nil?
           hvac_distribution.hydronic_supply_temp = hvac_distribution.hydronic_return_temp + default_delta_t # deg-F
@@ -1811,7 +1811,6 @@ class HPXMLDefaults
         end
         hvac_distribution.hydronic_supply_temp_isdefaulted = true
       end
-
       if hvac_distribution.hydronic_return_temp.nil?
         hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
         hvac_distribution.hydronic_return_temp_isdefaulted = true

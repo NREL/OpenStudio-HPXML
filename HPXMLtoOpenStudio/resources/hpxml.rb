@@ -5206,6 +5206,8 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @hydronic_supply_temp = XMLHelper.get_value(hydronic_distribution, 'SupplyTemperature', :float)
+        @hydronic_return_temp = XMLHelper.get_value(hydronic_distribution, 'ReturnTemperature', :float)
       end
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
