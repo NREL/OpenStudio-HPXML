@@ -1348,6 +1348,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       # Inputs for shared systems when modeling whole SFA/MF buildings
       if ['base-bldgtype-mf-whole-building-shared-boilers-simultaneous-operation.xml',
           'base-bldgtype-mf-whole-building-shared-boilers-sequenced-operation.xml'].include? hpxml_file
+        hpxml_bldg.hvac_distributions[0].hydronic_supply_temp = 160.0
+        hpxml_bldg.hvac_distributions[0].hydronic_return_temp = 120.0
         hpxml_bldg.heating_systems << hpxml_bldg.heating_systems[0].dup
         hpxml_bldg.heating_systems[-1].primary_system = false
         hpxml_bldg.heating_systems[-1].id = hpxml_bldg.heating_systems[-1].id.gsub('HeatingSystem1', 'HeatingSystem2')

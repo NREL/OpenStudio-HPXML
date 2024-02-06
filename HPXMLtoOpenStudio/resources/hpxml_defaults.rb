@@ -1324,6 +1324,15 @@ class HPXMLDefaults
       heating_system.fan_coil_watts = nil
     end
 
+    # Default boiler type
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_type != HPXML::HVACTypeBoiler
+      next unless heating_system.boiler_type.nil?
+
+      heating_system.boiler_type = HPXML::BoilerTypeHotWater
+      heating_system.boiler_type_isdefaulted = true
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
@@ -1788,6 +1797,28 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
+    # Hydronic distribution
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+
+      default_delta_t = 20.0 # deg-F
+
+      if hvac_distribution.hydronic_supply_temp.nil?
+        if not hvac_distribution.hydronic_return_temp.nil?
+          hvac_distribution.hydronic_supply_temp = hvac_distribution.hydronic_return_temp + default_delta_t # deg-F
+        else
+          hvac_distribution.hydronic_supply_temp = 180.0 # deg-F
+        end
+        hvac_distribution.hydronic_supply_temp_isdefaulted = true
+      end
+
+      if hvac_distribution.hydronic_return_temp.nil?
+        hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
+        hvac_distribution.hydronic_return_temp_isdefaulted = true
+      end
+    end
+
+    # Air distribution
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?

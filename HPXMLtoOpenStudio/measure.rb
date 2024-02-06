@@ -192,12 +192,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      # Merge unit models into final model
       if hpxml.buildings.size > 1
+        # Merge unit models into final model
         add_unit_models_to_model(model, hpxml_osm_map)
-        if not shared_systems_map.empty?
-          HVAC.apply_shared_boilers_for_whole_building_model(model, runner, hpxml, shared_systems_map, @hvac_unavailable_periods)
-        end
+        # Apply shared systems
+        HVAC.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_systems_map, @hvac_unavailable_periods)
       end
 
       # Output
@@ -463,7 +462,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, weather, spaces, airloop_map)
-    add_heating_system(runner, model, weather, spaces, airloop_map)
+    add_heating_system(model, weather, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
@@ -1624,7 +1623,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_heating_system(runner, model, weather, spaces, airloop_map)
+  def add_heating_system(model, weather, spaces, airloop_map)
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
@@ -1662,7 +1661,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
-        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, conditioned_zone,
+        airloop_map[sys_id] = HVAC.apply_boiler(model, heating_system, sequential_heat_load_fracs, conditioned_zone,
                                                 @hvac_unavailable_periods)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type

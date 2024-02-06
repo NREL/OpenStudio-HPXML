@@ -72,6 +72,8 @@ class HPXML < Object
   BatteryTypeLithiumIon = 'Li-ion'
   BatteryLifetimeModelNone = 'None'
   BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
+  BoilerTypeHotWater = 'hot water'
+  BoilerTypeSteam = 'steam'
   BuildingAmerica = 'BuildingAmerica'
   CapacityDescriptionMinimum = 'minimum'
   CapacityDescriptionMaximum = 'maximum'
@@ -576,11 +578,12 @@ class HPXML < Object
     # Delete any shared HVAC systems; returns a map of HPXML Building => [deleted_systems]
     deleted_systems_map = {}
     buildings.each do |hpxml_bldg|
-      deleted_systems_map[hpxml_bldg] = []
       hpxml_bldg.hvac_systems.each do |hvac_system|
         if hvac_system.is_shared_system
+          deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
           deleted_systems_map[hpxml_bldg] << hvac_system
         elsif !hvac_system.sameas_id.nil? && hvac_system.sameas.is_shared_system
+          deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
           deleted_systems_map[hpxml_bldg] << hvac_system
         end
       end
@@ -4095,7 +4098,7 @@ class HPXML < Object
       super(hpxml_object, *args)
     end
     ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :heating_system_type,
-             :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
+             :boiler_type, :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
@@ -4197,6 +4200,9 @@ class HPXML < Object
       if not @heating_system_type.nil?
         heating_system_type_el = XMLHelper.add_element(heating_system, 'HeatingSystemType')
         type_el = XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        if @heating_system_type == HPXML::HVACTypeBoiler
+          XMLHelper.add_element(type_el, 'BoilerType', @boiler_type, :string, @boiler_type_isdefaulted) unless @boiler_type.nil?
+        end
         if [HPXML::HVACTypeFurnace,
             HPXML::HVACTypeWallFurnace,
             HPXML::HVACTypeFloorFurnace,
@@ -4247,6 +4253,9 @@ class HPXML < Object
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
+      if @heating_system_type == HPXML::HVACTypeBoiler
+        @boiler_type = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/BoilerType", :string)
+      end
       @pilot_light = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/PilotLight", :boolean)
       if @pilot_light
         @pilot_light_btuh = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/extension/PilotLightBtuh", :float)
@@ -5072,7 +5081,8 @@ class HPXML < Object
       super(hpxml_bldg, *args)
     end
     ATTRS = [:id, :sameas_id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
-             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type,
+             :hydronic_supply_temp, :hydronic_return_temp]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -5161,8 +5171,9 @@ class HPXML < Object
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
         distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
         XMLHelper.add_element(distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
-      end
-      if [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
+        XMLHelper.add_element(distribution, 'SupplyTemperature', @hydronic_supply_temp, :float, @hydronic_supply_temp_isdefaulted) unless @hydronic_supply_temp.nil?
+        XMLHelper.add_element(distribution, 'ReturnTemperature', @hydronic_return_temp, :float, @hydronic_return_temp_isdefaulted) unless @hydronic_return_temp.nil?
+      elsif [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
         distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
         XMLHelper.add_element(distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
         @duct_leakage_measurements.to_doc(distribution)

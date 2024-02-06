@@ -496,22 +496,10 @@ class HVAC
     return air_loop
   end
 
-  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+  def self.apply_boiler(model, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
     obj_name = Constants.ObjectNameBoiler
-    is_condensing = false # FUTURE: Expose as input; default based on AFUE
-    oat_reset_enabled = false
-    oat_high = nil
-    oat_low = nil
-    oat_hwst_high = nil
-    oat_hwst_low = nil
-    design_temp = 180.0 # deg-F
-
-    if oat_reset_enabled
-      if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
-        runner.registerWarning('Boiler outdoor air temperature (OAT) reset is enabled but no setpoints were specified so OAT reset is being disabled.')
-        oat_reset_enabled = false
-      end
-    end
+    supply_temp = heating_system.distribution_system.hydronic_supply_temp # deg-F
+    return_temp = heating_system.distribution_system.hydronic_return_temp # deg-F
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
@@ -524,8 +512,8 @@ class HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp, 'F', 'C'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
@@ -544,28 +532,17 @@ class HVAC
     pump.setPumpControlType('Intermittent')
     pump.addToNode(plant_loop.supplyInletNode)
 
-    # Boiler
+    # Hot Water Boiler
+    if heating_system.boiler_type != HPXML::BoilerTypeHotWater
+      fail "Unexpected boiler type: #{heating_system.boiler_type}"
+    end
+
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
     boiler.setFuelType(EPlus.fuel_type(heating_system.heating_system_fuel))
-    if is_condensing
-      # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
-      boiler_RatedHWRT = UnitConversions.convert(80.0, 'F', 'C')
-      plr_Rated = 1.0
-      plr_Design = 1.0
-      boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0, 'F', 'C')
-      # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
-      condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
-      boilerEff_Norm = heating_system.heating_efficiency_afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
-      boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
-      boiler.setNominalThermalEfficiency(boilerEff_Design)
-      boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-      boiler_eff_curve = create_curve_biquadratic(model, [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723], 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
-    else
-      boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
-      boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
-      boiler_eff_curve = create_curve_bicubic(model, [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05], 'NonCondensingBoilerEff', 0.1, 1.0, 20.0, 80.0)
-    end
+    boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
+    boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
+    boiler_eff_curve = create_curve_bicubic(model, [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05], 'NonCondensingBoilerEff', 0.1, 1.0, 20.0, 80.0)
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
     boiler.setMinimumPartLoadRatio(0.0)
     boiler.setMaximumPartLoadRatio(1.0)
@@ -580,20 +557,9 @@ class HVAC
     boiler.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
     set_pump_power_ems_program(model, pump_w, pump, boiler)
 
-    if is_condensing && oat_reset_enabled
-      setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
-      setpoint_manager_oar.setName(obj_name + ' outdoor reset')
-      setpoint_manager_oar.setControlVariable('Temperature')
-      setpoint_manager_oar.setSetpointatOutdoorLowTemperature(UnitConversions.convert(oat_hwst_low, 'F', 'C'))
-      setpoint_manager_oar.setOutdoorLowTemperature(UnitConversions.convert(oat_low, 'F', 'C'))
-      setpoint_manager_oar.setSetpointatOutdoorHighTemperature(UnitConversions.convert(oat_hwst_high, 'F', 'C'))
-      setpoint_manager_oar.setOutdoorHighTemperature(UnitConversions.convert(oat_high, 'F', 'C'))
-      setpoint_manager_oar.addToNode(plant_loop.supplyOutletNode)
-    end
-
     hydronic_heat_supply_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
     hydronic_heat_supply_setpoint.setName(obj_name + ' hydronic heat supply setpoint')
-    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(design_temp, 'F', 'C'))
+    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(supply_temp, 'F', 'C'))
 
     setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, hydronic_heat_supply_setpoint)
     setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
@@ -612,7 +578,7 @@ class HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+    max_water_flow = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
     fan_cfm = 400.0 * UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'ton') # CFM; assumes 400 cfm/ton
 
     if heating_system.distribution_system.air_type.to_s == HPXML::AirTypeFanCoil
@@ -682,9 +648,23 @@ class HVAC
     return zone_hvac
   end
 
-  def self.apply_shared_boilers_for_whole_building_model(model, _runner, hpxml, shared_systems_map, hvac_unavailable_periods)
+  def self.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_systems_map, hvac_unavailable_periods)
+    return if shared_systems_map.empty?
+
     obj_name = Constants.ObjectNameBoiler
-    design_temp = 180.0 # deg-F
+
+    # Get distribution system
+    distribution_system = nil
+    shared_systems_map.values.each do |heating_systems|
+      heating_systems.each do |heating_system|
+        next unless heating_system.sameas_id.nil?
+
+        distribution_system = heating_system.distribution_system
+      end
+    end
+    check_distribution_system(distribution_system, HPXML::HVACTypeBoiler)
+    supply_temp = distribution_system.hydronic_supply_temp # deg-F
+    return_temp = distribution_system.hydronic_return_temp # deg-F
 
     # Plant Loop
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
@@ -703,8 +683,8 @@ class HVAC
 
     loop_sizing = plant_loop.sizingPlant
     loop_sizing.setLoopType('Heating')
-    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp, 'F', 'C'))
-    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'deltaF', 'deltaC'))
+    loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(supply_temp, 'F', 'C'))
+    loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(supply_temp - return_temp, 'deltaF', 'deltaC'))
 
     # Pump
     pump_w = 1000.0 # FIXME
@@ -722,12 +702,15 @@ class HVAC
     pump.setPumpControlType('Intermittent')
     pump.addToNode(plant_loop.supplyInletNode)
 
-    # Boilers
+    # Hot Water Boilers
     total_heating_capacity = 0
-    distribution_system = nil
     shared_systems_map.values.each do |heating_systems|
       heating_systems.each do |heating_system|
         next unless heating_system.sameas_id.nil?
+
+        if heating_system.boiler_type != HPXML::BoilerTypeHotWater
+          fail "Unexpected boiler type: #{heating_system.boiler_type}"
+        end
 
         boiler = OpenStudio::Model::BoilerHotWater.new(model)
         boiler.setName(obj_name)
@@ -748,13 +731,12 @@ class HVAC
         boiler.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
 
         total_heating_capacity += heating_system.heating_capacity
-        distribution_system = heating_system.distribution_system
       end
     end
 
     hydronic_heat_supply_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
     hydronic_heat_supply_setpoint.setName(obj_name + ' hydronic heat supply setpoint')
-    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(design_temp, 'F', 'C'))
+    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(supply_temp, 'F', 'C'))
 
     setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, hydronic_heat_supply_setpoint)
     setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
@@ -785,7 +767,7 @@ class HVAC
         zone_heating_capacity = hpxml_bldg.hvac_plant.hdl_total / total_heating_design_load * total_heating_capacity
 
         bb_ua = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
-        max_water_flow = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'deltaF', 'deltaC') / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
+        max_water_flow = UnitConversions.convert(zone_heating_capacity, 'Btu/hr', 'W') / loop_sizing.loopDesignTemperatureDifference / 4.186 / 998.2 / 1000.0 * 2.0 # m^3/s
 
         # Heating Coil
         htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
