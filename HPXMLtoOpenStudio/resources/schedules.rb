@@ -1350,8 +1350,8 @@ class SchedulesFile
   ColumnBattery = 'battery'
   ColumnBatteryCharging = 'battery_charging'
   ColumnBatteryDischarging = 'battery_discharging'
-  ColumnMaximumPowerRatio = 'maximum_power_ratio'
   ColumnHVAC = 'hvac'
+  ColumnHVACMaximumPowerRatio = 'hvac_maximum_power_ratio'
   ColumnWaterHeater = 'water_heater'
   ColumnDehumidifier = 'dehumidifier'
   ColumnKitchenFan = 'kitchen_fan'
@@ -1391,12 +1391,6 @@ class SchedulesFile
     end
 
     return false
-  end
-
-  def remove_col_name(col_name)
-    return unless @schedules.keys.include?(col_name)
-
-    @schedules.delete(col_name)
   end
 
   def import(schedules_paths)

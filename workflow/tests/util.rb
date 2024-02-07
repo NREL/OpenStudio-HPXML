@@ -14,7 +14,6 @@ def run_simulation_tests(xmls)
 
     next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
     next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
-    next if xml.include? 'max-power-ratio-schedule' # Unit multiplier not supported yet
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
@@ -26,6 +25,8 @@ end
 
 def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
   unit_multiplier = 1
+  rundir = File.join(File.dirname(__FILE__), "test#{worker_num}")
+  outputdir = File.join(rundir, 'run')
   if apply_unit_multiplier
     hpxml = HPXML.new(hpxml_path: xml)
     hpxml.buildings.each do |hpxml_bldg|
@@ -40,12 +41,21 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
     n_bldgs = hpxml.buildings.size
     for i in 0..n_bldgs - 1
       hpxml_bldg = hpxml.buildings[i]
+      epw_path = Location.get_epw_path(hpxml_bldg, xml)
+      epw_file = OpenStudio::EpwFile.new(epw_path)
+      in_schedules_csv = i > 0 ? "in.schedules#{i + 1}.csv" : 'in.schedules.csv'
+      schedules_file = SchedulesFile.new(schedules_paths: hpxml_bldg.header.schedules_filepaths,
+                                         year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
+                                         output_path: File.join(outputdir, in_schedules_csv))
       if hpxml_bldg.dehumidifiers.size > 0
         # FUTURE: Dehumidifiers currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
       elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
         # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
+      elsif schedules_file.includes_col_name(SchedulesFile::ColumnHVACMaximumPowerRatio)
+        # FUTURE: Maximum power ratio schedule currently gives inconsistent component load results w/ unit multipliers
+        # https://github.com/NREL/OpenStudio-HPXML/issues/1610
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
@@ -66,7 +76,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
   end
 
   print "Testing #{File.basename(xml)}...\n"
-  rundir = File.join(File.dirname(__FILE__), "test#{worker_num}")
 
   # Uses 'monthly' to verify timeseries results match annual results via error-checking
   # inside the ReportSimulationOutput measure.
@@ -80,21 +89,19 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
     xml.gsub!('-10x.xml', '.xml')
   end
 
-  rundir = File.join(rundir, 'run')
-
   # Check results
   print "Simulation failed: #{xml}.\n" unless success
   assert_equal(true, success)
 
   # Check for output files
-  annual_csv_path = File.join(rundir, 'results_annual.csv')
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  bills_csv_path = File.join(rundir, 'results_bills.csv')
+  annual_csv_path = File.join(outputdir, 'results_annual.csv')
+  timeseries_csv_path = File.join(outputdir, 'results_timeseries.csv')
+  bills_csv_path = File.join(outputdir, 'results_bills.csv')
   assert(File.exist? annual_csv_path)
   assert(File.exist? timeseries_csv_path)
 
   # Check outputs
-  hpxml_defaults_path = File.join(rundir, 'in.xml')
+  hpxml_defaults_path = File.join(outputdir, 'in.xml')
   schema_validator = XMLValidator.get_schema_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
   schematron_validator = XMLValidator.get_schematron_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml'))
   hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
@@ -108,7 +115,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
   bill_results = _get_bill_results(bills_csv_path)
   results = _get_simulation_results(annual_csv_path)
   timeseries_results = _get_simulation_timeseries_results(timeseries_csv_path)
-  _verify_outputs(rundir, xml, results, hpxml, unit_multiplier)
+  _verify_outputs(outputdir, xml, results, hpxml, unit_multiplier)
   if unit_multiplier > 1
     _check_unit_multiplier_results(hpxml.buildings[0], results_1x, results, timeseries_results_1x, timeseries_results, unit_multiplier)
   end

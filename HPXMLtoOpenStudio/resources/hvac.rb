@@ -12,21 +12,9 @@ class HVAC
                                          weather_max_drybulb, weather_min_drybulb,
                                          control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
     is_heatpump = false
-    if not schedules_file.nil?
-      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnMaximumPowerRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
-      # Not allowed with unit multiplier for now
-      if not max_pow_ratio_sch.nil?
-        fail 'Maximum power ratio schedules of variable speed hvac systems are only supported if NumberofUnits is 1.' if hpxml_bldg.building_construction.number_of_units > 1
-      end
-    end
 
     if not cooling_system.nil?
       clg_ap = cooling_system.additional_properties
-      # Check maximum power ratio schedules only used in var speed systems
-      if cooling_system.compressor_type != HPXML::HVACCompressorTypeVariableSpeed && (not max_pow_ratio_sch.nil?)
-        max_pow_ratio_sch = nil
-        runner.registerWarning("Maximum power ratio schedule is only attached to variable speed systems. Ignored for compressor type: #{cooling_system.compressor_type}")
-      end
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
         if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
@@ -68,7 +56,6 @@ class HVAC
       end
     elsif (heating_system.is_a? HPXML::HeatingSystem) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       obj_name = Constants.ObjectNameFurnace
-      max_pow_ratio_sch = nil
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
@@ -216,12 +203,7 @@ class HVAC
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
-    if not max_pow_ratio_sch.nil?
-      # Only apply heating control when it's a heat pump
-      htg_coil = nil unless is_heatpump
-      htg_supp_coil = nil unless is_heatpump
-      apply_max_power_EMS(model, max_pow_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil, clg_coil, htg_coil)
-    end
+    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, htg_supp_coil, clg_coil, htg_coil, schedules_file) unless schedules_file.nil?
 
     return air_loop
   end
@@ -1822,7 +1804,33 @@ class HVAC
     end
   end
 
-  def self.apply_max_power_EMS(model, max_pow_ratio_sch, air_loop_unitary, control_zone, htg_supp_coil = nil, clg_coil, htg_coil)
+  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, htg_supp_coil = nil, clg_coil, htg_coil, schedules_file)
+    if not schedules_file.nil?
+      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHVACMaximumPowerRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      # Not allowed with unit multiplier for now
+      if not max_pow_ratio_sch.nil?
+        fail 'NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.' if hpxml_bldg.building_construction.number_of_units > 1
+      end
+    end
+    return if max_pow_ratio_sch.nil?
+
+    # Check maximum power ratio schedules only used in var speed systems,
+    if ((not clg_coil.nil?) && (not clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed)) ||
+       ((not htg_coil.nil?) && (not htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed))
+      runner.registerWarning('Maximum power ratio schedule is only supported for variable speed systems. Schedule is ignored.')
+      clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
+      htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+      htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+    end
+
+    if heating_system.backup_type != HPXML::HeatPumpBackupTypeIntegrated
+      htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+      htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+      runner.registerWarning('Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.')
+    end
+
+    return if (clg_coil.nil? && htg_coil.nil?)
+
     pow_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     pow_ratio_sensor.setName("#{air_loop_unitary.name} power_ratio")
     pow_ratio_sensor.setKeyName(max_pow_ratio_sch.name.to_s)

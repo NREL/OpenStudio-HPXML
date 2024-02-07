@@ -42,7 +42,7 @@ class HPXMLDefaults
     apply_doors(hpxml_bldg)
     apply_partition_wall_mass(hpxml_bldg)
     apply_furniture_mass(hpxml_bldg)
-    apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems, schedules_file)
+    apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     apply_hvac_control(hpxml_bldg, schedules_file)
     apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
     apply_hvac_location(hpxml_bldg)
@@ -1182,7 +1182,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems, _schedules_file)
+  def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml_bldg)
     end
