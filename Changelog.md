@@ -11,18 +11,22 @@ __New Features__
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
+- Now defaults to -20F for `CompressorLockoutTemperature` for variable-speed air-to-air heat pumps.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
+- Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - Updated water heater installation location defaulting to match ANSI 301-2022
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
+- Update calculation of hot water piping length for buildings with both conditioned and unconditioned basements to avoid double counting.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
 - Prevents mains water temperature from going below freezing (0 C).
 - Fixes error if HPXML has emissions scenario and abbreviated run period.
+- Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
 
 ## OpenStudio-HPXML v1.7.0
 

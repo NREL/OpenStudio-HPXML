@@ -940,22 +940,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeReflective, nil] => [0.89, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.27, 0.64],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [0.89, 0.54],
-              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.81, 0.67],
-              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.60, 0.67],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.51, 0.56],
+              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [0.81, 0.67],
+              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [0.60, 0.67],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [0.51, 0.56],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [0.81, 0.55],
               [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [0.60, 0.55],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [0.51, 0.46],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasAir] => [0.42, 0.52],
               [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.47, 0.62],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.39, 0.52],
-              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [0.67, 0.37],
-              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [0.47, 0.37],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [0.39, 0.31],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasArgon] => [0.36, 0.31],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowEHighSolarGain, HPXML::WindowGasArgon] => [0.39, 0.52],
+              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [0.67, 0.37],
+              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [0.47, 0.37],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [0.39, 0.31],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasArgon] => [0.36, 0.31],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.27, 0.31],
               [nil, nil, HPXML::WindowLayersGlassBlock, nil, nil] => [0.60, 0.60] }
     tests.each do |k, v|
@@ -1051,22 +1051,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test U/SHGC lookups [frame_type, thermal_break, glass_layers, glass_type, gas_fill] => [ufactor, shgc]
     tests = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeReflective, nil] => [1.47, 0.64],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.98, 0.64],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlassTypeTintedReflective, nil] => [1.47, 0.54],
-              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.30, 0.67],
-              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.10, 0.67],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.84, 0.56],
+              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [1.30, 0.67],
+              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [1.10, 0.67],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeClear, HPXML::WindowGasAir] => [0.84, 0.56],
               [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [1.30, 0.55],
               [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [1.10, 0.55],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeTintedReflective, HPXML::WindowGasAir] => [0.84, 0.46],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasAir] => [0.74, 0.52],
               [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.95, 0.62],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.68, 0.52],
-              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [1.17, 0.37],
-              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [0.98, 0.37],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasAir] => [0.71, 0.31],
-              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeReflective, HPXML::WindowGasArgon] => [0.65, 0.31],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowEHighSolarGain, HPXML::WindowGasArgon] => [0.68, 0.52],
+              [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [1.17, 0.37],
+              [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [0.98, 0.37],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasAir] => [0.71, 0.31],
+              [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlassTypeLowELowSolarGain, HPXML::WindowGasArgon] => [0.65, 0.31],
               [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlassTypeLowE, HPXML::WindowGasArgon] => [0.47, 0.31],
               [nil, nil, HPXML::WindowLayersGlassBlock, nil, nil] => [0.60, 0.60] }
     tests.each do |k, v|
@@ -1776,6 +1776,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], 0.0, 40.0, nil)
+
+    # Test inputs not overridden by defaults - Var-speed ASHP w/ electric backup
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
+    hpxml_bldg.heat_pumps[0].compressor_lockout_temp = -2.0
+    hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = 44.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], -2.0, 44.0, nil)
+
+    # Test defaults
+    hpxml_bldg.heat_pumps[0].compressor_lockout_temp = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], -20.0, 40.0, nil)
 
     # Test inputs not overridden by defaults - MSHP w/o backup
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml')
