@@ -4228,6 +4228,7 @@ If not entered, the simulation will not include a ceiling fan.
   ``SystemIdentifier``                       id                             Yes                 Unique identifier
   ``Airflow[FanSpeed="medium"]/Efficiency``  double   cfm/W    > 0          No        See [#]_  Efficiency at medium speed
   ``Count``                                  integer           > 0          No        See [#]_  Number of similar ceiling fans
+  ``extension/LabelAverageEnergyUse``        double   W/cfm    > 0          No                  Energy use in Watts
   ``extension/WeekdayScheduleFractions``     array                          No        See [#]_  24 comma-separated weekday fractions
   ``extension/WeekendScheduleFractions``     array                          No                  24 comma-separated weekend fractions
   ``extension/MonthlyScheduleMultipliers``   array                          No        See [#]_  12 comma-separated monthly multipliers
