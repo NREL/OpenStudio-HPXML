@@ -20,6 +20,7 @@ __New Features__
 - Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - Updated water heater installation location defaulting to match ANSI 301-2022
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
+- Update calculation of hot water piping length for buildings with both conditioned and unconditioned basements to avoid double counting.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
