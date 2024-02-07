@@ -847,11 +847,16 @@ class HVAC
   def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
     obj_name = Constants.ObjectNameCeilingFan
-    medium_cfm = 3000.0 # From ANSI 301-2019
     hrs_per_day = 10.5 # From ANSI 301-2019
     cfm_per_w = ceiling_fan.efficiency
+    label_average_energy_use = ceiling_fan.label_average_energy_use
     count = ceiling_fan.count
-    annual_kwh = UnitConversions.convert(count * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
+    if !cfm_per_w.nil?
+      medium_cfm = 3000.0 # From ANSI 301-2019
+      annual_kwh = UnitConversions.convert(count * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
+    elsif !label_average_energy_use.nil?
+      annual_kwh = UnitConversions.convert(count * label_average_energy_use * hrs_per_day * 365.0, 'Wh', 'kWh')
+    end
 
     # Create schedule
     ceiling_fan_sch = nil

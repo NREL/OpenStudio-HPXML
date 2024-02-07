@@ -2671,8 +2671,8 @@ class HPXMLDefaults
     return if hpxml_bldg.ceiling_fans.size == 0
 
     ceiling_fan = hpxml_bldg.ceiling_fans[0]
-    if ceiling_fan.efficiency.nil?
-      medium_cfm = 3000.0
+    if ceiling_fan.efficiency.nil? && ceiling_fan.label_average_energy_use.nil?
+      medium_cfm = 3000.0 # FIXME: this is also set to 3000.0 in hvac.rb; should it be a constant somewhere?
       ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
       ceiling_fan.efficiency_isdefaulted = true
     end
