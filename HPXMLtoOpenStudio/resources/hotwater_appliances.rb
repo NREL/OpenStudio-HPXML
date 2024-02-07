@@ -155,53 +155,7 @@ class HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           fridge_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
-
-          # Create fridge availability sensor
-          if not fridge_unavailable_periods.empty?
-            avail_sch = ScheduleConstant.new(model, fridge_col_name, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
-
-            fridge_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-            fridge_availability_sensor.setName('fridge availability s')
-            fridge_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
-          end
-
-          fridge_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-          fridge_schedule.setName(fridge_obj_name + ' schedule')
-
-          if not refrigerator.additional_properties.loc_space.nil?
-            fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-            fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
-            fridge_temperature_sensor.setKeyName(refrigerator.additional_properties.loc_space.thermalZone.get.name.to_s)
-          elsif not refrigerator.additional_properties.loc_schedule.nil?
-            fridge_temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-            fridge_temperature_sensor.setName(fridge_obj_name + ' tin s')
-            fridge_temperature_sensor.setKeyName(refrigerator.additional_properties.loc_schedule.name.to_s)
-          end
-
-          fridge_schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(fridge_schedule, *EPlus::EMSActuatorScheduleConstantValue)
-          fridge_schedule_actuator.setName("#{fridge_schedule.name} act")
-
-          fridge_constant_coefficients = refrigerator.constant_coefficients.split(',').map { |i| i.to_f }
-          fridge_temperature_coefficients = refrigerator.temperature_coefficients.split(',').map { |i| i.to_f }
-
-          fridge_schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-          fridge_schedule_program.setName("#{fridge_schedule.name} program")
-          fridge_schedule_program.addLine("Set Tin = #{fridge_temperature_sensor.name}*(9.0/5.0)+32.0") # C to F
-          fridge_schedule_program.addLine("Set #{fridge_schedule_actuator.name} = 0")
-          fridge_constant_coefficients.zip(fridge_temperature_coefficients).each_with_index do |constant_temperature, i|
-            a, b = constant_temperature
-            line = "If (Hour == #{i})"
-            line += " && (#{fridge_availability_sensor.name} == 1)" if not fridge_availability_sensor.nil?
-            fridge_schedule_program.addLine(line)
-            fridge_schedule_program.addLine("  Set #{fridge_schedule_actuator.name} = (#{b}*Tin+(#{a}))")
-            fridge_schedule_program.addLine('EndIf')
-          end
-
-          fridge_schedule_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-          fridge_schedule_pcm.setName("#{fridge_schedule.name} program calling manager")
-          fridge_schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-          fridge_schedule_pcm.addProgram(fridge_schedule_program)
-
+          fridge_schedule = refrigerator_or_freezer_coefficients_schedule(model, fridge_col_name, fridge_obj_name, refrigerator, fridge_unavailable_periods)
         elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
           fridge_weekday_sch = refrigerator.weekday_fractions
           fridge_weekend_sch = refrigerator.weekend_fractions
@@ -227,7 +181,7 @@ class HotWaterAndAppliances
 
     # Freezer(s) energy
     hpxml_bldg.freezers.each do |freezer|
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
+      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.loc_space.nil?)
 
       # Create schedule
       freezer_schedule = nil
@@ -239,20 +193,31 @@ class HotWaterAndAppliances
       end
       if freezer_schedule.nil?
         freezer_unavailable_periods = Schedule.get_unavailable_periods(runner, freezer_col_name, unavailable_periods)
-        freezer_weekday_sch = freezer.weekday_fractions
-        freezer_weekend_sch = freezer.weekend_fractions
-        freezer_monthly_sch = freezer.monthly_multipliers
-        freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, freezer_obj_name + ' schedule', freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: freezer_unavailable_periods)
-        freezer_design_level = freezer_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
-        freezer_schedule = freezer_schedule_obj.schedule
+
+        # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
+        if !freezer.constant_coefficients.nil? && !freezer.temperature_coefficients.nil?
+          freezer_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
+          freezer_schedule = refrigerator_or_freezer_coefficients_schedule(model, freezer_col_name, freezer_obj_name, freezer, freezer_unavailable_periods)
+        elsif !freezer.weekday_fractions.nil? && !freezer.weekend_fractions.nil? && !freezer.monthly_multipliers.nil?
+          freezer_weekday_sch = freezer.weekday_fractions
+          freezer_weekend_sch = freezer.weekend_fractions
+          freezer_monthly_sch = freezer.monthly_multipliers
+
+          freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, freezer_obj_name + ' schedule', freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: freezer_unavailable_periods)
+          freezer_design_level = freezer_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
+          freezer_schedule = freezer_schedule_obj.schedule
+        end
       else
         runner.registerWarning("Both '#{freezer_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !freezer.weekday_fractions.nil?
         runner.registerWarning("Both '#{freezer_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !freezer.weekend_fractions.nil?
         runner.registerWarning("Both '#{freezer_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !freezer.monthly_multipliers.nil?
+        runner.registerWarning("Both '#{freezer_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !freezer.constant_coefficients.nil?
+        runner.registerWarning("Both '#{freezer_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !freezer.temperature_coefficients.nil?
       end
 
-      fz_space = freezer.additional_properties.space
+      fz_space = freezer.additional_properties.loc_space
       fz_space = conditioned_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+
       add_electric_equipment(model, freezer_obj_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
     end
 
@@ -815,6 +780,56 @@ class HotWaterAndAppliances
     annual_kwh = 0.0 if annual_kwh < 0
 
     return annual_kwh, frac_sens, frac_lat
+  end
+
+  def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
+    # Create availability sensor
+    if not unavailable_periods.empty?
+      avail_sch = ScheduleConstant.new(model, col_name, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
+
+      availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      availability_sensor.setName("#{col_name} availability s")
+      availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
+    end
+
+    schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    schedule.setName(obj_name + ' schedule')
+
+    if not refrigerator_or_freezer.additional_properties.loc_space.nil?
+      temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+      temperature_sensor.setName(obj_name + ' tin s')
+      temperature_sensor.setKeyName(refrigerator_or_freezer.additional_properties.loc_space.thermalZone.get.name.to_s)
+    elsif not refrigerator_or_freezer.additional_properties.loc_schedule.nil?
+      temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      temperature_sensor.setName(obj_name + ' tin s')
+      temperature_sensor.setKeyName(refrigerator_or_freezer.additional_properties.loc_schedule.name.to_s)
+    end
+
+    schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(schedule, *EPlus::EMSActuatorScheduleConstantValue)
+    schedule_actuator.setName("#{schedule.name} act")
+
+    constant_coefficients = refrigerator_or_freezer.constant_coefficients.split(',').map { |i| i.to_f }
+    temperature_coefficients = refrigerator_or_freezer.temperature_coefficients.split(',').map { |i| i.to_f }
+
+    schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    schedule_program.setName("#{schedule.name} program")
+    schedule_program.addLine("Set Tin = #{temperature_sensor.name}*(9.0/5.0)+32.0") # C to F
+    schedule_program.addLine("Set #{schedule_actuator.name} = 0")
+    constant_coefficients.zip(temperature_coefficients).each_with_index do |constant_temperature, i|
+      a, b = constant_temperature
+      line = "If (Hour == #{i})"
+      line += " && (#{availability_sensor.name} == 1)" if not availability_sensor.nil?
+      schedule_program.addLine(line)
+      schedule_program.addLine("  Set #{schedule_actuator.name} = (#{b}*Tin+(#{a}))")
+      schedule_program.addLine('EndIf')
+    end
+
+    schedule_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    schedule_pcm.setName("#{schedule.name} program calling manager")
+    schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
+    schedule_pcm.addProgram(schedule_program)
+
+    return schedule
   end
 
   def self.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, cfa, ncfl,

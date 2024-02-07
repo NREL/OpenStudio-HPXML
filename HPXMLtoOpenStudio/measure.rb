@@ -1510,7 +1510,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       refrigerator.additional_properties.loc_schedule = loc_schedule
     end
     @hpxml_bldg.freezers.each do |freezer|
-      freezer.additional_properties.space = get_space_from_location(freezer.location, spaces)
+      loc_space, loc_schedule = get_space_or_schedule_from_location(freezer.location, model, spaces)
+      freezer.additional_properties.loc_space = loc_space
+      freezer.additional_properties.loc_schedule = loc_schedule
     end
     @hpxml_bldg.cooking_ranges.each do |cooking_range|
       cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
