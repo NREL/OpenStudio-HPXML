@@ -3401,10 +3401,10 @@ class HVAC
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
-  def self.apply_shared_systems(hpxml_bldg)
+  def self.apply_shared_systems(hpxml_header, hpxml_bldg)
     # Apply ANSI 301 to shared systems connected to individual dwelling unit models
     applied_clg = apply_shared_cooling_systems(hpxml_bldg)
-    applied_htg = apply_shared_heating_systems(hpxml_bldg)
+    applied_htg = apply_shared_heating_systems(hpxml_header, hpxml_bldg)
     return unless (applied_clg || applied_htg)
 
     # Remove WLHP if not serving heating nor cooling
@@ -3552,9 +3552,10 @@ class HVAC
     return applied
   end
 
-  def self.apply_shared_heating_systems(hpxml_bldg)
+  def self.apply_shared_heating_systems(hpxml_header, hpxml_bldg)
     applied = false
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if hpxml_header.whole_sfa_or_mf_building_sim # Central boilers are explicitly modeled for whole SFA/MF buildings
       next unless heating_system.is_shared_system
 
       applied = true

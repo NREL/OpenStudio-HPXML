@@ -576,9 +576,13 @@ class HPXML < Object
 
   def delete_shared_systems()
     # Delete any shared HVAC systems; returns a map of HPXML Building => [deleted_systems]
+    # Currently only deletes central boilers, as they are the only technology explicitly modeled
+    # for whole SFA/MF buildings
     deleted_systems_map = {}
     buildings.each do |hpxml_bldg|
       hpxml_bldg.hvac_systems.each do |hvac_system|
+        next unless hvac_system.is_a?(HPXML::HeatingSystem) && hvac_system.heating_system_type == HPXML::HVACTypeBoiler
+
         if hvac_system.is_shared_system
           deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
           deleted_systems_map[hpxml_bldg] << hvac_system

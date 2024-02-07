@@ -1190,8 +1190,8 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
-    if convert_shared_systems && !hpxml.header.whole_sfa_or_mf_building_sim
-      HVAC.apply_shared_systems(hpxml_bldg)
+    if convert_shared_systems
+      HVAC.apply_shared_systems(hpxml.header, hpxml_bldg)
     end
 
     # Convert negative values (e.g., -1) to nil as appropriate
