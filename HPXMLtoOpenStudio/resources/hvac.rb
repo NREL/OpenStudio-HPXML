@@ -1921,11 +1921,11 @@ class HVAC
         program.addLine("  If #{outdoor_db_sensor.name} < 4.444444,")
         program.addLine("    Set T_coil_out = 0.82 * #{outdoor_db_sensor.name} - 8.589")
         program.addLine("    Set delta_humidity_ratio = @MAX 0 (#{outdoor_w_sensor.name} - (@WFnTdbRhPb T_coil_out 1.0 #{outdoor_bp_sensor.name}))")
-        program.addLine('    Set htg_frost_multiplier_cap = 0.909 - 107.33 * delta_humidity_ratio')
-        program.addLine('    Set htg_frost_multiplier_pow = 0.90 - 36.45 * delta_humidity_ratio')
+        program.addLine("    Set #{cap_multiplier} = 0.909 - 107.33 * delta_humidity_ratio")
+        program.addLine("    Set #{pow_multiplier} = 0.90 - 36.45 * delta_humidity_ratio")
         program.addLine('  Else')
-        program.addLine('    Set htg_frost_multiplier_cap = 1.0')
-        program.addLine('    Set htg_frost_multiplier_pow = 1.0')
+        program.addLine("    Set #{cap_multiplier} = 1.0")
+        program.addLine("    Set #{pow_multiplier} = 1.0")
         program.addLine('  EndIf')
         program.addLine('EndIf')
       elsif coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
@@ -1947,9 +1947,9 @@ class HVAC
 
         program.addLine('If clg_mode > 0')
         program.addLine("  If #{clg_tot_sensor.name} > 0")
-        program.addLine("    Set shr = #{clg_sens_sensor.name} / #{clg_tot_sensor.name}")
+        program.addLine("    Set #{cap_multiplier} = #{clg_sens_sensor.name} / #{clg_tot_sensor.name}")
         program.addLine('  Else')
-        program.addLine('    Set shr = 0.0')
+        program.addLine('    Set #{cap_multiplier} = 0.0')
         program.addLine('  EndIf')
         program.addLine('EndIf')
       end
