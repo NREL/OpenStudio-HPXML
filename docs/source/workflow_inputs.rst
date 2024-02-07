@@ -2120,7 +2120,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] CompressorType choices are "single stage", "two stage", or "variable speed".
   .. [#] If CompressorType not provided, defaults to "single stage" if SEER <= 15, else "two stage" if SEER <= 21, else "variable speed".
-  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
+  .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise -20F if CompressorType is "variable speed" otherwise 0F.
   .. [#] If SensibleHeatFraction not provided, defaults to 0.73 for single/two stage and 0.78 for variable speed.
   .. [#] BackupType choices are "integrated" or "separate".
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
@@ -3505,9 +3505,9 @@ A standard hot water distribution system is entered as a ``/HPXML/Building/Build
          
          CFA = conditioned floor area [ft2],
          
-         NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         NCfl = number of conditioned floor levels in the residence including conditioned basements,
          
-         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence. If a building has both a conditioned and unconditioned basement on the same level, Bsmnt = 0 to avoid double counting.
          
   .. [#] PipingLength is the length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
@@ -3555,9 +3555,9 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
          
          CFA = conditioned floor area [ft2],
          
-         NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         NCfl = number of conditioned floor levels in the residence including conditioned basements,
          
-         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence. If a building has both a conditioned and unconditioned basement on the same level, Bsmnt = 0 to avoid double counting.
          
   .. [#] RecirculationPipingLoopLength is the recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
@@ -3604,9 +3604,9 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
          
          CFA = conditioned floor area [ft2],
          
-         NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements,
+         NCfl = number of conditioned floor levels in the residence including conditioned basements,
          
-         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence.
+         Bsmnt = presence (1.0) or absence (0.0) of an unconditioned basement in the residence. If a building has both a conditioned and unconditioned basement on the same level, Bsmnt = 0 to avoid double counting.
          
   .. [#] PipingLength is the length of hot water piping from the shared recirculation loop to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.

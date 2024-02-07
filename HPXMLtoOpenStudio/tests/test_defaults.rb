@@ -1676,6 +1676,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], 0.0, 40.0, nil)
 
+    # Test inputs not overridden by defaults - Var-speed ASHP w/ electric backup
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed.xml')
+    hpxml_bldg.heat_pumps[0].compressor_lockout_temp = -2.0
+    hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = 44.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], -2.0, 44.0, nil)
+
+    # Test defaults
+    hpxml_bldg.heat_pumps[0].compressor_lockout_temp = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_lockout_temp = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_heat_pump_temperature_values(default_hpxml_bldg.heat_pumps[0], -20.0, 40.0, nil)
+
     # Test inputs not overridden by defaults - MSHP w/o backup
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless.xml')
     hpxml_bldg.heat_pumps[0].compressor_lockout_temp = 33.0
