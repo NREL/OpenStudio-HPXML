@@ -53,7 +53,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
       elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
         # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-      elsif schedules_file.includes_col_name(SchedulesFile::ColumnHVACMaximumPowerRatio)
+      elsif (not schedules_file.nil?) && (schedules_file.includes_col_name(SchedulesFile::ColumnHVACMaximumPowerRatio))
         # FUTURE: Maximum power ratio schedule currently gives inconsistent component load results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1610
       elsif hpxml_bldg.batteries.size > 0
@@ -254,6 +254,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     if hpxml_path.include? 'base-hvac-multiple.xml'
       next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
+    end
+    if hpxml_path.include? 'base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml'
+      next if message.include? 'Maximum power ratio schedule is only supported for variable speed systems'
     end
 
     # FUTURE: Revert this eventually
