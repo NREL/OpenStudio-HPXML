@@ -4932,6 +4932,19 @@ The efficiency rating of the ceiling fan(s) at medium speed. If not provided, th
 
 <br/>
 
+**Ceiling Fan: Label Average Energy Use**
+
+The average energy use (in Watts) of the ceiling fan(s) at medium speed.
+
+- **Name:** ``ceiling_fan_label_average_energy_use``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
 **Ceiling Fan: Quantity**
 
 Total number of ceiling fans. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.

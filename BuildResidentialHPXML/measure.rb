@@ -2903,6 +2903,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_label_average_energy_use', false)
+    arg.setDisplayName('Ceiling Fan: Label Average Energy Use')
+    arg.setUnits('W')
+    arg.setDescription('The average energy use (in Watts) of the ceiling fan(s) at medium speed.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_quantity', false)
     arg.setDisplayName('Ceiling Fan: Quantity')
     arg.setUnits('#')
@@ -6762,6 +6768,8 @@ class HPXMLFile
 
     if args[:ceiling_fan_efficiency].is_initialized
       efficiency = args[:ceiling_fan_efficiency].get
+    elsif args[:ceiling_fan_label_average_energy_use].is_initialized
+      label_average_energy_use = args[:ceiling_fan_label_average_energy_use].get
     end
 
     if args[:ceiling_fan_quantity].is_initialized
@@ -6770,6 +6778,7 @@ class HPXMLFile
 
     hpxml_bldg.ceiling_fans.add(id: "CeilingFan#{hpxml_bldg.ceiling_fans.size + 1}",
                                 efficiency: efficiency,
+                                label_average_energy_use: label_average_energy_use,
                                 count: quantity)
   end
 
