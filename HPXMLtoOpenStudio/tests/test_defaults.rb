@@ -3403,13 +3403,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-lighting-ceiling-fans.xml')
     hpxml_bldg.ceiling_fans[0].count = 2
     hpxml_bldg.ceiling_fans[0].efficiency = 100
-    hpxml_bldg.ceiling_fans[0].label_energy_use = 30
+    hpxml_bldg.ceiling_fans[0].label_energy_use = nil
     hpxml_bldg.ceiling_fans[0].weekday_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].weekend_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, 30, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, nil, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml_bldg.ceiling_fans.each do |ceiling_fan|
