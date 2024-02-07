@@ -673,12 +673,12 @@ HPXML HVAC Sizing Control
 
 HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl``.
 
-  =================================  ========  =====  ===========  ========  ========  ===========================================================
+  =================================  ========  =====  ===========  ========  ========  ============================================
   Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ===========================================================
+  =================================  ========  =====  ===========  ========  ========  ============================================
   ``AllowIncreasedFixedCapacities``  boolean                       No        false     Logic for fixed capacity HVAC equipment [#]_
   ``HeatPumpSizingMethodology``      string           See [#]_     No        HERS      Logic for autosized heat pumps [#]_
-  =================================  ========  =====  ===========  ========  ========  ===========================================================
+  =================================  ========  =====  ===========  ========  ========  ============================================
 
   .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
   .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.

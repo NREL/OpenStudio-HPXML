@@ -50,9 +50,10 @@ class HVACSizing
       apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_airflow_adjustments(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
+
       all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
 
@@ -1952,7 +1953,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_hvac_airflow_adjustments(hvac_sizing_values, hvac_heating, hvac_cooling)
+  def self.apply_hvac_airflow_adjustments(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
     '''
     Airflow Adjustments
     '''
@@ -1981,7 +1982,7 @@ class HVACSizing
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
       if hvac_sizing_values.Heat_Capacity > 0
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
-        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Heat_Capacity, (@supply_air_temp - @heat_setpoint), hvac_sizing_values.Heat_Capacity)
+        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
         hvac_sizing_values.Heat_Airflow_isdefaulted = false
       end
     else # hvac_sizing_values.Heat_Airflow > hvac_sizing_values.Cool_Airflow
@@ -1993,7 +1994,7 @@ class HVACSizing
       if hvac_sizing_values.Cool_Capacity > 0
         hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(hvac_sizing_values.Cool_Capacity_Sens, (@cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Capacity_Sens, (mj.cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
         hvac_sizing_values.Cool_Airflow_isdefaulted = false
       end
     end
