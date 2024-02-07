@@ -4932,11 +4932,11 @@ The efficiency rating of the ceiling fan(s) at medium speed. If not provided, th
 
 <br/>
 
-**Ceiling Fan: Label Average Energy Use**
+**Ceiling Fan: Label Energy Use**
 
-The average energy use (in Watts) of the ceiling fan(s) at medium speed.
+The label energy use of the ceiling fan(s).
 
-- **Name:** ``ceiling_fan_label_average_energy_use``
+- **Name:** ``ceiling_fan_label_energy_use``
 - **Type:** ``Double``
 
 - **Units:** ``W``
