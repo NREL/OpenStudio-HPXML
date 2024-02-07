@@ -11,6 +11,7 @@ __New Features__
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
+- Now defaults to -20F for `CompressorLockoutTemperature` for variable-speed air-to-air heat pumps.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
