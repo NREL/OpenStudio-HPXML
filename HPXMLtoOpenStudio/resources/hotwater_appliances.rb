@@ -818,12 +818,16 @@ class HotWaterAndAppliances
     schedule_program.addLine("Set #{schedule_actuator.name} = 0")
     constant_coefficients.zip(temperature_coefficients).each_with_index do |constant_temperature, i|
       a, b = constant_temperature
-      line = "If (Hour == #{i})"
+      if i == 0
+        line = "If (Hour == #{i})"
+      else
+        line = "ElseIf (Hour == #{i})"
+      end
       line += " && (#{availability_sensor.name} == 1)" if not availability_sensor.nil?
       schedule_program.addLine(line)
-      schedule_program.addLine("  Set #{schedule_actuator.name} = (#{b}*Tin+(#{a}))")
-      schedule_program.addLine('EndIf')
+      schedule_program.addLine("  Set #{schedule_actuator.name} = (#{a}+#{b}*Tin)")
     end
+    schedule_program.addLine('EndIf')
 
     schedule_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     schedule_pcm.setName("#{schedule.name} program calling manager")
