@@ -137,6 +137,9 @@ denver-hvac-autosize-mini-split-air-conditioner-only-ductless.xml,0.0,14282.0,0.
 denver-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-ACCA.xml,0.0,17356.0,0.0,0.0,722.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-HERS.xml,0.0,15306.0,0.0,0.0,636.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-MaxLoad.xml,0.0,17356.0,0.0,0.0,722.0
+denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-ACCA.xml,26181.0,0.0,26181.0,826.0,0.0
+denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-HERS.xml,26181.0,0.0,26181.0,826.0,0.0
+denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-MaxLoad.xml,41122.0,0.0,26181.0,1297.0,0.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-ACCA.xml,26181.0,0.0,26181.0,826.0,0.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-HERS.xml,26181.0,0.0,26181.0,826.0,0.0
 denver-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-MaxLoad.xml,41122.0,0.0,26181.0,1297.0,0.0
@@ -332,6 +335,9 @@ houston-hvac-autosize-mini-split-air-conditioner-only-ductless.xml,0.0,17967.0,0
 houston-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-ACCA.xml,0.0,20779.0,0.0,0.0,864.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-HERS.xml,0.0,19590.0,0.0,0.0,815.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-cooling-only-sizing-methodology-MaxLoad.xml,0.0,20779.0,0.0,0.0,864.0
+houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-ACCA.xml,16055.0,0.0,16055.0,418.0,0.0
+houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-HERS.xml,16055.0,0.0,16055.0,418.0,0.0
+houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule-sizing-methodology-MaxLoad.xml,18399.0,0.0,16055.0,479.0,0.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-ACCA.xml,16055.0,0.0,16055.0,418.0,0.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-HERS.xml,16055.0,0.0,16055.0,418.0,0.0
 houston-hvac-autosize-mini-split-heat-pump-ducted-heating-only-sizing-methodology-MaxLoad.xml,18399.0,0.0,16055.0,479.0,0.0
