@@ -1815,12 +1815,12 @@ class HVAC
     return if max_pow_ratio_sch.nil?
 
     # Check maximum power ratio schedules only used in var speed systems,
-    if ((not clg_coil.nil?) && (not clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed)) ||
+    clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
+    htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+    htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+    if ((not clg_coil.nil?) && (not clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed)) &&
        ((not htg_coil.nil?) && (not htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed))
       runner.registerWarning('Maximum power ratio schedule is only supported for variable speed systems.')
-      clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-      htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
-      htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
     end
 
     if (htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed) && (heating_system.backup_type != HPXML::HeatPumpBackupTypeIntegrated)

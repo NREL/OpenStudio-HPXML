@@ -250,9 +250,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-hvac-multiple.xml'
       next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
     end
-    if hpxml_path.include? 'base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml'
-      next if message.include? 'Maximum power ratio schedule is only supported for variable speed systems'
-    end
 
     # FUTURE: Revert this eventually
     # https://github.com/NREL/OpenStudio-HPXML/issues/1499
