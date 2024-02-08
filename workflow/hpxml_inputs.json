@@ -2044,6 +2044,10 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
+  "sample_files/base-hvac-furnace-gas-only-oversizing-factor.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
+    "heating_system_oversizing_factor": 1.4
+  },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
     "heating_system_pilot_light": 600

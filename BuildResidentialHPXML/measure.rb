@@ -1120,6 +1120,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btuh')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_oversizing_factor', false)
+    arg.setDisplayName('Heating System: Oversizing Factor')
+    arg.setDescription("The oversizing factor applied to the auto-sizing methodology. If not provided, 1.0 is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_airflow_defect_ratio', false)
     arg.setDisplayName('Heating System: Airflow Defect Ratio')
     arg.setDescription("The airflow defect ratio, defined as (InstalledAirflow - DesignAirflow) / DesignAirflow, of the heating system per ANSI/RESNET/ACCA Standard 310. A value of zero means no airflow defect. Applies only to #{HPXML::HVACTypeFurnace}. If not provided, assumes no defect.")
@@ -4375,6 +4380,10 @@ class HPXMLFile
 
     if args[:heat_pump_sizing_methodology].is_initialized
       hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
+    end
+
+    if args[:heating_system_oversizing_factor].is_initialized
+      hpxml_bldg.header.heating_system_oversizing_factor = args[:heating_system_oversizing_factor].get
     end
 
     if args[:window_natvent_availability].is_initialized
