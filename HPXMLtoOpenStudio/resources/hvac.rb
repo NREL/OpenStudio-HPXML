@@ -1817,6 +1817,7 @@ class HVAC
       end
     end
     return if max_pow_ratio_sch.nil?
+    return if (clg_coil.nil? && htg_coil.nil?)
 
     # Check maximum power ratio schedules only used in var speed systems,
     clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
