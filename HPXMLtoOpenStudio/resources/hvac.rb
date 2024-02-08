@@ -851,11 +851,11 @@ class HVAC
     cfm_per_w = ceiling_fan.efficiency
     label_energy_use = ceiling_fan.label_energy_use
     count = ceiling_fan.count
-    if !cfm_per_w.nil?
+    if !label_energy_use.nil? # priority if both provided
+      annual_kwh = UnitConversions.convert(count * label_energy_use * hrs_per_day * 365.0, 'Wh', 'kWh')
+    elsif !cfm_per_w.nil?
       medium_cfm = get_default_ceiling_fan_medium_cfm()
       annual_kwh = UnitConversions.convert(count * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
-    elsif !label_energy_use.nil?
-      annual_kwh = UnitConversions.convert(count * label_energy_use * hrs_per_day * 365.0, 'Wh', 'kWh')
     end
 
     # Create schedule

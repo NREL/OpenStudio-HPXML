@@ -529,6 +529,10 @@
         </LightingGroup>
         <CeilingFan>
           <SystemIdentifier id='CeilingFan1'/>
+          <Airflow>
+            <FanSpeed>medium</FanSpeed>
+            <Efficiency>100.0</Efficiency>
+          </Airflow>
           <Count>4</Count>
           <extension>
             <LabelEnergyUse>39.0</LabelEnergyUse>

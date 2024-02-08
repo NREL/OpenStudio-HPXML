@@ -4943,27 +4943,27 @@ Whether there are any ceiling fans.
 
 <br/>
 
-**Ceiling Fan: Efficiency**
-
-The efficiency rating of the ceiling fan(s) at medium speed. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
-
-- **Name:** ``ceiling_fan_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``CFM/W``
-
-- **Required:** ``false``
-
-<br/>
-
 **Ceiling Fan: Label Energy Use**
 
-The label energy use of the ceiling fan(s).
+The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default Label Energy Use (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
 
 - **Name:** ``ceiling_fan_label_energy_use``
 - **Type:** ``Double``
 
 - **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Ceiling Fan: Efficiency**
+
+The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default Label Energy Use (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
+
+- **Name:** ``ceiling_fan_efficiency``
+- **Type:** ``Double``
+
+- **Units:** ``CFM/W``
 
 - **Required:** ``false``
 

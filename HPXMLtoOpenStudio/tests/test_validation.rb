@@ -70,7 +70,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
   def test_schema_schematron_error_messages
     # Test case => Error message
     all_expected_errors = { 'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
-                            'ceiling-fan-efficiency-watts' => ['Expected either Airflow[FanSpeed="medium"]/Efficiency or extension/LabelEnergyUse but not both. [context: /HPXML/Building/BuildingDetails/Lighting/CeilingFan, id: "CeilingFan1"]'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'clothes-washer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'cooking-range-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -231,9 +230,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       if ['boiler-invalid-afue'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
         hpxml_bldg.heating_systems[0].heating_efficiency_afue *= 100.0
-      elsif ['ceiling-fan-efficiency-watts'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-lighting-ceiling-fans.xml')
-        hpxml_bldg.ceiling_fans[0].label_energy_use = 30
       elsif ['clothes-dryer-location'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.clothes_dryers[0].location = HPXML::LocationGarage

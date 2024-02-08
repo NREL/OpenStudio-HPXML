@@ -2908,16 +2908,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', false)
-    arg.setDisplayName('Ceiling Fan: Efficiency')
-    arg.setUnits('CFM/W')
-    arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_label_energy_use', false)
     arg.setDisplayName('Ceiling Fan: Label Energy Use')
     arg.setUnits('W')
-    arg.setDescription('The label energy use of the ceiling fan(s).')
+    arg.setDescription("The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default Label Energy Use (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', false)
+    arg.setDisplayName('Ceiling Fan: Efficiency')
+    arg.setUnits('CFM/W')
+    arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default Label Energy Use (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_quantity', false)
@@ -6789,10 +6789,12 @@ class HPXMLFile
   def self.set_ceiling_fans(hpxml_bldg, args)
     return unless args[:ceiling_fan_present]
 
+    if args[:ceiling_fan_label_energy_use].is_initialized
+      label_energy_use = args[:ceiling_fan_label_energy_use].get
+    end
+
     if args[:ceiling_fan_efficiency].is_initialized
       efficiency = args[:ceiling_fan_efficiency].get
-    elsif args[:ceiling_fan_label_energy_use].is_initialized
-      label_energy_use = args[:ceiling_fan_label_energy_use].get
     end
 
     if args[:ceiling_fan_quantity].is_initialized

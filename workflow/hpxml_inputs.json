@@ -2514,7 +2514,6 @@
   },
   "sample_files/base-lighting-ceiling-fans-label-energy-use.xml": {
     "parent_hpxml": "sample_files/base-lighting-ceiling-fans.xml",
-    "ceiling_fan_efficiency": null,
     "ceiling_fan_label_energy_use": 39
   },
   "sample_files/base-lighting-holiday.xml": {

@@ -2777,9 +2777,8 @@ class HPXMLDefaults
 
     ceiling_fan = hpxml_bldg.ceiling_fans[0]
     if ceiling_fan.efficiency.nil? && ceiling_fan.label_energy_use.nil?
-      medium_cfm = HVAC.get_default_ceiling_fan_medium_cfm()
-      ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
-      ceiling_fan.efficiency_isdefaulted = true
+      ceiling_fan.label_energy_use = HVAC.get_default_ceiling_fan_power()
+      ceiling_fan.label_energy_use_isdefaulted = true
     end
     if ceiling_fan.count.nil?
       ceiling_fan.count = HVAC.get_default_ceiling_fan_quantity(nbeds)

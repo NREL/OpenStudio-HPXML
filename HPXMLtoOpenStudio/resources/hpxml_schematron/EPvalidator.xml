@@ -2436,7 +2436,6 @@
       <sch:assert role='ERROR' test='count(h:Airflow[h:FanSpeed="medium"]/h:Efficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Airflow[FanSpeed="medium"]/Efficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:LabelEnergyUse) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/LabelEnergyUse</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:LabelEnergyUse) &gt; 0 or not(h:extension/h:LabelEnergyUse)'>Expected extension/LabelEnergyUse to be greater than 0</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Airflow[h:FanSpeed="medium"]/h:Efficiency) + count(h:extension/h:LabelEnergyUse) &lt;= 1'>Expected either Airflow[FanSpeed="medium"]/Efficiency or extension/LabelEnergyUse but not both.</sch:assert>
       <sch:assert role='ERROR' test='count(h:Count) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Count</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>

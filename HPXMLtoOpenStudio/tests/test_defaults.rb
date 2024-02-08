@@ -3496,13 +3496,31 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-lighting-ceiling-fans.xml')
     hpxml_bldg.ceiling_fans[0].count = 2
     hpxml_bldg.ceiling_fans[0].efficiency = 100
-    hpxml_bldg.ceiling_fans[0].label_energy_use = nil
+    hpxml_bldg.ceiling_fans[0].label_energy_use = 39
     hpxml_bldg.ceiling_fans[0].weekday_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].weekend_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+
+    # Test inputs not overridden by defaults 2
+    hpxml_bldg.ceiling_fans.each do |ceiling_fan|
+      ceiling_fan.efficiency = 100
+      ceiling_fan.label_energy_use = nil
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, nil, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+
+    # Test inputs not overridden by defaults 3
+    hpxml_bldg.ceiling_fans.each do |ceiling_fan|
+      ceiling_fan.efficiency = nil
+      ceiling_fan.label_energy_use = 39
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, nil, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml_bldg.ceiling_fans.each do |ceiling_fan|
@@ -3515,20 +3533,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 4, 70.4, nil, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
-
-    # Test defaults 2
-    hpxml_bldg.ceiling_fans.each do |ceiling_fan|
-      ceiling_fan.count = nil
-      ceiling_fan.efficiency = nil
-      ceiling_fan.label_energy_use = 40
-      ceiling_fan.weekday_fractions = nil
-      ceiling_fan.weekend_fractions = nil
-      ceiling_fan.monthly_multipliers = nil
-    end
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 4, nil, 40, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 4, nil, 42.6, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
   end
 
   def test_pools
