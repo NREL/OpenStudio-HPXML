@@ -7743,6 +7743,10 @@ class HPXML < Object
         end
       end
     end
+    if not sameas_id.nil?
+      fail "Sameas object '#{sameas_id}' not found."
+    end
+
     return
   end
 
