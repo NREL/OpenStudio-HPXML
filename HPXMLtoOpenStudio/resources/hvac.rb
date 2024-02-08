@@ -1822,8 +1822,8 @@ class HVAC
     clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
     htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
     htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
-    if ((not clg_coil.nil?) && (not clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed)) &&
-       ((not htg_coil.nil?) && (not htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed))
+    # No variable speed coil
+    if (clg_coil.nil?) && (htg_coil.nil?)
       runner.registerWarning('Maximum power ratio schedule is only supported for variable speed systems.')
     end
 
