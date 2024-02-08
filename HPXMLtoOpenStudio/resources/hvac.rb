@@ -1954,7 +1954,7 @@ class HVAC
         program.addLine("  If #{clg_tot_sensor.name} > 0")
         program.addLine("    Set #{cap_multiplier} = #{clg_sens_sensor.name} / #{clg_tot_sensor.name}")
         program.addLine('  Else')
-        program.addLine('    Set #{cap_multiplier} = 0.0')
+        program.addLine("    Set #{cap_multiplier} = 0.0")
         program.addLine('  EndIf')
         program.addLine('EndIf')
       end
