@@ -34,7 +34,7 @@ class HVACSizing
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       set_hvac_types(hvac_heating, hvac_cooling)
-      next if is_system_to_skip(hvac_heating)
+      next if is_system_to_skip(hvac_heating, hvac_cooling)
 
       # Apply duct loads as needed
       set_fractions_load_served(hvac_heating, hvac_cooling)
@@ -61,7 +61,7 @@ class HVACSizing
 
   private
 
-  def self.is_system_to_skip(hvac_heating)
+  def self.is_system_to_skip(hvac_heating, hvac_cooling)
     # These shared systems should be converted to other equivalent
     # systems before being autosized
     if [HPXML::HVACTypeChiller,
@@ -73,10 +73,12 @@ class HVACSizing
       return true
     end
 
-    if @hpxml_header.whole_sfa_or_mf_building_sim
-      if !hvac_heating.nil? && @heating_type == HPXML::HVACTypeBoiler && (hvac_heating.is_shared_system || !hvac_heating.sameas_id.nil?)
-        return true
-      end
+    if !hvac_heating.nil? && hvac_heating.is_shared_system_serving_multiple_dwelling_units
+      return true
+    end
+
+    if !hvac_cooling.nil? && hvac_cooling.is_shared_system_serving_multiple_dwelling_units
+      return true
     end
 
     return false

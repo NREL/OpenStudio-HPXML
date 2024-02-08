@@ -648,14 +648,14 @@ class HVAC
     return zone_hvac
   end
 
-  def self.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_systems_map, hvac_unavailable_periods)
-    return if shared_systems_map.empty?
+  def self.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_boilers_map, hvac_unavailable_periods)
+    return if shared_boilers_map.empty?
 
     obj_name = Constants.ObjectNameBoiler
 
     # Get distribution system
     distribution_system = nil
-    shared_systems_map.values.each do |heating_systems|
+    shared_boilers_map.values.each do |heating_systems|
       heating_systems.each do |heating_system|
         next unless heating_system.sameas_id.nil?
 
@@ -704,7 +704,7 @@ class HVAC
 
     # Hot Water Boilers
     total_heating_capacity = 0
-    shared_systems_map.values.each do |heating_systems|
+    shared_boilers_map.values.each do |heating_systems|
       heating_systems.each do |heating_system|
         next unless heating_system.sameas_id.nil?
 
@@ -755,12 +755,12 @@ class HVAC
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     total_heating_design_load = 0.0
-    shared_systems_map.keys.each do |hpxml_bldg|
+    shared_boilers_map.keys.each do |hpxml_bldg|
       total_heating_design_load += hpxml_bldg.hvac_plant.hdl_total
     end
 
     if distribution_system.distribution_system_type == HPXML::HVACDistributionTypeHydronic
-      shared_systems_map.keys.each do |hpxml_bldg|
+      shared_boilers_map.keys.each do |hpxml_bldg|
         # Apportion total boiler heating capacity to each zone based on the HPXML Building's heating design load
 
         control_zone = model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('BuildingID').to_s == hpxml_bldg.building_id }

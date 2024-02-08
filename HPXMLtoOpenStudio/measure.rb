@@ -174,7 +174,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # has been created.
       shared_systems_map = {}
       if hpxml.header.whole_sfa_or_mf_building_sim
-        shared_systems_map = hpxml.delete_shared_systems()
+        shared_systems_map = hpxml.delete_shared_systems_serving_multiple_dwelling_units()
       end
 
       # Create OpenStudio model
@@ -196,7 +196,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # Merge unit models into final model
         add_unit_models_to_model(model, hpxml_osm_map)
         # Apply shared systems
-        HVAC.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_systems_map, @hvac_unavailable_periods)
+        shared_boilers_map = shared_systems_map # FIXME: Need to pull out the shared boilers from any other shared systems
+        HVAC.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_boilers_map, @hvac_unavailable_periods)
       end
 
       # Output

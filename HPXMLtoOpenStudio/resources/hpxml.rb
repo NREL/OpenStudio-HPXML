@@ -574,22 +574,17 @@ class HPXML < Object
     return has_fuels
   end
 
-  def delete_shared_systems()
-    # Delete any shared HVAC systems; returns a map of HPXML Building => [deleted_systems]
-    # Currently only deletes central boilers, as they are the only technology explicitly modeled
-    # for whole SFA/MF buildings
+  def delete_shared_systems_serving_multiple_dwelling_units()
+    # Delete any shared HVAC systems that are actually modeled as systems serving multiple dwelling units.
+    # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not deleted.
+    # Returns a map of HPXML Building => [deleted_systems]
     deleted_systems_map = {}
     buildings.each do |hpxml_bldg|
       hpxml_bldg.hvac_systems.each do |hvac_system|
-        next unless hvac_system.is_a?(HPXML::HeatingSystem) && hvac_system.heating_system_type == HPXML::HVACTypeBoiler
+        next unless hvac_system.is_shared_system_serving_multiple_dwelling_units
 
-        if hvac_system.is_shared_system
-          deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
-          deleted_systems_map[hpxml_bldg] << hvac_system
-        elsif !hvac_system.sameas_id.nil? && hvac_system.sameas.is_shared_system
-          deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
-          deleted_systems_map[hpxml_bldg] << hvac_system
-        end
+        deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
+        deleted_systems_map[hpxml_bldg] << hvac_system
       end
     end
     deleted_systems_map.values.each do |deleted_systems|
@@ -4172,6 +4167,27 @@ class HPXML < Object
       return !primary_heat_pump.nil?
     end
 
+    def is_shared_system_serving_multiple_dwelling_units
+      # Returns true if we are modeling a whole MF building and the technology is actually
+      # modeled as a system serving multiple dwelling units. Shared systems that are modeled
+      # as equivalent in-unit systems per ANSI 301 are not included.
+      if @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        actual_system = self
+        if !@sameas_id.nil?
+          actual_system = sameas
+        end
+
+        if actual_system.is_shared_system
+          # Currently central boilers are the only technology explicitly modeled as serving multiple dwelling units
+          if actual_system.is_a?(HPXML::HeatingSystem) && actual_system.heating_system_type == HPXML::HVACTypeBoiler
+            return true
+          end
+        end
+      end
+
+      return false
+    end
+
     def delete
       @parent_object.heating_systems.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
@@ -4361,6 +4377,10 @@ class HPXML < Object
       return false if @integrated_heating_system_fuel.nil?
 
       return true
+    end
+
+    def is_shared_system_serving_multiple_dwelling_units
+      return false
     end
 
     def delete
@@ -4702,6 +4722,10 @@ class HPXML < Object
 
         return heating_system
       end
+    end
+
+    def is_shared_system_serving_multiple_dwelling_units
+      return false
     end
 
     def delete

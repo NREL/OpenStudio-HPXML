@@ -162,8 +162,8 @@ class HPXMLDefaults
       end
     end
 
-    if hpxml_header.shared_boiler_operation.nil? && hpxml_header.whole_sfa_or_mf_building_sim
-      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system }.size > 0
+    if hpxml_header.shared_boiler_operation.nil?
+      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system_serving_multiple_dwelling_units }.size > 0
         hpxml_header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
         hpxml_header.shared_boiler_operation_isdefaulted = true
       end

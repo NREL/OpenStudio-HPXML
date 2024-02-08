@@ -49,9 +49,6 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
-      elsif hpxml_bldg.heating_systems.select { |htg_sys| htg_sys.heating_system_type == HPXML::HVACTypeBoiler && htg_sys.is_shared_system }.size > 0
-        # Shared boilers have different input requirements when modeled for individual dwelling units vs whole MF buildings
-        return
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
@@ -61,6 +58,13 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
     if unit_multiplier > 1
       hpxml.header.whole_sfa_or_mf_building_sim = true
     end
+
+    # Skip shared systems serving multiple dwelling units, they have different input requirements compared to when the
+    # shared system is modeled as an individual dwelling unit.
+    if hpxml.buildings.any? { |hpxml_bldg| hpxml_bldg.hvac_systems.any? { |hvac_system| hvac_system.is_shared_system_serving_multiple_dwelling_units } }
+      return
+    end
+
     xml.gsub!('.xml', '-10x.xml')
     hpxml_doc = hpxml.to_doc()
     hpxml.set_unique_hpxml_ids(hpxml_doc)
