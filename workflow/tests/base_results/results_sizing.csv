@@ -85,6 +85,7 @@ denver-hvac-autosize-furnace-elec-only.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-central-ac-2-speed.xml,32235.0,20844.0,0.0,712.0,867.0
 denver-hvac-autosize-furnace-gas-central-ac-var-speed.xml,32235.0,19936.0,0.0,712.0,829.0
 denver-hvac-autosize-furnace-gas-only-detailed-setpoints.xml,32235.0,0.0,0.0,712.0,0.0
+denver-hvac-autosize-furnace-gas-only-oversizing-factor.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-only-pilot.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-only.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-room-ac.xml,32235.0,14272.0,0.0,712.0,371.0
@@ -269,6 +270,7 @@ houston-hvac-autosize-furnace-elec-only.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-central-ac-2-speed.xml,21260.0,27339.0,0.0,388.0,1137.0
 houston-hvac-autosize-furnace-gas-central-ac-var-speed.xml,21260.0,24475.0,0.0,388.0,1018.0
 houston-hvac-autosize-furnace-gas-only-detailed-setpoints.xml,21260.0,0.0,0.0,388.0,0.0
+houston-hvac-autosize-furnace-gas-only-oversizing-factor.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-only-pilot.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-only.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-room-ac.xml,21260.0,18120.0,0.0,388.0,471.0
