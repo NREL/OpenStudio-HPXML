@@ -1,4 +1,7 @@
 HPXML,HVAC Capacity: Heating (Btu/h),HVAC Capacity: Cooling (Btu/h),HVAC Capacity: Heat Pump Backup (Btu/h),HVAC Airflow: Heating (cfm),HVAC Airflow: Cooling (cfm)
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-ACCA.xml,22911.0,22911.0,31147.0,723.0,953.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-HERS.xml,31147.0,31147.0,31147.0,982.0,1295.0
+denver-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-MaxLoad.xml,65909.0,65909.0,31147.0,2079.0,2741.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,21309.0,0.0,0.0,886.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-HERS.xml,0.0,18787.0,0.0,0.0,781.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-MaxLoad.xml,0.0,21309.0,0.0,0.0,886.0
@@ -43,6 +46,7 @@ denver-hvac-autosize-boiler-gas-only.xml,23640.0,0.0,0.0,0.0,0.0
 denver-hvac-autosize-boiler-oil-only.xml,23640.0,0.0,0.0,0.0,0.0
 denver-hvac-autosize-boiler-propane-only.xml,23640.0,0.0,0.0,0.0,0.0
 denver-hvac-autosize-boiler-wood-only.xml,23640.0,0.0,0.0,0.0,0.0
+denver-hvac-autosize-central-ac-only-1-speed-autosizing-factor.xml,0.0,21309.0,0.0,0.0,886.0
 denver-hvac-autosize-central-ac-only-1-speed-seer2.xml,0.0,21309.0,0.0,0.0,886.0
 denver-hvac-autosize-central-ac-only-1-speed.xml,0.0,21309.0,0.0,0.0,886.0
 denver-hvac-autosize-central-ac-only-2-speed.xml,0.0,20844.0,0.0,0.0,867.0
@@ -84,8 +88,8 @@ denver-hvac-autosize-furnace-elec-central-ac-1-speed.xml,32235.0,21309.0,0.0,712
 denver-hvac-autosize-furnace-elec-only.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-central-ac-2-speed.xml,32235.0,20844.0,0.0,712.0,867.0
 denver-hvac-autosize-furnace-gas-central-ac-var-speed.xml,32235.0,19936.0,0.0,712.0,829.0
+denver-hvac-autosize-furnace-gas-only-autosizing-factor.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-only-detailed-setpoints.xml,32235.0,0.0,0.0,712.0,0.0
-denver-hvac-autosize-furnace-gas-only-oversizing-factor.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-only-pilot.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-only.xml,32235.0,0.0,0.0,712.0,0.0
 denver-hvac-autosize-furnace-gas-room-ac.xml,32235.0,14272.0,0.0,712.0,371.0
@@ -184,6 +188,9 @@ denver-hvac-autosize-stove-oil-only.xml,23640.0,0.0,0.0,689.0,0.0
 denver-hvac-autosize-stove-wood-pellets-only.xml,23640.0,0.0,0.0,689.0,0.0
 denver-hvac-autosize-undersized.xml,28898.0,19717.0,0.0,638.0,820.0
 denver-hvac-autosize-wall-furnace-elec-only.xml,23640.0,0.0,0.0,689.0,0.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-ACCA.xml,27095.0,27095.0,20038.0,706.0,1127.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-HERS.xml,25329.0,25329.0,20038.0,660.0,1053.0
+houston-hvac-autosize-air-to-air-heat-pump-1-speed-autosizing-factor-sizing-methodology-MaxLoad.xml,30521.0,30521.0,20038.0,795.0,1269.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-ACCA.xml,0.0,27095.0,0.0,0.0,1127.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-HERS.xml,0.0,25329.0,0.0,0.0,1053.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-cooling-only-sizing-methodology-MaxLoad.xml,0.0,27095.0,0.0,0.0,1127.0
@@ -228,6 +235,7 @@ houston-hvac-autosize-boiler-gas-only.xml,14077.0,0.0,0.0,0.0,0.0
 houston-hvac-autosize-boiler-oil-only.xml,14077.0,0.0,0.0,0.0,0.0
 houston-hvac-autosize-boiler-propane-only.xml,14077.0,0.0,0.0,0.0,0.0
 houston-hvac-autosize-boiler-wood-only.xml,14077.0,0.0,0.0,0.0,0.0
+houston-hvac-autosize-central-ac-only-1-speed-autosizing-factor.xml,0.0,27095.0,0.0,0.0,1127.0
 houston-hvac-autosize-central-ac-only-1-speed-seer2.xml,0.0,27095.0,0.0,0.0,1127.0
 houston-hvac-autosize-central-ac-only-1-speed.xml,0.0,27095.0,0.0,0.0,1127.0
 houston-hvac-autosize-central-ac-only-2-speed.xml,0.0,27339.0,0.0,0.0,1137.0
@@ -269,8 +277,8 @@ houston-hvac-autosize-furnace-elec-central-ac-1-speed.xml,21260.0,27095.0,0.0,38
 houston-hvac-autosize-furnace-elec-only.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-central-ac-2-speed.xml,21260.0,27339.0,0.0,388.0,1137.0
 houston-hvac-autosize-furnace-gas-central-ac-var-speed.xml,21260.0,24475.0,0.0,388.0,1018.0
+houston-hvac-autosize-furnace-gas-only-autosizing-factor.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-only-detailed-setpoints.xml,21260.0,0.0,0.0,388.0,0.0
-houston-hvac-autosize-furnace-gas-only-oversizing-factor.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-only-pilot.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-only.xml,21260.0,0.0,0.0,388.0,0.0
 houston-hvac-autosize-furnace-gas-room-ac.xml,21260.0,18120.0,0.0,388.0,471.0
