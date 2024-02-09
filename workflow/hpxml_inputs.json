@@ -1660,6 +1660,11 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosizing-factor.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "heat_pump_cooling_autosizing_factor": 1.7,
+    "heat_pump_heating_autosizing_factor": 1.4
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
@@ -1844,6 +1849,10 @@
     "heating_system_type": "none",
     "heating_system_heating_efficiency": 0,
     "heating_system_fraction_heat_load_served": 0
+  },
+  "sample_files/base-hvac-central-ac-only-1-speed-autosizing-factor.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "cooling_system_cooling_autosizing_factor": 1.7
   },
   "sample_files/base-hvac-central-ac-only-1-speed-seer2.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2044,9 +2053,9 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
-  "sample_files/base-hvac-furnace-gas-only-oversizing-factor.xml": {
+  "sample_files/base-hvac-furnace-gas-only-autosizing-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "heating_system_oversizing_factor": 1.4
+    "heating_system_heating_autosizing_factor": 1.4
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
