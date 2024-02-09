@@ -203,7 +203,7 @@ class HVAC
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
-    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, htg_supp_coil, clg_coil, htg_coil, schedules_file) unless schedules_file.nil?
+    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file) unless schedules_file.nil?
 
     return air_loop
   end
@@ -1808,7 +1808,7 @@ class HVAC
     end
   end
 
-  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, htg_supp_coil = nil, clg_coil, htg_coil, schedules_file)
+  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil = nil, clg_coil, htg_coil, schedules_file)
     if not schedules_file.nil?
       max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHVACMaximumPowerRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       # Not allowed with unit multiplier for now
@@ -1820,9 +1820,9 @@ class HVAC
     return if (clg_coil.nil? && htg_coil.nil?)
 
     # Check maximum power ratio schedules only used in var speed systems,
-    clg_coil = nil unless clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
-    htg_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
-    htg_supp_coil = nil unless htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
+    clg_coil = nil unless (cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
+    htg_coil = nil unless ((heating_system.is_a? HPXML::HeatPump) && heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
+    htg_supp_coil = nil unless ((heating_system.is_a? HPXML::HeatPump) && heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
     # No variable speed coil
     if (clg_coil.nil?) && (htg_coil.nil?)
       runner.registerWarning('Maximum power ratio schedule is only supported for variable speed systems.')

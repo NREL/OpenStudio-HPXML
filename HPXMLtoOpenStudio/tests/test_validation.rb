@@ -1554,6 +1554,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                 "Both 'water_heater_setpoint' schedule file and setpoint temperature provided; the latter will be ignored."],
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
+                              'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
@@ -1644,6 +1645,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/water-heater-operating-modes.csv')
       elsif ['schedule-file-max-power-ratio-with-single-speed-system'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
+      elsif ['schedule-file-max-power-ratio-with-two-speed-system'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
       elsif ['schedule-file-max-power-ratio-with-separate-backup-system'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
