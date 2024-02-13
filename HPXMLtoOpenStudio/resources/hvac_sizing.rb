@@ -22,7 +22,7 @@ class HVACSizing
     process_load_ceilings(mj, bldg_design_loads)
     process_load_floors(mj, bldg_design_loads)
     process_load_slabs(mj, bldg_design_loads)
-    process_load_infiltration_ventilation(mj, bldg_design_loads, weather)
+    process_load_infiltration_ventilation(mj, bldg_design_loads, weather, runner)
     process_load_internal_gains(bldg_design_loads)
 
     # Aggregate zone loads into initial loads
@@ -338,8 +338,10 @@ class HVACSizing
     @hpxml_bldg.zones.each do |zone|
       next unless zone.zone_type == HPXML::ZoneTypeConditioned
 
+      @zone = zone
       zone.spaces.each do |space|
         @space_loads[space.id] = DesignLoads.new
+        space.additional_properties.total_exposed_wall_area = 0.0
       end
     end
   end
@@ -650,27 +652,21 @@ class HVACSizing
 
     @hpxml_bldg.doors.each do |door|
       next unless door.is_thermal_boundary
-      
-      if not door.wall.attached_to_space_idref.nil?
-        space_design_loads = @space_loads[door.wall.attached_to_space_idref]
-      end
+
+      space_design_loads = @space_loads[door.wall.attached_to_space_idref] unless door.wall.attached_to_space_idref.nil?
 
       if door.wall.is_exterior
         htg_loads = (1.0 / door.r_value) * door.area * mj.htd
         clg_loads = (1.0 / door.r_value) * door.area * cltd
-        bldg_design_loads.Heat_Doors += htg_loads
-        bldg_design_loads.Cool_Doors += clg_loads
-        space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
-        space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
       else # Partition door
         adjacent_space = door.wall.exterior_adjacent_to
         htg_loads = (1.0 / door.r_value) * door.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
         clg_loads = (1.0 / door.r_value) * door.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-        bldg_design_loads.Heat_Doors += htg_loads
-        bldg_design_loads.Cool_Doors += clg_loads
-        space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
-        space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
       end
+      bldg_design_loads.Heat_Doors += htg_loads
+      bldg_design_loads.Cool_Doors += clg_loads
+      space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
+      space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
     end
   end
 
@@ -698,6 +694,8 @@ class HVACSizing
       end
       if not wall.attached_to_space_idref.nil?
         space_design_loads = @space_loads[wall.attached_to_space_idref]
+        # Store exposed wall gross area for infiltration calculation
+        wall.space.additional_properties.total_exposed_wall_area += wall.area if wall.is_exterior
       end
 
       azimuths.each do |azimuth|
@@ -738,19 +736,15 @@ class HVACSizing
 
           clg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
           htg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * mj.htd
-          bldg_design_loads.Cool_Walls += clg_loads
-          bldg_design_loads.Heat_Walls += htg_loads
-          space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
-          space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
         else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
           clg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
           htg_loads = (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
-          bldg_design_loads.Cool_Walls += clg_loads
-          bldg_design_loads.Heat_Walls += htg_loads
-          space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
-          space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
         end
+        bldg_design_loads.Cool_Walls += clg_loads
+        bldg_design_loads.Heat_Walls += htg_loads
+        space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
+        space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       end
     end
 
@@ -758,22 +752,18 @@ class HVACSizing
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
 
-      if not foundation_wall.attached_to_space_idref.nil?
-        space_design_loads = @space_loads[foundation_wall.attached_to_space_idref]
-      end
+      space_design_loads = @space_loads[foundation_wall.attached_to_space_idref] unless foundation_wall.attached_to_space_idref.nil?
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true)
         htg_loads = u_wall_with_soil * foundation_wall.net_area * mj.htd
-        bldg_design_loads.Heat_Walls += htg_loads
-        space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
         u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false)
         htg_loads = u_wall_without_soil * foundation_wall.net_area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
-        bldg_design_loads.Heat_Walls += htg_loads
-        space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       end
+      bldg_design_loads.Heat_Walls += htg_loads
+      space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
     end
   end
 
@@ -786,9 +776,7 @@ class HVACSizing
     @hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
 
-      if not roof.attached_to_space_idref.nil?
-        space_design_loads = @space_loads[roof.attached_to_space_idref]
-      end
+      space_design_loads = @space_loads[roof.attached_to_space_idref] unless roof.attached_to_space_idref.nil?
 
       # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
       if roof.insulation_assembly_r_value <= 6
@@ -845,14 +833,20 @@ class HVACSizing
       next unless floor.is_ceiling
       next unless floor.is_thermal_boundary
 
+      space_design_loads = @space_loads[floor.attached_to_space_idref] unless floor.attached_to_space_idref.nil?
+
       if floor.is_exterior
-        bldg_design_loads.Cool_Ceilings += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
-        bldg_design_loads.Heat_Ceilings += (1.0 / floor.insulation_assembly_r_value) * floor.area * mj.htd
+        clg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
+        htg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * mj.htd
       else
         adjacent_space = floor.exterior_adjacent_to
-        bldg_design_loads.Cool_Ceilings += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-        bldg_design_loads.Heat_Ceilings += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        clg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
+        htg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
       end
+      bldg_design_loads.Cool_Ceilings += clg_loads
+      bldg_design_loads.Heat_Ceilings += htg_loads
+      space_design_loads.Cool_Ceilings += clg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Ceilings += htg_loads unless space_design_loads.nil?
     end
   end
 
@@ -867,12 +861,14 @@ class HVACSizing
       next unless floor.is_floor
       next unless floor.is_thermal_boundary
 
+      space_design_loads = @space_loads[floor.attached_to_space_idref] unless floor.attached_to_space_idref.nil?
+
       if floor.is_exterior
         htd_adj = mj.htd
         htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant floor over open crawlspace: HTM = U-Value × (HTD + 25)
 
-        bldg_design_loads.Cool_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
-        bldg_design_loads.Heat_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * htd_adj
+        clg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
+        htg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * htd_adj
       else # Partition floor
         adjacent_space = floor.exterior_adjacent_to
         if floor.is_floor && [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned].include?(adjacent_space)
@@ -912,13 +908,17 @@ class HVACSizing
             ptdh_floor = u_wall * htd_adj / (4.0 * u_floor + u_wall)
           end
 
-          bldg_design_loads.Cool_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * ptdc_floor
-          bldg_design_loads.Heat_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * ptdh_floor
+          clg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * ptdc_floor
+          htg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * ptdh_floor
         else # E.g., floor over garage
-          bldg_design_loads.Cool_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-          bldg_design_loads.Heat_Floors += (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+          clg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
+          htg_loads = (1.0 / floor.insulation_assembly_r_value) * floor.area * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
         end
       end
+      bldg_design_loads.Cool_Floors += clg_loads
+      bldg_design_loads.Heat_Floors += htg_loads
+      space_design_loads.Cool_Roofs += clg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Roofs += htg_loads unless space_design_loads.nil?
     end
   end
 
@@ -932,12 +932,14 @@ class HVACSizing
     @hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
 
+      space_design_loads = @space_loads[slab.attached_to_space_idref] unless slab.attached_to_space_idref.nil?
+
       htd_adj = mj.htd
       htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant slab floor: HTM = F-Value × (HTD + 25)
 
       if slab.interior_adjacent_to == HPXML::LocationConditionedSpace # Slab-on-grade
         f_value = calc_slab_f_value(slab, @hpxml_bldg.site.ground_conductivity)
-        bldg_design_loads.Heat_Slabs += f_value * slab.exposed_perimeter * htd_adj
+        htg_loads = f_value * slab.exposed_perimeter * htd_adj
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
         ext_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.is_exterior }
         z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum # Weighted-average (by length) below-grade depth
@@ -958,12 +960,14 @@ class HVACSizing
         end
 
         u_value = calc_basement_effective_uvalue(slab_is_insulated, z_f, w_b, @hpxml_bldg.site.ground_conductivity)
-        bldg_design_loads.Heat_Slabs += u_value * slab.area * htd_adj
+        htg_loads = u_value * slab.area * htd_adj
       end
+      bldg_design_loads.Heat_Slabs += htg_loads
+      space_design_loads.Heat_Slabs += htg_loads unless space_design_loads.nil?
     end
   end
 
-  def self.process_load_infiltration_ventilation(mj, bldg_design_loads, weather)
+  def self.process_load_infiltration_ventilation(mj, bldg_design_loads, weather, _runner)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
@@ -1006,10 +1010,24 @@ class HVACSizing
     cfm_cool_load_sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
     cfm_cool_load_lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
 
-    bldg_design_loads.Heat_InfilVent = 1.1 * mj.acf * cfm_Heating * mj.htd
+    htg_infil_vent_loads = 1.1 * mj.acf * cfm_Heating * mj.htd
+    clg_infil_vent_sens_loads = 1.1 * mj.acf * cfm_cool_load_sens * mj.ctd
+    clg_infil_vent_lat_loads = 0.68 * mj.acf * cfm_cool_load_lat * (mj.cool_design_grains - mj.cool_indoor_grains)
 
-    bldg_design_loads.Cool_InfilVent_Sens = 1.1 * mj.acf * cfm_cool_load_sens * mj.ctd
-    bldg_design_loads.Cool_InfilVent_Lat = 0.68 * mj.acf * cfm_cool_load_lat * (mj.cool_design_grains - mj.cool_indoor_grains)
+    bldg_design_loads.Heat_InfilVent = htg_infil_vent_loads
+    bldg_design_loads.Cool_InfilVent_Sens = clg_infil_vent_sens_loads
+    bldg_design_loads.Cool_InfilVent_Lat = clg_infil_vent_lat_loads
+    # total exposed wall area
+    return if @zone.nil?
+
+    spaces_total_exposed_wall_area = @zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
+
+    @space_loads.each do |space_id, space_design_loads|
+      space_exposed_wall_area = @zone.spaces.find { |space| space.id == space_id }.additional_properties.total_exposed_wall_area
+      war = space_exposed_wall_area / spaces_total_exposed_wall_area
+      space_design_loads.Heat_InfilVent = war * htg_infil_vent_loads
+      space_design_loads.Cool_InfilVent_Sens = war * clg_infil_vent_sens_loads
+    end
   end
 
   def self.process_load_internal_gains(bldg_design_loads)

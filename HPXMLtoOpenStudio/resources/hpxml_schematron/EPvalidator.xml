@@ -431,7 +431,7 @@
   <sch:pattern>
     <sch:title>[conditioned Zone]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Zones/h:Zone[h:ZoneType[text()="conditioned"]]'>
-      <sch:assert role='ERROR' test='count(h:Spaces/h:Space) &gt;= 1'>Expected 1 or more element(s) for xpath: Spaces/Space</sch:assert> <!-- See [Space] -->
+      <sch:assert role='ERROR' test='count(h:Spaces/h:Space) &gt;= 1'>Expected 1 or more element(s) for xpath: Spaces/Space</sch:assert> <!-- See [Space] --><!-- Define surface attached to spaces, see [Slab_Conditioned_Space], [Wall_Conditioned_Space], [FoundationWall_Conditioned_Space], [Roof_Conditioned_Space], [RimJoist_Conditioned_Space], [Floor_Conditioned_Space] -->
     </sch:rule>
   </sch:pattern>
 

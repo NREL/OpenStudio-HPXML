@@ -2206,6 +2206,10 @@ class HPXML < Object
       return errors
     end
 
+    def delete
+      @parent_object.spaces.delete(self)
+    end
+
     def to_doc(zone)
       return if nil?
 
@@ -2826,6 +2830,10 @@ class HPXML < Object
       roof = XMLHelper.add_element(roofs, 'Roof')
       sys_id = XMLHelper.add_element(roof, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(roof, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(roof, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(roof, 'Area', @area, :float) unless @area.nil?
       XMLHelper.add_element(roof, 'Orientation', @orientation, :string, @orientation_isdefaulted) unless @orientation.nil?
@@ -2866,10 +2874,6 @@ class HPXML < Object
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(roof, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
       end
     end
 
@@ -2979,6 +2983,10 @@ class HPXML < Object
       rim_joist = XMLHelper.add_element(rim_joists, 'RimJoist')
       sys_id = XMLHelper.add_element(rim_joist, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(rim_joist, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(rim_joist, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(rim_joist, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(rim_joist, 'Area', @area, :float) unless @area.nil?
@@ -3009,10 +3017,6 @@ class HPXML < Object
       if not @framing_size.nil?
         floor_joists = XMLHelper.add_element(rim_joist, 'FloorJoists')
         XMLHelper.add_element(floor_joists, 'Size', @framing_size, :string) unless @framing_size.nil?
-      end
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(rim_joist, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
       end
     end
 
@@ -3069,6 +3073,13 @@ class HPXML < Object
 
     def doors
       return @parent_object.doors.select { |door| door.wall_idref == @id }
+    end
+
+    def space
+      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
+      return if zone.nil?
+
+      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
     end
 
     def net_area
@@ -3141,6 +3152,10 @@ class HPXML < Object
       wall = XMLHelper.add_element(walls, 'Wall')
       sys_id = XMLHelper.add_element(wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(wall, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(wall, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(wall, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(wall, 'AtticWallType', @attic_wall_type, :string) unless @attic_wall_type.nil?
@@ -3189,10 +3204,6 @@ class HPXML < Object
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(wall, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
       end
     end
 
@@ -3356,6 +3367,10 @@ class HPXML < Object
       foundation_wall = XMLHelper.add_element(foundation_walls, 'FoundationWall')
       sys_id = XMLHelper.add_element(foundation_wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(foundation_wall, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(foundation_wall, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(foundation_wall, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(foundation_wall, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
@@ -3392,10 +3407,6 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_interior_r_value, :float)
         XMLHelper.add_element(layer, 'DistanceToTopOfInsulation', @insulation_interior_distance_to_top, :float, @insulation_interior_distance_to_top_isdefaulted) unless @insulation_interior_distance_to_top.nil?
         XMLHelper.add_element(layer, 'DistanceToBottomOfInsulation', @insulation_interior_distance_to_bottom, :float, @insulation_interior_distance_to_bottom_isdefaulted) unless @insulation_interior_distance_to_bottom.nil?
-      end
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(foundation_wall, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
       end
     end
 
@@ -3525,6 +3536,10 @@ class HPXML < Object
       floor = XMLHelper.add_element(floors, 'Floor')
       sys_id = XMLHelper.add_element(floor, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(floor, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(floor, 'ExteriorAdjacentTo', @exterior_adjacent_to, :string) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(floor, 'FloorOrCeiling', @floor_or_ceiling, :string, @floor_or_ceiling_isdefaulted) unless @floor_or_ceiling.nil?
@@ -3564,10 +3579,6 @@ class HPXML < Object
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous', :string)
         XMLHelper.add_element(layer, 'NominalRValue', @insulation_continuous_r_value, :float)
-      end
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(floor, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
       end
     end
 
@@ -3671,6 +3682,10 @@ class HPXML < Object
       slab = XMLHelper.add_element(slabs, 'Slab')
       sys_id = XMLHelper.add_element(slab, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_space_idref.nil?
+        space_attached = XMLHelper.add_element(slab, 'AttachedToSpace')
+        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
+      end
       XMLHelper.add_element(slab, 'InteriorAdjacentTo', @interior_adjacent_to, :string) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(slab, 'Area', @area, :float) unless @area.nil?
       XMLHelper.add_element(slab, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
@@ -3699,10 +3714,6 @@ class HPXML < Object
       XMLHelper.add_element(layer, 'InsulationSpansEntireSlab', @under_slab_insulation_spans_entire_slab, :boolean) unless @under_slab_insulation_spans_entire_slab.nil?
       XMLHelper.add_extension(slab, 'CarpetFraction', @carpet_fraction, :float, @carpet_fraction_isdefaulted) unless @carpet_fraction.nil?
       XMLHelper.add_extension(slab, 'CarpetRValue', @carpet_r_value, :float, @carpet_r_value_isdefaulted) unless @carpet_r_value.nil?
-      if not @attached_to_space_idref.nil?
-        space_attached = XMLHelper.add_element(slab, 'AttachedToSpace')
-        XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
-      end
     end
 
     def from_doc(slab)

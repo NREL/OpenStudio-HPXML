@@ -205,6 +205,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                            "Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'manufactured-home-reference-floor' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
                                                                     'There must be at least one ceiling adjacent to "crawlspace - vented".'],
+                            'missing-attached-to-space' => ['Expected 1 element(s) for xpath: AttachedToSpace',
+                                                            'Expected 1 element(s) for xpath: AttachedToSpace',
+                                                            'Expected 1 element(s) for xpath: AttachedToSpace',
+                                                            'Expected 1 element(s) for xpath: AttachedToSpace',
+                                                            'Expected 1 element(s) for xpath: AttachedToSpace'],
+                            'missing-spaces-in-conditioned-zone' => ['Expected 1 or more element(s) for xpath: Spaces/Space'],
                             'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
                                                                         'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
@@ -213,6 +219,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'missing-duct-location' => ['Expected 0 element(s) for xpath: FractionDuctArea | DuctSurfaceArea [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[not(DuctLocation)], id: "Ducts2"]'],
                             'missing-elements' => ['Expected 1 element(s) for xpath: NumberofConditionedFloors [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]',
                                                    'Expected 1 element(s) for xpath: ConditionedFloorArea [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
+                            'more-than-one-conditioned-zone' => ['Expected 0 or 1 element(s) for xpath: Zone/ZoneType[text()="conditioned"]'],
                             'multifamily-reference-appliance' => ['There are references to "other housing unit" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
@@ -599,6 +606,35 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             floor.exterior_adjacent_to = HPXML::LocationManufacturedHomeUnderBelly
             break
           end
+        end
+      elsif ['missing-attached-to-space'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('Long_Residence.xml',
+                                          building_id: nil,
+                                          alt_files_path: File.join(@root_path, 'workflow', 'tests', 'ACCA_Examples'))
+        hpxml_bldg.walls[0].attached_to_space_idref = nil
+        hpxml_bldg.roofs[0].attached_to_space_idref = nil
+        hpxml_bldg.floors[0].attached_to_space_idref = nil
+        hpxml_bldg.slabs[0].attached_to_space_idref = nil
+        hpxml_bldg.foundation_walls[0].attached_to_space_idref = nil
+      elsif ['more-than-one-conditioned-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('Long_Residence.xml',
+                                          building_id: nil,
+                                          alt_files_path: File.join(@root_path, 'workflow', 'tests', 'ACCA_Examples'))
+        hpxml_bldg.zones.add(id: 'LongResidence2',
+                             zone_type: HPXML::ZoneTypeConditioned)
+        hpxml_bldg.zones[-1].spaces = hpxml_bldg.zones[0].spaces.dup
+        hpxml_bldg.zones[0].spaces.each_with_index do |s, i|
+          dup_s = s.dup
+          dup_s.id += '_dup'
+          hpxml_bldg.zones[-1].spaces[i] = dup_s
+        end
+      elsif ['missing-spaces-in-conditioned-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('Long_Residence.xml',
+                                          building_id: nil,
+                                          alt_files_path: File.join(@root_path, 'workflow', 'tests', 'ACCA_Examples'))
+        # remove spaces
+        hpxml_bldg.zones[0].spaces.reverse_each do |s|
+          s.delete
         end
       elsif ['missing-capacity-detailed-performance'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml')
@@ -1709,8 +1745,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     end
   end
 
-  def _create_hpxml(hpxml_name, building_id: nil)
-    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name), building_id: building_id)
+  def _create_hpxml(hpxml_name, building_id: nil, alt_files_path: nil)
+    files_path = alt_files_path.nil? ? @sample_files_path : alt_files_path
+    hpxml = HPXML.new(hpxml_path: File.join(files_path, hpxml_name), building_id: building_id)
     if not hpxml.errors.empty?
       hpxml.errors.each do |error|
         puts error
