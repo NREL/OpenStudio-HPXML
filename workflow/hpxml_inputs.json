@@ -1662,6 +1662,9 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosizing-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_backup_heating_capacity": null,
     "heat_pump_cooling_autosizing_factor": 1.7,
     "heat_pump_heating_autosizing_factor": 1.4
   },
@@ -1852,6 +1855,7 @@
   },
   "sample_files/base-hvac-central-ac-only-1-speed-autosizing-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "cooling_system_cooling_capacity": null,
     "cooling_system_cooling_autosizing_factor": 1.7
   },
   "sample_files/base-hvac-central-ac-only-1-speed-seer2.xml": {
@@ -2055,6 +2059,7 @@
   },
   "sample_files/base-hvac-furnace-gas-only-autosizing-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
+    "heating_system_heating_capacity": null,
     "heating_system_heating_autosizing_factor": 1.4
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
