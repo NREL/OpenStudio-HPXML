@@ -217,6 +217,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
+                            'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
+                                                              'HeatingAutosizingFactor should be greater than 0.0'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected either schedule fractions/multipliers or schedule coefficients but not both.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
@@ -639,6 +641,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+      elsif ['negative-autosizing-factors'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-autosizing-factor.xml')
+        hpxml_bldg.heat_pumps[0].heating_autosizing_factor = -0.5
+        hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = -1.2
       elsif ['refrigerator-location'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.refrigerators[0].location = HPXML::LocationGarage
