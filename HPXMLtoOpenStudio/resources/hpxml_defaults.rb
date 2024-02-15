@@ -1268,12 +1268,12 @@ class HPXMLDefaults
       heating_system.heating_autosizing_factor_isdefaulted = true
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      if (heat_pump.heating_autosizing_factor.nil?)
-        heat_pump.heating_autosizing_factor = 1.0 
+      if heat_pump.heating_autosizing_factor.nil?
+        heat_pump.heating_autosizing_factor = 1.0
         heat_pump.heating_autosizing_factor_isdefaulted = true
       end
-      if(heat_pump.cooling_autosizing_factor.nil?)
-        heat_pump.cooling_autosizing_factor = 1.0 
+      if heat_pump.cooling_autosizing_factor.nil?
+        heat_pump.cooling_autosizing_factor = 1.0
         heat_pump.cooling_autosizing_factor_isdefaulted = true
       end
     end

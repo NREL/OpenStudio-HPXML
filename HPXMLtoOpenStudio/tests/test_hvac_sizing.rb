@@ -436,7 +436,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap_orig * caf, 0.001)
         # Fixme: backup heating not impacted, is it right?
         assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig)
-        
+
         # Test heat pump w/ detailed performance
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
@@ -460,7 +460,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap_orig * caf, 0.001)
         # Fixme: backup heating not impacted, is it right?
         assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig)
-        
+
         # Test allow fixed capacity
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-undersized.xml')
         hpxml_bldg.header.allow_increased_fixed_capacities = true

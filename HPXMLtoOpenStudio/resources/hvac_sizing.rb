@@ -1894,7 +1894,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
     end
   end
- 
+
   def self.apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
     '''
     Fixed Sizing Equipment

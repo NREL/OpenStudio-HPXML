@@ -1755,6 +1755,17 @@ The output heating capacity of the heating system. If not provided, the OS-HPXML
 
 <br/>
 
+**Heating System: Heating Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``heating_system_heating_autosizing_factor``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heating System: Fraction Heat Load Served**
 
 The heating load served by the heating system.
@@ -1865,6 +1876,17 @@ The output cooling capacity of the cooling system. If not provided, the OS-HPXML
 - **Type:** ``Double``
 
 - **Units:** ``Btu/hr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Cooling System: Cooling Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``cooling_system_cooling_autosizing_factor``
+- **Type:** ``Double``
 
 - **Required:** ``false``
 
@@ -2085,6 +2107,17 @@ The output heating capacity of the heat pump. If not provided, the OS-HPXML auto
 
 <br/>
 
+**Heat Pump: Heating Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``heat_pump_heating_autosizing_factor``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heat Pump: Heating Capacity Retention Fraction**
 
 The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except ground-to-air. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.
@@ -2119,6 +2152,17 @@ The output cooling capacity of the heat pump. If not provided, the OS-HPXML auto
 - **Type:** ``Double``
 
 - **Units:** ``Btu/hr``
+
+- **Required:** ``false``
+
+<br/>
+
+**Heat Pump: Cooling Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``heat_pump_cooling_autosizing_factor``
+- **Type:** ``Double``
 
 - **Required:** ``false``
 

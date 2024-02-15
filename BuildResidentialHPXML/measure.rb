@@ -1109,7 +1109,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_autosizing_factor', false)
     arg.setDisplayName('Heating System: Heating Autosizing Factor')
-    arg.setDescription("The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.")
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_fraction_heat_load_served', true)
@@ -1168,7 +1168,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_autosizing_factor', false)
     arg.setDisplayName('Cooling System: Cooling Autosizing Factor')
-    arg.setDescription("The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.")
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_fraction_cool_load_served', true)
@@ -1303,7 +1303,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_autosizing_factor', false)
     arg.setDisplayName('Heat Pump: Heating Autosizing Factor')
-    arg.setDescription("The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.")
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
@@ -1326,7 +1326,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_autosizing_factor', false)
     arg.setDisplayName('Heat Pump: Cooling Autosizing Factor')
-    arg.setDescription("The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.")
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_fraction_heat_load_served', true)
