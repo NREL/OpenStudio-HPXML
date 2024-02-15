@@ -1746,6 +1746,10 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
+    if hpxml_bldg.hvac_controls.size == 0 && hpxml_bldg.has_location(HPXML::LocationOtherHeatedSpace)
+      hpxml_bldg.hvac_controls.add(id: "HVACControl#{hpxml_bldg.hvac_controls.size + 1}")
+    end
+
     hpxml_bldg.hvac_controls.each do |hvac_control|
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::ColumnHeatingSetpoint))
       if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil? && !schedules_file_includes_heating_setpoint_temp
