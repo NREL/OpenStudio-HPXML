@@ -1891,6 +1891,7 @@ class HVACSizing
     end
     if not hvac_heating.nil?
       hvac_sizing_values.Heat_Capacity *= hvac_heating.heating_autosizing_factor
+      hvac_sizing_values.Heat_Capacity_Supp *= hvac_heating.heating_autosizing_factor
       hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
     end
   end
