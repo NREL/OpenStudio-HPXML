@@ -1903,7 +1903,7 @@ class HVACSizing
     if not hvac_cooling.nil?
       fixed_cooling_capacity = hvac_cooling.cooling_capacity
     end
-    if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
+    if not fixed_cooling_capacity.nil?
       if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Cool_Capacity > fixed_cooling_capacity)
         # Use fixed size; proportionally adjust autosized airflow & sensible capacity
         prev_capacity = hvac_sizing_values.Cool_Capacity
@@ -1917,7 +1917,7 @@ class HVACSizing
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity
     end
-    if (not fixed_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity > 0)
+    if not fixed_heating_capacity.nil?
       if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Heat_Capacity > fixed_heating_capacity)
         # Use fixed size; proportionally adjust autosized airflow & sensible capacity
         prev_capacity = hvac_sizing_values.Heat_Capacity
@@ -1932,11 +1932,9 @@ class HVACSizing
         fixed_supp_heating_capacity = hvac_heating.backup_system.heating_capacity
       end
     end
-    if (not fixed_supp_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity_Supp > 0)
-      prev_capacity = hvac_sizing_values.Heat_Capacity_Supp
-      hvac_sizing_values.Heat_Capacity_Supp = fixed_supp_heating_capacity
-      if @hpxml_bldg.header.allow_increased_fixed_capacities
-        hvac_sizing_values.Heat_Capacity_Supp = [hvac_sizing_values.Heat_Capacity_Supp, prev_capacity].max
+    if not fixed_supp_heating_capacity.nil?
+      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Heat_Capacity_Supp > fixed_supp_heating_capacity)
+        hvac_sizing_values.Heat_Capacity_Supp = fixed_supp_heating_capacity
       end
     end
   end
