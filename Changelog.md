@@ -14,21 +14,24 @@ __New Features__
   - Small update to default hot water piping length for homes with both conditioned and unconditioned basements to avoid double counting.
 - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
-- Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
-- Allows autosizing with detailed performance data inputs for variable-speed air source HVAC systems using `CapacityFractionOfNominal`.
 - Adds maximum power ratio detailed schedule for variable-speed HVAC systems (e.g., to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small)).
-- Now defaults to -20F for `CompressorLockoutTemperature` for variable-speed air-to-air heat pumps.
+- Air source heat pump enhancements:
+  - Adds heat pump backup autosizing methodology input (`HeatPumpBackupSizingMethodology`) with choices of "emergency" and "supplemental".
+  - Allows autosizing with detailed performance data inputs for variable-speed systems using `CapacityFractionOfNominal`.
+  - Now defaults to -20F for `CompressorLockoutTemperature` for variable-speed systems.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
+- Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
+- Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
+  - Adds heat pump backup sizing methodology input.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
-- Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 
 __Bugfixes__

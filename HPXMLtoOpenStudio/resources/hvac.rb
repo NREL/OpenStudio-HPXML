@@ -1824,7 +1824,7 @@ class HVAC
     htg_coil = nil unless ((heating_system.is_a? HPXML::HeatPump) && heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
     htg_supp_coil = nil unless ((heating_system.is_a? HPXML::HeatPump) && heating_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
     # No variable speed coil
-    if (clg_coil.nil?) && (htg_coil.nil?)
+    if clg_coil.nil? && htg_coil.nil?
       runner.registerWarning('Maximum power ratio schedule is only supported for variable speed systems.')
     end
 
