@@ -374,7 +374,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
         adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
       elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml'
         adjacent_to = HPXML::LocationOtherNonFreezingSpace
-      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml' || hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-heated-space-hvac-none.xml'
+      elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml'
         adjacent_to = HPXML::LocationOtherHeatedSpace
       elsif hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'
         adjacent_to = HPXML::LocationOtherHousingUnit
@@ -407,7 +407,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.dishwashers[0].location = adjacent_to
       hpxml_bldg.refrigerators[0].location = adjacent_to
       hpxml_bldg.cooking_ranges[0].location = adjacent_to
-    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml'].include? hpxml_file
+    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml',
+           'base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml'].include? hpxml_file
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
