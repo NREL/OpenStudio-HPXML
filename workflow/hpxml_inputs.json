@@ -842,8 +842,8 @@
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
-  "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space-hvac-none.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml",
+  "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple.xml",
     "heating_system_type": "none",
     "cooling_system_type": "none"
   },
