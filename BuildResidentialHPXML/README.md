@@ -2239,6 +2239,19 @@ The auto-sizing methodology to use when the heat pump capacity is not provided. 
 
 <br/>
 
+**Heat Pump: Backup Sizing Methodology**
+
+The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
+
+- **Name:** ``heat_pump_backup_sizing_methodology``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `emergency`, `supplemental`
+
+<br/>
+
 **Heat Pump: Is Ducted**
 
 Whether the heat pump is ducted or not. Only used for mini-split. It's assumed that air-to-air and ground-to-air are ducted, and packaged terminal heat pump and room air conditioner with reverse cycle are not ducted. If not provided, assumes not ducted.
@@ -3734,6 +3747,17 @@ Multiplier on the hot water usage that can reflect, e.g., high/low usage occupan
 
 <br/>
 
+**General Water Use: Usage Multiplier**
+
+Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-building-occupancy'>HPXML Building Occupancy</a>) is used.
+
+- **Name:** ``general_water_use_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
 **Solar Thermal: System Type**
 
 The type of solar thermal system. Use 'none' if there is no solar thermal system.
@@ -4146,6 +4170,19 @@ The round trip efficiency of the lithium ion battery. If not provided, the OS-HP
 - **Type:** ``Double``
 
 - **Units:** ``Frac``
+
+- **Required:** ``false``
+
+<br/>
+
+**Battery: Number of Bedrooms Served**
+
+Number of bedrooms served by the lithium ion battery. Required if single-family attached or apartment unit. Used to apportion battery charging/discharging to the unit of a SFA/MF building.
+
+- **Name:** ``battery_num_bedrooms_served``
+- **Type:** ``Integer``
+
+- **Units:** ``#``
 
 - **Required:** ``false``
 
