@@ -348,8 +348,8 @@
               </AnnualHeatingEfficiency>
               <extension>
                 <FanPowerWattsPerCFM>0.4</FanPowerWattsPerCFM>
-                <MaxHeatingAirflowCFM>900.0</MaxHeatingAirflowCFM>
-                <MaxCoolingAirflowCFM>1200.0</MaxCoolingAirflowCFM>
+                <MaxHeatingAirflowCFM>700.0</MaxHeatingAirflowCFM>
+                <MaxCoolingAirflowCFM>900.0</MaxCoolingAirflowCFM>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>

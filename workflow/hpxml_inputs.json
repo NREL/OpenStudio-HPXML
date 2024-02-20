@@ -1668,8 +1668,8 @@
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-existing-ductwork-restriction.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_distribution_fan_watts_per_cfm": 0.4,
-    "hvac_distribution_max_heating_airflow_cfm": 900,
-    "hvac_distribution_max_cooling_airflow_cfm": 1200
+    "hvac_distribution_max_heating_airflow_cfm": 700,
+    "hvac_distribution_max_cooling_airflow_cfm": 900
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
