@@ -33,7 +33,6 @@ __New Features__
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
 - Miscellaneous Manual J improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
-- Update calculation of hot water piping length for buildings with both conditioned and unconditioned basements to avoid double counting.
 - Allow alternative label energy use (W) input for ceiling fans.
 
 __Bugfixes__
