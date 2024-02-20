@@ -797,6 +797,8 @@
     <sch:title>[HeatingSystemType=Resistance]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:ElectricResistance]'>
       <sch:assert role='ERROR' test='count(h:DistributionSystem) = 0'>Expected 0 element(s) for xpath: DistributionSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:HeatingSystemType/h:ElectricResistance/h:ElectricDistribution) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingSystemType/ElectricResistance/ElectricDistribution</sch:assert>
+      <sch:assert role='ERROR' test='h:HeatingSystemType/h:ElectricResistance/h:ElectricDistribution[text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"] or not(h:HeatingSystemType/h:ElectricResistance/h:ElectricDistribution)'>Expected HeatingSystemType/ElectricResistance/ElectricDistribution to be 'baseboard' or 'radiant floor' or 'radiant ceiling'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingSystemFuel) = 1'>Expected 1 element(s) for xpath: HeatingSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='h:HeatingSystemFuel[text()="electricity"] or not(h:HeatingSystemFuel)'>Expected HeatingSystemFuel to be 'electricity'</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatingCapacity) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatingCapacity</sch:assert>

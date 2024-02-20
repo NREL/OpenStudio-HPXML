@@ -1373,6 +1373,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, nil, false, nil)
   end
 
+  def test_electric_resistance
+    # Test inputs not overridden by defaults
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-elec-resistance-only.xml')
+    hpxml_bldg.heating_systems[0].electric_resistance_distribution = HPXML::ElectricResistanceDistributionRadiantCeiling
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_electric_resistance_values(default_hpxml_bldg.heating_systems[0], HPXML::ElectricResistanceDistributionRadiantCeiling)
+
+    # Test defaults
+    hpxml_bldg.heating_systems[0].electric_resistance_distribution = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_electric_resistance_values(default_hpxml_bldg.heating_systems[0], HPXML::ElectricResistanceDistributionBaseboard)
+  end
+
   def test_boilers
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
@@ -4295,6 +4310,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     else
       assert_equal(pilot_light_btuh, heating_system.pilot_light_btuh)
     end
+  end
+
+  def _test_default_electric_resistance_values(heating_system, distribution)
+    assert_equal(distribution, heating_system.electric_resistance_distribution)
   end
 
   def _test_default_boiler_values(heating_system, eae, heating_capacity, pilot_light, pilot_light_btuh)
