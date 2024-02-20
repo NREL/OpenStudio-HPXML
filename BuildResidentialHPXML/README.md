@@ -33,6 +33,17 @@ Absolute/relative path of the existing HPXML file. If not provided, a new HPXML 
 
 <br/>
 
+**Whole SFA/MF Building Simulation?**
+
+If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.
+
+- **Name:** ``whole_sfa_or_mf_building_sim``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Software Info: Program Used**
 
 The name of the software program used.
@@ -2228,6 +2239,19 @@ The auto-sizing methodology to use when the heat pump capacity is not provided. 
 
 <br/>
 
+**Heat Pump: Backup Sizing Methodology**
+
+The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.
+
+- **Name:** ``heat_pump_backup_sizing_methodology``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `emergency`, `supplemental`
+
+<br/>
+
 **Heat Pump: Is Ducted**
 
 Whether the heat pump is ducted or not. Only used for mini-split. It's assumed that air-to-air and ground-to-air are ducted, and packaged terminal heat pump and room air conditioner with reverse cycle are not ducted. If not provided, assumes not ducted.
@@ -2287,7 +2311,7 @@ Type of capacity values for detailed performance data if available. Applies only
 
 - **Required:** ``false``
 
-- **Choices:** `Absolute capacities`
+- **Choices:** `Absolute capacities`, `Normalized capacity fractions`
 
 <br/>
 
@@ -3652,6 +3676,17 @@ Whether the sink fixture is low flow.
 Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.
 
 - **Name:** ``water_fixtures_usage_multiplier``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
+**General Water Use: Usage Multiplier**
+
+Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-building-occupancy'>HPXML Building Occupancy</a>) is used.
+
+- **Name:** ``general_water_use_usage_multiplier``
 - **Type:** ``Double``
 
 - **Required:** ``false``

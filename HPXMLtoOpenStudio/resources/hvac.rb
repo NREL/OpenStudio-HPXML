@@ -1234,13 +1234,13 @@ class HVAC
   def self.set_heat_curves_central_air_source(heating_system, use_cop = false)
     htg_ap = heating_system.additional_properties
     htg_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
-    heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
     set_heat_c_d(heating_system)
 
     hspf = heating_system.heating_efficiency_hspf
     if heating_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
+      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       if not use_cop
         htg_ap.heat_rated_cops = [0.0353 * hspf**2 + 0.0331 * hspf + 0.9447] # Regression based on inverse model
@@ -1251,6 +1251,7 @@ class HVAC
       end
 
     elsif heating_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
+      heating_capacity_retention_temp, heating_capacity_retention_fraction = get_heating_capacity_retention(heating_system)
       htg_ap.heat_cap_ft_spec, htg_ap.heat_eir_ft_spec = get_heat_cap_eir_ft_spec(heating_system.compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
       htg_ap.heat_rated_airflow_rate = htg_ap.heat_rated_cfm_per_ton[-1]
       htg_ap.heat_fan_speed_ratios = calc_fan_speed_ratios(htg_ap.heat_capacity_ratios, htg_ap.heat_rated_cfm_per_ton, htg_ap.heat_rated_airflow_rate)
@@ -2001,66 +2002,16 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_boiler_eae(heating_system)
-    if heating_system.heating_system_type != HPXML::HVACTypeBoiler
-      return
-    end
-    if not heating_system.electric_auxiliary_energy.nil?
-      return heating_system.electric_auxiliary_energy
-    end
-
-    # From ANSI/RESNET/ICC 301-2019 Standard
-    fuel = heating_system.heating_system_fuel
-
-    if heating_system.is_shared_system
-      distribution_system = heating_system.distribution_system
-      distribution_type = distribution_system.distribution_system_type
-
-      if not heating_system.shared_loop_watts.nil?
-        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-        n_dweq = heating_system.number_of_units_served.to_f
-        if distribution_system.air_type == HPXML::AirTypeFanCoil
-          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-        else
-          aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
-        end
-        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-        return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
-      elsif distribution_type == HPXML::HVACDistributionTypeHydronic
-        # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop # Shared boiler w/ WLHP
-          return 265.0
-        else # Shared boiler w/ baseboard/radiators/etc
-          return 220.0
-        end
-      elsif distribution_type == HPXML::HVACDistributionTypeAir
-        if distribution_system.air_type == HPXML::AirTypeFanCoil # Shared boiler w/ fan coil
-          return 438.0
-        end
-      end
-
-    else # In-unit boilers
-
-      if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane,
-          HPXML::FuelTypeElectricity,
-          HPXML::FuelTypeWoodCord,
-          HPXML::FuelTypeWoodPellets].include? fuel
-        return 170.0 # kWh/yr
-      elsif [HPXML::FuelTypeOil,
-             HPXML::FuelTypeOil1,
-             HPXML::FuelTypeOil2,
-             HPXML::FuelTypeOil4,
-             HPXML::FuelTypeOil5or6,
-             HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene,
-             HPXML::FuelTypeCoal,
-             HPXML::FuelTypeCoalAnthracite,
-             HPXML::FuelTypeCoalBituminous,
-             HPXML::FuelTypeCoke].include? fuel
-        return 330.0 # kWh/yr
-      end
-
+  def self.get_default_in_unit_boiler_eae(boiler_fuel)
+    # Electric auxiliary energy, from ANSI/RESNET/ICC 301-2022 Addendum C Standard
+    if [HPXML::FuelTypeNaturalGas,
+        HPXML::FuelTypePropane,
+        HPXML::FuelTypeElectricity,
+        HPXML::FuelTypeWoodCord,
+        HPXML::FuelTypeWoodPellets].include? boiler_fuel
+      return 170.0 # kWh/yr
+    else
+      return 330.0 # kWh/yr
     end
   end
 
@@ -3451,6 +3402,17 @@ class HVAC
       distribution_system = heating_system.distribution_system
       hydronic_type = distribution_system.hydronic_type
 
+      if heating_system.heating_system_type == HPXML::HVACTypeBoiler
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+        if distribution_system.air_type == HPXML::AirTypeFanCoil
+          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+        else
+          aux_in = 0.0
+        end
+        heating_system.electric_auxiliary_energy = (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
+      end
+
       if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_type.to_s == HPXML::HydronicTypeWaterLoop
 
         # Shared boiler w/ water loop heat pump
@@ -3507,6 +3469,7 @@ class HVAC
     end
 
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.is_heat_pump_backup_system # Will be processed later
       if is_attached_heating_and_cooling_systems(hpxml_bldg, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
       end
@@ -3521,6 +3484,13 @@ class HVAC
     hpxml_bldg.heat_pumps.sort_by { |hp| hp.backup_system_idref.to_s }.each do |heat_pump|
       hvac_systems << { cooling: heat_pump,
                         heating: heat_pump }
+    end
+
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.is_heat_pump_backup_system
+
+      hvac_systems << { cooling: nil,
+                        heating: heating_system }
     end
 
     return hvac_systems
@@ -3553,13 +3523,17 @@ class HVAC
       hp_sys.backup_heating_capacity = [hp_sys.backup_heating_capacity, min_capacity].max unless hp_sys.backup_heating_capacity.nil?
       if not hp_sys.heating_detailed_performance_data.empty?
         hp_sys.heating_detailed_performance_data.each do |dp|
+          next if dp.capacity.nil?
+
           speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
           dp.capacity = [dp.capacity, min_capacity * speed].max
         end
       end
-      next unless not hp_sys.cooling_detailed_performance_data.empty?
+      next if hp_sys.cooling_detailed_performance_data.empty?
 
       hp_sys.cooling_detailed_performance_data.each do |dp|
+        next if dp.capacity.nil?
+
         speed = dp.capacity_description == HPXML::CapacityDescriptionMinimum ? 1 : 2
         dp.capacity = [dp.capacity, min_capacity * speed].max
       end
