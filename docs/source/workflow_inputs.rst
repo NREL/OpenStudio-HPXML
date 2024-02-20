@@ -682,18 +682,27 @@ HPXML HVAC Sizing Control
 
 HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl``.
 
-  =================================  ========  =====  ===========  ========  ========  ============================================
-  Element                            Type      Units  Constraints  Required  Default   Description
-  =================================  ========  =====  ===========  ========  ========  ============================================
-  ``AllowIncreasedFixedCapacities``  boolean                       No        false     Logic for fixed capacity HVAC equipment [#]_
-  ``HeatPumpSizingMethodology``      string           See [#]_     No        HERS      Logic for autosized heat pumps [#]_
-  =================================  ========  =====  ===========  ========  ========  ============================================
+  ===================================  ========  =====  ===========  ========  =========  ============================================
+  Element                              Type      Units  Constraints  Required  Default    Description
+  ===================================  ========  =====  ===========  ========  =========  ============================================
+  ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps [#]_
+  ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup [#]_
+  ``AllowIncreasedFixedCapacities``    boolean                       No        false      Logic for fixed capacity HVAC equipment [#]_
+  ===================================  ========  =====  ===========  ========  =========  ============================================
 
-  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
   .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
   .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
          If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
          If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
+  .. [#] HeatPumpBackupSizingMethodology choices are 'emergency' or 'supplemental'.
+  .. [#] Heat pump backup capacity is often sized for emergency heat so that it can meet the entire design load if the heat pump fails.
+         Some contractors/homeowners may choose not to do so, perhaps due to insufficient panel/wiring capacity.
+
+         If HeatPumpBackupSizingMethodology is 'emergency', heat pump backup capacity will be autosized to meet the ACCA Manual J heating design load.
+         If HeatPumpBackupSizingMethodology is 'supplemental', heat pump backup capacity will be autosized to meet the remainder of the ACCA Manual J heating design load not met by the heat pump at the heating design temperature.
+
+         If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
+  .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
 
 If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
@@ -1510,17 +1519,19 @@ Electric Resistance
 
 Each electric resistance heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
-  Element                                             Type     Units   Constraints         Required  Default         Notes
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
-  ``SystemIdentifier``                                id                                   Yes                       Unique identifier
-  ``HeatingSystemType/ElectricResistance``            element                              Yes                       Type of heating system
-  ``HeatingSystemFuel``                               string           electricity         Yes                       Fuel type
-  ``HeatingCapacity``                                 double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1           Yes                       Efficiency
-  ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
+  Element                                                        Type     Units   Constraints         Required  Default         Notes
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
+  ``SystemIdentifier``                                           id                                   Yes                       Unique identifier
+  ``HeatingSystemType/ElectricResistance``                       element                              Yes                       Type of heating system
+  ``HeatingSystemType/ElectricResistance/ElectricDistribution``  string           See [#]_            No        baseboard       Type of electric resistance distribution
+  ``HeatingSystemFuel``                                          string           electricity         Yes                       Fuel type
+  ``HeatingCapacity``                                            double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``             double   frac    > 0, <= 1           Yes                       Efficiency
+  ``FractionHeatLoadServed``                                     double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
 
+  .. [#] ElectricDistribution choices are "baseboard", "radiant floor", or "radiant ceiling".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
