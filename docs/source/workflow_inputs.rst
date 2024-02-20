@@ -1519,17 +1519,19 @@ Electric Resistance
 
 Each electric resistance heating system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
-  Element                                             Type     Units   Constraints         Required  Default         Notes
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
-  ``SystemIdentifier``                                id                                   Yes                       Unique identifier
-  ``HeatingSystemType/ElectricResistance``            element                              Yes                       Type of heating system
-  ``HeatingSystemFuel``                               string           electricity         Yes                       Fuel type
-  ``HeatingCapacity``                                 double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1           Yes                       Efficiency
-  ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
-  ==================================================  =======  ======  ==================  ========  ==============  ==========
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
+  Element                                                        Type     Units   Constraints         Required  Default         Notes
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
+  ``SystemIdentifier``                                           id                                   Yes                       Unique identifier
+  ``HeatingSystemType/ElectricResistance``                       element                              Yes                       Type of heating system
+  ``HeatingSystemType/ElectricResistance/ElectricDistribution``  string           See [#]_            No        baseboard       Type of electric resistance distribution
+  ``HeatingSystemFuel``                                          string           electricity         Yes                       Fuel type
+  ``HeatingCapacity``                                            double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``             double   frac    > 0, <= 1           Yes                       Efficiency
+  ``FractionHeatLoadServed``                                     double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
+  =============================================================  =======  ======  ==================  ========  ==============  ==========
 
+  .. [#] ElectricDistribution choices are "baseboard", "radiant floor", or "radiant ceiling".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
