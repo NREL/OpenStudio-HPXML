@@ -2753,20 +2753,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         sensor_htg_spt.setKeyName(htg_sch.name.to_s)
         space_values[:temp_min] = sensor_htg_spt.name.to_s
       else
-        # No HVAC system; use the average of defaulted heating/cooling setpoints.
+        # No HVAC system; use the defaulted heating setpoint.
         htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
-        clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
         if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
           default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f
         else
           fail 'Unexpected heating setpoints.'
         end
-        if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
-          default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f
-        else
-          fail 'Unexpected cooling setpoints.'
-        end
-        space_values[:temp_min] = (default_htg_sp + default_clg_sp) / 2.0 # avg-F
+        space_values[:temp_min] = default_htg_sp # F
       end
     end
 
@@ -2777,9 +2771,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Sensors
     if space_values[:indoor_weight] > 0
-      sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-      sensor_ia.setName('cond_zone_temp')
-      sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
+      if location == HPXML::LocationOtherHeatedSpace
+        sensor_ia = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
+      else
+        sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+        sensor_ia.setName('cond_zone_temp')
+        sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
+        sensor_ia = sensor_ia.name
+      end
     end
 
     if space_values[:outdoor_weight] > 0
@@ -2800,7 +2799,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program.setName("#{location.gsub('-', '_')} Temperature Program")
     program.addLine("Set #{actuator.name} = 0.0")
     if not sensor_ia.nil?
-      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia.name} * #{space_values[:indoor_weight]})")
+      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia} * #{space_values[:indoor_weight]})")
     end
     if not sensor_oa.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_oa.name} * #{space_values[:outdoor_weight]})")
