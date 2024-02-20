@@ -2771,7 +2771,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Sensors
     if space_values[:indoor_weight] > 0
-      if location == HPXML::LocationOtherHeatedSpace
+      if location == HPXML::LocationOtherHeatedSpace && !spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
         sensor_ia = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
       else
         sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
