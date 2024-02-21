@@ -2818,10 +2818,9 @@ class HPXMLDefaults
     return if hpxml_bldg.ceiling_fans.size == 0
 
     ceiling_fan = hpxml_bldg.ceiling_fans[0]
-    if ceiling_fan.efficiency.nil?
-      medium_cfm = 3000.0
-      ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
-      ceiling_fan.efficiency_isdefaulted = true
+    if ceiling_fan.efficiency.nil? && ceiling_fan.label_energy_use.nil?
+      ceiling_fan.label_energy_use = HVAC.get_default_ceiling_fan_power()
+      ceiling_fan.label_energy_use_isdefaulted = true
     end
     if ceiling_fan.count.nil?
       ceiling_fan.count = HVAC.get_default_ceiling_fan_quantity(nbeds)

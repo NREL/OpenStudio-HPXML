@@ -2114,7 +2114,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # -------------- #
 
     # Logic that can only be applied based on the file name
-    if ['base-lighting-ceiling-fans.xml'].include? hpxml_file
+    if ['base-lighting-ceiling-fans.xml',
+        'base-lighting-ceiling-fans-label-energy-use.xml'].include? hpxml_file
       hpxml_bldg.ceiling_fans[0].weekday_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].weekend_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].monthly_multipliers = '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0'

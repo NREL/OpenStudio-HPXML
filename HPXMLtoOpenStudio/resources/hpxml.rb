@@ -7036,7 +7036,7 @@ class HPXML < Object
   end
 
   class CeilingFan < BaseElement
-    ATTRS = [:id, :efficiency, :count, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+    ATTRS = [:id, :efficiency, :label_energy_use, :count, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -7061,6 +7061,7 @@ class HPXML < Object
         XMLHelper.add_element(airflow, 'Efficiency', @efficiency, :float, @efficiency_isdefaulted)
       end
       XMLHelper.add_element(ceiling_fan, 'Count', @count, :integer, @count_isdefaulted) unless @count.nil?
+      XMLHelper.add_element(ceiling_fan, 'LabelEnergyUse', @label_energy_use, :float, @label_energy_use_isdefaulted) unless @label_energy_use.nil?
       XMLHelper.add_extension(ceiling_fan, 'WeekdayScheduleFractions', @weekday_fractions, :string, @weekday_fractions_isdefaulted) unless @weekday_fractions.nil?
       XMLHelper.add_extension(ceiling_fan, 'WeekendScheduleFractions', @weekend_fractions, :string, @weekend_fractions_isdefaulted) unless @weekend_fractions.nil?
       XMLHelper.add_extension(ceiling_fan, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
@@ -7069,6 +7070,7 @@ class HPXML < Object
     def from_doc(ceiling_fan)
       @id = HPXML::get_id(ceiling_fan)
       @efficiency = XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency", :float)
+      @label_energy_use = XMLHelper.get_value(ceiling_fan, 'LabelEnergyUse', :float)
       @count = XMLHelper.get_value(ceiling_fan, 'Count', :integer)
       @weekday_fractions = XMLHelper.get_value(ceiling_fan, 'extension/WeekdayScheduleFractions', :string)
       @weekend_fractions = XMLHelper.get_value(ceiling_fan, 'extension/WeekendScheduleFractions', :string)

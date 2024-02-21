@@ -2449,6 +2449,7 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan'>
       <sch:assert role='ERROR' test='count(h:Airflow[h:FanSpeed="medium"]/h:Efficiency) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Airflow[FanSpeed="medium"]/Efficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:Count) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Count</sch:assert>
+      <sch:assert role='ERROR' test='count(h:LabelEnergyUse) &lt;= 1'>Expected 0 or 1 element(s) for xpath: LabelEnergyUse</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekdayScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekdayScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:WeekendScheduleFractions) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/WeekendScheduleFractions</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/MonthlyScheduleMultipliers</sch:assert>
