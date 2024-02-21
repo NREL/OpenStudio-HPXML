@@ -368,7 +368,6 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     if ['base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml',
         'base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml',
-        'base-bldgtype-mf-unit-adjacent-to-other-heated-space-hvac-none.xml',
         'base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml'].include? hpxml_file
       if hpxml_file == 'base-bldgtype-mf-unit-adjacent-to-multifamily-buffer-space.xml'
         adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
@@ -399,8 +398,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                            area: 20,
                            azimuth: 0,
                            r_value: 4.4)
-      hpxml_bldg.hvac_distributions[0].ducts[0].duct_location = adjacent_to if hpxml_bldg.hvac_distributions.size > 0
-      hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = adjacent_to if hpxml_bldg.hvac_distributions.size > 0
+      hpxml_bldg.hvac_distributions[0].ducts[0].duct_location = adjacent_to
+      hpxml_bldg.hvac_distributions[0].ducts[1].duct_location = adjacent_to
       hpxml_bldg.water_heating_systems[0].location = adjacent_to
       hpxml_bldg.clothes_washers[0].location = adjacent_to
       hpxml_bldg.clothes_dryers[0].location = adjacent_to
