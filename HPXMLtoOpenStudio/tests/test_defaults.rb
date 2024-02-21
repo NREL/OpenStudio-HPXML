@@ -3522,19 +3522,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test inputs not overridden by defaults 2
-    hpxml_bldg.ceiling_fans.each do |ceiling_fan|
-      ceiling_fan.efficiency = 100
-      ceiling_fan.label_energy_use = nil
-    end
+    hpxml_bldg.ceiling_fans[0].label_energy_use = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, nil, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test inputs not overridden by defaults 3
-    hpxml_bldg.ceiling_fans.each do |ceiling_fan|
-      ceiling_fan.efficiency = nil
-      ceiling_fan.label_energy_use = 39
-    end
+    hpxml_bldg.ceiling_fans[0].efficiency = nil
+    hpxml_bldg.ceiling_fans[0].label_energy_use = 39
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, nil, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
