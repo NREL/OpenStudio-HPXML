@@ -652,7 +652,11 @@ The column names available in the schedule CSV files are:
   ``outage``                        0/1      Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
   ================================  =======  =================================================================================  ===============================
 
-  .. [#] Allows modeling, e.g., shedding controls per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_.
+  .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems as opposed to setpoint changes to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
+  While any value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
+  A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated.
+  Values of 0.4 or below in the schedule are treated as "Critical curtailment" events and values between 0.4-0.7 are treated as "General curtailment" events.
+  
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
