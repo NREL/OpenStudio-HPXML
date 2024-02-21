@@ -2207,6 +2207,17 @@ The temperature below which the heat pump compressor is disabled. If both this a
 
 <br/>
 
+**Heat Pump: Heating Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``heat_pump_backup_heating_autosizing_factor``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heat Pump: Backup Type**
 
 The backup type of the heat pump. If 'integrated', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If 'separate', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.

@@ -1276,6 +1276,10 @@ class HPXMLDefaults
         heat_pump.cooling_autosizing_factor = 1.0
         heat_pump.cooling_autosizing_factor_isdefaulted = true
       end
+      if heat_pump.backup_heating_autosizing_factor.nil?
+        heat_pump.backup_heating_autosizing_factor = 1.0
+        heat_pump.backup_heating_autosizing_factor_isdefaulted = true
+      end
     end
 
     # Default AC/HP compressor type

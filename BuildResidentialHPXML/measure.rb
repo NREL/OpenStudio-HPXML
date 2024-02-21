@@ -1349,6 +1349,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_autosizing_factor', false)
+    arg.setDisplayName('Heat Pump: Heating Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
     arg.setDisplayName('Heat Pump: Backup Type')
     arg.setDescription("The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.")
@@ -5327,6 +5332,10 @@ class HPXMLFile
       heating_capacity_retention_temp = args[:heat_pump_heating_capacity_retention_temp].get
     end
 
+    if args[:heat_pump_backup_heating_autosizing_factor].is_initialized
+      backup_heating_autosizing_factor = args[:heat_pump_backup_heating_autosizing_factor].get
+    end
+
     if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
       backup_type = args[:heat_pump_backup_type]
       backup_heating_fuel = args[:heat_pump_backup_fuel]
@@ -5430,6 +5439,7 @@ class HPXMLFile
                               heat_pump_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: heating_capacity,
                               heating_autosizing_factor: heating_autosizing_factor,
+                              backup_heating_autosizing_factor: backup_heating_autosizing_factor,
                               heating_capacity_retention_fraction: heating_capacity_retention_fraction,
                               heating_capacity_retention_temp: heating_capacity_retention_temp,
                               compressor_type: compressor_type,

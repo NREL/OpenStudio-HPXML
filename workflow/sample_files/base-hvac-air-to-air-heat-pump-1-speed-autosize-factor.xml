@@ -350,6 +350,7 @@
                 </HeatingCapacityRetention>
                 <CoolingAutosizingFactor>1.7</CoolingAutosizingFactor>
                 <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
+                <BackupHeatingAutosizingFactor>0.9</BackupHeatingAutosizingFactor>
               </extension>
             </HeatPump>
           </HVACPlant>

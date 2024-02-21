@@ -30,7 +30,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = { 'hpxml_path' => File.absolute_path(@tmp_hpxml_path),
                   'skip_validation' => true }
     Dir["#{@sample_files_path}/base-hvac*.xml"].each do |hvac_hpxml|
-      next if (hvac_hpxml.include? 'autosize') || (hvac_hpxml.include? 'autosizing-factor')
+      next if (hvac_hpxml.include? 'autosize')
       next if hvac_hpxml.include? 'detailed-performance' # Autosizing not allowed
 
       { 'USA_CO_Denver.Intl.AP.725650_TMY3.epw' => 'denver',
@@ -427,13 +427,15 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].heating_capacity = nil
         hpxml_bldg.heat_pumps[0].cooling_capacity = nil
         hpxml_bldg.heat_pumps[0].heating_autosizing_factor = haf
+        # use a reverse factor for backup heating sizing
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = (2.0 - haf)
         hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = caf
         XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
         _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
         htg_cap = hpxml_bldg.heat_pumps[0].heating_capacity
         clg_cap = hpxml_bldg.heat_pumps[0].cooling_capacity
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].heating_capacity, htg_cap_orig * haf, 0.001)
-        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig * haf, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig * (2.0 - haf), 0.001)
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap_orig * caf, 0.001)
 
         # Test heat pump w/ detailed performance
@@ -451,12 +453,14 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].cooling_capacity = nil
         hpxml_bldg.heat_pumps[0].heating_autosizing_factor = haf
         hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = caf
+        # use a reverse factor for backup heating sizing
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = (2.0 - haf)
         XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
         _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
         htg_cap = hpxml_bldg.heat_pumps[0].heating_capacity
         clg_cap = hpxml_bldg.heat_pumps[0].cooling_capacity
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].heating_capacity, htg_cap_orig * haf, 0.001)
-        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig * haf, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, backup_htg_cap_orig * (2.0 - haf), 0.001)
         assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap_orig * caf, 0.001)
 
         # Test allow fixed capacity
