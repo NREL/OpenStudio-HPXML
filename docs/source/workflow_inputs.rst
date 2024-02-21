@@ -646,8 +646,6 @@ The column names available in the schedule CSV files are:
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
-  ``vacancy``                       0/1      Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
-  ``outage``                        0/1      Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
   ================================  =======  =================================================================================  ===============================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
