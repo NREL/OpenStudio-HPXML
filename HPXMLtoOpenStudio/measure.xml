@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e00fa5e4-2901-485f-b248-c8cbc347211d</version_id>
-  <version_modified>2024-02-22T02:27:26Z</version_modified>
+  <version_id>209f2683-845f-4cff-84bc-3f96ba1b151c</version_id>
+  <version_modified>2024-02-22T15:38:00Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -274,7 +274,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24CC1590</checksum>
+      <checksum>73BFECE2</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -577,6 +577,12 @@
       <checksum>87937B84</checksum>
     </file>
     <file>
+      <filename>in.schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8FBBC133</checksum>
+    </file>
+    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -652,7 +658,7 @@
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>92D61DDA</checksum>
+      <checksum>33CC4E30</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
