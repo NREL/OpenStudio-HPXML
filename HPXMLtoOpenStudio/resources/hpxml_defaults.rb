@@ -664,7 +664,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_infiltration(hpxml_bldg, infil_measurement)
+  def self.apply_infiltration(hpxml_bldg)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
     if infil_measurement.infiltration_volume.nil?
       infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
