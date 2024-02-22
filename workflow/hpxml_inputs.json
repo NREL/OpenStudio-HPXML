@@ -902,6 +902,9 @@
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-ducted.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml"
   },
+  "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-eae.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml"
+  },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-water-loop-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml"
   },
