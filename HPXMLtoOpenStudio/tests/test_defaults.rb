@@ -3513,24 +3513,39 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml, hpxml_bldg = _create_hpxml('base-lighting-ceiling-fans.xml')
     hpxml_bldg.ceiling_fans[0].count = 2
     hpxml_bldg.ceiling_fans[0].efficiency = 100
+    hpxml_bldg.ceiling_fans[0].label_energy_use = 39
     hpxml_bldg.ceiling_fans[0].weekday_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].weekend_fractions = ConstantDaySchedule
     hpxml_bldg.ceiling_fans[0].monthly_multipliers = ConstantMonthSchedule
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+
+    # Test inputs not overridden by defaults 2
+    hpxml_bldg.ceiling_fans[0].label_energy_use = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, 100, nil, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
+
+    # Test inputs not overridden by defaults 3
+    hpxml_bldg.ceiling_fans[0].efficiency = nil
+    hpxml_bldg.ceiling_fans[0].label_energy_use = 39
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 2, nil, 39, ConstantDaySchedule, ConstantDaySchedule, ConstantMonthSchedule)
 
     # Test defaults
     hpxml_bldg.ceiling_fans.each do |ceiling_fan|
       ceiling_fan.count = nil
       ceiling_fan.efficiency = nil
+      ceiling_fan.label_energy_use = nil
       ceiling_fan.weekday_fractions = nil
       ceiling_fan.weekend_fractions = nil
       ceiling_fan.monthly_multipliers = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 4, 70.4, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
+    _test_default_ceiling_fan_values(default_hpxml_bldg.ceiling_fans[0], 4, nil, 42.6, Schedule.CeilingFanWeekdayFractions, Schedule.CeilingFanWeekendFractions, '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0')
   end
 
   def test_pools
@@ -5196,9 +5211,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_ceiling_fan_values(ceiling_fan, count, efficiency, weekday_sch, weekend_sch, monthly_mults)
+  def _test_default_ceiling_fan_values(ceiling_fan, count, efficiency, label_energy_use, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(count, ceiling_fan.count)
-    assert_in_epsilon(efficiency, ceiling_fan.efficiency, 0.01)
+    if efficiency.nil?
+      assert_nil(ceiling_fan.efficiency)
+    else
+      assert_in_epsilon(efficiency, ceiling_fan.efficiency, 0.01)
+    end
+    if label_energy_use.nil?
+      assert_nil(ceiling_fan.label_energy_use)
+    else
+      assert_in_epsilon(label_energy_use, ceiling_fan.label_energy_use, 0.01)
+    end
     if weekday_sch.nil?
       assert_nil(ceiling_fan.weekday_fractions)
     else

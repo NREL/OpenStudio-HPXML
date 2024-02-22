@@ -4295,18 +4295,19 @@ HPXML Ceiling Fans
 Each ceiling fan is entered as a ``/HPXML/Building/BuildingDetails/Lighting/CeilingFan``.
 If not entered, the simulation will not include a ceiling fan.
 
-  =========================================  =======  =======  ===========  ========  ========  ==============================
-  Element                                    Type     Units    Constraints  Required  Default   Notes
-  =========================================  =======  =======  ===========  ========  ========  ==============================
-  ``SystemIdentifier``                       id                             Yes                 Unique identifier
-  ``Airflow[FanSpeed="medium"]/Efficiency``  double   cfm/W    > 0          No        See [#]_  Efficiency at medium speed
-  ``Count``                                  integer           > 0          No        See [#]_  Number of similar ceiling fans
-  ``extension/WeekdayScheduleFractions``     array                          No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``     array                          No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``   array                          No        See [#]_  12 comma-separated monthly multipliers
-  =========================================  =======  =======  ===========  ========  ========  ==============================
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
+  Element                                                                        Type     Units       Constraints  Required  Default   Notes
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
+  ``SystemIdentifier``                                                           id                                Yes                 Unique identifier
+  ``Airflow[FanSpeed="medium"]/Efficiency`` and/or ``LabelEnergyUse``            double   cfm/W or W  > 0          No        See [#]_  Efficiency at medium speed or EnergyGuide label average energy use
+  ``Count``                                                                      integer              > 0          No        See [#]_  Number of similar ceiling fans
+  ``extension/WeekdayScheduleFractions``                                         array                             No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``                                         array                             No                  24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``                                       array                             No        See [#]_  12 comma-separated monthly multipliers
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
 
-  .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+  .. [#] If Efficiency and LabelEnergyUse not provided, LabelEnergyUse defaults to 42.6 W based on ANSI/RESNET/ICC 301-2022 Addendum C.
+         If both are provided, LabelEnergyUse will be used in the model.
   .. [#] If Count not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.052, 0.057, 0.057, 0.057, 0.057, 0.057".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), defaults based on monthly average outdoor temperatures per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_
