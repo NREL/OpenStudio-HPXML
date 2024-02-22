@@ -2385,7 +2385,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 21.7, 61.9)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 22.5, 64.3)
 
     # Test defaults w/ CFM50 infiltration
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-cfm50.xml')
