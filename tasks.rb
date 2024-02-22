@@ -406,7 +406,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.dishwashers[0].location = adjacent_to
       hpxml_bldg.refrigerators[0].location = adjacent_to
       hpxml_bldg.cooking_ranges[0].location = adjacent_to
-    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml'].include? hpxml_file
+    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml',
+           'base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml'].include? hpxml_file
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
@@ -2118,7 +2119,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     # -------------- #
 
     # Logic that can only be applied based on the file name
-    if ['base-lighting-ceiling-fans.xml'].include? hpxml_file
+    if ['base-lighting-ceiling-fans.xml',
+        'base-lighting-ceiling-fans-label-energy-use.xml'].include? hpxml_file
       hpxml_bldg.ceiling_fans[0].weekday_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].weekend_fractions = '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057'
       hpxml_bldg.ceiling_fans[0].monthly_multipliers = '0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0'
