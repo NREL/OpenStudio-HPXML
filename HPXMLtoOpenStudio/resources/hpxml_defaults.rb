@@ -631,7 +631,7 @@ class HPXMLDefaults
   def self.apply_building_construction(hpxml_bldg, cfa, nbeds)
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     if hpxml_bldg.building_construction.conditioned_building_volume.nil? && hpxml_bldg.building_construction.average_ceiling_height.nil?
-      hpxml_bldg.building_construction.average_ceiling_height = 8.2
+      hpxml_bldg.building_construction.average_ceiling_height = 8.0
       hpxml_bldg.building_construction.average_ceiling_height_isdefaulted = true
       hpxml_bldg.building_construction.conditioned_building_volume = (cfa * hpxml_bldg.building_construction.average_ceiling_height + cond_crawl_volume).round
       hpxml_bldg.building_construction.conditioned_building_volume_isdefaulted = true

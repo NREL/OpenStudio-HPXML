@@ -426,7 +426,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.number_of_units = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 22140, 8.2, 2, 1)
+    _test_default_building_construction_values(default_hpxml_bldg, 21600, 8, 2, 1)
 
     # Test defaults w/ average ceiling height
     hpxml_bldg.building_construction.conditioned_building_volume = nil
