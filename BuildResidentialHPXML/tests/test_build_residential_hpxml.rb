@@ -187,6 +187,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-rim-joist-height-but-no-assembly-r.xml' => 'base-sfd.xml',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'base-sfd.xml',
       'error-power-outage-args-not-all-same-size.xml' => 'base-sfd.xml',
+      'error-power-outage-window-natvent-invalid.xml' => 'base-sfd.xml',
       'error-heating-perf-data-not-all-specified.xml' => 'base-sfd.xml',
       'error-heating-perf-data-not-all-same-size.xml' => 'base-sfd.xml',
       'error-cooling-perf-data-not-all-specified.xml' => 'base-sfd.xml',
