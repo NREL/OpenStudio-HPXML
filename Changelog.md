@@ -3,7 +3,6 @@
 __New Features__
 - Updates to HPXML v4.0-rc3.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
-  - **Breaking change**: Shared boilers require `SharedLoopWatts` (and `FanCoilWatts` if a fan coil system) inputs; removed EAE input/defaults.
   - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
