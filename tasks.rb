@@ -406,7 +406,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.dishwashers[0].location = adjacent_to
       hpxml_bldg.refrigerators[0].location = adjacent_to
       hpxml_bldg.cooking_ranges[0].location = adjacent_to
-    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml'].include? hpxml_file
+    elsif ['base-bldgtype-mf-unit-adjacent-to-multiple.xml',
+           'base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml'].include? hpxml_file
       wall = hpxml_bldg.walls.select { |w|
                w.interior_adjacent_to == HPXML::LocationConditionedSpace &&
                  w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit

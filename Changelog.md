@@ -40,6 +40,7 @@ __Bugfixes__
 - Prevents mains water temperature from going below freezing (0 C).
 - Fixes error if HPXML has emissions scenario and abbreviated run period.
 - Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
+- Fixes error if using MF space types (e.g., "other heated space") and the building has no HVAC equipment.
 
 ## OpenStudio-HPXML v1.7.0
 
