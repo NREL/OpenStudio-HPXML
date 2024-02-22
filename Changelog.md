@@ -33,6 +33,7 @@ __New Features__
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
 - Miscellaneous Manual J improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
+- Allow alternative label energy use (W) input for ceiling fans.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
