@@ -3,7 +3,6 @@
 __New Features__
 - Updates to HPXML v4.0-rc3.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
-  - **Breaking change**: Shared boilers require `SharedLoopWatts` (and `FanCoilWatts` if a fan coil system) inputs; removed EAE input/defaults.
   - Allows shared batteries (batteries serving multiple dwelling units).
   - Updated default CFIS fan power to 0.58 W/cfm.
   - Removed natural ventilation availability RH constraint; HR constraint remains.
@@ -27,6 +26,7 @@ __New Features__
 - Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
+  - Allows defining multiple unavailable periods; **Breaking change**: arguments renamed to `schedules_vacancy_periods`, `schedules_power_outage_periods`, and `schedules_power_outage_periods_window_natvent_availability`.
   - Adds detailed performance data inputs for variable-speed air source HVAC systems.
   - Adds heat pump backup sizing methodology input.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
