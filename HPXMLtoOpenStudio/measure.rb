@@ -1960,9 +1960,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                            HPXML::DuctTypeReturn => [0.0, nil] }
     hvac_distribution.duct_leakage_measurements.each do |duct_leakage_measurement|
       next unless [HPXML::UnitsCFM25, HPXML::UnitsCFM50, HPXML::UnitsPercent].include?(duct_leakage_measurement.duct_leakage_units) && (duct_leakage_measurement.duct_leakage_total_or_to_outside == 'to outside')
-      next if duct_leakage_measurement.duct_type.nil?
 
-      leakage_to_outside[duct_leakage_measurement.duct_type] = [duct_leakage_measurement.duct_leakage_value, duct_leakage_measurement.duct_leakage_units]
+      if not duct_leakage_measurement.duct_type.nil?
+        leakage_to_outside[duct_leakage_measurement.duct_type] = [duct_leakage_measurement.duct_leakage_value, duct_leakage_measurement.duct_leakage_units]
+      else
+        [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
+          leakage_to_outside[duct_type] = [(duct_leakage_measurement.duct_leakage_value / 2), duct_leakage_measurement.duct_leakage_units]
+        end
+      end
     end
 
     # Duct location, R-value, Area

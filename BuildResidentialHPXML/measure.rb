@@ -1654,16 +1654,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::UnitsPercent)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_leakage_to_outside_value', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_leakage_to_outside_value', false)
     arg.setDisplayName('Ducts: Supply Leakage to Outside Value')
     arg.setDescription('The leakage value to outside for the supply ducts.')
-    arg.setDefaultValue(0.1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_leakage_to_outside_value', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_leakage_to_outside_value', false)
     arg.setDisplayName('Ducts: Return Leakage to Outside Value')
     arg.setDescription('The leakage value to outside for the return ducts.')
-    arg.setDefaultValue(0.1)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_whole_leakage_to_outside_value', false)
+    arg.setDisplayName('Ducts: Whole Leakage to Outside Value')
+    arg.setDescription('The leakage value to outside for the supply and return ducts.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_location', duct_location_choices, false)
@@ -5691,15 +5694,25 @@ class HPXMLFile
   end
 
   def self.set_duct_leakages(args, hvac_distribution)
-    hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                    duct_leakage_units: args[:ducts_leakage_units],
-                                                    duct_leakage_value: args[:ducts_supply_leakage_to_outside_value],
-                                                    duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    if args[:ducts_supply_leakage_to_outside_value].is_initialized
+      hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                      duct_leakage_units: args[:ducts_leakage_units],
+                                                      duct_leakage_value: args[:ducts_supply_leakage_to_outside_value],
+                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    end
+    
+    if args[:ducts_return_leakage_to_outside_value].is_initialized
+      hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                      duct_leakage_units: args[:ducts_leakage_units],
+                                                      duct_leakage_value: args[:ducts_return_leakage_to_outside_value],
+                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    end
 
-    hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                    duct_leakage_units: args[:ducts_leakage_units],
-                                                    duct_leakage_value: args[:ducts_return_leakage_to_outside_value],
-                                                    duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    if args[:ducts_whole_leakage_to_outside_value].is_initialized
+      hvac_distribution.duct_leakage_measurements.add(duct_leakage_units: args[:ducts_leakage_units],
+                                                      duct_leakage_value: args[:ducts_whole_leakage_to_outside_value],
+                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    end
   end
 
   def self.get_location(location, foundation_type, attic_type)
