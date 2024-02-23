@@ -576,8 +576,8 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
-         If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
+         If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
 HPXML Schedules
 ***************
@@ -646,8 +646,6 @@ The column names available in the schedule CSV files are:
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
-  ``vacancy``                       0/1      Vacancy schedule. 0=occupied, 1=vacant. Automatically overrides other columns.     N/A
-  ``outage``                        0/1      Power outage schedule. 0=power. 1=nopower. Automatically overrides other columns.  N/A
   ================================  =======  =================================================================================  ===============================
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
@@ -1670,7 +1668,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
-  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows:
+  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows per ANSI/RESNET/ICC 301-2019:
          
          \- **Oil boiler**: 330 kWh/yr
          
@@ -1697,8 +1695,8 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ``HeatingSystemFuel``                                         string                See [#]_         Yes                       Fuel type
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                    double   frac         >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
-  ``extension/SharedLoopWatts``                                 double   W            >= 0             Yes                       Shared loop power
-  ``extension/FanCoilWatts``                                    double   W            >= 0             See [#]_                  Fan coil power
+  ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double   kWh/yr or W  >= 0             No        See [#]_        Electric auxiliary energy or shared loop power
+  ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double   kWh/yr or W  >= 0             No [#]_                   Electric auxiliary energy or fan coil power
   ============================================================  =======  ===========  ===============  ========  ==============  =========================================
 
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
@@ -1715,7 +1713,15 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
-  .. [#] FanCoilWatts only required if boiler connected to fan coil.
+  .. [#] If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows per ANSI/RESNET/ICC 301-2019:
+
+         \- **Shared boiler w/ baseboard**: 220 kWh/yr
+
+         \- **Shared boiler w/ water loop heat pump**: 265 kWh/yr
+
+         \- **Shared boiler w/ fan coil**: 438 kWh/yr
+
+  .. [#] FanCoilWatts only used if boiler connected to fan coil and SharedLoopWatts provided.
 
 .. _hvac_heating_stove:
 
@@ -4309,18 +4315,19 @@ HPXML Ceiling Fans
 Each ceiling fan is entered as a ``/HPXML/Building/BuildingDetails/Lighting/CeilingFan``.
 If not entered, the simulation will not include a ceiling fan.
 
-  =========================================  =======  =======  ===========  ========  ========  ==============================
-  Element                                    Type     Units    Constraints  Required  Default   Notes
-  =========================================  =======  =======  ===========  ========  ========  ==============================
-  ``SystemIdentifier``                       id                             Yes                 Unique identifier
-  ``Airflow[FanSpeed="medium"]/Efficiency``  double   cfm/W    > 0          No        See [#]_  Efficiency at medium speed
-  ``Count``                                  integer           > 0          No        See [#]_  Number of similar ceiling fans
-  ``extension/WeekdayScheduleFractions``     array                          No        See [#]_  24 comma-separated weekday fractions
-  ``extension/WeekendScheduleFractions``     array                          No                  24 comma-separated weekend fractions
-  ``extension/MonthlyScheduleMultipliers``   array                          No        See [#]_  12 comma-separated monthly multipliers
-  =========================================  =======  =======  ===========  ========  ========  ==============================
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
+  Element                                                                        Type     Units       Constraints  Required  Default   Notes
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
+  ``SystemIdentifier``                                                           id                                Yes                 Unique identifier
+  ``Airflow[FanSpeed="medium"]/Efficiency`` and/or ``LabelEnergyUse``            double   cfm/W or W  > 0          No        See [#]_  Efficiency at medium speed or EnergyGuide label average energy use
+  ``Count``                                                                      integer              > 0          No        See [#]_  Number of similar ceiling fans
+  ``extension/WeekdayScheduleFractions``                                         array                             No        See [#]_  24 comma-separated weekday fractions
+  ``extension/WeekendScheduleFractions``                                         array                             No                  24 comma-separated weekend fractions
+  ``extension/MonthlyScheduleMultipliers``                                       array                             No        See [#]_  12 comma-separated monthly multipliers
+  =============================================================================  =======  ==========  ===========  ========  ========  ==============================
 
-  .. [#] If Efficiency not provided, defaults to 3000 / 42.6 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+  .. [#] If Efficiency and LabelEnergyUse not provided, LabelEnergyUse defaults to 42.6 W based on ANSI/RESNET/ICC 301-2022 Addendum C.
+         If both are provided, LabelEnergyUse will be used in the model.
   .. [#] If Count not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.052, 0.057, 0.057, 0.057, 0.057, 0.057".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), defaults based on monthly average outdoor temperatures per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_
@@ -4617,31 +4624,31 @@ HPXML Locations
 
 The various locations used in an HPXML file are defined as follows:
 
-  ==============================  =======================================================  ============================================  =================
-  Value                           Description                                              Temperature                                   Building Type
-  ==============================  =======================================================  ============================================  =================
-  outside                         Ambient environment                                      Weather data                                  Any
-  ground                                                                                   EnergyPlus calculation                        Any
-  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  attic - vented                                                                           EnergyPlus calculation                        Any
-  attic - unvented                                                                         EnergyPlus calculation                        Any
-  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  basement - unconditioned                                                                 EnergyPlus calculation                        Any
-  crawlspace - vented                                                                      EnergyPlus calculation                        Any
-  crawlspace - unvented                                                                    EnergyPlus calculation                        Any
-  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                        Any
-  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                  Manufactured only
-  manufactured home belly         Within the belly                                         Same as conditioned space                     Manufactured only              
-  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                     SFA/MF only
-  other heated space              E.g., shared laundry/equipment space                     Avg of conditioned space/outside; min of 68F  SFA/MF only
-  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of conditioned space/outside; min of 50F  SFA/MF only
-  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F           SFA/MF only
-  other exterior                  Water heater outside                                     Weather data                                  Any
-  exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside              Any
-  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                        Any
-  roof deck                       Ducts on roof deck (outside)                             Weather data                                  Any
-  ==============================  =======================================================  ============================================  =================
+  ==============================  =======================================================  =========================================================  =================
+  Value                           Description                                              Temperature                                                Building Type
+  ==============================  =======================================================  =========================================================  =================
+  outside                         Ambient environment                                      Weather data                                               Any
+  ground                                                                                   EnergyPlus calculation                                     Any
+  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  attic - vented                                                                           EnergyPlus calculation                                     Any
+  attic - unvented                                                                         EnergyPlus calculation                                     Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  basement - unconditioned                                                                 EnergyPlus calculation                                     Any
+  crawlspace - vented                                                                      EnergyPlus calculation                                     Any
+  crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                                     Any
+  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
+  manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
+  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
+  other heated space              E.g., shared laundry/equipment space                     Avg of conditioned space/outside; min of heating setpoint  SFA/MF only
+  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of conditioned space/outside; min of 50F               SFA/MF only
+  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F                        SFA/MF only
+  other exterior                  Water heater outside                                     Weather data                                               Any
+  exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside                           Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
+  roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
+  ==============================  =======================================================  =========================================================  =================
 
 Validating & Debugging Errors
 -----------------------------

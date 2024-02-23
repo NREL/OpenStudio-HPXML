@@ -77,38 +77,36 @@ Absolute/relative paths of csv files containing user-specified detailed schedule
 
 <br/>
 
-**Schedules: Vacancy Period**
+**Schedules: Vacancy Periods**
 
-Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).
+Specifies the vacancy periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_vacancy_period``
+- **Name:** ``schedules_vacancy_periods``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Schedules: Power Outage Period**
+**Schedules: Power Outage Periods**
 
-Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).
+Specifies the power outage periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_power_outage_period``
+- **Name:** ``schedules_power_outage_periods``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Schedules: Power Outage Period Window Natural Ventilation Availability**
+**Schedules: Power Outage Periods Window Natural Ventilation Availability**
 
-The availability of the natural ventilation schedule during the outage period.
+The availability of the natural ventilation schedule during the power outage periods. Valid choices are 'regular schedule', 'always available', 'always unavailable'. If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_power_outage_window_natvent_availability``
-- **Type:** ``Choice``
+- **Name:** ``schedules_power_outage_periods_window_natvent_availability``
+- **Type:** ``String``
 
 - **Required:** ``false``
-
-- **Choices:** `regular schedule`, `always available`, `always unavailable`
 
 <br/>
 
@@ -4956,9 +4954,22 @@ Whether there are any ceiling fans.
 
 <br/>
 
+**Ceiling Fan: Label Energy Use**
+
+The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
+
+- **Name:** ``ceiling_fan_label_energy_use``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
 **Ceiling Fan: Efficiency**
 
-The efficiency rating of the ceiling fan(s) at medium speed. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
+The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.
 
 - **Name:** ``ceiling_fan_efficiency``
 - **Type:** ``Double``
