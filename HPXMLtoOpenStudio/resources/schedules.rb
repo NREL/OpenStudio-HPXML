@@ -1818,17 +1818,18 @@ class SchedulesFile
   end
 
   def create_battery_charging_discharging_schedules
-    return if !@schedules.keys.include?(:ColumnBattery)
+    battery_col_name = Columns[:Battery].name
+    return if !@schedules.keys.include?(battery_col_name)
 
-    @schedules[SchedulesFile::Columns[:BatteryCharging].name] = Array.new(@schedules[:ColumnBattery].size, 0)
-    @schedules[SchedulesFile::Columns[:BatteryDischarging].name] = Array.new(@schedules[:ColumnBattery].size, 0)
-    @schedules[:ColumnBattery].each_with_index do |_ts, i|
-      if @schedules[:ColumnBattery][i] > 0
-        @schedules[SchedulesFile::Columns[:BatteryCharging].name][i] = @schedules[:ColumnBattery][i]
-      elsif @schedules[:ColumnBattery][i] < 0
-        @schedules[SchedulesFile::Columns[:BatteryDischarging].name][i] = -1 * @schedules[:ColumnBattery][i]
+    @schedules[SchedulesFile::Columns[:BatteryCharging].name] = Array.new(@schedules[battery_col_name].size, 0)
+    @schedules[SchedulesFile::Columns[:BatteryDischarging].name] = Array.new(@schedules[battery_col_name].size, 0)
+    @schedules[battery_col_name].each_with_index do |_ts, i|
+      if @schedules[battery_col_name][i] > 0
+        @schedules[SchedulesFile::Columns[:BatteryCharging].name][i] = @schedules[battery_col_name][i]
+      elsif @schedules[battery_col_name][i] < 0
+        @schedules[SchedulesFile::Columns[:BatteryDischarging].name][i] = -1 * @schedules[battery_col_name][i]
       end
     end
-    @schedules.delete(:ColumnBattery)
+    @schedules.delete(battery_col_name)
   end
 end
