@@ -5697,20 +5697,20 @@ class HPXMLFile
     if args[:ducts_supply_leakage_to_outside_value].is_initialized
       hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                       duct_leakage_units: args[:ducts_leakage_units],
-                                                      duct_leakage_value: args[:ducts_supply_leakage_to_outside_value],
+                                                      duct_leakage_value: args[:ducts_supply_leakage_to_outside_value].get,
                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
     
     if args[:ducts_return_leakage_to_outside_value].is_initialized
       hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                       duct_leakage_units: args[:ducts_leakage_units],
-                                                      duct_leakage_value: args[:ducts_return_leakage_to_outside_value],
+                                                      duct_leakage_value: args[:ducts_return_leakage_to_outside_value].get,
                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
 
     if args[:ducts_whole_leakage_to_outside_value].is_initialized
       hvac_distribution.duct_leakage_measurements.add(duct_leakage_units: args[:ducts_leakage_units],
-                                                      duct_leakage_value: args[:ducts_whole_leakage_to_outside_value],
+                                                      duct_leakage_value: args[:ducts_whole_leakage_to_outside_value].get,
                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
   end
