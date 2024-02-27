@@ -3412,13 +3412,12 @@ class HVACSizing
       fj1 = floor.additional_properties.formj1_values
       results_out << ["Floors: #{floor.id}", '', fj1.Heat_HTM, fj1.Cool_HTM]
     end
-    # FIXME: Disaggregate infiltration and ventilation
     results_out << ['Infiltration', '', '', '', @hpxml_bldg.additional_properties.infil_heat_cfm.round, @hpxml_bldg.additional_properties.infil_cool_cfm.round]
-    # FIXME: Ventilation
+    # FIXME: Disaggregate Ventilation
     # FIXME: Winter Humidification
     # FIXME: Piping
     # FIXME: Blower Heat
-    # FIXME: AED Excursion
+    # FIXME: Disaggregate AED Excursion
 
     # Block load results
     results_out << [line_break]
@@ -3447,15 +3446,14 @@ class HVACSizing
       fj1 = floor.additional_properties.formj1_values
       results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
-    # FIXME: Disaggregate infiltration and ventilation
     results_out << ['Infiltration', '', '', 1.0, bldg_design_loads.Heat_InfilVent.round, bldg_design_loads.Cool_InfilVent_Sens.round, bldg_design_loads.Cool_InfilVent_Lat.round]
     results_out << ['Internal Gains', '', '', '', 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
     results_out << ['Ducts', '', '', '', bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
-    # FIXME: Ventilation
+    # FIXME: Disaggregate Ventilation
     # FIXME: Winter Humidification
     # FIXME: Piping
     # FIXME: Blower Heat
-    # FIXME: AED Excursion
+    # FIXME: Disaggregate AED Excursion
 
     # Room by room results
     @space_loads.keys.each do |space_id|
@@ -3486,17 +3484,14 @@ class HVACSizing
         results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       space_load = @space_loads[space_id]
-      # FIXME: Disaggregate infiltration and ventilation
       results_out << ['Infiltration', '', '', space_load.WindowAreaRatio.round(2), space_load.Heat_InfilVent.round, space_load.Cool_InfilVent_Sens.round, space_load.Cool_InfilVent_Lat.round]
-      # FIXME: internal gains net yet assigned to spaces
       results_out << ['Internal Gains', '', '', '', 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
-      # FIXME: Apply WAR to ducts?
       results_out << ['Ducts', '', '', '', space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
-      # FIXME: Ventilation
+      # FIXME: Disaggregate Ventilation
       # FIXME: Winter Humidification
       # FIXME: Piping
       # FIXME: Blower Heat
-      # FIXME: AED Excursion
+      # FIXME: Disaggregate AED Excursion
     end
 
     CSV.open(csv_out, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
