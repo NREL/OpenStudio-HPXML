@@ -1173,7 +1173,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, 12345, 12.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, -0.11, -0.22, nil, 12.0, 40.0, 1.2)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1357,7 +1357,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.0, 0, nil, false, nil)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.0, 0, nil, false, nil, 1.0)
   end
 
   def test_wall_furnaces

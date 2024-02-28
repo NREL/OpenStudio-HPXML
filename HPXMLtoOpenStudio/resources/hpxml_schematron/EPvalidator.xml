@@ -1432,6 +1432,10 @@
       <sch:assert role='ERROR' test='sum(../*/h:FractionHeatLoadServed) &lt;= 1.01 and sum(../*/h:FractionHeatLoadServed) &gt;= 0.99'>Expected sum(FractionHeatLoadServed) to be 1</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupType[text()="separate"]) = 1'>Expected 1 element(s) for xpath: BackupType[text()="separate"]</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupSystem) = 1'>Expected 1 element(s) for xpath: BackupSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:BackupSystemFuel) = 0'>Expected 0 element(s) for xpath: BackupSystemFuel</sch:assert>
+      <sch:assert role='ERROR' test='count(h:BackupAnnualHeatingEfficiency) = 0'>Expected 0 element(s) for xpath: BackupAnnualHeatingEfficiency</sch:assert>
+      <sch:assert role='ERROR' test='count(h:BackupHeatingCapacity) = 0'>Expected 0 element(s) for xpath: BackupHeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingAutosizingFactor) = 0'>Expected 0 element(s) for xpath: extension/BackupHeatingCapacity</sch:assert>
     </sch:rule>
   </sch:pattern>
 

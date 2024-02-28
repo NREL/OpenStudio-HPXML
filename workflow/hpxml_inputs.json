@@ -1752,6 +1752,14 @@
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_autosizing_factor": 1.7,
+    "heat_pump_heating_autosizing_factor": 1.4,
+    "heating_system_2_heating_autosizing_factor": 0.9
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump_cooling_compressor_type": "variable speed",

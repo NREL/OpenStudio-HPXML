@@ -2660,6 +2660,17 @@ The output heating capacity of the second heating system. If not provided, the O
 
 <br/>
 
+**Heating System 2: Heating Autosizing Factor**
+
+The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+
+- **Name:** ``heating_system_2_heating_autosizing_factor``
+- **Type:** ``Double``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heating System 2: Fraction Heat Load Served**
 
 The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.

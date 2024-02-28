@@ -1600,6 +1600,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_heating_autosizing_factor', false)
+    arg.setDisplayName('Heating System 2: Heating Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_fraction_heat_load_served', true)
     arg.setDisplayName('Heating System 2: Fraction Heat Load Served')
     arg.setDescription('The heat load served fraction of the second heating system. Ignored if this heating system serves as a backup system for a heat pump.')
@@ -5657,6 +5662,10 @@ class HPXMLFile
       heating_capacity = args[:heating_system_2_heating_capacity].get
     end
 
+    if args[:heating_system_2_heating_autosizing_factor].is_initialized
+      heating_autosizing_factor = args[:heating_system_2_heating_autosizing_factor].get
+    end
+
     if args[:heating_system_2_fuel] == HPXML::HVACTypeElectricResistance
       heating_system_fuel = HPXML::FuelTypeElectricity
     else
@@ -5681,6 +5690,7 @@ class HPXMLFile
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: heating_system_fuel,
                                    heating_capacity: heating_capacity,
+                                   heating_autosizing_factor: heating_autosizing_factor,
                                    fraction_heat_load_served: fraction_heat_load_served,
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent)
