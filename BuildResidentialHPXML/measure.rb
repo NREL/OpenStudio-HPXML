@@ -1664,8 +1664,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The leakage value to outside for the return ducts.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_whole_leakage_to_outside_value', false)
-    arg.setDisplayName('Ducts: Whole Leakage to Outside Value')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_total_leakage_to_outside_value', false)
+    arg.setDisplayName('Ducts: Total Leakage to Outside Value')
     arg.setDescription('The leakage value to outside for the supply and return ducts.')
     args << arg
 
@@ -5708,9 +5708,9 @@ class HPXMLFile
                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
 
-    if args[:ducts_whole_leakage_to_outside_value].is_initialized
+    if args[:ducts_total_leakage_to_outside_value].is_initialized
       hvac_distribution.duct_leakage_measurements.add(duct_leakage_units: args[:ducts_leakage_units],
-                                                      duct_leakage_value: args[:ducts_whole_leakage_to_outside_value].get,
+                                                      duct_leakage_value: args[:ducts_total_leakage_to_outside_value].get,
                                                       duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     end
   end
