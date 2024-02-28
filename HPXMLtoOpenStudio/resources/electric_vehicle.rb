@@ -8,8 +8,7 @@ class ElectricVehicle
       runner.registerWarning('Electric vehicle specified with no charger provided; battery will not be modeled.')
       return
     end
-
-    Battery.apply(runner, model, nil, electric_vehicle, schedules_file, unit_multiplier, is_ev: true, ev_charger: ev_charger)
+    Battery.apply(runner, model, nil, nil, electric_vehicle, schedules_file, unit_multiplier, is_ev: true, ev_charger: ev_charger)
   end
 
   def self.get_ev_battery_default_values

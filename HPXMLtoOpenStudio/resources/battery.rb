@@ -1,15 +1,16 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(runner, model, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
+  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
+
     charging_schedule = nil
     discharging_schedule = nil
     if is_ev
-      charging_col = SchedulesFile::ColumnEVBatteryCharging
-      discharging_col = SchedulesFile::ColumnEVBatteryDischarging
+      charging_col = SchedulesFile::Columns[:EVBatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:EVBatteryDischarging].name
     else
-      charging_col = SchedulesFile::ColumnBatteryCharging
-      discharging_col = SchedulesFile::ColumnBatteryDischarging
+      charging_col = SchedulesFile::Columns[:BatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:BatteryDischarging].name
     end
 
     if not schedules_file.nil?
@@ -50,6 +51,15 @@ class Battery
     end
 
     return if rated_power_output <= 0 || nominal_capacity_kwh <= 0 || battery.nominal_voltage <= 0
+
+    if !is_ev && battery.is_shared_system
+      # Apportion to single dwelling unit by # bedrooms
+      fail if battery.number_of_bedrooms_served.to_f <= nbeds.to_f # EPvalidator.xml should prevent this
+
+      nominal_capacity_kwh = nominal_capacity_kwh * nbeds.to_f / battery.number_of_bedrooms_served.to_f
+      usable_capacity_kwh = usable_capacity_kwh * nbeds.to_f / battery.number_of_bedrooms_served.to_f
+      rated_power_output = rated_power_output * nbeds.to_f / battery.number_of_bedrooms_served.to_f
+    end
 
     nominal_capacity_kwh *= unit_multiplier
     usable_capacity_kwh *= unit_multiplier
@@ -93,6 +103,7 @@ class Battery
     elcs.setNumberofStringsinParallel(number_of_strings_in_parallel)
     elcs.setInitialFractionalStateofCharge(0.0)
     elcs.setBatteryMass(battery_mass)
+    elcs.setDCtoDCChargingEfficiency(battery.round_trip_efficiency) # Note: This is currently unused in E+, so we use an EMS program below instead
     elcs.setBatterySurfaceArea(battery_surface_area)
     elcs.setDefaultNominalCellVoltage(default_nominal_cell_voltage)
     elcs.setFullyChargedCellCapacity(default_cell_capacity)

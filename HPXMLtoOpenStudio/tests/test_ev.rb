@@ -61,7 +61,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       ev_battery = get_battery(model, hpxml_ev.id)
       assert_equal(HPXML::LocationGarage, ev_battery.thermalZone.get.name.get)
       assert_equal(0.9, ev_battery.radiativeFraction)
-      assert_equal(0.95, ev_battery.dctoDCChargingEfficiency)
+      assert_equal(0.925, ev_battery.dctoDCChargingEfficiency)
       assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(623, ev_battery.numberofStringsinParallel, 0.01)
@@ -124,7 +124,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    # File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
     return model, hpxml, hpxml.buildings[0]
   end
