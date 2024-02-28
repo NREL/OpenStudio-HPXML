@@ -43,6 +43,7 @@ __Bugfixes__
 - Fixes error if HPXML has emissions scenario and abbreviated run period.
 - Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
 - Fixes error if using MF space types (e.g., "other heated space") and the building has no HVAC equipment.
+- Fixes `ManualJInputs/HumiditySetpoint` not being used in the design load calculation.
 
 ## OpenStudio-HPXML v1.7.0
 
