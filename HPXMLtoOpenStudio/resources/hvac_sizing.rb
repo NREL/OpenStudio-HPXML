@@ -29,7 +29,7 @@ class HVACSizing
     aggregate_loads(bldg_design_loads)
 
     # Loop through each HVAC system and calculate equipment values.
-    all_hvac_sizing_values = {}
+    @all_hvac_sizing_values = {}
     system_design_loads = bldg_design_loads.dup
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
@@ -58,7 +58,7 @@ class HVACSizing
         assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizing_values)
       end
 
-      all_hvac_sizing_values[hvac_system] = hvac_sizing_values
+      @all_hvac_sizing_values[hvac_system] = hvac_sizing_values
     end
 
     if update_hpxml
@@ -70,7 +70,7 @@ class HVACSizing
       end
     end
 
-    return all_hvac_sizing_values
+    return @all_hvac_sizing_values
   end
 
   private
@@ -972,7 +972,7 @@ class HVACSizing
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
 
-    sla, _ach50, _nach, _volume, _height, a_ext = Airflow.get_values_from_air_infiltration_measurements(@hpxml_bldg, @cfa, weather)
+    sla, _, _, _, _, a_ext = Airflow.get_values_from_air_infiltration_measurements(@hpxml_bldg, @cfa, weather)
     sla *= a_ext
     ela = sla * @cfa
 
@@ -1590,6 +1590,18 @@ class HVACSizing
     if not hvac_heating.nil?
       hvac_heating_ap = hvac_heating.additional_properties
       is_ducted = !hvac_heating.distribution_system.nil?
+
+      if hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
+        # Adjust heating load using the HP backup calculation
+        hvac_hp = hvac_heating.primary_heat_pump
+        hp_sizing_values = @all_hvac_sizing_values[{ heating: hvac_hp, cooling: hvac_hp }]
+        if hp_sizing_values.nil?
+          fail 'Primary heat pump should have been sized already.'
+        end
+
+        hp_heating_speed = get_sizing_speed(hvac_hp.additional_properties, false)
+        hvac_sizing_values.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizing_values.Heat_Load, hp_sizing_values.Heat_Capacity, hp_heating_speed)
+      end
     end
 
     if hvac_sizing_values.Heat_Load <= 0
@@ -1610,7 +1622,7 @@ class HVACSizing
         process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed)
       end
 
-      hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
+      hvac_sizing_values.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizing_values.Heat_Load_Supp, hvac_sizing_values.Heat_Capacity, hvac_heating_speed)
       if (@heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (@heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
       else
@@ -1895,13 +1907,13 @@ class HVACSizing
     if not hvac_cooling.nil?
       fixed_cooling_capacity = hvac_cooling.cooling_capacity
     end
-    if (not fixed_cooling_capacity.nil?) && (hvac_sizing_values.Cool_Capacity > 0)
-      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Cool_Capacity > fixed_cooling_capacity)
+    autosized_cooling_capacity = hvac_sizing_values.Cool_Capacity
+    if (not fixed_cooling_capacity.nil?) && (autosized_cooling_capacity > 0)
+      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && autosized_cooling_capacity > fixed_cooling_capacity)
         # Use fixed size; proportionally adjust autosized airflow & sensible capacity
-        prev_capacity = hvac_sizing_values.Cool_Capacity
         hvac_sizing_values.Cool_Capacity = fixed_cooling_capacity
-        hvac_sizing_values.Cool_Airflow *= hvac_sizing_values.Cool_Capacity / prev_capacity
-        hvac_sizing_values.Cool_Capacity_Sens *= hvac_sizing_values.Cool_Capacity / prev_capacity
+        hvac_sizing_values.Cool_Airflow *= fixed_cooling_capacity / autosized_cooling_capacity
+        hvac_sizing_values.Cool_Capacity_Sens *= fixed_cooling_capacity / autosized_cooling_capacity
       end
     end
     if not hvac_heating.nil?
@@ -1909,12 +1921,12 @@ class HVACSizing
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
       fixed_heating_capacity = hvac_cooling.integrated_heating_system_capacity
     end
-    if (not fixed_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity > 0)
-      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && hvac_sizing_values.Heat_Capacity > fixed_heating_capacity)
-        # Use fixed size; proportionally adjust autosized airflow & sensible capacity
-        prev_capacity = hvac_sizing_values.Heat_Capacity
+    autosized_heating_capacity = hvac_sizing_values.Heat_Capacity
+    if (not fixed_heating_capacity.nil?) && (autosized_heating_capacity > 0)
+      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && autosized_heating_capacity > fixed_heating_capacity)
+        # Use fixed size; proportionally adjust autosized airflow
         hvac_sizing_values.Heat_Capacity = fixed_heating_capacity
-        hvac_sizing_values.Heat_Airflow *= hvac_sizing_values.Heat_Capacity / prev_capacity
+        hvac_sizing_values.Heat_Airflow *= fixed_heating_capacity / autosized_heating_capacity
       end
     end
     if hvac_heating.is_a? HPXML::HeatPump
@@ -1924,11 +1936,11 @@ class HVACSizing
         fixed_supp_heating_capacity = hvac_heating.backup_system.heating_capacity
       end
     end
-    if (not fixed_supp_heating_capacity.nil?) && (hvac_sizing_values.Heat_Capacity_Supp > 0)
-      prev_capacity = hvac_sizing_values.Heat_Capacity_Supp
-      hvac_sizing_values.Heat_Capacity_Supp = fixed_supp_heating_capacity
-      if @hpxml_bldg.header.allow_increased_fixed_capacities
-        hvac_sizing_values.Heat_Capacity_Supp = [hvac_sizing_values.Heat_Capacity_Supp, prev_capacity].max
+    autosized_supp_heating_capacity = hvac_sizing_values.Heat_Capacity_Supp
+    if not fixed_supp_heating_capacity.nil?
+      if not (@hpxml_bldg.header.allow_increased_fixed_capacities && autosized_supp_heating_capacity > fixed_supp_heating_capacity)
+        # Use fixed size
+        hvac_sizing_values.Heat_Capacity_Supp = fixed_supp_heating_capacity
       end
     end
   end
@@ -2085,22 +2097,56 @@ class HVACSizing
     end
   end
 
-  def self.process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed)
-    '''
-    Adjust heat pump sizing
-    '''
+  def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
+    # FIXME: Check why this value doesn't exactly match the values in in.xml
+    if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      idb_adj = adjust_indoor_condition_var_speed(heating_db, mj.heat_setpoint, :htg)
+      odb_adj = adjust_outdoor_condition_var_speed(hvac_heating.heating_detailed_performance_data, heating_db, hvac_heating, :htg)
+      return odb_adj * idb_adj
+    else
+      coefficients = hvac_heating.additional_properties.heat_cap_ft_spec[hvac_heating_speed]
+      return MathTools.biquadratic(mj.heat_setpoint, heating_db, coefficients)
+    end
+  end
 
-    hvac_heating_ap = hvac_heating.additional_properties
-
-    capacity_ratio = hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed]
-
-    if hvac_heating.is_a? HPXML::HeatPump
+  def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hvac_heating_speed)
+    if @hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
+      # Size backup to meet full design load in case heat pump fails
+      return heating_load
+    elsif @hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingSupplemental
       if not hvac_heating.backup_heating_switchover_temp.nil?
         min_compressor_temp = hvac_heating.backup_heating_switchover_temp
       elsif not hvac_heating.compressor_lockout_temp.nil?
         min_compressor_temp = hvac_heating.compressor_lockout_temp
       end
+
+      if min_compressor_temp > @hpxml_bldg.header.manualj_heating_design_temp
+        # Heat pump not running at design temperature, size backup to meet full design load
+        return heating_load
+      end
+
+      # Heat pump operating at design temperature, size backup to meet remaining design load
+      adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, @hpxml_bldg.header.manualj_heating_design_temp, hvac_heating_speed)
+      hp_output_at_outdoor_temperature = hp_nominal_heating_capacity * adj_factor
+      return [heating_load - hp_output_at_outdoor_temperature, 0.0].max
+    else
+      fail "Unexpected HP backup methodology: #{@hpxml_bldg.header.heat_pump_backup_sizing_methodology}"
     end
+  end
+
+  def self.process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed)
+    '''
+    Adjust heat pump sizing
+    '''
+
+    capacity_ratio = hvac_heating.additional_properties.heat_capacity_ratios[hvac_heating_speed]
+
+    if not hvac_heating.backup_heating_switchover_temp.nil?
+      min_compressor_temp = hvac_heating.backup_heating_switchover_temp
+    elsif not hvac_heating.compressor_lockout_temp.nil?
+      min_compressor_temp = hvac_heating.compressor_lockout_temp
+    end
+
     if (not min_compressor_temp.nil?) && (min_compressor_temp > @hpxml_bldg.header.manualj_heating_design_temp)
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = @hpxml_bldg.header.manualj_heating_design_temp
@@ -2114,14 +2160,7 @@ class HVACSizing
       heating_db = @hpxml_bldg.header.manualj_heating_design_temp
     end
 
-    if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      idb_adj = adjust_indoor_condition_var_speed(heating_db, mj.heat_setpoint, :htg)
-      odb_adj = adjust_outdoor_condition_var_speed(hvac_heating.heating_detailed_performance_data, heating_db, hvac_heating, :htg)
-      adj_factor = odb_adj * idb_adj
-    else
-      coefficients = hvac_heating_ap.heat_cap_ft_spec[hvac_heating_speed]
-      adj_factor = MathTools.biquadratic(mj.heat_setpoint, heating_db, coefficients)
-    end
+    adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
     heat_cap_rated = (heating_load / adj_factor) / capacity_ratio
 
     if total_cap_curve_value.nil? # Heat pump has no cooling
