@@ -723,7 +723,7 @@ If any HVAC equipment is being autosized (i.e., capacities are not provided), ad
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
   .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
-  .. [#] If HumiditySetpoint not provided, defaults to 0.5 unless there is a dehumidifier with a lower setpoint, in which case that value is used.
+  .. [#] If HumiditySetpoint not provided, defaults to 0.45 in a dry climate, otherwise 0.5.
   .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
