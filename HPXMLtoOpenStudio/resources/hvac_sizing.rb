@@ -794,10 +794,10 @@ class HVACSizing
       end
       clg_loads = clg_htm * wall_area
       htg_loads = htg_htm * wall_area
-      bldg_design_loads.Cool_Walls = clg_loads
-      bldg_design_loads.Heat_Walls = htg_loads
-      space_design_loads.Cool_Walls = clg_loads unless space_design_loads.nil?
-      space_design_loads.Heat_Walls = htg_loads unless space_design_loads.nil?
+      bldg_design_loads.Cool_Walls += clg_loads
+      bldg_design_loads.Heat_Walls += htg_loads
+      space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
       wall.additional_properties.formj1_values = FormJ1Values.new(area: wall_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
