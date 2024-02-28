@@ -1874,7 +1874,7 @@ class HVACSizing
       hvac_sizing_values.Heat_Capacity *= hvac_heating.heating_autosizing_factor
       hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
     end
-    if (hvac_cooling.is_a? HPXML::HeatPump)
+    if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
       hvac_sizing_values.Heat_Capacity_Supp *= hvac_cooling.backup_heating_autosizing_factor
     end
   end

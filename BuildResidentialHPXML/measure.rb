@@ -1348,15 +1348,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_autosizing_factor', false)
-    arg.setDisplayName('Heat Pump: Heating Autosizing Factor')
-    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
     arg.setDisplayName('Heat Pump: Backup Type')
     arg.setDescription("The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.")
     arg.setDefaultValue(HPXML::HeatPumpBackupTypeIntegrated)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_autosizing_factor', false)
+    arg.setDisplayName('Heat Pump: Backup Heating Autosizing Factor')
+    arg.setDescription("The scaling factor applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, 1.0 is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Factor.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_fuel', heat_pump_backup_fuel_choices, true)
