@@ -4086,22 +4086,22 @@ The round trip efficiency of the lithium ion battery. If not provided, the OS-HP
 
 <br/>
 
-**Electric Vehicle Battery: Present**
+**Electric Vehicle: Present**
 
 Whether there is an electric vehicle battery present.
 
-- **Name:** ``ev_battery_present``
+- **Name:** ``ev_present``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
 
 <br/>
 
-**Electric Vehicle Battery: Rated Power Output**
+**Electric Vehicle: Rated Battery Power Output**
 
 The rated power output of the EV battery. If not provided, the OS-HPXML default is used.
 
-- **Name:** ``ev_battery_power``
+- **Name:** ``ev_battery_discharge_power``
 - **Type:** ``Double``
 
 - **Units:** ``W``
@@ -4110,7 +4110,7 @@ The rated power output of the EV battery. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Electric Vehicle Battery: Nominal Capacity**
+**Electric Vehicle: Nominal Battery Capacity**
 
 The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.
 
@@ -4123,7 +4123,7 @@ The nominal capacity of the EV battery. If not provided, the OS-HPXML default is
 
 <br/>
 
-**Electric Vehicle Battery: Usable Capacity**
+**Electric Vehicle: Usable Battery Capacity**
 
 The usable capacity of the EV battery. If not provided, the OS-HPXML default is used.
 
@@ -4136,16 +4136,40 @@ The usable capacity of the EV battery. If not provided, the OS-HPXML default is 
 
 <br/>
 
-**Electric Vehicle Battery: Round Trip Efficiency**
+**Electric Vehicle Charger: Present**
 
-The round trip efficiency of the EV battery. If not provided, the OS-HPXML default is used.
+Whether there is an electric vehicle charger present.
 
-- **Name:** ``ev_battery_round_trip_efficiency``
-- **Type:** ``Double``
-
-- **Units:** ``Frac``
+- **Name:** ``ev_charger_present``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
+
+<br/>
+
+**Electric Vehicle Charger: Rated Charger Power Output**
+
+The rated power output of the EV charger. If not provided, the OS-HPXML default is used.
+
+- **Name:** ``ev_charger_power``
+- **Type:** ``Double``
+
+- **Units:** ``W``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Vehicle Charger: Location**
+
+The space type for the EV charger. If not provided, the OS-HPXML default is used.
+
+- **Name:** ``ev_charger_location``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `garage`, `outside`
 
 <br/>
 

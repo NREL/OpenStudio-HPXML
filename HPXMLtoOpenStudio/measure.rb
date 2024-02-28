@@ -2053,19 +2053,23 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_electric_vehicles(runner, model, spaces)
     @hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?("ElectricVehicle")
+      next unless vehicle.id.include?('ElectricVehicle')
+
       ev_charger = nil
       if not vehicle.ev_charger_idref.nil?
         @hpxml_bldg.ev_chargers.each do |charger|
           next unless vehicle.ev_charger_idref == charger.id
+
           ev_charger = charger
         end
       end
 
       # Assign charging and vehicle space
-      ev_charger.additional_properties.space = get_space_from_location(ev_charger.location, spaces)
-      vehicle.location = ev_charger.location
-      vehicle.additional_properties.space = get_space_from_location(vehicle.location, spaces)
+      if ev_charger
+        ev_charger.additional_properties.space = get_space_from_location(ev_charger.location, spaces)
+        vehicle.location = ev_charger.location
+        vehicle.additional_properties.space = get_space_from_location(vehicle.location, spaces)
+      end
 
       ElectricVehicle.apply(runner, model, vehicle, ev_charger, @schedules_file, @hpxml_bldg.building_construction.number_of_units)
     end

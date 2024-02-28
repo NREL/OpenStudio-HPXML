@@ -51,9 +51,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv</SchedulesFilePath>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -517,16 +514,8 @@
               <Value>80.0</Value>
             </UsableCapacity>
             <RatedPowerOutput>6000.0</RatedPowerOutput>
-            <ElectricVehicleCharger idref='EVCharger1'/>
           </ElectricVehicle>
         </Vehicles>
-        <ElectricVehicleChargers>
-          <ElectricVehicleCharger>
-            <SystemIdentifier id='EVCharger1'/>
-            <Location>garage</Location>
-            <ChargingPower>7200.0</ChargingPower>
-          </ElectricVehicleCharger>
-        </ElectricVehicleChargers>
       </Systems>
       <Appliances>
         <ClothesWasher>

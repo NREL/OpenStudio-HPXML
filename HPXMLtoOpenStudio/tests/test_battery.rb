@@ -18,6 +18,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
 
       return b
     end
+    return
   end
 
   def calc_nom_capacity(battery)
@@ -65,7 +66,7 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
 
     hpxml_bldg.batteries.each do |hpxml_battery|
       battery = get_battery(model, hpxml_battery.id)
-      assert_empty(battery)
+      assert_nil(battery)
     end
 
     elcds = model.getElectricLoadCenterDistributions

@@ -23,6 +23,9 @@ class Battery
     elsif is_ev && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
       return
+    elsif is_ev && ev_charger.nil?
+      runner.registerWarning('Electric vehicle battery specified with no charger provided, battery will not be modeled.')
+      return
     end
 
     obj_name = battery.id

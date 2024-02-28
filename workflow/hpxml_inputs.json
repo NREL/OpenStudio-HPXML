@@ -754,19 +754,25 @@
     "parent_hpxml": "sample_files/base-battery.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
-  "sample_files/base-battery-ev.xml": {
+  "sample_files/base-battery-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
     "ev_present": true,
-    "ev_battery_capacity": 40,
-    "ev_battery_usable_capacity": 38,
-    "ev_battery_discharge_power": 10000,
+    "ev_battery_capacity": 100,
+    "ev_battery_usable_capacity": 80,
+    "ev_battery_discharge_power": 6000
+  },
+  "sample_files/base-battery-ev.xml": {
+    "parent_hpxml": "sample_files/base-battery-ev-no-charger.xml",
     "ev_charger_present": true,
-    "ev_charger_power": 15000,
+    "ev_charger_power": 7200,
     "ev_charger_location": "garage"
   },
   "sample_files/base-battery-ev-scheduled.xml": {
     "parent_hpxml": "sample_files/base-battery-ev.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv"
+  },
+  "sample_files/base-battery-ev-lifetime-model.xml": {
+    "parent_hpxml": "sample_files/base-battery-ev-scheduled.xml"
   },
   "sample_files/base-bldgtype-sfa-unit.xml": {
     "parent_hpxml": "sample_files/base.xml",

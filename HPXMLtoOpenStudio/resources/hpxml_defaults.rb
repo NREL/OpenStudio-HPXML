@@ -2257,7 +2257,8 @@ class HPXMLDefaults
 
   def self.apply_vehicles(hpxml_bldg)
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?("ElectricVehicle")
+      next unless vehicle.id.include?('ElectricVehicle')
+
       default_values = ElectricVehicle.get_ev_battery_default_values()
       apply_battery(vehicle, default_values)
 
@@ -2265,10 +2266,12 @@ class HPXMLDefaults
       if not vehicle.ev_charger_idref.nil?
         hpxml_bldg.ev_chargers.each do |charger|
           next unless vehicle.ev_charger_idref == charger.id
+
           ev_charger = charger
         end
       end
       next if ev_charger.nil?
+
       default_values = ElectricVehicle.get_ev_charger_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
       apply_ev_charger(ev_charger, default_values)
     end

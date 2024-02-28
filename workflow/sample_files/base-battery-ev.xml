@@ -507,13 +507,13 @@
             <BatteryType>Li-ion</BatteryType>
             <NominalCapacity>
               <Units>kWh</Units>
-              <Value>40.0</Value>
+              <Value>100.0</Value>
             </NominalCapacity>
             <UsableCapacity>
               <Units>kWh</Units>
-              <Value>38.0</Value>
+              <Value>80.0</Value>
             </UsableCapacity>
-            <RatedPowerOutput>10000.0</RatedPowerOutput>
+            <RatedPowerOutput>6000.0</RatedPowerOutput>
             <ElectricVehicleCharger idref='EVCharger1'/>
           </ElectricVehicle>
         </Vehicles>
@@ -521,7 +521,7 @@
           <ElectricVehicleCharger>
             <SystemIdentifier id='EVCharger1'/>
             <Location>garage</Location>
-            <ChargingPower>15000.0</ChargingPower>
+            <ChargingPower>7200.0</ChargingPower>
           </ElectricVehicleCharger>
         </ElectricVehicleChargers>
       </Systems>

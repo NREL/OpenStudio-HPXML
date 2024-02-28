@@ -224,20 +224,31 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'No windows specified, the model will not include window heat transfer.'
     end
     check_battery_log = true
-    hpxml_bldg.batteries.each do |battery|
-      if hpxml_bldg.pv_systems.empty? && hpxml_bldg.header.schedules_filepaths.empty?
-        next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
-        check_battery_log = false
-      end
+    hpxml_bldg.batteries.each do |_battery|
+      next unless hpxml_bldg.pv_systems.empty? && hpxml_bldg.header.schedules_filepaths.empty?
+      next if message.include? 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.'
+
+      check_battery_log = false
     end
+    # Battery with no schedule
     hpxml_bldg.vehicles.each do |vehicle|
-      next unless vehicle.id.include?("ElectricVehicle")
-      if hpxml_bldg.header.schedules_filepaths.empty?
-        next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
-        check_battery_log = false
-      end
+      next unless vehicle.id.include?('ElectricVehicle')
+      next unless hpxml_bldg.header.schedules_filepaths.empty?
+      next unless not vehicle.ev_charger_idref.nil?
+      next if message.include? 'Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.'
+
+      check_battery_log = false
+    end
+    # Battery with no charger
+    hpxml_bldg.vehicles.each do |vehicle|
+      next unless vehicle.id.include?('ElectricVehicle')
+      next unless vehicle.ev_charger_idref.nil?
+      next if message.include? 'Electric vehicle specified with no charger provided; battery will not be modeled.'
+
+      check_battery_log = false
     end
     next if check_battery_log
+
     if hpxml_path.include? 'base-location-capetown-zaf.xml'
       next if message.include? 'OS Message: Minutes field (60) on line 9 of EPW file'
       next if message.include? 'Could not find a marginal Electricity rate.'

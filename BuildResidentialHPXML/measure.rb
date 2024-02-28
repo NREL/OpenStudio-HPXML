@@ -2494,7 +2494,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_location', ev_charger_location_choices, false)
     arg.setDisplayName('Electric Vehicle Charger: Location')
-    arg.setDescription("The space type for the EV charger. If not provided, the OS-HPXML default is used.")
+    arg.setDescription('The space type for the EV charger. If not provided, the OS-HPXML default is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
@@ -6493,17 +6493,17 @@ class HPXMLFile
     if ev_charger_present
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
-                                location: location,
-                                charging_power: ev_charger_power)
+                                 location: location,
+                                 charging_power: ev_charger_power)
     end
 
-    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.id.include?("ElectricVehicle") }
+    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.id.include?('ElectricVehicle') }
     hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
                             type: HPXML::BatteryTypeLithiumIon,
                             rated_power_output: rated_power_output,
                             nominal_capacity_kwh: nominal_capacity_kwh,
                             usable_capacity_kwh: usable_capacity_kwh,
-                            ev_charger_idref: charger_id) 
+                            ev_charger_idref: charger_id)
   end
 
   def self.set_lighting(hpxml_bldg, args)

@@ -518,6 +518,9 @@
             </UsableCapacity>
             <RatedPowerOutput>6000.0</RatedPowerOutput>
             <ElectricVehicleCharger idref='EVCharger1'/>
+            <extension>
+              <LifetimeModel>KandlerSmith</LifetimeModel>
+            </extension>
           </ElectricVehicle>
         </Vehicles>
         <ElectricVehicleChargers>
