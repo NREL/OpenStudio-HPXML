@@ -576,8 +576,8 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to the lesser of 8.0 and InfiltrationVolume / ConditionedFloorArea.
-         If needed, additional defaulting is performed using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
+         If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
 HPXML Schedules
 ***************
@@ -1674,7 +1674,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
-  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows:
+  .. [#] If ElectricAuxiliaryEnergy not provided, defaults as follows per ANSI/RESNET/ICC 301-2019:
          
          \- **Oil boiler**: 330 kWh/yr
          
@@ -1701,8 +1701,8 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ``HeatingSystemFuel``                                         string                See [#]_         Yes                       Fuel type
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                    double   frac         >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
-  ``extension/SharedLoopWatts``                                 double   W            >= 0             Yes                       Shared loop power
-  ``extension/FanCoilWatts``                                    double   W            >= 0             See [#]_                  Fan coil power
+  ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double   kWh/yr or W  >= 0             No        See [#]_        Electric auxiliary energy or shared loop power
+  ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double   kWh/yr or W  >= 0             No [#]_                   Electric auxiliary energy or fan coil power
   ``extension/HeatingAutosizingFactor``                         double   frac         > 0              No        1.0             Heating autosizing scaling factor
   ============================================================  =======  ===========  ===============  ========  ==============  =========================================
 
@@ -1720,7 +1720,15 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
          Heat pump backup will only operate during colder temperatures when the heat pump runs out of heating capacity or is disabled due to a switchover/lockout temperature.
-  .. [#] FanCoilWatts only required if boiler connected to fan coil.
+  .. [#] If ElectricAuxiliaryEnergy nor SharedLoopWatts provided, defaults as follows per ANSI/RESNET/ICC 301-2019:
+
+         \- **Shared boiler w/ baseboard**: 220 kWh/yr
+
+         \- **Shared boiler w/ water loop heat pump**: 265 kWh/yr
+
+         \- **Shared boiler w/ fan coil**: 438 kWh/yr
+
+  .. [#] FanCoilWatts only used if boiler connected to fan coil and SharedLoopWatts provided.
 
 .. _hvac_heating_stove:
 
@@ -4639,31 +4647,31 @@ HPXML Locations
 
 The various locations used in an HPXML file are defined as follows:
 
-  ==============================  =======================================================  ============================================  =================
-  Value                           Description                                              Temperature                                   Building Type
-  ==============================  =======================================================  ============================================  =================
-  outside                         Ambient environment                                      Weather data                                  Any
-  ground                                                                                   EnergyPlus calculation                        Any
-  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  attic - vented                                                                           EnergyPlus calculation                        Any
-  attic - unvented                                                                         EnergyPlus calculation                        Any
-  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  basement - unconditioned                                                                 EnergyPlus calculation                        Any
-  crawlspace - vented                                                                      EnergyPlus calculation                        Any
-  crawlspace - unvented                                                                    EnergyPlus calculation                        Any
-  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                        Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                        Any
-  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                  Manufactured only
-  manufactured home belly         Within the belly                                         Same as conditioned space                     Manufactured only              
-  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                     SFA/MF only
-  other heated space              E.g., shared laundry/equipment space                     Avg of conditioned space/outside; min of 68F  SFA/MF only
-  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of conditioned space/outside; min of 50F  SFA/MF only
-  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F           SFA/MF only
-  other exterior                  Water heater outside                                     Weather data                                  Any
-  exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside              Any
-  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                        Any
-  roof deck                       Ducts on roof deck (outside)                             Weather data                                  Any
-  ==============================  =======================================================  ============================================  =================
+  ==============================  =======================================================  =========================================================  =================
+  Value                           Description                                              Temperature                                                Building Type
+  ==============================  =======================================================  =========================================================  =================
+  outside                         Ambient environment                                      Weather data                                               Any
+  ground                                                                                   EnergyPlus calculation                                     Any
+  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  attic - vented                                                                           EnergyPlus calculation                                     Any
+  attic - unvented                                                                         EnergyPlus calculation                                     Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  basement - unconditioned                                                                 EnergyPlus calculation                                     Any
+  crawlspace - vented                                                                      EnergyPlus calculation                                     Any
+  crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
+  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                                     Any
+  manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
+  manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
+  other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
+  other heated space              E.g., shared laundry/equipment space                     Avg of conditioned space/outside; min of heating setpoint  SFA/MF only
+  other multifamily buffer space  E.g., enclosed unconditioned stairwell                   Avg of conditioned space/outside; min of 50F               SFA/MF only
+  other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F                        SFA/MF only
+  other exterior                  Water heater outside                                     Weather data                                               Any
+  exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside                           Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
+  roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
+  ==============================  =======================================================  =========================================================  =================
 
 Validating & Debugging Errors
 -----------------------------

@@ -442,20 +442,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 20000, 7.4, 2, 1)
 
-    # Test defaults w/ infiltration volume
-    hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = 25650
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 21600, 8, 2, 1)
-
-    # Test defaults w/ infiltration volume
-    hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = 18000
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 18000, 6.67, 2, 1)
-
     # Test defaults w/ conditioned crawlspace
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
@@ -1453,7 +1439,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def test_boilers
-    # Test inputs not overridden by defaults
+    # Test inputs not overridden by defaults (in-unit boiler)
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-only.xml')
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 99.9
     hpxml_bldg.heating_systems[0].heating_capacity = 12345
@@ -1470,7 +1456,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, true, 999, 1.2)
 
-    # Test defaults
+    # Test defaults w/ in-unit boiler
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].pilot_light_btuh = nil
@@ -1478,6 +1464,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 170.0, nil, true, 500, 1.0)
+
+    # Test inputs not overridden by defaults (shared boiler)
+    hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml')
+    hpxml_bldg.heating_systems[0].shared_loop_watts = nil
+    hpxml_bldg.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, false, nil, 1.0)
   end
 
   def test_stoves
@@ -2532,7 +2526,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 21.7, 61.9)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 22.5, 64.3)
 
     # Test defaults w/ CFM50 infiltration
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-cfm50.xml')
