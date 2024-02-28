@@ -138,9 +138,12 @@ class ScheduleGenerator
       all_simulated_values << Matrix[*simulated_values]
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    plugload_weekday_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
-    plugload_weekend_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekendFractions, 24, 'weekend')
-    plugload_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    plugload_other_weekday_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
+    plugload_other_weekend_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekendFractions, 24, 'weekend')
+    plugload_other_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    plugload_tv_weekday_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekdayFractions, 24, 'weekday')
+    plugload_tv_weekend_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekendFractions, 24, 'weekend')
+    plugload_tv_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsTVMonthlyMultipliers, 12, 'monthly')
     ceiling_fan_weekday_sch = Schedule.validate_values(Constants.CeilingFanWeekdayFractions, 24, 'weekday')
     ceiling_fan_weekend_sch = Schedule.validate_values(Constants.CeilingFanWeekendFractions, 24, 'weekend')
     ceiling_fan_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
@@ -173,13 +176,14 @@ class ScheduleGenerator
         away_schedule << sum_across_occupants(all_simulated_values, 5, index_15).to_f / args[:geometry_num_occupants]
         idle_schedule << sum_across_occupants(all_simulated_values, 6, index_15).to_f / args[:geometry_num_occupants]
         active_occupancy_percentage = 1 - (away_schedule[-1] + sleep_schedule[-1])
-        @schedules[SchedulesFile::Columns[:PlugLoadsOther].name][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_weekday_sch, plugload_weekend_sch, plugload_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
+        @schedules[SchedulesFile::Columns[:PlugLoadsOther].name][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_other_weekday_sch, plugload_other_weekend_sch, plugload_other_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
+        @schedules[SchedulesFile::Columns[:PlugLoadsTV].name][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_tv_weekday_sch, plugload_tv_weekend_sch, plugload_tv_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::Columns[:LightingInterior].name][day * @steps_in_day + step] = scale_lighting_by_occupancy(interior_lighting_schedule, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::Columns[:CeilingFan].name][day * @steps_in_day + step] = get_value_from_daily_sch(ceiling_fan_weekday_sch, ceiling_fan_weekend_sch, ceiling_fan_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
       end
     end
     @schedules[SchedulesFile::Columns[:PlugLoadsOther].name] = normalize(@schedules[SchedulesFile::Columns[:PlugLoadsOther].name])
-    @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = @schedules[SchedulesFile::Columns[:PlugLoadsOther].name]
+    @schedules[SchedulesFile::Columns[:PlugLoadsTV].name] = normalize(@schedules[SchedulesFile::Columns[:PlugLoadsTV].name])
     @schedules[SchedulesFile::Columns[:LightingInterior].name] = normalize(@schedules[SchedulesFile::Columns[:LightingInterior].name])
     @schedules[SchedulesFile::Columns[:LightingGarage].name] = @schedules[SchedulesFile::Columns[:LightingInterior].name]
     @schedules[SchedulesFile::Columns[:CeilingFan].name] = normalize(@schedules[SchedulesFile::Columns[:CeilingFan].name])
