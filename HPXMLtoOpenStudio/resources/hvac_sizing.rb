@@ -348,11 +348,12 @@ class HVACSizing
     Room loads set up based on spaces
     '''
     @space_loads = {}
+    @spaces = []
     @hpxml_bldg.zones.each do |zone|
       next unless zone.zone_type == HPXML::ZoneTypeConditioned
 
-      @zone = zone
       zone.spaces.each do |space|
+        @spaces << space
         @space_loads[space.id] = DesignLoads.new
         space.additional_properties.total_exposed_wall_area = 0.0
         space.additional_properties.afl_hr = [0.0] * 12
@@ -575,7 +576,7 @@ class HVACSizing
           space_design_loads.Cool_Windows += htm * window.area unless space_design_loads.nil?
         else
           afl_hr[hr] += htm * window.area
-          wall.space.additional_properties.afl_hr[hr] += htm * window.area
+          wall.space.additional_properties.afl_hr[hr] += htm * window.area unless wall.space.nil?
         end
       end
     end # window
@@ -638,7 +639,7 @@ class HVACSizing
           space_design_loads.Cool_Skylights += htm * skylight.area unless space_design_loads.nil?
         else
           afl_hr[hr] += htm * skylight.area
-          roof.space.additional_properties.afl_hr[hr] += htm * skylight.area
+          roof.space.additional_properties.afl_hr[hr] += htm * skylight.area unless roof.space.nil?
         end
       end
     end # skylight
@@ -647,7 +648,7 @@ class HVACSizing
     # If not adequate, add AED Excursion to windows cooling load
 
     # Loop spaces to calculate adjustment for each space
-    @zone.spaces.each do |space|
+    @spaces.each do |space|
       @space_loads[space.id].Cool_Windows += add_aed_excursion(space.additional_properties.afl_hr)
     end
 
@@ -1049,11 +1050,11 @@ class HVACSizing
     bldg_design_loads.Cool_InfilVent_Sens = clg_infil_vent_sens_loads
     bldg_design_loads.Cool_InfilVent_Lat = clg_infil_vent_lat_loads
     # total exposed wall area
-    return if @zone.nil?
+    return if @spaces.empty?
 
-    spaces_total_exposed_wall_area = @zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
+    spaces_total_exposed_wall_area = @spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
 
-    @zone.spaces.each do |space|
+    @spaces.each do |space|
       space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
       war = space_exposed_wall_area / spaces_total_exposed_wall_area
       @space_loads[space.id].Heat_InfilVent = war * htg_infil_vent_loads
@@ -1071,8 +1072,8 @@ class HVACSizing
     bldg_design_loads.Cool_IntGains_Lat = clg_loads_lat
 
     # Area weighted space assignment
-    total_floor_area = @zone.spaces.map { |space| space.floor_area }.sum
-    @zone.spaces.each do |space|
+    total_floor_area = @spaces.map { |space| space.floor_area }.sum
+    @spaces.each do |space|
       @space_loads[space.id].Cool_IntGains_Sens = space.manualj_internal_loads_sensible.nil? ? (clg_loads_sens * space.floor_area / total_floor_area) : space.manualj_internal_loads_sensible
     end
   end
