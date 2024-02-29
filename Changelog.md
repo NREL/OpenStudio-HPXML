@@ -35,6 +35,7 @@ __New Features__
 - Miscellaneous Manual J improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
+- Stochastic schedule for TV plug loads now use TV plug load schedules (instead of mirroring stochastic schedule for miscellaneous plug loads).
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
