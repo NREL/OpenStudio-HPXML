@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5ffe7037-58e6-44a2-ab53-b5e77f46deb9</version_id>
-  <version_modified>2024-02-29T02:10:58Z</version_modified>
+  <version_id>c4da986b-a967-43cb-ab48-eb46e372ef0a</version_id>
+  <version_modified>2024-02-29T17:45:30Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C75ABDBF</checksum>
+      <checksum>ECAF5AA7</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -304,13 +304,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C51F160D</checksum>
+      <checksum>52CD2ABB</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3E4A3005</checksum>
+      <checksum>D4B3A728</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>31A0885B</checksum>
+      <checksum>CE7F5D20</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -340,13 +340,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BE071714</checksum>
+      <checksum>3C0DF198</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FC6B22A0</checksum>
+      <checksum>77CFD747</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -358,7 +358,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>389D56E0</checksum>
+      <checksum>AC8FD8C6</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -562,7 +562,7 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>84E0D7F1</checksum>
+      <checksum>33639DD2</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C872CE98</checksum>
+      <checksum>BC0DA303</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -676,7 +676,7 @@
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6B132C27</checksum>
+      <checksum>D5865627</checksum>
     </file>
     <file>
       <filename>util.rb</filename>

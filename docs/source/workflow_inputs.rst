@@ -408,6 +408,7 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   Element                                  Type      Units  Constraints  Required  Default   Description
   =======================================  ========  =====  ===========  ========  ========  ===============
   ``SiteID``                               id                            Yes                 Unique identifier
+  ``Address/CityMunicipality``             string                        No        See [#]_  City where the home is located
   ``Address/StateCode``                    string                        No        See [#]_  State/territory where the home is located
   ``Address/ZipCode``                      string           See [#]_     No                  ZIP Code where the home is located
   ``Elevation``                            double    ft     >= 0         No        See [#]_  Elevation of the home
@@ -415,6 +416,7 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   ``TimeZone/DSTObserved``                 boolean                       No        true      Daylight saving time observed?
   =======================================  ========  =====  ===========  ========  ========  ===============
 
+  .. [#] If CityMunicipality not provided, defaults according to the EPW weather file header.
   .. [#] If StateCode not provided, defaults according to the EPW weather file header.
   .. [#] ZipCode can be defined as the standard 5 number postal code, or it can have the additional 4 number code separated by a hyphen.
   .. [#] If Elevation not provided, defaults according to the EPW weather file header.

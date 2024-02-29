@@ -14,7 +14,7 @@ class HVACSizing
 
     # Calculate loads for the conditioned thermal zone
     bldg_design_loads = DesignLoads.new
-    process_load_windows_skylights(mj, bldg_design_loads, weather)
+    process_load_windows_skylights(mj, bldg_design_loads)
     process_load_doors(mj, bldg_design_loads)
     process_load_walls(mj, bldg_design_loads)
     process_load_roofs(mj, bldg_design_loads)
@@ -340,7 +340,7 @@ class HVACSizing
     return cool_temp
   end
 
-  def self.process_load_windows_skylights(mj, bldg_design_loads, weather)
+  def self.process_load_windows_skylights(mj, bldg_design_loads)
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -427,7 +427,7 @@ class HVACSizing
     psf_lat_horiz = nil
     slm_hr_lat = []
     slm_avg_lat = []
-    latitude = weather.header.Latitude.to_f
+    latitude = @hpxml_bldg.latitude
     for cnt in 0..8 # S/SW/W/NW/N/NE/E/SE/S
       # psf/psf_horiz
       if latitude <= psf_lats[0]
@@ -2820,7 +2820,7 @@ class HVACSizing
     r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 
-    is_southern_hemisphere = (weather.header.Latitude < 0)
+    is_southern_hemisphere = (@hpxml_bldg.latitude < 0)
 
     if is_southern_hemisphere
       heating_month = 6 # July

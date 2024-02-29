@@ -238,7 +238,7 @@ class HPXMLDefaults
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
       if not weather.nil?
         # Default based on Building America seasons
-        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
         begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
         if not begin_month.nil? # Check if no summer
           hpxml_bldg.header.shading_summer_begin_month = begin_month
@@ -442,19 +442,6 @@ class HPXMLDefaults
   end
 
   def self.apply_building(hpxml_bldg, epw_file)
-    if (not epw_file.nil?) && hpxml_bldg.state_code.nil?
-      state_province_region = epw_file.stateProvinceRegion.upcase
-      if /^[A-Z]{2}$/.match(state_province_region)
-        hpxml_bldg.state_code = state_province_region
-        hpxml_bldg.state_code_isdefaulted = true
-      end
-    end
-
-    if (not epw_file.nil?) && hpxml_bldg.time_zone_utc_offset.nil?
-      hpxml_bldg.time_zone_utc_offset = epw_file.timeZone
-      hpxml_bldg.time_zone_utc_offset_isdefaulted = true
-    end
-
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
       hpxml_bldg.site.soil_type = HPXML::SiteSoilTypeUnknown
       hpxml_bldg.site.soil_type_isdefaulted = true
@@ -534,33 +521,61 @@ class HPXMLDefaults
       hpxml_bldg.dst_enabled_isdefaulted = true
     end
 
-    if hpxml_bldg.dst_enabled && (not epw_file.nil?)
-      if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
-        if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
-          # Use weather file DST dates if available
-          dst_start_date = epw_file.daylightSavingStartDate.get
-          dst_end_date = epw_file.daylightSavingEndDate.get
-          hpxml_bldg.dst_begin_month = dst_start_date.monthOfYear.value
-          hpxml_bldg.dst_begin_day = dst_start_date.dayOfMonth
-          hpxml_bldg.dst_end_month = dst_end_date.monthOfYear.value
-          hpxml_bldg.dst_end_day = dst_end_date.dayOfMonth
-        else
-          # Roughly average US dates according to https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States
-          hpxml_bldg.dst_begin_month = 3
-          hpxml_bldg.dst_begin_day = 12
-          hpxml_bldg.dst_end_month = 11
-          hpxml_bldg.dst_end_day = 5
-        end
-        hpxml_bldg.dst_begin_month_isdefaulted = true
-        hpxml_bldg.dst_begin_day_isdefaulted = true
-        hpxml_bldg.dst_end_month_isdefaulted = true
-        hpxml_bldg.dst_end_day_isdefaulted = true
-      end
-    end
+    if not epw_file.nil?
 
-    if hpxml_bldg.elevation.nil? && (not epw_file.nil?)
-      hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
-      hpxml_bldg.elevation_isdefaulted = true
+      if hpxml_bldg.state_code.nil?
+        hpxml_bldg.state_code = get_default_state_code(hpxml_bldg.state_code, epw_file)
+        hpxml_bldg.state_code_isdefaulted = true
+      end
+
+      if hpxml_bldg.city.nil?
+        hpxml_bldg.city = epw_file.city
+        hpxml_bldg.city_isdefaulted = true
+      end
+
+      if hpxml_bldg.time_zone_utc_offset.nil?
+        hpxml_bldg.time_zone_utc_offset = get_default_time_zone(hpxml_bldg.time_zone_utc_offset, epw_file)
+        hpxml_bldg.time_zone_utc_offset_isdefaulted = true
+      end
+
+      if hpxml_bldg.dst_enabled
+        if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
+          if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
+            # Use weather file DST dates if available
+            dst_start_date = epw_file.daylightSavingStartDate.get
+            dst_end_date = epw_file.daylightSavingEndDate.get
+            hpxml_bldg.dst_begin_month = dst_start_date.monthOfYear.value
+            hpxml_bldg.dst_begin_day = dst_start_date.dayOfMonth
+            hpxml_bldg.dst_end_month = dst_end_date.monthOfYear.value
+            hpxml_bldg.dst_end_day = dst_end_date.dayOfMonth
+          else
+            # Roughly average US dates according to https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States
+            hpxml_bldg.dst_begin_month = 3
+            hpxml_bldg.dst_begin_day = 12
+            hpxml_bldg.dst_end_month = 11
+            hpxml_bldg.dst_end_day = 5
+          end
+          hpxml_bldg.dst_begin_month_isdefaulted = true
+          hpxml_bldg.dst_begin_day_isdefaulted = true
+          hpxml_bldg.dst_end_month_isdefaulted = true
+          hpxml_bldg.dst_end_day_isdefaulted = true
+        end
+      end
+
+      if hpxml_bldg.elevation.nil?
+        hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
+        hpxml_bldg.elevation_isdefaulted = true
+      end
+
+      if hpxml_bldg.latitude.nil?
+        hpxml_bldg.latitude = get_default_latitude(hpxml_bldg.latitude, epw_file)
+        hpxml_bldg.latitude_isdefaulted = true
+      end
+
+      if hpxml_bldg.longitude.nil?
+        hpxml_bldg.longitude = get_default_longitude(hpxml_bldg.longitude, epw_file)
+        hpxml_bldg.longitude_isdefaulted = true
+      end
     end
   end
 
@@ -3243,5 +3258,29 @@ class HPXMLDefaults
       return true
     end
     return false
+  end
+
+  def self.get_default_latitude(latitude, epw_file)
+    return latitude unless latitude.nil?
+
+    return epw_file.latitude
+  end
+
+  def self.get_default_longitude(longitude, epw_file)
+    return longitude unless longitude.nil?
+
+    return epw_file.longitude
+  end
+
+  def self.get_default_time_zone(time_zone, epw_file)
+    return time_zone unless time_zone.nil?
+
+    return epw_file.timeZone
+  end
+
+  def self.get_default_state_code(state_code, epw_file)
+    return state_code unless state_code.nil?
+
+    return epw_file.stateProvinceRegion.upcase
   end
 end

@@ -45,6 +45,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.83') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-104.65') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -128,6 +130,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.83') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-104.65') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -165,6 +169,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-5.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.17') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-76.68') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -196,6 +202,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-5.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.17') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-76.68') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -232,6 +240,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.83') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-104.65') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -284,11 +294,15 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_empty(hpxml.buildings[0].header.schedules_filepaths)
   end
 
-  def test_different_time_zone
+  def test_different_time_zone_latitude_longitude
     time_zone_utc_offset = 4
+    latitude = 12
+    longitude = -34
 
     hpxml = _create_hpxml('base.xml')
     hpxml.buildings[0].time_zone_utc_offset = time_zone_utc_offset
+    hpxml.buildings[0].latitude = latitude
+    hpxml.buildings[0].longitude = longitude
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
@@ -296,6 +310,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     info_msgs = result.info.map { |x| x.logMessage }
     assert(info_msgs.any? { |info_msg| info_msg.include?("TimeZoneUTCOffset=#{time_zone_utc_offset}") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("Latitude=#{latitude}") })
+    assert(info_msgs.any? { |info_msg| info_msg.include?("Longitude=#{longitude}") })
   end
 
   def test_multiple_buildings
@@ -317,6 +333,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.83') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-104.65') })
 
     hpxml.buildings.each do |hpxml_bldg|
       sf = SchedulesFile.new(schedules_paths: hpxml_bldg.header.schedules_filepaths,
@@ -397,6 +415,8 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Latitude=39.83') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('Longitude=-104.65') })
 
     hpxml.buildings.each do |hpxml_bldg|
       building_id = hpxml_bldg.building_id

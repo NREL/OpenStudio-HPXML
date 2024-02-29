@@ -2579,7 +2579,14 @@
     "heating_system_heating_capacity": 24000
   },
   "sample_files/base-location-detailed.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "site_time_zone_utc_offset": -7,
+    "site_elevation": 5325,
+    "site_latitude": 39.88,
+    "site_longitude": 105.06,
+    "site_state_code": "CO",
+    "site_city": "Westminster",
+    "site_zip_code": 80003
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
