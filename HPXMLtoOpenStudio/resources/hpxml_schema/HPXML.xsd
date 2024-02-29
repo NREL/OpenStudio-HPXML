@@ -11331,7 +11331,9 @@
 	</xs:simpleType>
 	<xs:complexType name="ElevationType">
 		<xs:simpleContent>
-			<xs:extension base="ElevationType_simple"/>
+			<xs:extension base="ElevationType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
 </xs:schema>
