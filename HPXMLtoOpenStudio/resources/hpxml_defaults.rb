@@ -559,7 +559,7 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.elevation.nil? && (not epw_file.nil?)
-      hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round
+      hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
       hpxml_bldg.elevation_isdefaulted = true
     end
   end

@@ -279,7 +279,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.header.manualj_num_occupants = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', -7, 5413, 3, HPXML::HeatPumpSizingHERS, false,
+    _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', -7, 5413.4, 3, HPXML::HeatPumpSizingHERS, false,
                                   5, 1, 10, 31, 6.8, 91.4, 70.0, 75.0, 0.45, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
 
     # Test defaults - DST in weather file
@@ -294,7 +294,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.elevation = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_values(default_hpxml_bldg, true, 3, 11, 11, 4, 'CO', -7, 5300, 3, nil, false,
+    _test_default_building_values(default_hpxml_bldg, true, 3, 11, 11, 4, 'CO', -7, 5300.2, 3, nil, false,
                                   5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.45, 2400.0, 0.0, 4, nil)
 
     # Test defaults - southern hemisphere, invalid state code
@@ -309,7 +309,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.elevation = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, nil, 2, 138, 3, nil, false,
+    _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, nil, 2, 137.8, 3, nil, false,
                                   12, 1, 4, 30, 41.0, 84.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4, nil)
   end
 
