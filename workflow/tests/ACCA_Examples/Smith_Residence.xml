@@ -31,8 +31,8 @@
         <extension>
           <HVACSizingControl>
             <ManualJInputs>
-              <HeatingDesignTemperature>-6</HeatingDesignTemperature>
-              <CoolingDesignTemperature>90</CoolingDesignTemperature>
+              <HeatingDesignTemperature>-6.0</HeatingDesignTemperature>
+              <CoolingDesignTemperature>90.0</CoolingDesignTemperature>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -51,7 +51,7 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
             <EffectiveLeakageArea>62.0</EffectiveLeakageArea>
-            <InfiltrationVolume>20355</InfiltrationVolume>
+            <InfiltrationVolume>20355.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>
@@ -122,7 +122,7 @@
             <SystemIdentifier id='FoundationWall2'/>
             <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>10</Height>
+            <Height>10.0</Height>
             <Area>96.0</Area>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
@@ -480,7 +480,7 @@
         </MechanicalVentilation>
       </Systems>
       <Appliances>
-       <Refrigerator>
+        <Refrigerator>
           <SystemIdentifier id='Refrigerator1'/>
         </Refrigerator>
         <CookingRange>

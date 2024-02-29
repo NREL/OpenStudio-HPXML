@@ -30,8 +30,8 @@
         <extension>
           <HVACSizingControl>
             <ManualJInputs>
-              <HeatingDesignTemperature>31</HeatingDesignTemperature>
-              <CoolingDesignTemperature>94</CoolingDesignTemperature>
+              <HeatingDesignTemperature>31.0</HeatingDesignTemperature>
+              <CoolingDesignTemperature>94.0</CoolingDesignTemperature>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>

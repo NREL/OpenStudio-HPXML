@@ -30,9 +30,9 @@
         <extension>
           <HVACSizingControl>
             <ManualJInputs>
-              <HeatingDesignTemperature>52</HeatingDesignTemperature>
-              <CoolingDesignTemperature>90</CoolingDesignTemperature>
-              <InternalLoadsSensible>4621</InternalLoadsSensible>
+              <HeatingDesignTemperature>52.0</HeatingDesignTemperature>
+              <CoolingDesignTemperature>90.0</CoolingDesignTemperature>
+              <InternalLoadsSensible>4621.0</InternalLoadsSensible>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
