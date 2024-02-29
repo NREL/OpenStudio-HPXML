@@ -108,7 +108,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'heat-pump-backup-sizing' => ["Expected HeatPumpBackupSizingMethodology to be 'emergency' or 'supplemental'"],
                             'heat-pump-separate-backup-inputs' => ['Expected 0 element(s) for xpath: BackupAnnualHeatingEfficiency',
                                                                    'Expected 0 element(s) for xpath: BackupHeatingCapacity',
-                                                                   'Expected 0 element(s) for xpath: extension/BackupHeatingCapacity'],
+                                                                   'Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingFactor'],
                             'heat-pump-capacity-17f' => ['Expected HeatingCapacity17F to be less than or equal to HeatingCapacity'],
                             'heat-pump-lockout-temperatures' => ['Expected CompressorLockoutTemperature to be less than or equal to BackupHeatingLockoutTemperature'],
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
