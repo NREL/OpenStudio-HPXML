@@ -1820,7 +1820,7 @@ class HVAC
 
   def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil = nil, clg_coil, htg_coil, schedules_file)
     if not schedules_file.nil?
-      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::ColumnHVACMaximumPowerRatio, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:HVACMaximumPowerRatio].name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       # Not allowed with unit multiplier for now
       if not max_pow_ratio_sch.nil?
         fail 'NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.' if hpxml_bldg.building_construction.number_of_units > 1
