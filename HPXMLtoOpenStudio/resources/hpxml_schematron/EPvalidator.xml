@@ -1435,7 +1435,7 @@
       <sch:assert role='ERROR' test='count(h:BackupSystemFuel) = 0'>Expected 0 element(s) for xpath: BackupSystemFuel</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupAnnualHeatingEfficiency) = 0'>Expected 0 element(s) for xpath: BackupAnnualHeatingEfficiency</sch:assert>
       <sch:assert role='ERROR' test='count(h:BackupHeatingCapacity) = 0'>Expected 0 element(s) for xpath: BackupHeatingCapacity</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingAutosizingFactor) = 0'>Expected 0 element(s) for xpath: extension/BackupHeatingCapacity</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:BackupHeatingAutosizingFactor) = 0'>Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingFactor</sch:assert>
     </sch:rule>
   </sch:pattern>
 
