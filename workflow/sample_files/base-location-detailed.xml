@@ -23,15 +23,15 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <CityMunicipality>Westminster</CityMunicipality>
+        <CityMunicipality>Craig</CityMunicipality>
         <StateCode>CO</StateCode>
-        <ZipCode>80003</ZipCode>
+        <ZipCode>81625</ZipCode>
       </Address>
       <GeoLocation>
-        <Latitude>39.88</Latitude>
-        <Longitude>-105.06</Longitude>
+        <Latitude>40.51</Latitude>
+        <Longitude>-107.55</Longitude>
       </GeoLocation>
-      <Elevation>5325.0</Elevation>
+      <Elevation>6191.0</Elevation>
       <TimeZone>
         <UTCOffset>-7.0</UTCOffset>
       </TimeZone>
