@@ -907,7 +907,7 @@ class Psychrometrics
     return twb
   end
 
-  def self.CalculateLocalPressure(elevation)
-    return Math::exp(-0.0000368 * elevation) # atm
+  def self.CalculateLocalPressure(elevation_ft)
+    return Math::exp(-0.0000368 * elevation_ft) # atm
   end
 end

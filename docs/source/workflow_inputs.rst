@@ -408,9 +408,9 @@ Building site information can be entered in ``/HPXML/Building/Site``.
   Element                                  Type      Units  Constraints      Required  Default   Description
   =======================================  ========  =====  ===============  ========  ========  ===============
   ``SiteID``                               id                                Yes                 Unique identifier
-  ``Address/CityMunicipality``             string                            No        See [#]_  Address city/municipality
+  ``Address/CityMunicipality``             string                            No        See [#]_  Address city/municipality (not used in the energy model)
   ``Address/StateCode``                    string                            No        See [#]_  Address state/territory
-  ``Address/ZipCode``                      string           See [#]_         No                  Address ZIP Code
+  ``Address/ZipCode``                      string           See [#]_         No                  Address ZIP Code (not used in the energy model)
   ``GeoLocation/Latitude``                 double    deg    >= -90, <= 90    No        See [#]_  Site latitude (negative for southern hemisphere)
   ``GeoLocation/Longitude``                double    deg    >= -180, <= 180  No        See [#]_  Site longitude (negative for western hemisphere)
   ``Elevation``                            double    ft     >= 0             No        See [#]_  Site elevation
