@@ -307,6 +307,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
     elsif ['base-bldgtype-mf-unit-infil-compartmentalization-test.xml'].include? hpxml_file
       hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
+    elsif ['base-location-detailed.xml'].include? hpxml_file
+      hpxml_bldg.elevation = 5309
     end
 
     # --------------- #

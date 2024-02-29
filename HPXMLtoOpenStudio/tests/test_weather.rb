@@ -31,7 +31,6 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(-104.65, weather.header.Longitude)
     assert_equal(-7.0, weather.header.Timezone)
     assert_in_delta(5413.4, weather.header.Altitude, 0.1)
-    assert_in_delta(0.82, weather.header.LocalPressure, 0.01)
 
     # Check data
     assert_equal(1, weather.header.RecordsPerHour)
@@ -86,7 +85,6 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(-157.93, weather.header.Longitude)
     assert_equal(-10.0, weather.header.Timezone)
     assert_in_delta(6.6, weather.header.Altitude, 0.1)
-    assert_in_delta(1.0, weather.header.LocalPressure, 0.01)
 
     # Check data
     assert_equal(1, weather.header.RecordsPerHour)
@@ -141,7 +139,6 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(18.6, weather.header.Longitude)
     assert_equal(2.0, weather.header.Timezone)
     assert_in_delta(137.8, weather.header.Altitude, 0.1)
-    assert_in_delta(1.0, weather.header.LocalPressure, 0.01)
 
     # Check data
     assert_equal(1, weather.header.RecordsPerHour)
@@ -196,7 +193,6 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_equal(-105.22, weather.header.Longitude)
     assert_equal(-7.0, weather.header.Timezone)
     assert_in_delta(5300.2, weather.header.Altitude, 0.1)
-    assert_in_delta(0.82, weather.header.LocalPressure, 0.01)
 
     # Check data
     assert_equal(1, weather.header.RecordsPerHour)

@@ -3,7 +3,7 @@
 class WeatherHeader
   def initialize
   end
-  ATTRS ||= [:City, :State, :Country, :DataSource, :Station, :Latitude, :Longitude, :Timezone, :Altitude, :LocalPressure, :RecordsPerHour]
+  ATTRS ||= [:City, :State, :Country, :DataSource, :Station, :Latitude, :Longitude, :Timezone, :Altitude, :RecordsPerHour]
   attr_accessor(*ATTRS)
 end
 
@@ -53,7 +53,6 @@ class WeatherProcess
     header.Longitude = epw_file.longitude
     header.Timezone = epw_file.timeZone
     header.Altitude = UnitConversions.convert(epw_file.elevation, 'm', 'ft')
-    header.LocalPressure = Math::exp(-0.0000368 * header.Altitude) # atm
     header.RecordsPerHour = epw_file.recordsPerHour
     if header.RecordsPerHour != 1
       fail "Unexpected records per hour: #{header.RecordsPerHour}."

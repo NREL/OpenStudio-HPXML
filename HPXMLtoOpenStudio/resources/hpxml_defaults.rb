@@ -185,7 +185,8 @@ class HPXMLDefaults
 
     if hpxml_bldg.header.manualj_humidity_setpoint.nil?
       hpxml_bldg.header.manualj_humidity_setpoint = 0.5 # 50%
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, weather.header.LocalPressure)
+      local_press = Psychrometrics.CalculateLocalPressure(hpxml_bldg.elevation)
+      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, local_press)
       if HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling) < 0
         # Dry summer climate per Manual J 18-1 Design Grains
         hpxml_bldg.header.manualj_humidity_setpoint = 0.45 # 45%
@@ -555,6 +556,11 @@ class HPXMLDefaults
         hpxml_bldg.dst_end_month_isdefaulted = true
         hpxml_bldg.dst_end_day_isdefaulted = true
       end
+    end
+
+    if hpxml_bldg.elevation.nil? && (not epw_file.nil?)
+      hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round
+      hpxml_bldg.elevation_isdefaulted = true
     end
   end
 

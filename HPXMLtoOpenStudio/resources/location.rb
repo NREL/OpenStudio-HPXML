@@ -3,20 +3,20 @@
 class Location
   def self.apply(model, weather, epw_file, hpxml_header, hpxml_bldg)
     apply_year(model, hpxml_header, epw_file)
-    apply_site(model, epw_file)
+    apply_site(model, epw_file, hpxml_bldg)
     apply_dst(model, hpxml_bldg)
     apply_ground_temps(model, weather, hpxml_bldg)
   end
 
   private
 
-  def self.apply_site(model, epw_file)
+  def self.apply_site(model, epw_file, hpxml_bldg)
     site = model.getSite
     site.setName("#{epw_file.city}_#{epw_file.stateProvinceRegion}_#{epw_file.country}")
     site.setLatitude(epw_file.latitude)
     site.setLongitude(epw_file.longitude)
     site.setTimeZone(epw_file.timeZone)
-    site.setElevation(epw_file.elevation)
+    site.setElevation(UnitConversions.convert(hpxml_bldg.elevation, 'ft', 'm').round)
   end
 
   def self.apply_year(model, hpxml_header, epw_file)
