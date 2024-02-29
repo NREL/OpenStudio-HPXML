@@ -2211,7 +2211,7 @@ class HPXML < Object
   end
 
   class Space < BaseElement
-    ATTRS = [:id, :floor_area] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
+    ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2231,6 +2231,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
+      XMLHelper.add_extension(space, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
       HPXML.design_loads_to_doc(self, space)
     end
 
@@ -2239,6 +2240,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(space)
       @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
+      @manualj_internal_loads_sensible = XMLHelper.get_value(space, 'extension/InternalLoadsSensible', :float)
       HPXML.design_loads_from_doc(self, space)
     end
   end
@@ -2783,6 +2785,13 @@ class HPXML < Object
       return @parent_object.skylights.select { |skylight| skylight.roof_idref == @id }
     end
 
+    def space
+      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
+      return if zone.nil?
+
+      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
+    end
+
     def net_area
       return if nil?
       return if @area.nil?
@@ -3285,6 +3294,13 @@ class HPXML < Object
 
     def windows
       return @parent_object.windows.select { |window| window.wall_idref == @id }
+    end
+
+    def space
+      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
+      return if zone.nil?
+
+      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
     end
 
     def doors

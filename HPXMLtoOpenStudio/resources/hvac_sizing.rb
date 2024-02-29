@@ -355,6 +355,7 @@ class HVACSizing
       zone.spaces.each do |space|
         @space_loads[space.id] = DesignLoads.new
         space.additional_properties.total_exposed_wall_area = 0.0
+        space.additional_properties.afl_hr = [0.0] * 12
       end
     end
   end
@@ -491,7 +492,10 @@ class HVACSizing
 
     # Windows
     @hpxml_bldg.windows.each do |window|
-      next unless window.wall.is_exterior_thermal_boundary
+      wall = window.wall
+      next unless wall.is_exterior_thermal_boundary
+
+      space_design_loads = @space_loads[wall.attached_to_space_idref] unless wall.attached_to_space_idref.nil?
 
       window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(window.azimuth) / 45.0).round.to_i
@@ -568,17 +572,22 @@ class HVACSizing
         if hr == -1
           # Average Load Procedure (ALP) load
           bldg_design_loads.Cool_Windows += htm * window.area
+          space_design_loads.Cool_Windows += htm * window.area unless space_design_loads.nil?
         else
           afl_hr[hr] += htm * window.area
+          wall.space.additional_properties.afl_hr[hr] += htm * window.area
         end
       end
     end # window
 
     # Skylights
     @hpxml_bldg.skylights.each do |skylight|
+      roof = skylight.roof
+      space_design_loads = @space_loads[roof.attached_to_space_idref] unless roof.attached_to_space_idref.nil?
+
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(skylight.azimuth) / 45.0).round.to_i
-      inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
+      inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 
       skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
       u_curb = 0.51 # default to wood (Table 2B-3)
@@ -626,8 +635,10 @@ class HVACSizing
         if hr == -1
           # Average Load Procedure (ALP) load
           bldg_design_loads.Cool_Skylights += htm * skylight.area
+          space_design_loads.Cool_Skylights += htm * skylight.area unless space_design_loads.nil?
         else
           afl_hr[hr] += htm * skylight.area
+          roof.space.additional_properties.afl_hr[hr] += htm * skylight.area
         end
       end
     end # skylight
@@ -635,6 +646,15 @@ class HVACSizing
     # Check for Adequate Exposure Diversity (AED)
     # If not adequate, add AED Excursion to windows cooling load
 
+    # Loop spaces to calculate adjustment for each space
+    @zone.spaces.each do |space|
+      @space_loads[space.id].Cool_Windows += add_aed_excursion(space.additional_properties.afl_hr)
+    end
+
+    bldg_design_loads.Cool_Windows += add_aed_excursion(afl_hr)
+  end
+
+  def self.add_aed_excursion(afl_hr)
     # Daily Average Load (DAL)
     dal = afl_hr.sum(0.0) / afl_hr.size
 
@@ -645,9 +665,7 @@ class HVACSizing
     pfl = afl_hr.max
 
     # Excursion Adjustment Load (EAL)
-    eal = [0.0, pfl - ell].max
-
-    bldg_design_loads.Cool_Windows += eal
+    return [0.0, pfl - ell].max
   end
 
   def self.process_load_doors(mj, bldg_design_loads)
@@ -1035,11 +1053,11 @@ class HVACSizing
 
     spaces_total_exposed_wall_area = @zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
 
-    @space_loads.each do |space_id, space_design_loads|
-      space_exposed_wall_area = @zone.spaces.find { |space| space.id == space_id }.additional_properties.total_exposed_wall_area
+    @zone.spaces.each do |space|
+      space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
       war = space_exposed_wall_area / spaces_total_exposed_wall_area
-      space_design_loads.Heat_InfilVent = war * htg_infil_vent_loads
-      space_design_loads.Cool_InfilVent_Sens = war * clg_infil_vent_sens_loads
+      @space_loads[space.id].Heat_InfilVent = war * htg_infil_vent_loads
+      @space_loads[space.id].Cool_InfilVent_Sens = war * clg_infil_vent_sens_loads
     end
   end
 
@@ -1047,9 +1065,16 @@ class HVACSizing
     '''
     Cooling Load: Internal Gains
     '''
+    clg_loads_sens = @hpxml_bldg.header.manualj_internal_loads_sensible + 230.0 * @hpxml_bldg.header.manualj_num_occupants
+    clg_loads_lat = @hpxml_bldg.header.manualj_internal_loads_latent + 200.0 * @hpxml_bldg.header.manualj_num_occupants
+    bldg_design_loads.Cool_IntGains_Sens = clg_loads_sens
+    bldg_design_loads.Cool_IntGains_Lat = clg_loads_lat
 
-    bldg_design_loads.Cool_IntGains_Sens = @hpxml_bldg.header.manualj_internal_loads_sensible + 230.0 * @hpxml_bldg.header.manualj_num_occupants
-    bldg_design_loads.Cool_IntGains_Lat = @hpxml_bldg.header.manualj_internal_loads_latent + 200.0 * @hpxml_bldg.header.manualj_num_occupants
+    # Area weighted space assignment
+    total_floor_area = @zone.spaces.map { |space| space.floor_area }.sum
+    @zone.spaces.each do |space|
+      @space_loads[space.id].Cool_IntGains_Sens = space.manualj_internal_loads_sensible.nil? ? (clg_loads_sens * space.floor_area / total_floor_area) : space.manualj_internal_loads_sensible
+    end
   end
 
   def self.aggregate_loads(bldg_design_loads)
