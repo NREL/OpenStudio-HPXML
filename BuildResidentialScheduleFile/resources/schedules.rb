@@ -145,7 +145,7 @@ class ScheduleGenerator
     ceiling_fan_weekend_sch = Schedule.validate_values(Constants.CeilingFanWeekendFractions, 24, 'weekend')
     ceiling_fan_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
 
-    sch = get_building_america_lighting_schedule(@epw_file)
+    sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], @epw_file)
     interior_lighting_schedule = []
     num_days_in_months = Constants.NumDaysInMonths(@sim_year)
     for month in 0..11
@@ -808,11 +808,11 @@ class ScheduleGenerator
     return weights.size - 1 # If the prob weight don't sum to n, return last index
   end
 
-  def get_building_america_lighting_schedule(epw_file)
+  def get_building_america_lighting_schedule(time_zone_utc_offset, epw_file)
     # Sunrise and sunset hours
     sunrise_hour = []
     sunset_hour = []
-    std_long = -epw_file.timeZone * 15
+    std_long = -time_zone_utc_offset * 15
     normalized_hourly_lighting = [[1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24]]
     for month in 0..11
       if epw_file.latitude < 51.49

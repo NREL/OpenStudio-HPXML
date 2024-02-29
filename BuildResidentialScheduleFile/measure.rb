@@ -202,6 +202,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "State=#{args[:state]}"
     info_msgs << "RandomSeed=#{args[:random_seed]}" if args[:schedules_random_seed].is_initialized
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
+    info_msgs << "TimeZoneUTCOffset=#{args[:time_zone_utc_offset]}"
     info_msgs << "ColumnNames=#{args[:column_names]}" if args[:schedules_column_names].is_initialized
 
     runner.registerInfo("Created stochastic schedule with #{info_msgs.join(', ')}")
@@ -236,6 +237,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:geometry_num_occupants] = hpxml_bldg.building_occupancy.number_of_residents
     end
     args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
+
+    if not hpxml_bldg.time_zone_utc_offset.nil?
+      args[:time_zone_utc_offset] = hpxml_bldg.time_zone_utc_offset
+    else
+      args[:time_zone_utc_offset] = epw_file.timeZone
+    end
   end
 end
 

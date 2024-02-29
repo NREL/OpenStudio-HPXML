@@ -15,7 +15,7 @@ class Location
     site.setName("#{epw_file.city}_#{epw_file.stateProvinceRegion}_#{epw_file.country}")
     site.setLatitude(epw_file.latitude)
     site.setLongitude(epw_file.longitude)
-    site.setTimeZone(epw_file.timeZone)
+    site.setTimeZone(hpxml_bldg.time_zone_utc_offset)
     site.setElevation(UnitConversions.convert(hpxml_bldg.elevation, 'ft', 'm').round)
   end
 

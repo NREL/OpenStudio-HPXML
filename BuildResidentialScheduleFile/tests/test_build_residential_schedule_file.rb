@@ -44,6 +44,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -126,6 +127,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -162,6 +164,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=MD') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=1') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-5.0') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -192,6 +195,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=MD') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('RandomSeed=2') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-5.0') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -227,6 +231,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
 
     sf = SchedulesFile.new(schedules_paths: hpxml.buildings[0].header.schedules_filepaths,
                            year: @year,
@@ -279,6 +284,20 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert_empty(hpxml.buildings[0].header.schedules_filepaths)
   end
 
+  def test_different_time_zone
+    time_zone_utc_offset = 4
+
+    hpxml = _create_hpxml('base.xml')
+    hpxml.buildings[0].time_zone_utc_offset = time_zone_utc_offset
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+
+    @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
+    _hpxml, result = _test_measure()
+
+    info_msgs = result.info.map { |x| x.logMessage }
+    assert(info_msgs.any? { |info_msg| info_msg.include?("TimeZoneUTCOffset=#{time_zone_utc_offset}") })
+  end
+
   def test_multiple_buildings
     hpxml = _create_hpxml('base-bldgtype-mf-whole-building.xml')
     hpxml.buildings.each do |hpxml_bldg|
@@ -297,6 +316,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
 
     hpxml.buildings.each do |hpxml_bldg|
       sf = SchedulesFile.new(schedules_paths: hpxml_bldg.header.schedules_filepaths,
@@ -376,6 +396,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     assert(info_msgs.any? { |info_msg| info_msg.include?('State=CO') })
     assert(!info_msgs.any? { |info_msg| info_msg.include?('RandomSeed') })
     assert(info_msgs.any? { |info_msg| info_msg.include?('GeometryNumOccupants=3.0') })
+    assert(info_msgs.any? { |info_msg| info_msg.include?('TimeZoneUTCOffset=-7.0') })
 
     hpxml.buildings.each do |hpxml_bldg|
       building_id = hpxml_bldg.building_id

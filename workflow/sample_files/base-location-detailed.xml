@@ -26,6 +26,9 @@
         <StateCode>CO</StateCode>
       </Address>
       <Elevation>5309.0</Elevation>
+      <TimeZone>
+        <UTCOffset>-6.0</UTCOffset>
+      </TimeZone>
     </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>

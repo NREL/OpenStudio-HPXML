@@ -309,6 +309,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
     elsif ['base-location-detailed.xml'].include? hpxml_file
       hpxml_bldg.elevation = 5309
+      hpxml_bldg.time_zone_utc_offset = -6
     end
 
     # --------------- #
