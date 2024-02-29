@@ -5910,6 +5910,8 @@ class HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
+
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
 
@@ -5925,7 +5927,7 @@ class HPXMLFile
       if args[:hvac_control_heating_season_period].is_initialized
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period].get
         if hvac_control_heating_season_period == HPXML::BuildingAmerica
-          heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
+          heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
@@ -5958,7 +5960,7 @@ class HPXMLFile
       if args[:hvac_control_cooling_season_period].is_initialized
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period].get
         if hvac_control_cooling_season_period == HPXML::BuildingAmerica
-          _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
+          _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
