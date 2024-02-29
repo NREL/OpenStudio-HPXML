@@ -842,6 +842,11 @@
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
+  "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple-hvac-none.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-adjacent-to-multiple.xml",
+    "heating_system_type": "none",
+    "cooling_system_type": "none"
+  },
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
@@ -895,6 +900,9 @@
     "heating_system_2_fraction_heat_load_served": 0.25
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-ducted.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml"
+  },
+  "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil-eae.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-only-fan-coil.xml"
   },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-only-water-loop-heat-pump.xml": {
@@ -2544,6 +2552,10 @@
     "ceiling_fan_quantity": 4,
     "ceiling_fan_cooling_setpoint_temp_offset": 0.5
   },
+  "sample_files/base-lighting-ceiling-fans-label-energy-use.xml": {
+    "parent_hpxml": "sample_files/base-lighting-ceiling-fans.xml",
+    "ceiling_fan_label_energy_use": 39
+  },
   "sample_files/base-lighting-holiday.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "holiday_lighting_present": true,
@@ -2904,6 +2916,7 @@
   },
   "sample_files/base-misc-loads-large-uncommon.xml": {
     "parent_hpxml": "sample_files/base-schedules-simple.xml",
+    "hot_water_distribution_system_type": "Standard",
     "extra_refrigerator_present": true,
     "extra_refrigerator_rated_annual_kwh": 700,
     "freezer_present": true,
@@ -3178,15 +3191,30 @@
     "geometry_unit_num_occupants": 5
   },
   "sample_files/base-schedules-simple.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base.xml",
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "no control",
+    "hot_water_distribution_recirc_piping_length": 50,
+    "hot_water_distribution_recirc_branch_piping_length": 50,
+    "hot_water_distribution_recirc_pump_power": 50
   },
   "sample_files/base-schedules-simple-vacancy.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_vacancy_period": "Dec 1 - Jan 31"
+    "schedules_vacancy_periods": "Dec 1 - Jan 31",
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "no control",
+    "hot_water_distribution_recirc_piping_length": 50,
+    "hot_water_distribution_recirc_branch_piping_length": 50,
+    "hot_water_distribution_recirc_pump_power": 50
   },
   "sample_files/base-schedules-simple-power-outage.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "schedules_power_outage_period": "Jul 1 5 - Jul 31 14"
+    "schedules_power_outage_periods": "Jul 1 5 - Jul 31 14",
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "no control",
+    "hot_water_distribution_recirc_piping_length": 50,
+    "hot_water_distribution_recirc_branch_piping_length": 50,
+    "hot_water_distribution_recirc_pump_power": 50
   },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
@@ -3208,7 +3236,7 @@
   },
   "sample_files/base-schedules-detailed-mixed-timesteps-power-outage.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-mixed-timesteps.xml",
-    "schedules_power_outage_period": "Dec 1 5 - Jan 31 14"
+    "schedules_power_outage_periods": "Dec 1 5 - Jan 31 14"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3216,11 +3244,11 @@
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-vacancy.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_vacancy_period": "Dec 1 - Jan 31"
+    "schedules_vacancy_periods": "Dec 1 - Jan 31"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-power-outage.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
-    "schedules_power_outage_period": "Dec 1 5 - Jan 31 14"
+    "schedules_power_outage_periods": "Dec 1 5 - Jan 31 14"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-10-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",

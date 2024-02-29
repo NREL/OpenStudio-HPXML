@@ -445,7 +445,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_num_occupants(model, runner, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnHVAC, @hpxml_header.unavailable_periods)
+    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
@@ -1530,7 +1530,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Water Heater
-    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::ColumnWaterHeater, @hpxml_header.unavailable_periods)
+    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:WaterHeater].name, @hpxml_header.unavailable_periods)
     unit_multiplier = @hpxml_bldg.building_construction.number_of_units
     has_uncond_bsmnt = @hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
     has_cond_bsmnt = @hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
@@ -1939,7 +1939,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Create HVAC availability sensor
     hvac_availability_sensor = nil
     if not @hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, SchedulesFile::ColumnHVAC, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
+      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
 
       hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       hvac_availability_sensor.setName('hvac availability s')
@@ -2745,13 +2745,32 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     space_values = Geometry.get_temperature_scheduled_space_values(location)
 
+    htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
+      default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f # F
+    else
+      fail 'Unexpected heating setpoints.'
+    end
+
+    clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
+      default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f # F
+    else
+      fail 'Unexpected cooling setpoints.'
+    end
+
     if location == HPXML::LocationOtherHeatedSpace
-      # Create a sensor to get dynamic heating setpoint
-      htg_sch = spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-      sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      sensor_htg_spt.setName('htg_spt')
-      sensor_htg_spt.setKeyName(htg_sch.name.to_s)
-      space_values[:temp_min] = sensor_htg_spt.name.to_s
+      if spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
+        # Create a sensor to get dynamic heating setpoint
+        htg_sch = spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+        sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        sensor_htg_spt.setName('htg_spt')
+        sensor_htg_spt.setKeyName(htg_sch.name.to_s)
+        space_values[:temp_min] = sensor_htg_spt.name.to_s
+      else
+        # No HVAC system; use the defaulted heating setpoint.
+        space_values[:temp_min] = default_htg_sp # F
+      end
     end
 
     # Schedule type limits compatible
@@ -2761,9 +2780,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Sensors
     if space_values[:indoor_weight] > 0
-      sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-      sensor_ia.setName('cond_zone_temp')
-      sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
+      if not spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
+        # No HVAC system; use the average of defaulted heating/cooling setpoints.
+        sensor_ia = UnitConversions.convert((default_htg_sp + default_clg_sp) / 2.0, 'F', 'C')
+      else
+        sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+        sensor_ia.setName('cond_zone_temp')
+        sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
+        sensor_ia = sensor_ia.name
+      end
     end
 
     if space_values[:outdoor_weight] > 0
@@ -2784,7 +2809,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program.setName("#{location.gsub('-', '_')} Temperature Program")
     program.addLine("Set #{actuator.name} = 0.0")
     if not sensor_ia.nil?
-      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia.name} * #{space_values[:indoor_weight]})")
+      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia} * #{space_values[:indoor_weight]})")
     end
     if not sensor_oa.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_oa.name} * #{space_values[:outdoor_weight]})")
