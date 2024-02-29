@@ -20,7 +20,6 @@ class ElectricVehicle
   end
 
   def self.get_ev_charger_default_values(has_garage = false)
-    # FIXME: update values
     if has_garage
       location = HPXML::LocationGarage
     else

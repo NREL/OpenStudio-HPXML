@@ -24,9 +24,6 @@ class Battery
     elsif is_ev && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
       return
-    elsif is_ev && ev_charger.nil?
-      runner.registerWarning('Electric vehicle battery specified with no charger provided, battery will not be modeled.')
-      return
     end
 
     obj_name = battery.id
@@ -61,9 +58,16 @@ class Battery
       rated_power_output = rated_power_output * nbeds.to_f / battery.number_of_bedrooms_served.to_f
     end
 
+    if not ev_charger.nil?
+      charging_power = ev_charger.charging_power
+    else
+      charging_power = rated_power_output
+    end
+
     nominal_capacity_kwh *= unit_multiplier
     usable_capacity_kwh *= unit_multiplier
     rated_power_output *= unit_multiplier
+    charging_power *= unit_multiplier
 
     is_outside = (battery.location == HPXML::LocationOutside)
     if not is_outside
@@ -134,11 +138,7 @@ class Battery
     elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
     elcd.setElectricalStorage(elcs)
     elcd.setDesignStorageControlDischargePower(rated_power_output)
-    if not ev_charger.nil?
-      elcd.setDesignStorageControlChargePower(ev_charger.charging_power)
-    else
-      elcd.setDesignStorageControlChargePower(rated_power_output)
-    end
+    elcd.setDesignStorageControlChargePower(charging_power)
 
     if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')

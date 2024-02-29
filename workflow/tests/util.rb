@@ -49,6 +49,9 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
+      elsif hpxml_bldg.vehicles.size > 0
+        # Same as battery issue above
+        return
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
