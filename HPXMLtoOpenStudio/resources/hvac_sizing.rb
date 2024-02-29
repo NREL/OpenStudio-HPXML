@@ -48,6 +48,7 @@ class HVACSizing
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
       apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
@@ -1862,6 +1863,21 @@ class HVACSizing
       else
         hvac_sizing_values.Heat_Airflow = 0.0
       end
+    end
+  end
+
+  def self.apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
+    if not hvac_cooling.nil?
+      hvac_sizing_values.Cool_Capacity *= hvac_cooling.cooling_autosizing_factor
+      hvac_sizing_values.Cool_Airflow *= hvac_cooling.cooling_autosizing_factor
+      hvac_sizing_values.Cool_Capacity_Sens *= hvac_cooling.cooling_autosizing_factor
+    end
+    if not hvac_heating.nil?
+      hvac_sizing_values.Heat_Capacity *= hvac_heating.heating_autosizing_factor
+      hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
+    end
+    if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
+      hvac_sizing_values.Heat_Capacity_Supp *= hvac_cooling.backup_heating_autosizing_factor
     end
   end
 

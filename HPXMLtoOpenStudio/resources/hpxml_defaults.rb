@@ -1278,6 +1278,34 @@ class HPXMLDefaults
       heat_pump.heating_efficiency_hspf2 = nil
     end
 
+    # Default HVAC autosizing factors
+    hpxml_bldg.cooling_systems.each do |cooling_system|
+      next unless cooling_system.cooling_autosizing_factor.nil?
+
+      cooling_system.cooling_autosizing_factor = 1.0
+      cooling_system.cooling_autosizing_factor_isdefaulted = true
+    end
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.heating_autosizing_factor.nil?
+
+      heating_system.heating_autosizing_factor = 1.0
+      heating_system.heating_autosizing_factor_isdefaulted = true
+    end
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      if heat_pump.heating_autosizing_factor.nil?
+        heat_pump.heating_autosizing_factor = 1.0
+        heat_pump.heating_autosizing_factor_isdefaulted = true
+      end
+      if heat_pump.cooling_autosizing_factor.nil?
+        heat_pump.cooling_autosizing_factor = 1.0
+        heat_pump.cooling_autosizing_factor_isdefaulted = true
+      end
+      if (heat_pump.backup_type == HPXML::HeatPumpBackupTypeIntegrated) && heat_pump.backup_heating_autosizing_factor.nil?
+        heat_pump.backup_heating_autosizing_factor = 1.0
+        heat_pump.backup_heating_autosizing_factor_isdefaulted = true
+      end
+    end
+
     # Default AC/HP compressor type
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?

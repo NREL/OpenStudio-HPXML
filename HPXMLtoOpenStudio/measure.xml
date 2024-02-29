@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c4da986b-a967-43cb-ab48-eb46e372ef0a</version_id>
-  <version_modified>2024-02-29T17:45:30Z</version_modified>
+  <version_id>fc6db4f6-b0fb-41cd-864c-7feaf9d01234</version_id>
+  <version_modified>2024-02-29T22:19:47Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -304,13 +304,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>52CD2ABB</checksum>
+      <checksum>D66DE14A</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D4B3A728</checksum>
+      <checksum>467D8358</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CE7F5D20</checksum>
+      <checksum>EED99DBB</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -346,7 +346,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>77CFD747</checksum>
+      <checksum>9146CC97</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -592,7 +592,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>BC0DA303</checksum>
+      <checksum>BD47CFCE</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -622,7 +622,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EC5BC51B</checksum>
+      <checksum>847337FF</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
@@ -664,7 +664,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>DE60C819</checksum>
+      <checksum>CBE47587</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
