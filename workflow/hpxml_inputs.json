@@ -1952,9 +1952,9 @@
     "ducts_supply_leakage_to_outside_value": 0.1,
     "ducts_return_leakage_to_outside_value": 0.05
   },
-  "sample_files/base-hvac-ducts-whole-leakage.xml": {
+  "sample_files/base-hvac-ducts-total-leakage_to_outside.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "ducts_whole_leakage_to_outside_value": 100
+    "ducts_total_leakage_to_outside_value": 100
   },
   "sample_files/base-hvac-ducts-area-fractions.xml": {
     "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
