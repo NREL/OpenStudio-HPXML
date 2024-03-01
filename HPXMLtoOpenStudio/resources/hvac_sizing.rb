@@ -2427,7 +2427,7 @@ class HVACSizing
       if m.duct_leakage_units == HPXML::UnitsPercent
         if not m.duct_type.nil?
           cfms[m.duct_type] += m.duct_leakage_value * system_cfm
-        else  # Split the air distribution leakage equally between supply and return ducts
+        else # Split the air distribution leakage equally between supply and return ducts
           [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
             cfms[duct_type] += (m.duct_leakage_value / 2) * system_cfm
           end
