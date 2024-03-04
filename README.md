@@ -29,7 +29,7 @@ OpenStudio-HPXML capabilities include:
 - Occupancy schedules (smooth or stochastic)
 - Utility bill calculations (flat, tired, time-of-use, real-time pricing, etc.)
 - Emissions calculations (CO2e, etc.)
-- Annual and timeseries outputs (energy, loads temperatures, etc.)
+- Annual and timeseries outputs (energy, loads, temperatures, etc.)
 - Optional HPXML inputs with transparent defaults
 - Schematron and XSD Schema input validation
 
