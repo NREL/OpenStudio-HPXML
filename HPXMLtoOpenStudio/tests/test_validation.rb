@@ -105,6 +105,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'furnace-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'generator-number-of-bedrooms-served' => ['Expected NumberofBedroomsServed to be greater than ../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator[IsSharedSystem="true"], id: "Generator1"]'],
                             'generator-output-greater-than-consumption' => ['Expected AnnualConsumptionkBtu to be greater than AnnualOutputkWh*3412 [context: /HPXML/Building/BuildingDetails/Systems/extension/Generators/Generator, id: "Generator1"]'],
+                            'heat-pump-backup-sizing' => ["Expected HeatPumpBackupSizingMethodology to be 'emergency' or 'supplemental'"],
+                            'heat-pump-separate-backup-inputs' => ['Expected 0 element(s) for xpath: BackupAnnualHeatingEfficiency',
+                                                                   'Expected 0 element(s) for xpath: BackupHeatingCapacity',
+                                                                   'Expected 0 element(s) for xpath: extension/BackupHeatingAutosizingFactor'],
                             'heat-pump-capacity-17f' => ['Expected HeatingCapacity17F to be less than or equal to HeatingCapacity'],
                             'heat-pump-lockout-temperatures' => ['Expected CompressorLockoutTemperature to be less than or equal to BackupHeatingLockoutTemperature'],
                             'heat-pump-multiple-backup-systems' => ['Expected 0 or 1 element(s) for xpath: HeatPump/BackupSystem [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
@@ -217,6 +221,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
+                            'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
+                                                              'HeatingAutosizingFactor should be greater than 0.0',
+                                                              'BackupHeatingAutosizingFactor should be greater than 0.0'],
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected either schedule fractions/multipliers or schedule coefficients but not both.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
@@ -357,6 +364,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['generator-output-greater-than-consumption'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-misc-generators.xml')
         hpxml_bldg.generators[0].annual_consumption_kbtu = 1500
+      elsif ['heat-pump-backup-sizing'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.header.heat_pump_backup_sizing_methodology = 'foobar'
+      elsif ['heat-pump-separate-backup-inputs'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_capacity = 12345
+        hpxml_bldg.heat_pumps[0].backup_heating_efficiency_afue = 0.8
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.2
       elsif ['heat-pump-capacity-17f'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
         hpxml_bldg.heat_pumps[0].heating_capacity_17F = hpxml_bldg.heat_pumps[0].heating_capacity + 1000.0
@@ -639,6 +654,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+      elsif ['negative-autosizing-factors'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml')
+        hpxml_bldg.heat_pumps[0].heating_autosizing_factor = -0.5
+        hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = -1.2
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = -0.1
       elsif ['refrigerator-location'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.refrigerators[0].location = HPXML::LocationGarage
@@ -918,8 +938,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
   def test_ruby_error_messages
     # Test case => Error message
-    all_expected_errors = { 'battery-bad-values-max-not-one' => ["Schedule max value for column 'battery' must be 1."],
-                            'battery-bad-values-min-not-neg-one' => ["Schedule min value for column 'battery' must be -1."],
+    all_expected_errors = { 'battery-bad-values-max-greater-than-one' => ["Schedule value for column 'battery' must be less than or equal to 1."],
+                            'battery-bad-values-min-less-than-neg-one' => ["Schedule value for column 'battery' must be greater than or equal to -1."],
                             'cfis-with-hydronic-distribution' => ["Attached HVAC distribution system 'HVACDistribution1' cannot be hydronic for ventilation fan 'VentilationFan1'."],
                             'cfis-invalid-supplemental-fan' => ["CFIS supplemental fan 'VentilationFan2' must be of type 'supply only' or 'exhaust only'."],
                             'cfis-invalid-supplemental-fan2' => ["CFIS supplemental fan 'VentilationFan2' must be set as used for whole building ventilation."],
@@ -1015,13 +1035,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       building_id = nil
       # Create HPXML object
-      if ['battery-bad-values-max-not-one'].include? error_case
+      if ['battery-bad-values-max-greater-than-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         csv_data[1][0] = 1.1
         File.write(@tmp_csv_path, csv_data.map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['battery-bad-values-min-not-neg-one'].include? error_case
+      elsif ['battery-bad-values-min-less-than-neg-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-battery-scheduled.xml')
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         csv_data[1][0] = -1.1
@@ -1539,8 +1559,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                   "Both 'permanent_spa_heater' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'permanent_spa_heater' schedule file and monthly multipliers provided; the latter will be ignored."],
-                              'schedule-file-and-refrigerator-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
-                                                                                "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored."],
+                              'schedule-file-and-refrigerators-freezer-coefficients' => ["Both 'refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
+                                                                                         "Both 'refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
+                                                                                         "Both 'extra_refrigerator' schedule file and constant coefficients provided; the latter will be ignored.",
+                                                                                         "Both 'extra_refrigerator' schedule file and temperature coefficients provided; the latter will be ignored.",
+                                                                                         "Both 'freezer' schedule file and constant coefficients provided; the latter will be ignored.",
+                                                                                         "Both 'freezer' schedule file and temperature coefficients provided; the latter will be ignored."],
                               'schedule-file-and-setpoints' => ["Both 'heating_setpoint' schedule file and heating setpoint temperature provided; the latter will be ignored.",
                                                                 "Both 'cooling_setpoint' schedule file and cooling setpoint temperature provided; the latter will be ignored.",
                                                                 "Both 'water_heater_setpoint' schedule file and setpoint temperature provided; the latter will be ignored."],
@@ -1613,12 +1637,18 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
         hpxml_bldg.hot_water_distributions[0].recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
-      elsif ['schedule-file-and-refrigerator-coefficients'].include? warning_case
+      elsif ['schedule-file-and-refrigerators-freezer-coefficients'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-stochastic.csv')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/occupancy-non-stochastic.csv')
         hpxml_bldg.refrigerators[0].constant_coefficients = '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544'
         hpxml_bldg.refrigerators[0].temperature_coefficients = '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020'
+        hpxml_bldg.refrigerators.add(id: "Refrigerator#{hpxml_bldg.refrigerators.size + 1}",
+                                     constant_coefficients: '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544',
+                                     temperature_coefficients: '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020')
+        hpxml_bldg.freezers.add(id: "Freezer#{hpxml_bldg.freezers.size + 1}",
+                                constant_coefficients: '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544',
+                                temperature_coefficients: '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020')
       elsif ['schedule-file-and-setpoints'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/setpoints.csv')

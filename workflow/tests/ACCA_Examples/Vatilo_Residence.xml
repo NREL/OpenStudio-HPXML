@@ -9,6 +9,10 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Elevation>96</Elevation>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -16,6 +20,9 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <Soil>
+            <Conductivity>0.8</Conductivity>
+          </Soil>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
@@ -24,6 +31,14 @@
           <NumberofBedrooms>2</NumberofBedrooms>
           <ConditionedFloorArea>1200.0</ConditionedFloorArea>
         </BuildingConstruction>
+        <extension>
+          <HVACSizingControl>
+            <ManualJInputs>
+              <HeatingDesignTemperature>31</HeatingDesignTemperature>
+              <CoolingDesignTemperature>94</CoolingDesignTemperature>
+            </ManualJInputs>
+          </HVACSizingControl>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <WeatherStation>
@@ -195,7 +210,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -229,7 +244,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -246,7 +261,7 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window5InteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -263,7 +278,7 @@
             <SHGC>0.69</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window6InteriorShading'/>
-              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -339,14 +354,14 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>5.0</DuctEffectiveRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>366.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctEffectiveRValue>5.0</DuctEffectiveRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>70.0</DuctSurfaceArea>
                 </Ducts>
@@ -370,7 +385,7 @@
       </Appliances>
       <MiscLoads>
         <PlugLoad>
-          <SystemIdentifier id='PlugLoad2'/>
+          <SystemIdentifier id='PlugLoad1'/>
           <PlugLoadType>other</PlugLoadType>
         </PlugLoad>
       </MiscLoads>
