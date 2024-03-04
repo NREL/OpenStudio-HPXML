@@ -795,6 +795,8 @@ Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRi
 
   .. [#] A full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
 
+.. _enclosure:
+
 HPXML Enclosure
 ---------------
 
