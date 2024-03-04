@@ -1406,6 +1406,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_capacity_increment', false)
+    arg.setDisplayName('Heat Pump: Backup Heating Capacity Increment')
+    arg.setDescription("Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'.")
+    arg.setUnits('Btu/hr')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
     arg.setDisplayName('Heat Pump: Sizing Methodology')
     arg.setDescription("The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
@@ -5434,6 +5440,9 @@ class HPXMLFile
 
       if backup_heating_fuel == HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = args[:heat_pump_backup_heating_efficiency]
+        if args[:heat_pump_backup_heating_capacity_increment].is_initialized
+          backup_heating_capacity_increment = args[:heat_pump_backup_heating_capacity_increment]
+        end
       else
         backup_heating_efficiency_afue = args[:heat_pump_backup_heating_efficiency]
       end
@@ -5545,6 +5554,7 @@ class HPXMLFile
                               backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                               backup_heating_switchover_temp: backup_heating_switchover_temp,
                               backup_heating_lockout_temp: backup_heating_lockout_temp,
+                              backup_heating_capacity_increment: backup_heating_capacity_increment,
                               heating_efficiency_hspf: heating_efficiency_hspf,
                               heating_efficiency_hspf2: heating_efficiency_hspf2,
                               cooling_efficiency_seer: cooling_efficiency_seer,

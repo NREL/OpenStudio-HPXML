@@ -122,7 +122,7 @@ class HVAC
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, heating_system.backup_heating_capacity_increment)
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
         end
@@ -1855,7 +1855,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1865,17 +1865,39 @@ class HVAC
       return
     end
 
-    if fuel == HPXML::FuelTypeElectricity
-      htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-      htg_supp_coil.setEfficiency(efficiency)
+    backup_heating_capacity_increment = nil unless fuel == HPXML::FuelTypeElectricity
+    if not backup_heating_capacity_increment.nil?
+      num_stages = (capacity / backup_heating_capacity_increment).ceil()
+      remainder = capacity.remainder(backup_heating_capacity_increment)
+      htg_supp_coil = OpenStudio::Model::CoilHeatingElectricMultiStage.new(model)
+      htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      stage_capacity = 0.0
+
+      for i in 0..(num_stages - 1)
+        stage = OpenStudio::Model::CoilHeatingElectricMultiStageStageData.new(model)
+        if i == (num_stages - 1)
+          capacity_increment = remainder
+        else
+          capacity_increment = backup_heating_capacity_increment
+        end
+        stage_capacity += capacity_increment
+        stage.setNominalCapacity(UnitConversions.convert(stage_capacity, 'Btu/hr', 'W'))
+        stage.setEfficiency(efficiency)
+        htg_supp_coil.addStage(stage)
+      end
     else
-      htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
-      htg_supp_coil.setGasBurnerEfficiency(efficiency)
-      htg_supp_coil.setOnCycleParasiticElectricLoad(0)
-      htg_supp_coil.setOffCycleParasiticGasLoad(0)
-      htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
+      if fuel == HPXML::FuelTypeElectricity
+        htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
+        htg_supp_coil.setEfficiency(efficiency)
+      else
+        htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+        htg_supp_coil.setGasBurnerEfficiency(efficiency)
+        htg_supp_coil.setOnCycleParasiticElectricLoad(0)
+        htg_supp_coil.setOffCycleParasiticGasLoad(0)
+        htg_supp_coil.setFuelType(EPlus.fuel_type(fuel))
+      end
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     end
-    htg_supp_coil.setNominalCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
     htg_supp_coil.setName(obj_name + ' backup htg coil')
     htg_supp_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     htg_supp_coil.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure

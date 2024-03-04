@@ -4623,7 +4623,8 @@ class HPXML < Object
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
              :heating_airflow_cfm, :cooling_airflow_cfm, :location, :primary_heating_system, :primary_cooling_system,
              :heating_capacity_retention_fraction, :heating_capacity_retention_temp, :crankcase_heater_watts,
-             :geothermal_loop_idref, :cooling_autosizing_factor, :heating_autosizing_factor, :backup_heating_autosizing_factor]
+             :geothermal_loop_idref, :cooling_autosizing_factor, :heating_autosizing_factor, :backup_heating_autosizing_factor,
+             :backup_heating_capacity_increment]
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
@@ -4805,6 +4806,7 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingFactor', @backup_heating_autosizing_factor, :float, @backup_heating_autosizing_factor_isdefaulted) unless @backup_heating_autosizing_factor.nil?
+      XMLHelper.add_extension(heat_pump, 'BackupHeatingCapacityIncrement', @backup_heating_capacity_increment, :float, @backup_heating_capacity_increment_isdefaulted) unless @backup_heating_capacity_increment.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       if @primary_heating_system
@@ -4843,6 +4845,7 @@ class HPXML < Object
       @backup_heating_capacity = XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity', :float)
       @backup_heating_switchover_temp = XMLHelper.get_value(heat_pump, 'BackupHeatingSwitchoverTemperature', :float)
       @backup_heating_lockout_temp = XMLHelper.get_value(heat_pump, 'BackupHeatingLockoutTemperature', :float)
+      @backup_heating_capacity_increment = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingCapacityIncrement', :float)
       @fraction_heat_load_served = XMLHelper.get_value(heat_pump, 'FractionHeatLoadServed', :float)
       @fraction_cool_load_served = XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed', :float)
       @cooling_efficiency_seer = XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value", :float)
