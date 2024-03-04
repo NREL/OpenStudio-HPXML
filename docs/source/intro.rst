@@ -36,6 +36,35 @@ There are additional ways that software developers using this workflow can reduc
 - Avoid using the ``--add-component-loads`` argument if heating/cooling component loads are not of interest.
 - Use the ``--skip-validation`` argument if the HPXML input file has already been validated against the Schema & Schematron documents.
 
+Geometry
+--------
+
+The surfaces stored in HPXML building description files represent the area and orientation of ground and exterior exposure, but do not represent their position relative to each other.
+See :ref:`enclosure` for more information.
+
+The ``BuildResidentialHPXML`` measure generates enclosure elements of an HPXML file using the following steps:
+
+#. Collecting a set of simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width).
+#. Using the inputs and methods from a `geometry resource file <https://github.com/NREL/OpenStudio-HPXML/blob/master/BuildResidentialHPXML/resources/geometry.rb>`_ to create 3D closed-form dwelling unit representations in OpenStudio.
+#. Mapping individual OpenStudio surfaces to HPXML elements using surface types, outside boundary conditions, areas, orientations, etc.
+
+The ``HPXMLtoOpenStudio`` measure translates enclosure elements of an HPXML file back to OpenStudio Model.
+OpenStudio surfaces are organized such that they do not shade each other.
+
+single-family detached
+
+.. image:: images/base-sfd-1.png
+   :width: 49%
+.. image:: images/base-sfd-2.png
+   :width: 49%
+
+apartment unit
+
+.. image:: images/base-mf-1.png
+   :width: 49%
+.. image:: images/base-mf-2.png
+   :width: 49%
+
 License
 -------
 
