@@ -14,7 +14,8 @@ __New Features__
   - `AverageCeilingHeight` now used in natural ACH/CFM infiltration calculations.
 - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
-- Air source HVAC enhancements:
+- Allows optional building site inputs (`GeoLocation/Latitude`, `GeoLocation/Longitude`, `Elevation`); useful when located far from, or at a very different elevation than, the EPW weather station.
+- Air source heat pump enhancements:
   - Adds heat pump backup autosizing methodology input (`HeatPumpBackupSizingMethodology`) with choices of "emergency" and "supplemental".
   - Allows autosizing with detailed performance data inputs for variable-speed HVAC systems using `CapacityFractionOfNominal`.
   - Adds maximum power ratio detailed schedule for variable-speed HVAC systems (e.g., to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small)).
