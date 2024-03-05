@@ -173,6 +173,11 @@ class HPXMLDefaults
       hpxml_bldg.header.manualj_cooling_design_temp_isdefaulted = true
     end
 
+    if hpxml_bldg.header.manualj_daily_temp_range.nil?
+      hpxml_bldg.header.manualj_daily_temp_range = HVACSizing.determine_daily_temperature_range_class(weather.design.DailyTemperatureRange)
+      hpxml_bldg.header.manualj_daily_temp_range_isdefaulted = true
+    end
+
     if hpxml_bldg.header.manualj_heating_setpoint.nil?
       hpxml_bldg.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
       hpxml_bldg.header.manualj_heating_setpoint_isdefaulted = true
