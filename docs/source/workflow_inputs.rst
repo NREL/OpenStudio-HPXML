@@ -665,9 +665,10 @@ The column names available in the schedule CSV files are:
   ================================  =======  =================================================================================  ===============================
 
   .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
-         While any value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
-         A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated.
-         Values of 0.4 or below in the schedule are treated as "Critical Curtailment" events and values between 0.4-0.7 are treated as "General Curtailment" events.
+         While any fraction value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
+         A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
+         During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
+         When the comfort constraints are violated, both heat pump and backup systems are allowed to run the full load to recover the indoor temperature until reaching setpoint.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
