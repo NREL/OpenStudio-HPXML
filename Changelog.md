@@ -36,7 +36,8 @@ __New Features__
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
 - Miscellaneous Manual J improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
-- Allow alternative label energy use (W) input for ceiling fans.
+- Allows alternative label energy use (W) input for ceiling fans.
+- Allows the total duct leakage to outside input. The total duct leakage to outside will be split equally between supply and return side of the air distribution system. 
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
