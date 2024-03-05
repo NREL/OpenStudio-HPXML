@@ -1875,7 +1875,7 @@ class HVAC
       htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       stage_capacity = 0.0
 
-      for i in 1..num_stages
+      while stage_capacity < capacity
         stage = OpenStudio::Model::CoilHeatingElectricMultiStageStageData.new(model)
         stage_capacity += [backup_heating_capacity_increment, (capacity - stage_capacity)].min
         stage.setNominalCapacity(UnitConversions.convert(stage_capacity, 'Btu/hr', 'W'))
