@@ -74,6 +74,12 @@ denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-siz
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-HERS-backup-supplemental.xml,31615.0,31615.0,11487.0,997.0,1315.0
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-MaxLoad-backup-emergency.xml,49658.0,49658.0,31615.0,1566.0,2065.0
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-MaxLoad-backup-supplemental.xml,49658.0,49658.0,0.0,1566.0,2065.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-ACCA-backup-emergency.xml,43726.0,43726.0,28018.0,1379.0,1818.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-ACCA-backup-supplemental.xml,43726.0,43726.0,5239.0,1379.0,1818.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-HERS-backup-emergency.xml,40854.0,40854.0,28018.0,1289.0,1699.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-HERS-backup-supplemental.xml,40854.0,40854.0,3729.0,1289.0,1699.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-MaxLoad-backup-emergency.xml,64169.0,64169.0,28018.0,2024.0,2668.0
+denver-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-MaxLoad-backup-supplemental.xml,64169.0,64169.0,0.0,2024.0,2668.0
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-ACCA-backup-emergency.xml,27780.0,27780.0,31615.0,876.0,1155.0
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-ACCA-backup-supplemental.xml,27780.0,27780.0,13929.0,876.0,1155.0
 denver-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-HERS-backup-emergency.xml,31615.0,31615.0,31615.0,997.0,1315.0
@@ -389,6 +395,12 @@ houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-si
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-HERS-backup-supplemental.xml,25334.0,25334.0,0.0,660.0,1053.0
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-MaxLoad-backup-emergency.xml,29034.0,29034.0,20318.0,756.0,1207.0
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-sizing-methodology-MaxLoad-backup-supplemental.xml,29034.0,29034.0,0.0,756.0,1207.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-ACCA-backup-emergency.xml,40987.0,40987.0,18928.0,1068.0,1705.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-ACCA-backup-supplemental.xml,40987.0,40987.0,0.0,1068.0,1705.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-HERS-backup-emergency.xml,40435.0,40435.0,18928.0,1054.0,1681.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-HERS-backup-supplemental.xml,40435.0,40435.0,0.0,1054.0,1681.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-MaxLoad-backup-emergency.xml,46340.0,46340.0,18928.0,1207.0,1927.0
+houston-hvac-autosize-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems-sizing-methodology-MaxLoad-backup-supplemental.xml,46340.0,46340.0,0.0,1207.0,1927.0
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-ACCA-backup-emergency.xml,24480.0,24480.0,20318.0,638.0,1018.0
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-ACCA-backup-supplemental.xml,24480.0,24480.0,0.0,638.0,1018.0
 houston-hvac-autosize-air-to-air-heat-pump-var-speed-sizing-methodology-HERS-backup-emergency.xml,25334.0,25334.0,20318.0,660.0,1053.0

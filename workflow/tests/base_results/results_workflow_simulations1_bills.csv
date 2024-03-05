@@ -195,6 +195,7 @@ base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-normalized-capacit
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures.xml,1997.4,144.0,1853.4,0.0,1997.4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,1705.99,144.0,1561.99,0.0,1705.99,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,1656.19,144.0,1512.19,0.0,1656.19,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,1699.19,144.0,1555.19,0.0,1699.19,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml,1646.11,144.0,1502.11,0.0,1646.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,1652.84,144.0,1508.84,0.0,1652.84,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-hvac-autosize-sizing-controls.xml,1923.43,144.0,1552.69,0.0,1696.69,144.0,82.74,226.74,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
