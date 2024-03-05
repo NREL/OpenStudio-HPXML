@@ -2180,6 +2180,10 @@
     "heat_pump_cooling_capacity": 0,
     "heat_pump_fraction_cool_load_served": 0
   },
+  "sample_files/base-hvac-ground-to-air-heat-pump-multistage-backup.xml": {
+    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
+    "heat_pump_backup_heating_capacity_increment": 10000
+  },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_airflow_defect_ratio": -0.25,

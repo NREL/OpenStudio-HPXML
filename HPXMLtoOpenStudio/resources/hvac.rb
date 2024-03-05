@@ -316,7 +316,7 @@ class HVAC
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Supplemental Heating Coil
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump, heat_pump.backup_heating_capacity_increment)
 
     # Site Ground Temperature Undisturbed
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
@@ -480,7 +480,7 @@ class HVAC
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Supplemental Heating Coil
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump, heat_pump.backup_heating_capacity_increment)
 
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
@@ -1855,7 +1855,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1868,19 +1868,16 @@ class HVAC
     backup_heating_capacity_increment = nil unless fuel == HPXML::FuelTypeElectricity
     if not backup_heating_capacity_increment.nil?
       num_stages = (capacity / backup_heating_capacity_increment).ceil()
-      remainder = capacity.remainder(backup_heating_capacity_increment)
+      # OpenStudio only supports 4 stages for now
+      fail 'Currently only support less than 4 stages for multi-stage electric backup coil.' if num_stages > 4
+
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectricMultiStage.new(model)
       htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       stage_capacity = 0.0
 
-      for i in 0..(num_stages - 1)
+      for i in 1..num_stages
         stage = OpenStudio::Model::CoilHeatingElectricMultiStageStageData.new(model)
-        if i == (num_stages - 1)
-          capacity_increment = remainder
-        else
-          capacity_increment = backup_heating_capacity_increment
-        end
-        stage_capacity += capacity_increment
+        stage_capacity += [backup_heating_capacity_increment, (capacity - stage_capacity)].min
         stage.setNominalCapacity(UnitConversions.convert(stage_capacity, 'Btu/hr', 'W'))
         stage.setEfficiency(efficiency)
         htg_supp_coil.addStage(stage)
