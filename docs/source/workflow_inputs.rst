@@ -394,9 +394,8 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
+- Batteries are not currently supported.
 - Utility bill calculations using detailed rates are not supported.
-- HVAC maximum power ratio schedules of variable speed hvac systems are only supported if ``NumberofUnits`` is 1.
 
 .. _buildingsite:
 
@@ -583,6 +582,14 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
+         Note that when NumberofUnits is greater than 1, a few capabilities are not currently supported:
+         
+         \- Dehumidifiers
+         
+         \- Ground-source heat pumps
+         
+         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
+         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
          If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
@@ -657,11 +664,10 @@ The column names available in the schedule CSV files are:
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
   ================================  =======  =================================================================================  ===============================
 
-  .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems as opposed to setpoint changes to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
+  .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
          While any value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
          A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated.
-         Values of 0.4 or below in the schedule are treated as "Critical curtailment" events and values between 0.4-0.7 are treated as "General curtailment" events.
-  
+         Values of 0.4 or below in the schedule are treated as "Critical Curtailment" events and values between 0.4-0.7 are treated as "General Curtailment" events.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.

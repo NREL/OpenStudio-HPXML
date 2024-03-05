@@ -14,7 +14,6 @@ class HVAC
     is_heatpump = false
 
     if not cooling_system.nil?
-      clg_ap = cooling_system.additional_properties
       if cooling_system.is_a? HPXML::HeatPump
         is_heatpump = true
         if cooling_system.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
@@ -203,7 +202,7 @@ class HVAC
 
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
-    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file) unless schedules_file.nil?
+    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
     return air_loop
   end
@@ -1818,16 +1817,16 @@ class HVAC
     end
   end
 
-  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil = nil, clg_coil, htg_coil, schedules_file)
-    if not schedules_file.nil?
-      max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:HVACMaximumPowerRatio].name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
-      # Not allowed with unit multiplier for now
-      if not max_pow_ratio_sch.nil?
-        fail 'NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.' if hpxml_bldg.building_construction.number_of_units > 1
-      end
+  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
+    return if schedules_file.nil?
+    return if clg_coil.nil? && htg_coil.nil?
+
+    max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:HVACMaximumPowerRatio].name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+    # Not allowed with unit multiplier for now
+    if not max_pow_ratio_sch.nil?
+      fail 'NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.' if hpxml_bldg.building_construction.number_of_units > 1
     end
     return if max_pow_ratio_sch.nil?
-    return if (clg_coil.nil? && htg_coil.nil?)
 
     # Check maximum power ratio schedules only used in var speed systems,
     clg_coil = nil unless (cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed)
@@ -1846,6 +1845,7 @@ class HVAC
 
     return if (clg_coil.nil? && htg_coil.nil?)
 
+    # sensors
     pow_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     pow_ratio_sensor.setName("#{air_loop_unitary.name} power_ratio")
     pow_ratio_sensor.setKeyName(max_pow_ratio_sch.name.to_s)
@@ -1861,13 +1861,18 @@ class HVAC
     load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Predicted Sensible Load to Setpoint Heat Transfer Rate')
     load_sensor.setName("#{air_loop_unitary.name} sens load")
     load_sensor.setKeyName(air_loop_unitary.name.to_s)
+
+    # global variable
     temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, 'temp_offset_signal')
+
     # Temp offset Initialization Program
     # Temperature offset signal used to see if the hvac is recovering temperature to setpoint.
     # If abs (indoor temperature - setpoint) > offset, then hvac and backup is allowed to operate without cap to recover temperature until it reaches setpoint
     temp_offset_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     temp_offset_program.setName("#{air_loop_unitary.name} temp offset init program")
     temp_offset_program.addLine("Set #{temp_offset_signal.name} = 0")
+
+    # calling managers
     manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     manager.setName("#{temp_offset_program.name} calling manager")
     manager.setCallingPoint('BeginNewEnvironment')
@@ -2058,6 +2063,7 @@ class HVAC
     program.addLine('  EndIf')
     program.addLine('EndIf')
 
+    # calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName(program.name.to_s + ' calling manager')
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
