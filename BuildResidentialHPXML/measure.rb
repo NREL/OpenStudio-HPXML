@@ -2514,6 +2514,51 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_present', false)
+    arg.setDisplayName('Electric Vehicle: Present')
+    arg.setDescription('Whether there is an electric vehicle battery present.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_discharge_power', false)
+    arg.setDisplayName('Electric Vehicle: Rated Battery Power Output')
+    arg.setDescription('The rated power output of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_capacity', false)
+    arg.setDisplayName('Electric Vehicle: Nominal Battery Capacity')
+    arg.setDescription('The nominal capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_battery_usable_capacity', false)
+    arg.setDisplayName('Electric Vehicle: Usable Battery Capacity')
+    arg.setDescription('The usable capacity of the EV battery. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
+    arg.setDisplayName('Electric Vehicle Charger: Present')
+    arg.setDescription('Whether there is an electric vehicle charger present.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_charger_power', false)
+    arg.setDisplayName('Electric Vehicle Charger: Rated Charger Power Output')
+    arg.setDescription('The rated power output of the EV charger. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('W')
+    args << arg
+
+    ev_charger_location_choices = OpenStudio::StringVector.new
+    ev_charger_location_choices << HPXML::LocationGarage
+    ev_charger_location_choices << HPXML::LocationOutside
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ev_charger_location', ev_charger_location_choices, false)
+    arg.setDisplayName('Electric Vehicle Charger: Location')
+    arg.setDescription('The space type for the EV charger. If not provided, the OS-HPXML default is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
     arg.setDisplayName('Battery: Number of Bedrooms Served')
     arg.setDescription("Number of bedrooms served by the lithium ion battery. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
@@ -3742,6 +3787,7 @@ class HPXMLFile
     set_solar_thermal(hpxml_bldg, args, epw_file)
     set_pv_systems(hpxml_bldg, args, epw_file)
     set_battery(hpxml_bldg, args)
+    set_electric_vehicle(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
     set_clothes_washer(hpxml_bldg, args)
@@ -6581,6 +6627,56 @@ class HPXMLFile
                              round_trip_efficiency: round_trip_efficiency,
                              is_shared_system: is_shared_system,
                              number_of_bedrooms_served: number_of_bedrooms_served)
+  end
+
+  def self.set_electric_vehicle(hpxml_bldg, args)
+    if args[:ev_present].is_initialized && args[:ev_present].get != true
+      return
+    end
+
+    location = get_location('outside', hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
+
+    if args[:ev_battery_discharge_power].is_initialized
+      rated_power_output = args[:ev_battery_discharge_power].get
+    end
+
+    if args[:ev_battery_capacity].is_initialized
+      nominal_capacity_kwh = args[:ev_battery_capacity].get
+    end
+
+    if args[:ev_battery_usable_capacity].is_initialized
+      usable_capacity_kwh = args[:ev_battery_usable_capacity].get
+    end
+
+    if args[:ev_charger_present].is_initialized
+      ev_charger_present = args[:ev_charger_present].get
+    else
+      ev_charger_present = false
+    end
+
+    if args[:ev_charger_power].is_initialized
+      ev_charger_power = args[:ev_charger_power].get
+    end
+
+    if args[:ev_charger_location].is_initialized
+      location = get_location(args[:ev_charger_location].get, hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
+    end
+
+    charger_id = nil
+    if ev_charger_present
+      charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
+      hpxml_bldg.ev_chargers.add(id: charger_id,
+                                 location: location,
+                                 charging_power: ev_charger_power)
+    end
+
+    ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.id.include?('ElectricVehicle') }
+    hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
+                            type: HPXML::BatteryTypeLithiumIon,
+                            rated_power_output: rated_power_output,
+                            nominal_capacity_kwh: nominal_capacity_kwh,
+                            usable_capacity_kwh: usable_capacity_kwh,
+                            ev_charger_idref: charger_id)
   end
 
   def self.set_lighting(hpxml_bldg, args)

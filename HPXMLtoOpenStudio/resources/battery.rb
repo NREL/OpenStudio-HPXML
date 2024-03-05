@@ -1,16 +1,28 @@
 # frozen_string_literal: true
 
 class Battery
-  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)
+  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
+
     charging_schedule = nil
     discharging_schedule = nil
-    if not schedules_file.nil?
-      charging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryCharging].name)
-      discharging_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:BatteryDischarging].name)
+    if is_ev
+      charging_col = SchedulesFile::Columns[:EVBatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:EVBatteryDischarging].name
+    else
+      charging_col = SchedulesFile::Columns[:BatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:BatteryDischarging].name
     end
 
-    if pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
+    if not schedules_file.nil?
+      charging_schedule = schedules_file.create_schedule_file(model, col_name: charging_col)
+      discharging_schedule = schedules_file.create_schedule_file(model, col_name: discharging_col)
+    end
+
+    if !is_ev && pv_systems.empty? && charging_schedule.nil? && discharging_schedule.nil?
       runner.registerWarning('Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
+      return
+    elsif is_ev && charging_schedule.nil? && discharging_schedule.nil?
+      runner.registerWarning('Electric vehicle battery specified with no charging/discharging schedule provided; battery will not be modeled.')
       return
     end
 
@@ -37,7 +49,7 @@ class Battery
 
     return if rated_power_output <= 0 || nominal_capacity_kwh <= 0 || battery.nominal_voltage <= 0
 
-    if battery.is_shared_system
+    if !is_ev && battery.is_shared_system
       # Apportion to single dwelling unit by # bedrooms
       fail if battery.number_of_bedrooms_served.to_f <= nbeds.to_f # EPvalidator.xml should prevent this
 
@@ -46,9 +58,16 @@ class Battery
       rated_power_output = rated_power_output * nbeds.to_f / battery.number_of_bedrooms_served.to_f
     end
 
+    if not ev_charger.nil?
+      charging_power = ev_charger.charging_power
+    else
+      charging_power = rated_power_output
+    end
+
     nominal_capacity_kwh *= unit_multiplier
     usable_capacity_kwh *= unit_multiplier
     rated_power_output *= unit_multiplier
+    charging_power *= unit_multiplier
 
     is_outside = (battery.location == HPXML::LocationOutside)
     if not is_outside
@@ -119,7 +138,7 @@ class Battery
     elcd.setMaximumStorageStateofChargeFraction(maximum_storage_state_of_charge_fraction)
     elcd.setElectricalStorage(elcs)
     elcd.setDesignStorageControlDischargePower(rated_power_output)
-    elcd.setDesignStorageControlChargePower(rated_power_output)
+    elcd.setDesignStorageControlChargePower(charging_power)
 
     if (not charging_schedule.nil?) && (not discharging_schedule.nil?)
       elcd.setStorageOperationScheme('TrackChargeDischargeSchedules')
