@@ -1001,7 +1001,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Emittance``                           double                               >= 0, <= 1                No         0.90                            Emittance
   ``InteriorFinish/Type``                 string                               See [#]_                  No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No         0.5                             Interior finish thickness
-  ``Pitch``                               integer            ?:12              >= 0                      Yes                                        Pitch
+  ``Pitch``                               double             ?/12              >= 0                      Yes                                        Pitch [#]_
   ``RadiantBarrier``                      boolean                                                        No         false                           Presence of radiant barrier [#]_
   ``RadiantBarrierGrade``                 integer                              >= 1, <= 3                No         1                               Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                             Yes                                        Unique identifier
@@ -1037,6 +1037,8 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
+  .. [#] Pitch is entered as vertical rise in inches for every 12 inches of horizontal run.
+         For example, 6.0 means a 6/12 roof, which has a 26.57-degree roof slope.
   .. [#] RadiantBarrier intended for attic roofs. Model assumes an emittance of 0.05.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
 
