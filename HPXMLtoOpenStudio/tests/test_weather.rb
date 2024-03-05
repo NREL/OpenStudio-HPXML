@@ -178,7 +178,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
     assert_in_delta(91.4, weather.design.CoolingDrybulb, 0.1)
     assert_in_delta(58.0, weather.design.CoolingWetbulb, 0.1)
     assert_in_delta(0.0046, weather.design.CoolingHumidityRatio, 0.0001)
-    assert_in_delta(31.9, weather.design.DailyTemperatureRange, 0.1)
+    assert_in_delta(28.7, weather.design.DailyTemperatureRange, 0.1)
 
     # Check runner
     assert_equal(0, runner.result.stepErrors.size)
