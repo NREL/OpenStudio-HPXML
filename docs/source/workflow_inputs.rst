@@ -724,10 +724,11 @@ If any HVAC equipment is being autosized (i.e., capacities are not provided), ad
   =================================  ========  ======  ===========  ========  ============  ============================================
   ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating outdoor design temperature
   ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling outdoor design temperature
-  ``DailyTemperatureRange``          string            See [#]_     No        See [#]_      Class based on average difference between daily high/low outdoor temperatures for the hottest month
+  ``DailyTemperatureRange``          string            See [#]_     No        See [#]_      Class based on average difference between daily high/low outdoor temperatures during the hottest month
   ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
   ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
   ``HumiditySetpoint``               double    frac    > 0, < 1     No        See [#]_      Conditioned space relative humidity
+  ``HumidityDifference``             double    grains               No        See [#]_      Difference between absolute humidity of the outdoor/indoor air during the summer
   ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
   ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
   ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
@@ -743,6 +744,8 @@ If any HVAC equipment is being autosized (i.e., capacities are not provided), ad
   .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
   .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
   .. [#] If HumiditySetpoint not provided, defaults to 0.45 in a dry climate, otherwise 0.5.
+  .. [#] If HumidityDifference not provided, it is calculated from the other inputs/defaults and the cooling humidity ratio.
+         The cooling humidity ratio is obtained from the DESIGN CONDITIONS header section inside the EPW weather file or, if not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.

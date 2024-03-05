@@ -12,7 +12,7 @@ end
 class WeatherDesign
   def initialize
   end
-  ATTRS ||= [:HeatingDrybulb, :CoolingDrybulb, :CoolingWetbulb, :CoolingHumidityRatio, :DailyTemperatureRange]
+  ATTRS ||= [:HeatingDrybulb, :CoolingDrybulb, :CoolingHumidityRatio, :DailyTemperatureRange]
   attr_accessor(*ATTRS)
 end
 
@@ -224,6 +224,7 @@ class WeatherProcess
   end
 
   def get_design_info_from_epw(epw_file)
+    # Retrieve design conditions from weather header
     epw_design_conditions = epw_file.designConditions
     epwHasDesignData = false
     if epw_design_conditions.length > 0
@@ -231,27 +232,20 @@ class WeatherProcess
       epw_design_conditions = epw_design_conditions[0]
       design.HeatingDrybulb = UnitConversions.convert(epw_design_conditions.heatingDryBulb99, 'C', 'F')
       design.CoolingDrybulb = UnitConversions.convert(epw_design_conditions.coolingDryBulb1, 'C', 'F')
-      design.CoolingWetbulb = UnitConversions.convert(epw_design_conditions.coolingMeanCoincidentWetBulb1, 'C', 'F')
       design.DailyTemperatureRange = UnitConversions.convert(epw_design_conditions.coolingDryBulbRange, 'deltaC', 'deltaF')
-      std_press = Psychrometrics.Pstd_fZ(UnitConversions.convert(epw_file.elevation, 'm', 'ft'))
-      design.CoolingHumidityRatio = Psychrometrics.w_fT_Twb_P(design.CoolingDrybulb, design.CoolingWetbulb, std_press)
+      press_psi = Psychrometrics.Pstd_fZ(UnitConversions.convert(epw_file.elevation, 'm', 'ft'))
+      design.CoolingHumidityRatio = Psychrometrics.w_fT_Twb_P(design.CoolingDrybulb, UnitConversions.convert(epw_design_conditions.coolingMeanCoincidentWetBulb1, 'C', 'F'), press_psi)
     end
     return epwHasDesignData
   end
 
   def calc_design_info(runner, rowdata, epw_file, data)
-    # Calculate design day info:
-    # - Heating 99% drybulb
-    # - Cooling 99% drybulb
-    # - Cooling mean coincident wetbulb
-    # - Cooling mean coincident humidity ratio
-    # - Cooling average daily temperature range for hottest month
-
+    # Calculate design conditions from weather data
     if not runner.nil?
       runner.registerWarning('No design condition info found; calculating design conditions from EPW weather data.')
     end
 
-    std_press = Psychrometrics.Pstd_fZ(UnitConversions.convert(epw_file.elevation, 'm', 'ft'))
+    press_psi = Psychrometrics.Pstd_fZ(UnitConversions.convert(epw_file.elevation, 'm', 'ft'))
     annual_hd_sorted_by_db = rowdata.sort_by { |x| x['db'] }
 
     # 1%/99% values
@@ -263,14 +257,13 @@ class WeatherProcess
     for i in 0..(annual_hd_sorted_by_db.size - 1)
       next unless (annual_hd_sorted_by_db[i]['db'] > cool01per_db - 0.5) && (annual_hd_sorted_by_db[i]['db'] < cool01per_db + 0.5)
 
-      wb = Psychrometrics.Twb_fT_R_P(runner, UnitConversions.convert(annual_hd_sorted_by_db[i]['db'], 'C', 'F'), annual_hd_sorted_by_db[i]['rh'], std_press)
+      wb = Psychrometrics.Twb_fT_R_P(runner, UnitConversions.convert(annual_hd_sorted_by_db[i]['db'], 'C', 'F'), annual_hd_sorted_by_db[i]['rh'], press_psi)
       cool_wetbulb << wb
     end
     cool_design_wb = cool_wetbulb.sum(0.0) / cool_wetbulb.size
 
     design.CoolingDrybulb = UnitConversions.convert(cool01per_db, 'C', 'F')
-    design.CoolingWetbulb = cool_design_wb
-    design.CoolingHumidityRatio = Psychrometrics.w_fT_Twb_P(design.CoolingDrybulb, design.CoolingWetbulb, std_press)
+    design.CoolingHumidityRatio = Psychrometrics.w_fT_Twb_P(design.CoolingDrybulb, cool_design_wb, press_psi)
 
     hottest_month_index = data.MonthlyAvgDrybulbs.each_with_index.max[1]
     design.DailyTemperatureRange = data.MonthlyAvgDailyHighDrybulbs[hottest_month_index] - data.MonthlyAvgDailyLowDrybulbs[hottest_month_index]

@@ -1962,7 +1962,7 @@ class HPXML < Object
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
              :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
              :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants,
-             :manualj_daily_temp_range]
+             :manualj_daily_temp_range, :manualj_humidity_difference]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1981,7 +1981,7 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'HeatPumpBackupSizingMethodology', @heat_pump_backup_sizing_methodology, :string, @heat_pump_backup_sizing_methodology_isdefaulted) unless @heat_pump_backup_sizing_methodology.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_daily_temp_range.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?)
+      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_daily_temp_range.nil?) || (not @manualj_humidity_difference.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?)
         manualj_sizing_inputs = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACSizingControl', 'ManualJInputs'])
         XMLHelper.add_element(manualj_sizing_inputs, 'HeatingDesignTemperature', @manualj_heating_design_temp, :float, @manualj_heating_design_temp_isdefaulted) unless @manualj_heating_design_temp.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'CoolingDesignTemperature', @manualj_cooling_design_temp, :float, @manualj_cooling_design_temp_isdefaulted) unless @manualj_cooling_design_temp.nil?
@@ -1989,6 +1989,7 @@ class HPXML < Object
         XMLHelper.add_element(manualj_sizing_inputs, 'HeatingSetpoint', @manualj_heating_setpoint, :float, @manualj_heating_setpoint_isdefaulted) unless @manualj_heating_setpoint.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'CoolingSetpoint', @manualj_cooling_setpoint, :float, @manualj_cooling_setpoint_isdefaulted) unless @manualj_cooling_setpoint.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'HumiditySetpoint', @manualj_humidity_setpoint, :float, @manualj_humidity_setpoint_isdefaulted) unless @manualj_humidity_setpoint.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'HumidityDifference', @manualj_humidity_difference, :float, @manualj_humidity_difference_isdefaulted) unless @manualj_humidity_difference.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
@@ -2035,6 +2036,7 @@ class HPXML < Object
       @manualj_heating_setpoint = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/HeatingSetpoint', :float)
       @manualj_cooling_setpoint = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/CoolingSetpoint', :float)
       @manualj_humidity_setpoint = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/HumiditySetpoint', :float)
+      @manualj_humidity_difference = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/HumidityDifference', :float)
       @manualj_internal_loads_sensible = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
       @manualj_internal_loads_latent = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
       @manualj_num_occupants = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
