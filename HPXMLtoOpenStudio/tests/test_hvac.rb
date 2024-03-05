@@ -712,6 +712,33 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
+
+    # two systems
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(2, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil_1 = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil_1.stages.size)
+    clg_coil_2 = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil_2.stages.size)
+
+    # Check heating coil
+    assert_equal(2, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil_1 = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil_1.stages.size)
+    htg_coil_2 = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil_2.stages.size)
+
+    # Check supp heating coil
+    assert_equal(2, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 0)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 1)
   end
 
   def test_mini_split_heat_pump
@@ -1507,11 +1534,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-  def _check_max_power_ratio_EMS_multispeed(model, htg_speed1_capacity, htg_speed1_cop, htg_speed2_capacity, htg_speed2_cop, clg_speed1_capacity, clg_speed1_cop, clg_speed2_capacity, clg_speed2_cop)
+  def _check_max_power_ratio_EMS_multispeed(model, htg_speed1_capacity, htg_speed1_cop, htg_speed2_capacity, htg_speed2_cop, clg_speed1_capacity, clg_speed1_cop, clg_speed2_capacity, clg_speed2_cop, num_sys = 1, sys_i = 0)
     # model objects:
     # Unitary system
-    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    assert_equal(num_sys, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[sys_i]
 
     # Check max power ratio EMS
     index = 0

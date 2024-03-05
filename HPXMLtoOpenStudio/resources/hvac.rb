@@ -1863,7 +1863,7 @@ class HVAC
     load_sensor.setKeyName(air_loop_unitary.name.to_s)
 
     # global variable
-    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_unitary.name} temp offset signal")
+    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_unitary.name.to_s.gsub(' ', '_')}_temp_offset")
 
     # Temp offset Initialization Program
     # Temperature offset signal used to see if the hvac is recovering temperature to setpoint.
