@@ -118,7 +118,7 @@ class HVACSizing
 
     # Calculate interior/outdoor wetbulb temperature for cooling
     mj.cool_indoor_wetbulb = Psychrometrics.Twb_fT_R_P(nil, mj.cool_setpoint, @hpxml_bldg.header.manualj_humidity_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'))
-    mj.cool_outdoor_wetbulb = Psychrometrics.Twb_fT_w_P(runner, @hpxml_bldg.header.manualj_cooling_design_temp, weather.design.CoolingHumidityRatio, mj.p_atm)
+    mj.cool_outdoor_wetbulb = Psychrometrics.Twb_fT_w_P(runner, @hpxml_bldg.header.manualj_cooling_design_temp, weather.design.CoolingHumidityRatio, UnitConversions.convert(mj.p_atm, 'atm', 'psi'))
 
     # Design Grains (DG), difference between absolute humidity of the outdoor air and outdoor humidity of the indoor air
     mj.cool_design_grains = @hpxml_bldg.header.manualj_humidity_difference
