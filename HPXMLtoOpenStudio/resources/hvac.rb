@@ -1863,7 +1863,7 @@ class HVAC
     load_sensor.setKeyName(air_loop_unitary.name.to_s)
 
     # global variable
-    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, 'temp_offset_signal')
+    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_unitary.name} temp offset signal")
 
     # Temp offset Initialization Program
     # Temperature offset signal used to see if the hvac is recovering temperature to setpoint.
@@ -1937,6 +1937,7 @@ class HVAC
         outdoor_bp_sensor.setName('outdoor_bp')
 
         # Calculate capacity and eirs for later use of full-load power calculations at each stage
+        # Equations from E+ source code
         program.addLine('If htg_mode > 0')
         program.addLine("  If #{outdoor_db_sensor.name} < 4.444444,")
         program.addLine("    Set T_coil_out = 0.82 * #{outdoor_db_sensor.name} - 8.589")
