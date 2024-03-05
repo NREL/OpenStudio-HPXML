@@ -36,7 +36,6 @@
             <ManualJInputs>
               <HeatingDesignTemperature>52</HeatingDesignTemperature>
               <CoolingDesignTemperature>90</CoolingDesignTemperature>
-              <DailyTemperatureRange>low</DailyTemperatureRange>
               <InternalLoadsSensible>4621</InternalLoadsSensible>
             </ManualJInputs>
           </HVACSizingControl>

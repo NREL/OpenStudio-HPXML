@@ -102,10 +102,16 @@ class HVACSizing
     mj.ctd = [@hpxml_bldg.header.manualj_cooling_design_temp - mj.cool_setpoint, 0.0].max
     mj.htd = [mj.heat_setpoint - @hpxml_bldg.header.manualj_heating_design_temp, 0.0].max
 
-    # Determine class (low, medium, high) based on average Daily Temperature Range (DTR)
-    mj.daily_range_num = { HPXML::ManualJDailyTempRangeLow => 0,
-                           HPXML::ManualJDailyTempRangeMedium => 1,
-                           HPXML::ManualJDailyTempRangeHigh => 2 }[@hpxml_bldg.header.manualj_daily_temp_range]
+    # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
+    dtr = weather.design.DailyTemperatureRange
+
+    if dtr < 16.0
+      mj.daily_range_num = 0.0   # Low
+    elsif dtr > 25.0
+      mj.daily_range_num = 2.0   # High
+    else
+      mj.daily_range_num = 1.0   # Medium
+    end
 
     # Altitude Correction Factors (ACF) taken from Table 10A (sea level - 12,000 ft)
     acfs = [1.0, 0.97, 0.93, 0.89, 0.87, 0.84, 0.80, 0.77, 0.75, 0.72, 0.69, 0.66, 0.63]
@@ -182,16 +188,6 @@ class HVACSizing
     cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
     cool_design_grains = cool_outdoor_grains - cool_indoor_grains
     return cool_design_grains
-  end
-
-  def self.determine_daily_temperature_range_class(daily_temperature_range)
-    if daily_temperature_range < 16.0
-      return HPXML::ManualJDailyTempRangeLow
-    elsif daily_temperature_range > 25.0
-      return HPXML::ManualJDailyTempRangeHigh
-    else
-      return HPXML::ManualJDailyTempRangeMedium
-    end
   end
 
   def self.process_design_temp_heating(mj, weather, location)
@@ -647,11 +643,11 @@ class HVACSizing
     Heating and Cooling Loads: Doors
     '''
 
-    if mj.daily_range_num == 0
+    if mj.daily_range_num == 0.0
       cltd = mj.ctd + 15.0
-    elsif mj.daily_range_num == 1
+    elsif mj.daily_range_num == 1.0
       cltd = mj.ctd + 11.0
-    elsif mj.daily_range_num == 2
+    elsif mj.daily_range_num == 2.0
       cltd = mj.ctd + 6.0
     end
 

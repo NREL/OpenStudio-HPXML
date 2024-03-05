@@ -110,7 +110,11 @@ class WeatherProcess
     data.WSF = calc_ashrae_622_wsf(rowdata, epw_file)
 
     if not epwHasDesignData
-      calc_design_info(runner, rowdata, epw_file, data)
+      if not runner.nil?
+        runner.registerWarning('No design condition info found; calculating design conditions from EPW weather data.')
+      end
+      calc_design_info(runner, rowdata, epw_file)
+      design.DailyTemperatureRange = data.MonthlyAvgDailyHighDrybulbs[7] - data.MonthlyAvgDailyLowDrybulbs[7]
     end
   end
 
@@ -239,22 +243,17 @@ class WeatherProcess
     return epwHasDesignData
   end
 
-  def calc_design_info(runner, rowdata, epw_file, data)
+  def calc_design_info(runner, rowdata, epw_file)
     # Calculate design day info:
     # - Heating 99% drybulb
     # - Cooling 99% drybulb
     # - Cooling mean coincident wetbulb
     # - Cooling mean coincident humidity ratio
-    # - Cooling average daily temperature range for hottest month
-
-    if not runner.nil?
-      runner.registerWarning('No design condition info found; calculating design conditions from EPW weather data.')
-    end
 
     std_press = Psychrometrics.Pstd_fZ(UnitConversions.convert(epw_file.elevation, 'm', 'ft'))
     annual_hd_sorted_by_db = rowdata.sort_by { |x| x['db'] }
 
-    # 1%/99% values
+    # 1%/99%/2% values
     heat99per_db = annual_hd_sorted_by_db[88 * epw_file.recordsPerHour]['db']
     cool01per_db = annual_hd_sorted_by_db[8673 * epw_file.recordsPerHour]['db']
 
@@ -271,9 +270,6 @@ class WeatherProcess
     design.CoolingDrybulb = UnitConversions.convert(cool01per_db, 'C', 'F')
     design.CoolingWetbulb = cool_design_wb
     design.CoolingHumidityRatio = Psychrometrics.w_fT_Twb_P(design.CoolingDrybulb, design.CoolingWetbulb, std_press)
-
-    hottest_month_index = data.MonthlyAvgDrybulbs.each_with_index.max[1]
-    design.DailyTemperatureRange = data.MonthlyAvgDailyHighDrybulbs[hottest_month_index] - data.MonthlyAvgDailyLowDrybulbs[hottest_month_index]
 
     design.HeatingDrybulb = UnitConversions.convert(heat99per_db, 'C', 'F')
   end

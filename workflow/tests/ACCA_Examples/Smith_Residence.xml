@@ -37,7 +37,6 @@
             <ManualJInputs>
               <HeatingDesignTemperature>-6</HeatingDesignTemperature>
               <CoolingDesignTemperature>90</CoolingDesignTemperature>
-              <DailyTemperatureRange>medium</DailyTemperatureRange>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
