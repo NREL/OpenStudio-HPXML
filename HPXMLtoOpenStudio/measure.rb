@@ -1963,10 +1963,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       if not duct_leakage_measurement.duct_type.nil?
         leakage_to_outside[duct_leakage_measurement.duct_type] = [duct_leakage_measurement.duct_leakage_value, duct_leakage_measurement.duct_leakage_units]
-      else
-        [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
-          leakage_to_outside[duct_type] = [(duct_leakage_measurement.duct_leakage_value / 2), duct_leakage_measurement.duct_leakage_units]
-        end
+      end
+      
+      next if hvac_distribution.duct_leakage_measurements.any? { |duct_leakage_measurement| !duct_leakage_measurement.duct_type.nil? } # Use the total_leakage_to_outside only when leakage_to_outside for supply/returen ducts are not provided.
+      
+      [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
+        leakage_to_outside[duct_type] = [(duct_leakage_measurement.duct_leakage_value / 2), duct_leakage_measurement.duct_leakage_units]
       end
     end
 
