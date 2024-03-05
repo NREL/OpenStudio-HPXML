@@ -23,11 +23,11 @@ Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/
 ## Capabilities
 
 OpenStudio-HPXML capabilities include:
-- Modeling individual dwelling units or whole multifamily buildings (work in progress)
+- Modeling individual dwelling units or whole multifamily buildings
 - Modeling a wide range of building technologies
 - HVAC design load calculations and equipment autosizing
 - Occupancy schedules (smooth or stochastic)
-- Utility bill calculations (flat, tired, time-of-use, real-time pricing, etc.)
+- Utility bill calculations (flat, tiered, time-of-use, real-time pricing, etc.)
 - Emissions calculations (CO2e, etc.)
 - Annual and timeseries outputs (energy, loads, temperatures, etc.)
 - Optional HPXML inputs with transparent defaults
