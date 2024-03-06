@@ -4711,7 +4711,7 @@ The various locations used in an HPXML file are defined as follows:
   crawlspace - vented                                                                      EnergyPlus calculation                                     Any
   crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
   crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                                     Any
+  garage                          Unconditioned garage (not shared parking garage) [#]_    EnergyPlus calculation                                     Any
   manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
   manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
@@ -4723,6 +4723,10 @@ The various locations used in an HPXML file are defined as follows:
   under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
   roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
   ==============================  =======================================================  =========================================================  =================
+
+  .. [#] OpenStudio-HPXML does not model "conditioned" or "heated" garages.
+         Many conditioned garages are not conditioned 24/7, rather they are only conditioned for short periods when occupants are in them and turn on the space conditioning equipment, so it is best to assume an unconditioned garage.
+         However, if a garage was converted into livable space, then "conditioned space" should be used instead.
 
 Validating & Debugging Errors
 -----------------------------
