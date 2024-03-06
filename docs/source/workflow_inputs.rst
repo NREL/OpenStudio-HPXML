@@ -944,6 +944,14 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
+If the dwelling unit has an unvented attic, whether it is within the infiltration volume is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
 If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
@@ -959,6 +967,22 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
 HPXML Foundations
 *****************
 
+If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
 If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
@@ -971,11 +995,15 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-If the dwelling has a manufactured home belly-and-wing foundation, whether a
-skirt is present can be optionally entered in
-``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing/SkirtPresent``.
-The default, if that value is missing, is to assume there is a skirt present and
-the floors above that foundation do not have exposure to the wind. 
+If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
+
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  Element            Type     Units  Constraints  Required  Default     Notes
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  ``SkirtPresent``   boolean                      No        true        Presence of skirt [#]_
+  =================  =======  =====  ===========  ========  ==========  ==========================
+
+  .. [#] When a skirt is present, it is assumed that the foundation does not have exposure to wind.
 
 HPXML Roofs
 ***********
