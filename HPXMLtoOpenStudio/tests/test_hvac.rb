@@ -472,6 +472,43 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
   end
 
+  def test_air_to_air_heat_pump_multistage_backup_system
+    ['base-hvac-air-to-air-heat-pump-1-speed-multistage-backup.xml',
+     'base-hvac-air-to-air-heat-pump-2-speed-multistage-backup.xml',
+     'base-hvac-air-to-air-heat-pump-var-speed-multistage-backup.xml'].each do |hpxml_path|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+      # Get HPXML values
+      heat_pump = hpxml_bldg.heat_pumps[0]
+      backup_efficiency = heat_pump.backup_heating_efficiency_percent
+      supp_htg_capacity_increment = UnitConversions.convert(10000, 'Btu/hr', 'W')
+      supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+
+      # Check cooling coil
+      assert_equal(1, (model.getCoilCoolingDXSingleSpeeds.size + model.getCoilCoolingDXMultiSpeeds.size))
+
+      # Check heating coil
+      assert_equal(1, (model.getCoilHeatingDXSingleSpeeds.size + model.getCoilHeatingDXMultiSpeeds.size))
+
+      # Check supp heating coil
+      assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
+      supp_htg_coil = model.getCoilHeatingElectricMultiStages[0]
+      supp_htg_coil.stages.each_with_index do |stage, i|
+        capacity = [supp_htg_capacity_increment * (i + 1), supp_htg_capacity].min
+        assert_in_epsilon(capacity, stage.nominalCapacity.get, 0.01)
+        assert_in_epsilon(backup_efficiency, stage.efficiency, 0.01)
+      end
+
+      # Check EMS
+      assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+      unitary_system = model.getAirLoopHVACUnitarySystems[0]
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      assert(program_values.empty?) # Check no EMS program
+    end
+  end
+
   def test_heat_pump_temperatures
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
      'base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml',
@@ -798,6 +835,55 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(31, xing.phaseShiftofTemperatureAmplitude2, 0.01)
   end
 
+  def test_ground_to_air_heat_pump_multistage_backup_system
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-multistage-backup.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    backup_efficiency = heat_pump.backup_heating_efficiency_percent
+    supp_htg_capacity_increment = UnitConversions.convert(10000, 'Btu/hr', 'W')
+    supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingWaterToAirHeatPumpEquationFits.size)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingWaterToAirHeatPumpEquationFits.size)
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
+    supp_htg_coil = model.getCoilHeatingElectricMultiStages[0]
+    supp_htg_coil.stages.each_with_index do |stage, i|
+      capacity = [supp_htg_capacity_increment * (i + 1), supp_htg_capacity].min
+      assert_in_epsilon(capacity, stage.nominalCapacity.get, 0.01)
+      assert_in_epsilon(backup_efficiency, stage.efficiency, 0.01)
+    end
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+    assert(program_values.empty?) # Check no EMS program
+
+    # Check ghx
+    assert(1, model.getGroundHeatExchangerVerticals.size)
+    ghx = model.getGroundHeatExchangerVerticals[0]
+
+    # Check xing
+    assert(1, model.getSiteGroundTemperatureUndisturbedXings.size)
+    xing = model.getSiteGroundTemperatureUndisturbedXings[0]
+    assert_in_epsilon(ghx.groundThermalConductivity.get, xing.soilThermalConductivity, 0.01)
+    assert_in_epsilon(962, xing.soilDensity, 0.01)
+    assert_in_epsilon(ghx.groundThermalHeatCapacity.get / xing.soilDensity, xing.soilSpecificHeat, 0.01)
+    assert_in_epsilon(ghx.groundTemperature.get, xing.averageSoilSurfaceTemperature, 0.01)
+    assert_in_epsilon(12.5, xing.soilSurfaceTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(-1.3, xing.soilSurfaceTemperatureAmplitude2, 0.01)
+    assert_in_epsilon(20, xing.phaseShiftofTemperatureAmplitude1, 0.01)
+    assert_in_epsilon(31, xing.phaseShiftofTemperatureAmplitude2, 0.01)
+  end
+
   def test_geothermal_loop
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'))
@@ -963,6 +1049,36 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Check supp heating coil
     assert_equal(0, model.getCoilHeatingElectrics.size)
+  end
+
+  def test_water_loop_heat_pump_multistage_backup_system
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump-multistage-backup.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    backup_efficiency = heat_pump.backup_heating_efficiency_percent
+    supp_htg_capacity_increment = UnitConversions.convert(10000, 'Btu/hr', 'W')
+    supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+
+    # Check boiler
+    assert_equal(1, model.getBoilerHotWaters.size)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
+    supp_htg_coil = model.getCoilHeatingElectricMultiStages[0]
+    supp_htg_coil.stages.each_with_index do |stage, i|
+      capacity = [supp_htg_capacity_increment * (i + 1), supp_htg_capacity].min
+      assert_in_epsilon(capacity, stage.nominalCapacity.get, 0.01)
+      assert_in_epsilon(backup_efficiency, stage.efficiency, 0.01)
+    end
   end
 
   def test_shared_ground_loop_ground_to_air_heat_pump
