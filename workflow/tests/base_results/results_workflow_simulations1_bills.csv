@@ -32,6 +32,7 @@ base-bldgtype-mf-unit-residents-1.xml,982.17,144.0,679.25,0.0,823.25,144.0,14.92
 base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml,1268.81,144.0,971.05,0.0,1115.05,144.0,9.76,153.76,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml,1295.37,144.0,996.95,0.0,1140.95,144.0,10.42,154.42,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml,1278.76,144.0,981.51,0.0,1125.51,144.0,9.25,153.25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump-multistage-backup.xml,1423.31,144.0,1127.71,0.0,1271.71,144.0,7.6,151.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump.xml,1423.31,144.0,1127.71,0.0,1271.71,144.0,7.6,151.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-boiler-cooling-tower-water-loop-heat-pump.xml,1287.27,144.0,991.67,0.0,1135.67,144.0,7.6,151.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 base-bldgtype-mf-unit-shared-boiler-only-baseboard.xml,1133.54,144.0,837.09,0.0,981.09,144.0,8.45,152.45,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
