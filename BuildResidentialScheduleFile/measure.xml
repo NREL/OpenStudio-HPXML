@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>dd98ee62-9579-4dd8-b3d8-28f68d20ea91</version_id>
-  <version_modified>2024-03-06T15:11:17Z</version_modified>
+  <version_id>8ec08eda-4551-4531-a145-5b8683c9a3dd</version_id>
+  <version_modified>2024-03-06T16:05:22Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -114,7 +114,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>53FA82A5</checksum>
+      <checksum>51B16AA7</checksum>
     </file>
     <file>
       <filename>README.md</filename>
@@ -150,7 +150,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4850F93E</checksum>
+      <checksum>410A8645</checksum>
     </file>
     <file>
       <filename>cooking_consumption_dist.csv</filename>
@@ -204,7 +204,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>682A7FE4</checksum>
+      <checksum>4685742F</checksum>
     </file>
     <file>
       <filename>schedules_config.md</filename>
@@ -912,7 +912,7 @@
       <filename>test_build_residential_schedule_file.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>510C5B72</checksum>
+      <checksum>E6B67228</checksum>
     </file>
   </files>
 </measure>

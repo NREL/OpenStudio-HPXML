@@ -120,7 +120,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
     end
 
-    epw_path, epw_file = nil, nil
+    epw_path, epw_file, weather = nil, nil, nil
 
     output_csv_basename, _ = args[:output_csv_path].split('.csv')
 
@@ -138,6 +138,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       if epw_path.nil?
         epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
         epw_file = OpenStudio::EpwFile.new(epw_path)
+        weather = WeatherProcess.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       end
 
       # deterministically vary schedules across building units
@@ -154,7 +155,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:output_csv_path] = "#{output_csv_basename}_#{i + 1}.csv" if i > 0 && building_id == 'ALL'
 
       # create the schedules
-      success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
+      success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, weather, args)
       return false if not success
 
       # modify the hpxml with the schedules path
@@ -177,7 +178,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def create_schedules(runner, hpxml, hpxml_bldg, epw_file, args)
+  def create_schedules(runner, hpxml, hpxml_bldg, epw_file, weather, args)
     info_msgs = []
 
     get_simulation_parameters(hpxml, epw_file, args)
@@ -186,7 +187,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
     schedule_generator = ScheduleGenerator.new(runner: runner, **args)
 
-    success = schedule_generator.create(args: args)
+    success = schedule_generator.create(args: args, weather: weather)
     return false if not success
 
     output_csv_path = args[:output_csv_path]
