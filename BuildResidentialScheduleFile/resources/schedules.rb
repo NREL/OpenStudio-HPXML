@@ -39,7 +39,8 @@ class ScheduleGenerator
     return @schedules
   end
 
-  def create(args:)
+  def create(args:,
+             weather:)
     @schedules = {}
 
     ScheduleGenerator.export_columns.each do |col_name|
@@ -56,13 +57,14 @@ class ScheduleGenerator
     end
     return false unless invalid_columns.empty?
 
-    success = create_stochastic_schedules(args: args)
+    success = create_stochastic_schedules(args: args, weather: weather)
     return false if not success
 
     return true
   end
 
-  def create_stochastic_schedules(args:)
+  def create_stochastic_schedules(args:,
+                                  weather:)
     # initialize a random number generator
     prng = Random.new(@random_seed)
 
@@ -136,15 +138,15 @@ class ScheduleGenerator
       all_simulated_values << Matrix[*simulated_values]
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    plugload_other_weekday_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
-    plugload_other_weekend_sch = Schedule.validate_values(Constants.PlugLoadsOtherWeekendFractions, 24, 'weekend')
-    plugload_other_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
-    plugload_tv_weekday_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekdayFractions, 24, 'weekday')
-    plugload_tv_weekend_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekendFractions, 24, 'weekend')
-    plugload_tv_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsTVMonthlyMultipliers, 12, 'monthly')
-    ceiling_fan_weekday_sch = Schedule.validate_values(Constants.CeilingFanWeekdayFractions, 24, 'weekday')
-    ceiling_fan_weekend_sch = Schedule.validate_values(Constants.CeilingFanWeekendFractions, 24, 'weekend')
-    ceiling_fan_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    plugload_other_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
+    plugload_other_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekendFractions, 24, 'weekend')
+    plugload_other_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
+    plugload_tv_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsTVWeekdayFractions, 24, 'weekday')
+    plugload_tv_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsTVWeekendFractions, 24, 'weekend')
+    plugload_tv_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsTVMonthlyMultipliers, 12, 'monthly')
+    ceiling_fan_weekday_sch = Schedule.validate_values(Schedule.CeilingFanWeekdayFractions, 24, 'weekday')
+    ceiling_fan_weekend_sch = Schedule.validate_values(Schedule.CeilingFanWeekendFractions, 24, 'weekend')
+    ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly')
 
     sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude])
     interior_lighting_schedule = []
