@@ -124,7 +124,7 @@ denver-hvac-autosize-ducts-defaults.xml,29832.0,14881.0,0.0,703.0,387.0
 denver-hvac-autosize-ducts-effective-rvalue.xml,32701.0,21817.0,0.0,722.0,907.0
 denver-hvac-autosize-ducts-leakage-cfm50.xml,34972.0,24253.0,0.0,772.0,1009.0
 denver-hvac-autosize-ducts-leakage-percent.xml,33200.0,24799.0,0.0,733.0,1031.0
-denver-hvac-autosize-ducts-total-leakage-to-outside.xml,33096.0,22739.0,0.0,731.0,946.0
+denver-hvac-autosize-ducts-total-leakage-to-outside.xml,33096.0,22737.0,0.0,731.0,945.0
 denver-hvac-autosize-elec-resistance-only.xml,24098.0,0.0,0.0,0.0,0.0
 denver-hvac-autosize-evap-cooler-furnace-gas.xml,32706.0,13886.0,0.0,722.0,2508.0
 denver-hvac-autosize-evap-cooler-only-ducted.xml,0.0,16376.0,0.0,0.0,2962.0
@@ -414,7 +414,7 @@ houston-hvac-autosize-ducts-defaults.xml,20016.0,18125.0,0.0,407.0,471.0
 houston-hvac-autosize-ducts-effective-rvalue.xml,21538.0,27095.0,0.0,393.0,1127.0
 houston-hvac-autosize-ducts-leakage-cfm50.xml,22796.0,33171.0,0.0,416.0,1379.0
 houston-hvac-autosize-ducts-leakage-percent.xml,19754.0,33314.0,0.0,360.0,1385.0
-houston-hvac-autosize-ducts-total-leakage-to-outside.xml,21327.0,29613.0,0.0,389.0,1231.0
+houston-hvac-autosize-ducts-total-leakage-to-outside.xml,21327.0,29614.0,0.0,389.0,1231.0
 houston-hvac-autosize-elec-resistance-only.xml,14346.0,0.0,0.0,0.0,0.0
 houston-hvac-autosize-evap-cooler-furnace-gas.xml,21542.0,16944.0,0.0,393.0,5400.0
 houston-hvac-autosize-evap-cooler-only-ducted.xml,0.0,18499.0,0.0,0.0,5400.0
