@@ -1631,7 +1631,11 @@ class Airflow
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
     if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2022')
       infil_program.addLine('Set Qimb = (@Abs (Qsupply - Qexhaust))')
-      infil_program.addLine('Set Qinf_adj = (Qinf^2) / (Qinf + Qimb)')
+      infil_program.addLine('If Qinf + Qimb > 0.1')
+      infil_program.addLine('  Set Qinf_adj = (Qinf^2) / (Qinf + Qimb)')
+      infil_program.addLine('Else')
+      infil_program.addLine('  Set Qinf_adj = 0')
+      infil_program.addLine('EndIf')
     elsif Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
       infil_program.addLine('If Qfan > 0')
