@@ -2364,7 +2364,7 @@ if ARGV[0].to_sym == :update_hpxmls
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end
-  
+
   # Reformat ACCA_Examples HPXMLs
   puts 'Reformatting ACCA_Examples HPXMLs...'
   Dir['workflow/tests/ACCA_Examples/*.xml'].each do |hpxml_path|
