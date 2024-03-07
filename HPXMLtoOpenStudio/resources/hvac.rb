@@ -199,6 +199,7 @@ class HVAC
     # Air Loop
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, hvac_unavailable_periods)
 
+    add_backup_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone)
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     return air_loop
@@ -445,6 +446,7 @@ class HVAC
     # Air Loop
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm, clg_cfm].max, heat_pump, hvac_unavailable_periods)
 
+    add_backup_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone)
     # HVAC Installation Quality
     apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
@@ -493,6 +495,7 @@ class HVAC
     # Air Loop
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, htg_cfm, heat_pump, hvac_unavailable_periods)
 
+    add_backup_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone)
     return air_loop
   end
 
@@ -1901,6 +1904,94 @@ class HVAC
     htg_supp_coil.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 
     return htg_supp_coil
+  end
+  
+  def self.add_backup_staging_EMS(model, unitary_system, htg_supp_coil, control_zone)
+    return unless htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
+    # Note: Currently only available in 1 min time step
+    number_of_timestep_logged = 5 # wait 5 mins to check demand
+
+    # Sensors
+    living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+    living_temp_ss.setName('living temp')
+    living_temp_ss.setKeyName(control_zone.name.get)
+
+    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    htg_sp_ss.setName('htg_setpoint')
+    htg_sp_ss.setKeyName(htg_sch.name.to_s)
+
+    backup_coil_htg_rate = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Rate')
+    backup_coil_htg_rate.setName('supp coil heating rate')
+    backup_coil_htg_rate.setKeyName(htg_supp_coil.name.get)
+
+    # Trend variable
+    zone_temp_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, living_temp_ss)
+    zone_temp_trend.setName("#{living_temp_ss.name} Trend")
+    zone_temp_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    # Trend variable
+    setpoint_temp_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, htg_sp_ss)
+    setpoint_temp_trend.setName("#{htg_sp_ss.name} Trend")
+    setpoint_temp_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+
+    # Actuators
+    supp_stage_act = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System Supplemental Coil Stage Level')
+    supp_stage_act.setName(unitary_system.name.get + ' backup stage level')
+    
+    # Initialization Program
+    supp_staging_init_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    supp_staging_init_program.setName("#{unitary_system.name} backup staging init program")
+    supp_staging_init_program.addLine("Set #{supp_stage_act.name} = 0")
+
+    # calling managers
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{supp_staging_init_program.name} calling manager")
+    manager.setCallingPoint('BeginNewEnvironment')
+    manager.addProgram(supp_staging_init_program)
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{supp_staging_init_program.name} calling manager2")
+    manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
+    manager.addProgram(supp_staging_init_program)
+
+    # staging Program
+    supp_staging_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    # Check values within min/max limits
+    supp_staging_program.setName("#{unitary_system.name.get} backup staging")
+    supp_staging_program.addLine("Set living_t = #{living_temp_ss.name}")
+
+    (1..number_of_timestep_logged).each do |t_i|
+      supp_staging_program.addLine("Set zone_temp_#{t_i}_ago = @TrendValue #{zone_temp_trend.name} #{t_i}")
+      supp_staging_program.addLine("Set htg_spt_temp_#{t_i}_ago = @TrendValue #{setpoint_temp_trend.name} #{t_i}")
+    end
+    s_trend = []
+    (1..number_of_timestep_logged).each do |t_i|
+      s_trend << "(htg_spt_temp_#{t_i}_ago - zone_temp_#{t_i}_ago > 0.01)"
+    end
+    supp_staging_program.addLine("If (#{s_trend.join(' && ')})")
+    htg_supp_coil.stages.each_with_index do |stage, i|
+      if i == 0
+        supp_staging_program.addLine("  If #{backup_coil_htg_rate.name} < #{stage.nominalCapacity.get}")
+      elsif i == (htg_supp_coil.stages.size-1)
+        supp_staging_program.addLine("  Else")
+      else
+        supp_staging_program.addLine("  ElseIf #{backup_coil_htg_rate.name} < #{stage.nominalCapacity.get}")
+      end
+      supp_staging_program.addLine("    Set #{supp_stage_act.name} = #{i + 1}")
+    end
+    supp_staging_program.addLine('  EndIf')
+    supp_staging_program.addLine('Else')
+    supp_staging_program.addLine("    Set #{supp_stage_act.name} = 0")
+    supp_staging_program.addLine('EndIf')
+    # ProgramCallingManagers
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{supp_staging_program.name} ProgramManager")
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(supp_staging_program)
+
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
