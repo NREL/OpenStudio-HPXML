@@ -255,6 +255,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml_bldg.header.manualj_internal_loads_sensible = 4000
     hpxml_bldg.header.manualj_internal_loads_latent = 200
     hpxml_bldg.header.manualj_num_occupants = 5
+    hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
+    hpxml_bldg.header.manualj_humidity_difference = 30
   end
 
   hpxml.buildings.each do |hpxml_bldg|
@@ -2378,6 +2380,13 @@ if ARGV[0].to_sym == :update_hpxmls
   # Reformat real_homes HPXMLs
   puts 'Reformatting real_homes HPXMLs...'
   Dir['workflow/real_homes/*.xml'].each do |hpxml_path|
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, hpxml_path)
+  end
+
+  # Reformat ACCA_Examples HPXMLs
+  puts 'Reformatting ACCA_Examples HPXMLs...'
+  Dir['workflow/tests/ACCA_Examples/*.xml'].each do |hpxml_path|
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end
