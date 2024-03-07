@@ -11,6 +11,8 @@ __New Features__
   - Adds schedule inputs for hot water recirculation pumps and general water use internal gains.
   - Updated water heater installation location defaulting to match ANSI 301-2022
   - Updated calculation of hot water piping length for buildings with both conditioned and unconditioned basements to avoid double counting.
+  - Updates how imbalanced infiltration and mechanical ventilation are combined on an hourly basis.
+  - Small change to default flow rate for imbalanced mechanical ventilation systems.
   - `AverageCeilingHeight` now used in natural ACH/CFM infiltration calculations.
 - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
@@ -35,7 +37,9 @@ __New Features__
   - Adds heat pump backup sizing methodology input.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
-- Miscellaneous Manual J improvements.
+- Manual J design load calculations:
+  - Allow additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
+  - Miscellaneous improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
 
