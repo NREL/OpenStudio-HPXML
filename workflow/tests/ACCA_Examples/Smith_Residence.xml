@@ -9,6 +9,13 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <GeoLocation>
+        <Latitude>42.0</Latitude>
+      </GeoLocation>
+      <Elevation>955.0</Elevation>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
