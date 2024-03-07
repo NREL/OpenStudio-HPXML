@@ -32,7 +32,13 @@
             <ManualJInputs>
               <HeatingDesignTemperature>52.0</HeatingDesignTemperature>
               <CoolingDesignTemperature>90.0</CoolingDesignTemperature>
+              <DailyTemperatureRange>low</DailyTemperatureRange>
+              <HeatingSetpoint>70.0</HeatingSetpoint>
+              <CoolingSetpoint>75.0</CoolingSetpoint>
+              <HumiditySetpoint>0.55</HumiditySetpoint>
               <InternalLoadsSensible>4621.0</InternalLoadsSensible>
+              <InternalLoadsLatent>0.0</InternalLoadsLatent>
+              <NumberofOccupants>4</NumberofOccupants>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
