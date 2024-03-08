@@ -143,7 +143,6 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     # --------------------- #
 
     hpxml_bldg.site.azimuth_of_front_of_home = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
 
     # --------------- #
     # HPXML Enclosure #
