@@ -568,18 +568,19 @@ HPXML Building Construction
 
 Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction``.
 
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  Element                                                    Type      Units      Constraints                        Required  Default   Notes
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
-  ``NumberofUnits``                                          integer              >= 1                               No        1         Unit multiplier [#]_
-  ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
-  ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              >= 0                               Yes                 Number of bedrooms
-  ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
-  ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
-  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  Element                                  Type      Units      Constraints                        Required  Default   Notes
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
+  ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
+  ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
+  ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
+  ``AverageCeilingHeight``                 double    ft         > 0                                No        8.0       Ceiling height within conditioned space
+  ``NumberofBedrooms``                     integer              >= 0                               Yes                 Number of bedrooms
+  ``NumberofBathrooms``                    integer              > 0                                No        See [#]_  Number of bathrooms
+  ``ConditionedFloorArea``                 double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
+  ``ConditionedBuildingVolume``            double    ft3        > 0                                No        See [#]_  Volume within conditioned space boundary (including a conditioned basement/crawlspace)
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
@@ -594,8 +595,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
          
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
-         If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
 HPXML Schedules
 ***************
