@@ -2426,28 +2426,24 @@ class HVACSizing
     distribution_system.duct_leakage_measurements.each do |m|
       next if m.duct_leakage_total_or_to_outside != HPXML::DuctLeakageToOutside
 
-      if m.duct_leakage_units == HPXML::UnitsPercent
-        if not m.duct_type.nil?
-          cfms[m.duct_type] += m.duct_leakage_value * system_cfm
-        else # Split the air distribution leakage equally between supply and return ducts
-          [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
-            cfms[duct_type] += (m.duct_leakage_value / 2) * system_cfm
-          end
+      if not m.duct_type.nil?
+        duct_leakage = m.duct_leakage_value
+        if m.duct_leakage_units == HPXML::UnitsPercent
+          cfms[m.duct_type] += duct_leakage * system_cfm
+        elsif m.duct_leakage_units == HPXML::UnitsCFM25
+          cfms[m.duct_type] += duct_leakage
+        elsif m.duct_leakage_units == HPXML::UnitsCFM50
+          cfms[m.duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, duct_leakage, 50.0, 25.0)
         end
-      elsif m.duct_leakage_units == HPXML::UnitsCFM25
-        if not m.duct_type.nil?
-          cfms[m.duct_type] += m.duct_leakage_value
-        else
-          [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
-            cfms[duct_type] += (m.duct_leakage_value / 2)
-          end
-        end
-      elsif m.duct_leakage_units == HPXML::UnitsCFM50
-        if not m.duct_type.nil?
-          cfms[m.duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, m.duct_leakage_value, 50.0, 25.0)
-        else
-          [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
-            cfms[duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, (m.duct_leakage_value / 2), 50.0, 25.0)
+      else # Split the air distribution leakage equally between supply and return side when the air distribution system leakage split between the supply and return is not measured
+        duct_leakage = m.duct_leakage_value / 2
+        [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_type|
+          if m.duct_leakage_units == HPXML::UnitsPercent
+            cfms[duct_type] += duct_leakage * system_cfm
+          elsif m.duct_leakage_units == HPXML::UnitsCFM25
+            cfms[duct_type] += duct_leakage
+          elsif m.duct_leakage_units == HPXML::UnitsCFM50
+            cfms[duct_type] += Airflow.calc_air_leakage_at_diff_pressure(0.65, duct_leakage, 50.0, 25.0)
           end
         end
       end
