@@ -594,6 +594,22 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     assert_in_epsilon(return_leakage_frac, program_values['f_ret'].sum, 0.01)
   end
 
+  def test_ducts_total_leakage_to_outside
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-ducts-total-leakage-to-outside.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    leakage = hpxml_bldg.hvac_distributions[0].duct_leakage_measurements.select { |m| m.duct_type.nil? }[0]
+    supply_leakage_cfm25 = leakage.duct_leakage_value / 2
+    return_leakage_cfm25 = leakage.duct_leakage_value / 2
+
+    # Check ducts program
+    program_values = get_ems_values(model.getEnergyManagementSystemSubroutines, 'duct subroutine')
+    assert_in_epsilon(supply_leakage_cfm25, UnitConversions.convert(program_values['f_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(return_leakage_cfm25, UnitConversions.convert(program_values['f_ret'].sum, 'm^3/s', 'cfm'), 0.01)
+  end
+
   def test_ducts_ua
     ['base.xml',
      'base-hvac-ducts-area-multipliers.xml',

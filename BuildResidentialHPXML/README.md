@@ -2820,7 +2820,7 @@ The leakage value to outside for the supply ducts.
 - **Name:** ``ducts_supply_leakage_to_outside_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -2831,7 +2831,18 @@ The leakage value to outside for the return ducts.
 - **Name:** ``ducts_return_leakage_to_outside_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
+
+<br/>
+
+**Ducts: Total Leakage to Outside Value**
+
+The leakage value to outside for the supply and return ducts.
+
+- **Name:** ``ducts_total_leakage_to_outside_value``
+- **Type:** ``Double``
+
+- **Required:** ``false``
 
 <br/>
 
