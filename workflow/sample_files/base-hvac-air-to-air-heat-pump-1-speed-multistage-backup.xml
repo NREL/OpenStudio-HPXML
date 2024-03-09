@@ -9,7 +9,7 @@
   <SoftwareInfo>
     <extension>
       <SimulationControl>
-        <Timestep>60</Timestep>
+        <Timestep>1</Timestep>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -325,7 +325,7 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
+              <HeatingCapacity>12000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
@@ -351,7 +351,7 @@
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>
                 </HeatingCapacityRetention>
-                <BackupHeatingCapacityIncrement>10000.0</BackupHeatingCapacityIncrement>
+                <BackupHeatingCapacityIncrement>17060.7109375</BackupHeatingCapacityIncrement>
               </extension>
             </HeatPump>
           </HVACPlant>

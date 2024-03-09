@@ -997,6 +997,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'inverter-unequal-efficiencies' => ['Expected all InverterEfficiency values to be equal.'],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
                             'multistage-backup-more-than-4-stages' => ['Currently only support less than 4 stages for multi-stage electric backup coil.'],
+                            'multistage-backup-hourly' => ['Backup heating capacity increment currently is only supported for 1 min timestep.'],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
                             'net-area-negative-roof' => ["Calculated a negative net surface area for surface 'Roof1'."],
                             'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
@@ -1281,6 +1282,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['multistage-backup-more-than-4-stages'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-multistage-backup.xml')
         hpxml_bldg.heat_pumps[0].backup_heating_capacity_increment = 5000
+      elsif ['multistage-backup-hourly'].include? error_case
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-multistage-backup.xml')
+        hpxml.header.timestep = 60
       elsif ['net-area-negative-roof'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].area = 4000

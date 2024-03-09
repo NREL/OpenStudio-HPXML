@@ -1287,11 +1287,12 @@ def apply_hpxml_modification(hpxml_file, hpxml)
           hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
         end
         if hpxml_file.include? 'multistage-backup'
+          hpxml_bldg.heat_pumps[-1].heating_capacity = 12000
           hpxml_bldg.heat_pumps[-1].backup_type = HPXML::HeatPumpBackupTypeIntegrated
           hpxml_bldg.heat_pumps[-1].backup_heating_fuel = HPXML::FuelTypeElectricity
           hpxml_bldg.heat_pumps[-1].backup_heating_capacity = 36000
           hpxml_bldg.heat_pumps[-1].backup_heating_efficiency_percent = 1.0
-          hpxml_bldg.heat_pumps[-1].backup_heating_capacity_increment = 10000.0
+          hpxml_bldg.heat_pumps[-1].backup_heating_capacity_increment = 17060.71
         end
         hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
                                           distribution_system_type: HPXML::HVACDistributionTypeAir,
