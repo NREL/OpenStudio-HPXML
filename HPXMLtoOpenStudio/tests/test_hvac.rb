@@ -526,7 +526,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
       # Get HPXML values
       heat_pump = hpxml_bldg.heat_pumps[0]
       backup_efficiency = heat_pump.backup_heating_efficiency_percent
-      supp_htg_capacity_increment = UnitConversions.convert(10000, 'Btu/hr', 'W')
+      supp_htg_capacity_increment = 5000 #5kw
       supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
       # Check cooling coil
@@ -1175,7 +1175,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     backup_efficiency = heat_pump.backup_heating_efficiency_percent
-    supp_htg_capacity_increment = UnitConversions.convert(10000, 'Btu/hr', 'W')
+    supp_htg_capacity_increment = 5000 # 5kw
     supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
 
     # Check boiler
