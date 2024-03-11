@@ -1,39 +1,24 @@
 Introduction
 ============
 
-The OpenStudio-HPXML repository consists of a simple residential EnergyPlus-based workflow build on top of `OpenStudio measures <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_.
-The workflow operates using `HPXML building description files <https://hpxml.nrel.gov>`_.
+OpenStudio-HPXML allows running residential EnergyPlus simulations using an `HPXML file <https://hpxml.nrel.gov/>`_ for the building description.
+It is intended to be used by user interfaces or other automated software workflows that automatically produce the HPXML file.
+A `Schematron <http://schematron.com/>`_ document for the EnergyPlus use case is used to validate that the appropriate HPXML inputs are provided to run EnergyPlus.
 
-The OpenStudio measures used by the workflow are:
+Capabilities
+------------
 
-#. ``BuildResidentialHPXML``: A measure that generates an HPXML file from a set of building description inputs (including, e.g., simplified geometry inputs).
-#. ``BuildResidentialScheduleFile``: A measure that generates a CSV of detailed schedules (e.g., stochastic occupancy) for use in the simulation.
-#. ``HPXMLtoOpenStudio``: A measure that translates an HPXML file to an OpenStudio model.
-#. ``ReportSimulationOutput``: A reporting measure that generates a variety of simulation-based annual/timeseries outputs in CSV/JSON/MessagePack format.
-#. ``ReportUtilityBills``: A reporting measure that generates utility bill outputs in CSV/JSON/MessagePack format.
+OpenStudio-HPXML capabilities include:
 
-
-Scope (Dwelling Units)
-----------------------
-
-The OpenStudio-HPXML workflow is intended to be used to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
-This approach was taken because:
-
-- It is required/desired for certain projects.
-- It improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
-- It doesn't necessarily preclude the possibility of running a single integrated EnergyPlus simulation.
-
-To model units of SFA/MF buildings, current capabilities include:
-
-- Defining surfaces adjacent to generic SFA/MF spaces (e.g., "other housing unit" or "other multifamily buffer space").
-- Locating various building components (e.g., ducts, water heaters, appliances) in these SFA/MF spaces.
-- Defining shared systems (HVAC, water heating, mechanical ventilation, etc.) by approximating the energy use attributed to the unit.
-
-Note that only the energy use attributed to each dwelling unit is calculated.
-Other OpenStudio capabilities should be used to supplement this workflow if the energy use of non-residential dwelling spaces (e.g., gyms, elevators, corridors, etc.) are of interest.
-
-For situations where more complex, integrated modeling is required, it is possible to merge multiple OpenStudio models together into a single model, such that one could merge all residential OSMs together and potentially combine it with a commercial OSM.
-That capability is outside the scope of this project.
+- Modeling individual dwelling units or whole multifamily buildings; see :ref:`hpxmlbuilding` for more information
+- Modeling a wide range of building technologies
+- HVAC design load calculations and equipment autosizing
+- Occupancy schedules (smooth or stochastic)
+- Utility bill calculations (flat, tiered, time-of-use, real-time pricing, etc.)
+- Emissions calculations (CO2e, etc.)
+- Annual and timeseries outputs (energy, loads, temperatures, etc.)
+- Optional HPXML inputs with transparent defaults
+- Schematron and XSD Schema input validation
 
 Accuracy vs Speed
 -----------------
@@ -52,6 +37,20 @@ There are additional ways that software developers using this workflow can reduc
 - Limit requests for timeseries output (e.g., ``--hourly``, ``--daily``, ``--timestep`` arguments) and limit the number of output variables requested.
 - Avoid using the ``--add-component-loads`` argument if heating/cooling component loads are not of interest.
 - Use the ``--skip-validation`` argument if the HPXML input file has already been validated against the Schema & Schematron documents.
+
+.. _openstudio_measures:
+
+OpenStudio Measures
+-------------------
+
+You can read about OpenStudio measures `here <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_.
+The OpenStudio measures used by the workflow are:
+
+#. ``BuildResidentialHPXML``: A measure that generates an HPXML file from a set of building description inputs (including, e.g., simplified geometry inputs).
+#. ``BuildResidentialScheduleFile``: A measure that generates a CSV of detailed schedules (e.g., stochastic occupancy) for use in the simulation.
+#. ``HPXMLtoOpenStudio``: A measure that translates an HPXML file to an OpenStudio model.
+#. ``ReportSimulationOutput``: A reporting measure that generates a variety of simulation-based annual/timeseries outputs in CSV/JSON/MessagePack format.
+#. ``ReportUtilityBills``: A reporting measure that generates utility bill outputs in CSV/JSON/MessagePack format.
 
 License
 -------
