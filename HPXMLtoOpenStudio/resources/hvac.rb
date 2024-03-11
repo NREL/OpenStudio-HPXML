@@ -3265,18 +3265,18 @@ class HVAC
     end
     # Sensors
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-    living_temp_ss.setName("#{control_zone} temp")
+    living_temp_ss.setName("#{control_zone.name.to_s} temp")
     living_temp_ss.setKeyName(control_zone.name.to_s)
 
     htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    htg_sp_ss.setName("#{control_zone} htg setpoint")
+    htg_sp_ss.setName("#{control_zone.name.to_s} htg setpoint")
     htg_sp_ss.setKeyName(htg_sch.name.to_s)
 
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_sp_ss.setName("#{control_zone} clg setpoint")
+    clg_sp_ss.setName("#{control_zone.name.to_s} clg setpoint")
     clg_sp_ss.setKeyName(clg_sch.name.to_s)
 
     unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
