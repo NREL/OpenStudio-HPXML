@@ -10,11 +10,7 @@ class HVAC
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-<<<<<<< HEAD
-                                         control_zone, hvac_unavailable_periods, header)
-=======
-                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
->>>>>>> ff7186235298d88148558b73233ac7aa347d6f86
+                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg, header)
     is_heatpump = false
 
     if not cooling_system.nil?
