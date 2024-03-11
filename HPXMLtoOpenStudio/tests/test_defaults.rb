@@ -2104,14 +2104,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = 77.5
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 71.5, 77.5)
+    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 71.5, 77.5, 0.0, false)
 
     # Test defaults
     hpxml_bldg.hvac_controls[0].heating_setpoint_temp = nil
     hpxml_bldg.hvac_controls[0].cooling_setpoint_temp = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78)
+    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78, 0.0, false)
 
     # Test inputs not overridden by defaults (w/ setbacks)
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-setbacks.xml')

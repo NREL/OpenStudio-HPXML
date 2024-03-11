@@ -938,7 +938,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSauna
