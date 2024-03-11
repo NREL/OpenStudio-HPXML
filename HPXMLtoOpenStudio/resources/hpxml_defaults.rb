@@ -1891,7 +1891,7 @@ class HPXMLDefaults
       # Only apply for single/two speed systems for now
       if hvac_control.onoff_thermostat_deadband > 0.0
         hvac_system = (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps)[0]
-        if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? hvac_system.compressor_type
+        if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? hvac_system.compressor_type
           hvac_control.onoff_thermostat_deadband = 0.0
           hvac_control.onoff_thermostat_deadband_isdefaulted = true
         end

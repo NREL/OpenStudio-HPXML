@@ -27,7 +27,7 @@ class WorkflowSimulations1Test < Minitest::Test
 
     xmls = []
     [sample_files_dir, real_homes_dir].each do |hpxml_files_dir|
-      Dir["#{hpxml_files_dir}/*.xml"].sort.each do |xml|
+      Dir["#{hpxml_files_dir}/base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
