@@ -244,16 +244,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.header.shading_summer_end_day = 5
     hpxml_bldg.header.manualj_heating_design_temp = 0.0
     hpxml_bldg.header.manualj_cooling_design_temp = 100.0
+    hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
     hpxml_bldg.header.manualj_heating_setpoint = 68.0
     hpxml_bldg.header.manualj_cooling_setpoint = 78.0
     hpxml_bldg.header.manualj_humidity_setpoint = 0.33
+    hpxml_bldg.header.manualj_humidity_difference = 50.0
     hpxml_bldg.header.manualj_internal_loads_sensible = 1600.0
     hpxml_bldg.header.manualj_internal_loads_latent = 60.0
     hpxml_bldg.header.manualj_num_occupants = 8
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, false, 3, 3, 10, 10, 'CA', 'CityName', -8, 1234, 12, -34, 7, HPXML::HeatPumpSizingMaxLoad, true,
-                                  2, 3, 4, 5, 0.0, 100.0, 68.0, 78.0, 0.33, 1600.0, 60.0, 8, HPXML::HeatPumpBackupSizingSupplemental)
+                                  2, 3, 4, 5, 0.0, 100.0, HPXML::ManualJDailyTempRangeLow, 68.0, 78.0, 0.33, 50.0, 1600.0, 60.0, 8, HPXML::HeatPumpBackupSizingSupplemental)
 
     # Test defaults - DST not in weather file
     hpxml_bldg.dst_enabled = nil
@@ -277,16 +279,18 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.header.shading_summer_end_day = nil
     hpxml_bldg.header.manualj_heating_design_temp = nil
     hpxml_bldg.header.manualj_cooling_design_temp = nil
+    hpxml_bldg.header.manualj_daily_temp_range = nil
     hpxml_bldg.header.manualj_heating_setpoint = nil
     hpxml_bldg.header.manualj_cooling_setpoint = nil
     hpxml_bldg.header.manualj_humidity_setpoint = nil
+    hpxml_bldg.header.manualj_humidity_difference = nil
     hpxml_bldg.header.manualj_internal_loads_sensible = nil
     hpxml_bldg.header.manualj_internal_loads_latent = nil
     hpxml_bldg.header.manualj_num_occupants = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', 'Denver Intl Ap', -7, 5413.4, 39.83, -104.65, 3, HPXML::HeatPumpSizingHERS, false,
-                                  5, 1, 10, 31, 6.8, 91.4, 70.0, 75.0, 0.45, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
+                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.7, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
 
     # Test defaults - DST in weather file
     hpxml, hpxml_bldg = _create_hpxml('base-location-AMY-2012.xml')
@@ -304,7 +308,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 11, 11, 4, 'CO', 'Boulder', -7, 5300.2, 40.13, -105.22, 3, nil, false,
-                                  5, 1, 9, 30, 10.2, 91.4, 70.0, 75.0, 0.45, 2400.0, 0.0, 4, nil)
+                                  5, 1, 9, 30, 10.22, 91.4, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -38.5, 2400.0, 0.0, 4, nil)
 
     # Test defaults - southern hemisphere, invalid state code
     hpxml, hpxml_bldg = _create_hpxml('base-location-capetown-zaf.xml')
@@ -322,7 +326,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, '-', 'CAPE TOWN', 2, 137.8, -33.98, 18.6, 3, nil, false,
-                                  12, 1, 4, 30, 41.0, 84.4, 70.0, 75.0, 0.5, 2400.0, 0.0, 4, nil)
+                                  12, 1, 4, 30, 41.0, 84.38, HPXML::ManualJDailyTempRangeMedium, 70.0, 75.0, 0.5, 1.6, 2400.0, 0.0, 4, nil)
   end
 
   def test_site
@@ -433,7 +437,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.number_of_units = 3
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 20000, 7, 4, 3)
+    _test_default_building_construction_values(default_hpxml_bldg, 20000, 7.0, 4, 3)
 
     # Test defaults
     hpxml_bldg.building_construction.conditioned_building_volume = nil
@@ -442,28 +446,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.number_of_units = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 21600, 8, 2, 1)
-
-    # Test defaults w/ average ceiling height
-    hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.average_ceiling_height = 10
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 27000, 10, 2, 1)
-
-    # Test defaults w/ conditioned building volume
-    hpxml_bldg.building_construction.conditioned_building_volume = 20000
-    hpxml_bldg.building_construction.average_ceiling_height = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 20000, 7.4, 2, 1)
+    _test_default_building_construction_values(default_hpxml_bldg, 22140, 8.2, 2, 1)
 
     # Test defaults w/ conditioned crawlspace
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_construction_values(default_hpxml_bldg, 16200, 8, 2, 1)
+    _test_default_building_construction_values(default_hpxml_bldg, 16200, 8.0, 2, 1)
   end
 
   def test_climate_and_risk_zones
@@ -2637,7 +2627,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.delivered_ventilation = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.1, 77.3)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.5, 78.5)
 
     # Test defaults w/ SFA building, compartmentalization test
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-sfa-unit.xml')
@@ -2647,13 +2637,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.4, 78.4)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 28.0, 80.0)
 
     # Test defaults w/ SFA building, guarded test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.1, 77.3)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.5, 78.5)
 
     # Test defaults w/ MF building, compartmentalization test
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit.xml')
@@ -2663,13 +2653,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.8, 56.5)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.8, 56.9)
 
     # Test defaults w/ MF building, guarded test
     hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.2, 54.9)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 19.3, 55.2)
 
     # Test defaults w/ nACH infiltration
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-natural-ach.xml')
@@ -2678,7 +2668,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 22.5, 64.3)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 26.6, 76.0)
 
     # Test defaults w/ CFM50 infiltration
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-cfm50.xml')
@@ -2687,7 +2677,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 34.9, 99.6)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 35.6, 101.8)
 
     # Test defaults w/ balanced system
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -2705,7 +2695,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     used_for_whole_building_ventilation: true)
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 27.0, 77.2)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 24.0, 29.9, 85.5)
 
     # Test inputs not overridden by defaults w/ CFIS
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis.xml')
@@ -2735,7 +2725,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     suppl_vent_fan.fan_power = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_suppl_values(default_hpxml_bldg, false, nil, 35.0, 100.0)
+    _test_default_mech_vent_suppl_values(default_hpxml_bldg, false, nil, 35.6, 101.8)
 
     # Test defaults w/ CFIS
     vent_fan.is_shared_system = nil
@@ -2746,7 +2736,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 173.3, 298.8, 1.0, HPXML::CFISModeAirHandler)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 177.1, 305.4, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
@@ -4274,8 +4264,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def _test_default_building_values(hpxml_bldg, dst_enabled, dst_begin_month, dst_begin_day, dst_end_month, dst_end_day, state_code, city, time_zone_utc_offset,
                                     elevation, latitude, longitude, natvent_days_per_week, heat_pump_sizing_methodology, allow_increased_fixed_capacities,
                                     shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day,
-                                    manualj_heating_design_temp, manualj_cooling_design_temp, manualj_heating_setpoint, manualj_cooling_setpoint,
-                                    manualj_humidity_setpoint, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants,
+                                    manualj_heating_design_temp, manualj_cooling_design_temp, manualj_daily_temp_range, manualj_heating_setpoint, manualj_cooling_setpoint,
+                                    manualj_humidity_setpoint, manualj_humidity_difference, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants,
                                     heat_pump_backup_sizing_methodology)
     assert_equal(dst_enabled, hpxml_bldg.dst_enabled)
     assert_equal(dst_begin_month, hpxml_bldg.dst_begin_month)
@@ -4312,11 +4302,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(shading_summer_begin_day, hpxml_bldg.header.shading_summer_begin_day)
     assert_equal(shading_summer_end_month, hpxml_bldg.header.shading_summer_end_month)
     assert_equal(shading_summer_end_day, hpxml_bldg.header.shading_summer_end_day)
-    assert_in_epsilon(manualj_heating_design_temp, hpxml_bldg.header.manualj_heating_design_temp, 0.01)
-    assert_in_epsilon(manualj_cooling_design_temp, hpxml_bldg.header.manualj_cooling_design_temp, 0.01)
+    assert_in_delta(manualj_heating_design_temp, hpxml_bldg.header.manualj_heating_design_temp, 0.01)
+    assert_in_delta(manualj_cooling_design_temp, hpxml_bldg.header.manualj_cooling_design_temp, 0.01)
+    assert_equal(manualj_daily_temp_range, hpxml_bldg.header.manualj_daily_temp_range)
     assert_equal(manualj_heating_setpoint, hpxml_bldg.header.manualj_heating_setpoint)
     assert_equal(manualj_cooling_setpoint, hpxml_bldg.header.manualj_cooling_setpoint)
     assert_equal(manualj_humidity_setpoint, hpxml_bldg.header.manualj_humidity_setpoint)
+    assert_in_delta(manualj_humidity_difference, hpxml_bldg.header.manualj_humidity_difference, 0.1)
     assert_equal(manualj_internal_loads_sensible, hpxml_bldg.header.manualj_internal_loads_sensible)
     assert_equal(manualj_internal_loads_latent, hpxml_bldg.header.manualj_internal_loads_latent)
     assert_equal(manualj_num_occupants, hpxml_bldg.header.manualj_num_occupants)
