@@ -319,16 +319,7 @@ class Airflow
 
     # Technically the duct leakage imbalance interacts with the infiltration/ventilation,
     # but the interaction is not that important to capture for an unconditioned space.
-    fan_vars = []
-    duct_lk_imbals.each do |values|
-      duct_location, duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var = values
-      next if duct_location != space.thermalZone.get.name.to_s
-
-      fan_vars << duct_lk_supply_fan_equiv_var
-      fan_vars << duct_lk_exhaust_fan_equiv_var
-    end
-
-    if fan_vars.size > 0
+    if duct_lk_imbals.any? { |values| values[0] == space.thermalZone.get.name.to_s }
       space_name = space.name.to_s.gsub(' - ', '_')
 
       uncond_infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
@@ -342,10 +333,14 @@ class Airflow
       uncond_infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       uncond_infil_program.setName("#{space_name} duct leakage imbalance infil program")
       uncond_infil_program.addLine('Set Qducts = 0')
-      fan_vars.each do |fan_var|
-        uncond_infil_program.addLine("Set Qducts = Qducts + (@Abs(#{fan_var.name}))")
+      duct_lk_imbals.each do |values|
+        duct_location, duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var = values
+        next if duct_location != space.thermalZone.get.name.to_s
+
+        uncond_infil_program.addLine("Set Qducts = Qducts - #{duct_lk_supply_fan_equiv_var.name}")
+        uncond_infil_program.addLine("Set Qducts = Qducts + #{duct_lk_exhaust_fan_equiv_var.name}")
       end
-      uncond_infil_program.addLine("Set #{uncond_infil_flow_actuator.name} = Qducts")
+      uncond_infil_program.addLine("Set #{uncond_infil_flow_actuator.name} = (@Abs(Qducts))")
 
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName("#{uncond_infil_program.name} calling manager")
@@ -1696,51 +1691,60 @@ class Airflow
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
     infil_program.addLine("Set QWHV_exh = #{UnitConversions.convert(exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(5)}")
 
-    # Duct leakage imbalance
-    infil_program.addLine('Set Qducts_sup = 0')
-    infil_program.addLine('Set Qducts_exh = 0')
+    # Ventilation fans
+    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis_sup + QWHV_cfis_suppl_sup')
+    infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + QWHV_exh + QWHV_cfis_suppl_exh')
+    infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
+
+    # Duct leakage imbalance induced infiltration
+    infil_program.addLine('Set Qducts = 0')
     duct_lk_imbals.each do |values|
       duct_location, duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var = values
       next if duct_location != @conditioned_zone.name.to_s
 
-      infil_program.addLine("Set Qducts_sup = Qducts_sup + #{duct_lk_supply_fan_equiv_var.name}")
-      infil_program.addLine("Set Qducts_exh = Qducts_exh + #{duct_lk_exhaust_fan_equiv_var.name}")
+      infil_program.addLine("Set Qducts = Qducts - #{duct_lk_supply_fan_equiv_var.name}")
+      infil_program.addLine("Set Qducts = Qducts + #{duct_lk_exhaust_fan_equiv_var.name}")
     end
+    infil_program.addLine('If Qducts < 0')
+    infil_program.addLine('  Set Qsupply = Qsupply - Qducts')
+    infil_program.addLine('Else')
+    infil_program.addLine('  Set Qexhaust = Qexhaust + Qducts')
+    infil_program.addLine('EndIf')
+    infil_program.addLine('Set Qfan_with_ducts = (@Max Qexhaust Qsupply)')
 
-    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis_sup + QWHV_cfis_suppl_sup + Qducts_sup')
-    infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + QWHV_exh + QWHV_cfis_suppl_exh + Qducts_exh')
-
-    infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
+    # Total combined air exchange
     if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2022')
       infil_program.addLine('Set Qimb = (@Abs (Qsupply - Qexhaust))')
       infil_program.addLine('If Qinf + Qimb > 0')
-      infil_program.addLine('  Set Qinf_adj = (Qinf^2) / (Qinf + Qimb)')
+      infil_program.addLine('  Set Qtot = Qfan_with_ducts + (Qinf^2) / (Qinf + Qimb)')
       infil_program.addLine('Else')
-      infil_program.addLine('  Set Qinf_adj = 0')
+      infil_program.addLine('  Set Qtot = Qfan_with_ducts')
       infil_program.addLine('EndIf')
     elsif Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
-      infil_program.addLine('If Qfan > 0')
+      infil_program.addLine('If Qfan_with_ducts > 0')
       # Balanced system if the total supply airflow and total exhaust airflow are within 10% of their average.
       infil_program.addLine('  Set Qavg = ((Qexhaust + Qsupply) / 2.0)')
       infil_program.addLine('  If ((@Abs (Qexhaust - Qavg)) / Qavg) <= 0.1') # Only need to check Qexhaust, Qsupply will give same result
       infil_program.addLine('    Set phi = 1')
       infil_program.addLine('  Else')
-      infil_program.addLine('    Set phi = (Qinf / (Qinf + Qfan))')
+      infil_program.addLine('    Set phi = (Qinf / (Qinf + Qfan_with_ducts))')
       infil_program.addLine('  EndIf')
-      infil_program.addLine('  Set Qinf_adj = phi * Qinf')
+      infil_program.addLine('  Set Qtot = Qfan_with_ducts + (phi * Qinf)')
       infil_program.addLine('Else')
-      infil_program.addLine('  Set Qinf_adj = Qinf')
+      infil_program.addLine('  Set Qtot = Qfan_with_ducts + Qinf')
       infil_program.addLine('EndIf')
     else
-      infil_program.addLine('Set Qu = (@Abs (Qexhaust - Qsupply))') # Unbalanced flow
-      infil_program.addLine('Set Qb = Qfan - Qu') # Balanced flow
-      infil_program.addLine('Set Qtot = (((Qu^2) + (Qinf^2)) ^ 0.5) + Qb')
-      infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
+      infil_program.addLine('Set Qimb = (@Abs (Qexhaust - Qsupply))') # Unbalanced flow
+      infil_program.addLine('Set Qbal = Qfan_with_ducts - Qimb') # Balanced flow
+      infil_program.addLine('Set Qtot = (((Qimb^2) + (Qinf^2)) ^ 0.5) + Qbal')
     end
-    infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
 
+    # Mechanical ventilation only
     create_timeseries_flowrate_ems_output_var(model, 'Qfan', infil_program)
+
+    # Natural infiltration and duct leakage imbalance induced infiltration
+    infil_program.addLine("Set #{infil_flow_actuator.name} = Qtot - Qfan")
     create_timeseries_flowrate_ems_output_var(model, infil_flow_actuator.name.to_s, infil_program)
   end
 
@@ -1917,8 +1921,7 @@ class Airflow
     infil_program.addLine("Set #{cfis_suppl_fan_actuator.name} = 0.0") unless cfis_suppl_fan_actuator.nil?
     apply_cfis(infil_program, vent_mech_cfis_tot, cfis_fan_actuator, cfis_suppl_fan_actuator)
 
-    # Calculate Qfan, Qinf_adj
-    # Calculate adjusted infiltration based on mechanical ventilation system
+    # Calculate combined air exchange (infiltration and mechanical ventilation)
     apply_infiltration_adjustment_to_conditioned(model, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals, vent_mech_sup_tot,
                                                  vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, infil_flow_actuator, schedules_file, unavailable_periods)
 
