@@ -3248,7 +3248,7 @@ class HVAC
     # Sensors
     if is_heatpump
       backup_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Energy')
-      backup_coil_energy.setName('supp coil heating energy')
+      backup_coil_energy.setName("#{htg_supp_coil.name} heating energy")
       backup_coil_energy.setKeyName(htg_supp_coil.name.get)
 
       # Trend variable
@@ -3258,25 +3258,25 @@ class HVAC
 
       # Create a new schedule for supp availability
       supp_avail_sch = htg_supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
-      supp_avail_sch.setName('supp coil avail sch')
+      supp_avail_sch.setName("#{htg_supp_coil.name.to_s} avail sch")
       htg_supp_coil.setAvailabilitySchedule(supp_avail_sch)
       supp_coil_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(supp_avail_sch, *EPlus::EMSActuatorScheduleConstantValue)
       supp_coil_avail_actuator.setName(htg_supp_coil.name.get.gsub('-', '_') + ' avail')
     end
     # Sensors
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-    living_temp_ss.setName('living temp')
-    living_temp_ss.setKeyName(HPXML::LocationLivingSpace)
+    living_temp_ss.setName("#{control_zone} temp")
+    living_temp_ss.setKeyName(control_zone.name.to_s)
 
     htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    htg_sp_ss.setName('htg_setpoint')
+    htg_sp_ss.setName("#{control_zone} htg setpoint")
     htg_sp_ss.setKeyName(htg_sch.name.to_s)
 
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_sp_ss.setName('clg_setpoint')
+    clg_sp_ss.setName("#{control_zone} clg setpoint")
     clg_sp_ss.setKeyName(clg_sch.name.to_s)
 
     unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
@@ -3346,7 +3346,7 @@ class HVAC
     end
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{realistic_cycling_program.name} ProgramManager")
+    program_calling_manager.setName("#{realistic_cycling_program.name} Program Manager")
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(realistic_cycling_program)
 
