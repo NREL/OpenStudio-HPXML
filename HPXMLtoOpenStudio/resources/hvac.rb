@@ -3125,45 +3125,46 @@ class HVAC
   def self.calc_time_to_full_cap(c_d)
     # assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
     time = (20.0 * c_d + 0.4).round
-    time = [time, 2].max
-    time = [time, 5].min
+    time = [time, get_time_to_full_cap_limits[0]].max
+    time = [time, get_time_to_full_cap_limits[1]].min
     return time
+  end
+
+  def self.get_time_to_full_cap_limits()
+    return [2, 5]
   end
 
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     if is_cooling
       c_d = system_ap.cool_c_d
+      cap_fflow_spec = system_ap.cool_cap_fflow_spec[0]
+      eir_fflow_spec = system_ap.cool_eir_fflow_spec[0]
+      ss_var_name = 'Cooling Coil Electricity Energy'
     else
       c_d = system_ap.heat_c_d
+      cap_fflow_spec = system_ap.heat_cap_fflow_spec[0]
+      eir_fflow_spec = system_ap.heat_eir_fflow_spec[0]
+      ss_var_name = 'Heating Coil Electricity Energy'
     end
     number_of_timestep_logged = calc_time_to_full_cap(c_d)
 
     # Sensors
     cap_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    cap_curve_var_in.setName('CAP fFF Var')
+    cap_curve_var_in.setName("#{cap_fff_curve.name.get} Var")
     cap_curve_var_in.setKeyName(cap_fff_curve.name.get)
 
     eir_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    eir_curve_var_in.setName('EIR fFF Var')
+    eir_curve_var_in.setName("#{eir_fff_curve.name.get} Var")
     eir_curve_var_in.setKeyName(eir_fff_curve.name.get)
 
-    if is_cooling
-      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electricity Energy')
-      coil_energy.setName('clg coil electric energy')
-      cap_fflow_spec = system_ap.cool_cap_fflow_spec[0]
-      eir_fflow_spec = system_ap.cool_eir_fflow_spec[0]
-    else
-      coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
-      coil_energy.setName('htg coil electric energy')
-      cap_fflow_spec = system_ap.heat_cap_fflow_spec[0]
-      eir_fflow_spec = system_ap.heat_eir_fflow_spec[0]
-    end
-    coil_energy.setKeyName(coil_name)
+    coil_power_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, ss_var_name)
+    coil_power_ss.setName("#{coil_name} electric energy")
+    coil_power_ss.setKeyName(coil_name)
     # Trend variable
-    energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
-    energy_trend.setName("#{coil_energy.name} Trend")
-    energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    coil_power_ss_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_power_ss)
+    coil_power_ss_trend.setName("#{coil_power_ss.name} Trend")
+    coil_power_ss_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
 
     # Actuators
     cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, *EPlus::EMSActuatorCurveResult)
@@ -3201,9 +3202,9 @@ class HVAC
     cycling_degrad_program.addLine("Set ec_out = #{ec_out_calc.join(' + ')}")
     (0..number_of_timestep_logged).each do |t_i|
       if t_i == 0
-        cycling_degrad_program.addLine("Set cc_now = #{energy_trend.name}")
+        cycling_degrad_program.addLine("Set cc_now = #{coil_power_ss_trend.name}")
       else
-        cycling_degrad_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
+        cycling_degrad_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{coil_power_ss_trend.name} #{t_i}")
       end
     end
     (1..number_of_timestep_logged).each do |t_i|
@@ -3219,8 +3220,10 @@ class HVAC
       end
       # Curve fit from Winkler's thesis, page 200: https://drum.lib.umd.edu/bitstream/handle/1903/9493/Winkler_umd_0117E_10504.pdf?sequence=1&isAllowed=y
       # use average curve value ( ~ at 0.5 min).
-      cycling_degrad_program.addLine("  Set exp = @Exp((-2.19722) * #{t_i - 0.5})")
-      cycling_degrad_program.addLine('  Set cc_mult = -1.0125 * exp + 1.0125')
+      # This curve reached steady state in 2 mins, assume shape for high efficiency units, scale it down based on number_of_timestep_logged
+      cycling_degrad_program.addLine("  Set exp = @Exp((-2.19722) * #{get_time_to_full_cap_limits[0]} / #{number_of_timestep_logged} * #{t_i - 0.5})")
+      cycling_degrad_program.addLine("  Set cc_mult = (-1.0125 * exp + 1.0125)")
+      cycling_degrad_program.addLine('  Set cc_mult = @Min cc_mult 1.0')
     end
     cycling_degrad_program.addLine('Else')
     cycling_degrad_program.addLine('  Set cc_mult = 1.0')
