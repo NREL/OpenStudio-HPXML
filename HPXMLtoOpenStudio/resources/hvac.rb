@@ -3151,11 +3151,11 @@ class HVAC
 
     # Sensors
     cap_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    cap_curve_var_in.setName("#{cap_fff_curve.name.get} Var")
+    cap_curve_var_in.setName("#{cap_fff_curve.name.get.gsub('-', '_')} Var")
     cap_curve_var_in.setKeyName(cap_fff_curve.name.get)
 
     eir_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    eir_curve_var_in.setName("#{eir_fff_curve.name.get} Var")
+    eir_curve_var_in.setName("#{eir_fff_curve.name.get.gsub('-', '_')} Var")
     eir_curve_var_in.setKeyName(eir_fff_curve.name.get)
 
     coil_power_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, ss_var_name)
@@ -3168,9 +3168,9 @@ class HVAC
 
     # Actuators
     cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, *EPlus::EMSActuatorCurveResult)
-    cc_actuator.setName(cap_fff_curve.name.get.gsub('-', '_') + ' value')
+    cc_actuator.setName("#{cap_fff_curve.name.get.gsub('-', '_')} value")
     ec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_fff_curve, *EPlus::EMSActuatorCurveResult)
-    ec_actuator.setName(eir_fff_curve.name.get.gsub('-', '_') + ' value')
+    ec_actuator.setName("#{eir_fff_curve.name.get.gsub('-', '_')} value")
 
     # Program
     cycling_degrad_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
