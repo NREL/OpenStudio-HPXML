@@ -2212,7 +2212,7 @@
   "sample_files/base-hvac-ground-to-air-heat-pump-multistage-backup.xml": {
     "simulation_control_timestep": 1,
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "heat_pump_heating_capacity": 12000,
+    "heat_pump_heating_capacity": 36000,
     "heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
