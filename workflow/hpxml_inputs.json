@@ -2442,6 +2442,25 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
+  "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_temperature_capacitance_multiplier": 4,
+    "heat_pump_heating_capacity": 10000
+  },
+  "sample_files/base-hvac-onoff-thermostat-deadband-room-air-conditioner.xml": {
+    "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_temperature_capacitance_multiplier": 4
+  },
+  "sample_files/base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml",
+    "hvac_control_heating_weekday_setpoint": null,
+    "hvac_control_heating_weekend_setpoint": null,
+    "hvac_control_cooling_weekday_setpoint": null,
+    "hvac_control_cooling_weekend_setpoint": null,
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv"
+  },
   "sample_files/base-hvac-ptac.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_type": "none",
@@ -2476,6 +2495,18 @@
   },
   "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
+  },
+  "sample_files/base-hvac-realistic-control-2-speed-ashp.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_temperature_capacitance_multiplier": 4,
+    "heat_pump_heating_capacity": 10000
+  },
+  "sample_files/base-hvac-realistic-control-2-speed-central-ac.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_temperature_capacitance_multiplier": 4,
+    "heat_pump_heating_capacity": 10000
   },
   "sample_files/base-hvac-room-ac-only.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3303,19 +3334,11 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv"
   },
   "sample_files/base-schedules-detailed-setpoints-daily-schedules.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "parent_hpxml": "sample_files/base-schedules-detailed-setpoints.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-schedules.csv"
   },
   "sample_files/base-schedules-detailed-setpoints-daily-setbacks.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "parent_hpxml": "sample_files/base-schedules-detailed-setpoints.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv"
   },
   "sample_files/base-simcontrol-calendar-year-custom.xml": {

@@ -222,6 +222,15 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
+                            'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
+                            'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
+                            'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0'],
+                            'onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support single speed dx systems'],
+                            'onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system',
+                                                                  'Expected at maximum one heating system'],
+                            'realistic-staging-missiong-ddb' => ['Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature',
+                                                                 'Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
+                            'realistic-staging-zero-ddb' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
                             'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
                                                               'HeatingAutosizingFactor should be greater than 0.0',
                                                               'BackupHeatingAutosizingFactor should be greater than 0.0'],
@@ -658,6 +667,33 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
+      elsif ['onoff-thermostat-heat-load-fraction'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
+      elsif ['onoff-thermostat-cool-load-fraction'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
+      elsif ['onoff-thermostat-negative-value'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = -1.0
+      elsif ['onoff-thermostat-wrong-cooling-system-type'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
+        hpxml_bldg.heat_pumps[0].compressor_type = nil
+      elsif ['onoff-thermostat-two-heat-pumps'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
+        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
+        hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
+        hpxml_bldg.heat_pumps[-1].id = 'HeatPump2'
+        hpxml_bldg.heat_pumps[-1].primary_heating_system = false
+        hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
+      elsif ['realistic-staging-missiong-ddb'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
+        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = nil
+      elsif ['realistic-staging-zero-ddb'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
+        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 0.0
       elsif ['negative-autosizing-factors'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml')
         hpxml_bldg.heat_pumps[0].heating_autosizing_factor = -0.5
@@ -765,6 +801,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
+                              'onoff-thermostat-timestep-ten-mins' => ['Timestep should be 1; simulation will continue without deadband control.'],
+                              'onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
+                              'onoff-thermostat-num-speeds-greater-than-two' => ['Expected single-speed or two-speed DX systems to be modeled; simulation will continue without deadband control.'],
                               'plug-load-type-sauna' => ["Plug load type 'sauna' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-aquarium' => ["Plug load type 'aquarium' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-water-bed' => ["Plug load type 'water bed' is not currently handled, the plug load will not be modeled."],
@@ -891,6 +930,15 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
+      elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml.header.timestep = 10
+      elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml.header.temperature_capacitance_multiplier = 1
+      elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSauna

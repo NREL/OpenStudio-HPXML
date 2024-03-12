@@ -2731,18 +2731,22 @@ HPXML HVAC Control
 
 If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl``.
 
-  =======================================================  ========  =====  ===========  ========  =========  ========================================
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
   Element                                                  Type      Units  Constraints  Required  Default    Notes
-  =======================================================  ========  =====  ===========  ========  =========  ========================================
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
   ``SystemIdentifier``                                     id                            Yes                  Unique identifier
   ``HeatingSeason``                                        element                       No        See [#]_   Heating season        
   ``CoolingSeason``                                        element                       No        See [#]_   Cooling season
   ``extension/CeilingFanSetpointTempCoolingSeasonOffset``  double    F      >= 0         No        0          Cooling setpoint temperature offset [#]_
-  =======================================================  ========  =====  ===========  ========  =========  ========================================
+  ``extension/OnOffThermostatDeadbandTemperature``         double    F      >= 0         No        0          On-off thermostats/deadbands temperature [#]_
+  ``extension/TwospeedRealisticStaging``                   boolean                       No        false      Whether to apply two speed DX system realistic staging [#]_
+  =======================================================  ========  =====  ===========  ========  =========  ===========================================================
 
   .. [#] If HeatingSeason not provided, defaults to year-round.
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
+  .. [#] OnOffThermostatDeadband models a deadband thermostat rather than the typical EnergyPlus approach of perfectly meeting the load every timestep. This input is the size of the deadband, which is the temperature difference between when a thermostat turns on the HVAC to when it turns off. Typical values are between 2-4 F, with actual values being specific to the thermostat installed. Note that thermostat deadbands are two sided. As an example, if you had a heating setpoint of 71 F and a 2 F deadband, the heating equipemnt will turn on when the space temperature hits 70 F and off when it hits 72 F. When this feature is enable, the model will also explicitly model cycling and it will take several minutes for the HVAC to reach full capacity. This feature should only be used if detailed power profiles and loads are required. Common use cases for this feature are when modeling advanced controls, such as a Home Energy Management System, or if performing co-simulation with a grid model. Simulation time step should be 1 minute to enable this feature. Currently, this feature only supports at most one cooling or one heating system (including heat pumps) serving 100% loads(FractionHeatLoadServed or FractionCoolLoadServed sum to 1.0), and only supports single speed room air conditioner or air-to-air heat pump systems.
+  .. [#] TwospeedRealisticStaging should only be used when OnOffThermostatDeadband is greater than 0. It only applies to two speed central AC or two speed air source heat pump systems. TwospeedRealisticStaging enables a time-based staging control where the HVAC systems will stay at low speed for 5 minutes before transitioning to the higher stage, and stay at high speed until cut-out deadband temperature is reached. Backup system will follow the same control logic of waiting for 5 minutes when heat pump is not meeting the loads.
 
 HPXML HVAC Seasons
 ~~~~~~~~~~~~~~~~~~

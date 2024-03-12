@@ -162,6 +162,8 @@ __New Features__
 - Stochastic schedules for garage lighting and TV plug loads now use interior lighting and miscellaneous plug load schedules, respectively.
 - Performance improvement for HPXML files w/ large numbers of `Building` elements.
 - Weather cache files (\*foo-cache.csv) are no longer used/needed.
+- **Research Feature**: Allows modeling on/off thermostat deadband with start-up degradation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
+- **Research Feature**: Allows modeling time-based realistic staging for two speed DX systems (central ac and ASHP). Assumes 5 minutes before transitioning to a higher speed.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.

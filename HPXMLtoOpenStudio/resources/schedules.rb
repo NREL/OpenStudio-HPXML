@@ -1445,7 +1445,8 @@ class SchedulesFile
                  schedules_paths:,
                  year:,
                  unavailable_periods: [],
-                 output_path:)
+                 output_path:,
+                 offset_db: nil)
     return if schedules_paths.empty?
 
     @year = year
@@ -1454,7 +1455,7 @@ class SchedulesFile
     expand_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(runner, unavailable_periods)
-    convert_setpoints
+    convert_setpoints(offset_db)
     @output_schedules_path = output_path
     export()
   end
@@ -1803,17 +1804,22 @@ class SchedulesFile
     end
   end
 
-  def convert_setpoints
+  def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
 
     col_names = @tmp_schedules.keys
 
+    offset_db_c = UnitConversions.convert(offset_db.to_f / 2.0, 'deltaF', 'deltaC')
     @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
       setpoint_col_names.each do |setpoint_col_name|
         next unless col_names.include?(setpoint_col_name)
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c').round(4)
+        next if offset_db_c == 0.0
+
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] - offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:HeatingSetpoint].name)
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] + offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:CoolingSetpoint].name)
       end
     end
   end
