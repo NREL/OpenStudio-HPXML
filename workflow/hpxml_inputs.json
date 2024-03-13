@@ -878,10 +878,6 @@
   "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml"
   },
-  "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump-multistage-backup.xml": {
-    "simulation_control_timestep": 1,
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump.xml"
-  },
   "sample_files/base-bldgtype-mf-unit-shared-boiler-cooling-tower-water-loop-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-boiler-chiller-water-loop-heat-pump.xml"
   },
@@ -2208,12 +2204,6 @@
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump_cooling_capacity": 0,
     "heat_pump_fraction_cool_load_served": 0
-  },
-  "sample_files/base-hvac-ground-to-air-heat-pump-multistage-backup.xml": {
-    "simulation_control_timestep": 1,
-    "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
-    "heat_pump_heating_capacity": 36000,
-    "heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
