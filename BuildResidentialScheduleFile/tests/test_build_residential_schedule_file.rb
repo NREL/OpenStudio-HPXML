@@ -466,6 +466,39 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     end
   end
 
+  def test_append_output
+    existing_csv_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'schedule_files', 'setpoints.csv')
+    orig_cols = File.readlines(existing_csv_path)[0].strip.split(',')
+
+    # Test w/ append_output=false
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    FileUtils.cp(existing_csv_path, @tmp_schedule_file_path)
+    @args_hash['output_csv_path'] = @tmp_schedule_file_path
+    @args_hash['append_output'] = false
+    _test_measure()
+
+    assert(File.exist?(@tmp_schedule_file_path))
+    outdata = File.readlines(@tmp_schedule_file_path)
+    expected_cols = ScheduleGenerator.export_columns
+    assert_equal(expected_cols, outdata[0].strip.split(',')) # Header
+    assert_equal(expected_cols.size, outdata[1].split(',').size) # Data
+
+    # Test w/ append_output=true
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    FileUtils.cp(existing_csv_path, @tmp_schedule_file_path)
+    @args_hash['output_csv_path'] = @tmp_schedule_file_path
+    @args_hash['append_output'] = true
+    _test_measure()
+
+    assert(File.exist?(@tmp_schedule_file_path))
+    outdata = File.readlines(@tmp_schedule_file_path)
+    expected_cols = orig_cols + ScheduleGenerator.export_columns
+    assert_equal(expected_cols, outdata[0].strip.split(',')) # Header
+    assert_equal(expected_cols.size, outdata[1].split(',').size) # Data
+  end
+
   def _test_measure(expect_fail: false)
     # create an instance of the measure
     measure = BuildResidentialScheduleFile.new

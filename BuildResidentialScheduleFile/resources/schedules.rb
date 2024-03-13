@@ -16,6 +16,7 @@ class ScheduleGenerator
                  sim_year:,
                  sim_start_day:,
                  debug:,
+                 append_output:,
                  **)
     @runner = runner
     @state = state
@@ -29,6 +30,7 @@ class ScheduleGenerator
     @sim_year = sim_year
     @sim_start_day = sim_start_day
     @debug = debug
+    @append_output = append_output
   end
 
   def self.export_columns
@@ -743,11 +745,17 @@ class ScheduleGenerator
     (SchedulesFile::Columns.values.map { |c| c.name } - @column_names).each do |col_to_remove|
       @schedules.delete(col_to_remove)
     end
+    schedule_keys = @schedules.keys
+    schedule_rows = @schedules.values.transpose.map { |row| row.map { |x| '%.3g' % x } }
+    if @append_output && File.exist?(schedules_path)
+      table = CSV.read(schedules_path)
+      schedule_keys = table[0] + schedule_keys
+      schedule_rows = schedule_rows.map.with_index { |row, i| table[i + 1] + row }
+    end
     CSV.open(schedules_path, 'w') do |csv|
-      csv << @schedules.keys
-      rows = @schedules.values.transpose
-      rows.each do |row|
-        csv << row.map { |x| '%.3g' % x }
+      csv << schedule_keys
+      schedule_rows.each do |row|
+        csv << row
       end
     end
     return true
