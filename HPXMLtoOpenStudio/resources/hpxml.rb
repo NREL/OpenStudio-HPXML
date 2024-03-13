@@ -2254,7 +2254,9 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
       XMLHelper.add_extension(space, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
-      HPXML.design_loads_to_doc(self, space)
+      if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map{|key| self.send(key)}.any?
+        HPXML.design_loads_to_doc(self, space)
+      end
     end
 
     def from_doc(space)
@@ -7863,13 +7865,11 @@ class HPXML < Object
       CDL_SENS_ATTRS => 'CoolingSensible',
       CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
       next if dl_child_name == 'CoolingLatent' && hpxml_object.is_a?(HPXML::Space) # Latent loads are not calculated for spaces
-      next if attrs.map { |attr, _element_name| hpxml_object.send(attr).to_f }.sum == 0.0
 
       dl_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'DesignLoads'])
       XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
       dl_child = XMLHelper.add_element(dl_extension, dl_child_name)
       attrs.each do |attr, element_name|
-        next if hpxml_object.send(attr).nil?
 
         XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :float)
       end
@@ -7880,7 +7880,6 @@ class HPXML < Object
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
       CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
-      next if dl_child_name == 'CoolingLatent' && hpxml_object.is_a?(HPXML::Space) # Latent loads are not calculated for spaces
 
       attrs.each do |attr, element_name|
         hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
