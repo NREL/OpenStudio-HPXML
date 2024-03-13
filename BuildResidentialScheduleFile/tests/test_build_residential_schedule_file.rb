@@ -497,6 +497,18 @@ class BuildResidentialScheduleFileTest < Minitest::Test
     expected_cols = orig_cols + ScheduleGenerator.export_columns
     assert_equal(expected_cols, outdata[0].strip.split(',')) # Header
     assert_equal(expected_cols.size, outdata[1].split(',').size) # Data
+
+    # Test w/ append_output=true and inconsistent data
+    existing_csv_path = File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'schedule_files', 'setpoints-10-mins.csv')
+    hpxml = _create_hpxml('base.xml')
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    FileUtils.cp(existing_csv_path, @tmp_schedule_file_path)
+    @args_hash['output_csv_path'] = @tmp_schedule_file_path
+    @args_hash['append_output'] = true
+    _hpxml, result = _test_measure(expect_fail: true)
+
+    error_msgs = result.errors.map { |x| x.logMessage }
+    assert(error_msgs.any? { |error_msg| error_msg.include?('Invalid number of rows (52561) in file.csv. Expected 8761 rows (including the header row).') })
   end
 
   def _test_measure(expect_fail: false)

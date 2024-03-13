@@ -749,6 +749,10 @@ class ScheduleGenerator
     schedule_rows = @schedules.values.transpose.map { |row| row.map { |x| '%.3g' % x } }
     if @append_output && File.exist?(schedules_path)
       table = CSV.read(schedules_path)
+      if table.size != schedule_rows.size + 1
+        @runner.registerError("Invalid number of rows (#{table.size}) in file.csv. Expected #{schedule_rows.size + 1} rows (including the header row).")
+        return false
+      end
       schedule_keys = table[0] + schedule_keys
       schedule_rows = schedule_rows.map.with_index { |row, i| table[i + 1] + row }
     end
