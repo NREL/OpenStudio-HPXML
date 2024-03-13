@@ -2329,6 +2329,19 @@ The temperature above which the heat pump backup system is disabled. If both thi
 
 <br/>
 
+**Heat Pump: Backup Heating Capacity Increment**
+
+Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is 'integrated' and Backup Fuel Type is 'electricity'.
+
+- **Name:** ``heat_pump_backup_heating_capacity_increment``
+- **Type:** ``Double``
+
+- **Units:** ``Btu/hr``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heat Pump: Sizing Methodology**
 
 The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.

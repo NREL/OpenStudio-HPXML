@@ -515,6 +515,43 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
   end
 
+  def test_air_to_air_heat_pump_multistage_backup_system
+    ['base-hvac-air-to-air-heat-pump-1-speed-multistage-backup.xml',
+     'base-hvac-air-to-air-heat-pump-2-speed-multistage-backup.xml',
+     'base-hvac-air-to-air-heat-pump-var-speed-multistage-backup.xml'].each do |hpxml_path|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
+      model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+      # Get HPXML values
+      heat_pump = hpxml_bldg.heat_pumps[0]
+      backup_efficiency = heat_pump.backup_heating_efficiency_percent
+      supp_htg_capacity_increment = 5000 #5kw
+      supp_htg_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+
+      # Check cooling coil
+      assert_equal(1, (model.getCoilCoolingDXSingleSpeeds.size + model.getCoilCoolingDXMultiSpeeds.size))
+
+      # Check heating coil
+      assert_equal(1, (model.getCoilHeatingDXSingleSpeeds.size + model.getCoilHeatingDXMultiSpeeds.size))
+
+      # Check supp heating coil
+      assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
+      supp_htg_coil = model.getCoilHeatingElectricMultiStages[0]
+      supp_htg_coil.stages.each_with_index do |stage, i|
+        capacity = [supp_htg_capacity_increment * (i + 1), supp_htg_capacity].min
+        assert_in_epsilon(capacity, stage.nominalCapacity.get, 0.01)
+        assert_in_epsilon(backup_efficiency, stage.efficiency, 0.01)
+      end
+
+      # Check EMS
+      assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+      unitary_system = model.getAirLoopHVACUnitarySystems[0]
+      program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
+      assert(program_values.empty?) # Check no EMS program
+    end
+  end
+
   def test_heat_pump_temperatures
     ['base-hvac-air-to-air-heat-pump-1-speed.xml',
      'base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml',

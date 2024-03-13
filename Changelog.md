@@ -22,6 +22,7 @@ __New Features__
   - Allows autosizing with detailed performance data inputs for variable-speed HVAC systems using `CapacityFractionOfNominal`.
   - Adds maximum power ratio detailed schedule for variable-speed HVAC systems to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small).
   - Now defaults to -20F for `CompressorLockoutTemperature` for variable-speed heat pump systems.
+  - Allows modeling multi-stage electric backup coils with `extension/BackupHeatingCapacityIncrement`.
 - Ground source heat pump enhancements:
   - Allows optional detailed inputs related to geothermal loop (`HVACPlant/GeothermalLoop`).
   - Allows optional ground diffusivity input.
