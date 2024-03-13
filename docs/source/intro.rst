@@ -60,26 +60,40 @@ See :ref:`enclosure` for more information.
 
 The ``BuildResidentialHPXML`` measure generates enclosure elements of an HPXML file using the following steps:
 
-#. Collecting a set of simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width).
-#. Using the inputs and methods from a `geometry resource file <https://github.com/NREL/OpenStudio-HPXML/blob/master/BuildResidentialHPXML/resources/geometry.rb>`_ to create 3D closed-form dwelling unit representations in OpenStudio.
-#. Mapping individual OpenStudio surfaces to HPXML elements using surface types, outside boundary conditions, areas, orientations, etc.
+#. Collect a set of simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width).
+#. Use the inputs and methods from a `geometry resource file <https://github.com/NREL/OpenStudio-HPXML/blob/master/BuildResidentialHPXML/resources/geometry.rb>`_ to create 3D closed-form dwelling unit representations in OpenStudio.
+#. Map individual OpenStudio surfaces to HPXML elements using surface types, outside boundary conditions, areas, orientations, etc.
 
-The ``HPXMLtoOpenStudio`` measure translates enclosure elements of an HPXML file back to OpenStudio Model.
-OpenStudio surfaces are organized such that they do not shade each other.
+The image below is an example 3D representation for a single-family detached dwelling unit.
+Some of the simplified geometry inputs used to assemble the model are given below:
 
-single-family detached
+- conditioned basement foundation type
+- rim joists with a height of 9.25 in
+- 1 living floor above grade
+- unvented attic w/gable roof and 6:12 pitch
+- 50% protruding 12 ft wide garage
+- windows on all 4 facades
+- 40 ft2 front door oriented to the South
 
-.. image:: images/base-sfd-1.png
-   :width: 49%
-.. image:: images/base-sfd-2.png
-   :width: 49%
+.. image:: images/extra-enclosure-garage-partially-protruded.png
+   :align: center
 
-apartment unit
+Each of the surfaces (i.e., walls, floors, ceilings, roof decks, windows, doors, etc.) is mapped to an enclosure-related element as described in :ref:`enclosure`.
+Like surfaces (i.e., by type, orientation, exposure, etc.) are collapsed into a single surface with aggregate surface area.
+This can help to improve the speed of the simulation.
 
-.. image:: images/base-mf-1.png
-   :width: 49%
-.. image:: images/base-mf-2.png
-   :width: 49%
+The ``HPXMLtoOpenStudio`` measure translates :ref:`enclosure` elements (back) to OpenStudio Model.
+The image below shows the result of translating the previous single-family detached example, stored in an HPXML file, to OpenStudio Model.
+Note that all surfaces retain their original area and orientation, and are organized such that they do not shade one another.
+
+.. image:: images/extra-enclosure-garage-partially-protruded2.png
+   :align: center
+
+The geometry representation in this OpenStudio Model is simulated using EnergyPlus.
+
+In the case of whole multifamily buildings, the process is much the same.
+Individual dwelling units contained in the HPXML file are translated, and resulting OpenStudio Models are merged into a single OpenStudio Model.
+Sets of dwelling unit surfaces are spaced along the y-axis so as not to sit on top of one another.
 
 License
 -------
