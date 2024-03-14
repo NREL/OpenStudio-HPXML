@@ -16,6 +16,7 @@ class ScheduleGenerator
                  sim_year:,
                  sim_start_day:,
                  debug:,
+                 append_output:,
                  **)
     @runner = runner
     @state = state
@@ -29,6 +30,7 @@ class ScheduleGenerator
     @sim_year = sim_year
     @sim_start_day = sim_start_day
     @debug = debug
+    @append_output = append_output
   end
 
   def self.export_columns
@@ -138,15 +140,15 @@ class ScheduleGenerator
       all_simulated_values << Matrix[*simulated_values]
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    plugload_other_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekdayFractions, 24, 'weekday')
-    plugload_other_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekendFractions, 24, 'weekend')
-    plugload_other_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly')
-    plugload_tv_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsTVWeekdayFractions, 24, 'weekday')
-    plugload_tv_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsTVWeekendFractions, 24, 'weekend')
-    plugload_tv_monthly_multiplier = Schedule.validate_values(Schedule.PlugLoadsTVMonthlyMultipliers, 12, 'monthly')
-    ceiling_fan_weekday_sch = Schedule.validate_values(Schedule.CeilingFanWeekdayFractions, 24, 'weekday')
-    ceiling_fan_weekend_sch = Schedule.validate_values(Schedule.CeilingFanWeekendFractions, 24, 'weekend')
-    ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly')
+    plugload_other_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekdayFractions, 24, 'weekday') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
+    plugload_other_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekendFractions, 24, 'weekend') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
+    plugload_other_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly') # Figure 24 of the 2010 BAHSP
+    plugload_tv_weekday_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekdayFractions, 24, 'weekday') # American Time Use Survey
+    plugload_tv_weekend_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekendFractions, 24, 'weekend') # American Time Use Survey
+    plugload_tv_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsTVMonthlyMultipliers, 12, 'monthly') # American Time Use Survey
+    ceiling_fan_weekday_sch = Schedule.validate_values(Schedule.CeilingFanWeekdayFractions, 24, 'weekday') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
+    ceiling_fan_weekend_sch = Schedule.validate_values(Schedule.CeilingFanWeekendFractions, 24, 'weekend') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
+    ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly') # based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019
 
     sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude])
     interior_lighting_schedule = []
@@ -749,11 +751,21 @@ class ScheduleGenerator
     (SchedulesFile::Columns.values.map { |c| c.name } - @column_names).each do |col_to_remove|
       @schedules.delete(col_to_remove)
     end
+    schedule_keys = @schedules.keys
+    schedule_rows = @schedules.values.transpose.map { |row| row.map { |x| '%.3g' % x } }
+    if @append_output && File.exist?(schedules_path)
+      table = CSV.read(schedules_path)
+      if table.size != schedule_rows.size + 1
+        @runner.registerError("Invalid number of rows (#{table.size}) in file.csv. Expected #{schedule_rows.size + 1} rows (including the header row).")
+        return false
+      end
+      schedule_keys = table[0] + schedule_keys
+      schedule_rows = schedule_rows.map.with_index { |row, i| table[i + 1] + row }
+    end
     CSV.open(schedules_path, 'w') do |csv|
-      csv << @schedules.keys
-      rows = @schedules.values.transpose
-      rows.each do |row|
-        csv << row.map { |x| '%.3g' % x }
+      csv << schedule_keys
+      schedule_rows.each do |row|
+        csv << row
       end
     end
     return true

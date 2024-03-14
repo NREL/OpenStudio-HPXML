@@ -49,7 +49,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('schedules_random_seed', false)
     arg.setDisplayName('Schedules: Random Seed')
     arg.setUnits('#')
-    arg.setDescription("This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.")
+    arg.setDescription('This numeric field is the seed for the random number generator.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_csv_path', true)
@@ -62,9 +62,15 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative output path of the HPXML file. This HPXML file will include the output CSV path.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('append_output', false)
+    arg.setDisplayName('Append Output?')
+    arg.setDescription('If true and the output CSV file already exists, appends columns to the file rather than overwriting it. The existing output CSV file must have the same number of rows (i.e., timeseries frequency) as the new columns being appended.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
     arg.setDisplayName('Debug Mode?')
-    arg.setDescription('Applicable when schedules type is stochastic. If true: Write extra state column(s).')
+    arg.setDescription('If true, writes extra column(s) for informational purposes.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -102,14 +108,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
     args[:hpxml_output_path] = hpxml_output_path
 
-    building_id = nil
-    building_id = args[:building_id].get if args[:building_id].is_initialized
-
-    debug = false
-    if args[:debug].is_initialized
-      debug = args[:debug].get
-    end
-    args[:debug] = debug
+    args[:building_id] = args[:building_id].is_initialized ? args[:building_id].get : nil
+    args[:debug] = args[:debug].is_initialized ? args[:debug].get : false
+    args[:append_output] = args[:append_output].is_initialized ? args[:append_output].get : false
 
     # random seed
     if args[:schedules_random_seed].is_initialized
@@ -130,7 +131,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     doc_buildings.each_with_index do |building, i|
       doc_building_id = XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id')
 
-      next if doc_buildings.size > 1 && building_id != 'ALL' && building_id != doc_building_id
+      next if doc_buildings.size > 1 && args[:building_id] != 'ALL' && args[:building_id] != doc_building_id
 
       hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: doc_building_id)
       hpxml_bldg = hpxml.buildings[0]
@@ -152,7 +153,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       # output csv path
       args[:output_csv_path] = "#{output_csv_basename}.csv"
-      args[:output_csv_path] = "#{output_csv_basename}_#{i + 1}.csv" if i > 0 && building_id == 'ALL'
+      args[:output_csv_path] = "#{output_csv_basename}_#{i + 1}.csv" if i > 0 && args[:building_id] == 'ALL'
 
       # create the schedules
       success = create_schedules(runner, hpxml, hpxml_bldg, epw_file, weather, args)

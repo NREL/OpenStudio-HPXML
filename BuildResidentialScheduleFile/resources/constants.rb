@@ -112,4 +112,20 @@ class Constants
   def self.CookingMonthlyMultiplier
     return '1.038, 1.026, 0.976, 0.945, 0.965, 0.947, 0.939, 0.965, 0.967, 1.006, 1.098, 1.129'
   end
+
+  def self.PlugLoadsOtherMonthlyMultipliers
+    return '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+  end
+
+  def self.PlugLoadsTVWeekdayFractions
+    return '0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090'
+  end
+
+  def self.PlugLoadsTVWeekendFractions
+    return '0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103'
+  end
+
+  def self.PlugLoadsTVMonthlyMultipliers
+    return '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
+  end
 end
