@@ -64,7 +64,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('append_output', false)
     arg.setDisplayName('Append Output?')
-    arg.setDescription('If true and the output CSV file exists, appends columns to the file rather than overwriting.')
+    arg.setDescription('If true and the output CSV file already exists, appends columns to the file rather than overwriting it. The existing output CSV file must have the same number of rows (i.e., timeseries frequency) as the new columns being appended.')
     arg.setDefaultValue(false)
     args << arg
 
