@@ -372,14 +372,6 @@ class Constants
     return 'water heater setpoint'
   end
 
-  def self.ObjectNameWaterLatent
-    return 'water latent'
-  end
-
-  def self.ObjectNameWaterSensible
-    return 'water sensible'
-  end
-
   def self.ObjectNameWaterLoopHeatPump
     return 'water loop heat pump'
   end
