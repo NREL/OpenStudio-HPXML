@@ -104,7 +104,6 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
     building_id = nil
     building_id = args[:building_id].get if args[:building_id].is_initialized
-    hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: building_id)
 
     debug = false
     if args[:debug].is_initialized
@@ -121,9 +120,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       runner.registerInfo('Unable to retrieve the schedules random seed; setting it to 1.')
     end
 
-    # create EpwFile object
-    epw_path = Location.get_epw_path(hpxml.buildings[0], hpxml_path)
-    epw_file = OpenStudio::EpwFile.new(epw_path)
+    epw_path, epw_file = nil, nil
 
     output_csv_basename, _ = args[:output_csv_path].split('.csv')
 
@@ -135,11 +132,16 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
       next if doc_buildings.size > 1 && building_id != 'ALL' && building_id != doc_building_id
 
+      hpxml = HPXML.new(hpxml_path: hpxml_path, building_id: doc_building_id)
+      hpxml_bldg = hpxml.buildings[0]
+
+      if epw_path.nil?
+        epw_path = Location.get_epw_path(hpxml_bldg, hpxml_path)
+        epw_file = OpenStudio::EpwFile.new(epw_path)
+      end
+
       # deterministically vary schedules across building units
       args[:random_seed] *= (i + 1)
-
-      # get hpxml_bldg
-      hpxml_bldg = hpxml.buildings.find { |hb| hb.building_id == doc_building_id }
 
       # exit if number of occupants is zero
       if hpxml_bldg.building_occupancy.number_of_residents == 0
@@ -182,7 +184,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     get_generator_inputs(hpxml_bldg, epw_file, args)
 
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
-    schedule_generator = ScheduleGenerator.new(runner: runner, epw_file: epw_file, **args)
+    schedule_generator = ScheduleGenerator.new(runner: runner, **args)
 
     success = schedule_generator.create(args: args)
     return false if not success
@@ -200,6 +202,9 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     info_msgs << "State=#{args[:state]}"
     info_msgs << "RandomSeed=#{args[:random_seed]}" if args[:schedules_random_seed].is_initialized
     info_msgs << "GeometryNumOccupants=#{args[:geometry_num_occupants]}"
+    info_msgs << "TimeZoneUTCOffset=#{args[:time_zone_utc_offset]}"
+    info_msgs << "Latitude=#{args[:latitude]}"
+    info_msgs << "Longitude=#{args[:longitude]}"
     info_msgs << "ColumnNames=#{args[:column_names]}" if args[:schedules_column_names].is_initialized
 
     runner.registerInfo("Created stochastic schedule with #{info_msgs.join(', ')}")
@@ -223,9 +228,13 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   end
 
   def get_generator_inputs(hpxml_bldg, epw_file, args)
-    args[:state] = 'CO'
-    args[:state] = epw_file.stateProvinceRegion if Constants.StateCodesMap.keys.include?(epw_file.stateProvinceRegion)
-    args[:state] = hpxml_bldg.state_code if !hpxml_bldg.state_code.nil?
+    state_code = HPXMLDefaults.get_default_state_code(hpxml_bldg.state_code, epw_file)
+    if Constants.StateCodesMap.keys.include?(state_code)
+      args[:state] = state_code
+    else
+      # Unhandled state code, fallback to CO
+      args[:state] = 'CO'
+    end
     args[:column_names] = args[:schedules_column_names].get.split(',').map(&:strip) if args[:schedules_column_names].is_initialized
 
     if hpxml_bldg.building_occupancy.number_of_residents.nil?
@@ -234,6 +243,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       args[:geometry_num_occupants] = hpxml_bldg.building_occupancy.number_of_residents
     end
     args[:geometry_num_occupants] = Float(Integer(args[:geometry_num_occupants]))
+
+    args[:time_zone_utc_offset] = HPXMLDefaults.get_default_time_zone(hpxml_bldg.time_zone_utc_offset, epw_file)
+    args[:latitude] = HPXMLDefaults.get_default_latitude(hpxml_bldg.latitude, epw_file)
+    args[:longitude] = HPXMLDefaults.get_default_longitude(hpxml_bldg.longitude, epw_file)
   end
 end
 
