@@ -41,9 +41,6 @@
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
         </Site>
-        <BuildingOccupancy>
-          <NumberofResidents>5.0</NumberofResidents>
-        </BuildingOccupancy>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
@@ -54,22 +51,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <HVACSizingControl>
-            <ManualJInputs>
-              <HeatingDesignTemperature>0.0</HeatingDesignTemperature>
-              <CoolingDesignTemperature>100.0</CoolingDesignTemperature>
-              <DailyTemperatureRange>low</DailyTemperatureRange>
-              <HeatingSetpoint>60.0</HeatingSetpoint>
-              <CoolingSetpoint>80.0</CoolingSetpoint>
-              <HumiditySetpoint>0.55</HumiditySetpoint>
-              <HumidityDifference>30.0</HumidityDifference>
-              <InternalLoadsSensible>4000.0</InternalLoadsSensible>
-              <InternalLoadsLatent>200.0</InternalLoadsLatent>
-              <NumberofOccupants>5</NumberofOccupants>
-            </ManualJInputs>
-          </HVACSizingControl>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -337,7 +318,6 @@
           <HVACPlant>
             <PrimarySystems>
               <PrimaryHeatingSystem idref='HeatingSystem1'/>
-              <PrimaryCoolingSystem idref='CoolingSystem1'/>
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
@@ -351,25 +331,14 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
+              </extension>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem1'/>
-              <DistributionSystem idref='HVACDistribution1'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
-              </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.73</SensibleHeatFraction>
-            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <SetpointTempHeatingSeason>60.0</SetpointTempHeatingSeason>
-            <SetpointTempCoolingSeason>80.0</SetpointTempCoolingSeason>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

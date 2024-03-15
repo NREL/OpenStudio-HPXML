@@ -9,6 +9,13 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <GeoLocation>
+        <Latitude>41.0</Latitude>
+      </GeoLocation>
+      <Elevation>863.0</Elevation>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -30,8 +37,16 @@
         <extension>
           <HVACSizingControl>
             <ManualJInputs>
-              <HeatingDesignTemperature>-5</HeatingDesignTemperature>
-              <CoolingDesignTemperature>89</CoolingDesignTemperature>
+              <HeatingDesignTemperature>-5.0</HeatingDesignTemperature>
+              <CoolingDesignTemperature>89.0</CoolingDesignTemperature>
+              <DailyTemperatureRange>medium</DailyTemperatureRange>
+              <HeatingSetpoint>70.0</HeatingSetpoint>
+              <CoolingSetpoint>75.0</CoolingSetpoint>
+              <HumiditySetpoint>0.5</HumiditySetpoint>
+              <HumidityDifference>40.0</HumidityDifference>
+              <InternalLoadsSensible>2400.0</InternalLoadsSensible>
+              <InternalLoadsLatent>0.0</InternalLoadsLatent>
+              <NumberofOccupants>4</NumberofOccupants>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -52,59 +67,59 @@
           <Spaces>
             <Space>
               <SystemIdentifier id='laundry'/>
-              <FloorArea>77</FloorArea>
+              <FloorArea>77.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='kitchen'/>
-              <FloorArea>121</FloorArea>
+              <FloorArea>121.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='bathroom_1'/>
-              <FloorArea>99</FloorArea>
+              <FloorArea>99.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='bedroom_3'/>
-              <FloorArea>110</FloorArea>
+              <FloorArea>110.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='bedroom_2'/>
-              <FloorArea>140</FloorArea>
+              <FloorArea>140.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='dining_room'/>
-              <FloorArea>126</FloorArea>
+              <FloorArea>126.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='living_room'/>
-              <FloorArea>294</FloorArea>
+              <FloorArea>294.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='hall_1'/>
-              <FloorArea>112</FloorArea>
+              <FloorArea>112.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='hall_2'/>
-              <FloorArea>165</FloorArea>
+              <FloorArea>165.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='bedroom_1'/>
-              <FloorArea>210</FloorArea>
+              <FloorArea>210.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='bathroom_2'/>
-              <FloorArea>25</FloorArea>
+              <FloorArea>25.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='recroom'/>
-              <FloorArea>783</FloorArea>
+              <FloorArea>783.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='workshop'/>
-              <FloorArea>360</FloorArea>
+              <FloorArea>360.0</FloorArea>
             </Space>
             <Space>
               <SystemIdentifier id='utility_room'/>
-              <FloorArea>336</FloorArea>
+              <FloorArea>336.0</FloorArea>
             </Space>
           </Spaces>
         </Zone>
