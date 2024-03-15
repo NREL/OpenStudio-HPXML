@@ -45,7 +45,7 @@ __New Features__
 - BuildResidentialScheduleFile measure:
   - Allows appending columns to an existing CSV file rather than overwriting.
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
-  - TV plug load schedules now use TV schedule fractions and monthly multipliers based on the American Time Use Survey (instead of mirroring miscellaneous plug load schedules).
+  - TV plug load schedules now use TV schedule fractions from the American Time Use Survey (instead of mirroring miscellaneous plug load schedules) and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
   - Ceiling fan schedules now use ceiling fan schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C, and monthly multipliers based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019.
 
 __Bugfixes__
