@@ -463,7 +463,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
-    add_heating_system(model, weather, spaces, airloop_map)
+    add_heating_system(model, runner, weather, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
@@ -1630,7 +1630,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_heating_system(model, weather, spaces, airloop_map)
+  def add_heating_system(model, runner, weather, spaces, airloop_map)
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
