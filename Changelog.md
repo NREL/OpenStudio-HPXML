@@ -37,8 +37,12 @@ __New Features__
   - Adds heat pump backup sizing methodology input.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
-- Manual J design load calculations:
-  - Allow additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
+- HVAC Manual J design load calculations:
+  - **Breaking change**: Outputs for "Infiltration/Ventilation" category disaggregated into "Infiltration" and "Ventilation".
+  - **Breaking change**: Outputs for "Windows" category no longer includes AED excursion; now a separate "AED Excursion" category.
+  - Allows optional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
+  - Allows optional room-by-room design load calculations using HPXML `Space` elements.
+  - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
