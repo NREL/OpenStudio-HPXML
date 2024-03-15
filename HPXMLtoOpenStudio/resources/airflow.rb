@@ -103,20 +103,23 @@ class Airflow
     vented_attic = hpxml_bldg.attics.find { |attic| attic.attic_type == HPXML::AtticTypeVented }
     vented_crawl = hpxml_bldg.foundations.find { |foundation| foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
 
-    _sla, conditioned_ach50, nach, infil_volume, infil_height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+    infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     if @apply_ashrae140_assumptions
-      conditioned_const_ach = nach
+      conditioned_const_ach = infil_values[:nach]
       conditioned_ach50 = nil
+    else
+      conditioned_ach50 = infil_values[:ach50]
+      conditioned_const_ach = nil
     end
-    conditioned_const_ach *= a_ext unless conditioned_const_ach.nil?
-    conditioned_ach50 *= a_ext unless conditioned_ach50.nil?
+    conditioned_const_ach *= infil_values[:a_ext] unless conditioned_const_ach.nil?
+    conditioned_ach50 *= infil_values[:a_ext] unless conditioned_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_bldg.header.natvent_days_per_week,
-                                                  infil_volume, infil_height, unavailable_periods)
+                                                  infil_values[:volume], infil_values[:height], unavailable_periods)
     apply_infiltration_and_ventilation_fans(model, weather, hpxml_bldg.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
-                                            has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height,
-                                            vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
+                                            has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_values[:volume], infil_values[:height],
+                                            vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, hpxml_bldg.elevation)
   end
 
   def self.get_default_fraction_of_windows_operable()
@@ -177,10 +180,10 @@ class Airflow
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
 
-    volume = measurement.infiltration_volume
-    height = measurement.infiltration_height
-    if height.nil?
-      height = hpxml_bldg.inferred_infiltration_height(volume)
+    infil_volume = measurement.infiltration_volume
+    infil_height = measurement.infiltration_height
+    if infil_height.nil?
+      infil_height = hpxml_bldg.inferred_infiltration_height(infil_volume)
     end
 
     sla, ach50, nach = nil
@@ -188,23 +191,24 @@ class Airflow
       if measurement.unit_of_measure == HPXML::UnitsACH
         ach50 = calc_air_leakage_at_diff_pressure(InfilPressureExponent, measurement.air_leakage, measurement.house_pressure, 50.0)
       elsif measurement.unit_of_measure == HPXML::UnitsCFM
-        achXX = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
+        achXX = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
         ach50 = calc_air_leakage_at_diff_pressure(InfilPressureExponent, achXX, measurement.house_pressure, 50.0)
       end
-      sla = get_infiltration_SLA_from_ACH50(ach50, InfilPressureExponent, cfa, volume)
-      nach = get_infiltration_ACH_from_SLA(sla, height, weather)
+      sla = get_infiltration_SLA_from_ACH50(ach50, InfilPressureExponent, cfa, infil_volume)
+      nach = get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
       if measurement.unit_of_measure == HPXML::UnitsACHNatural
         nach = measurement.air_leakage
       elsif measurement.unit_of_measure == HPXML::UnitsCFMNatural
-        nach = measurement.air_leakage * 60.0 / volume # Convert CFM to ACH
+        nach = measurement.air_leakage * 60.0 / infil_volume # Convert CFM to ACH
       end
-      sla = get_infiltration_SLA_from_ACH(nach, height, weather)
-      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, volume)
+      avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+      sla = get_infiltration_SLA_from_ACH(nach, infil_height, avg_ceiling_height, weather)
+      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, infil_volume)
     elsif !measurement.effective_leakage_area.nil?
       sla = UnitConversions.convert(measurement.effective_leakage_area, 'in^2', 'ft^2') / cfa
-      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, volume)
-      nach = get_infiltration_ACH_from_SLA(sla, height, weather)
+      ach50 = get_infiltration_ACH50_from_SLA(sla, InfilPressureExponent, cfa, infil_volume)
+      nach = get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     else
       fail 'Unexpected error.'
     end
@@ -214,31 +218,23 @@ class Airflow
     end
     a_ext = 1.0 if a_ext.nil?
 
-    return sla, ach50, nach, volume, height, a_ext
+    return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
   end
 
-  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds)
-    # Calculates Qfan cfm requirement per ASHRAE 62.2-2019
-    sla, _ach50, _nach, _volume, height, a_ext = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds, eri_version)
+    # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
+    infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+    bldg_type = hpxml_bldg.building_construction.residential_facility_type
 
-    nl = get_infiltration_NL_from_SLA(sla, height)
+    nl = get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
     q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
-
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
-
     if vent_fan.is_balanced?
-      phi = 1.0
+      is_balanced, frac_imbal = true, 0.0
     else
-      phi = q_inf / q_tot
+      is_balanced, frac_imbal = false, 1.0
     end
-    q_fan = q_tot - phi * (q_inf * a_ext)
-    q_fan = [q_fan, 0].max
-
-    if not vent_fan.hours_in_operation.nil?
-      # Convert from hourly average requirement to actual fan flow rate
-      q_fan *= 24.0 / vent_fan.hours_in_operation
-    end
-
+    q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, infil_values[:a_ext], bldg_type, eri_version, vent_fan.hours_in_operation)
     return q_fan
   end
 
@@ -334,7 +330,7 @@ class Airflow
     vent_fans_whf.each_with_index do |vent_whf, index|
       whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
       obj_name = "#{Constants.ObjectNameWholeHouseFan} #{index}"
-      whf_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::ColumnWholeHouseFan, unavailable_periods)
+      whf_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::Columns[:WholeHouseFan].name, unavailable_periods)
       whf_avail_sch = create_nv_and_whf_avail_sch(model, obj_name, whf_num_days_per_week, whf_unavailable_periods)
 
       whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
@@ -1250,7 +1246,7 @@ class Airflow
       if @apply_ashrae140_assumptions
         vented_attic_const_ach = vented_attic.vented_attic_ach
       else
-        vented_attic_sla = get_infiltration_SLA_from_ACH(vented_attic.vented_attic_ach, 8.202, weather)
+        vented_attic_sla = get_infiltration_SLA_from_ACH(vented_attic.vented_attic_ach, 8.202, 8.202, weather)
       end
     end
 
@@ -1315,7 +1311,7 @@ class Airflow
     # Create schedule
     obj_sch = nil
     if not schedules_file.nil?
-      obj_sch_name = SchedulesFile::ColumnClothesDryer
+      obj_sch_name = SchedulesFile::Columns[:ClothesDryer].name
       obj_sch = schedules_file.create_schedule_file(model, col_name: obj_sch_name)
       full_load_hrs = schedules_file.annual_equivalent_full_load_hrs(col_name: obj_sch_name)
     end
@@ -1600,7 +1596,7 @@ class Airflow
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each_with_index do |vent_kitchen, index|
       # Electricity impact
-      vent_kitchen_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::ColumnKitchenFan, unavailable_periods)
+      vent_kitchen_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::Columns[:KitchenFan].name, unavailable_periods)
       obj_sch_sensor = apply_local_ventilation(model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan, index, vent_kitchen_unavailable_periods)
       next unless @cooking_range_in_cond_space
 
@@ -1611,7 +1607,7 @@ class Airflow
     infil_program.addLine('Set Qbath = 0')
     vent_fans_bath.each_with_index do |vent_bath, index|
       # Electricity impact
-      vent_bath_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::ColumnBathFan, unavailable_periods)
+      vent_bath_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::Columns[:BathFan].name, unavailable_periods)
       obj_sch_sensor = apply_local_ventilation(model, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan, index, vent_bath_unavailable_periods)
       # Infiltration impact
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.flow_rate * vent_bath.count, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
@@ -1622,7 +1618,7 @@ class Airflow
       next unless @clothes_dryer_in_cond_space
 
       # Infiltration impact
-      vented_dryer_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::ColumnClothesDryer, unavailable_periods)
+      vented_dryer_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::Columns[:ClothesDryer].name, unavailable_periods)
       obj_sch_sensor, cfm_mult = apply_dryer_exhaust(model, vented_dryer, schedules_file, index, vented_dryer_unavailable_periods)
       infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(vented_dryer.vented_flow_rate * cfm_mult, 'cfm', 'm^3/s').round(5)} * #{obj_sch_sensor.name}")
     end
@@ -1633,7 +1629,14 @@ class Airflow
     infil_program.addLine('Set Qexhaust = Qrange + Qbath + Qdryer + QWHV_exh + QWHV_cfis_suppl_exh')
     infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_cfis_sup + QWHV_cfis_suppl_sup')
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
-    if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
+    if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2022')
+      infil_program.addLine('Set Qimb = (@Abs (Qsupply - Qexhaust))')
+      infil_program.addLine('If Qinf + Qimb > 0')
+      infil_program.addLine('  Set Qinf_adj = (Qinf^2) / (Qinf + Qimb)')
+      infil_program.addLine('Else')
+      infil_program.addLine('  Set Qinf_adj = 0')
+      infil_program.addLine('EndIf')
+    elsif Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
       infil_program.addLine('If Qfan > 0')
       # Balanced system if the total supply airflow and total exhaust airflow are within 10% of their average.
@@ -1776,7 +1779,7 @@ class Airflow
 
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
                                                          vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                         vent_fans_cfis_suppl, unavailable_periods)
+                                                         vent_fans_cfis_suppl, unavailable_periods, elevation)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -1788,7 +1791,7 @@ class Airflow
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     # Non-CFIS fan power
-    house_fan_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::ColumnHouseFan, unavailable_periods)
+    house_fan_unavailable_periods = Schedule.get_unavailable_periods(@runner, SchedulesFile::Columns[:HouseFan].name, unavailable_periods)
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan,
                               vent_mech_sup_tot, vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, house_fan_unavailable_periods)
 
@@ -1822,7 +1825,7 @@ class Airflow
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
-    apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height)
+    apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -1860,7 +1863,7 @@ class Airflow
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers,
                                                    has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, vented_attic,
-                                                   vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods)
+                                                   vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, elevation)
 
     # Infiltration for unconditioned spaces
     apply_infiltration_to_garage(model, site, conditioned_ach50)
@@ -1873,17 +1876,18 @@ class Airflow
     # Infiltration/ventilation for conditioned space
     apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
                                                   vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                  vent_fans_cfis_suppl, unavailable_periods)
+                                                  vent_fans_cfis_suppl, unavailable_periods, elevation)
   end
 
-  def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height)
+  def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
     site_ap = site.additional_properties
 
     if conditioned_ach50.to_f > 0
       # Based on "Field Validation of Algebraic Equations for Stack and
       # Wind Driven Air Infiltration Calculations" by Walker and Wilson (1998)
 
-      outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
+      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(elevation), 'psi', 'atm')
+      outside_air_density = UnitConversions.convert(p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
 
       n_i = InfilPressureExponent
       conditioned_sla = get_infiltration_SLA_from_ACH50(conditioned_ach50, n_i, @cfa, infil_volume) # Calculate SLA
@@ -2009,19 +2013,19 @@ class Airflow
     return norm_leakage * weather.data.WSF
   end
 
-  def self.get_infiltration_SLA_from_ACH(ach, infil_height, weather)
+  def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)
     # Returns the infiltration SLA given an annual average ACH.
-    return ach / (weather.data.WSF * 1000 * (infil_height / 8.202)**0.4)
+    return ach * (avg_ceiling_height / 8.202) / (weather.data.WSF * 1000 * (infil_height / 8.202)**0.4)
   end
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, floor_area, volume)
     # Returns the infiltration SLA given a ACH50.
-    return ((ach50 * 0.283316478 * 4.0**n_i * volume) / (floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0))
+    return ((ach50 * 0.283316 * 4.0**n_i * volume) / (floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0))
   end
 
   def self.get_infiltration_ACH50_from_SLA(sla, n_i, floor_area, volume)
     # Returns the infiltration ACH50 given a SLA.
-    return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0) / (0.283316478 * 4.0**n_i * volume))
+    return ((sla * floor_area * UnitConversions.convert(1.0, 'ft^2', 'in^2') * 50.0**n_i * 60.0) / (0.283316 * 4.0**n_i * volume))
   end
 
   def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
@@ -2100,6 +2104,47 @@ class Airflow
   def self.get_mech_vent_qtot_cfm(nbeds, cfa)
     # Returns Qtot cfm per ASHRAE 62.2-2019
     return (nbeds + 1.0) * 7.5 + 0.03 * cfa
+  end
+
+  def self.get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, a_ext, bldg_type, eri_version, hours_in_operation)
+    q_inf_eff = q_inf * a_ext
+    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2022')
+      if frac_imbal == 0
+        q_fan = q_tot - q_inf_eff
+      else
+        q_inf_eff = q_inf * a_ext
+        if q_inf_eff >= q_tot
+          q_fan = 0.0
+        else
+          q_fan = ((frac_imbal**2.0 * q_tot**2.0 - 4.0 * frac_imbal * q_inf_eff**2.0 + 2.0 * frac_imbal * q_inf_eff * q_tot + q_inf_eff**2.0)**0.5 + frac_imbal * q_tot - q_inf_eff) / (2.0 * frac_imbal)
+        end
+      end
+    elsif Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019')
+      if is_balanced
+        phi = 1.0
+      else
+        phi = q_inf / q_tot
+      end
+      q_fan = q_tot - phi * q_inf_eff
+    else
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? bldg_type
+        # No infiltration credit for attached/multifamily
+        return q_tot
+      end
+
+      if q_inf > 2.0 / 3.0 * q_tot
+        q_fan = q_tot - 2.0 / 3.0 * q_tot
+      else
+        q_fan = q_tot - q_inf
+      end
+    end
+
+    # Convert from hourly average requirement to actual fan flow rate
+    if not hours_in_operation.nil?
+      q_fan *= 24.0 / hours_in_operation
+    end
+
+    return [q_fan, 0.0].max
   end
 end
 
