@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true)
+  def self.calculate(runner, weather, hpxml_header, hpxml_bldg, cfa, hvac_systems, update_hpxml: true)
     # Calculates heating/cooling design loads, and selects equipment
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
 
     @hpxml_bldg = hpxml_bldg
+    @hpxml_header = hpxml_header
     @cfa = cfa
 
     mj = MJ.new
@@ -33,7 +34,7 @@ class HVACSizing
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       set_hvac_types(hvac_heating, hvac_cooling)
-      next if is_system_to_skip(hvac_heating)
+      next if is_system_to_skip(hvac_heating, hvac_cooling)
 
       # Apply duct loads as needed
       set_fractions_load_served(hvac_heating, hvac_cooling)
@@ -71,7 +72,7 @@ class HVACSizing
 
   private
 
-  def self.is_system_to_skip(hvac_heating)
+  def self.is_system_to_skip(hvac_heating, hvac_cooling)
     # These shared systems should be converted to other equivalent
     # systems before being autosized
     if [HPXML::HVACTypeChiller,
@@ -80,6 +81,14 @@ class HVACSizing
     end
     if (@heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir) &&
        hvac_heating.fraction_heat_load_served.nil?
+      return true
+    end
+
+    if !hvac_heating.nil? && hvac_heating.is_shared_system_serving_multiple_dwelling_units
+      return true
+    end
+
+    if !hvac_cooling.nil? && hvac_cooling.is_shared_system_serving_multiple_dwelling_units
       return true
     end
 
@@ -2136,7 +2145,7 @@ class HVACSizing
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = @hpxml_bldg.header.manualj_heating_design_temp
       @hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
-      alternate_all_hvac_sizing_values = calculate(runner, weather, @hpxml_bldg, @cfa, [hvac_system], update_hpxml: false)
+      alternate_all_hvac_sizing_values = calculate(runner, weather, @hpxml_header, @hpxml_bldg, @cfa, [hvac_system], update_hpxml: false)
       heating_load = alternate_all_hvac_sizing_values[hvac_system].Heat_Load
       heating_db = min_compressor_temp
       @hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp
@@ -3111,13 +3120,17 @@ class HVACSizing
       # Use the same load fractions as the heat pump
       heat_pump = @hpxml_bldg.heat_pumps.find { |hp| hp.backup_system_idref == hvac_heating.id }
       @fraction_heat_load_served = heat_pump.fraction_heat_load_served
-    else
+    elsif not hvac_heating.fraction_heat_load_served.nil?
       @fraction_heat_load_served = hvac_heating.fraction_heat_load_served
+    else
+      @fraction_heat_load_served = 0
     end
     if hvac_cooling.nil?
       @fraction_cool_load_served = 0
-    else
+    elsif not hvac_cooling.fraction_cool_load_served.nil?
       @fraction_cool_load_served = hvac_cooling.fraction_cool_load_served
+    else
+      @fraction_cool_load_served = 0
     end
   end
 

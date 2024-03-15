@@ -169,6 +169,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hpxml_defaults_path = File.join(output_dir, 'in.xml')
       XMLHelper.write_file(hpxml.to_doc, hpxml_defaults_path)
 
+      # When modeling whole SFA/MF buildings, remove shared systems upfront
+      # from the HPXML object; handle them at the end once the full model
+      # has been created.
+      shared_systems_map = {}
+      if hpxml.header.whole_sfa_or_mf_building_sim
+        shared_systems_map = hpxml.delete_shared_systems_serving_multiple_dwelling_units()
+      end
+
       # Create OpenStudio model
       hpxml_osm_map = {}
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
@@ -184,9 +192,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
 
-      # Merge unit models into final model
       if hpxml.buildings.size > 1
-        add_unit_model_to_model(model, hpxml_osm_map)
+        # Merge unit models into final model
+        add_unit_models_to_model(model, hpxml_osm_map)
+        # Apply shared systems
+        shared_boilers_map = shared_systems_map # FIXME: Need to pull out the shared boilers from any other shared systems
+        HVAC.apply_shared_boilers_for_whole_building_model(model, hpxml, shared_boilers_map, @hvac_unavailable_periods)
       end
 
       # Output
@@ -215,7 +226,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def add_unit_model_to_model(model, hpxml_osm_map)
+  def add_unit_models_to_model(model, hpxml_osm_map)
+    # Note: ZoneCapacitanceMultiplierResearchSpecial is not actually unique, but we don't assign it to
+    # individual thermal zones, so we'll treat it as unique here.
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
                        'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
                        'OS:OutputControl:Files' => 'OutputControlFiles',
@@ -232,7 +245,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                        'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
                        'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
                        'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
-                       'OS:Timestep' => 'Timestep' }
+                       'OS:Timestep' => 'Timestep',
+                       'OS:ZoneCapacitanceMultiplier:ResearchSpecial' => 'ZoneCapacitanceMultiplierResearchSpecial' }
 
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
@@ -449,7 +463,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
-    add_heating_system(runner, model, weather, spaces, airloop_map)
+    add_heating_system(model, runner, weather, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
@@ -570,7 +584,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units)
+      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units, @hpxml_bldg.building_id)
     end
     return spaces[location]
   end
@@ -1580,7 +1594,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      HVAC.check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1616,7 +1630,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  def add_heating_system(runner, model, weather, spaces, airloop_map)
+  def add_heating_system(model, runner, weather, spaces, airloop_map)
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
@@ -1626,7 +1640,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
+      HVAC.check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
@@ -1654,7 +1668,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
-        airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, conditioned_zone,
+        airloop_map[sys_id] = HVAC.apply_boiler(model, heating_system, sequential_heat_load_fracs, conditioned_zone,
                                                 @hvac_unavailable_periods)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
@@ -1689,7 +1703,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       heat_pump = hvac_system[:cooling]
 
-      check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
+      HVAC.check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
@@ -1799,24 +1813,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationConditionedSpace], @hpxml_header.unavailable_periods,
                              @hpxml_bldg.building_construction.number_of_units)
-  end
-
-  def check_distribution_system(hvac_distribution, system_type)
-    return if hvac_distribution.nil?
-
-    hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
-
-    if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
-    end
   end
 
   def add_mels(runner, model, spaces)

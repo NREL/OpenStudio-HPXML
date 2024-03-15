@@ -17,7 +17,7 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
-    apply_header(hpxml.header, epw_file)
+    apply_header(hpxml.header, hpxml_bldg, epw_file)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
@@ -63,7 +63,7 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+    apply_hvac_sizing(runner, hpxml.header, hpxml_bldg, weather, cfa)
 
     # default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
@@ -107,7 +107,7 @@ class HPXMLDefaults
 
   private
 
-  def self.apply_header(hpxml_header, epw_file)
+  def self.apply_header(hpxml_header, hpxml_bldg, epw_file)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -158,6 +158,13 @@ class HPXMLDefaults
       if unavailable_period.natvent_availability.nil?
         unavailable_period.natvent_availability = HPXML::ScheduleRegular
         unavailable_period.natvent_availability_isdefaulted = true
+      end
+    end
+
+    if hpxml_header.shared_boiler_operation.nil?
+      if hpxml_bldg.heating_systems.select { |htg| htg.heating_system_type == HPXML::HVACTypeBoiler && htg.is_shared_system_serving_multiple_dwelling_units }.size > 0
+        hpxml_header.shared_boiler_operation = HPXML::SharedBoilerOperationSequenced
+        hpxml_header.shared_boiler_operation_isdefaulted = true
       end
     end
   end
@@ -1254,7 +1261,7 @@ class HPXMLDefaults
 
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     if convert_shared_systems
-      HVAC.apply_shared_systems(hpxml_bldg)
+      HVAC.apply_shared_systems(hpxml.header, hpxml_bldg)
     end
 
     # Convert negative values (e.g., -1) to nil as appropriate
@@ -1424,6 +1431,15 @@ class HPXMLDefaults
       heating_system.shared_loop_watts = nil
       heating_system.shared_loop_motor_efficiency = nil
       heating_system.fan_coil_watts = nil
+    end
+
+    # Default boiler type
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_type != HPXML::HVACTypeBoiler
+      next unless heating_system.boiler_type.nil?
+
+      heating_system.boiler_type = HPXML::BoilerTypeHotWater
+      heating_system.boiler_type_isdefaulted = true
     end
 
     # Default AC/HP sensible heat ratio
@@ -1898,6 +1914,27 @@ class HPXMLDefaults
   end
 
   def self.apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
+    # Hydronic distribution
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.hvac_systems.any? { |h| h.is_a?(HPXML::HeatingSystem) && h.heating_system_type == HPXML::HVACTypeBoiler }
+
+      # Supply/return loop temperatures
+      default_delta_t = 20.0 # deg-F
+      if hvac_distribution.hydronic_supply_temp.nil?
+        if not hvac_distribution.hydronic_return_temp.nil?
+          hvac_distribution.hydronic_supply_temp = hvac_distribution.hydronic_return_temp + default_delta_t # deg-F
+        else
+          hvac_distribution.hydronic_supply_temp = 180.0 # deg-F
+        end
+        hvac_distribution.hydronic_supply_temp_isdefaulted = true
+      end
+      if hvac_distribution.hydronic_return_temp.nil?
+        hvac_distribution.hydronic_return_temp = hvac_distribution.hydronic_supply_temp - default_delta_t # deg-F
+        hvac_distribution.hydronic_return_temp_isdefaulted = true
+      end
+    end
+
+    # Air distribution
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
       next if hvac_distribution.ducts.empty?
@@ -3215,10 +3252,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+  def self.apply_hvac_sizing(runner, hpxml_header, hpxml_bldg, weather, cfa)
     # Calculate building design loads and equipment capacities/airflows
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems)
+    HVACSizing.calculate(runner, weather, hpxml_header, hpxml_bldg, cfa, hvac_systems)
   end
 
   def self.get_azimuth_from_orientation(orientation)

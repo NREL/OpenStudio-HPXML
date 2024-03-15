@@ -49,7 +49,7 @@ XMLHelper.write_file(hpxml.to_doc, "out.xml")
 
 class HPXML < Object
   HPXML_ATTRS = [:header, :buildings]
-  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
+  attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path, :hpxml_doc)
 
   NameSpace = 'http://hpxmlonline.com/2023/09'
 
@@ -72,6 +72,8 @@ class HPXML < Object
   BatteryTypeLithiumIon = 'Li-ion'
   BatteryLifetimeModelNone = 'None'
   BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
+  BoilerTypeHotWater = 'hot water'
+  BoilerTypeSteam = 'steam'
   BuildingAmerica = 'BuildingAmerica'
   CapacityDescriptionMinimum = 'minimum'
   CapacityDescriptionMaximum = 'maximum'
@@ -313,6 +315,8 @@ class HPXML < Object
   ScheduleRegular = 'regular schedule'
   ScheduleAvailable = 'always available'
   ScheduleUnavailable = 'always unavailable'
+  SharedBoilerOperationSequenced = 'sequenced'
+  SharedBoilerOperationSimultaneous = 'simultaneous'
   ShieldingExposed = 'exposed'
   ShieldingNormal = 'normal'
   ShieldingWellShielded = 'well-shielded'
@@ -448,7 +452,7 @@ class HPXML < Object
     @warnings = []
     building_id = nil if building_id.to_s.empty?
 
-    hpxml_doc = nil
+    @hpxml_doc = nil
     if not hpxml_path.nil?
       doc = XMLHelper.parse_file(hpxml_path)
 
@@ -461,13 +465,13 @@ class HPXML < Object
       end
 
       # Check HPXML version
-      hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
-      Version.check_hpxml_version(XMLHelper.get_attribute_value(hpxml_doc, 'schemaVersion'))
+      @hpxml_doc = XMLHelper.get_element(doc, '/HPXML')
+      Version.check_hpxml_version(XMLHelper.get_attribute_value(@hpxml_doc, 'schemaVersion'))
 
       # Get value of WholeSFAorMFBuildingSimulation element
-      whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      whole_sfa_or_mf_building_sim = XMLHelper.get_value(@hpxml_doc, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
       whole_sfa_or_mf_building_sim = false if whole_sfa_or_mf_building_sim.nil?
-      has_mult_building_elements = XMLHelper.get_elements(hpxml_doc, 'Building').size > 1
+      has_mult_building_elements = XMLHelper.get_elements(@hpxml_doc, 'Building').size > 1
       if has_mult_building_elements
         if building_id.nil? && !whole_sfa_or_mf_building_sim
           @errors << 'Multiple Building elements defined in HPXML file; provide Building ID argument or set WholeSFAorMFBuildingSimulation=true.'
@@ -484,24 +488,24 @@ class HPXML < Object
       # 2. The schematron validation occurs faster (as we're only validating one Building).
       if has_mult_building_elements && (not building_id.nil?)
         # Discard all Building elements except the one of interest
-        XMLHelper.get_elements(hpxml_doc, 'Building').reverse_each do |building|
+        XMLHelper.get_elements(@hpxml_doc, 'Building').reverse_each do |building|
           next if XMLHelper.get_attribute_value(XMLHelper.get_element(building, 'BuildingID'), 'id') == building_id
 
           building.remove
         end
-        if XMLHelper.get_elements(hpxml_doc, 'Building').size == 0
+        if XMLHelper.get_elements(@hpxml_doc, 'Building').size == 0
           @errors << "Could not find Building element with ID '#{building_id}'."
           return unless @errors.empty?
         end
 
         # Write new HPXML file with all other Building elements removed
         hpxml_path = Tempfile.new(['hpxml', '.xml']).path.to_s
-        XMLHelper.write_file(hpxml_doc, hpxml_path)
+        XMLHelper.write_file(@hpxml_doc, hpxml_path)
       end
 
       # Validate against Schematron
       if not schematron_validator.nil?
-        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml_doc)
+        sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, @hpxml_doc)
         @errors += sct_errors
         @warnings += sct_warnings
         return unless @errors.empty?
@@ -509,7 +513,7 @@ class HPXML < Object
     end
 
     # Create/populate child objects
-    from_doc(hpxml_doc)
+    from_doc(@hpxml_doc)
 
     # Check for additional errors (those hard to check via Schematron)
     @errors += header.check_for_errors
@@ -576,6 +580,27 @@ class HPXML < Object
     end
 
     return has_fuels
+  end
+
+  def delete_shared_systems_serving_multiple_dwelling_units()
+    # Delete any shared HVAC systems that are actually modeled as systems serving multiple dwelling units.
+    # Shared systems that are modeled as equivalent in-unit systems per ANSI 301 are not deleted.
+    # Returns a map of HPXML Building => [deleted_systems]
+    deleted_systems_map = {}
+    buildings.each do |hpxml_bldg|
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        next unless hvac_system.is_shared_system_serving_multiple_dwelling_units
+
+        deleted_systems_map[hpxml_bldg] = [] if deleted_systems_map[hpxml_bldg].nil?
+        deleted_systems_map[hpxml_bldg] << hvac_system
+      end
+    end
+    deleted_systems_map.values.each do |deleted_systems|
+      deleted_systems.reverse_each do |deleted_system|
+        deleted_system.delete
+      end
+    end
+    return deleted_systems_map
   end
 
   # Class to store additional properties on an HPXML object that are not intended
@@ -700,7 +725,8 @@ class HPXML < Object
              :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
-             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim]
+             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim,
+             :shared_boiler_operation]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -749,6 +775,10 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', @software_program_version, :string) unless @software_program_version.nil?
       XMLHelper.add_extension(software_info, 'ApplyASHRAE140Assumptions', @apply_ashrae140_assumptions, :boolean) unless @apply_ashrae140_assumptions.nil?
       XMLHelper.add_extension(software_info, 'WholeSFAorMFBuildingSimulation', @whole_sfa_or_mf_building_sim, :boolean) unless @whole_sfa_or_mf_building_sim.nil?
+      if not @shared_boiler_operation.nil?
+        hvac_sizing_control = XMLHelper.create_elements_as_needed(software_info, ['extension', 'SharedHVACSizingControl'])
+        XMLHelper.add_element(hvac_sizing_control, 'SharedBoilerOperation', @shared_boiler_operation, :string, @shared_boiler_operation_isdefaulted)
+      end
       { 'ERICalculation' => @eri_calculation_version,
         'CO2IndexCalculation' => @co2index_calculation_version,
         'EnergyStarCalculation' => @energystar_calculation_version,
@@ -799,6 +829,7 @@ class HPXML < Object
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
+      @shared_boiler_operation = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SharedHVACSizingControl/SharedBoilerOperation', :string)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @utility_bill_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
       @unavailable_periods.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
@@ -1639,24 +1670,26 @@ class HPXML < Object
         errors << 'More than one cooling system designated as the primary.'
       end
 
-      # Check for at most 1 shared heating system and 1 shared cooling system
-      num_htg_shared = 0
-      num_clg_shared = 0
-      (@heating_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+      if not @parent_object.header.whole_sfa_or_mf_building_sim
+        # Check for at most 1 shared heating system and 1 shared cooling system
+        num_htg_shared = 0
+        num_clg_shared = 0
+        (@heating_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_htg_shared += 1
-      end
-      (@cooling_systems + @heat_pumps).each do |hvac_system|
-        next unless hvac_system.is_shared_system
+          num_htg_shared += 1
+        end
+        (@cooling_systems + @heat_pumps).each do |hvac_system|
+          next unless hvac_system.is_shared_system
 
-        num_clg_shared += 1
-      end
-      if num_htg_shared > 1
-        errors << 'More than one shared heating system found.'
-      end
-      if num_clg_shared > 1
-        errors << 'More than one shared cooling system found.'
+          num_clg_shared += 1
+        end
+        if num_htg_shared > 1
+          errors << 'More than one shared heating system found.'
+        end
+        if num_clg_shared > 1
+          errors << 'More than one shared cooling system found.'
+        end
       end
 
       return errors
@@ -4101,8 +4134,8 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
-             :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :heating_system_type,
+             :boiler_type, :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
@@ -4110,6 +4143,10 @@ class HPXML < Object
              :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4159,6 +4196,27 @@ class HPXML < Object
       return !primary_heat_pump.nil?
     end
 
+    def is_shared_system_serving_multiple_dwelling_units
+      # Returns true if we are modeling a whole MF building and the technology is actually
+      # modeled as a system serving multiple dwelling units. Shared systems that are modeled
+      # as equivalent in-unit systems per ANSI 301 are not included.
+      if @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        actual_system = self
+        if !@sameas_id.nil?
+          actual_system = sameas
+        end
+
+        if actual_system.is_shared_system
+          # Currently central boilers are the only technology explicitly modeled as serving multiple dwelling units
+          if actual_system.is_a?(HPXML::HeatingSystem) && actual_system.heating_system_type == HPXML::HVACTypeBoiler
+            return true
+          end
+        end
+      end
+
+      return false
+    end
+
     def delete
       @parent_object.heating_systems.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
@@ -4180,9 +4238,14 @@ class HPXML < Object
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      if @primary_system
+        primary_heating_system = XMLHelper.insert_element(primary_systems, 'PrimaryHeatingSystem')
+        XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
+      end
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(heating_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heating_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heating_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4195,6 +4258,9 @@ class HPXML < Object
       if not @heating_system_type.nil?
         heating_system_type_el = XMLHelper.add_element(heating_system, 'HeatingSystemType')
         type_el = XMLHelper.add_element(heating_system_type_el, @heating_system_type)
+        if @heating_system_type == HPXML::HVACTypeBoiler
+          XMLHelper.add_element(type_el, 'BoilerType', @boiler_type, :string, @boiler_type_isdefaulted) unless @boiler_type.nil?
+        end
         if [HPXML::HVACTypeFurnace,
             HPXML::HVACTypeWallFurnace,
             HPXML::HVACTypeFloorFurnace,
@@ -4234,16 +4300,13 @@ class HPXML < Object
       XMLHelper.add_extension(heating_system, 'HeatingAirflowCFM', @heating_airflow_cfm, :float, @heating_airflow_cfm_isdefaulted) unless @heating_airflow_cfm.nil?
       XMLHelper.add_extension(heating_system, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
       XMLHelper.add_extension(heating_system, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
-      if @primary_system
-        primary_heating_system = XMLHelper.insert_element(primary_systems, 'PrimaryHeatingSystem')
-        XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
-      end
     end
 
     def from_doc(heating_system)
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
+      @sameas_id = HPXML::get_sameas_id(heating_system)
       @location = XMLHelper.get_value(heating_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heating_system, 'ThirdPartyCertification', :string)
@@ -4252,6 +4315,9 @@ class HPXML < Object
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
+      if @heating_system_type == HPXML::HVACTypeBoiler
+        @boiler_type = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/BoilerType", :string)
+      end
       @pilot_light = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/PilotLight", :boolean)
       if @pilot_light
         @pilot_light_btuh = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/extension/PilotLightBtuh", :float)
@@ -4274,12 +4340,7 @@ class HPXML < Object
       @heating_airflow_cfm = XMLHelper.get_value(heating_system, 'extension/HeatingAirflowCFM', :float)
       @heating_autosizing_factor = XMLHelper.get_value(heating_system, 'extension/HeatingAutosizingFactor', :float)
       @htg_seed_id = XMLHelper.get_value(heating_system, 'extension/HeatingSeedId', :string)
-      primary_heating_system = HPXML::get_idref(XMLHelper.get_element(heating_system, '../PrimarySystems/PrimaryHeatingSystem'))
-      if primary_heating_system == @id
-        @primary_system = true
-      else
-        @primary_system = false
-      end
+      @primary_system = (HPXML::get_idref(XMLHelper.get_element(heating_system, '../PrimarySystems/PrimaryHeatingSystem')) == @id)
     end
   end
 
@@ -4310,7 +4371,7 @@ class HPXML < Object
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
              :cooling_capacity, :compressor_type, :fraction_cool_load_served, :cooling_efficiency_seer,
              :cooling_efficiency_seer2, :cooling_efficiency_eer, :cooling_efficiency_ceer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :third_party_certification, :clg_seed_id, :is_shared_system, :number_of_units_served,
@@ -4321,6 +4382,10 @@ class HPXML < Object
              :cooling_autosizing_factor]
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4352,6 +4417,10 @@ class HPXML < Object
       return true
     end
 
+    def is_shared_system_serving_multiple_dwelling_units
+      return false
+    end
+
     def delete
       @parent_object.cooling_systems.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
@@ -4373,9 +4442,14 @@ class HPXML < Object
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      if @primary_system
+        primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
+        XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
+      end
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(cooling_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(cooling_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(cooling_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4437,16 +4511,13 @@ class HPXML < Object
       XMLHelper.add_extension(cooling_system, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(cooling_system, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       XMLHelper.add_extension(cooling_system, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
-      if @primary_system
-        primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
-        XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
-      end
     end
 
     def from_doc(cooling_system)
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
+      @sameas_id = HPXML::get_sameas_id(cooling_system)
       @location = XMLHelper.get_value(cooling_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(cooling_system, 'ThirdPartyCertification', :string)
@@ -4481,12 +4552,7 @@ class HPXML < Object
       @cooling_autosizing_factor = XMLHelper.get_value(cooling_system, 'extension/CoolingAutosizingFactor', :float)
       @clg_seed_id = XMLHelper.get_value(cooling_system, 'extension/CoolingSeedId', :string)
       @htg_seed_id = XMLHelper.get_value(cooling_system, 'extension/HeatingSeedId', :string)
-      primary_cooling_system = HPXML::get_idref(XMLHelper.get_element(cooling_system, '../PrimarySystems/PrimaryCoolingSystem'))
-      if primary_cooling_system == @id
-        @primary_system = true
-      else
-        @primary_system = false
-      end
+      @primary_system = (HPXML::get_idref(XMLHelper.get_element(cooling_system, '../PrimarySystems/PrimaryCoolingSystem')) == @id)
     end
   end
 
@@ -4623,7 +4689,7 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
+    ATTRS = [:id, :sameas_id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type, :compressor_lockout_temp,
              :cooling_shr, :backup_type, :backup_system_idref, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue, :backup_heating_lockout_temp,
@@ -4638,6 +4704,10 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4694,6 +4764,10 @@ class HPXML < Object
       end
     end
 
+    def is_shared_system_serving_multiple_dwelling_units
+      return false
+    end
+
     def delete
       @parent_object.heat_pumps.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
@@ -4717,9 +4791,18 @@ class HPXML < Object
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
+      if @primary_heating_system
+        primary_heating_system = XMLHelper.insert_element(primary_systems, 'PrimaryHeatingSystem')
+        XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
+      end
+      if @primary_cooling_system
+        primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
+        XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
+      end
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       XMLHelper.add_element(heat_pump, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heat_pump, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heat_pump, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4818,20 +4901,13 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingFactor', @backup_heating_autosizing_factor, :float, @backup_heating_autosizing_factor_isdefaulted) unless @backup_heating_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
-      if @primary_heating_system
-        primary_heating_system = XMLHelper.insert_element(primary_systems, 'PrimaryHeatingSystem')
-        XMLHelper.add_attribute(primary_heating_system, 'idref', @id)
-      end
-      if @primary_cooling_system
-        primary_cooling_system = XMLHelper.add_element(primary_systems, 'PrimaryCoolingSystem')
-        XMLHelper.add_attribute(primary_cooling_system, 'idref', @id)
-      end
     end
 
     def from_doc(heat_pump)
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
+      @sameas_id = HPXML::get_sameas_id(heat_pump)
       @location = XMLHelper.get_value(heat_pump, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heat_pump, 'ThirdPartyCertification', :string)
@@ -4882,18 +4958,8 @@ class HPXML < Object
       @backup_heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingAutosizingFactor', :float)
       @htg_seed_id = XMLHelper.get_value(heat_pump, 'extension/HeatingSeedId', :string)
       @clg_seed_id = XMLHelper.get_value(heat_pump, 'extension/CoolingSeedId', :string)
-      primary_heating_system = HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryHeatingSystem'))
-      if primary_heating_system == @id
-        @primary_heating_system = true
-      else
-        @primary_heating_system = false
-      end
-      primary_cooling_system = HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryCoolingSystem'))
-      if primary_cooling_system == @id
-        @primary_cooling_system = true
-      else
-        @primary_cooling_system = false
-      end
+      @primary_heating_system = (HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryHeatingSystem')) == @id)
+      @primary_cooling_system = (HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryCoolingSystem')) == @id)
     end
   end
 
@@ -5097,10 +5163,15 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_bldg)
       super(hpxml_bldg, *args)
     end
-    ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
-             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
+    ATTRS = [:id, :sameas_id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type,
+             :hydronic_supply_temp, :hydronic_return_temp]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
+
+    def sameas
+      return HPXML::get_sameas_obj(@parent_object.parent_object, @sameas_id)
+    end
 
     def hvac_systems
       list = []
@@ -5126,11 +5197,13 @@ class HPXML < Object
         end
       end
 
-      if num_clg > 1
-        fail "Multiple cooling systems found attached to distribution system '#{@id}'."
-      end
-      if num_htg > 1
-        fail "Multiple heating systems found attached to distribution system '#{@id}'."
+      if not @parent_object.parent_object.header.whole_sfa_or_mf_building_sim
+        if num_clg > 1
+          fail "Multiple cooling systems found attached to distribution system '#{@id}'."
+        end
+        if num_htg > 1
+          fail "Multiple heating systems found attached to distribution system '#{@id}'."
+        end
       end
 
       return list
@@ -5166,23 +5239,24 @@ class HPXML < Object
       hvac_distribution = XMLHelper.add_element(hvac, 'HVACDistribution')
       sys_id = XMLHelper.add_element(hvac_distribution, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
+        distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
         XMLHelper.add_element(distribution_system_type_el, @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', @conditioned_floor_area_served, :float) unless @conditioned_floor_area_served.nil?
       elsif [HVACDistributionTypeDSE].include? @distribution_system_type
+        distribution_system_type_el = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
         XMLHelper.add_element(distribution_system_type_el, 'Other', @distribution_system_type, :string)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', @annual_heating_dse, :float) unless @annual_heating_dse.nil?
         XMLHelper.add_element(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency', @annual_cooling_dse, :float) unless @annual_cooling_dse.nil?
-      else
-        fail "Unexpected distribution_system_type '#{@distribution_system_type}'."
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
         distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
         XMLHelper.add_element(distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
-      end
-      if [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
+        XMLHelper.add_element(distribution, 'SupplyTemperature', @hydronic_supply_temp, :float, @hydronic_supply_temp_isdefaulted) unless @hydronic_supply_temp.nil?
+        XMLHelper.add_element(distribution, 'ReturnTemperature', @hydronic_return_temp, :float, @hydronic_return_temp_isdefaulted) unless @hydronic_return_temp.nil?
+      elsif [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
         distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
         XMLHelper.add_element(distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
         @duct_leakage_measurements.to_doc(distribution)
@@ -5200,6 +5274,7 @@ class HPXML < Object
       return if hvac_distribution.nil?
 
       @id = HPXML::get_id(hvac_distribution)
+      @sameas_id = HPXML::get_sameas_id(hvac_distribution)
       @distribution_system_type = XMLHelper.get_child_name(hvac_distribution, 'DistributionSystemType')
       if @distribution_system_type == 'Other'
         @distribution_system_type = XMLHelper.get_value(XMLHelper.get_element(hvac_distribution, 'DistributionSystemType'), 'Other', :string)
@@ -5214,6 +5289,8 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @hydronic_supply_temp = XMLHelper.get_value(hydronic_distribution, 'SupplyTemperature', :float)
+        @hydronic_return_temp = XMLHelper.get_value(hydronic_distribution, 'ReturnTemperature', :float)
       end
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
@@ -7692,8 +7769,33 @@ class HPXML < Object
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
+  def self.get_sameas_id(parent, element_name = 'SystemIdentifier')
+    return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'sameas')
+  end
+
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  def self.get_sameas_obj(hpxml, sameas_id)
+    # Returns the sameas obj (from another Building) with the specified sameas_id.
+    hpxml.buildings.each do |building|
+      building.class::CLASS_ATTRS.each do |attr|
+        building_child = building.send(attr)
+        next unless building_child.is_a? HPXML::BaseArrayElement
+
+        building_child.each do |obj|
+          next unless obj.id == sameas_id
+
+          return obj
+        end
+      end
+    end
+    if not sameas_id.nil?
+      fail "Sameas object '#{sameas_id}' not found."
+    end
+
+    return
   end
 
   def self.check_dates(str, begin_month, begin_day, end_month, end_day)
