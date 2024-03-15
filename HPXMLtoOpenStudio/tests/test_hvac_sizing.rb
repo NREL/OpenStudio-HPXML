@@ -199,7 +199,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     end
   end
 
-  def test_manual_j_block_load_residences
+  def test_manual_j_residences
     default_tol_btuh = 500
 
     # Section 7: Vatilo Residence
@@ -219,7 +219,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1498, hpxml_bldg.hvac_plant.hdl_ceilings, default_tol_btuh)
     assert_in_delta(3089, hpxml_bldg.hvac_plant.hdl_infilvent, default_tol_btuh)
     assert_in_delta(9973, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2000)
-    assert_in_delta(6260, hpxml_bldg.hvac_plant.cdl_sens_windows, default_tol_btuh) # AE worksheet, so assumes AED; added AED=965 Btuh to their value since we actually calculate it
+    assert_in_delta(5295, hpxml_bldg.hvac_plant.cdl_sens_windows, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, default_tol_btuh)
     assert_in_delta(456, hpxml_bldg.hvac_plant.cdl_sens_doors, default_tol_btuh)
     assert_in_delta(1715, hpxml_bldg.hvac_plant.cdl_sens_walls, default_tol_btuh)
@@ -428,7 +428,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ceilings, default_tol_btuh)
     assert_in_delta(1770, hpxml_bldg.hvac_plant.hdl_infilvent, default_tol_btuh)
     # assert_in_delta(1631, hpxml_bldg.hvac_plant.cdl_sens_ducts, default_tol_btuh) Skip due to ducts in closed ceiling cavity
-    assert_in_delta(13170, hpxml_bldg.hvac_plant.cdl_sens_windows, default_tol_btuh) # Includes 5516 Btuh for AED excursion
+    assert_in_delta(7654, hpxml_bldg.hvac_plant.cdl_sens_windows, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, default_tol_btuh)
     assert_in_delta(228, hpxml_bldg.hvac_plant.cdl_sens_doors, default_tol_btuh)
     assert_in_delta(1236, hpxml_bldg.hvac_plant.cdl_sens_walls, default_tol_btuh)
@@ -438,6 +438,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings, default_tol_btuh)
     assert_in_delta(764, hpxml_bldg.hvac_plant.cdl_sens_infilvent, default_tol_btuh)
     assert_in_delta(5224, hpxml_bldg.hvac_plant.cdl_sens_intgains, default_tol_btuh)
+    assert_in_delta(5516, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, default_tol_btuh)
     # assert_in_delta(1189, hpxml_bldg.hvac_plant.cdl_lat_ducts, default_tol_btuh) Skip due to ducts in closed ceiling cavity
     assert_in_delta(1391, hpxml_bldg.hvac_plant.cdl_lat_infilvent, default_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)

@@ -466,7 +466,8 @@ class HPXML < Object
                      cdl_sens_slabs: 'Slabs',
                      cdl_sens_ceilings: 'Ceilings',
                      cdl_sens_infilvent: 'InfilVent',
-                     cdl_sens_intgains: 'InternalLoads' }
+                     cdl_sens_intgains: 'InternalLoads',
+                     cdl_sens_aedexcursion: 'AEDExcursion' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
                     cdl_lat_ducts: 'Ducts',
                     cdl_lat_infilvent: 'InfilVent',

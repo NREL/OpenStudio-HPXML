@@ -682,14 +682,14 @@ class HVACSizing
     # Loop spaces to calculate adjustment for each space
     @spaces.each do |space|
       @space_loads[space.id].HourlyFenestrationLoads = space.additional_properties.afl_hr
-      @space_loads[space.id].Cool_Windows += add_aed_excursion(space.additional_properties.afl_hr)
+      @space_loads[space.id].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
     end
 
     bldg_design_loads.HourlyFenestrationLoads = afl_hr
-    bldg_design_loads.Cool_Windows += add_aed_excursion(afl_hr)
+    bldg_design_loads.Cool_AEDExcursion = calculate_aed_excursion(afl_hr)
   end
 
-  def self.add_aed_excursion(afl_hr)
+  def self.calculate_aed_excursion(afl_hr)
     # Daily Average Load (DAL)
     dal = afl_hr.sum(0.0) / afl_hr.size
 
@@ -1181,7 +1181,8 @@ class HVACSizing
                                   bldg_design_loads.Cool_Doors + bldg_design_loads.Cool_Walls +
                                   bldg_design_loads.Cool_Floors + bldg_design_loads.Cool_Ceilings +
                                   bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_InfilVent_Sens +
-                                  bldg_design_loads.Cool_IntGains_Sens + bldg_design_loads.Cool_Slabs
+                                  bldg_design_loads.Cool_IntGains_Sens + bldg_design_loads.Cool_Slabs +
+                                  bldg_design_loads.Cool_AEDExcursion
     bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_InfilVent_Lat + bldg_design_loads.Cool_IntGains_Lat
     if bldg_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
       bldg_design_loads.Cool_Lat = 0.0
@@ -3428,6 +3429,7 @@ class HVACSizing
     hpxml_object.cdl_sens_slabs = Float(design_loads.Cool_Slabs.round)
     hpxml_object.cdl_sens_windows = Float(design_loads.Cool_Windows.round)
     hpxml_object.cdl_sens_skylights = Float(design_loads.Cool_Skylights.round)
+    hpxml_object.cdl_sens_aedexcursion = Float(design_loads.Cool_AEDExcursion.round)
     hpxml_object.cdl_sens_doors = Float(design_loads.Cool_Doors.round)
     hpxml_object.cdl_sens_infilvent = Float(design_loads.Cool_InfilVent_Sens.round)
     hpxml_object.cdl_sens_ducts = Float(design_loads.Cool_Ducts_Sens.round)
@@ -3439,7 +3441,7 @@ class HVACSizing
                       hpxml_object.cdl_sens_slabs + hpxml_object.cdl_sens_windows +
                       hpxml_object.cdl_sens_skylights + hpxml_object.cdl_sens_doors +
                       hpxml_object.cdl_sens_infilvent + hpxml_object.cdl_sens_ducts +
-                      hpxml_object.cdl_sens_intgains)
+                      hpxml_object.cdl_sens_intgains + hpxml_object.cdl_sens_aedexcursion)
       if (cdl_sens_sum - hpxml_object.cdl_sens_total).abs > tol
         fail 'Cooling sensible design loads do not sum to total.'
       end
@@ -3514,7 +3516,6 @@ class HVACSizing
       results_out << ["Floors: #{floor.id}", nil, fj1.Heat_HTM, fj1.Cool_HTM]
     end
     results_out << ['Infiltration', nil, nil, nil, @hpxml_bldg.additional_properties.infil_heat_cfm.round, @hpxml_bldg.additional_properties.infil_cool_cfm.round]
-    # FIXME: Disaggregate AED Excursion
 
     # Block load results
     results_out << [line_break]
@@ -3546,7 +3547,7 @@ class HVACSizing
     results_out << ['Infiltration', nil, nil, 1.0, bldg_design_loads.Heat_InfilVent.round, bldg_design_loads.Cool_InfilVent_Sens.round, bldg_design_loads.Cool_InfilVent_Lat.round]
     results_out << ['Internal Gains', nil, nil, nil, 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
     results_out << ['Ducts', nil, nil, nil, bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
-    # FIXME: Disaggregate AED Excursion
+    results_out << ['AED Excursion', nil, nil, nil, nil, bldg_design_loads.Cool_AEDExcursion.round, nil]
 
     # Room by room results
     @space_loads.keys.each_with_index do |space_id, i|
@@ -3580,7 +3581,7 @@ class HVACSizing
       results_out << ['Infiltration', nil, nil, space_load.WindowAreaRatio.round(2), space_load.Heat_InfilVent.round, space_load.Cool_InfilVent_Sens.round, space_load.Cool_InfilVent_Lat.round]
       results_out << ['Internal Gains', nil, nil, nil, 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
       results_out << ['Ducts', nil, nil, nil, space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
-      # FIXME: Disaggregate AED Excursion
+      results_out << ['AED Excursion', nil, nil, nil, nil, space_load.Cool_AEDExcursion.round, nil]
     end
 
     # AED curve
@@ -3590,8 +3591,8 @@ class HVACSizing
       if i == 0
         results_out << [col_name] + bldg_design_loads.HourlyFenestrationLoads.map { |l| l.round }
       else
-        space_load = @space_loads[@space_loads.keys[i - 1]]
-        results_out << [col_name] + space_load.HourlyFenestrationLoads.map { |l| l.round }
+        space_id = @space_loads.keys[i - 1]
+        results_out << [col_name] + @space_loads[space_id].HourlyFenestrationLoads.map { |l| l.round }
       end
     end
 
@@ -3608,7 +3609,7 @@ class MJ
 end
 
 class DesignLoads
-  attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
+  attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat, :Cool_AEDExcursion,
                 :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors, :Cool_Slabs,
                 :Cool_Ceilings, :Cool_InfilVent_Sens, :Cool_InfilVent_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
@@ -3624,6 +3625,7 @@ class DesignLoads
     @Cool_Ducts_Lat = 0.0
     @Cool_Windows = 0.0
     @Cool_Skylights = 0.0
+    @Cool_AEDExcursion = 0.0
     @Cool_Doors = 0.0
     @Cool_Walls = 0.0
     @Cool_Roofs = 0.0
