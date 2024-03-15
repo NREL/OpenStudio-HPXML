@@ -681,9 +681,11 @@ class HVACSizing
 
     # Loop spaces to calculate adjustment for each space
     @spaces.each do |space|
+      @space_loads[space.id].HourlyFenestrationLoads = space.additional_properties.afl_hr
       @space_loads[space.id].Cool_Windows += add_aed_excursion(space.additional_properties.afl_hr)
     end
 
+    bldg_design_loads.HourlyFenestrationLoads = afl_hr
     bldg_design_loads.Cool_Windows += add_aed_excursion(afl_hr)
   end
 
@@ -3483,8 +3485,10 @@ class HVACSizing
     ceilings = hpxml_bldg.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_ceiling } + hpxml_bldg.roofs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     floors = hpxml_bldg.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_floor } + hpxml_bldg.slabs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
 
+    col_names = ['Entire House'] + @space_loads.keys.map { |space_id| "Space: #{space_id}" }
+
     # Summary Results
-    results_out << ['Summary', 'Orientation', 'Heating HTM', 'Cooling HTM', 'Heating CFM', 'Cooling CFM']
+    results_out << ['Report: Summary', 'Orientation', 'Heating HTM', 'Cooling HTM', 'Heating CFM', 'Cooling CFM']
     windows.each do |window|
       fj1 = window.additional_properties.formj1_values
       results_out << ["Windows: #{window.id}", orientation_map[window.orientation], fj1.Heat_HTM, fj1.Cool_HTM]
@@ -3503,92 +3507,92 @@ class HVACSizing
     end
     ceilings.each do |ceiling|
       fj1 = ceiling.additional_properties.formj1_values
-      results_out << ["Ceilings: #{ceiling.id}", '', fj1.Heat_HTM, fj1.Cool_HTM]
+      results_out << ["Ceilings: #{ceiling.id}", nil, fj1.Heat_HTM, fj1.Cool_HTM]
     end
     floors.each do |floor|
       fj1 = floor.additional_properties.formj1_values
-      results_out << ["Floors: #{floor.id}", '', fj1.Heat_HTM, fj1.Cool_HTM]
+      results_out << ["Floors: #{floor.id}", nil, fj1.Heat_HTM, fj1.Cool_HTM]
     end
-    results_out << ['Infiltration', '', '', '', @hpxml_bldg.additional_properties.infil_heat_cfm.round, @hpxml_bldg.additional_properties.infil_cool_cfm.round]
-    # FIXME: Disaggregate Ventilation
-    # FIXME: Winter Humidification
-    # FIXME: Piping
-    # FIXME: Blower Heat
+    results_out << ['Infiltration', nil, nil, nil, @hpxml_bldg.additional_properties.infil_heat_cfm.round, @hpxml_bldg.additional_properties.infil_cool_cfm.round]
     # FIXME: Disaggregate AED Excursion
 
     # Block load results
     results_out << [line_break]
-    results_out << ['Entire House', 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
+    results_out << ["Report: #{col_names[0]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
     windows.each do |window|
       fj1 = window.additional_properties.formj1_values
-      results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
     skylights.each do |skylight|
       fj1 = skylight.additional_properties.formj1_values
-      results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
     doors.each do |door|
       fj1 = door.additional_properties.formj1_values
-      results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
     walls.each do |wall|
       fj1 = wall.additional_properties.formj1_values
-      results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
     ceilings.each do |ceiling|
       fj1 = ceiling.additional_properties.formj1_values
-      results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
     floors.each do |floor|
       fj1 = floor.additional_properties.formj1_values
-      results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
-    results_out << ['Infiltration', '', '', 1.0, bldg_design_loads.Heat_InfilVent.round, bldg_design_loads.Cool_InfilVent_Sens.round, bldg_design_loads.Cool_InfilVent_Lat.round]
-    results_out << ['Internal Gains', '', '', '', 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
-    results_out << ['Ducts', '', '', '', bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
-    # FIXME: Disaggregate Ventilation
-    # FIXME: Winter Humidification
-    # FIXME: Piping
-    # FIXME: Blower Heat
+    results_out << ['Infiltration', nil, nil, 1.0, bldg_design_loads.Heat_InfilVent.round, bldg_design_loads.Cool_InfilVent_Sens.round, bldg_design_loads.Cool_InfilVent_Lat.round]
+    results_out << ['Internal Gains', nil, nil, nil, 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
+    results_out << ['Ducts', nil, nil, nil, bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
     # FIXME: Disaggregate AED Excursion
 
     # Room by room results
-    @space_loads.keys.each do |space_id|
+    @space_loads.keys.each_with_index do |space_id, i|
       results_out << [line_break]
-      results_out << ["Room: #{space_id}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
+      results_out << ["Report: #{col_names[i + 1]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
       windows.select { |s| s.wall.attached_to_space_idref == space_id }.each do |window|
         fj1 = window.additional_properties.formj1_values
-        results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       skylights.select { |s| s.roof.attached_to_space_idref == space_id }.each do |skylight|
         fj1 = skylight.additional_properties.formj1_values
-        results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       doors.select { |s| s.wall.attached_to_space_idref == space_id }.each do |door|
         fj1 = door.additional_properties.formj1_values
-        results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       walls.select { |s| s.attached_to_space_idref == space_id }.each do |wall|
         fj1 = wall.additional_properties.formj1_values
-        results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       ceilings.select { |s| s.attached_to_space_idref == space_id }.each do |ceiling|
         fj1 = ceiling.additional_properties.formj1_values
-        results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       floors.select { |s| s.attached_to_space_idref == space_id }.each do |floor|
         fj1 = floor.additional_properties.formj1_values
-        results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, '', fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       space_load = @space_loads[space_id]
-      results_out << ['Infiltration', '', '', space_load.WindowAreaRatio.round(2), space_load.Heat_InfilVent.round, space_load.Cool_InfilVent_Sens.round, space_load.Cool_InfilVent_Lat.round]
-      results_out << ['Internal Gains', '', '', '', 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
-      results_out << ['Ducts', '', '', '', space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
-      # FIXME: Disaggregate Ventilation
-      # FIXME: Winter Humidification
-      # FIXME: Piping
-      # FIXME: Blower Heat
+      results_out << ['Infiltration', nil, nil, space_load.WindowAreaRatio.round(2), space_load.Heat_InfilVent.round, space_load.Cool_InfilVent_Sens.round, space_load.Cool_InfilVent_Lat.round]
+      results_out << ['Internal Gains', nil, nil, nil, 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
+      results_out << ['Ducts', nil, nil, nil, space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
       # FIXME: Disaggregate AED Excursion
+    end
+
+    # AED curve
+    results_out << [line_break]
+    results_out << ['Report: AED Curve'] + [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map { |hr| "Hr #{hr} (Btuh)" }
+    col_names.each_with_index do |col_name, i|
+      if i == 0
+        results_out << [col_name] + bldg_design_loads.HourlyFenestrationLoads.map { |l| l.round }
+      else
+        space_load = @space_loads[@space_loads.keys[i - 1]]
+        results_out << [col_name] + space_load.HourlyFenestrationLoads.map { |l| l.round }
+      end
     end
 
     CSV.open(csv_out, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
@@ -3608,7 +3612,7 @@ class DesignLoads
                 :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors, :Cool_Slabs,
                 :Cool_Ceilings, :Cool_InfilVent_Sens, :Cool_InfilVent_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
-                :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent, :WindowAreaRatio)
+                :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent, :WindowAreaRatio, :HourlyFenestrationLoads)
 
   def initialize
     @Cool_Sens = 0.0
