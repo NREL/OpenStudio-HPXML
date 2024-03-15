@@ -1115,36 +1115,50 @@ class HVACSizing
     windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
     windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
 
-    icfm_cooling = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
-    icfm_heating = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
+    icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
+    icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
+    icfm_heat += q_fireplace
 
-    @hpxml_bldg.additional_properties.infil_heat_cfm = icfm_heating
-    @hpxml_bldg.additional_properties.infil_cool_cfm = icfm_cooling
+    q_unb_cfm, q_bal_cfm, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff = get_ventilation_data()
 
-    q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
+    # Calculate adjusted infiltration cfm (combined with ventilation)
+    infil_cfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
+    infil_cfm_cool = (icfm_cool**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
 
-    cfm_heating = q_bal_Sens + ((icfm_heating + q_fireplace)**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
+    @hpxml_bldg.additional_properties.infil_heat_cfm = infil_cfm_heat
+    @hpxml_bldg.additional_properties.infil_cool_cfm = infil_cfm_cool
 
-    cfm_cool_load_sens = q_bal_Sens + (icfm_cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
-    cfm_cool_load_lat = q_bal_Lat + (icfm_cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
+    # Infiltration load
+    bldg_design_loads.Heat_Infil = 1.1 * mj.acf * infil_cfm_heat * mj.htd
+    bldg_design_loads.Cool_Infil_Sens = 1.1 * mj.acf * infil_cfm_cool * mj.ctd
+    bldg_design_loads.Cool_Infil_Lat = 0.68 * mj.acf * infil_cfm_cool * mj.cool_design_grains
 
-    htg_infil_vent_loads = 1.1 * mj.acf * cfm_heating * mj.htd
-    clg_infil_vent_sens_loads = 1.1 * mj.acf * cfm_cool_load_sens * mj.ctd
-    clg_infil_vent_lat_loads = 0.68 * mj.acf * cfm_cool_load_lat * mj.cool_design_grains
+    # Calculate vent cfm
+    vent_cfm_heat = q_unb_cfm + q_bal_cfm
+    vent_cfm_cool = vent_cfm_heat
 
-    bldg_design_loads.Heat_InfilVent = htg_infil_vent_loads
-    bldg_design_loads.Cool_InfilVent_Sens = clg_infil_vent_sens_loads
-    bldg_design_loads.Cool_InfilVent_Lat = clg_infil_vent_lat_loads
-    # total exposed wall area
+    @hpxml_bldg.additional_properties.vent_heat_cfm = vent_cfm_heat
+    @hpxml_bldg.additional_properties.vent_cool_cfm = vent_cfm_cool
+
+    # Calculate vent cfm incorporating sens/lat effectiveness, preheat/precool, and recirc
+    vent_cfm_heat = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_preheat - q_recirc
+    vent_cfm_cool_sens = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_precool - q_recirc
+    vent_cfm_cool_lat = q_unb_cfm + q_bal_cfm * (1.0 - bal_lat_eff) - q_recirc
+
+    bldg_design_loads.Heat_Vent = 1.1 * mj.acf * vent_cfm_heat * mj.htd
+    bldg_design_loads.Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
+    bldg_design_loads.Cool_Vent_Lat = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
+
     return if @spaces.empty?
 
+    # total exposed wall area
     spaces_total_exposed_wall_area = @spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
 
     @spaces.each do |space|
       space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
       @space_loads[space.id].WindowAreaRatio = space_exposed_wall_area / spaces_total_exposed_wall_area
-      @space_loads[space.id].Heat_InfilVent = @space_loads[space.id].WindowAreaRatio * htg_infil_vent_loads
-      @space_loads[space.id].Cool_InfilVent_Sens = @space_loads[space.id].WindowAreaRatio * clg_infil_vent_sens_loads
+      @space_loads[space.id].Heat_Infil = @space_loads[space.id].WindowAreaRatio * bldg_design_loads.Heat_Infil
+      @space_loads[space.id].Cool_Infil_Sens = @space_loads[space.id].WindowAreaRatio * bldg_design_loads.Cool_Infil_Sens
     end
   end
 
@@ -1174,19 +1188,21 @@ class HVACSizing
       bldg_design_loads.Heat_Doors + bldg_design_loads.Heat_Walls +
       bldg_design_loads.Heat_Floors + bldg_design_loads.Heat_Slabs +
       bldg_design_loads.Heat_Ceilings + bldg_design_loads.Heat_Roofs, 0.0].max +
-                                 bldg_design_loads.Heat_InfilVent
+                                 bldg_design_loads.Heat_Infil + bldg_design_loads.Heat_Vent
 
     # Cooling
     bldg_design_loads.Cool_Sens = bldg_design_loads.Cool_Windows + bldg_design_loads.Cool_Skylights +
                                   bldg_design_loads.Cool_Doors + bldg_design_loads.Cool_Walls +
                                   bldg_design_loads.Cool_Floors + bldg_design_loads.Cool_Ceilings +
-                                  bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_InfilVent_Sens +
+                                  bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_Infil_Sens +
                                   bldg_design_loads.Cool_IntGains_Sens + bldg_design_loads.Cool_Slabs +
-                                  bldg_design_loads.Cool_AEDExcursion
-    bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_InfilVent_Lat + bldg_design_loads.Cool_IntGains_Lat
+                                  bldg_design_loads.Cool_AEDExcursion + bldg_design_loads.Cool_Vent_Sens
+    bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_Infil_Lat + bldg_design_loads.Cool_Vent_Lat +
+                                 bldg_design_loads.Cool_IntGains_Lat
     if bldg_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
       bldg_design_loads.Cool_Lat = 0.0
-      bldg_design_loads.Cool_InfilVent_Lat = 0.0
+      bldg_design_loads.Cool_Infil_Lat = 0.0
+      bldg_design_loads.Cool_Vent_Lat = 0.0
       bldg_design_loads.Cool_IntGains_Lat = 0.0
     end
     bldg_design_loads.Cool_Tot = bldg_design_loads.Cool_Sens + bldg_design_loads.Cool_Lat
@@ -2335,12 +2351,12 @@ class HVACSizing
     end
   end
 
-  def self.get_ventilation_rates()
+  def self.get_ventilation_data()
     # If CFIS w/ supplemental fan, assume air handler is running most of the hour and can provide
     # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
     vent_fans_mech = @hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? && f.flow_rate > 0 && f.hours_in_operation > 0 }
     if vent_fans_mech.empty?
-      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     end
 
     # Categorize fans into different types
@@ -2355,39 +2371,36 @@ class HVACSizing
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
 
     # Average preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
-    oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
-    oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
-    recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
+    q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
+    q_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
+    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
 
     # Total CFMS
-    tot_sup_cfm = sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot + cfis_cfm_tot
-    tot_exh_cfm = exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot
-    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
-    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
+    a_tot_sup = q_sup_tot + q_bal_tot + q_erv_hrv_tot + q_cfis_tot
+    q_tot_exh = q_exh_tot + q_bal_tot + q_erv_hrv_tot
+    q_unbal = (a_tot_sup - q_tot_exh).abs
+    q_bal = [q_tot_exh, a_tot_sup].min
 
     # Calculate effectiveness for all ERV/HRV and store results in a hash
     hrv_erv_effectiveness_map = Airflow.calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
 
     # Calculate cfm weighted average effectiveness for the combined balanced airflow
-    weighted_vent_mech_lat_eff = 0.0
-    weighted_vent_mech_apparent_sens_eff = 0.0
+    bal_lat_eff = 0.0
+    bal_sens_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
     vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      weighted_vent_mech_lat_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_unit_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      bal_lat_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      bal_sens_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
 
-    tot_bal_cfm_sens = tot_bal_cfm * (1.0 - weighted_vent_mech_apparent_sens_eff)
-    tot_bal_cfm_lat = tot_bal_cfm * (1.0 - weighted_vent_mech_lat_eff)
-
-    return [tot_unbal_cfm, oa_cfm_preheat, oa_cfm_precool, recirc_cfm_shared, tot_bal_cfm_sens, tot_bal_cfm_lat]
+    return [q_unbal, q_bal, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff]
   end
 
   def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, deltaT, rated_capacity_for_cfm_per_ton_limits = nil)
@@ -3407,14 +3420,15 @@ class HVACSizing
     hpxml_object.hdl_windows = Float(design_loads.Heat_Windows.round)
     hpxml_object.hdl_skylights = Float(design_loads.Heat_Skylights.round)
     hpxml_object.hdl_doors = Float(design_loads.Heat_Doors.round)
-    hpxml_object.hdl_infilvent = Float(design_loads.Heat_InfilVent.round)
+    hpxml_object.hdl_infil = Float(design_loads.Heat_Infil.round)
+    hpxml_object.hdl_vent = Float(design_loads.Heat_Vent.round)
     hpxml_object.hdl_ducts = Float(design_loads.Heat_Ducts.round)
     if hpxml_object.hdl_total != 0
       # Error-checking to ensure we captured all the design load components
       hdl_sum = (hpxml_object.hdl_walls + hpxml_object.hdl_ceilings + hpxml_object.hdl_roofs +
                  hpxml_object.hdl_floors + hpxml_object.hdl_slabs + hpxml_object.hdl_windows +
-                 hpxml_object.hdl_skylights + hpxml_object.hdl_doors + hpxml_object.hdl_infilvent +
-                 hpxml_object.hdl_ducts)
+                 hpxml_object.hdl_skylights + hpxml_object.hdl_doors + hpxml_object.hdl_infil +
+                 hpxml_object.hdl_vent + hpxml_object.hdl_ducts)
       if (hdl_sum - hpxml_object.hdl_total).abs > tol
         fail 'Heating design loads do not sum to total.'
       end
@@ -3431,7 +3445,8 @@ class HVACSizing
     hpxml_object.cdl_sens_skylights = Float(design_loads.Cool_Skylights.round)
     hpxml_object.cdl_sens_aedexcursion = Float(design_loads.Cool_AEDExcursion.round)
     hpxml_object.cdl_sens_doors = Float(design_loads.Cool_Doors.round)
-    hpxml_object.cdl_sens_infilvent = Float(design_loads.Cool_InfilVent_Sens.round)
+    hpxml_object.cdl_sens_infil = Float(design_loads.Cool_Infil_Sens.round)
+    hpxml_object.cdl_sens_vent = Float(design_loads.Cool_Vent_Sens.round)
     hpxml_object.cdl_sens_ducts = Float(design_loads.Cool_Ducts_Sens.round)
     hpxml_object.cdl_sens_intgains = Float(design_loads.Cool_IntGains_Sens.round)
     if hpxml_object.cdl_sens_total != 0
@@ -3440,8 +3455,9 @@ class HVACSizing
                       hpxml_object.cdl_sens_roofs + hpxml_object.cdl_sens_floors +
                       hpxml_object.cdl_sens_slabs + hpxml_object.cdl_sens_windows +
                       hpxml_object.cdl_sens_skylights + hpxml_object.cdl_sens_doors +
-                      hpxml_object.cdl_sens_infilvent + hpxml_object.cdl_sens_ducts +
-                      hpxml_object.cdl_sens_intgains + hpxml_object.cdl_sens_aedexcursion)
+                      hpxml_object.cdl_sens_infil + hpxml_object.cdl_sens_vent +
+                      hpxml_object.cdl_sens_ducts + hpxml_object.cdl_sens_intgains +
+                      hpxml_object.cdl_sens_aedexcursion)
       if (cdl_sens_sum - hpxml_object.cdl_sens_total).abs > tol
         fail 'Cooling sensible design loads do not sum to total.'
       end
@@ -3450,12 +3466,13 @@ class HVACSizing
     # Assign cooling latent design loads to HPXML object
     hpxml_object.cdl_lat_total = Float(design_loads.Cool_Lat.round)
     hpxml_object.cdl_lat_ducts = Float(design_loads.Cool_Ducts_Lat.round)
-    hpxml_object.cdl_lat_infilvent = Float(design_loads.Cool_InfilVent_Lat.round)
+    hpxml_object.cdl_lat_infil = Float(design_loads.Cool_Infil_Lat.round)
+    hpxml_object.cdl_lat_vent = Float(design_loads.Cool_Vent_Lat.round)
     hpxml_object.cdl_lat_intgains = Float(design_loads.Cool_IntGains_Lat.round)
     if hpxml_object.cdl_lat_total != 0
       # Error-checking to ensure we captured all the design load components
-      cdl_lat_sum = (hpxml_object.cdl_lat_ducts + hpxml_object.cdl_lat_infilvent +
-                     hpxml_object.cdl_lat_intgains)
+      cdl_lat_sum = (hpxml_object.cdl_lat_ducts + hpxml_object.cdl_lat_infil +
+                     hpxml_object.cdl_lat_vent + hpxml_object.cdl_lat_intgains)
       if (cdl_lat_sum - hpxml_object.cdl_lat_total).abs > tol
         fail 'Cooling latent design loads do not sum to total.'
       end
@@ -3516,6 +3533,7 @@ class HVACSizing
       results_out << ["Floors: #{floor.id}", nil, fj1.Heat_HTM, fj1.Cool_HTM]
     end
     results_out << ['Infiltration', nil, nil, nil, @hpxml_bldg.additional_properties.infil_heat_cfm.round, @hpxml_bldg.additional_properties.infil_cool_cfm.round]
+    results_out << ['Ventilation', nil, nil, nil, @hpxml_bldg.additional_properties.vent_heat_cfm.round, @hpxml_bldg.additional_properties.vent_cool_cfm.round]
 
     # Block load results
     results_out << [line_break]
@@ -3544,9 +3562,10 @@ class HVACSizing
       fj1 = floor.additional_properties.formj1_values
       results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
     end
-    results_out << ['Infiltration', nil, nil, 1.0, bldg_design_loads.Heat_InfilVent.round, bldg_design_loads.Cool_InfilVent_Sens.round, bldg_design_loads.Cool_InfilVent_Lat.round]
+    results_out << ['Infiltration', nil, nil, 1.0, bldg_design_loads.Heat_Infil.round, bldg_design_loads.Cool_Infil_Sens.round, bldg_design_loads.Cool_Infil_Lat.round]
     results_out << ['Internal Gains', nil, nil, nil, 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
     results_out << ['Ducts', nil, nil, nil, bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
+    results_out << ['Ventilation', nil, nil, nil, bldg_design_loads.Heat_Vent.round, bldg_design_loads.Cool_Vent_Sens.round, bldg_design_loads.Cool_Vent_Lat.round]
     results_out << ['AED Excursion', nil, nil, nil, nil, bldg_design_loads.Cool_AEDExcursion.round, nil]
 
     # Room by room results
@@ -3578,7 +3597,7 @@ class HVACSizing
         results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       space_load = @space_loads[space_id]
-      results_out << ['Infiltration', nil, nil, space_load.WindowAreaRatio.round(2), space_load.Heat_InfilVent.round, space_load.Cool_InfilVent_Sens.round, space_load.Cool_InfilVent_Lat.round]
+      results_out << ['Infiltration', nil, nil, space_load.WindowAreaRatio.round(2), space_load.Heat_Infil.round, space_load.Cool_Infil_Sens.round, space_load.Cool_Infil_Lat.round]
       results_out << ['Internal Gains', nil, nil, nil, 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
       results_out << ['Ducts', nil, nil, nil, space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
       results_out << ['AED Excursion', nil, nil, nil, nil, space_load.Cool_AEDExcursion.round, nil]
@@ -3609,11 +3628,12 @@ class MJ
 end
 
 class DesignLoads
-  attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat, :Cool_AEDExcursion,
+  attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
                 :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors, :Cool_Slabs,
-                :Cool_Ceilings, :Cool_InfilVent_Sens, :Cool_InfilVent_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
+                :Cool_Ceilings, :Cool_Infil_Sens, :Cool_Vent_Sens, :Cool_Infil_Lat, :Cool_Vent_Lat,
+                :Cool_IntGains_Sens, :Cool_IntGains_Lat, :Cool_AEDExcursion,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
-                :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent, :WindowAreaRatio, :HourlyFenestrationLoads)
+                :Heat_Slabs, :Heat_Ceilings, :Heat_Infil, :Heat_Vent, :WindowAreaRatio, :HourlyFenestrationLoads)
 
   def initialize
     @Cool_Sens = 0.0
@@ -3632,8 +3652,10 @@ class DesignLoads
     @Cool_Floors = 0.0
     @Cool_Slabs = 0.0
     @Cool_Ceilings = 0.0
-    @Cool_InfilVent_Sens = 0.0
-    @Cool_InfilVent_Lat = 0.0
+    @Cool_Infil_Sens = 0.0
+    @Cool_Infil_Lat = 0.0
+    @Cool_Vent_Sens = 0.0
+    @Cool_Vent_Lat = 0.0
     @Cool_IntGains_Sens = 0.0
     @Cool_IntGains_Lat = 0.0
     @Heat_Windows = 0.0
@@ -3644,7 +3666,8 @@ class DesignLoads
     @Heat_Floors = 0.0
     @Heat_Slabs = 0.0
     @Heat_Ceilings = 0.0
-    @Heat_InfilVent = 0.0
+    @Heat_Infil = 0.0
+    @Heat_Vent = 0.0
   end
 end
 

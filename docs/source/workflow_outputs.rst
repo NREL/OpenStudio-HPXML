@@ -478,7 +478,8 @@ Design loads can also be found in the ``in.xml`` file.
    HVAC Design Load: Heating: Floors (Btu/h)                              Heating design load for floors
    HVAC Design Load: Heating: Slabs (Btu/h)                               Heating design load for slabs
    HVAC Design Load: Heating: Ceilings (Btu/h)                            Heating design load for ceilings
-   HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)            Heating design load for infiltration/ventilation
+   HVAC Design Load: Heating: Infiltration (Btu/h)                        Heating design load for infiltration
+   HVAC Design Load: Heating: Ventilation (Btu/h)                         Heating design load for ventilation
    HVAC Design Load: Cooling Sensible: Total (Btu/h)                      Total sensible cooling design load
    HVAC Design Load: Cooling Sensible: Ducts (Btu/h)                      Sensible cooling design load for ducts
    HVAC Design Load: Cooling Sensible: Windows (Btu/h)                    Sensible cooling design load for windows
@@ -489,12 +490,14 @@ Design loads can also be found in the ``in.xml`` file.
    HVAC Design Load: Cooling Sensible: Floors (Btu/h)                     Sensible cooling design load for floors
    HVAC Design Load: Cooling Sensible: Slabs (Btu/h)                      Sensible cooling design load for slabs
    HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)                   Sensible cooling design load for ceilings
-   HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)   Sensible cooling design load for infiltration/ventilation
+   HVAC Design Load: Cooling Sensible: Infiltration (Btu/h)               Sensible cooling design load for infiltration
+   HVAC Design Load: Cooling Sensible: Ventilation (Btu/h)                Sensible cooling design load for ventilation
    HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)             Sensible cooling design load for internal gains
    HVAC Design Load: Cooling Sensible: AED Excursion (Btu/h)              Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
    HVAC Design Load: Cooling Latent: Total (Btu/h)                        Total latent cooling design load
    HVAC Design Load: Cooling Latent: Ducts (Btu/h)                        Latent cooling design load for ducts
-   HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)     Latent cooling design load for infiltration/ventilation
+   HVAC Design Load: Cooling Latent: Infiltration (Btu/h)                 Latent cooling design load for infiltration
+   HVAC Design Load: Cooling Latent: Ventilation (Btu/h)                  Latent cooling design load for ventilation
    HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)               Latent cooling design load for internal gains
    =====================================================================  ====================
 
@@ -517,7 +520,7 @@ Room design loads can also be found in the ``in.xml`` file.
    HVAC Room Design Load: <SpaceID>: Heating: Floors (Btu/h)                              Heating design load for floors
    HVAC Room Design Load: <SpaceID>: Heating: Slabs (Btu/h)                               Heating design load for slabs
    HVAC Room Design Load: <SpaceID>: Heating: Ceilings (Btu/h)                            Heating design load for ceilings
-   HVAC Room Design Load: <SpaceID>: Heating: Infiltration/Ventilation (Btu/h)            Heating design load for infiltration/ventilation
+   HVAC Room Design Load: <SpaceID>: Heating: Infiltration (Btu/h)                        Heating design load for infiltration
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Total (Btu/h)                      Total sensible cooling design load
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Ducts (Btu/h)                      Sensible cooling design load for ducts
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Windows (Btu/h)                    Sensible cooling design load for windows
@@ -528,7 +531,7 @@ Room design loads can also be found in the ``in.xml`` file.
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Floors (Btu/h)                     Sensible cooling design load for floors
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Slabs (Btu/h)                      Sensible cooling design load for slabs
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Ceilings (Btu/h)                   Sensible cooling design load for ceilings
-   HVAC Room Design Load: <SpaceID>: Cooling Sensible: Infiltration/Ventilation (Btu/h)   Sensible cooling design load for infiltration/ventilation
+   HVAC Room Design Load: <SpaceID>: Cooling Sensible: Infiltration (Btu/h)               Sensible cooling design load for infiltration
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: Internal Gains (Btu/h)             Sensible cooling design load for internal gains
    HVAC Room Design Load: <SpaceID>: Cooling Sensible: AED Excursion (Btu/h)              Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
    =====================================================================================  ====================

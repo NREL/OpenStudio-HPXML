@@ -454,7 +454,8 @@ class HPXML < Object
                 hdl_floors: 'Floors',
                 hdl_slabs: 'Slabs',
                 hdl_ceilings: 'Ceilings',
-                hdl_infilvent: 'InfilVent' }
+                hdl_infil: 'Infiltration',
+                hdl_vent: 'Ventilation' }
   CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
                      cdl_sens_ducts: 'Ducts',
                      cdl_sens_windows: 'Windows',
@@ -465,12 +466,14 @@ class HPXML < Object
                      cdl_sens_floors: 'Floors',
                      cdl_sens_slabs: 'Slabs',
                      cdl_sens_ceilings: 'Ceilings',
-                     cdl_sens_infilvent: 'InfilVent',
+                     cdl_sens_infil: 'Infiltration',
+                     cdl_sens_vent: 'Ventilation',
                      cdl_sens_intgains: 'InternalLoads',
                      cdl_sens_aedexcursion: 'AEDExcursion' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
                     cdl_lat_ducts: 'Ducts',
-                    cdl_lat_infilvent: 'InfilVent',
+                    cdl_lat_infil: 'Infiltration',
+                    cdl_lat_vent: 'Ventilation',
                     cdl_lat_intgains: 'InternalLoads' }
 
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
