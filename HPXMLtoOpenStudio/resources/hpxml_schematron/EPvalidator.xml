@@ -455,6 +455,8 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Zones/h:Zone/h:Spaces/h:Space'>
       <sch:assert role='ERROR' test='count(h:FloorArea) = 1'>Expected 1 element(s) for xpath: FloorArea</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:InternalLoadsSensible) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/InternalLoadsSensible</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:FenestrationLoadProcedure) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/FenestrationLoadProcedure</sch:assert>
+      <sch:assert role='ERROR' test='h:extension/h:FenestrationLoadProcedure[text()="aed excursion" or text()="peak value"] or not(h:extension/h:FenestrationLoadProcedure)'>Expected FenestrationLoadProcedure to be 'aed excursion' or 'peak value'</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:InternalLoadsSensible) &gt; 0 or not(h:extension/h:InternalLoadsSensible)'>Expected extension/InternalLoadsSensible to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(../*/h:extension/h:InternalLoadsSensible) = count(../h:Space) or count(../*/h:extension/h:InternalLoadsSensible) = 0'>Expected 1 element(s) for xpath: extension/InternalLoadsSensible for each Space, or 0 element(s) for xpath: extension/InternalLoadsSensible</sch:assert>
     </sch:rule>

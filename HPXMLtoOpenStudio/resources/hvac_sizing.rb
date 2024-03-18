@@ -361,15 +361,13 @@ class HVACSizing
     '''
     @space_loads = {}
     @spaces = []
-    @hpxml_bldg.zones.each do |zone|
-      next unless zone.zone_type == HPXML::ZoneTypeConditioned
-
-      zone.spaces.each do |space|
-        @spaces << space
-        @space_loads[space.id] = DesignLoads.new
-        space.additional_properties.total_exposed_wall_area = 0.0
-        space.additional_properties.afl_hr = [0.0] * 12
-      end
+    @hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      @spaces << space
+      @space_loads[space.id] = DesignLoads.new
+      space.additional_properties.total_exposed_wall_area = 0.0
+      space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed excursion
+      space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
+      space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
     end
   end
 
@@ -508,7 +506,11 @@ class HVACSizing
       wall = window.wall
       next unless wall.is_exterior_thermal_boundary
 
-      space_design_loads = @space_loads[wall.attached_to_space_idref] unless wall.attached_to_space_idref.nil?
+      # Space load calculation
+      if not wall.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[wall.attached_to_space_idref]
+        fenestration_load_procedure = wall.space.fenestration_load_procedure
+      end
 
       window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(window.azimuth) / 45.0).round.to_i
@@ -518,6 +520,7 @@ class HVACSizing
       htg_htm = window_ufactor * mj.htd
       htg_loads = htg_htm * window.area
       bldg_design_loads.Heat_Windows += htg_loads
+      space_design_loads.Heat_Windows += htg_loads unless space_design_loads.nil?
 
       for hr in -1..11
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
@@ -584,15 +587,28 @@ class HVACSizing
           htm = htm_d
         end
 
+        # Block load
+        clg_loads_tmp = htm * window.area
         if hr == -1
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          clg_loads = htm * window.area
+          clg_loads = clg_loads_tmp
           bldg_design_loads.Cool_Windows += clg_loads
-          space_design_loads.Cool_Windows += clg_loads unless space_design_loads.nil?
         else
-          afl_hr[hr] += htm * window.area
-          wall.space.additional_properties.afl_hr[hr] += htm * window.area unless wall.space.nil?
+          afl_hr[hr] += clg_loads_tmp
+        end
+        # Space load
+        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+          if hr == -1
+            # Store average window loads
+            space_design_loads.Cool_Windows += clg_loads
+          else
+            # Store AED curve values for excursion
+            wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp
+          end
+        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeakValue
+          # Store AED curve values for peak value
+          wall.space.additional_properties.afl_hr_windows[hr] += clg_loads_tmp unless hr == -1
         end
       end
       window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
@@ -606,7 +622,12 @@ class HVACSizing
     # Skylights
     @hpxml_bldg.skylights.each do |skylight|
       roof = skylight.roof
-      space_design_loads = @space_loads[roof.attached_to_space_idref] unless roof.attached_to_space_idref.nil?
+
+      # Space load calculation
+      if not roof.attached_to_space_idref.nil?
+        space_design_loads = @space_loads[roof.attached_to_space_idref]
+        fenestration_load_procedure = roof.space.fenestration_load_procedure
+      end
 
       skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(skylight.azimuth) / 45.0).round.to_i
@@ -620,6 +641,7 @@ class HVACSizing
       htg_htm = skylight_ufactor * mj.htd
       htg_loads = htg_htm * skylight.area
       bldg_design_loads.Heat_Skylights += htg_loads
+      space_design_loads.Heat_Skylights += htg_loads unless space_design_loads.nil?
 
       for hr in -1..11
         # If hr == -1: Calculate the Average Load Procedure (ALP) Load
@@ -657,15 +679,28 @@ class HVACSizing
         # Hourly Heat Transfer Multiplier for the given skylight Direction
         htm = (sol_h + sol_v) * (skylight_shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
 
+        # Block load
+        clg_loads_tmp = htm * skylight.area
         if hr == -1
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          clg_loads = clg_htm * skylight.area
+          clg_loads = clg_loads_tmp
           bldg_design_loads.Cool_Skylights += clg_loads
-          space_design_loads.Cool_Skylights += clg_loads unless space_design_loads.nil?
         else
-          afl_hr[hr] += htm * skylight.area
-          roof.space.additional_properties.afl_hr[hr] += htm * skylight.area unless roof.space.nil?
+          afl_hr[hr] += clg_loads_tmp
+        end
+        # Space load
+        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+          if hr == -1
+            # Store average skylight loads
+            space_design_loads.Cool_Skylights += clg_loads
+          else
+            # Store AED curve values for excursion
+            roof.space.additional_properties.afl_hr[hr] += clg_loads_tmp
+          end
+        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeakValue
+          # Store AED curve values for peak value
+          roof.space.additional_properties.afl_hr_skylights[hr] += htm * skylight.area unless hr == -1
         end
       end
       skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
@@ -682,7 +717,13 @@ class HVACSizing
     # Loop spaces to calculate adjustment for each space
     @spaces.each do |space|
       @space_loads[space.id].HourlyFenestrationLoads = space.additional_properties.afl_hr
-      @space_loads[space.id].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
+      if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+        @space_loads[space.id].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
+      else
+        @space_loads[space.id].Cool_AEDExcursion = 0.0
+        @space_loads[space.id].Cool_Windows = space.additional_properties.afl_hr_windows.max
+        @space_loads[space.id].Cool_Skylights = space.additional_properties.afl_hr_skylights.max
+      end
     end
 
     bldg_design_loads.HourlyFenestrationLoads = afl_hr

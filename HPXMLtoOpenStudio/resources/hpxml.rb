@@ -348,6 +348,8 @@ class HPXML < Object
   SolarThermalTypeEvacuatedTube = 'evacuated tube'
   SolarThermalTypeICS = 'integrated collector storage'
   SolarThermalTypeSingleGlazing = 'single glazing black'
+  SpaceFenestrationLoadProcedureAEDExcursion = 'aed excursion'
+  SpaceFenestrationLoadProcedurePeakValue = 'peak value'
   SurroundingsOneSide = 'attached on one side'
   SurroundingsTwoSides = 'attached on two sides'
   SurroundingsThreeSides = 'attached on three sides'
@@ -1421,6 +1423,10 @@ class HPXML < Object
       return window_area_operable / window_area_total
     end
 
+    def get_conditioned_zone()
+      return zones.find{|z| z.zone_type == ZoneTypeConditioned}
+    end
+    
     def primary_hvac_systems()
       return hvac_systems.select { |h| h.primary_system }
     end
@@ -2237,7 +2243,7 @@ class HPXML < Object
   end
 
   class Space < BaseElement
-    ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
+    ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible, :fenestration_load_procedure] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2258,6 +2264,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
       XMLHelper.add_extension(space, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
+      XMLHelper.add_extension(space, 'FenestrationLoadProcedure', @fenestration_load_procedure, :string, @fenestration_load_procedure_isdefaulted) unless @fenestration_load_procedure.nil?
       if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map { |key| send(key) }.any?
         HPXML.design_loads_to_doc(self, space)
       end
@@ -2269,6 +2276,7 @@ class HPXML < Object
       @id = HPXML::get_id(space)
       @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
       @manualj_internal_loads_sensible = XMLHelper.get_value(space, 'extension/InternalLoadsSensible', :float)
+      @fenestration_load_procedure = XMLHelper.get_value(space, 'extension/FenestrationLoadProcedure', :string)
       HPXML.design_loads_from_doc(self, space)
     end
   end

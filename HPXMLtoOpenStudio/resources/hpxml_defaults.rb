@@ -27,6 +27,7 @@ class HPXMLDefaults
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
     apply_building_construction(hpxml_bldg, cfa, nbeds)
+    apply_zone_spaces(hpxml_bldg)
     apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
@@ -681,6 +682,16 @@ class HPXMLDefaults
     if hpxml_bldg.building_construction.number_of_units.nil?
       hpxml_bldg.building_construction.number_of_units = 1
       hpxml_bldg.building_construction.number_of_units_isdefaulted = true
+    end
+  end
+
+  def self.apply_zone_spaces(hpxml_bldg)
+    return if hpxml_bldg.get_conditioned_zone.nil?
+    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      if space.fenestration_load_procedure.nil?
+        space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+        space.fenestration_load_procedure_isdefaulted = true
+      end
     end
   end
 
