@@ -7770,6 +7770,11 @@ class HPXML < Object
     return doc
   end
 
+  def self.vented_locations
+    return [HPXML::LocationAtticVented,
+            HPXML::LocationCrawlspaceVented]
+  end
+
   def self.conditioned_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
