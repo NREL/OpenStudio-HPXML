@@ -394,7 +394,7 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
+- Batteries are not currently supported.
 - Utility bill calculations using detailed rates are not supported.
 
 .. _buildingsite:
@@ -513,6 +513,9 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Conductivity is used for foundation heat transfer and ground source heat pumps.
   Diffusivity is used for ground source heat pumps.
 
+HPXML Neighbor Buildings
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
   ==============================  =================  ================  ========================  ========  ========  =============================================
@@ -565,26 +568,34 @@ HPXML Building Construction
 
 Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction``.
 
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  Element                                                    Type      Units      Constraints                        Required  Default   Notes
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
-  ``NumberofUnits``                                          integer              >= 1                               No        1         Unit multiplier [#]_
-  ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
-  ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              >= 0                               Yes                 Number of bedrooms
-  ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
-  ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
-  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  Element                                  Type      Units      Constraints                        Required  Default   Notes
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
+  ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
+  ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
+  ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
+  ``AverageCeilingHeight``                 double    ft         > 0                                No        8.2       Floor to ceiling height within conditioned space
+  ``NumberofBedrooms``                     integer              >= 0                               Yes                 Number of bedrooms
+  ``NumberofBathrooms``                    integer              > 0                                No        See [#]_  Number of bathrooms
+  ``ConditionedFloorArea``                 double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
+  ``ConditionedBuildingVolume``            double    ft3        > 0                                No        See [#]_  Volume within conditioned space boundary (including a conditioned basement/crawlspace)
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
+         Note that when NumberofUnits is greater than 1, a few capabilities are not currently supported:
+         
+         \- Dehumidifiers
+         
+         \- Ground-source heat pumps
+         
+         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
+         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
-         If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
 HPXML Schedules
 ***************
@@ -650,10 +661,17 @@ The column names available in the schedule CSV files are:
   ``general_water_use``             frac     General water use internal gains.                                                  No
   ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                              No
   ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                              No
+  ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                           No
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
   ================================  =======  =================================================================================  ===============================
+
+  .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
+         While any fraction value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
+         A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
+         During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
+         When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -717,16 +735,21 @@ Additional autosizing factor inputs are available at the system level, see :ref:
          If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
   .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
 
+Manual J Inputs
+~~~~~~~~~~~~~~~
+
 If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
   =================================  ========  ======  ===========  ========  ============  ============================================
   Element                            Type      Units   Constraints  Required  Default       Description
   =================================  ========  ======  ===========  ========  ============  ============================================
-  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
-  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
+  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating outdoor design temperature
+  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling outdoor design temperature
+  ``DailyTemperatureRange``          string            See [#]_     No        See [#]_      Class based on average difference between daily high/low outdoor temperatures during the hottest month
   ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
   ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
   ``HumiditySetpoint``               double    frac    > 0, < 1     No        See [#]_      Conditioned space relative humidity
+  ``HumidityDifference``             double    grains               No        See [#]_      Difference between absolute humidity of the outdoor/indoor air during the summer
   ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
   ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
   ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
@@ -736,9 +759,14 @@ If any HVAC equipment is being autosized (i.e., capacities are not provided), ad
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] DailyTemperatureRange choices are "low", "medium", or "high".
+  .. [#] If DailyTemperatureRange not provided, the cooling drybulb temperature range is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
   .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
   .. [#] If HumiditySetpoint not provided, defaults to 0.45 in a dry climate, otherwise 0.5.
+  .. [#] If HumidityDifference not provided, it is calculated from the other inputs/defaults and the cooling humidity ratio.
+         The cooling humidity ratio is calculated from the DESIGN CONDITIONS header section inside the EPW weather file or, if not available, the 8760 hourly temperatures in the EPW.
   .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
@@ -931,6 +959,14 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
+If the dwelling unit has an unvented attic, whether it is within the infiltration volume is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
 If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
@@ -946,6 +982,22 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
 HPXML Foundations
 *****************
 
+If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
 If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
@@ -958,11 +1010,15 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-If the dwelling has a manufactured home belly-and-wing foundation, whether a
-skirt is present can be optionally entered in
-``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing/SkirtPresent``.
-The default, if that value is missing, is to assume there is a skirt present and
-the floors above that foundation do not have exposure to the wind. 
+If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
+
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  Element            Type     Units  Constraints  Required  Default     Notes
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  ``SkirtPresent``   boolean                      No        true        Presence of skirt [#]_
+  =================  =======  =====  ===========  ========  ==========  ==========================
+
+  .. [#] When a skirt is present, it is assumed that the foundation does not have exposure to wind.
 
 HPXML Roofs
 ***********
@@ -1302,6 +1358,9 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
          The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
+Natural Ventilation
+~~~~~~~~~~~~~~~~~~~
+
 If operable windows are defined, the availability of natural ventilation is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
 
   =============================================  ========  =========  ===========  ========  ========  ========================================================
@@ -1311,6 +1370,9 @@ If operable windows are defined, the availability of natural ventilation is ente
   =============================================  ========  =========  ===========  ========  ========  ========================================================
 
   .. [#] Default of 3 days per week (Monday/Wednesday/Friday) is based on `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+UFactor/SHGC Lookup
+~~~~~~~~~~~~~~~~~~~
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Window``.
 
@@ -1359,6 +1421,9 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 
   OpenStudio-HPXML will return an error if the combination of window properties is not in the above table.
 
+HPXML Overhangs
+~~~~~~~~~~~~~~~
+
 If overhangs are specified, additional information is entered in ``Overhangs``.
 
   ============================  ========  ======  ===========  ========  =======  ========================================================
@@ -1405,6 +1470,9 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
          Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
          
   .. [#] AttachedToRoof must reference a ``Roof``.
+
+UFactor/SHGC Lookup
+~~~~~~~~~~~~~~~~~~~
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Skylight``.
 
@@ -2629,7 +2697,7 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
-         
+
          \- **standard**: 0.75 Btu/hr-ft-F
          
          \- **thermally enhanced**: 1.2 Btu/hr-ft-F
@@ -2676,6 +2744,9 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
 
+HPXML HVAC Seasons
+~~~~~~~~~~~~~~~~~~
+
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
   ===================  ========  =====  ===========  ========  =======  ===========
@@ -2687,17 +2758,12 @@ If a heating and/or cooling season is defined, additional information is entered
   ``EndDayOfMonth``    integer          >= 1, <= 31  Yes                End day
   ===================  ========  =====  ===========  ========  =======  ===========
 
-Thermostat setpoints are additionally entered using either simple inputs or hourly inputs.
+HPXML HVAC Setpoints
+~~~~~~~~~~~~~~~~~~~~
 
-- :ref:`hvac_control_simple`
-- :ref:`hvac_control_hourly`
+Thermostat setpoints are additionally entered using either simple inputs, hourly inputs, or :ref:`schedules_detailed`.
 
-Alternatively, setpoints can be defined using :ref:`schedules_detailed`.
-
-.. _hvac_control_simple:
-
-Simple Inputs
-~~~~~~~~~~~~~
+**Simple Inputs**
 
 To define simple thermostat setpoints, additional information is entered in ``HVACControl``.
 
@@ -2735,10 +2801,7 @@ If there is a cooling temperature setup, additional information is entered in ``
 
   .. [#] TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
 
-.. _hvac_control_hourly:
-
-Hourly Inputs
-~~~~~~~~~~~~~~~
+**Hourly Inputs**
 
 To define hourly thermostat setpoints, additional information is entered in ``HVACControl``.
 
@@ -2952,19 +3015,21 @@ Each exhaust only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -2990,19 +3055,21 @@ Each supply only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/M
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -3028,19 +3095,21 @@ Each balanced (supply and exhaust) fan is entered as a ``/HPXML/Building/Buildin
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] If FanPower not provided, defaults to 0.7 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -3066,19 +3135,21 @@ Each heat recovery ventilator (HRV) is entered as a ``/HPXML/Building/BuildingDe
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
   .. [#] If FanPower not provided, defaults to 1.0 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -3106,19 +3177,21 @@ Each energy recovery ventilator (ERV) is entered as a ``/HPXML/Building/Building
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan  = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] Providing AdjustedTotalRecoveryEfficiency (ATRE) is preferable to TotalRecoveryEfficiency (TRE).
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
@@ -3150,19 +3223,21 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per ANSI/RESNET/ICC 301-2022:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] The HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
@@ -3887,7 +3962,10 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-In addition, an inverter must be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
+HPXML Inverters
+~~~~~~~~~~~~~~~
+
+In addition, the PVSystem must be connected to an inverter that is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
   =======================================================  =================  ================  ===================  ========  ========  ============================================
   Element                                                  Type               Units             Constraints          Required  Default   Notes
@@ -4264,41 +4342,13 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-Lighting can be specified in one of two ways: using 1) lighting type fractions or 2) annual energy consumption values.
 Lighting is described using multiple ``LightingGroup`` elements for each location (interior, exterior, or garage).
 If no LightingGroup elements are provided for a given location (e.g., exterior), the simulation will not include that lighting use.
 
-If specifying **lighting type fractions**, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements (one for each possible ``LightingType``) are entered for each lighting location:
+Lighting can be specified in one of two ways:
 
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-  Element                        Type     Units   Constraints      Required  Default  Notes
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-  ``SystemIdentifier``           id                                Yes                Unique identifier
-  ``LightingType``               element          See [#]_         Yes                Lighting type
-  ``Location``                   string           See [#]_         Yes                Lighting location [#]_
-  ``FractionofUnitsInLocation``  double   frac    >= 0, <= 1 [#]_  Yes                Fraction of light fixtures in the location with the specified lighting type
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-
-  .. [#] LightingType child element choices are ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
-  .. [#] Location choices are "interior", "garage", or "exterior".
-  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
-  .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
-         If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
-
-  Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
-
-If specifying **annual energy consumption** instead, a single ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` element is entered for each lighting location:
-
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-  Element                           Type     Units   Constraints  Required  Default   Notes
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-  ``SystemIdentifier``              id                            Yes                 Unique identifier
-  ``Location``                      string           See [#]_     Yes                 Lighting location [#]_
-  ``Load[Units="kWh/year"]/Value``  double   kWh/yr  >= 0         Yes                 Lighting energy use
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-
-  .. [#] Location choices are "interior", "garage", or "exterior".
-  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+- :ref:`lighting_fractions`
+- :ref:`lighting_annual_energy`
 
 With either lighting specification, additional information can be entered in ``/HPXML/Building/BuildingDetails/Lighting``.
 
@@ -4325,6 +4375,51 @@ With either lighting specification, additional information can be entered in ``/
   .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
   .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.065, 0.056, 0.047".
   .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
+
+.. _lighting_fractions:
+
+Lighting Type Fractions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If specifying lighting type fractions, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements (one for each possible ``LightingType``) are entered for each lighting location:
+
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+  Element                        Type     Units   Constraints      Required  Default  Notes
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+  ``SystemIdentifier``           id                                Yes                Unique identifier
+  ``LightingType``               element          See [#]_         Yes                Lighting type
+  ``Location``                   string           See [#]_         Yes                Lighting location [#]_
+  ``FractionofUnitsInLocation``  double   frac    >= 0, <= 1 [#]_  Yes                Fraction of light fixtures in the location with the specified lighting type
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+
+  .. [#] LightingType child element choices are ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
+  .. [#] Location choices are "interior", "garage", or "exterior".
+  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+  .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
+         If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
+
+  Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+
+.. _lighting_annual_energy:
+
+Annual Energy Consumption
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If specifying annual energy consumption, a single ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` element is entered for each lighting location:
+
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  Element                           Type     Units   Constraints  Required  Default   Notes
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  ``SystemIdentifier``              id                            Yes                 Unique identifier
+  ``Location``                      string           See [#]_     Yes                 Lighting location [#]_
+  ``Load[Units="kWh/year"]/Value``  double   kWh/yr  >= 0         Yes                 Lighting energy use
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+
+  .. [#] Location choices are "interior", "garage", or "exterior".
+  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+
+Exterior Holiday Lighting
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If exterior holiday lighting is specified, additional information is entered in ``/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting``.
 
@@ -4671,7 +4766,7 @@ The various locations used in an HPXML file are defined as follows:
   crawlspace - vented                                                                      EnergyPlus calculation                                     Any
   crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
   crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                                     Any
+  garage                          Unconditioned garage (not shared parking garage) [#]_    EnergyPlus calculation                                     Any
   manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
   manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
@@ -4683,6 +4778,10 @@ The various locations used in an HPXML file are defined as follows:
   under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
   roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
   ==============================  =======================================================  =========================================================  =================
+
+  .. [#] OpenStudio-HPXML does not model "conditioned" or "heated" garages.
+         Many conditioned garages are not conditioned 24/7, rather they are only conditioned for short periods when occupants are in them and turn on the space conditioning equipment, so it is best to assume an unconditioned garage.
+         However, if a garage was converted into livable space, then "conditioned space" should be used instead.
 
 Validating & Debugging Errors
 -----------------------------
