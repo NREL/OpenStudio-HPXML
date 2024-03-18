@@ -1092,32 +1092,48 @@ class Airflow
       duct_subroutine.addLine('  Set SupSensLkToDZ = SupTotLkToDZ-SupLatLkToDZ') # W
 
       # Handle duct leakage imbalance induced infiltration (ANSI 301-2022 Addendum C Table 4.2.2(1c)
-      duct_subroutine.addLine("  Set DZVented = #{duct_location_is_vented ? 1 : 0}")
-      duct_subroutine.addLine('  Set FracOutsideToCond = 0.0')
-      duct_subroutine.addLine('  Set FracOutsideToDZ = 0.0')
-      duct_subroutine.addLine('  Set FracCondToOutside = 0.0')
-      duct_subroutine.addLine('  Set FracDZToOutside = 0.0')
-      duct_subroutine.addLine('  Set FracDZToCond = 0.0')
-      duct_subroutine.addLine('  Set FracCondToDZ = 0.0')
-      duct_subroutine.addLine('  If f_sup > f_ret') # Supply > Return (conditioned space is depressurized)
-      duct_subroutine.addLine('    If (DZVented == 1)') # Duct zone vented
-      duct_subroutine.addLine('      Set FracOutsideToCond = 1.0')
-      duct_subroutine.addLine('      Set FracDZToOutside = 1.0')
-      duct_subroutine.addLine('    Else') # Duct zone unvented
-      duct_subroutine.addLine('      Set FracOutsideToCond = 0.5')
-      duct_subroutine.addLine('      Set FracDZToCond = 0.5')
-      duct_subroutine.addLine('      Set FracDZToOutside = 0.5')
-      duct_subroutine.addLine('    EndIf')
-      duct_subroutine.addLine('  Else') # Supply < Return (conditioned space is pressurized)
-      duct_subroutine.addLine('    If (DZVented == 1)') # Duct zone vented
-      duct_subroutine.addLine('      Set FracOutsideToDZ = 1.0')
-      duct_subroutine.addLine('      Set FracCondToOutside = 1.0')
-      duct_subroutine.addLine('    Else') # Duct zone unvented
-      duct_subroutine.addLine('      Set FracOutsideToDZ = 0.5')
-      duct_subroutine.addLine('      Set FracCondToDZ = 0.5')
-      duct_subroutine.addLine('      Set FracCondToOutside = 0.5')
-      duct_subroutine.addLine('    EndIf')
-      duct_subroutine.addLine('  EndIf')
+      leakage_supply = leakage_fracs[HPXML::DuctTypeSupply].to_f + leakage_cfm25s[HPXML::DuctTypeSupply].to_f
+      leakage_return = leakage_fracs[HPXML::DuctTypeReturn].to_f + leakage_cfm25s[HPXML::DuctTypeReturn].to_f
+      if leakage_supply == leakage_return
+        duct_subroutine.addLine('  Set FracOutsideToCond = 0.0')
+        duct_subroutine.addLine('  Set FracOutsideToDZ = 0.0')
+        duct_subroutine.addLine('  Set FracCondToOutside = 0.0')
+        duct_subroutine.addLine('  Set FracDZToOutside = 0.0')
+        duct_subroutine.addLine('  Set FracDZToCond = 0.0')
+        duct_subroutine.addLine('  Set FracCondToDZ = 0.0')
+      elsif leakage_supply > leakage_return # Supply > Return (conditioned space is depressurized)
+        if duct_location_is_vented # Duct location vented
+          duct_subroutine.addLine('  Set FracOutsideToCond = 1.0')
+          duct_subroutine.addLine('  Set FracOutsideToDZ = 0.0')
+          duct_subroutine.addLine('  Set FracCondToOutside = 0.0')
+          duct_subroutine.addLine('  Set FracDZToOutside = 1.0')
+          duct_subroutine.addLine('  Set FracDZToCond = 0.0')
+          duct_subroutine.addLine('  Set FracCondToDZ = 0.0')
+        else # Duct location unvented
+          duct_subroutine.addLine('  Set FracOutsideToCond = 0.5')
+          duct_subroutine.addLine('  Set FracOutsideToDZ = 0.0')
+          duct_subroutine.addLine('  Set FracCondToOutside = 0.0')
+          duct_subroutine.addLine('  Set FracDZToOutside = 0.5')
+          duct_subroutine.addLine('  Set FracDZToCond = 0.5')
+          duct_subroutine.addLine('  Set FracCondToDZ = 0.0')
+        end
+      else # Supply < Return (conditioned space is pressurized)
+        if duct_location_is_vented # Duct location vented
+          duct_subroutine.addLine('  Set FracOutsideToCond = 0.0')
+          duct_subroutine.addLine('  Set FracOutsideToDZ = 1.0')
+          duct_subroutine.addLine('  Set FracCondToOutside = 1.0')
+          duct_subroutine.addLine('  Set FracDZToOutside = 0.0')
+          duct_subroutine.addLine('  Set FracDZToCond = 0.0')
+          duct_subroutine.addLine('  Set FracCondToDZ = 0.0')
+        else # Duct location unvented
+          duct_subroutine.addLine('  Set FracOutsideToCond = 0.0')
+          duct_subroutine.addLine('  Set FracOutsideToDZ = 0.5')
+          duct_subroutine.addLine('  Set FracCondToOutside = 0.5')
+          duct_subroutine.addLine('  Set FracDZToOutside = 0.0')
+          duct_subroutine.addLine('  Set FracDZToCond = 0.0')
+          duct_subroutine.addLine('  Set FracCondToDZ = 0.5')
+        end
+      end
       duct_subroutine.addLine('  Set lk_imbal_vfr = @ABS(f_sup - f_ret) * AH_VFR') # m3/s
       duct_subroutine.addLine('  Set ImbalLkCondToDZ = lk_imbal_vfr * FracCondToDZ') # m3/s
       duct_subroutine.addLine('  Set ImbalLkDZToCond = lk_imbal_vfr * FracDZToCond') # m3/s
