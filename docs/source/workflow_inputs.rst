@@ -513,6 +513,8 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Conductivity is used for foundation heat transfer and ground source heat pumps.
   Diffusivity is used for ground source heat pumps.
 
+.. _neighbor_buildings:
+
 HPXML Neighbor Buildings
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1422,6 +1424,8 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 .. warning::
 
   OpenStudio-HPXML will return an error if the combination of window properties is not in the above table.
+
+.. _overhangs:
 
 HPXML Overhangs
 ~~~~~~~~~~~~~~~

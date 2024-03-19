@@ -55,45 +55,66 @@ The OpenStudio measures used by the workflow are:
 Geometry
 --------
 
-The surfaces stored in HPXML building description files represent the area and orientation of ground and exterior exposure, but do not represent their position relative to each other.
-See :ref:`enclosure` for more information.
+HPXML files currently do not include detailed 3D geometry (e.g., surface vertices or positions of surfaces relative to each other).
+Rather, surfaces are defined by area and orientation.
+However, HPXML can still handle the most important aspect of geometry -- shading of solar radiation.
+Geometry inputs that affect solar shading include :ref:`overhangs` and :ref:`neighbor_buildings`.
 
-The ``BuildResidentialHPXML`` measure generates enclosure elements of an HPXML file using the following steps:
+Support for 3D geometry may be added to HPXML and OpenStudio-HPXML in the future.
 
-#. Collect a set of simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width).
-#. Use the inputs and methods from a `geometry resource file <https://github.com/NREL/OpenStudio-HPXML/blob/master/BuildResidentialHPXML/resources/geometry.rb>`_ to create 3D closed-form dwelling unit representations in OpenStudio.
-#. Map individual OpenStudio surfaces to HPXML elements using surface types, outside boundary conditions, areas, orientations, etc.
+More detail is provided below on how geometry is handled in the :ref:`geometry_buildreshpxml_measure` and :ref:`geometry_hpxmltoopenstudio_measure`.
 
-The image below is an example 3D representation for a single-family detached dwelling unit.
-Some of the simplified geometry inputs used to assemble the model are given below:
+.. _geometry_buildreshpxml_measure:
 
-- conditioned basement foundation type
-- rim joists with a height of 9.25 in
-- 1 living floor above grade
-- unvented attic w/gable roof and 6:12 pitch
-- 50% protruding 12 ft wide garage
-- windows on all 4 facades
-- 40 ft2 front door oriented to the South
+BuildResidentialHPXML measure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. image:: images/extra-enclosure-garage-partially-protruded.png
+The ``BuildResidentialHPXML`` measure generates an HPXML file with surfaces using the following steps:
+
+#. Collect simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width/protrusion).
+#. Create a 3D closed-form geometry in an OpenStudio model.
+#. Map OpenStudio surfaces to HPXML surfaces using surface types, boundary conditions, areas, orientations, etc. Like surfaces are collapsed into a single surface with aggregate surface area.
+
+For example, the image below is a 3D representation of a single-family detached home.
+
+.. image:: images/geometry_3d.png
    :align: center
 
-Each of the surfaces (i.e., walls, floors, ceilings, roof decks, windows, doors, etc.) is mapped to an enclosure-related element as described in :ref:`enclosure`.
-Like surfaces (i.e., by type, orientation, exposure, etc.) are collapsed into a single surface with aggregate surface area.
-This can help to improve the speed of the simulation.
+And a corresponding ``Wall`` surface in the HPXML file will look like:
 
-The ``HPXMLtoOpenStudio`` measure translates :ref:`enclosure` elements (back) to OpenStudio Model.
-The image below shows the result of translating the previous single-family detached example, stored in an HPXML file, to OpenStudio Model.
-Note that all surfaces retain their original area and orientation, and are organized such that they do not shade one another.
+.. code-block:: XML
 
-.. image:: images/extra-enclosure-garage-partially-protruded2.png
+  <Wall>
+    <SystemIdentifier id='Wall1'/>
+    <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+    <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
+    <WallType>
+      <WoodStud/>
+    </WallType>
+    <Area>360.0</Area>
+    <Orientation>north</Orientation>
+    <Insulation>
+      <SystemIdentifier id='Wall1Insulation'/>
+      <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+    </Insulation>
+  </Wall>
+  
+.. _geometry_hpxmltoopenstudio_measure:
+
+HPXMLtoOpenStudio measure
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``HPXMLtoOpenStudio`` measure translates :ref:`enclosure` elements to an OpenStudio Model.
+The image below shows the result of translating an HPXML file corresponding to the above single-family detached example.
+
+.. image:: images/geometry_exploded.png
    :align: center
 
-The geometry representation in this OpenStudio Model is simulated using EnergyPlus.
+Surfaces have the correct area/orientation for the heat transfer calculations (but are spread out such that they do not shade one another).
 
-In the case of whole multifamily buildings, the process is much the same.
-Individual dwelling units contained in the HPXML file are translated, and resulting OpenStudio Models are merged into a single OpenStudio Model.
-Sets of dwelling unit surfaces are spaced along the y-axis so as not to sit on top of one another.
+.. note::
+
+  It is not possible for the ``HPXMLtoOpenStudio`` measure to automatically construct a 3D closed-form geometry from an HPXML file since the shape of the building (rectangular, L-shaped, etc.) is unknown.
 
 License
 -------
