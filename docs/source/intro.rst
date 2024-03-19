@@ -60,7 +60,7 @@ Rather, surfaces are defined by area and orientation.
 However, HPXML can still handle the most important aspect of geometry -- shading of solar radiation.
 Geometry inputs that affect solar shading include :ref:`overhangs` and :ref:`neighbor_buildings`.
 
-For example, the image below shows the result of translating an HPXML file to an OpenStudio model.
+For example, the image below shows the result of translating a single-family detached HPXML file to an OpenStudio model.
 
 .. image:: images/geometry_exploded.png
    :align: center
@@ -68,15 +68,15 @@ For example, the image below shows the result of translating an HPXML file to an
 Surfaces are shown with the correct area/orientation for heat transfer calculations (but are spread out such that they do not shade one another).
 Shading surfaces, shown in purple, represent neighboring buildings that substantially shade the windows facing left/right.
 
-A 3D rendering of the single-family detached home represented by the above OpenStudio model is shown below (excluding the neighboring buildings).
-
-.. image:: images/geometry_3d.png
-   :align: center
-
 .. note::
 
   It is not possible to automatically construct a 3D closed-form geometry from HPXML inputs since the shape of the building (rectangular, L-shaped, etc.) is unknown.
   Support for 3D geometry may be added to OpenStudio-HPXML in the future.
+
+For illustrative purposes, a 3D representation of the above home (excluding neighboring buildings) is shown below.
+
+.. image:: images/geometry_3d.png
+   :align: center
 
 License
 -------
