@@ -159,6 +159,22 @@ class WorkflowOtherTest < Minitest::Test
     end
   end
 
+  def test_run_simulation_skip_simulation
+    # Check that we can correctly skip the EnergyPlus simulation and reporting measures
+    rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
+    xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
+    command = "\"#{OpenStudio.getOpenStudioCLI}\" \"#{rb_path}\" -x \"#{xml}\" --skip-simulation"
+    system(command, err: File::NULL)
+
+    # Check for in.xml HPXML file
+    assert(File.exist? File.join(File.dirname(xml), 'run', 'in.xml'))
+
+    # Check for no idf or output file
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'in.idf'))
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'eplusout.msgpack'))
+    refute(File.exist? File.join(File.dirname(xml), 'run', 'results_annual.csv'))
+  end
+
   def test_run_defaulted_in_xml
     # Check that if we simulate the in.xml file (HPXML w/ defaults), we get
     # the same results as the original HPXML.
