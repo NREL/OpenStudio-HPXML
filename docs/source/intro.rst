@@ -62,25 +62,12 @@ Geometry inputs that affect solar shading include :ref:`overhangs` and :ref:`nei
 
 Support for 3D geometry may be added to HPXML and OpenStudio-HPXML in the future.
 
-More detail is provided below on how geometry is handled in the :ref:`geometry_buildreshpxml_measure` and :ref:`geometry_hpxmltoopenstudio_measure`.
-
-.. _geometry_buildreshpxml_measure:
-
-BuildResidentialHPXML measure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``BuildResidentialHPXML`` measure generates an HPXML file with surfaces using the following steps:
-
-#. Collect simplified geometry inputs (e.g., conditioned floor area, number of floors above grade, aspect ratio, garage width/protrusion).
-#. Create a 3D closed-form geometry in an OpenStudio model.
-#. Map OpenStudio surfaces to HPXML surfaces using surface types, boundary conditions, areas, orientations, etc. Like surfaces are collapsed into a single surface with aggregate surface area.
-
 For example, the image below is a 3D representation of a single-family detached home.
 
 .. image:: images/geometry_3d.png
    :align: center
 
-And a corresponding ``Wall`` surface in the HPXML file will look like:
+:ref:`enclosure` elements that describe the home will look like this:
 
 .. code-block:: XML
 
@@ -99,13 +86,7 @@ And a corresponding ``Wall`` surface in the HPXML file will look like:
     </Insulation>
   </Wall>
   
-.. _geometry_hpxmltoopenstudio_measure:
-
-HPXMLtoOpenStudio measure
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``HPXMLtoOpenStudio`` measure translates :ref:`enclosure` elements to an OpenStudio Model.
-The image below shows the result of translating an HPXML file corresponding to the above single-family detached example, including neighboring buildings of the same height to the left/right.
+The image below shows the result of translating the HPXML file to an OpenStudio model, including neighboring buildings of the same height to the left/right.
 
 .. image:: images/geometry_exploded.png
    :align: center
@@ -115,7 +96,7 @@ Shading surfaces, shown in purple, represent neighboring buildings that substant
 
 .. note::
 
-  It is not possible for the ``HPXMLtoOpenStudio`` measure to automatically construct a 3D closed-form geometry from an HPXML file since the shape of the building (rectangular, L-shaped, etc.) is unknown.
+  It is not possible to automatically construct a 3D closed-form geometry from an HPXML file since the shape of the building (rectangular, L-shaped, etc.) is unknown.
 
 License
 -------
