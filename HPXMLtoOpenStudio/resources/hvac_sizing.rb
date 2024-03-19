@@ -359,8 +359,9 @@ class HVACSizing
     '''
     Room loads set up based on spaces
     '''
-    @space_loads = {}
     @spaces = []
+    @space_loads = {}
+    return if @hpxml_bldg.get_conditioned_zone.nil?
     @hpxml_bldg.get_conditioned_zone.spaces.each do |space|
       @spaces << space
       @space_loads[space.id] = DesignLoads.new
