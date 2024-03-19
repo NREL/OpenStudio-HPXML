@@ -1728,7 +1728,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       end
       hpxml_bldg.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size + 1}",
                                            is_shared_system: true,
-                                           number_of_units_served: 6,
+                                           number_of_bedrooms_served: 18,
                                            fuel_type: HPXML::FuelTypeNaturalGas,
                                            water_heater_type: HPXML::WaterHeaterTypeStorage,
                                            location: HPXML::LocationConditionedSpace,
@@ -1741,7 +1741,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       if hpxml_file == 'base-bldgtype-mf-unit-shared-laundry-room-multiple-water-heaters.xml'
         hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served /= 2.0
         hpxml_bldg.water_heating_systems[0].tank_volume /= 2.0
-        hpxml_bldg.water_heating_systems[0].number_of_units_served /= 2.0
+        hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served /= 2.0
         hpxml_bldg.water_heating_systems << hpxml_bldg.water_heating_systems[0].dup
         hpxml_bldg.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size}"
       end
