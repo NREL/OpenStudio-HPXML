@@ -2138,9 +2138,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_units_served', true)
-    arg.setDisplayName('Water Heater: Number of Units Served')
-    arg.setDescription("Number of dwelling units served (directly or indirectly) by the water heater. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion water heater tank losses to the unit.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_bedrooms_served', false)
+    arg.setDisplayName('Water Heater: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served (directly or indirectly) by the water heater. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion water heater tank losses to the unit.")
     arg.setUnits('#')
     arg.setDefaultValue(1)
     args << arg
@@ -6317,10 +6317,13 @@ class HPXMLFile
       end
     end
 
-    if args[:water_heater_num_units_served] > 1
-      is_shared_system = true
-      number_of_units_served = args[:water_heater_num_units_served]
+    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+      if args[:water_heater_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+        is_shared_system = true
+        number_of_bedrooms_served = args[:water_heater_num_bedrooms_served].get
+      end
     end
+
     if args[:water_heater_uses_desuperheater].is_initialized
       uses_desuperheater = args[:water_heater_uses_desuperheater].get
       if uses_desuperheater
@@ -6373,7 +6376,7 @@ class HPXMLFile
                                          temperature: temperature,
                                          heating_capacity: heating_capacity,
                                          is_shared_system: is_shared_system,
-                                         number_of_units_served: number_of_units_served,
+                                         number_of_bedrooms_served: number_of_bedrooms_served,
                                          tank_model_type: tank_model_type,
                                          operating_mode: operating_mode)
   end

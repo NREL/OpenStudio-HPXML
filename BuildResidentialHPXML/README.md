@@ -3585,16 +3585,16 @@ The setpoint temperature of water heater. If not provided, the OS-HPXML default 
 
 <br/>
 
-**Water Heater: Number of Units Served**
+**Water Heater: Number of Bedrooms Served**
 
-Number of dwelling units served (directly or indirectly) by the water heater. Must be 1 if single-family detached. Used to apportion water heater tank losses to the unit.
+Number of bedrooms served (directly or indirectly) by the water heater. Required if single-family attached or apartment unit. Used to apportion water heater tank losses to the unit.
 
-- **Name:** ``water_heater_num_units_served``
+- **Name:** ``water_heater_num_bedrooms_served``
 - **Type:** ``Integer``
 
 - **Units:** ``#``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
