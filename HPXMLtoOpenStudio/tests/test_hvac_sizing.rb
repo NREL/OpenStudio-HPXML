@@ -804,6 +804,41 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_equal(test_hpxml_bldg.hvac_plant.hdl_total, base_hpxml_bldg.hvac_plant.hdl_total)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_sens_intgains)
     assert_operator(test_hpxml_bldg.hvac_plant.cdl_lat_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_lat_intgains)
+
+    # Test room by room calculations
+    # Run ACCA test file base
+    acca_files_path = File.join(@test_files_path, 'ACCA_Examples')
+    acca_test_file_name = 'Long_Residence.xml'
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(acca_files_path, acca_test_file_name))
+    _model, _base_hpxml, base_hpxml_bldg = _test_measure(args_hash)
+
+    # Test window methodology
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml, hpxml_bldg = _create_hpxml(acca_test_file_name, acca_files_path)
+    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedurePeakValue
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    test_hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      base_space = base_hpxml_bldg.get_conditioned_zone.spaces.find{|s| s.id == space.id}
+      assert_operator(space.cdl_sens_windows, :>=, base_space.cdl_sens_windows * 1.3)
+      assert_operator(space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3)
+      assert_operator(space.cdl_sens_windows + space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_aedexcursion)
+    end
+
+    # Test space internal gain
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml, hpxml_bldg = _create_hpxml(acca_test_file_name, acca_files_path)
+    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      space.manualj_internal_loads_sensible = 200
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    test_hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      assert_equal(space.cdl_sens_intgains, 200)
+    end
   end
 
   def test_manual_j_slab_f_factor
@@ -1012,8 +1047,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     return model, hpxml, hpxml.buildings[0]
   end
 
-  def _create_hpxml(hpxml_name)
-    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, hpxml_name))
+  def _create_hpxml(hpxml_name, file_path = nil)
+    path = file_path.nil? ? @sample_files_path : file_path
+    hpxml = HPXML.new(hpxml_path: File.join(path, hpxml_name))
     return hpxml, hpxml.buildings[0]
   end
 
