@@ -3383,7 +3383,6 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``WaterHeaterType``                            string                            storage water heater  Yes                 Type of water heater
   ``Location``                                   string                            See [#]_              No        See [#]_  Water heater location
   ``IsSharedSystem``                             boolean                                                 No        false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                           > 0                   See [#]_            Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double             gal            > 0                   No        See [#]_  Nominal tank volume
   ``FractionDHWLoadServed``                      double             frac           >= 0, <= 1 [#]_       Yes                 Fraction of hot water load served [#]_
   ``HeatingCapacity``                            double             Btu/hr         > 0                   No        See [#]_  Heating capacity
@@ -3394,6 +3393,7 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
   ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
   ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
+  ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms    See [#]_            Number of bedrooms served directly or indirectly
   =============================================  =================  =============  ====================  ========  ========  =============================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -3405,7 +3405,6 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
@@ -3427,6 +3426,8 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] TankModelType choices are "mixed" or "stratified".
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. _water_heater_tankless:
 
@@ -3443,12 +3444,12 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``WaterHeaterType``                          string                 instantaneous water heater  Yes                     Type of water heater
   ``Location``                                 string                 See [#]_                    No            See [#]_  Water heater location
   ``IsSharedSystem``                           boolean                                            No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                      integer                > 0                         See [#]_                Number of dwelling units served directly or indirectly
   ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                  No            See [#]_  Multiplier on efficiency, typically to account for cycling
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
   ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
   ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms          See [#]_                Number of bedrooms served directly or indirectly
   ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -3460,13 +3461,14 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. _water_heater_heat_pump:
 
@@ -3483,7 +3485,6 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``WaterHeaterType``                            string                           heat pump water heater  Yes                    Type of water heater
   ``Location``                                   string                           See [#]_                No        See [#]_     Water heater location
   ``IsSharedSystem``                             boolean                                                  No        false        Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                          > 0                     See [#]_               Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double            gal            > 0                     Yes                    Nominal tank volume
   ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                    Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                    EnergyGuide label rated efficiency
@@ -3492,6 +3493,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0            R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double            F              > 0                     No        125          Water heater setpoint [#]_
   ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_               Number of bedrooms served directly or indirectly
   =============================================  ================  =============  ======================  ========  ===========  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -3514,6 +3516,8 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. _water_heater_combi_storage:
 
@@ -3529,13 +3533,13 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``WaterHeaterType``                            string                 space-heating boiler with storage tank  Yes                     Type of water heater
   ``Location``                                   string                 See [#]_                                No            See [#]_  Water heater location
   ``IsSharedSystem``                             boolean                                                        No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                > 0                                     See [#]_                Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double   gal           > 0                                     Yes                     Nominal volume of the storage tank
   ``FractionDHWLoadServed``                      double   frac          >= 0, <= 1 [#]_                         Yes                     Fraction of hot water load served [#]_
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
   ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
   ``HotWaterTemperature``                        double   F             > 0                                     No            125       Water heater setpoint [#]_
   ``RelatedHVACSystem``                          idref                  See [#]_                                Yes                     ID of boiler
+  ``extension/NumberofBedroomsServed``           integer                > NumberofBedrooms                      See [#]_                Number of bedrooms served directly or indirectly
   =============================================  =======  ============  ======================================  ============  ========  ==================================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -3546,13 +3550,14 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If StandbyLoss not provided, defaults based on a regression analysis of `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. _water_heater_combi_tankless_coil:
 
@@ -3568,7 +3573,6 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   ``WaterHeaterType``        string          space-heating boiler with tankless coil  Yes                     Type of water heater
   ``Location``               string          See [#]_                                 No            See [#]_  Water heater location
   ``IsSharedSystem``         boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``    integer         > 0                                      See [#]_                Number of dwelling units served directly or indirectly
   ``FractionDHWLoadServed``  double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
   ``HotWaterTemperature``    double   F      > 0                                      No            125       Water heater setpoint [#]_
   ``RelatedHVACSystem``      idref           See [#]_                                 Yes                     ID of boiler
@@ -3588,6 +3592,8 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 .. _water_heater_desuperheater:
 
