@@ -105,12 +105,13 @@ HPXMLtoOpenStudio measure
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``HPXMLtoOpenStudio`` measure translates :ref:`enclosure` elements to an OpenStudio Model.
-The image below shows the result of translating an HPXML file corresponding to the above single-family detached example.
+The image below shows the result of translating an HPXML file corresponding to the above single-family detached example, including neighboring buildings of the same height to the left/right.
 
 .. image:: images/geometry_exploded.png
    :align: center
 
-Surfaces have the correct area/orientation for the heat transfer calculations (but are spread out such that they do not shade one another).
+Surfaces are shown with the correct area/orientation for heat transfer calculations (but are spread out such that they do not shade one another).
+Shading surfaces, shown in purple, represent neighboring buildings that substantially shade the windows facing left/right.
 
 .. note::
 
