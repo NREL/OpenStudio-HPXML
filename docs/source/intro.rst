@@ -60,33 +60,9 @@ Rather, surfaces are defined by area and orientation.
 However, HPXML can still handle the most important aspect of geometry -- shading of solar radiation.
 Geometry inputs that affect solar shading include :ref:`overhangs` and :ref:`neighbor_buildings`.
 
-Support for 3D geometry may be added to HPXML and OpenStudio-HPXML in the future.
+Support for 3D geometry may be added to OpenStudio-HPXML in the future.
 
-For example, the image below is a 3D representation of a single-family detached home.
-
-.. image:: images/geometry_3d.png
-   :align: center
-
-:ref:`enclosure` elements that describe the home will look like this:
-
-.. code-block:: XML
-
-  <Wall>
-    <SystemIdentifier id='Wall1'/>
-    <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-    <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
-    <WallType>
-      <WoodStud/>
-    </WallType>
-    <Area>360.0</Area>
-    <Orientation>north</Orientation>
-    <Insulation>
-      <SystemIdentifier id='Wall1Insulation'/>
-      <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-    </Insulation>
-  </Wall>
-  
-The image below shows the result of translating the HPXML file to an OpenStudio model, including neighboring buildings of the same height to the left/right.
+For example, the image below shows the result of translating an HPXML file to an OpenStudio model, including neighboring buildings of the same height to the left/right.
 
 .. image:: images/geometry_exploded.png
    :align: center
@@ -96,7 +72,7 @@ Shading surfaces, shown in purple, represent neighboring buildings that substant
 
 .. note::
 
-  It is not possible to automatically construct a 3D closed-form geometry from an HPXML file since the shape of the building (rectangular, L-shaped, etc.) is unknown.
+  It is not possible to automatically construct a 3D closed-form geometry from HPXML inputs since the shape of the building (rectangular, L-shaped, etc.) is unknown.
 
 License
 -------
