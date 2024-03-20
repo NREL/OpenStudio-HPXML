@@ -330,7 +330,7 @@
             </PipeInsulation>
             <extension>
               <SharedRecirculation>
-                <NumberofUnitsServed>6</NumberofUnitsServed>
+                <NumberofBedroomsServed>18</NumberofBedroomsServed>
                 <PumpPower>220.0</PumpPower>
                 <ControlType>timer</ControlType>
               </SharedRecirculation>

@@ -1718,7 +1718,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc.xml',
            'base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml'].include? hpxml_file
       hpxml_bldg.hot_water_distributions[0].has_shared_recirculation = true
-      hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
+      hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_bedrooms_served = 18
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_pump_power = 220
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecircControlTypeTimer
     elsif ['base-bldgtype-mf-unit-shared-laundry-room.xml',
