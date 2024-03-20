@@ -687,6 +687,7 @@ class HPXMLDefaults
 
   def self.apply_zone_spaces(hpxml_bldg)
     return if hpxml_bldg.get_conditioned_zone.nil?
+
     hpxml_bldg.get_conditioned_zone.spaces.each do |space|
       if space.fenestration_load_procedure.nil?
         space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureAEDExcursion

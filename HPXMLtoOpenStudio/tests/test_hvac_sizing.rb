@@ -364,22 +364,22 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         assert_in_delta(655, space.hdl_infil, default_tol_btuh_space)
         assert_in_epsilon(655, space.hdl_infil, default_tol_relative_infil)
         assert_in_delta(158, space.cdl_sens_walls, default_tol_btuh_space)
-        #assert_in_epsilon(158, space.cdl_sens_walls, default_tol_relative) # Issue: https://github.com/NREL/OpenStudio-HPXML/issues/1653
+        # assert_in_epsilon(158, space.cdl_sens_walls, default_tol_relative) # Issue: https://github.com/NREL/OpenStudio-HPXML/issues/1653
         assert_in_delta(720, space.cdl_sens_ceilings, default_tol_btuh_space)
         assert_in_epsilon(720, space.cdl_sens_ceilings, default_tol_relative)
         assert_in_delta(53, space.cdl_sens_infil, default_tol_btuh_space)
         assert_in_epsilon(53, space.cdl_sens_infil, default_tol_relative_infil)
       end
-      if space.id.include? 'hall_1'
-        assert_in_delta(551, space.hdl_doors, default_tol_btuh_space)
-        assert_in_epsilon(551, space.hdl_doors, default_tol_relative)
-        assert_in_delta(313, space.hdl_walls, default_tol_btuh_space)
-        assert_in_epsilon(313, space.hdl_walls, default_tol_relative)
-        assert_in_delta(412, space.hdl_ceilings, default_tol_btuh_space)
-        assert_in_epsilon(412, space.hdl_ceilings, default_tol_relative)
-        assert_in_delta(249, space.hdl_infil, default_tol_btuh_space)
-        assert_in_epsilon(249, space.hdl_infil, default_tol_relative_infil)
-      end
+      next unless space.id.include? 'hall_1'
+
+      assert_in_delta(551, space.hdl_doors, default_tol_btuh_space)
+      assert_in_epsilon(551, space.hdl_doors, default_tol_relative)
+      assert_in_delta(313, space.hdl_walls, default_tol_btuh_space)
+      assert_in_epsilon(313, space.hdl_walls, default_tol_relative)
+      assert_in_delta(412, space.hdl_ceilings, default_tol_btuh_space)
+      assert_in_epsilon(412, space.hdl_ceilings, default_tol_relative)
+      assert_in_delta(249, space.hdl_infil, default_tol_btuh_space)
+      assert_in_epsilon(249, space.hdl_infil, default_tol_relative_infil)
     end
 
     # Section 12: Smith Residence
@@ -867,7 +867,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     test_hpxml_bldg.get_conditioned_zone.spaces.each do |space|
-      base_space = base_hpxml_bldg.get_conditioned_zone.spaces.find{|s| s.id == space.id}
+      base_space = base_hpxml_bldg.get_conditioned_zone.spaces.find { |s| s.id == space.id }
       assert_operator(space.cdl_sens_windows, :>=, base_space.cdl_sens_windows * 1.3)
       assert_operator(space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3)
       assert_operator(space.cdl_sens_windows + space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_aedexcursion)

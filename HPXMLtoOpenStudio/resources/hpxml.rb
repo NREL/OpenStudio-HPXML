@@ -1424,9 +1424,9 @@ class HPXML < Object
     end
 
     def get_conditioned_zone()
-      return zones.find{|z| z.zone_type == ZoneTypeConditioned}
+      return zones.find { |z| z.zone_type == ZoneTypeConditioned }
     end
-    
+
     def primary_hvac_systems()
       return hvac_systems.select { |h| h.primary_system }
     end

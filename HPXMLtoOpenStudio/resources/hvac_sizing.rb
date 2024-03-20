@@ -362,6 +362,7 @@ class HVACSizing
     @spaces = []
     @space_loads = {}
     return if @hpxml_bldg.get_conditioned_zone.nil?
+
     @hpxml_bldg.get_conditioned_zone.spaces.each do |space|
       @spaces << space
       @space_loads[space.id] = DesignLoads.new
@@ -795,7 +796,7 @@ class HVACSizing
     (@hpxml_bldg.walls + @hpxml_bldg.rim_joists).each do |wall|
       next unless wall.is_thermal_boundary
 
-      wall_group = get_wall_group(wall)
+      ashrae_wall_group = get_ashrae_wall_group(wall)
 
       if wall.azimuth.nil?
         azimuths = [0.0, 90.0, 180.0, 270.0] # Assume 4 equal surfaces facing every direction
@@ -834,14 +835,15 @@ class HVACSizing
           # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
           # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
           # determined using linear interpolation). Shaded walls apply to north facing and partition walls only.
-          cltd_base_sun = [38.0, 34.95, 31.9, 29.45, 27.0, 24.5, 22.0, 21.25, 20.5, 19.65, 18.8]
-          cltd_base_shade = [25.0, 22.5, 20.0, 18.45, 16.9, 15.45, 14.0, 13.55, 13.1, 12.85, 12.6]
+          cltd_base_sun = { 'G' => 38.0, 'F-G' => 34.95, 'F' => 31.9, 'E-F' => 29.45, 'E' => 27.0, 'D-E' => 24.5, 'D' => 22.0, 'C-D' => 21.25, 'C' => 20.5, 'B-C' => 19.65, 'B' => 18.8 }
+          cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
 
           if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
-            cltd = cltd_base_shade[wall_group - 1] * color_multiplier
+            cltd_base = cltd_base_shade
           else
-            cltd = cltd_base_sun[wall_group - 1] * color_multiplier
+            cltd_base = cltd_base_sun
           end
+          cltd = cltd_base[ashrae_wall_group] * color_multiplier
 
           if mj.ctd >= 10.0
             # Adjust base CLTD for different CTD or DR
@@ -2844,8 +2846,8 @@ class HVACSizing
     return design_temp
   end
 
-  def self.get_wall_group(wall)
-    # Determine the wall Group Number (A - K = 1 - 11) for above-grade walls
+  def self.get_ashrae_wall_group(wall)
+    # Determine the ASHRAE Group Number G-B (based on the Table 4A Group Number A-K) for above-grade walls
 
     if wall.is_a? HPXML::RimJoist
       wall_type = HPXML::WallTypeWoodStud
@@ -2859,162 +2861,165 @@ class HVACSizing
     if wall_type == HPXML::WallTypeWoodStud
       if wall.siding == HPXML::SidingTypeBrick
         if wall_ufactor <= 0.070
-          wall_group = 11 # K
+          table_4a_wall_group = 'K'
         elsif wall_ufactor <= 0.083
-          wall_group = 10 # J
+          table_4a_wall_group = 'J'
         elsif wall_ufactor <= 0.095
-          wall_group = 9 # I
+          table_4a_wall_group = 'I'
         elsif wall_ufactor <= 0.100
-          wall_group = 8 # H
+          table_4a_wall_group = 'H'
         elsif wall_ufactor <= 0.130
-          wall_group = 7 # G
+          table_4a_wall_group = 'G'
         elsif wall_ufactor <= 0.175
-          wall_group = 6 # F
+          table_4a_wall_group = 'F'
         else
-          wall_group = 5 # E
+          table_4a_wall_group = 'E'
         end
       else
         if wall_ufactor <= 0.048
-          wall_group = 10 # J
+          table_4a_wall_group = 'J'
         elsif wall_ufactor <= 0.051
-          wall_group = 9 # I
+          table_4a_wall_group = 'I'
         elsif wall_ufactor <= 0.059
-          wall_group = 8 # H
+          table_4a_wall_group = 'H'
         elsif wall_ufactor <= 0.063
-          wall_group = 7 # G
+          table_4a_wall_group = 'G'
         elsif wall_ufactor <= 0.067
-          wall_group = 6 # F
+          table_4a_wall_group = 'F'
         elsif wall_ufactor <= 0.075
-          wall_group = 5 # E
+          table_4a_wall_group = 'E'
         elsif wall_ufactor <= 0.086
-          wall_group = 4 # D
+          table_4a_wall_group = 'D'
         elsif wall_ufactor <= 0.110
-          wall_group = 3 # C
+          table_4a_wall_group = 'C'
         elsif wall_ufactor <= 0.170
-          wall_group = 2 # B
+          table_4a_wall_group = 'B'
         else
-          wall_group = 1 # A
+          table_4a_wall_group = 'A'
         end
       end
 
     elsif wall_type == HPXML::WallTypeSteelStud
       if wall.siding == HPXML::SidingTypeBrick
         if wall_ufactor <= 0.090
-          wall_group = 11 # K
+          table_4a_wall_group = 'K'
         elsif wall_ufactor <= 0.105
-          wall_group = 10 # J
+          table_4a_wall_group = 'J'
         elsif wall_ufactor <= 0.118
-          wall_group = 9 # I
+          table_4a_wall_group = 'I'
         elsif wall_ufactor <= 0.125
-          wall_group = 8 # H
+          table_4a_wall_group = 'H'
         elsif wall_ufactor <= 0.145
-          wall_group = 7 # G
+          table_4a_wall_group = 'G'
         elsif wall_ufactor <= 0.200
-          wall_group = 6 # F
+          table_4a_wall_group = 'F'
         else
-          wall_group = 5 # E
+          table_4a_wall_group = 'E'
         end
       else
         if wall_ufactor <= 0.066
-          wall_group = 10 # J
+          table_4a_wall_group = 'J'
         elsif wall_ufactor <= 0.070
-          wall_group = 9 # I
+          table_4a_wall_group = 'I'
         elsif wall_ufactor <= 0.075
-          wall_group = 8 # H
+          table_4a_wall_group = 'H'
         elsif wall_ufactor <= 0.081
-          wall_group = 7 # G
+          table_4a_wall_group = 'G'
         elsif wall_ufactor <= 0.088
-          wall_group = 6 # F
+          table_4a_wall_group = 'F'
         elsif wall_ufactor <= 0.100
-          wall_group = 5 # E
+          table_4a_wall_group = 'E'
         elsif wall_ufactor <= 0.105
-          wall_group = 4 # D
+          table_4a_wall_group = 'D'
         elsif wall_ufactor <= 0.120
-          wall_group = 3 # C
+          table_4a_wall_group = 'C'
         elsif wall_ufactor <= 0.200
-          wall_group = 2 # B
+          table_4a_wall_group = 'B'
         else
-          wall_group = 1 # A
+          table_4a_wall_group = 'A'
         end
       end
 
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
-      wall_group = 10 # J (assumed since MJ8 does not include double stud constructions)
+      table_4a_wall_group = 'J' # assumed since MJ8 does not include double stud constructions
       if wall.siding == HPXML::SidingTypeBrick
-        wall_group = 11 # K
+        table_4a_wall_group = 'K'
       end
 
     elsif wall_type == HPXML::WallTypeSIP
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
       if wall_ufactor >= (0.072 + 0.050) / 2
         if wall.siding == HPXML::SidingTypeBrick
-          wall_group = 10 # J
+          table_4a_wall_group = 'J'
         else
-          wall_group = 7 # G
+          table_4a_wall_group = 'G'
         end
       elsif wall_ufactor >= 0.050
         if wall.siding == HPXML::SidingTypeBrick
-          wall_group = 11 # K
+          table_4a_wall_group = 'K'
         else
-          wall_group = 9 # I
+          table_4a_wall_group = 'I'
         end
       else
-        wall_group = 11 # K
+        table_4a_wall_group = 'K'
       end
 
     elsif wall_type == HPXML::WallTypeCMU
       # Table 4A - Construction Number 13
       if wall_ufactor <= 0.0575
-        wall_group = 10 # J
+        table_4a_wall_group = 'J'
       elsif wall_ufactor <= 0.067
-        wall_group = 9 # I
+        table_4a_wall_group = 'I'
       elsif wall_ufactor <= 0.080
-        wall_group = 8 # H
+        table_4a_wall_group = 'H'
       elsif wall_ufactor <= 0.108
-        wall_group = 7 # G
+        table_4a_wall_group = 'G'
       elsif wall_ufactor <= 0.148
-        wall_group = 6 # F
+        table_4a_wall_group = 'F'
       else
-        wall_group = 5 # E
+        table_4a_wall_group = 'E'
       end
 
     elsif [HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeConcrete].include? wall_type
       # Two Courses Brick or 8 Inches Concrete
       if wall_ufactor >= (0.218 + 0.179) / 2
-        wall_group = 7  # G
+        table_4a_wall_group = 'G'
       elsif wall_ufactor >= (0.152 + 0.132) / 2
-        wall_group = 8  # H
+        table_4a_wall_group = 'H'
       elsif wall_ufactor >= (0.117 + 0.079) / 2
-        wall_group = 9  # I
+        table_4a_wall_group = 'I'
       elsif wall_ufactor >= 0.079
-        wall_group = 10 # J
+        table_4a_wall_group = 'J'
       else
-        wall_group = 11 # K
+        table_4a_wall_group = 'K'
       end
 
     elsif wall_type == HPXML::WallTypeLog
       # Stacked Logs
       if wall_ufactor >= (0.103 + 0.091) / 2
-        wall_group = 7  # G
+        table_4a_wall_group = 'G'
       elsif wall_ufactor >= (0.091 + 0.082) / 2
-        wall_group = 8  # H
+        table_4a_wall_group = 'H'
       elsif wall_ufactor >= (0.074 + 0.068) / 2
-        wall_group = 9  # I
+        table_4a_wall_group = 'I'
       elsif wall_ufactor >= (0.068 + 0.063) / 2
-        wall_group = 10 # J
+        table_4a_wall_group = 'J'
       else
-        wall_group = 11 # K
+        table_4a_wall_group = 'K'
       end
 
     elsif [HPXML::WallTypeICF, HPXML::WallTypeStrawBale, HPXML::WallTypeStone].include? wall_type
-      wall_group = 11 # K
+      table_4a_wall_group = 'K'
 
     end
 
-    # Maximum wall group is K
-    wall_group = [wall_group, 11].min
+    # Mapping from Figure A12-12
+    ashrae_wall_group = { 'A' => 'G', 'B' => 'F-G', 'C' => 'F', 'D' => 'E-F',
+                          'E' => 'E', 'F' => 'D-E', 'G' => 'D', 'H' => 'C-D',
+                          'I' => 'C', 'J' => 'B-C', 'K' => 'B' }[table_4a_wall_group]
+    fail "Unexpected Table 4A wall group: #{table_4a_wall_group}" if ashrae_wall_group.nil?
 
-    return wall_group
+    return ashrae_wall_group
   end
 
   def self.gshp_coil_bf
