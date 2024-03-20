@@ -3730,21 +3730,21 @@ Recirculation (Shared)
 
 A shared recirculation hot water distribution system (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution``.
 
-  =========================================================  =======  ============  ===========  ========  ========  =====================
-  Element                                                    Type     Units         Constraints  Required  Default   Notes
-  =========================================================  =======  ============  ===========  ========  ========  =====================
-  ``SystemIdentifier``                                       id                                  Yes                 Unique identifier
-  ``SystemType/Standard``                                    element                             Yes                 Type of distribution system
-  ``SystemType/Standard/PipingLength``                       double   ft            > 0          No        See [#]_  Length of piping [#]_
-  ``PipeInsulation/PipeRValue``                              double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
-  ``DrainWaterHeatRecovery``                                 element                             No        <none>    Presence of drain water heat recovery device [#]_
-  ``extension/SharedRecirculation/NumberofUnitsServed``      integer                > 1          Yes                 Number of dwelling units served
-  ``extension/SharedRecirculation/PumpPower``                double   W             >= 0         No        220 [#]_  Shared recirculation pump power
-  ``extension/SharedRecirculation/ControlType``              string                 See [#]_     Yes                 Shared recirculation control type
-  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                               No        See [#]_  24 comma-separated recirculation pump weekday fractions
-  ``extension/RecirculationPumpWeekendScheduleFractions``    array                               No                  24 comma-separated recirculation pump weekend fractions
-  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                               No        See [#]_  12 comma-separated recirculation pump monthly multipliers
-  =========================================================  =======  ============  ===========  ========  ========  =====================
+  =========================================================  =======  ============  ===================  ========  ========  =====================
+  Element                                                    Type     Units         Constraints          Required  Default   Notes
+  =========================================================  =======  ============  ===================  ========  ========  =====================
+  ``SystemIdentifier``                                       id                                          Yes                 Unique identifier
+  ``SystemType/Standard``                                    element                                     Yes                 Type of distribution system
+  ``SystemType/Standard/PipingLength``                       double   ft            > 0                  No        See [#]_  Length of piping [#]_
+  ``PipeInsulation/PipeRValue``                              double   F-ft2-hr/Btu  >= 0                 No        0.0       Pipe insulation R-value
+  ``DrainWaterHeatRecovery``                                 element                                     No        <none>    Presence of drain water heat recovery device [#]_
+  ``extension/SharedRecirculation/NumberofBedroomsServed``   integer                > NumberofBedrooms   Yes [#]_            Number of bedrooms served
+  ``extension/SharedRecirculation/PumpPower``                double   W             >= 0                 No        220 [#]_  Shared recirculation pump power
+  ``extension/SharedRecirculation/ControlType``              string                 See [#]_             Yes                 Shared recirculation control type
+  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                                       No        See [#]_  24 comma-separated recirculation pump weekday fractions
+  ``extension/RecirculationPumpWeekendScheduleFractions``    array                                       No                  24 comma-separated recirculation pump weekend fractions
+  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                                       No        See [#]_  12 comma-separated recirculation pump monthly multipliers
+  =========================================================  =======  ============  ===================  ========  ========  =====================
 
   .. [#] If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_:
          
@@ -3760,6 +3760,7 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
          
   .. [#] PipingLength is the length of hot water piping from the shared recirculation loop to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
+  .. [#] Shared recirculation pump energy will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the recirculation system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
