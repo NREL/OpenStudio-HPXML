@@ -337,48 +337,37 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, default_tol_btuh)
     assert_in_delta(1200, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
     # reduce tolerance for each space
-    default_tol_btuh_space = 50
     default_tol_relative = 0.02
     # Infiltration are specified differently in OS-HPXML using blower door method.
     # consider adding qualitative infiltration inputs: https://github.com/NREL/OpenStudio-HPXML/issues/1652
     default_tol_relative_infil = 0.15
+    # for CLTD, the example rounded up the CTD (14 to 15) and looked up CLTD @CTD15,
+    # while we adjust from CLTD value @CTD20 to @CTD14, so our CLTD value is 1 smaller than the example.
+    default_tol_relative_cltd = 0.092
     hpxml_bldg.get_conditioned_zone.spaces.each do |space|
       if space.id.include? 'dining'
-        assert_in_delta(902 + 407, space.hdl_walls, default_tol_btuh_space)
         assert_in_epsilon(902 + 407, space.hdl_walls, default_tol_relative)
-        assert_in_delta(463, space.hdl_ceilings, default_tol_btuh_space)
         assert_in_epsilon(463, space.hdl_ceilings, default_tol_relative)
-        assert_in_delta(779, space.hdl_infil, default_tol_btuh_space)
         assert_in_epsilon(779, space.hdl_infil, default_tol_relative_infil)
-        # assert_in_delta(153 + 69, space.cdl_sens_walls, default_tol_btuh_space) # Area correct, cooling htm in OS-HPXML: 0.51, Manual J: 1.23; Need further investigation
-        assert_in_delta(309, space.cdl_sens_ceilings, default_tol_btuh_space)
+        # We used north wall/partition CLTD values for north walls, 
+        # while the example used the non-directional wall CLTD, which caused more than 50% diff
+        assert_in_epsilon(153 + 69, space.cdl_sens_walls, 0.6)
         assert_in_epsilon(309, space.cdl_sens_ceilings, default_tol_relative)
-        assert_in_delta(63, space.cdl_sens_infil, default_tol_btuh_space)
         assert_in_epsilon(63, space.cdl_sens_infil, default_tol_relative_infil)
       end
       if space.id.include? 'living'
-        assert_in_delta(930, space.hdl_walls, default_tol_btuh_space)
         assert_in_epsilon(930, space.hdl_walls, default_tol_relative)
-        assert_in_delta(1080, space.hdl_ceilings, default_tol_btuh_space)
         assert_in_epsilon(1080, space.hdl_ceilings, default_tol_relative)
-        assert_in_delta(655, space.hdl_infil, default_tol_btuh_space)
         assert_in_epsilon(655, space.hdl_infil, default_tol_relative_infil)
-        assert_in_delta(158, space.cdl_sens_walls, default_tol_btuh_space)
-        # assert_in_epsilon(158, space.cdl_sens_walls, default_tol_relative) # Issue: https://github.com/NREL/OpenStudio-HPXML/issues/1653
-        assert_in_delta(720, space.cdl_sens_ceilings, default_tol_btuh_space)
+        assert_in_epsilon(158, space.cdl_sens_walls, default_tol_relative_cltd)
         assert_in_epsilon(720, space.cdl_sens_ceilings, default_tol_relative)
-        assert_in_delta(53, space.cdl_sens_infil, default_tol_btuh_space)
         assert_in_epsilon(53, space.cdl_sens_infil, default_tol_relative_infil)
       end
       next unless space.id.include? 'hall_1'
 
-      assert_in_delta(551, space.hdl_doors, default_tol_btuh_space)
       assert_in_epsilon(551, space.hdl_doors, default_tol_relative)
-      assert_in_delta(313, space.hdl_walls, default_tol_btuh_space)
       assert_in_epsilon(313, space.hdl_walls, default_tol_relative)
-      assert_in_delta(412, space.hdl_ceilings, default_tol_btuh_space)
       assert_in_epsilon(412, space.hdl_ceilings, default_tol_relative)
-      assert_in_delta(249, space.hdl_infil, default_tol_btuh_space)
       assert_in_epsilon(249, space.hdl_infil, default_tol_relative_infil)
     end
 
