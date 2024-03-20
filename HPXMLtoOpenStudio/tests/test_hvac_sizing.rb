@@ -336,6 +336,32 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(998, hpxml_bldg.hvac_plant.cdl_lat_infil, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, default_tol_btuh)
     assert_in_delta(1200, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
+    # reduce tolerance for each space
+    default_tol_btuh_space = 50
+    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+      if space.id.include? 'dining'
+        assert_in_delta(902 + 407, space.hdl_walls, default_tol_btuh_space)
+        assert_in_delta(463, space.hdl_ceilings, default_tol_btuh_space)
+        assert_in_delta(779, space.hdl_infil, default_tol_btuh_space)
+        # assert_in_delta(153 + 69, space.cdl_sens_walls, default_tol_btuh_space) # Area correct, cooling htm in OS-HPXML: 0.51, Manual J: 1.23; Need further investigation
+        assert_in_delta(309, space.cdl_sens_ceilings, default_tol_btuh_space)
+        assert_in_delta(63, space.cdl_sens_infil, default_tol_btuh_space)
+      end
+      if space.id.include? 'living'
+        assert_in_delta(930, space.hdl_walls, default_tol_btuh_space)
+        assert_in_delta(1080, space.hdl_ceilings, default_tol_btuh_space)
+        assert_in_delta(655, space.hdl_infil, default_tol_btuh_space)
+        assert_in_delta(158, space.cdl_sens_walls, default_tol_btuh_space)
+        assert_in_delta(720, space.cdl_sens_ceilings, default_tol_btuh_space)
+        assert_in_delta(53, space.cdl_sens_infil, default_tol_btuh_space)
+      end
+      if space.id.include? 'hall_1'
+        assert_in_delta(551, space.hdl_doors, default_tol_btuh_space)
+        assert_in_delta(313, space.hdl_walls, default_tol_btuh_space)
+        assert_in_delta(412, space.hdl_ceilings, default_tol_btuh_space)
+        assert_in_delta(249, space.hdl_infil, default_tol_btuh_space)
+      end
+    end
 
     # Section 12: Smith Residence
     # Expected values from Form J1

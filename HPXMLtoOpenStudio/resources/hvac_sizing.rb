@@ -1198,9 +1198,9 @@ class HVACSizing
 
     @spaces.each do |space|
       space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
-      @space_loads[space.id].WindowAreaRatio = space_exposed_wall_area / spaces_total_exposed_wall_area
-      @space_loads[space.id].Heat_Infil = @space_loads[space.id].WindowAreaRatio * bldg_design_loads.Heat_Infil
-      @space_loads[space.id].Cool_Infil_Sens = @space_loads[space.id].WindowAreaRatio * bldg_design_loads.Cool_Infil_Sens
+      @space_loads[space.id].WallAreaRatio = space_exposed_wall_area / spaces_total_exposed_wall_area
+      @space_loads[space.id].Heat_Infil = @space_loads[space.id].WallAreaRatio * bldg_design_loads.Heat_Infil
+      @space_loads[space.id].Cool_Infil_Sens = @space_loads[space.id].WallAreaRatio * bldg_design_loads.Cool_Infil_Sens
     end
   end
 
@@ -3639,7 +3639,7 @@ class HVACSizing
         results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
       end
       space_load = @space_loads[space_id]
-      results_out << ['Infiltration', nil, nil, space_load.WindowAreaRatio.round(2), space_load.Heat_Infil.round, space_load.Cool_Infil_Sens.round, space_load.Cool_Infil_Lat.round]
+      results_out << ['Infiltration', nil, nil, space_load.WallAreaRatio.round(2), space_load.Heat_Infil.round, space_load.Cool_Infil_Sens.round, space_load.Cool_Infil_Lat.round]
       results_out << ['Internal Gains', nil, nil, nil, 0, space_load.Cool_IntGains_Sens.round, space_load.Cool_IntGains_Lat.round]
       results_out << ['Ducts', nil, nil, nil, space_load.Heat_Ducts.round, space_load.Cool_Ducts_Sens.round, space_load.Cool_Ducts_Lat.round]
       results_out << ['AED Excursion', nil, nil, nil, nil, space_load.Cool_AEDExcursion.round, nil]
@@ -3675,7 +3675,7 @@ class DesignLoads
                 :Cool_Ceilings, :Cool_Infil_Sens, :Cool_Vent_Sens, :Cool_Infil_Lat, :Cool_Vent_Lat,
                 :Cool_IntGains_Sens, :Cool_IntGains_Lat, :Cool_AEDExcursion,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
-                :Heat_Slabs, :Heat_Ceilings, :Heat_Infil, :Heat_Vent, :WindowAreaRatio, :HourlyFenestrationLoads)
+                :Heat_Slabs, :Heat_Ceilings, :Heat_Infil, :Heat_Vent, :WallAreaRatio, :HourlyFenestrationLoads)
 
   def initialize
     @Cool_Sens = 0.0
