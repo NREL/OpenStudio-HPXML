@@ -3212,7 +3212,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-sfa-unit.xml')
     hpxml_bldg.water_heating_systems[0].is_shared_system = true
-    hpxml_bldg.water_heating_systems[0].number_of_units_served = 6
+    hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served = 18
     hpxml_bldg.clothes_dryers[0].location = HPXML::LocationBasementConditioned
     hpxml_bldg.clothes_dryers[0].is_shared_appliance = true
     hpxml_bldg.clothes_dryers[0].combined_energy_factor = 3.33
