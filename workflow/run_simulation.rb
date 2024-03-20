@@ -12,8 +12,8 @@ require_relative '../HPXMLtoOpenStudio/resources/version'
 basedir = File.expand_path(File.dirname(__FILE__))
 
 def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseries_outputs, skip_validation, add_comp_loads,
-                 output_format, building_id, ep_input_format, stochastic_schedules,
-                 timeseries_output_variables)
+                 output_format, building_id, ep_input_format, stochastic_schedules, timeseries_output_variables,
+                 skip_simulation)
   measures_dir = File.join(basedir, '..')
 
   measures = {}
@@ -41,38 +41,40 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['building_id'] = building_id
   update_args_hash(measures, measure_subdir, args)
 
-  # Add reporting measure to workflow
-  measure_subdir = 'ReportSimulationOutput'
-  args = {}
-  args['output_format'] = output_format
-  args['timeseries_frequency'] = timeseries_output_freq
-  args['include_timeseries_total_consumptions'] = timeseries_outputs.include? 'total'
-  args['include_timeseries_fuel_consumptions'] = timeseries_outputs.include? 'fuels'
-  args['include_timeseries_end_use_consumptions'] = timeseries_outputs.include? 'enduses'
-  args['include_timeseries_system_use_consumptions'] = timeseries_outputs.include? 'systemuses'
-  args['include_timeseries_emissions'] = timeseries_outputs.include? 'emissions'
-  args['include_timeseries_emission_fuels'] = timeseries_outputs.include? 'emissionfuels'
-  args['include_timeseries_emission_end_uses'] = timeseries_outputs.include? 'emissionenduses'
-  args['include_timeseries_hot_water_uses'] = timeseries_outputs.include? 'hotwater'
-  args['include_timeseries_total_loads'] = timeseries_outputs.include? 'loads'
-  args['include_timeseries_component_loads'] = timeseries_outputs.include? 'componentloads'
-  args['include_timeseries_unmet_hours'] = timeseries_outputs.include? 'unmethours'
-  args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
-  args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
-  args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
-  args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
-  args['user_output_variables'] = timeseries_output_variables.join(', ') unless timeseries_output_variables.empty?
-  update_args_hash(measures, measure_subdir, args)
+  if not skip_simulation
+    # Add reporting measure to workflow
+    measure_subdir = 'ReportSimulationOutput'
+    args = {}
+    args['output_format'] = output_format
+    args['timeseries_frequency'] = timeseries_output_freq
+    args['include_timeseries_total_consumptions'] = timeseries_outputs.include? 'total'
+    args['include_timeseries_fuel_consumptions'] = timeseries_outputs.include? 'fuels'
+    args['include_timeseries_end_use_consumptions'] = timeseries_outputs.include? 'enduses'
+    args['include_timeseries_system_use_consumptions'] = timeseries_outputs.include? 'systemuses'
+    args['include_timeseries_emissions'] = timeseries_outputs.include? 'emissions'
+    args['include_timeseries_emission_fuels'] = timeseries_outputs.include? 'emissionfuels'
+    args['include_timeseries_emission_end_uses'] = timeseries_outputs.include? 'emissionenduses'
+    args['include_timeseries_hot_water_uses'] = timeseries_outputs.include? 'hotwater'
+    args['include_timeseries_total_loads'] = timeseries_outputs.include? 'loads'
+    args['include_timeseries_component_loads'] = timeseries_outputs.include? 'componentloads'
+    args['include_timeseries_unmet_hours'] = timeseries_outputs.include? 'unmethours'
+    args['include_timeseries_zone_temperatures'] = timeseries_outputs.include? 'temperatures'
+    args['include_timeseries_airflows'] = timeseries_outputs.include? 'airflows'
+    args['include_timeseries_weather'] = timeseries_outputs.include? 'weather'
+    args['include_timeseries_resilience'] = timeseries_outputs.include? 'resilience'
+    args['user_output_variables'] = timeseries_output_variables.join(', ') unless timeseries_output_variables.empty?
+    update_args_hash(measures, measure_subdir, args)
 
-  output_format = 'csv' if output_format == 'csv_dview'
+    output_format = 'csv' if output_format == 'csv_dview'
 
-  # Add utility bills measure to workflow
-  measure_subdir = 'ReportUtilityBills'
-  args = {}
-  args['output_format'] = output_format
-  update_args_hash(measures, measure_subdir, args)
+    # Add utility bills measure to workflow
+    measure_subdir = 'ReportUtilityBills'
+    args = {}
+    args['output_format'] = output_format
+    update_args_hash(measures, measure_subdir, args)
+  end
 
-  results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)
+  results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format, run_measures_only: skip_simulation)
 
   return results[:success]
 end
@@ -115,6 +117,11 @@ OptionParser.new do |opts|
   options[:timestep_outputs] = []
   opts.on('--timestep TYPE', timeseries_types, "Request timestep output type (#{timeseries_types.join(', ')}); can be called multiple times") do |t|
     options[:timestep_outputs] << t
+  end
+
+  options[:skip_simulation] = false
+  opts.on('--skip-simulation', 'Skip the EnergyPlus simulation') do |_t|
+    options[:skip_simulation] = true
   end
 
   options[:skip_validation] = false
@@ -233,7 +240,8 @@ else
   end
   success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], timeseries_output_freq, timeseries_outputs,
                          options[:skip_validation], options[:add_comp_loads], options[:output_format], options[:building_id],
-                         options[:ep_input_format], options[:stochastic_schedules], options[:timeseries_output_variables])
+                         options[:ep_input_format], options[:stochastic_schedules], options[:timeseries_output_variables],
+                         options[:skip_simulation])
 
   if not success
     exit! 1

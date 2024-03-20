@@ -43,6 +43,7 @@ __New Features__
   - Miscellaneous improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
+- Adds an optional `--skip-simulation` argument to the run_simulation.rb script that allows skipping the EnergyPlus simulation.
 - BuildResidentialScheduleFile measure:
   - Allows appending columns to an existing CSV file rather than overwriting.
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
