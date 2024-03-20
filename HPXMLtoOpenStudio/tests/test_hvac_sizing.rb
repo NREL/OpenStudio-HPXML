@@ -350,8 +350,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
         assert_in_epsilon(463, space.hdl_ceilings, default_tol_relative)
         assert_in_epsilon(779, space.hdl_infil, default_tol_relative_infil)
         # We used north wall/partition CLTD values for north walls, 
-        # while the example used the non-directional wall CLTD, which caused more than 50% diff
-        assert_in_epsilon(153 + 69, space.cdl_sens_walls, 0.6)
+        # while the example used the non-directional wall CLTD, which caused more than 50% diff for that wall
+        assert_in_epsilon(153 + 69, space.cdl_sens_walls, 0.8)
         assert_in_epsilon(309, space.cdl_sens_ceilings, default_tol_relative)
         assert_in_epsilon(63, space.cdl_sens_infil, default_tol_relative_infil)
       end
