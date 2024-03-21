@@ -291,6 +291,15 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < Minitest::Test
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
     pump_kwh_yr = 8.76 * hot_water_distribution.shared_recirculation_pump_power / hot_water_distribution.shared_recirculation_number_of_units_served
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameHotWaterRecircPump), 0.001)
+
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # recirc
+    hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
+    pump_kwh_yr = 8.76 * hot_water_distribution.shared_recirculation_pump_power / hot_water_distribution.shared_recirculation_number_of_units_served
+    assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameHotWaterRecircPump), 0.001)
   end
 
   def test_dhw_shared_laundry
