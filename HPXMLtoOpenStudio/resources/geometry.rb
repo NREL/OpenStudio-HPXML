@@ -569,7 +569,7 @@ class Geometry
   end
 
   def self.get_occupancy_default_num(nbeds)
-    return [Float(nbeds), 1.0].max
+    return Float(nbeds)
   end
 
   def self.get_occupancy_default_values()

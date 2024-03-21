@@ -14,7 +14,6 @@ class HotWaterAndAppliances
     general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
-    nunits = hpxml_bldg.building_construction.number_of_units_in_building
 
     # Get appliances, etc.
     if not hpxml_bldg.clothes_washers.empty?
@@ -357,7 +356,7 @@ class HotWaterAndAppliances
         add_water_use_equipment(model, waste_obj_name, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
 
         # Recirculation pump
-        recirc_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds, nunits)
+        recirc_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
         if recirc_pump_annual_kwh > 0
 
           # Create schedule
@@ -1019,7 +1018,7 @@ class HotWaterAndAppliances
     return adjFmix
   end
 
-  def self.get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds, nunits)
+  def self.get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
     dist_pump_annual_kwh = 0.0
 
     # Annual electricity consumption factor for hot water recirculation system pumps
@@ -1046,7 +1045,7 @@ class HotWaterAndAppliances
     # Shared recirculation system pump energy
     # Assume the fixtures_usage_multiplier only applies for Sensor/Manual control type.
     if hot_water_distribution.has_shared_recirculation
-      n_bdeq = [hot_water_distribution.shared_recirculation_number_of_bedrooms_served, nunits].max
+      n_bdeq = hot_water_distribution.shared_recirculation_number_of_bedrooms_served
       if [HPXML::DHWRecircControlTypeNone,
           HPXML::DHWRecircControlTypeTimer,
           HPXML::DHWRecircControlTypeTemperature].include? hot_water_distribution.shared_recirculation_control_type
