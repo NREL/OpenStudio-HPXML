@@ -18,3 +18,9 @@ Propane
 * https://www.eia.gov/dnav/pet/xls/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.xls
 * Convert second tab (Data 1) to CSV
 * PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv
+
+Wood
+* https://www.eia.gov/state/seds/seds-data-fuel.php?sid=US#DataFiles
+* Download Prices (CSV) link
+* Filter the data where "MSN" is labeled as "WDRCD" (wood price in the residential sector)
+* SEDS_price_of_wood.csv
