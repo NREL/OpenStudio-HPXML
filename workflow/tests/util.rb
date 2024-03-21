@@ -250,6 +250,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-hvac-multiple.xml'
       next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
     end
+    if hpxml_path.include? 'base-zones'
+      next if message.include? 'Multiple conditioned zones specified but the model will only include a single thermal zone.'
+    end
 
     # FUTURE: Revert this eventually
     # https://github.com/NREL/OpenStudio-HPXML/issues/1499

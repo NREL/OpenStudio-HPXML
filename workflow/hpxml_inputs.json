@@ -3361,5 +3361,14 @@
   "sample_files/base-simcontrol-timestep-30-mins.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "simulation_control_timestep": 30
+  },
+  "sample_files/base-zones.xml": {
+    "parent_hpxml": "sample_files/base-enclosure-garage.xml"
+  },
+  "sample_files/base-zones-spaces.xml": {
+    "parent_hpxml": "sample_files/base-enclosure-garage.xml"
+  },
+  "sample_files/base-zones-spaces-attached-surfaces.xml": {
+    "parent_hpxml": "sample_files/base-enclosure-garage.xml"
   }
 }

@@ -348,8 +348,8 @@ class HPXML < Object
   SolarThermalTypeEvacuatedTube = 'evacuated tube'
   SolarThermalTypeICS = 'integrated collector storage'
   SolarThermalTypeSingleGlazing = 'single glazing black'
-  SpaceFenestrationLoadProcedureAEDExcursion = 'aed excursion'
-  SpaceFenestrationLoadProcedurePeakValue = 'peak value'
+  SpaceFenestrationLoadProcedureStandard = 'standard'
+  SpaceFenestrationLoadProcedurePeak = 'peak'
   SurroundingsOneSide = 'attached on one side'
   SurroundingsTwoSides = 'attached on two sides'
   SurroundingsThreeSides = 'attached on three sides'
@@ -444,6 +444,7 @@ class HPXML < Object
   WindowClassResidential = 'residential'
   WindowClassLightCommercial = 'light commercial'
   ZoneTypeConditioned = 'conditioned'
+  ZoneTypeUnconditioned = 'unconditioned'
 
   # Heating/cooling design load attributes
   HDL_ATTRS = { hdl_total: 'Total',
@@ -1423,8 +1424,13 @@ class HPXML < Object
       return window_area_operable / window_area_total
     end
 
-    def get_conditioned_zone()
-      return zones.find { |z| z.zone_type == ZoneTypeConditioned }
+    def conditioned_spaces()
+      return zones.select { |z| z.zone_type == ZoneTypeConditioned }.map { |z| z.spaces }.flatten
+    end
+
+    def calculate_space_design_loads?
+      # Only calculate space design loads if there are conditioned spaces w/ attached surfaces
+      return conditioned_spaces.map { |s| s.attached_surfaces.size }.sum > 0
     end
 
     def primary_hvac_systems()
@@ -2200,6 +2206,10 @@ class HPXML < Object
   end
 
   class Zone < BaseElement
+    def initialize(hpxml_bldg, *args)
+      @spaces = Spaces.new(hpxml_bldg)
+      super(hpxml_bldg, *args)
+    end
     ATTRS = [:id, :zone_type, :spaces]
     attr_accessor(*ATTRS)
 
@@ -2255,6 +2265,18 @@ class HPXML < Object
       @parent_object.spaces.delete(self)
     end
 
+    def attached_surfaces
+      surfaces = []
+      hpxml_bldg = @parent_object.parent_object
+      (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs).each do |s|
+        if s.attached_to_space_idref == @id
+          surfaces << s
+        end
+      end
+
+      return surfaces
+    end
+
     def to_doc(zone)
       return if nil?
 
@@ -2263,8 +2285,11 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
-      XMLHelper.add_extension(space, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
-      XMLHelper.add_extension(space, 'FenestrationLoadProcedure', @fenestration_load_procedure, :string, @fenestration_load_procedure_isdefaulted) unless @fenestration_load_procedure.nil?
+      if (not @manualj_internal_loads_sensible.nil?) || (not @fenestration_load_procedure.nil?)
+        mj_extension = XMLHelper.add_extension(space, 'ManualJInputs')
+        XMLHelper.add_element(mj_extension, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
+        XMLHelper.add_element(mj_extension, 'FenestrationLoadProcedure', @fenestration_load_procedure, :string, @fenestration_load_procedure_isdefaulted) unless @fenestration_load_procedure.nil?
+      end
       if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map { |key| send(key) }.any?
         HPXML.design_loads_to_doc(self, space)
       end
@@ -2275,8 +2300,8 @@ class HPXML < Object
 
       @id = HPXML::get_id(space)
       @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
-      @manualj_internal_loads_sensible = XMLHelper.get_value(space, 'extension/InternalLoadsSensible', :float)
-      @fenestration_load_procedure = XMLHelper.get_value(space, 'extension/FenestrationLoadProcedure', :string)
+      @manualj_internal_loads_sensible = XMLHelper.get_value(space, 'extension/ManualJInputs/InternalLoadsSensible', :float)
+      @fenestration_load_procedure = XMLHelper.get_value(space, 'extension/ManualJInputs/FenestrationLoadProcedure', :string)
       HPXML.design_loads_from_doc(self, space)
     end
   end
@@ -2822,10 +2847,15 @@ class HPXML < Object
     end
 
     def space
-      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
-      return if zone.nil?
+      return if @attached_to_space_idref.nil?
 
-      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for roof '#{@id}'."
     end
 
     def net_area
@@ -2878,6 +2908,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -2990,6 +3021,18 @@ class HPXML < Object
              :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    def space
+      return if @attached_to_space_idref.nil?
+
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for rim joist '#{@id}'."
+    end
+
     def is_exterior
       if @exterior_adjacent_to == LocationOutside
         return true
@@ -3031,6 +3074,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3134,10 +3178,15 @@ class HPXML < Object
     end
 
     def space
-      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
-      return if zone.nil?
+      return if @attached_to_space_idref.nil?
 
-      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for wall '#{@id}'."
     end
 
     def net_area
@@ -3200,6 +3249,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3333,10 +3383,15 @@ class HPXML < Object
     end
 
     def space
-      zone = @parent_object.zones.find { |zone| zone.zone_type == HPXML::ZoneTypeConditioned }
-      return if zone.nil?
+      return if @attached_to_space_idref.nil?
 
-      return zone.spaces.find { |space| space.id == @attached_to_space_idref }
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for foundation wall '#{@id}'."
     end
 
     def doors
@@ -3422,6 +3477,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3532,6 +3588,18 @@ class HPXML < Object
              :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    def space
+      return if @attached_to_space_idref.nil?
+
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for floor '#{@id}'."
+    end
+
     def is_ceiling
       # From the perspective of the conditioned space
       if @floor_or_ceiling.nil?
@@ -3591,6 +3659,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3700,6 +3769,18 @@ class HPXML < Object
              :under_slab_insulation_id, :under_slab_insulation_r_value, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    def space
+      return if @attached_to_space_idref.nil?
+
+      @parent_object.zones.each do |z|
+        z.spaces.each do |s|
+          return s if s.id == @attached_to_space_idref
+        end
+      end
+
+      fail "Attached space '#{@attached_to_space_idref}' not found for slab '#{@id}'."
+    end
+
     def exterior_adjacent_to
       return LocationGround
     end
@@ -3737,6 +3818,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 

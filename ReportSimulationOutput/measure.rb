@@ -1674,33 +1674,35 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # HVAC Space design loads
     @hpxml_bldgs.each do |hpxml_bldg|
-      hpxml_bldg.zones.map { |z| z.spaces }.flatten.each do |space|
+      next unless hpxml_bldg.calculate_space_design_loads?
+
+      hpxml_bldg.conditioned_spaces.each do |space|
         results_out << [line_break]
         # Note: Latent loads are not calculated for spaces
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Total (Btu/h)", space.hdl_total.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Ducts (Btu/h)", space.hdl_ducts.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Windows (Btu/h)", space.hdl_windows.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Skylights (Btu/h)", space.hdl_skylights.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Doors (Btu/h)", space.hdl_doors.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Walls (Btu/h)", space.hdl_walls.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Roofs (Btu/h)", space.hdl_roofs.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Floors (Btu/h)", space.hdl_floors.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Slabs (Btu/h)", space.hdl_slabs.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Ceilings (Btu/h)", space.hdl_ceilings.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Heating: Infiltration (Btu/h)", space.hdl_infil.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Total (Btu/h)", space.cdl_sens_total.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Ducts (Btu/h)", space.cdl_sens_ducts.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Windows (Btu/h)", space.cdl_sens_windows.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Skylights (Btu/h)", space.cdl_sens_skylights.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Doors (Btu/h)", space.cdl_sens_doors.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Walls (Btu/h)", space.cdl_sens_walls.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Roofs (Btu/h)", space.cdl_sens_roofs.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Floors (Btu/h)", space.cdl_sens_floors.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Slabs (Btu/h)", space.cdl_sens_slabs.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Ceilings (Btu/h)", space.cdl_sens_ceilings.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Infiltration (Btu/h)", space.cdl_sens_infil.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: Internal Gains (Btu/h)", space.cdl_sens_intgains.round(1)]
-        results_out << ["HVAC Room Design Load: #{space.id}: Cooling Sensible: AED Excursion (Btu/h)", space.cdl_sens_aedexcursion.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Total (Btu/h)", space.hdl_total.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Ducts (Btu/h)", space.hdl_ducts.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Windows (Btu/h)", space.hdl_windows.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Skylights (Btu/h)", space.hdl_skylights.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Doors (Btu/h)", space.hdl_doors.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Walls (Btu/h)", space.hdl_walls.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Roofs (Btu/h)", space.hdl_roofs.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Floors (Btu/h)", space.hdl_floors.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Slabs (Btu/h)", space.hdl_slabs.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Ceilings (Btu/h)", space.hdl_ceilings.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Heating: Infiltration (Btu/h)", space.hdl_infil.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Total (Btu/h)", space.cdl_sens_total.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Ducts (Btu/h)", space.cdl_sens_ducts.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Windows (Btu/h)", space.cdl_sens_windows.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Skylights (Btu/h)", space.cdl_sens_skylights.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Doors (Btu/h)", space.cdl_sens_doors.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Walls (Btu/h)", space.cdl_sens_walls.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Roofs (Btu/h)", space.cdl_sens_roofs.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Floors (Btu/h)", space.cdl_sens_floors.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Slabs (Btu/h)", space.cdl_sens_slabs.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Ceilings (Btu/h)", space.cdl_sens_ceilings.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Infiltration (Btu/h)", space.cdl_sens_infil.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: Internal Gains (Btu/h)", space.cdl_sens_intgains.round(1)]
+        results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: AED Excursion (Btu/h)", space.cdl_sens_aedexcursion.round(1)]
       end
     end
 

@@ -740,7 +740,7 @@ Additional autosizing factor inputs are available at the system level, see :ref:
 Manual J Inputs
 ~~~~~~~~~~~~~~~
 
-If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
+Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment, can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
   =================================  ========  ======  ===========  ========  ============  ============================================
   Element                            Type      Units   Constraints  Required  Default       Description
@@ -752,9 +752,9 @@ If any HVAC equipment is being autosized (i.e., capacities are not provided), ad
   ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
   ``HumiditySetpoint``               double    frac    > 0, < 1     No        See [#]_      Conditioned space relative humidity
   ``HumidityDifference``             double    grains               No        See [#]_      Difference between absolute humidity of the outdoor/indoor air during the summer
-  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
-  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
-  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
+  ``InternalLoadsSensible``          double    Btu/hr  >= 0         No        See [#]_      Sensible internal loads for cooling design load
+  ``InternalLoadsLatent``            double    Btu/hr  >= 0         No        0             Latent internal loads for cooling design load
+  ``NumberofOccupants``              integer           >= 0         No        #Beds+1 [#]_  Number of occupants for cooling design load
   =================================  ========  ======  ===========  ========  ============  ============================================
 
   .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
@@ -792,6 +792,51 @@ The remainder of the year is winter.
   ``SummerEndMonth``                    integer            >= 1, <= 12    Yes                Summer shading end date
   ``SummerEndDayOfMonth``               integer            >= 1, <= 31    Yes                Summer shading end date
   ====================================  ========  =======  =============  ========  =======  =====================================
+
+.. _zones_spaces:
+
+HPXML Zones
+-----------
+
+Currently the only purpose for creating (conditioned) ``Zones`` is to determine whether :ref:`hvac_space_design_loads` are produced.
+``Zones`` are not currently used to construct the model.
+Rather all conditioned space in a dwelling unit is modeled as a single EnergyPlus thermal zone.
+Some buffer spaces are also modeled as separate EnergyPlus thermal zones; see :ref:`hpxmllocations` for more information.
+
+One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone``.
+
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+  Element                    Type     Units    Constraints  Required  Default  Notes
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+  ``SystemIdentifier``       id                             Yes                Unique identifier
+  ``ZoneType``               string            See [#]_     Yes                Type of zone
+  ``Spaces/Space``           element                        No                 One or more spaces within the zone
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+
+  .. [#] ZoneType choices are "unconditioned" or "conditioned".
+
+HPXML Spaces
+************
+
+If spaces in conditioned zones are provided, as well as wall/roof/etc. surfaces with ``AttachedToSpace`` references, then :ref:`hvac_space_design_loads` will be produced.
+
+Each space (representing a room or block of rooms) within a zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone/Spaces/Space``.
+
+  =====================================================  ======  =======  ===========  ========  ========  ==============================================
+  Element                                                Type    Units    Constraints  Required  Default   Notes
+  =====================================================  ======  =======  ===========  ========  ========  ==============================================
+  ``SystemIdentifier``                                   id                            Yes                 Unique identifier
+  ``FloorArea``                                          double  ft2      > 0          Yes                 Space floor area
+  ``extension/ManualJInputs/InternalLoadsSensible``      double  Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space sensible internal loads
+  ``extension/ManualJInputs/FenestrationLoadProcedure``  string           See [#]_     No        standard  Conditioned space fenestration load procedure [#]_
+  =====================================================  ======  =======  ===========  ========  ========  ==============================================
+
+  .. [#] InternalLoadsSensible must be provided for all spaces or no spaces.
+  .. [#] If InternalLoadsSensible not provided for a conditioned space, the home's total internal sensible loads are apportioned to each space by floor area.
+  .. [#] FenestrationLoadProcedure choices are "standard" or "peak".
+  .. [#] The "standard" choice should be used for cooling individual rooms and spaces with a single-zone, central air system, where the local fenestration load equals the daily average fenestration load for the room/space plus the AED (Adequate Exposure Diversity) excursion value for the room/space.
+         The "peak" choice should be used for room and space cooling by any time of multi-zone system or local unitary equipment (in which the HVAC system has the ability to adjust cooling capacity on a room or zone basis), where the local fenestration load equals the peak value on the AED curve.
+         Consult ACCA Manual J for more information.
 
 HPXML Climate Zones
 -------------------
@@ -1035,6 +1080,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   Element                                 Type               Units             Constraints               Required   Default                         Notes
   ======================================  =================  ================  ========================  =========  ==============================  ==================================
   ``SystemIdentifier``                    id                                                             Yes                                        Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  No                                         ID of attached space
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                                        Interior adjacent space type
   ``Area``                                double             ft2               > 0                       Yes                                        Gross area (including skylights)
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No         See [#]_                        Direction (clockwise from North)
@@ -1050,6 +1096,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                                        Assembly R-value [#]_
   ======================================  =================  ================  ========================  =========  ==============================  ==================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "conditioned space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -1093,6 +1140,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   Element                                 Type               Units             Constraints               Required  Default      Notes
   ======================================  =================  ================  ========================  ========  ===========  ==============================
   ``SystemIdentifier``                    id                                                             Yes                    Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  No                     ID of attached space
   ``ExteriorAdjacentTo``                  string                               See [#]_                  Yes                    Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                    Interior adjacent space type
   ``Area``                                double             ft2               > 0                       Yes                    Gross area
@@ -1104,6 +1152,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                    Assembly R-value [#]_
   ======================================  =================  ================  ========================  ========  ===========  ==============================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1136,6 +1185,7 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   Element                                 Type               Units             Constraints               Required       Default      Notes
   ======================================  =================  ================  ========================  =============  ===========  ====================================
   ``SystemIdentifier``                    id                                                             Yes                         Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  No                          ID of attached space
   ``ExteriorAdjacentTo``                  string                               See [#]_                  Yes                         Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                         Interior adjacent space type
   ``WallType``                            element                              See [#]_                  Yes                         Wall type (for thermal mass)
@@ -1152,6 +1202,7 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                         Assembly R-value [#]_
   ======================================  =================  ================  ========================  =============  ===========  ====================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1189,6 +1240,7 @@ Any wall surface in contact with the ground is considered a foundation wall.
   Element                                                         Type               Units             Constraints               Required   Default         Notes
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
   ``SystemIdentifier``                                            id                                                             Yes                        Unique identifier
+  ``AttachedToSpace``                                             idref                                See [#]_                  No                         ID of attached space
   ``ExteriorAdjacentTo``                                          string                               See [#]_                  Yes                        Exterior adjacent space type [#]_
   ``InteriorAdjacentTo``                                          string                               See [#]_                  Yes                        Interior adjacent space type
   ``Type``                                                        string                               See [#]_                  No         solid concrete  Type of material
@@ -1205,6 +1257,7 @@ Any wall surface in contact with the ground is considered a foundation wall.
   ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0                       See [#]_                   Assembly R-value [#]_
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1247,6 +1300,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   Element                                 Type      Units         Constraints  Required  Default   Notes
   ======================================  ========  ============  ===========  ========  ========  ============================
   ``SystemIdentifier``                    id                                   Yes                 Unique identifier
+  ``AttachedToSpace``                     idref                   See [#]_     No                  ID of attached space
   ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                 Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
   ``FloorType``                           element                 See [#]_     Yes                 Floor type (for thermal mass)
@@ -1259,6 +1313,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home underbelly".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1289,6 +1344,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   Element                                                  Type      Units         Constraints  Required   Default   Notes
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
   ``SystemIdentifier``                                     id                                   Yes                  Unique identifier
+  ``AttachedToSpace``                                      idref                   See [#]_     No                   ID of attached space
   ``InteriorAdjacentTo``                                   string                  See [#]_     Yes                  Interior adjacent space type
   ``Area``                                                 double    ft2           > 0          Yes                  Gross area
   ``Thickness``                                            double    in            >= 0         No         See [#]_  Thickness [#]_
@@ -1305,6 +1361,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``extension/CarpetRValue``                               double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space``; currently only used for space-level HVAC design load calculations (see :ref:`zones_spaces`).
   .. [#] InteriorAdjacentTo choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
@@ -4763,16 +4820,16 @@ The various locations used in an HPXML file are defined as follows:
   Value                           Description                                              Temperature                                                Building Type
   ==============================  =======================================================  =========================================================  =================
   outside                         Ambient environment                                      Weather data                                               Any
-  ground                                                                                   EnergyPlus calculation                                     Any
-  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  attic - vented                                                                           EnergyPlus calculation                                     Any
-  attic - unvented                                                                         EnergyPlus calculation                                     Any
-  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  basement - unconditioned                                                                 EnergyPlus calculation                                     Any
-  crawlspace - vented                                                                      EnergyPlus calculation                                     Any
-  crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
-  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  garage                          Unconditioned garage (not shared parking garage) [#]_    EnergyPlus calculation                                     Any
+  ground                                                                                   EnergyPlus foundation model calculation                    Any
+  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  attic - vented                                                                           EnergyPlus thermal zone calculation                        Any
+  attic - unvented                                                                         EnergyPlus thermal zone calculation                        Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  basement - unconditioned                                                                 EnergyPlus thermal zone calculation                        Any
+  crawlspace - vented                                                                      EnergyPlus thermal zone calculation                        Any
+  crawlspace - unvented                                                                    EnergyPlus thermal zone calculation                        Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  garage                          Unconditioned garage (not shared parking garage) [#]_    EnergyPlus thermal zone calculation                        Any
   manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
   manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
@@ -4781,13 +4838,17 @@ The various locations used in an HPXML file are defined as follows:
   other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F                        SFA/MF only
   other exterior                  Water heater outside                                     Weather data                                               Any
   exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside                           Any
-  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus foundation model calculation                    Any
   roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
   ==============================  =======================================================  =========================================================  =================
 
   .. [#] OpenStudio-HPXML does not model "conditioned" or "heated" garages.
          Many conditioned garages are not conditioned 24/7, rather they are only conditioned for short periods when occupants are in them and turn on the space conditioning equipment, so it is best to assume an unconditioned garage.
          However, if a garage was converted into livable space, then "conditioned space" should be used instead.
+
+.. note::
+
+  All conditioned space in a dwelling unit (i.e., "conditioned space", "basement - conditioned", and "crawlspace - conditioned") is modeled as a single thermal zone, in which a single air temperature/humidity is calculated for each timestep.
 
 Validating & Debugging Errors
 -----------------------------

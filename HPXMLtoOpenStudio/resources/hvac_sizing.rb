@@ -66,8 +66,9 @@ class HVACSizing
     if update_hpxml
       # Assign building design loads to HPXML object for output
       assign_to_hpxml_bldg(hpxml_bldg.hvac_plant, bldg_design_loads)
+
       @space_loads.each do |space_id, space_design_loads|
-        space = hpxml_bldg.zones.map { |z| z.spaces }.flatten.find { |s| s.id == space_id }
+        space = hpxml_bldg.conditioned_spaces.find { |s| s.id == space_id }
         assign_to_hpxml_bldg(space, space_design_loads)
       end
     end
@@ -357,15 +358,16 @@ class HVACSizing
 
   def self.process_zone_and_spaces()
     '''
-    Room loads set up based on spaces
+    Space loads
     '''
-    @spaces = []
     @space_loads = {}
-    return if @hpxml_bldg.get_conditioned_zone.nil?
 
-    @hpxml_bldg.get_conditioned_zone.spaces.each do |space|
-      @spaces << space
-      @space_loads[space.id] = DesignLoads.new
+    calc_space_loads = @hpxml_bldg.calculate_space_design_loads?
+
+    @hpxml_bldg.conditioned_spaces.each do |space|
+      if calc_space_loads
+        @space_loads[space.id] = DesignLoads.new
+      end
       space.additional_properties.total_exposed_wall_area = 0.0
       space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed excursion
       space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
@@ -600,7 +602,7 @@ class HVACSizing
           afl_hr[hr] += clg_loads_tmp
         end
         # Space load
-        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
           if hr == -1
             # Store average window loads
             space_design_loads.Cool_Windows += clg_loads
@@ -608,7 +610,7 @@ class HVACSizing
             # Store AED curve values for excursion
             wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp
           end
-        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeakValue
+        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
           # Store AED curve values for peak value
           wall.space.additional_properties.afl_hr_windows[hr] += clg_loads_tmp unless hr == -1
         end
@@ -692,7 +694,7 @@ class HVACSizing
           afl_hr[hr] += clg_loads_tmp
         end
         # Space load
-        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
           if hr == -1
             # Store average skylight loads
             space_design_loads.Cool_Skylights += clg_loads
@@ -700,7 +702,7 @@ class HVACSizing
             # Store AED curve values for excursion
             roof.space.additional_properties.afl_hr[hr] += clg_loads_tmp
           end
-        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeakValue
+        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
           # Store AED curve values for peak value
           roof.space.additional_properties.afl_hr_skylights[hr] += htm * skylight.area unless hr == -1
         end
@@ -717,9 +719,11 @@ class HVACSizing
     # If not adequate, add AED Excursion to windows cooling load
 
     # Loop spaces to calculate adjustment for each space
-    @spaces.each do |space|
+    @hpxml_bldg.conditioned_spaces.each do |space|
+      next if @space_loads[space.id].nil?
+
       @space_loads[space.id].HourlyFenestrationLoads = space.additional_properties.afl_hr
-      if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureAEDExcursion
+      if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
         @space_loads[space.id].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
       else
         @space_loads[space.id].Cool_AEDExcursion = 0.0
@@ -1193,12 +1197,11 @@ class HVACSizing
     bldg_design_loads.Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
     bldg_design_loads.Cool_Vent_Lat = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
 
-    return if @spaces.empty?
+    @hpxml_bldg.conditioned_spaces.each do |space|
+      next if @space_loads[space.id].nil?
 
-    # total exposed wall area
-    spaces_total_exposed_wall_area = @spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
-
-    @spaces.each do |space|
+      # Exterior wall area weighted space assignment
+      spaces_total_exposed_wall_area = @hpxml_bldg.conditioned_spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
       space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
       @space_loads[space.id].WallAreaRatio = space_exposed_wall_area / spaces_total_exposed_wall_area
       @space_loads[space.id].Heat_Infil = @space_loads[space.id].WallAreaRatio * bldg_design_loads.Heat_Infil
@@ -1216,8 +1219,10 @@ class HVACSizing
     bldg_design_loads.Cool_IntGains_Lat = clg_loads_lat
 
     # Area weighted space assignment
-    total_floor_area = @spaces.map { |space| space.floor_area }.sum
-    @spaces.each do |space|
+    @hpxml_bldg.conditioned_spaces.each do |space|
+      next if @space_loads[space.id].nil?
+
+      total_floor_area = @hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
       @space_loads[space.id].Cool_IntGains_Sens = space.manualj_internal_loads_sensible.nil? ? (clg_loads_sens * space.floor_area / total_floor_area) : space.manualj_internal_loads_sensible
     end
   end
@@ -3615,7 +3620,7 @@ class HVACSizing
     results_out << ['Ventilation', nil, nil, nil, bldg_design_loads.Heat_Vent.round, bldg_design_loads.Cool_Vent_Sens.round, bldg_design_loads.Cool_Vent_Lat.round]
     results_out << ['AED Excursion', nil, nil, nil, nil, bldg_design_loads.Cool_AEDExcursion.round, nil]
 
-    # Room by room results
+    # Space results
     @space_loads.keys.each_with_index do |space_id, i|
       results_out << [line_break]
       results_out << ["Report: #{col_names[i + 1]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']

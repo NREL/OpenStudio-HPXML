@@ -344,12 +344,12 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # for CLTD, the example rounded up the CTD (14 to 15) and looked up CLTD @CTD15,
     # while we adjust from CLTD value @CTD20 to @CTD14, so our CLTD value is 1 smaller than the example.
     default_tol_relative_cltd = 0.092
-    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+    hpxml_bldg.conditioned_spaces.each do |space|
       if space.id.include? 'dining'
         assert_in_epsilon(902 + 407, space.hdl_walls, default_tol_relative)
         assert_in_epsilon(463, space.hdl_ceilings, default_tol_relative)
         assert_in_epsilon(779, space.hdl_infil, default_tol_relative_infil)
-        # We used north wall/partition CLTD values for north walls, 
+        # We used north wall/partition CLTD values for north walls,
         # while the example used the non-directional wall CLTD, which caused more than 50% diff for that wall
         assert_in_epsilon(153 + 69, space.cdl_sens_walls, 0.8)
         assert_in_epsilon(309, space.cdl_sens_ceilings, default_tol_relative)
@@ -850,13 +850,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Test window methodology
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml, hpxml_bldg = _create_hpxml(acca_test_file_name, acca_files_path)
-    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
-      space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedurePeakValue
+    hpxml_bldg.conditioned_spaces.each do |space|
+      space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedurePeak
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    test_hpxml_bldg.get_conditioned_zone.spaces.each do |space|
-      base_space = base_hpxml_bldg.get_conditioned_zone.spaces.find { |s| s.id == space.id }
+    test_hpxml_bldg.conditioned_spaces.each do |space|
+      base_space = base_hpxml_bldg.conditioned_spaces.find { |s| s.id == space.id }
       assert_operator(space.cdl_sens_windows, :>=, base_space.cdl_sens_windows * 1.3)
       assert_operator(space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3)
       assert_operator(space.cdl_sens_windows + space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_aedexcursion)
@@ -865,12 +865,12 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # Test space internal gain
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml, hpxml_bldg = _create_hpxml(acca_test_file_name, acca_files_path)
-    hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+    hpxml_bldg.conditioned_spaces.each do |space|
       space.manualj_internal_loads_sensible = 200
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    test_hpxml_bldg.get_conditioned_zone.spaces.each do |space|
+    test_hpxml_bldg.conditioned_spaces.each do |space|
       assert_equal(space.cdl_sens_intgains, 200)
     end
   end
