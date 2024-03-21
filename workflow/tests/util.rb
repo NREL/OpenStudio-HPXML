@@ -1058,7 +1058,7 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
 
   # Number of systems and thermal zones change between the 1x and 10x runs,
   # so remove these from the comparison
-  ['System Use:', 'Temperature:'].each do |key|
+  ['System Use:', 'Temperature:', 'HVAC Space Design Load:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     timeseries_results_1x.delete_if { |k, _v| k.start_with? key }
