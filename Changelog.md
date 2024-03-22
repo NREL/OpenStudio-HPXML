@@ -11,7 +11,8 @@ __New Features__
   - Adds schedule inputs for hot water recirculation pumps and general water use internal gains.
   - Updated water heater installation location defaulting to match ANSI 301-2022
   - Updated calculation of hot water piping length for buildings with both conditioned and unconditioned basements to avoid double counting.
-  - Updates how imbalanced infiltration and mechanical ventilation are combined on an hourly basis.
+  - Updated how imbalanced infiltration and mechanical ventilation are combined on an hourly basis.
+  - Updated handling of duct leakage imbalance induced infiltration.
   - Small change to default flow rate for imbalanced mechanical ventilation systems.
   - `AverageCeilingHeight` now used in natural ACH/CFM infiltration calculations.
 - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
@@ -42,6 +43,12 @@ __New Features__
   - Miscellaneous improvements.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
+- Adds an optional `--skip-simulation` argument to the run_simulation.rb script that allows skipping the EnergyPlus simulation.
+- BuildResidentialScheduleFile measure:
+  - Allows appending columns to an existing CSV file rather than overwriting.
+  - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
+  - TV plug load schedules now use TV schedule fractions from the American Time Use Survey (instead of mirroring miscellaneous plug load schedules) and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
+  - Ceiling fan schedules now use ceiling fan schedule fractions and monthly multipliers based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2022 Addendum C.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
