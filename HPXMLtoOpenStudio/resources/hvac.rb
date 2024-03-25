@@ -2939,6 +2939,7 @@ class HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[0]))
+        defrost_time_fraction = 0.1 # 6min/hr
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -2953,16 +2954,16 @@ class HVAC
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[i]))
         htg_coil.addStage(stage)
+        defrost_time_fraction = 0.06667 # 4min/hr
       end
     end
 
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
-    htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
-    htg_coil.setDefrostStrategy('ReverseCycle')
+    htg_coil.setDefrostStrategy('Resistive')
     htg_coil.setDefrostControl('Timed')
+    htg_coil.setDefrostTimePeriodFraction(defrost_time_fraction)
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
