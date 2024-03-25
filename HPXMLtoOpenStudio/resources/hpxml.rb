@@ -3015,8 +3015,8 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
-    def is_adjacent_to_common_spaces
-      return (HPXML::is_conditioned(self) && (HPXML::common_space_locations.include? @exterior_adjacent_to))
+    def is_conditioned_and_adjacent_to_multifamily_common_space
+      return (HPXML::is_conditioned(self) && (HPXML::multifamily_common_space_locations.include? @exterior_adjacent_to))
     end
 
     def is_conditioned
@@ -7654,7 +7654,7 @@ class HPXML < Object
             HPXML::LocationOtherHousingUnit]
   end
 
-  def self.common_space_locations
+  def self.multifamily_common_space_locations
     return [HPXML::LocationOtherHeatedSpace,
             HPXML::LocationOtherMultifamilyBufferSpace,
             HPXML::LocationOtherNonFreezingSpace]

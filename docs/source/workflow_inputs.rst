@@ -1346,9 +1346,9 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated with shgc, based on `ANSI/RESNET/ICC 301-2022 Addendum C <https://codes.iccsafe.org/content/RESNET3012022P1>`_: 
+  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
   
-         Interior shading coefficient = 0.92 - (0.21 * shgc)
+         Interior shading coefficient = 0.92 - (0.21 * SHGC)
          
   .. [#] InteriorShading/WinterShadingCoefficient default value is the same as InteriorShading/SummerShadingCoefficient default value.
   .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
