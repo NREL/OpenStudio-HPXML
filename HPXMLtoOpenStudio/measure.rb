@@ -43,10 +43,19 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path for the output files directory.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
-    arg.setDisplayName('Debug Mode?')
-    arg.setDescription('If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.')
-    arg.setDefaultValue(false)
+    format_chs = OpenStudio::StringVector.new
+    format_chs << 'csv'
+    format_chs << 'json'
+    format_chs << 'msgpack'
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('output_format', format_chs, false)
+    arg.setDisplayName('Output Format')
+    arg.setDescription('The file format of the HVAC design load details output.')
+    arg.setDefaultValue('csv')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('design_load_details_output_file_name', false)
+    arg.setDisplayName('Design Load Details Output File Name')
+    arg.setDescription("The name of the file w/ additional HVAC design load details. If not provided, defaults to 'results_design_load_details.csv' (or 'results_design_load_details.json' or 'results_design_load_details.msgpack').")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('add_component_loads', false)
@@ -55,15 +64,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
+    arg.setDisplayName('BuildingID')
+    arg.setDescription('The ID of the HPXML Building. Only required if the HPXML has multiple Building elements and WholeSFAorMFBuildingSimulation is not true.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('skip_validation', false)
     arg.setDisplayName('Skip Validation?')
     arg.setDescription('If true, bypasses HPXML input validation for faster performance. WARNING: This should only be used if the supplied HPXML file has already been validated against the Schema & Schematron documents.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('building_id', false)
-    arg.setDisplayName('BuildingID')
-    arg.setDescription('The ID of the HPXML Building. Only required if the HPXML has multiple Building elements and WholeSFAorMFBuildingSimulation is not true.')
+    arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
+    arg.setDisplayName('Debug Mode?')
+    arg.setDescription('If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.')
+    arg.setDefaultValue(false)
     args << arg
 
     return args
@@ -85,6 +100,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
+    output_format = runner.getStringArgumentValue('output_format', user_arguments)
+    design_load_details_output_file_name = runner.getOptionalStringArgumentValue('design_load_details_output_file_name', user_arguments)
     add_component_loads = runner.getBoolArgumentValue('add_component_loads', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
@@ -149,6 +166,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # Apply HPXML defaults upfront; process schedules & emissions
+      if not design_load_details_output_file_name.is_initialized
+        design_load_details_output_file_path = File.join(output_dir, "results_design_load_details.#{output_format}")
+      else
+        design_load_details_output_file_path = File.join(output_dir, design_load_details_output_file_name.get)
+      end
       hpxml_sch_map = {}
       check_emissions_references(hpxml.header, hpxml_path)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
@@ -160,7 +182,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(output_dir, in_schedules_csv))
-        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file, output_dir: output_dir)
+        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
+                                                                             design_load_details_output_file_path: design_load_details_output_file_path, output_format: output_format)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
       validate_emissions_files(hpxml.header)

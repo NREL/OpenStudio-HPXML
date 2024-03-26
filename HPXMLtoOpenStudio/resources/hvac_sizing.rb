@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true, output_dir: nil)
+  def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true,
+                     output_format: 'csv', output_file_path: nil)
     # Calculates heating/cooling design loads, and selects equipment
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
@@ -73,10 +74,9 @@ class HVACSizing
       end
     end
 
-    # Write Form J1 detailed outputs
-    # FIXME: Add HPXMLtoOpenStudio measure argument for whether to write this output file; default to true.
-    if not output_dir.nil?
-      write_form_j1_output(output_dir, hpxml_bldg, bldg_design_loads, all_space_design_loads)
+    # Write detailed outputs (useful for Form J1)
+    if not output_file_path.nil?
+      write_detailed_output(output_format, output_file_path, hpxml_bldg, bldg_design_loads, all_space_design_loads)
     end
 
     return @all_hvac_sizing_values
@@ -3552,11 +3552,7 @@ class HVACSizing
     end
   end
 
-  def self.write_form_j1_output(output_dir, hpxml_bldg, bldg_design_loads, all_space_design_loads)
-    # FIXME: Allow different file name?
-    # FIXME: Handle JSON instead of CSV
-    csv_out = File.join(output_dir, 'results_hvac_formj1.csv')
-
+  def self.write_detailed_output(output_format, output_file_path, hpxml_bldg, bldg_design_loads, all_space_design_loads)
     line_break = nil
     results_out = []
 
@@ -3689,7 +3685,42 @@ class HVACSizing
       end
     end
 
-    CSV.open(csv_out, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
+    if ['csv'].include? output_format
+      CSV.open(output_file_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
+    elsif ['json', 'msgpack'].include? output_format
+      h = {}
+      report, columns = nil, nil
+      results_out.each do |out|
+        if out == [line_break]
+          report, columns = nil, nil
+          next
+        end
+
+        if report.nil? && out[0].start_with?('Report:')
+          report = out[0]
+          columns = out[1..-1]
+          h[report] = {}
+          next
+        end
+
+        name = out[0]
+        items = {}
+        for i in 1..out.size - 1
+          next if out[i].nil?
+
+          items[columns[i - 1]] = out[i]
+        end
+        h[report][name] = items
+      end
+
+      if output_format == 'json'
+        require 'json'
+        File.open(output_file_path, 'w') { |json| json.write(JSON.pretty_generate(h)) }
+      elsif output_format == 'msgpack'
+        require 'msgpack'
+        File.open(output_file_path, 'w') { |json| h.to_msgpack(json) }
+      end
+    end
   end
 end
 
