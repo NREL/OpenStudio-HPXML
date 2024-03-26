@@ -2140,9 +2140,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_bedrooms_served', false)
     arg.setDisplayName('Water Heater: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served (directly or indirectly) by the water heater. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion water heater tank losses to the unit.")
+    arg.setDescription("Number of bedrooms served (directly or indirectly) by the water heater. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared water heater serving multiple dwelling units. Used to apportion water heater tank losses to the unit.")
     arg.setUnits('#')
-    arg.setDefaultValue(1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_uses_desuperheater', false)
@@ -2419,7 +2418,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_bedrooms_served', false)
     arg.setDisplayName('PV System: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by PV system. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
+    arg.setDescription("Number of bedrooms served by PV system. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared PV system serving multiple dwelling units. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
     arg.setUnits('#')
     args << arg
 
@@ -2516,7 +2515,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
     arg.setDisplayName('Battery: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by the lithium ion battery. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
+    arg.setDescription("Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
     arg.setUnits('#')
     args << arg
 
@@ -6318,7 +6317,7 @@ class HPXMLFile
     end
 
     if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-      if args[:water_heater_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+      if args[:water_heater_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
         is_shared_system = true
         number_of_bedrooms_served = args[:water_heater_num_bedrooms_served].get
       end
@@ -6510,7 +6509,7 @@ class HPXMLFile
       end
 
       if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-        if args[:pv_system_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+        if args[:pv_system_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
           is_shared_system = true
           number_of_bedrooms_served = args[:pv_system_num_bedrooms_served].get
         end
@@ -6569,7 +6568,7 @@ class HPXMLFile
     end
 
     if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-      if args[:battery_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+      if args[:battery_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
         is_shared_system = true
         number_of_bedrooms_served = args[:battery_num_bedrooms_served].get
       end
