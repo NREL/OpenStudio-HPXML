@@ -850,6 +850,10 @@
   "sample_files/base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml"
   },
+  "sample_files/base-bldgtype-mf-unit-beds-0.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "geometry_unit_num_bedrooms": 0
+  },
   "sample_files/base-bldgtype-mf-unit-infil-compartmentalization-test.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "air_leakage_value": 12.16,
@@ -1021,6 +1025,10 @@
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml"
+  },
+  "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml",
+    "geometry_unit_num_bedrooms": 0
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml"
