@@ -35,10 +35,11 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args = {}
   args['hpxml_path'] = hpxml
   args['output_dir'] = rundir
-  args['debug'] = debug
+  args['output_format'] = (output_format == 'csv_dview' ? 'csv' : output_format)
   args['add_component_loads'] = (add_comp_loads || timeseries_outputs.include?('componentloads'))
   args['skip_validation'] = skip_validation
   args['building_id'] = building_id
+  args['debug'] = debug
   update_args_hash(measures, measure_subdir, args)
 
   # Add reporting measure to workflow
@@ -64,12 +65,10 @@ def run_workflow(basedir, rundir, hpxml, debug, timeseries_output_freq, timeseri
   args['user_output_variables'] = timeseries_output_variables.join(', ') unless timeseries_output_variables.empty?
   update_args_hash(measures, measure_subdir, args)
 
-  output_format = 'csv' if output_format == 'csv_dview'
-
   # Add utility bills measure to workflow
   measure_subdir = 'ReportUtilityBills'
   args = {}
-  args['output_format'] = output_format
+  args['output_format'] = (output_format == 'csv_dview' ? 'csv' : output_format)
   update_args_hash(measures, measure_subdir, args)
 
   results = run_hpxml_workflow(rundir, measures, measures_dir, debug: debug, ep_input_format: ep_input_format)

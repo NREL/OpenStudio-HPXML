@@ -23,6 +23,7 @@ class WorkflowOtherTest < Minitest::Test
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_annual.#{output_format}"))
       assert(File.exist? File.join(File.dirname(xml), 'run', "results_timeseries.#{output_format}"))
       assert(File.exist?(File.join(File.dirname(xml), 'run', "results_bills.#{output_format}")))
+      assert(File.exist?(File.join(File.dirname(xml), 'run', "results_design_load_details.#{output_format}")))
 
       # Check for debug files
       osm_path = File.join(File.dirname(xml), 'run', 'in.osm')

@@ -6,7 +6,8 @@ class HPXMLDefaults
   # being written to the HPXML file. This will allow the custom information to
   # be used by subsequent calculations/logic.
 
-  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, output_dir: nil, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
+  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true,
+                 design_load_details_output_file_path: nil, output_format: 'csv')
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
@@ -64,7 +65,7 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_dir)
+    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
 
     # default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
@@ -3227,10 +3228,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_dir)
+  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
     # Calculate building design loads and equipment capacities/airflows
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, output_dir: output_dir)
+    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
   def self.get_azimuth_from_orientation(orientation)
