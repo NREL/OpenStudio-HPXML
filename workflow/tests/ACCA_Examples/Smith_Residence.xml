@@ -990,7 +990,7 @@
             <AttachedToSpace idref='laundry_equipment'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>204.0</Area>
-            <ExposedPerimeter>34.0</ExposedPerimeter>
+            <ExposedPerimeter>17.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabLaundryPerimeterInsulation'/>
               <Layer>
@@ -1011,7 +1011,7 @@
             <AttachedToSpace idref='workshop'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>340.0</Area>
-            <ExposedPerimeter>34.0</ExposedPerimeter>
+            <ExposedPerimeter>17.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabWorkshopPerimeterInsulation'/>
               <Layer>
