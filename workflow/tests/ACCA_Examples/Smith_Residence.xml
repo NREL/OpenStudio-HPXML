@@ -1212,13 +1212,13 @@
           <Door>
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='WallEntryNorth'/>
-            <Area>21</Area>
+            <Area>21.0</Area>
             <RValue>2.86</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='Door2'/>
             <AttachedToWall idref='WallKitchenStairwellWest'/>
-            <Area>21</Area>
+            <Area>21.0</Area>
             <RValue>2.86</RValue>
           </Door>
         </Doors>
