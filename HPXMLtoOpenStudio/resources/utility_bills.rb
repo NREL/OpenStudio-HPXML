@@ -76,6 +76,18 @@ class UtilityBills
         runner.registerWarning("Could not find state average #{fuel_type} rate based on #{state_name}; using #{average} average.") if !runner.nil?
       end
       marginal_rate = marginal_rates[header].sum / marginal_rates[header].size
+    
+    elsif [HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? fuel_type
+      # Calculate marginal & average rates from user-specified fixed charge and EIA data
+      year_ix = nil
+      rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/SEDS_price_of_wood.csv'))
+      rows = rows[3..-1]
+      rows.each do |row|
+        year_ix = row.size - 1 if row[0] == 'Data_Status' # last item in the row
+        next if row[1].upcase != state_code
+
+        marginal_rate = Float(row[year_ix]) # $/MMBtu
+      end
     end
 
     return marginal_rate, average_rate
