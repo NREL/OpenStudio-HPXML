@@ -310,6 +310,62 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.air_infiltration_measurements[0].a_ext = 0.2
     end
 
+    # ------------------ #
+    # HPXML Zones/Spaces #
+    # ------------------ #
+
+    if ['base-zones.xml',
+        'base-zones-spaces.xml',
+        'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
+      hpxml_bldg.zones.add(id: 'AGConditionedZone',
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.zones.add(id: 'BGConditionedZone',
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.zones.add(id: 'GarageZone',
+                           zone_type: HPXML::ZoneTypeUnconditioned)
+      all_surfaces = (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs)
+
+      if ['base-zones-spaces.xml',
+          'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
+        hpxml_bldg.zones[0].spaces.add(id: 'AGConditionedSpace',
+                                       floor_area: 0.0)
+        all_surfaces.each do |s|
+          next unless s.interior_adjacent_to == HPXML::LocationConditionedSpace
+
+          if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
+            s.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
+          end
+          if s.is_a?(HPXML::Floor) && s.is_ceiling
+            hpxml_bldg.zones[0].spaces[0].floor_area += s.area
+          end
+        end
+        hpxml_bldg.zones[1].spaces.add(id: 'BGConditionedSpace',
+                                       floor_area: 0.0)
+        all_surfaces.each do |s|
+          next unless s.interior_adjacent_to == HPXML::LocationBasementConditioned
+
+          if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
+            s.attached_to_space_idref = hpxml_bldg.zones[1].spaces[0].id
+          end
+          if s.is_a?(HPXML::Slab)
+            hpxml_bldg.zones[1].spaces[0].floor_area += s.area
+          end
+        end
+        hpxml_bldg.zones[2].spaces.add(id: 'GarageSpace',
+                                       floor_area: 0.0)
+        all_surfaces.each do |s|
+          next unless s.interior_adjacent_to == HPXML::LocationGarage
+
+          if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
+            s.attached_to_space_idref = hpxml_bldg.zones[2].spaces[0].id
+          end
+          if s.is_a?(HPXML::Slab)
+            hpxml_bldg.zones[2].spaces[0].floor_area += s.area
+          end
+        end
+      end
+    end
+
     # --------------- #
     # HPXML Enclosure #
     # --------------- #
@@ -1173,7 +1229,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       end
     end
     if ['base-enclosure-2stories-garage.xml',
-        'base-enclosure-garage.xml'].include? hpxml_file
+        'base-enclosure-garage.xml',
+        'base-zones.xml',
+        'base-zones-spaces.xml',
+        'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside
