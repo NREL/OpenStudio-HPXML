@@ -307,8 +307,6 @@
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
-            <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>6</NumberofUnitsServed>
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>40000.0</HeatingCapacity>
@@ -328,7 +326,7 @@
             </PipeInsulation>
             <extension>
               <SharedRecirculation>
-                <NumberofUnitsServed>6</NumberofUnitsServed>
+                <NumberofBedroomsServed>0</NumberofBedroomsServed>
                 <PumpPower>220.0</PumpPower>
                 <ControlType>timer</ControlType>
               </SharedRecirculation>
