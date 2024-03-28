@@ -137,128 +137,15 @@
         </AirInfiltration>
         <Roofs>
           <Roof>
-            <SystemIdentifier id='RoofBedroom1'/>
-            <AttachedToSpace idref='bedroom_1'/>
+            <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>275.6</Area>
+            <Area>2075.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>dark</RoofColor>
             <Pitch>7.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
-              <SystemIdentifier id='RoofBedroom1Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofBedroom2'/>
-            <AttachedToSpace idref='bedroom_2'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>243.2</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofBedroom2Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofBedroom3'/>
-            <AttachedToSpace idref='bedroom_3'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>259.4</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofBedroom3Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofHallClosets'/>
-            <AttachedToSpace idref='hall_closets'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>145.9</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofHallClosetsInsulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofBathroom1'/>
-            <AttachedToSpace idref='bathroom_1'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>72.9</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofBathroom1Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofBathroom2'/>
-            <AttachedToSpace idref='bathroom_2'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>40.5</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofBathroom2Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofEntry'/>
-            <AttachedToSpace idref='entry'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>113.5</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofEntryInsulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofLivingDining'/>
-            <AttachedToSpace idref='living_dining'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>583.6</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofLivingDiningInsulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='RoofKitchenStairwell'/>
-            <AttachedToSpace idref='kitchen_stairwell'/>
-            <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>340.4</Area>
-            <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
-            <Pitch>7.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='RoofKitchenStairwellInsulation'/>
+              <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
