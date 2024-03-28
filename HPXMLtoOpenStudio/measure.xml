@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ee5a3029-cb1a-40fb-926b-b51174a04012</version_id>
-  <version_modified>2024-03-26T22:15:54Z</version_modified>
+  <version_id>7c90530c-3114-4e46-bf68-01b1c6f9424e</version_id>
+  <version_modified>2024-03-28T18:33:46Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -298,7 +298,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>37D2CD9B</checksum>
+      <checksum>063242D8</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -562,7 +562,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C2E63DEB</checksum>
+      <checksum>591B7B94</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -616,7 +616,7 @@
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>0F9EE386</checksum>
+      <checksum>E3A99BA1</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
@@ -676,7 +676,7 @@
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>01482223</checksum>
+      <checksum>15054F7E</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>

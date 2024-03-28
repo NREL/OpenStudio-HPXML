@@ -1553,7 +1553,7 @@ class Waterheater
     ua *= (1.0 - solar_fraction)
     if water_heating_system.is_shared_system
       # Apportion shared water heater energy use due to tank losses to the dwelling unit
-      ua = ua * nbeds.to_f / water_heating_system.number_of_bedrooms_served.to_f
+      ua = ua * [nbeds.to_f, 1.0].max / water_heating_system.number_of_bedrooms_served.to_f
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     if eta_c > 1.0

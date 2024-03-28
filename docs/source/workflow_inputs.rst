@@ -3431,6 +3431,7 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   .. [#] TankModelType choices are "mixed" or "stratified".
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Zero bedroom dwelling units count as 1 bedroom.
 
 .. _water_heater_tankless:
 
@@ -3471,6 +3472,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Zero bedroom dwelling units count as 1 bedroom.
 
 .. _water_heater_heat_pump:
 
@@ -3520,6 +3522,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Zero bedroom dwelling units count as 1 bedroom.
 
 .. _water_heater_combi_storage:
 
@@ -3560,6 +3563,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Zero bedroom dwelling units count as 1 bedroom.
 
 .. _water_heater_combi_tankless_coil:
 
@@ -3596,6 +3600,7 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Zero bedroom dwelling units count as 1 bedroom.
 
 .. _water_heater_desuperheater:
 
@@ -3763,6 +3768,7 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
   .. [#] PipingLength is the length of hot water piping from the shared recirculation loop to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
   .. [#] Recirculation pump energy will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the recirculation system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Zero bedroom dwelling units count as 1 bedroom.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          

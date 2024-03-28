@@ -307,12 +307,16 @@
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>conditioned space</Location>
+            <IsSharedSystem>true</IsSharedSystem>
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>40000.0</HeatingCapacity>
             <EnergyFactor>0.59</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
             <HotWaterTemperature>125.0</HotWaterTemperature>
+            <extension>
+              <NumberofBedroomsServed>6</NumberofBedroomsServed>
+            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDistribution1'/>
@@ -326,7 +330,7 @@
             </PipeInsulation>
             <extension>
               <SharedRecirculation>
-                <NumberofBedroomsServed>0</NumberofBedroomsServed>
+                <NumberofBedroomsServed>6</NumberofBedroomsServed>
                 <PumpPower>220.0</PumpPower>
                 <ControlType>timer</ControlType>
               </SharedRecirculation>
