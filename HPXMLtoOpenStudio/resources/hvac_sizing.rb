@@ -985,10 +985,10 @@ class HVACSizing
 
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
-    cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
+    cfm_Heating = q_bal_Sens + (icfm_Heating**1.5 + q_unb_cfm**1.5)**0.67 - q_preheat - q_recirc
 
-    cfm_cool_load_sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
-    cfm_cool_load_lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
+    cfm_cool_load_sens = q_bal_Sens + (icfm_Cooling**1.5 + q_unb_cfm**1.5)**0.67 - q_precool - q_recirc
+    cfm_cool_load_lat = q_bal_Lat + (icfm_Cooling**1.5 + q_unb_cfm**1.5)**0.67 - q_recirc
 
     bldg_design_loads.Heat_InfilVent = 1.1 * mj.acf * cfm_Heating * mj.htd
 
