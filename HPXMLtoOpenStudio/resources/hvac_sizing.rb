@@ -1040,8 +1040,8 @@ class HVACSizing
     '''
     HVAC Temperatures
     '''
-    # Evaporative cooler temperature calculation based on Manual S Figure 4-7
     if @cooling_type == HPXML::HVACTypeEvaporativeCooler
+      # Evaporative cooler temperature calculation based on Manual S Figure 4-7
       td_potential = mj.cool_design_temps[HPXML::LocationOutside] - mj.cool_outdoor_wetbulb
       td = td_potential * hvac_cooling.additional_properties.effectiveness
       @leaving_air_temp = mj.cool_design_temps[HPXML::LocationOutside] - td
@@ -1219,8 +1219,8 @@ class HVACSizing
 
       heat_load_prev = heat_load_next
 
-      # Calculate the new heating air flow rate
-      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, (@supply_air_temp - mj.heat_setpoint))
+      # Calculate the new heating air flow rate assuming 400 cfm/ton
+      heat_cfm = 400.0 * UnitConversions.convert(heat_load_next, 'Btu/hr', 'ton')
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
@@ -1260,7 +1260,8 @@ class HVACSizing
     delta = 1
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
-    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, (mj.cool_setpoint - @leaving_air_temp))
+    # Calculate the initial cooling air flow rate assuming 400 cfm/ton
+    cool_cfm = 400.0 * UnitConversions.convert(init_cool_load_sens, 'Btu/hr', 'ton')
     _dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
     for _iter in 1..50
@@ -1271,8 +1272,8 @@ class HVACSizing
       cool_load_lat, cool_load_sens = calculate_sensible_latent_split(mj, dse_Qr, cool_load_tot_next, init_cool_load_lat)
       cool_load_tot = cool_load_lat + cool_load_sens
 
-      # Calculate the new cooling air flow rate
-      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, (mj.cool_setpoint - @leaving_air_temp))
+      # Calculate the new cooling air flow rate assuming 400 cfm/ton
+      cool_cfm = 400.0 * UnitConversions.convert(cool_load_sens, 'Btu/hr', 'ton')
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
@@ -1481,8 +1482,8 @@ class HVACSizing
       entering_temp = hvac_cooling_ap.design_chw
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
 
-      # Calculate the air flow rate required for design conditions
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp))
+      # Calculate an initial air flow rate assuming 400 cfm/ton
+      hvac_sizing_values.Cool_Airflow = 400.0 * UnitConversions.convert(hvac_sizing_values.Cool_Load_Sens, 'Btu/hr', 'ton')
 
       # Neglecting the water flow rate for now because it's not available yet. Air flow rate is pre-adjusted values.
       design_wb_temp = UnitConversions.convert(mj.cool_indoor_wetbulb, 'f', 'k')
@@ -1531,7 +1532,8 @@ class HVACSizing
       hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Load_Sens
       if mj.cool_setpoint - @leaving_air_temp > 0
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp))
+        # See Manual S Section 4-4 Direct Evaporative Cooling: Blower Cfm
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp), nil)
       else
         hvac_sizing_values.Cool_Airflow = @cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
@@ -1626,7 +1628,7 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
       end
-      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint))
+      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
 
     elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? @heating_type
 
@@ -2235,14 +2237,13 @@ class HVACSizing
     return [tot_unbal_cfm, oa_cfm_preheat, oa_cfm_precool, recirc_cfm_shared, tot_bal_cfm_sens, tot_bal_cfm_lat]
   end
 
-  def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, deltaT, rated_capacity_for_cfm_per_ton_limits = nil)
+  def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, deltaT, rated_capacity)
     # Airflow sizing following Manual S based on design calculation
     airflow_rate = sens_load_or_capacity / (1.1 * mj.acf * deltaT)
 
-    if not rated_capacity_for_cfm_per_ton_limits.nil?
-      rated_capacity_tons = UnitConversions.convert(rated_capacity_for_cfm_per_ton_limits, 'Btu/hr', 'ton')
-      # Ensure the air flow rate is in between 200 and 500 cfm/ton.
-      # Reset the air flow rate (with a safety margin), if required.
+    if not rated_capacity.nil?
+      # Ensure the air flow rate is in between 300 and 400 cfm/ton for typical DX equipment.
+      rated_capacity_tons = UnitConversions.convert(rated_capacity, 'Btu/hr', 'ton')
       if airflow_rate / rated_capacity_tons > 500
         airflow_rate = 499.0 * rated_capacity_tons
       elsif airflow_rate / rated_capacity_tons < 200
