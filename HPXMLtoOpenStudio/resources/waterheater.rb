@@ -119,10 +119,10 @@ class Waterheater
     add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, unit_multiplier)
 
     # Fan:SystemModel
-    fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate, unit_multiplier)
+    fan = setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate, unit_multiplier, ec_adj)
 
     # WaterHeater:HeatPump:WrappedCondenser
-    hpwh = setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
+    setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier, ec_adj)
 
     # Amb temp & RH sensors, temp sensor shared across programs
     amb_temp_sensor, amb_rh_sensors = get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, conditioned_zone)
@@ -628,7 +628,7 @@ class Waterheater
 
   private
 
-  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier)
+  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier, ec_adj)
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 * unit_multiplier # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
@@ -648,15 +648,13 @@ class Waterheater
     hpwh.setCompressorLocation('Schedule')
     hpwh.setCompressorAmbientTemperatureSchedule(hpwh_tamb)
     hpwh.setFanPlacement('DrawThrough')
-    hpwh.setOnCycleParasiticElectricLoad(0)
-    hpwh.setOffCycleParasiticElectricLoad(0)
+    hpwh.setOnCycleParasiticElectricLoad(0 * ec_adj)
+    hpwh.setOffCycleParasiticElectricLoad(0 * ec_adj)
     hpwh.setParasiticHeatRejectionLocation('Outdoors')
     hpwh.setTankElementControlLogic('MutuallyExclusive')
     hpwh.setControlSensor1HeightInStratifiedTank(h_hpctrl_up)
     hpwh.setControlSensor1Weight(0.75)
     hpwh.setControlSensor2HeightInStratifiedTank(h_hpctrl_low)
-
-    return hpwh
   end
 
   def self.setup_hpwh_dxcoil(model, runner, water_heating_system, elevation, obj_name_hpwh, airflow_rate, unit_multiplier, ec_adj)
@@ -718,11 +716,12 @@ class Waterheater
         cop = 1.1022 * uef - 0.0877
       end
     end
+    cop /= ec_adj
 
     coil = OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped.new(model)
     coil.setName("#{obj_name_hpwh} coil")
     coil.setRatedHeatingCapacity(UnitConversions.convert(cap, 'kW', 'W') * cop)
-    coil.setRatedCOP(cop / ec_adj)
+    coil.setRatedCOP(cop)
     coil.setRatedSensibleHeatRatio(shr)
     coil.setRatedEvaporatorInletAirDryBulbTemperature(rated_edb)
     coil.setRatedEvaporatorInletAirWetBulbTemperature(UnitConversions.convert(twb_adj, 'F', 'C'))
@@ -744,7 +743,7 @@ class Waterheater
     a_tank, a_side = calc_tank_areas(v_actual, UnitConversions.convert(h_tank, 'm', 'ft')) # sqft
 
     e_cap = 4.5 # kW
-    parasitics = 3.0 # W
+    parasitics = 3.0 * ec_adj # W
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
     if water_heating_system.tank_volume <= 58.0
       tank_ua = 3.6 # Btu/h-R
@@ -803,8 +802,8 @@ class Waterheater
     return tank
   end
 
-  def self.setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate, unit_multiplier)
-    fan_power = 0.0462 # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
+  def self.setup_hpwh_fan(model, water_heating_system, obj_name_hpwh, airflow_rate, unit_multiplier, ec_adj)
+    fan_power = 0.0462 * ec_adj # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
     fan = OpenStudio::Model::FanSystemModel.new(model)
     fan.setSpeedControlMethod('Discrete')
     fan.setDesignPowerSizingMethod('PowerPerFlow')
@@ -1642,16 +1641,13 @@ class Waterheater
 
     # FUTURE: These are always zero right now; develop smart defaults.
     new_heater.setOffCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-    new_heater.setOffCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOffCycleParasiticFuelConsumptionRate(0.0 * ec_adj)
     new_heater.setOffCycleParasiticHeatFractiontoTank(0)
     new_heater.setOnCycleParasiticFuelType(EPlus::FuelTypeElectricity)
-    new_heater.setOnCycleParasiticFuelConsumptionRate(0.0)
+    new_heater.setOnCycleParasiticFuelConsumptionRate(0.0 * ec_adj)
     new_heater.setOnCycleParasiticHeatFractiontoTank(0)
 
     return new_heater
-  end
-
-  def self.set_wh_parasitic_parameters(water_heating_system, water_heater, is_dsh_storage)
   end
 
   def self.set_wh_ambient(loc_space, loc_schedule, wh_obj)

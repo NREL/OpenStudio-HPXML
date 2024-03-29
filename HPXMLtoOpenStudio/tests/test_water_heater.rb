@@ -1196,7 +1196,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
 
     return model, hpxml, hpxml.buildings[0]
   end
-  
+
   def _get_ec_adj(hpxml_bldg, water_heating_system)
     has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
     has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
