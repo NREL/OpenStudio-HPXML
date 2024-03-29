@@ -2251,7 +2251,7 @@ class HVACSizing
       end
     end
 
-    if not corresponding_cooling_airflow_rate.to_f > 0
+    if corresponding_cooling_airflow_rate.to_f > 0
       # For a heat pump, ensure the heating airflow rate is within 30% of the cooling airflow rate.
       # Recommendation by Hugh Henderson.
       airflow_rate = [airflow_rate, 0.7 * corresponding_cooling_airflow_rate].max
