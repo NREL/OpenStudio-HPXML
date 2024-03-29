@@ -1641,7 +1641,6 @@ class HVACSizing
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
 
-      # FIXME: Pass hvac_sizing_values.Cool_Airflow for AC/furnace?
       hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
 
     elsif [HPXML::HVACTypeStove,
@@ -2251,11 +2250,12 @@ class HVACSizing
         airflow_rate = 201.0 * rated_capacity_tons
       end
     end
-    
-    if not corresponding_cooling_airflow_rate.nil?
+
+    if not corresponding_cooling_airflow_rate.to_f > 0
       # For a heat pump, ensure the heating airflow rate is within 30% of the cooling airflow rate.
       # Recommendation by Hugh Henderson.
       airflow_rate = [airflow_rate, 0.7 * corresponding_cooling_airflow_rate].max
+      airflow_rate = [airflow_rate, 1.3 * corresponding_cooling_airflow_rate].min
     end
 
     return airflow_rate
