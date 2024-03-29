@@ -1219,8 +1219,8 @@ class HVACSizing
 
       heat_load_prev = heat_load_next
 
-      # Calculate the new heating air flow rate assuming 400 cfm/ton
-      heat_cfm = 400.0 * UnitConversions.convert(heat_load_next, 'Btu/hr', 'ton')
+      # Calculate the new heating air flow rate
+      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, (@supply_air_temp - mj.heat_setpoint), nil)
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
@@ -1260,8 +1260,7 @@ class HVACSizing
     delta = 1
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
-    # Calculate the initial cooling air flow rate assuming 400 cfm/ton
-    cool_cfm = 400.0 * UnitConversions.convert(init_cool_load_sens, 'Btu/hr', 'ton')
+    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, (mj.cool_setpoint - @leaving_air_temp), nil)
     _dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
     for _iter in 1..50
@@ -1272,8 +1271,8 @@ class HVACSizing
       cool_load_lat, cool_load_sens = calculate_sensible_latent_split(mj, dse_Qr, cool_load_tot_next, init_cool_load_lat)
       cool_load_tot = cool_load_lat + cool_load_sens
 
-      # Calculate the new cooling air flow rate assuming 400 cfm/ton
-      cool_cfm = 400.0 * UnitConversions.convert(cool_load_sens, 'Btu/hr', 'ton')
+      # Calculate the new cooling air flow rate
+      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, (mj.cool_setpoint - @leaving_air_temp), nil)
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
@@ -2243,7 +2242,8 @@ class HVACSizing
     airflow_rate = sens_load_or_capacity / (1.1 * mj.acf * deltaT)
 
     if not rated_capacity.nil?
-      # Ensure the air flow rate is in between 300 and 400 cfm/ton for typical DX equipment.
+      # Ensure the air flow rate is between 300 and 400 cfm/ton for typical DX equipment.
+      # Recommendation by Hugh Henderson.
       rated_capacity_tons = UnitConversions.convert(rated_capacity, 'Btu/hr', 'ton')
       if airflow_rate / rated_capacity_tons > 500
         airflow_rate = 499.0 * rated_capacity_tons
@@ -2254,6 +2254,7 @@ class HVACSizing
     
     if not corresponding_cooling_airflow_rate.nil?
       # For a heat pump, ensure the heating airflow rate is within 30% of the cooling airflow rate.
+      # Recommendation by Hugh Henderson.
       airflow_rate = [airflow_rate, 0.7 * corresponding_cooling_airflow_rate].max
     end
 
