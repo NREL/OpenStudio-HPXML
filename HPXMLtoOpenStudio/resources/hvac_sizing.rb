@@ -2276,10 +2276,10 @@ class HVACSizing
       # Ensure the air flow rate is between 300 and 400 cfm/ton for typical DX equipment.
       # Recommendation by Hugh Henderson.
       rated_capacity_tons = UnitConversions.convert(rated_capacity, 'Btu/hr', 'ton')
-      if airflow_rate / rated_capacity_tons > 500
-        airflow_rate = 499.0 * rated_capacity_tons
-      elsif airflow_rate / rated_capacity_tons < 200
-        airflow_rate = 201.0 * rated_capacity_tons
+      if airflow_rate / rated_capacity_tons > 400
+        airflow_rate = 399.0 * rated_capacity_tons
+      elsif airflow_rate / rated_capacity_tons < 300
+        airflow_rate = 301.0 * rated_capacity_tons
       end
     end
 
