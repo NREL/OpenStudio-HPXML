@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>edc2d731-2133-48af-9c2b-7f5d28da47b2</version_id>
-  <version_modified>2024-03-29T20:10:27Z</version_modified>
+  <version_id>fc38c2c1-3d6a-43d5-819e-ba8e198f37a9</version_id>
+  <version_modified>2024-04-01T16:29:47Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B55E7A03</checksum>
+      <checksum>C679E172</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -562,7 +562,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C2E63DEB</checksum>
+      <checksum>255E1F67</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -676,7 +676,7 @@
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>01482223</checksum>
+      <checksum>077622EC</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>
