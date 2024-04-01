@@ -46,6 +46,17 @@ The file format of the HVAC design load details output.
 
 <br/>
 
+**Annual Output File Name**
+
+The name of the file w/ HVAC design loads and capacities. If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').
+
+- **Name:** ``annual_output_file_name``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Design Load Details Output File Name**
 
 The name of the file w/ additional HVAC design load details. If not provided, defaults to 'results_design_load_details.csv' (or 'results_design_load_details.json' or 'results_design_load_details.msgpack').

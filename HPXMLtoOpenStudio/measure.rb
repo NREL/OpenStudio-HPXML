@@ -53,6 +53,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('csv')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('annual_output_file_name', false)
+    arg.setDisplayName('Annual Output File Name')
+    arg.setDescription("The name of the file w/ HVAC design loads and capacities. If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('design_load_details_output_file_name', false)
     arg.setDisplayName('Design Load Details Output File Name')
     arg.setDescription("The name of the file w/ additional HVAC design load details. If not provided, defaults to 'results_design_load_details.csv' (or 'results_design_load_details.json' or 'results_design_load_details.msgpack').")
@@ -101,7 +106,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     output_dir = runner.getStringArgumentValue('output_dir', user_arguments)
     output_format = runner.getStringArgumentValue('output_format', user_arguments)
+    annual_output_file_name = runner.getOptionalStringArgumentValue('annual_output_file_name', user_arguments)
+    annual_output_file_name = annual_output_file_name.is_initialized ? annual_output_file_name.get : "results_annual.#{output_format}"
+    annual_output_file_path = File.join(output_dir, annual_output_file_name)
     design_load_details_output_file_name = runner.getOptionalStringArgumentValue('design_load_details_output_file_name', user_arguments)
+    design_load_details_output_file_name = design_load_details_output_file_name.is_initialized ? design_load_details_output_file_name.get : "results_design_load_details.#{output_format}"
+    design_load_details_output_file_path = File.join(output_dir, design_load_details_output_file_name)
     add_component_loads = runner.getBoolArgumentValue('add_component_loads', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
     skip_validation = runner.getBoolArgumentValue('skip_validation', user_arguments)
@@ -166,11 +176,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # Apply HPXML defaults upfront; process schedules & emissions
-      if not design_load_details_output_file_name.is_initialized
-        design_load_details_output_file_path = File.join(output_dir, "results_design_load_details.#{output_format}")
-      else
-        design_load_details_output_file_path = File.join(output_dir, design_load_details_output_file_name.get)
-      end
       hpxml_sch_map = {}
       check_emissions_references(hpxml.header, hpxml_path)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
@@ -182,8 +187,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(output_dir, in_schedules_csv))
-        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
-                                                                             design_load_details_output_file_path: design_load_details_output_file_path, output_format: output_format)
+        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather,
+                            epw_file: epw_file, schedules_file: schedules_file, design_load_details_output_file_path: design_load_details_output_file_path,
+                            output_format: output_format)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
       validate_emissions_files(hpxml.header)
@@ -191,6 +197,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # Write updated HPXML object (w/ defaults) to file for inspection
       hpxml_defaults_path = File.join(output_dir, 'in.xml')
       XMLHelper.write_file(hpxml.to_doc, hpxml_defaults_path)
+
+      # Write annual results output file
+      # This is helpful if the user wants to get these results right away (e.g.,
+      # they might be using the run_simulation.rb --skip-simulation argument.
+      results_out = []
+      Outputs.append_sizing_results(hpxml.buildings, results_out, nil)
+      Outputs.write_results_out_to_file(results_out, output_format, annual_output_file_path)
 
       # Create OpenStudio model
       hpxml_osm_map = {}
