@@ -694,7 +694,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_air_to_air_heat_pump_var_speed_max_power_ratio
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -739,6 +739,65 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
     _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 0)
     _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 1)
+  end
+
+  def test_air_to_air_heat_pump_1_speed_onoff_thermostat
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
+    clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+
+    # E+ thermostat
+    onoff_thermostat_deadband = hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband
+    assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
+    thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
+    assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_onoff_thermostat_EMS(model, htg_coil, 0.694, 0.474, -0.168, 2.185, -1.943, 0.757)
+    _check_onoff_thermostat_EMS(model, clg_coil, 0.719, 0.418, -0.137, 1.143, -0.139, -0.00405)
+  end
+
+  def test_air_to_air_heat_pump_2_speed_realistic_staging
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-realistic-control-2-speed-ashp.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+
+    # E+ thermostat
+    onoff_thermostat_deadband = hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband
+    assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
+    thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
+    assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_onoff_thermostat_EMS(model, htg_coil, 0.741, 0.379, -0.120, 2.154, -1.737, 0.584)
+    _check_onoff_thermostat_EMS(model, clg_coil, 0.655, 0.512, -0.167, 1.639, -0.999, 0.360)
+    # realistic staging EMS is hard to check values
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{model.getAirLoopHVACUnitarySystems[0].name} realistic cycling", true)
+    assert(!program_values.empty?) # Check EMS program
   end
 
   def test_mini_split_heat_pump
@@ -1564,6 +1623,20 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / clg_speed2_cop, 0.01) unless clg_speed2_cop.nil?
     assert_in_epsilon(program_values['rt_capacity_0'][index], clg_speed1_capacity, 0.01) unless clg_speed1_capacity.nil?
     assert_in_epsilon(program_values['rt_capacity_1'][index], clg_speed2_capacity, 0.01) unless clg_speed2_capacity.nil?
+
+    return program_values
+  end
+
+  def _check_onoff_thermostat_EMS(model, clg_or_htg_coil, c1_cap, c2_cap, c3_cap, c1_eir, c2_eir, c3_eir)
+    # Check max power ratio EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{clg_or_htg_coil.name} cycling degradation program", true)
+    assert_in_epsilon(program_values['c_1_cap'].sum, c1_cap, 0.01)
+    assert_in_epsilon(program_values['c_2_cap'].sum, c2_cap, 0.01)
+    assert_in_epsilon(program_values['c_3_cap'].sum, c3_cap, 0.01)
+    assert_in_epsilon(program_values['c_1_eir'].sum, c1_eir, 0.01)
+    assert_in_epsilon(program_values['c_2_eir'].sum, c2_eir, 0.01)
+    assert_in_epsilon(program_values['c_3_eir'].sum, c3_eir, 0.01)
+    # Other equations to complicated to check (contains functions, variables, or "()")
 
     return program_values
   end

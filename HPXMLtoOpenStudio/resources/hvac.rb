@@ -10,8 +10,27 @@ class HVAC
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
+                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg, header)
     is_heatpump = false
+
+    if (not cooling_system.nil?)
+      is_onoff_thermostat_ddb = hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband > 0.0
+      # Error-checking
+      # Do not apply on off thermostat if timestep is >= 2
+      # Only availabe with 1 min time step
+      if is_onoff_thermostat_ddb
+        if header.timestep >= 2
+          is_onoff_thermostat_ddb = false
+          runner.registerWarning('On-off thermostat deadband currently is only supported for 1 min timestep. Simulation continues without on-off thermostat deadband control.')
+        end
+        if (not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type)
+          is_onoff_thermostat_ddb = false
+          runner.registerWarning('On-off thermostat deadband currently is only supported for single speed or two speed air source systems. Simulation continues without on-off thermostat deadband control.')
+        end
+      end
+    else
+      is_onoff_thermostat_ddb = false
+    end
 
     if not cooling_system.nil?
       if cooling_system.is_a? HPXML::HeatPump
@@ -89,7 +108,7 @@ class HVAC
     fan_cfms = []
     if not cooling_system.nil?
       # Cooling Coil
-      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb, hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband > 0.0)
+      clg_coil = create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb, is_onoff_thermostat_ddb)
 
       clg_cfm = cooling_system.cooling_airflow_cfm
       clg_ap.cool_fan_speed_ratios.each do |r|
@@ -120,7 +139,7 @@ class HVAC
         supp_max_temp = htg_ap.supp_max_temp
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband > 0.0)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, is_onoff_thermostat_ddb)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)

@@ -226,11 +226,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0'],
-                            'onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support single speed dx systems'],
+                            'onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support dx systems'],
                             'onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system',
                                                                   'Expected at maximum one heating system'],
                             'realistic-staging-missiong-ddb' => ['Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature',
                                                                  'Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
+                            'realistic-staging-wrong-num-speeds' => ["Expected ../../HVACPlant/*/CompressorType to be 'two stage'."],
                             'realistic-staging-zero-ddb' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
                             'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
                                                               'HeatingAutosizingFactor should be greater than 0.0',
@@ -695,6 +696,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['realistic-staging-missiong-ddb'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
         hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = nil
+      elsif ['realistic-staging-wrong-num-speeds'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.hvac_controls[0].realistic_staging = true
       elsif ['realistic-staging-zero-ddb'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
         hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 0.0
@@ -805,9 +809,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
-                              'onoff-thermostat-timestep-ten-mins' => ['Timestep should be 1; simulation will continue without deadband control.'],
                               'onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
-                              'onoff-thermostat-num-speeds-greater-than-two' => ['Expected single-speed or two-speed DX systems to be modeled; simulation will continue without deadband control.'],
                               'plug-load-type-sauna' => ["Plug load type 'sauna' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-aquarium' => ["Plug load type 'aquarium' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-water-bed' => ["Plug load type 'water bed' is not currently handled, the plug load will not be modeled."],
@@ -934,15 +936,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
-      elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml.header.timestep = 10
       elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
         hpxml.header.temperature_capacitance_multiplier = 1
-      elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.plug_loads[0].plug_load_type = HPXML::PlugLoadTypeSauna
@@ -1545,6 +1541,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
+                              'onoff-thermostat-timestep-ten-mins' => ['On-off thermostat deadband currently is only supported for 1 min timestep. Simulation continues without on-off thermostat deadband control.'],
+                              'onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems. Simulation continues without on-off thermostat deadband control.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -1688,6 +1686,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-setpoint-adjustments-daily-schedules'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
+      elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml.header.timestep = 10
+      elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case

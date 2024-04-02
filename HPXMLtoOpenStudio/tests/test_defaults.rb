@@ -2173,21 +2173,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78, 0.0, false)
-
-    # Test on/off thermostat override, on off thermostat solely
-    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
-    hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 2.0
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78, 0.0, false)
-
-    # Test on/off thermostat override, large time step
-    hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeSingleStage
-    hpxml.header.timestep = 5
-    hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 2.0
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_hvac_control_setpoint_values(default_hpxml_bldg.hvac_controls[0], 68, 78, 0.0, false)
   end
 
   def test_hvac_distribution

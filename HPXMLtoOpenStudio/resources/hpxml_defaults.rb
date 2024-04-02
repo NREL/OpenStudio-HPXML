@@ -1835,7 +1835,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version, header)
+  def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version, _header)
     hpxml_bldg.hvac_controls.each do |hvac_control|
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HeatingSetpoint].name))
       if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil? && !schedules_file_includes_heating_setpoint_temp
@@ -1879,27 +1879,6 @@ class HPXMLDefaults
       if hvac_control.realistic_staging.nil?
         hvac_control.realistic_staging = false
         hvac_control.onoff_thermostat_deadband_isdefaulted = true
-      end
-
-      # Do not apply on off thermostat if timestep is >= 2
-      # Only availabe with 1 min time step
-      if hvac_control.onoff_thermostat_deadband > 0.0 && header.timestep >= 2
-        hvac_control.onoff_thermostat_deadband = 0.0
-        hvac_control.onoff_thermostat_deadband_isdefaulted = true
-      end
-
-      # Only apply for single/two speed systems for now
-      if hvac_control.onoff_thermostat_deadband > 0.0
-        hvac_system = (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps)[0]
-        if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? hvac_system.compressor_type
-          hvac_control.onoff_thermostat_deadband = 0.0
-          hvac_control.onoff_thermostat_deadband_isdefaulted = true
-        end
-        # No two speed system
-        if hvac_system.compressor_type != HPXML::HVACCompressorTypeTwoStage
-          hvac_control.realistic_staging = false
-          hvac_control.realistic_staging_isdefaulted = true
-        end
       end
 
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||
