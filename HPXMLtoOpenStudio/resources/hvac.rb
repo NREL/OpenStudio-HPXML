@@ -3222,7 +3222,7 @@ class HVAC
       # use average curve value ( ~ at 0.5 min).
       # This curve reached steady state in 2 mins, assume shape for high efficiency units, scale it down based on number_of_timestep_logged
       cycling_degrad_program.addLine("  Set exp = @Exp((-2.19722) * #{get_time_to_full_cap_limits[0]} / #{number_of_timestep_logged} * #{t_i - 0.5})")
-      cycling_degrad_program.addLine("  Set cc_mult = (-1.0125 * exp + 1.0125)")
+      cycling_degrad_program.addLine('  Set cc_mult = (-1.0125 * exp + 1.0125)')
       cycling_degrad_program.addLine('  Set cc_mult = @Min cc_mult 1.0')
     end
     cycling_degrad_program.addLine('Else')
@@ -3261,25 +3261,25 @@ class HVAC
 
       # Create a new schedule for supp availability
       supp_avail_sch = htg_supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
-      supp_avail_sch.setName("#{htg_supp_coil.name.to_s} avail sch")
+      supp_avail_sch.setName("#{htg_supp_coil.name} avail sch")
       htg_supp_coil.setAvailabilitySchedule(supp_avail_sch)
       supp_coil_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(supp_avail_sch, *EPlus::EMSActuatorScheduleConstantValue)
       supp_coil_avail_actuator.setName(htg_supp_coil.name.get.gsub('-', '_') + ' avail')
     end
     # Sensors
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-    living_temp_ss.setName("#{control_zone.name.to_s} temp")
+    living_temp_ss.setName("#{control_zone.name} temp")
     living_temp_ss.setKeyName(control_zone.name.to_s)
 
     htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
 
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    htg_sp_ss.setName("#{control_zone.name.to_s} htg setpoint")
+    htg_sp_ss.setName("#{control_zone.name} htg setpoint")
     htg_sp_ss.setKeyName(htg_sch.name.to_s)
 
     clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_sp_ss.setName("#{control_zone.name.to_s} clg setpoint")
+    clg_sp_ss.setName("#{control_zone.name} clg setpoint")
     clg_sp_ss.setKeyName(clg_sch.name.to_s)
 
     unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')

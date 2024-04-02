@@ -2115,7 +2115,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       total_cool_load_serveds[unit] = hpxml_bldg.total_fraction_cool_load_served
 
       hvac_control = hpxml_bldg.hvac_controls[0]
-      next if hvac_control.nil?      
+      next if hvac_control.nil?
+
       if (hvac_control.onoff_thermostat_deadband.to_f > 0)
         onoff_deadbands[unit] = hvac_control.onoff_thermostat_deadband.to_f
         zone_air_temp_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
@@ -2141,7 +2142,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameHVACAvailabilitySensor }
-
 
     # EMS program
     clg_hrs = 'clg_unmet_hours'
