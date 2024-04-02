@@ -1586,7 +1586,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Sizing data
     if args[:include_annual_hvac_summary]
-      results_out = Outputs.append_sizing_results(@hpxml_bldgs, results_out, line_break)
+      results_out = Outputs.append_sizing_results(@hpxml_bldgs, results_out)
     end
 
     Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_path)

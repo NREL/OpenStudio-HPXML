@@ -202,7 +202,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # This is helpful if the user wants to get these results right away (e.g.,
       # they might be using the run_simulation.rb --skip-simulation argument.
       results_out = []
-      Outputs.append_sizing_results(hpxml.buildings, results_out, nil)
+      Outputs.append_sizing_results(hpxml.buildings, results_out)
       Outputs.write_results_out_to_file(results_out, output_format, annual_output_file_path)
 
       # Create OpenStudio model

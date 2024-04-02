@@ -190,7 +190,9 @@ class Outputs
     return htg_cfm, clg_cfm
   end
 
-  def self.append_sizing_results(hpxml_bldgs, results_out, line_break)
+  def self.append_sizing_results(hpxml_bldgs, results_out)
+    line_break = nil
+
     # Summary HVAC capacities
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
     hpxml_bldgs.each do |hpxml_bldg|
@@ -280,6 +282,7 @@ class Outputs
   end
 
   def self.write_results_out_to_file(results_out, output_format, output_file_path, mode = 'w')
+    line_break = nil
     if ['csv'].include? output_format
       CSV.open(output_file_path, mode) { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif ['json', 'msgpack'].include? output_format
