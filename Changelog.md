@@ -34,6 +34,7 @@ __New Features__
 - Allows optional `HeatingAutosizingFactor`, `CoolingAutosizingFactor`, `BackupHeatingAutosizingFactor` inputs to scale HVAC equipment autosizing results.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
+- Updates default temperature capacitance multiplier from 1 to 7, an average value found in the literature when calibrating timeseries EnergyPlus simulation results to field data.
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaces `roof_radiant_barrier`/`roof_radiant_barrier_grade` arguments with `radiant_barrier_attic_location`/`radiant_barrier_grade`.
   - Allows specifying number of bedrooms served by the water heater which is used for apportioning tank losses; **Breaking change**: Replaces `water_heater_num_units_served` with `water_heater_num_bedrooms_served`.

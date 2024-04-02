@@ -89,12 +89,13 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            >= 1, <= 31       No        31                           Run period end date
   ``CalendarYear``                      integer            > 1600 [#]_       No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``TemperatureCapacitanceMultiplier``  double             > 0               No        1.0                          Multiplier on air heat capacitance [#]_
+  ``TemperatureCapacitanceMultiplier``  double             > 0               No        7.0 [#]_                     Multiplier on air heat capacitance [#]_
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
+  .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus simulation results to field data.
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
