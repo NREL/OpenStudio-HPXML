@@ -1080,7 +1080,8 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
         vals_10x = [vals_10x]
       end
 
-      vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), _i|
+      vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
+        _period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
         if not (key.include?('Unmet Hours') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather'))
@@ -1105,8 +1106,7 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
 
         # Uncomment these lines to debug:
         # if val_1x != 0 or val_10x != 0
-        #   period = is_timeseries ? Date::ABBR_MONTHNAMES[i+1] : 'Annual'
-        #   puts "[#{key}, #{period}] 1x=#{val_1x} 10x=#{val_10x}"
+        #   puts "[#{key}, #{_period}] 1x=#{val_1x} 10x=#{val_10x}"
         # end
         if abs_frac_tol.nil?
           if abs_delta_tol == 0
