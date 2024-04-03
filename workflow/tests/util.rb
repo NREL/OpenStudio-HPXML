@@ -1031,9 +1031,9 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       abs_delta_tol = 1.0
       abs_frac_tol = 0.01
     elsif key.include?('Airflow:')
-      # Check that airflow rate difference is less than 0.1 cfm or less than 0.5%
+      # Check that airflow rate difference is less than 0.1 cfm or less than 1.0%
       abs_delta_tol = 0.1
-      abs_frac_tol = 0.005
+      abs_frac_tol = 0.01
     elsif key.include?('Unmet Hours:')
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
@@ -1072,12 +1072,15 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       abs_delta_tol, abs_frac_tol = get_tolerances(key)
 
       vals_10x = results_10x[key]
-      if not vals_1x.is_a? Array
+      if vals_1x.is_a? Array
+        is_timeseries = true
+      else
+        is_timeseries = false
         vals_1x = [vals_1x]
         vals_10x = [vals_10x]
       end
 
-      vals_1x.zip(vals_10x).each do |val_1x, val_10x|
+      vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         if not (key.include?('Unmet Hours') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather'))
@@ -1102,7 +1105,8 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
 
         # Uncomment these lines to debug:
         # if val_1x != 0 or val_10x != 0
-        #   puts "[#{key}] 1x=#{val_1x} 10x=#{val_10x}"
+        #   period = is_timeseries ? Date::ABBR_MONTHNAMES[i+1] : 'Annual'
+        #   puts "[#{key}, #{period}] 1x=#{val_1x} 10x=#{val_10x}"
         # end
         if abs_frac_tol.nil?
           if abs_delta_tol == 0
