@@ -1493,6 +1493,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'duct-lto-cfm25' => ['Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.'],
                               'duct-lto-cfm50' => ['Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.'],
                               'duct-lto-percent' => ['Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.'],
+                              'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
+                              'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
@@ -1626,6 +1628,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
           duct.duct_surface_area = nil
           duct.duct_location = nil
         end
+      elsif ['floor-or-ceiling1'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.floors[0].floor_or_ceiling = HPXML::FloorOrCeilingFloor
+      elsif ['floor-or-ceiling2'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-unvented-crawlspace.xml')
+        hpxml_bldg.floors[0].floor_or_ceiling = HPXML::FloorOrCeilingCeiling
       elsif ['hvac-gshp-bore-depth-autosized-high'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.site.ground_conductivity = 0.07

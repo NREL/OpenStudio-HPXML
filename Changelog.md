@@ -64,6 +64,7 @@ __Bugfixes__
 - Fixes detailed schedule error-checking where schedules with MAX < 1 were incorrectly allowed.
 - Fixes error if using MF space types (e.g., "other heated space") and the building has no HVAC equipment.
 - Fixes `ManualJInputs/HumiditySetpoint` not being used in the design load calculation.
+- Prevents errors due to incorrect `Floor/FloorOrCeiling` input; issues a warning when detected.
 
 ## OpenStudio-HPXML v1.7.0
 
