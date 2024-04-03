@@ -1250,6 +1250,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``SystemIdentifier``                    id                                   Yes                 Unique identifier
   ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                 Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
+  ``FloorOrCeiling``                      string                  See [#]_     See [#]_            Floor or ceiling from the perspective of the conditioned space
   ``FloorType``                           element                 See [#]_     Yes                 Floor type (for thermal mass)
   ``Area``                                double    ft2           > 0          Yes                 Gross area
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
@@ -1264,22 +1265,14 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
+  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
+  .. [#] FloorOrCeiling only required for floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space and the surface is a ceiling, otherwise "none".
   .. [#] RadiantBarrier intended for attic floors. Model assumes an emittance of 0.5 (reduced effectiveness due to accumulation of dust) per `an ORNL article on radiant barriers <https://web.ornl.gov/sci/buildings/tools/radiant/rb2/>`_.
   .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
          For a manufactured home belly where the area of the belly wrap is different and usually greater than the floor area, the AssemblyEffectiveRValue should be adjusted to account for the surface area of the belly wrap and insulation.
-
-For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
-
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  Element                                 Type      Units  Constraints     Required  Default  Notes
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  ``FloorOrCeiling``                      string           See [#]_        Yes                Specifies whether a floor or ceiling from the perspective of the conditioned space
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-
-  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
 
 HPXML Slabs
 ***********

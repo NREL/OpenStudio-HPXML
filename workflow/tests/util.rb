@@ -1080,7 +1080,7 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
         vals_10x = [vals_10x]
       end
 
-      vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
+      vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), _i|
         if not (key.include?('Unmet Hours') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather'))
