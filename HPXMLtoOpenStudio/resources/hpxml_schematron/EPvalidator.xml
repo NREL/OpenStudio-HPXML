@@ -670,6 +670,7 @@
       <sch:assert role='ERROR' test='count(h:extension/h:CarpetRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/CarpetRValue</sch:assert>
       <!-- Warnings -->
       <sch:report role='WARN' test='number(h:ExposedPerimeter) = 0'>Slab has zero exposed perimeter, this may indicate an input error.</sch:report>
+      <sch:report role='WARN' test='number(h:ExposedPerimeter) &gt; 2*number(h:Area)'>Slab exposed perimeter is more than twice the slab area, this may indicate an input error.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &lt; 1 and number(h:Thickness) &gt; 0'>Thickness is less than 1 inch; this may indicate incorrect units.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &gt; 12'>Thickness is greater than 12 inches; this may indicate incorrect units.</sch:report>
     </sch:rule>
