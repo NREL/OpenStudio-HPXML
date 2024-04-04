@@ -57,6 +57,8 @@ class HPXML < Object
   FuelElementNames = ['HeatingSystemFuel', 'CoolingSystemFuel', 'HeatPumpFuel', 'BackupSystemFuel', 'FuelType', 'IntegratedHeatingSystemFuel', 'Heater/Type']
 
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
+  AddressTypeMailing = 'mailing'
+  AddressTypeStreet = 'street'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
@@ -1105,9 +1107,10 @@ class HPXML < Object
                    :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
                    :freezers, :dehumidifiers, :cooking_ranges, :ovens, :lighting_groups, :lighting,
                    :ceiling_fans, :pools, :permanent_spas, :portable_spas, :plug_loads, :fuel_loads]
-    ATTRS = [:building_id, :site_id, :city, :state_code, :zip_code, :time_zone_utc_offset, :egrid_region,
-             :egrid_subregion, :cambium_region_gea, :dst_enabled, :dst_begin_month, :dst_begin_day,
-             :dst_end_month, :dst_end_day, :event_type, :elevation, :latitude, :longitude]
+    ATTRS = [:building_id, :site_id, :address_type, :address1, :address2, :city, :state_code, :zip_code,
+             :time_zone_utc_offset, :egrid_region, :egrid_subregion, :cambium_region_gea,
+             :dst_enabled, :dst_begin_month, :dst_begin_day, :dst_end_month, :dst_end_day, :event_type,
+             :elevation, :latitude, :longitude]
 
     attr_accessor(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
@@ -1124,7 +1127,7 @@ class HPXML < Object
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
       XMLHelper.add_attribute(building_building_id, 'id', @building_id)
-      if (not @state_code.nil?) || (not @zip_code.nil?) || (not @city.nil?) || (not @latitude.nil?) || (not @longitude.nil?) || (not @elevation.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
+      if (not @address_type.nil?) || (not @address1.nil?) || (not @address2.nil?) || (not @state_code.nil?) || (not @zip_code.nil?) || (not @city.nil?) || (not @latitude.nil?) || (not @longitude.nil?) || (not @elevation.nil?) || (not @time_zone_utc_offset.nil?) || (not @egrid_region.nil?) || (not @egrid_subregion.nil?) || (not @cambium_region_gea.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day.nil?)
         building_site = XMLHelper.add_element(building, 'Site')
         building_site_id = XMLHelper.add_element(building_site, 'SiteID')
         if @site_id.nil?
@@ -1137,8 +1140,11 @@ class HPXML < Object
         else
           XMLHelper.add_attribute(building_site_id, 'id', @site_id)
         end
-        if (not @state_code.nil?) || (not @zip_code.nil?) || (not @city.nil?)
+        if (not @address_type.nil?) || (not @address1.nil?) || (not @address2.nil?) || (not @state_code.nil?) || (not @zip_code.nil?) || (not @city.nil?)
           address = XMLHelper.add_element(building_site, 'Address')
+          XMLHelper.add_element(address, 'AddressType', @address_type, :string, @address_type_isdefaulted) unless @address_type.nil?
+          XMLHelper.add_element(address, 'Address1', @address1, :string, @address1_isdefaulted) unless @address1.nil?
+          XMLHelper.add_element(address, 'Address2', @address2, :string, @address2_isdefaulted) unless @address2.nil?
           XMLHelper.add_element(address, 'CityMunicipality', @city, :string, @city_isdefaulted) unless @city.nil?
           XMLHelper.add_element(address, 'StateCode', @state_code, :string, @state_code_isdefaulted) unless @state_code.nil?
           XMLHelper.add_element(address, 'ZipCode', @zip_code, :string) unless @zip_code.nil?
@@ -1232,9 +1238,12 @@ class HPXML < Object
         @building_id = HPXML::get_id(building, 'BuildingID')
         @event_type = XMLHelper.get_value(building, 'ProjectStatus/EventType', :string)
         @site_id = HPXML::get_id(building, 'Site/SiteID')
+        @address_type = XMLHelper.get_value(building, 'Site/Address/AddressType', :string)
+        @address1 = XMLHelper.get_value(building, 'Site/Address/Address1', :string)
+        @address2 = XMLHelper.get_value(building, 'Site/Address/Address2', :string)
+        @city = XMLHelper.get_value(building, 'Site/Address/CityMunicipality', :string)
         @state_code = XMLHelper.get_value(building, 'Site/Address/StateCode', :string)
         @zip_code = XMLHelper.get_value(building, 'Site/Address/ZipCode', :string)
-        @city = XMLHelper.get_value(building, 'Site/Address/CityMunicipality', :string)
         @latitude = XMLHelper.get_value(building, 'Site/GeoLocation/Latitude', :float)
         @longitude = XMLHelper.get_value(building, 'Site/GeoLocation/Longitude', :float)
         @elevation = XMLHelper.get_value(building, 'Site/Elevation', :float)
@@ -1908,7 +1917,8 @@ class HPXML < Object
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
-             :building_footprint_area, :number_of_units, :number_of_units_in_building]
+             :building_footprint_area, :number_of_units, :number_of_units_in_building,
+             :manufactured_home_sections]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -1932,6 +1942,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'BuildingFootprintArea', @building_footprint_area, :float, @building_footprint_area_isdefaulted) unless @building_footprint_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', @conditioned_floor_area, :float) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', @conditioned_building_volume, :float, @conditioned_building_volume_isdefaulted) unless @conditioned_building_volume.nil?
+      XMLHelper.add_element(building_construction, 'ManufacturedHomeSections', @manufactured_home_sections, :string) unless @manufactured_home_sections.nil?
     end
 
     def from_doc(building)
@@ -1952,6 +1963,7 @@ class HPXML < Object
       @building_footprint_area = XMLHelper.get_value(building_construction, 'BuildingFootprintArea', :float)
       @conditioned_floor_area = XMLHelper.get_value(building_construction, 'ConditionedFloorArea', :float)
       @conditioned_building_volume = XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume', :float)
+      @manufactured_home_sections = XMLHelper.get_value(building_construction, 'ManufacturedHomeSections', :string)
     end
   end
 
