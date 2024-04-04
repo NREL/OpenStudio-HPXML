@@ -10,7 +10,7 @@ class HVAC
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg)
+                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg, conditioned_space)
     is_heatpump = false
 
     if not cooling_system.nil?
@@ -118,9 +118,11 @@ class HVAC
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
+        # Defrost calculations
+        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system)
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -203,6 +205,8 @@ class HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
+
+    apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
 
     return air_loop
   end
@@ -2883,7 +2887,7 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb)
+  def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
     htg_ap = heating_system.additional_properties
 
     if heating_system.heating_detailed_performance_data.empty?
@@ -2939,7 +2943,7 @@ class HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[0]))
-        defrost_time_fraction = 0.1 # 6min/hr
+        defrost_time_fraction = 0.1 if heating_system.advanced_defrost_approach # 6min/hr
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -2954,16 +2958,23 @@ class HVAC
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[i]))
         htg_coil.addStage(stage)
-        defrost_time_fraction = 0.06667 # 4min/hr
+        defrost_time_fraction = 0.06667 if heating_system.advanced_defrost_approach # 4min/hr
       end
     end
 
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    htg_coil.setDefrostStrategy('Resistive')
     htg_coil.setDefrostControl('Timed')
-    htg_coil.setDefrostTimePeriodFraction(defrost_time_fraction)
+    if heating_system.advanced_defrost_approach
+      htg_coil.setDefrostStrategy('Resistive')
+      htg_coil.setDefrostTimePeriodFraction(defrost_time_fraction)
+      htg_coil.setResistiveDefrostHeaterCapacity(p_dot_defrost)
+    else
+      defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
+      htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
+      htg_coil.setDefrostStrategy('ReverseCycle')
+    end
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
     end
@@ -3554,6 +3565,110 @@ class HVAC
     program_calling_manager.setName("#{obj_name} program manager")
     program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(fault_program)
+  end
+
+  def self.calculate_heat_pump_defrost_load_power_watts(heat_pump)
+    return [nil, nil] unless heat_pump.advanced_defrost_approach
+
+    # Fixme: fan power?
+    p_dot_odu_fan = 0.0
+    p_dot_blower = 0.0
+    rated_clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
+    rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
+    q_dot_defrost = rated_clg_capacity * 1.127 # defrost cooling rate, 1.127 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
+    cop_defrost = rated_clg_cop / 1.917 # defrost cooling cop, 1.917 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
+    p_dot_defrost = q_dot_defrost / cop_defrost - p_dot_odu_fan - p_dot_blower
+    return q_dot_defrost, p_dot_defrost
+  end
+
+  def self.apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, heat_pump, q_dot_defrost)
+    return unless heat_pump.advanced_defrost_approach
+
+    if htg_supp_coil.nil?
+      backup_system = heat_pump.backup_system
+      if backup_system.nil?
+        supp_sys_capacity = 0.0
+        supp_sys_power_level = 0.0
+        supp_sys_fuel = HPXML::FuelTypeElectricity
+      else
+        supp_sys_fuel = backup_system.heating_system_fuel
+        supp_sys_capacity = UnitConversions.convert(backup_system.heating_capacity, 'Btu/hr', 'W')
+        supp_sys_efficiency = backup_system.heating_efficiency_percent
+        supp_sys_efficiency = backup_system.heating_efficiency_afue if supp_sys_efficiency.nil?
+        supp_sys_power_level = [supp_sys_capacity, q_dot_defrost].min / supp_sys_efficiency # Assume perfect tempering
+      end
+    else
+      supp_sys_fuel = heat_pump.backup_heating_fuel
+      supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
+      supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
+      supp_sys_power_level = [supp_sys_capacity, q_dot_defrost].min / supp_sys_efficiency # Assume perfect tempering
+    end
+    # other equipment actuator
+    defrost_heat_load_oed = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    defrost_heat_load_oed.setName("#{air_loop_unitary.name} defrost heat load def")
+    defrost_heat_load_oed.setDesignLevel(0)
+    defrost_heat_load_oed.setFractionRadiant(0)
+    defrost_heat_load_oed.setFractionLatent(0)
+    defrost_heat_load_oed.setFractionLost(0)
+    defrost_heat_load_oe = OpenStudio::Model::OtherEquipment.new(defrost_heat_load_oed)
+    defrost_heat_load_oe.setName("#{air_loop_unitary.name} defrost heat load")
+    defrost_heat_load_oe.setSpace(conditioned_space)
+    defrost_heat_load_oe.setSchedule(model.alwaysOnDiscreteSchedule)
+
+    defrost_heat_load_oe_act = OpenStudio::Model::EnergyManagementSystemActuator.new(defrost_heat_load_oe, *EPlus::EMSActuatorOtherEquipmentPower, defrost_heat_load_oe.space.get)
+    defrost_heat_load_oe_act.setName("#{defrost_heat_load_oe.name} act")
+
+    # TODO: handle energy output to be categorized to heating
+    energyplus_fuel = EPlus.fuel_type(supp_sys_fuel)
+    defrost_supp_heat_energy_oed = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    defrost_supp_heat_energy_oed.setName("#{air_loop_unitary.name} supp heat energy def")
+    defrost_supp_heat_energy_oed.setDesignLevel(0)
+    defrost_supp_heat_energy_oed.setFractionRadiant(0)
+    defrost_supp_heat_energy_oed.setFractionLatent(0)
+    defrost_supp_heat_energy_oed.setFractionLost(1)
+    defrost_supp_heat_energy_oe = OpenStudio::Model::OtherEquipment.new(defrost_supp_heat_energy_oed)
+    defrost_supp_heat_energy_oe.setName("#{air_loop_unitary.name} defrost supp heat energy")
+    defrost_supp_heat_energy_oe.setSpace(conditioned_space)
+    defrost_supp_heat_energy_oe.setFuelType(energyplus_fuel)
+    defrost_supp_heat_energy_oe.setSchedule(model.alwaysOnDiscreteSchedule)
+    defrost_supp_heat_energy_oe.setEndUseSubcategory(Constants.ObjectNameBackupSuppHeat)
+    defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
+    defrost_supp_heat_energy_oe.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
+
+    defrost_supp_heat_energy_oe_act = OpenStudio::Model::EnergyManagementSystemActuator.new(defrost_supp_heat_energy_oe, *EPlus::EMSActuatorOtherEquipmentPower, defrost_supp_heat_energy_oe.space.get)
+    defrost_supp_heat_energy_oe_act.setName("#{defrost_supp_heat_energy_oe.name} act")
+
+    # Sensors
+    tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    tout_db_sensor.setName("#{air_loop_unitary.name} tout s")
+    tout_db_sensor.setKeyName('Environment')
+    htg_coil_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Runtime Fraction')
+    htg_coil_rtf_sensor.setName("#{htg_coil.name} rtf s")
+    htg_coil_rtf_sensor.setKeyName("#{htg_coil.name}")
+
+    # EMS program
+    max_oat_defrost = htg_coil.maximumOutdoorDryBulbTemperatureforDefrostOperation
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("#{air_loop_unitary.name} defrost program")
+    program.addLine("If #{tout_db_sensor.name} <= #{max_oat_defrost}")
+    program.addLine("  Set hp_defrost_time_fraction = #{htg_coil.defrostTimePeriodFraction}")
+    program.addLine("  Set supp_design_level = #{supp_sys_power_level}")
+    program.addLine("  Set q_dot_defrost = #{q_dot_defrost}")
+    program.addLine("  Set supp_delivered_htg = #{[supp_sys_capacity, q_dot_defrost].min}")
+    program.addLine('  Set defrost_load_design_level = supp_delivered_htg - q_dot_defrost')
+    program.addLine("  Set fraction_defrost = hp_defrost_time_fraction * #{htg_coil_rtf_sensor.name}")
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = fraction_defrost * defrost_load_design_level")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = fraction_defrost * supp_design_level")
+    program.addLine('Else')
+    program.addLine("  Set #{defrost_heat_load_oe_act.name} = 0")
+    program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
+    program.addLine('EndIf')
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName(program.name.to_s + 'calling manager')
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(program)
   end
 
   def self.get_default_gshp_pump_power()

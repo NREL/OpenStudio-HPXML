@@ -4631,7 +4631,7 @@ class HPXML < Object
              :shared_loop_motor_efficiency, :airflow_defect_ratio, :charge_defect_ratio,
              :heating_airflow_cfm, :cooling_airflow_cfm, :location, :primary_heating_system, :primary_cooling_system,
              :heating_capacity_retention_fraction, :heating_capacity_retention_temp, :crankcase_heater_watts,
-             :geothermal_loop_idref, :cooling_autosizing_factor, :heating_autosizing_factor, :backup_heating_autosizing_factor]
+             :geothermal_loop_idref, :cooling_autosizing_factor, :heating_autosizing_factor, :backup_heating_autosizing_factor, :advanced_defrost_approach]
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
@@ -4813,6 +4813,7 @@ class HPXML < Object
       XMLHelper.add_extension(heat_pump, 'CoolingAutosizingFactor', @cooling_autosizing_factor, :float, @cooling_autosizing_factor_isdefaulted) unless @cooling_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingAutosizingFactor', @heating_autosizing_factor, :float, @heating_autosizing_factor_isdefaulted) unless @heating_autosizing_factor.nil?
       XMLHelper.add_extension(heat_pump, 'BackupHeatingAutosizingFactor', @backup_heating_autosizing_factor, :float, @backup_heating_autosizing_factor_isdefaulted) unless @backup_heating_autosizing_factor.nil?
+      XMLHelper.add_extension(heat_pump, 'AdvancedDefrostApproach', @advanced_defrost_approach, :boolean, @advanced_defrost_approach_isdefaulted) unless @advanced_defrost_approach.nil?
       XMLHelper.add_extension(heat_pump, 'HeatingSeedId', @htg_seed_id, :string) unless @htg_seed_id.nil?
       XMLHelper.add_extension(heat_pump, 'CoolingSeedId', @clg_seed_id, :string) unless @clg_seed_id.nil?
       if @primary_heating_system
@@ -4877,6 +4878,7 @@ class HPXML < Object
       @cooling_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/CoolingAutosizingFactor', :float)
       @heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/HeatingAutosizingFactor', :float)
       @backup_heating_autosizing_factor = XMLHelper.get_value(heat_pump, 'extension/BackupHeatingAutosizingFactor', :float)
+      @advanced_defrost_approach = XMLHelper.get_value(heat_pump, 'extension/AdvancedDefrostApproach', :boolean)
       @htg_seed_id = XMLHelper.get_value(heat_pump, 'extension/HeatingSeedId', :string)
       @clg_seed_id = XMLHelper.get_value(heat_pump, 'extension/CoolingSeedId', :string)
       primary_heating_system = HPXML::get_idref(XMLHelper.get_element(heat_pump, '../PrimarySystems/PrimaryHeatingSystem'))

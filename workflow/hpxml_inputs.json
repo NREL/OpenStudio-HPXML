@@ -1684,6 +1684,10 @@
     "heat_pump_heating_autosizing_factor": 1.4,
     "heat_pump_backup_heating_autosizing_factor": 0.9
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-advanced-defrost.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "heat_pump_advanced_defrost_approach": true
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
@@ -1733,6 +1737,10 @@
     "heat_pump_backup_heating_capacity": null,
     "heat_pump_sizing_methodology": "MaxLoad",
     "heat_pump_backup_sizing_methodology": "supplemental"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-advanced-defrost.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "heat_pump_advanced_defrost_approach": true
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
