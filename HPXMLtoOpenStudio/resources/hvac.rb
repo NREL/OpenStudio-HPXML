@@ -206,7 +206,9 @@ class HVAC
 
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
-    apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
+    if (is_heatpump) && (heating_system.advanced_defrost_approach)
+      apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
+    end
 
     return air_loop
   end
@@ -3577,13 +3579,11 @@ class HVAC
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
     q_dot_defrost = rated_clg_capacity * 1.127 # defrost cooling rate, 1.127 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
     cop_defrost = rated_clg_cop / 1.917 # defrost cooling cop, 1.917 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
-    p_dot_defrost = q_dot_defrost / cop_defrost - p_dot_odu_fan - p_dot_blower
+    p_dot_defrost = q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower
     return q_dot_defrost, p_dot_defrost
   end
 
   def self.apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, heat_pump, q_dot_defrost)
-    return unless heat_pump.advanced_defrost_approach
-
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
       if backup_system.nil?
