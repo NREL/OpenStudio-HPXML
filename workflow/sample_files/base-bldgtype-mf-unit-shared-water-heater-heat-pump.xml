@@ -304,15 +304,13 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeatingSystem1'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <FuelType>electricity</FuelType>
+            <WaterHeaterType>heat pump water heater</WaterHeaterType>
             <Location>conditioned space</Location>
             <IsSharedSystem>true</IsSharedSystem>
             <TankVolume>120.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+            <EnergyFactor>2.3</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
               <NumberofBedroomsServed>18</NumberofBedroomsServed>
@@ -328,16 +326,6 @@
             <PipeInsulation>
               <PipeRValue>0.0</PipeRValue>
             </PipeInsulation>
-            <extension>
-              <SharedRecirculation>
-                <NumberofBedroomsServed>18</NumberofBedroomsServed>
-                <PumpPower>220.0</PumpPower>
-                <ControlType>timer</ControlType>
-              </SharedRecirculation>
-              <RecirculationPumpWeekdayScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekdayScheduleFractions>
-              <RecirculationPumpWeekendScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekendScheduleFractions>
-              <RecirculationPumpMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</RecirculationPumpMonthlyScheduleMultipliers>
-            </extension>
           </HotWaterDistribution>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture1'/>

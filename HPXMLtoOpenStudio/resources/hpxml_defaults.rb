@@ -35,9 +35,9 @@ class HPXMLDefaults
     apply_rim_joists(hpxml_bldg)
     apply_walls(hpxml_bldg)
     apply_foundation_walls(hpxml_bldg)
-    apply_floors(hpxml_bldg)
+    apply_floors(runner, hpxml_bldg)
     apply_slabs(hpxml_bldg)
-    apply_windows(hpxml_bldg)
+    apply_windows(hpxml_bldg, eri_version)
     apply_skylights(hpxml_bldg)
     apply_doors(hpxml_bldg)
     apply_partition_wall_mass(hpxml_bldg)
@@ -988,7 +988,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_floors(hpxml_bldg)
+  def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
       if floor.floor_or_ceiling.nil?
         if floor.is_ceiling
@@ -997,6 +997,19 @@ class HPXMLDefaults
         elsif floor.is_floor
           floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
           floor.floor_or_ceiling_isdefaulted = true
+        end
+      else
+        floor_is_ceiling = HPXML::is_floor_a_ceiling(floor, false)
+        if not floor_is_ceiling.nil?
+          if (floor.floor_or_ceiling == HPXML::FloorOrCeilingCeiling) && !floor_is_ceiling
+            runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden.")
+            floor.floor_or_ceiling = HPXML::FloorOrCeilingFloor
+            floor.floor_or_ceiling_isdefaulted = true
+          elsif (floor.floor_or_ceiling == HPXML::FloorOrCeilingFloor) && floor_is_ceiling
+            runner.registerWarning("Floor '#{floor.id}' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden.")
+            floor.floor_or_ceiling = HPXML::FloorOrCeilingCeiling
+            floor.floor_or_ceiling_isdefaulted = true
+          end
         end
       end
 
@@ -1056,9 +1069,51 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_windows(hpxml_bldg)
-    default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
+  def self.apply_windows(hpxml_bldg, eri_version)
     hpxml_bldg.windows.each do |window|
+      if window.ufactor.nil? || window.shgc.nil?
+        # Frame/Glass provided instead, fill in more defaults as needed
+        if window.glass_type.nil?
+          window.glass_type = HPXML::WindowGlassTypeClear
+          window.glass_type_isdefaulted = true
+        end
+        if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
+          if window.glass_layers == HPXML::WindowLayersSinglePane
+            window.thermal_break = false
+            window.thermal_break_isdefaulted = true
+          elsif window.glass_layers == HPXML::WindowLayersDoublePane
+            window.thermal_break = true
+            window.thermal_break_isdefaulted = true
+          end
+        end
+        if window.gas_fill.nil?
+          if window.glass_layers == HPXML::WindowLayersDoublePane
+            if [HPXML::WindowGlassTypeLowE,
+                HPXML::WindowGlassTypeLowEHighSolarGain,
+                HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+              window.gas_fill = HPXML::WindowGasArgon
+              window.gas_fill_isdefaulted = true
+            else
+              window.gas_fill = HPXML::WindowGasAir
+              window.gas_fill_isdefaulted = true
+            end
+          elsif window.glass_layers == HPXML::WindowLayersTriplePane
+            window.gas_fill = HPXML::WindowGasArgon
+            window.gas_fill_isdefaulted = true
+          end
+        end
+        # Now lookup U/SHGC based on properties
+        ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(window, 'window')
+        if window.ufactor.nil?
+          window.ufactor = ufactor
+          window.ufactor_isdefaulted = true
+        end
+        if window.shgc.nil?
+          window.shgc = shgc
+          window.shgc_isdefaulted = true
+        end
+      end
+      default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors(eri_version, window.shgc)
       if window.azimuth.nil?
         window.azimuth = get_azimuth_from_orientation(window.orientation)
         window.azimuth_isdefaulted = true
@@ -1086,48 +1141,6 @@ class HPXMLDefaults
       if window.fraction_operable.nil?
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
         window.fraction_operable_isdefaulted = true
-      end
-      next unless window.ufactor.nil? || window.shgc.nil?
-
-      # Frame/Glass provided instead, fill in more defaults as needed
-      if window.glass_type.nil?
-        window.glass_type = HPXML::WindowGlassTypeClear
-        window.glass_type_isdefaulted = true
-      end
-      if window.thermal_break.nil? && [HPXML::WindowFrameTypeAluminum, HPXML::WindowFrameTypeMetal].include?(window.frame_type)
-        if window.glass_layers == HPXML::WindowLayersSinglePane
-          window.thermal_break = false
-          window.thermal_break_isdefaulted = true
-        elsif window.glass_layers == HPXML::WindowLayersDoublePane
-          window.thermal_break = true
-          window.thermal_break_isdefaulted = true
-        end
-      end
-      if window.gas_fill.nil?
-        if window.glass_layers == HPXML::WindowLayersDoublePane
-          if [HPXML::WindowGlassTypeLowE,
-              HPXML::WindowGlassTypeLowEHighSolarGain,
-              HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
-            window.gas_fill = HPXML::WindowGasArgon
-            window.gas_fill_isdefaulted = true
-          else
-            window.gas_fill = HPXML::WindowGasAir
-            window.gas_fill_isdefaulted = true
-          end
-        elsif window.glass_layers == HPXML::WindowLayersTriplePane
-          window.gas_fill = HPXML::WindowGasArgon
-          window.gas_fill_isdefaulted = true
-        end
-      end
-      # Now lookup U/SHGC based on properties
-      ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(window, 'window')
-      if window.ufactor.nil?
-        window.ufactor = ufactor
-        window.ufactor_isdefaulted = true
-      end
-      if window.shgc.nil?
-        window.shgc = shgc
-        window.shgc_isdefaulted = true
       end
     end
   end
