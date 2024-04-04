@@ -206,7 +206,7 @@ class HVAC
 
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
-    if (is_heatpump) && (heating_system.advanced_defrost_approach)
+    if is_heatpump && heating_system.advanced_defrost_approach
       apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
     end
 
