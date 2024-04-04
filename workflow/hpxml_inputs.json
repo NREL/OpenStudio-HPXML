@@ -1710,6 +1710,7 @@
     "simulation_control_timestep": 1,
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_capacity": 12000,
+    "heat_pump_backup_heating_capacity": 34121.4,
     "heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
@@ -1729,6 +1730,7 @@
     "simulation_control_timestep": 1,
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "heat_pump_heating_capacity": 12000,
+    "heat_pump_backup_heating_capacity": 34121.4,
     "heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
@@ -1742,6 +1744,7 @@
     "simulation_control_timestep": 1,
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump_heating_capacity": 12000,
+    "heat_pump_backup_heating_capacity": 34121.4,
     "heat_pump_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml": {

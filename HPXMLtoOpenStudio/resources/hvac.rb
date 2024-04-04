@@ -123,7 +123,7 @@ class HVAC
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, heating_system.backup_heating_capacity_increment, header)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, heating_system.backup_heating_capacity_increment, header, runner)
         htg_ap.heat_fan_speed_ratios.each do |r|
           fan_cfms << htg_cfm * r
         end
@@ -320,7 +320,7 @@ class HVAC
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Supplemental Heating Coil
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump, nil, nil)
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
 
     # Site Ground Temperature Undisturbed
     xing = OpenStudio::Model::SiteGroundTemperatureUndisturbedXing.new(model)
@@ -484,7 +484,7 @@ class HVAC
     htg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Supplemental Heating Coil
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump, nil, nil)
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
 
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
@@ -2114,7 +2114,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment, header)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil, header = nil, runner = nil)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -2126,19 +2126,31 @@ class HVAC
 
     backup_heating_capacity_increment = nil unless fuel == HPXML::FuelTypeElectricity
     if not backup_heating_capacity_increment.nil?
+      max_num_stages = 4
       fail 'Backup heating capacity increment currently is only supported for 1 min timestep.' unless header.timestep == 1
 
-      num_stages = (capacity / backup_heating_capacity_increment).ceil()
+      num_stages = [(capacity / backup_heating_capacity_increment).ceil(), max_num_stages].min
       # OpenStudio only supports 4 stages for now
-      fail 'Currently only support less than 4 stages for multi-stage electric backup coil.' if num_stages > 4
+      runner.registerWarning("E+ Currently only supports less than #{max_num_stages.to_s} stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage. Simulation continued.") if (capacity / backup_heating_capacity_increment).ceil() > 4
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectricMultiStage.new(model)
       htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       stage_capacity = 0.0
 
-      while stage_capacity < capacity
+      
+      (1..num_stages).each do |stage_i|
         stage = OpenStudio::Model::CoilHeatingElectricMultiStageStageData.new(model)
-        stage_capacity += [backup_heating_capacity_increment, (capacity - stage_capacity)].min
+        if stage_i == max_num_stages
+          increment = (capacity - stage_capacity) # Model remaining capacity anyways
+        else
+          increment = backup_heating_capacity_increment
+        end
+        next if increment <= 5 # Tolerance to avoid modeling small capacity stage, Fixme: Is 5 a good tolerance?
+        # There're two cases to throw this warning: 1. More stages are needed so that the remaining capacities are combined in last stage. 2. Total capacity is not able to be perfectly divided by increment.
+        # For the first case, the above warning of num_stages has already thrown
+        runner.registerWarning("Calculated multi-stage backup coil capacity increment for last stage is not equal to user input, actual capacity increment is #{increment} Btu/hr.") if (increment - backup_heating_capacity_increment).abs > 1
+        stage_capacity += increment
+        
         stage.setNominalCapacity(UnitConversions.convert(stage_capacity, 'Btu/hr', 'W'))
         stage.setEfficiency(efficiency)
         htg_supp_coil.addStage(stage)
