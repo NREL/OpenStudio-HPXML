@@ -3359,14 +3359,7 @@ class HPXML < Object
     def is_ceiling
       # From the perspective of the conditioned space
       if @floor_or_ceiling.nil?
-        ceiling_locations = [LocationAtticUnconditioned,
-                             LocationAtticVented,
-                             LocationAtticUnvented]
-        if (ceiling_locations.include? @interior_adjacent_to) || (ceiling_locations.include? @exterior_adjacent_to)
-          return true
-        else # If we don't explicitly know that it's a ceiling, assume a floor
-          return false
-        end
+        return HPXML::is_floor_a_ceiling(self, true)
       else
         return @floor_or_ceiling == FloorOrCeilingCeiling
       end
@@ -7701,6 +7694,26 @@ class HPXML < Object
     interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
     exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
+  end
+
+  def self.is_floor_a_ceiling(surface, force_decision)
+    ceiling_locations = [LocationAtticUnconditioned,
+                         LocationAtticVented,
+                         LocationAtticUnvented]
+    floor_locations = [LocationCrawlspaceVented,
+                       LocationCrawlspaceUnvented,
+                       LocationCrawlspaceConditioned,
+                       LocationBasementConditioned,
+                       LocationBasementUnconditioned,
+                       LocationManufacturedHomeUnderBelly]
+    if (ceiling_locations.include? surface.interior_adjacent_to) || (ceiling_locations.include? surface.exterior_adjacent_to)
+      return true
+    elsif (floor_locations.include? surface.interior_adjacent_to) || (floor_locations.include? surface.exterior_adjacent_to)
+      return false
+    elsif force_decision
+      # If we don't explicitly know, assume a floor
+      return false
+    end
   end
 
   def self.get_id(parent, element_name = 'SystemIdentifier')
