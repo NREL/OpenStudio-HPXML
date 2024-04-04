@@ -3503,7 +3503,6 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -3565,17 +3564,18 @@ Combi Boiler w/ Tankless Coil
 
 Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  Element                    Type     Units  Constraints                              Required      Default   Notes
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  ``SystemIdentifier``       id                                                       Yes                     Unique identifier
-  ``WaterHeaterType``        string          space-heating boiler with tankless coil  Yes                     Type of water heater
-  ``Location``               string          See [#]_                                 No            See [#]_  Water heater location
-  ``IsSharedSystem``         boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``FractionDHWLoadServed``  double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
-  ``HotWaterTemperature``    double   F      > 0                                      No            125       Water heater setpoint [#]_
-  ``RelatedHVACSystem``      idref           See [#]_                                 Yes                     ID of boiler
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  Element                               Type     Units  Constraints                              Required      Default   Notes
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  ``SystemIdentifier``                  id                                                       Yes                     Unique identifier
+  ``WaterHeaterType``                   string          space-heating boiler with tankless coil  Yes                     Type of water heater
+  ``Location``                          string          See [#]_                                 No            See [#]_  Water heater location
+  ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
+  ``HotWaterTemperature``               double   F      > 0                                      No            125       Water heater setpoint [#]_
+  ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
+  ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
@@ -3585,14 +3585,12 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
-         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 .. _water_heater_desuperheater:
 
