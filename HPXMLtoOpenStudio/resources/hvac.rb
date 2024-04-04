@@ -2131,13 +2131,12 @@ class HVAC
 
       num_stages = [(capacity / backup_heating_capacity_increment).ceil(), max_num_stages].min
       # OpenStudio only supports 4 stages for now
-      runner.registerWarning("E+ Currently only supports less than #{max_num_stages.to_s} stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage. Simulation continued.") if (capacity / backup_heating_capacity_increment).ceil() > 4
+      runner.registerWarning("E+ Currently only supports less than #{max_num_stages} stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage. Simulation continued.") if (capacity / backup_heating_capacity_increment).ceil() > 4
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectricMultiStage.new(model)
       htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       stage_capacity = 0.0
 
-      
       (1..num_stages).each do |stage_i|
         stage = OpenStudio::Model::CoilHeatingElectricMultiStageStageData.new(model)
         if stage_i == max_num_stages
@@ -2146,11 +2145,12 @@ class HVAC
           increment = backup_heating_capacity_increment
         end
         next if increment <= 5 # Tolerance to avoid modeling small capacity stage, Fixme: Is 5 a good tolerance?
+
         # There're two cases to throw this warning: 1. More stages are needed so that the remaining capacities are combined in last stage. 2. Total capacity is not able to be perfectly divided by increment.
         # For the first case, the above warning of num_stages has already thrown
         runner.registerWarning("Calculated multi-stage backup coil capacity increment for last stage is not equal to user input, actual capacity increment is #{increment} Btu/hr.") if (increment - backup_heating_capacity_increment).abs > 1
         stage_capacity += increment
-        
+
         stage.setNominalCapacity(UnitConversions.convert(stage_capacity, 'Btu/hr', 'W'))
         stage.setEfficiency(efficiency)
         htg_supp_coil.addStage(stage)
