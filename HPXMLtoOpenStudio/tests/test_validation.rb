@@ -938,7 +938,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
       elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
         hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1699,7 +1699,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
       elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
         hpxml.header.timestep = 10
       elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')

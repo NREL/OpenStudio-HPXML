@@ -2452,13 +2452,13 @@
   "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "simulation_control_timestep": 1,
-    "simulation_control_temperature_capacitance_multiplier": 4,
+    "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000
   },
   "sample_files/base-hvac-onoff-thermostat-deadband-room-air-conditioner.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
     "simulation_control_timestep": 1,
-    "simulation_control_temperature_capacitance_multiplier": 4
+    "simulation_control_temperature_capacitance_multiplier": 7
   },
   "sample_files/base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml",
@@ -2506,13 +2506,13 @@
   "sample_files/base-hvac-realistic-control-2-speed-ashp.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "simulation_control_timestep": 1,
-    "simulation_control_temperature_capacitance_multiplier": 4,
+    "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000
   },
   "sample_files/base-hvac-realistic-control-2-speed-central-ac.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
     "simulation_control_timestep": 1,
-    "simulation_control_temperature_capacitance_multiplier": 4,
+    "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000
   },
   "sample_files/base-hvac-room-ac-only.xml": {

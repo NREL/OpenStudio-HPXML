@@ -10,7 +10,7 @@
     <extension>
       <SimulationControl>
         <Timestep>1</Timestep>
-        <TemperatureCapacitanceMultiplier>4.0</TemperatureCapacitanceMultiplier>
+        <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
