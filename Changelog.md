@@ -45,6 +45,7 @@ __New Features__
 - Manual J design load calculations:
   - Allow additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Miscellaneous improvements.
+- Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
 - Updates to run_simulation.rb script:
