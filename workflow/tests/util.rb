@@ -1153,7 +1153,7 @@ def _write_results(results, csv_out)
         csv << csv_row
       end
     end
-
-    puts "Wrote results to #{output_type_csv_out}."
   end
+
+  puts "Wrote results to #{csv_out.gsub('.csv', '_*.csv')}."
 end
