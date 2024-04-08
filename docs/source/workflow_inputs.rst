@@ -3615,7 +3615,7 @@ If the water heater uses a desuperheater, additional information is entered in `
 HPXML Hot Water Distribution
 ****************************
 
-If any water heating systems are provided, a single hot water distribution system can be described:
+If any water heating systems are provided, a single hot water distribution system must be described:
 
 - :ref:`hot_water_dist_standard`
 - :ref:`hot_water_dist_recirc`
