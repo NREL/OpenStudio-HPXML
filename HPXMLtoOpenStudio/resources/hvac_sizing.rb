@@ -2012,8 +2012,10 @@ class HVACSizing
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
       if hvac_sizing_values.Heat_Capacity > 0
+        supply_air_temp = hvac_heating.additional_properties.supply_air_temp
+
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
-        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
+        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
         hvac_sizing_values.Heat_Airflow_isdefaulted = false
       end
     else # hvac_sizing_values.Heat_Airflow > hvac_sizing_values.Cool_Airflow
@@ -2023,9 +2025,11 @@ class HVACSizing
       hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / prev_airflow
       hvac_sizing_values.Heat_Airflow_isdefaulted = false
       if hvac_sizing_values.Cool_Capacity > 0
+        leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
+
         hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Capacity_Sens, (mj.cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Capacity_Sens, (mj.cool_setpoint - leaving_air_temp), hvac_sizing_values.Cool_Capacity)
         hvac_sizing_values.Cool_Airflow_isdefaulted = false
       end
     end
