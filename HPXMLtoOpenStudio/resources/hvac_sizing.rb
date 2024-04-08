@@ -1297,6 +1297,7 @@ class HVACSizing
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
     '''
     Equipment Adjustments
+    This is where the bulk of ACCA Man. S is applied
     '''
 
     # Cooling
