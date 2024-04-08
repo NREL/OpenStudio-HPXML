@@ -143,7 +143,6 @@ def apply_hpxml_modification_ashrae_140(hpxml)
     # --------------------- #
 
     hpxml_bldg.site.azimuth_of_front_of_home = nil
-    hpxml_bldg.building_construction.average_ceiling_height = nil
 
     # --------------- #
     # HPXML Enclosure #
@@ -255,6 +254,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     hpxml_bldg.header.manualj_internal_loads_sensible = 4000
     hpxml_bldg.header.manualj_internal_loads_latent = 200
     hpxml_bldg.header.manualj_num_occupants = 5
+    hpxml_bldg.header.manualj_daily_temp_range = HPXML::ManualJDailyTempRangeLow
+    hpxml_bldg.header.manualj_humidity_difference = 30
   end
 
   hpxml.buildings.each do |hpxml_bldg|
@@ -1199,6 +1200,9 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.foundations[0].attached_to_wall_idrefs << hpxml_bldg.walls[-1].id
       hpxml_bldg.foundation_walls[0].delete
     end
+    if ['base-foundation-slab.xml'].include? hpxml_file
+      hpxml_bldg.slabs[0].gap_insulation_r_value = 0.0
+    end
 
     # ---------- #
     # HPXML HVAC #
@@ -1609,6 +1613,25 @@ def apply_hpxml_modification(hpxml_file, hpxml)
                                 cooling_shr: 0.73,
                                 primary_cooling_system: true,
                                 primary_heating_system: true)
+    elsif ['base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'].include? hpxml_file
+      hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
+      hpxml_bldg.heat_pumps[-1].id += "#{hpxml_bldg.hvac_distributions.size}"
+      hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
+      hpxml_bldg.heat_pumps[-1].primary_heating_system = false
+      hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.7
+      hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.7
+      hpxml_bldg.heat_pumps[-1].fraction_heat_load_served = 0.3
+      hpxml_bldg.heat_pumps[-1].fraction_cool_load_served = 0.3
+      hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                        distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                        air_type: HPXML::AirTypeRegularVelocity)
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
+      hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
+      hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
+      hpxml_bldg.hvac_distributions[-1].ducts[0].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 1}"
+      hpxml_bldg.hvac_distributions[-1].ducts[1].id = "Ducts#{hpxml_bldg.hvac_distributions[0].ducts.size + 2}"
+      hpxml_bldg.heat_pumps[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
     elsif ['base-mechvent-multiple.xml',
            'base-bldgtype-mf-unit-shared-mechvent-multiple.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
@@ -1696,11 +1719,15 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions = '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.087, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.039, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     elsif ['base-bldgtype-mf-unit-shared-water-heater-recirc.xml',
+           'base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml',
            'base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml'].include? hpxml_file
       hpxml_bldg.hot_water_distributions[0].has_shared_recirculation = true
-      hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
+      hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_bedrooms_served = 18
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_pump_power = 220
       hpxml_bldg.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecircControlTypeTimer
+      if hpxml_file == 'base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml'
+        hpxml_bldg.hot_water_distributions[0].shared_recirculation_number_of_bedrooms_served = 6
+      end
     elsif ['base-bldgtype-mf-unit-shared-laundry-room.xml',
            'base-bldgtype-mf-unit-shared-laundry-room-multiple-water-heaters.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems.reverse_each do |water_heating_system|
@@ -1708,7 +1735,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       end
       hpxml_bldg.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size + 1}",
                                            is_shared_system: true,
-                                           number_of_units_served: 6,
+                                           number_of_bedrooms_served: 18,
                                            fuel_type: HPXML::FuelTypeNaturalGas,
                                            water_heater_type: HPXML::WaterHeaterTypeStorage,
                                            location: HPXML::LocationConditionedSpace,
@@ -1721,7 +1748,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       if hpxml_file == 'base-bldgtype-mf-unit-shared-laundry-room-multiple-water-heaters.xml'
         hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served /= 2.0
         hpxml_bldg.water_heating_systems[0].tank_volume /= 2.0
-        hpxml_bldg.water_heating_systems[0].number_of_units_served /= 2.0
+        hpxml_bldg.water_heating_systems[0].number_of_bedrooms_served /= 2.0
         hpxml_bldg.water_heating_systems << hpxml_bldg.water_heating_systems[0].dup
         hpxml_bldg.water_heating_systems[1].id = "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size}"
       end
@@ -2359,6 +2386,13 @@ if ARGV[0].to_sym == :update_hpxmls
   # Reformat real_homes HPXMLs
   puts 'Reformatting real_homes HPXMLs...'
   Dir['workflow/real_homes/*.xml'].each do |hpxml_path|
+    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    XMLHelper.write_file(hpxml.to_doc, hpxml_path)
+  end
+
+  # Reformat ACCA_Examples HPXMLs
+  puts 'Reformatting ACCA_Examples HPXMLs...'
+  Dir['workflow/tests/ACCA_Examples/*.xml'].each do |hpxml_path|
     hpxml = HPXML.new(hpxml_path: hpxml_path)
     XMLHelper.write_file(hpxml.to_doc, hpxml_path)
   end

@@ -10,11 +10,11 @@ class HVACSizing
     @cfa = cfa
 
     mj = MJ.new
-    process_site_calcs_and_design_temps(mj, weather)
+    process_site_calcs_and_design_temps(mj, weather, runner)
 
     # Calculate loads for the conditioned thermal zone
     bldg_design_loads = DesignLoads.new
-    process_load_windows_skylights(mj, bldg_design_loads, weather)
+    process_load_windows_skylights(mj, bldg_design_loads)
     process_load_doors(mj, bldg_design_loads)
     process_load_walls(mj, bldg_design_loads)
     process_load_roofs(mj, bldg_design_loads)
@@ -32,22 +32,21 @@ class HVACSizing
     system_design_loads = bldg_design_loads.dup
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
-      set_hvac_types(hvac_heating, hvac_cooling)
-      next if is_system_to_skip(hvac_heating)
+      next if is_system_to_skip(hvac_heating, hvac_cooling)
 
       # Apply duct loads as needed
-      set_fractions_load_served(hvac_heating, hvac_cooling)
+      frac_heat_load_served, frac_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling)
       apply_hvac_temperatures(mj, system_design_loads, hvac_heating, hvac_cooling)
-      ducts_heat_load = calculate_load_ducts_heating(mj, system_design_loads, hvac_heating)
-      ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(mj, system_design_loads, weather, hvac_cooling)
+      ducts_heat_load = calculate_load_ducts_heating(mj, system_design_loads, hvac_heating, frac_heat_load_served)
+      ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(mj, system_design_loads, weather, hvac_cooling, frac_cool_load_served)
       apply_load_ducts(bldg_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat) # Update duct loads in reported building design loads
 
       hvac_sizing_values = HVACSizingValues.new
-      apply_hvac_loads(hvac_heating, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
-      apply_hvac_size_limits(hvac_cooling)
-      apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
+      apply_hvac_loads(hvac_heating, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat, frac_heat_load_served, frac_cool_load_served)
+      apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
-      apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
+      apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
@@ -70,14 +69,17 @@ class HVACSizing
 
   private
 
-  def self.is_system_to_skip(hvac_heating)
+  def self.is_system_to_skip(hvac_heating, hvac_cooling)
     # These shared systems should be converted to other equivalent
     # systems before being autosized
+    cooling_type = get_hvac_cooling_type(hvac_cooling)
     if [HPXML::HVACTypeChiller,
-        HPXML::HVACTypeCoolingTower].include?(@cooling_type)
+        HPXML::HVACTypeCoolingTower].include?(cooling_type)
       return true
     end
-    if (@heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir) &&
+
+    heating_type = get_hvac_heating_type(hvac_heating)
+    if (heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir) &&
        hvac_heating.fraction_heat_load_served.nil?
       return true
     end
@@ -85,7 +87,7 @@ class HVACSizing
     return false
   end
 
-  def self.process_site_calcs_and_design_temps(mj, weather)
+  def self.process_site_calcs_and_design_temps(mj, weather, runner)
     '''
     Site Calculations and Design Temperatures
     '''
@@ -101,40 +103,34 @@ class HVACSizing
     mj.ctd = [@hpxml_bldg.header.manualj_cooling_design_temp - mj.cool_setpoint, 0.0].max
     mj.htd = [mj.heat_setpoint - @hpxml_bldg.header.manualj_heating_design_temp, 0.0].max
 
-    # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
-    dtr = weather.design.DailyTemperatureRange
-
-    if dtr < 16.0
-      mj.daily_range_num = 0.0   # Low
-    elsif dtr > 25.0
-      mj.daily_range_num = 2.0   # High
-    else
-      mj.daily_range_num = 1.0   # Medium
-    end
+    # Determine class (low, medium, high) based on average Daily Temperature Range (DTR)
+    mj.daily_range_num = { HPXML::ManualJDailyTempRangeLow => 0,
+                           HPXML::ManualJDailyTempRangeMedium => 1,
+                           HPXML::ManualJDailyTempRangeHigh => 2 }[@hpxml_bldg.header.manualj_daily_temp_range]
 
     # Altitude Correction Factors (ACF) taken from Table 10A (sea level - 12,000 ft)
     acfs = [1.0, 0.97, 0.93, 0.89, 0.87, 0.84, 0.80, 0.77, 0.75, 0.72, 0.69, 0.66, 0.63]
 
     # Calculate the altitude correction factor (ACF) for the site
-    alt_cnt = (weather.header.Altitude / 1000.0).to_i
-    mj.acf = MathTools.interp2(weather.header.Altitude, alt_cnt * 1000.0, (alt_cnt + 1.0) * 1000.0, acfs[alt_cnt], acfs[alt_cnt + 1])
+    alt_cnt = (@hpxml_bldg.elevation / 1000.0).to_i
+    mj.acf = MathTools.interp2(@hpxml_bldg.elevation, alt_cnt * 1000.0, (alt_cnt + 1.0) * 1000.0, acfs[alt_cnt], acfs[alt_cnt + 1])
 
-    # Calculate interior wetbulb temperature for cooling
-    mj.cool_indoor_wetbulb = Psychrometrics.Twb_fT_R_P(nil, mj.cool_setpoint, @hpxml_bldg.header.manualj_humidity_setpoint, UnitConversions.convert(weather.header.LocalPressure, 'atm', 'psi'))
+    mj.p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(@hpxml_bldg.elevation), 'psi', 'atm')
 
-    # Calculate Design Grains (DG), difference between absolute humidity of the outdoor air and outdoor humidity of the indoor air
-    hr_indoor_cooling = calculate_indoor_hr(@hpxml_bldg.header.manualj_humidity_setpoint, mj.cool_setpoint, weather.header.LocalPressure)
-    mj.cool_design_grains = calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling)
+    # Calculate interior/outdoor wetbulb temperature for cooling
+    mj.cool_indoor_wetbulb = Psychrometrics.Twb_fT_R_P(nil, mj.cool_setpoint, @hpxml_bldg.header.manualj_humidity_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'))
+    mj.cool_outdoor_wetbulb = Psychrometrics.Twb_fT_w_P(runner, @hpxml_bldg.header.manualj_cooling_design_temp, weather.design.CoolingHumidityRatio, UnitConversions.convert(mj.p_atm, 'atm', 'psi'))
+
+    # Design Grains (DG), difference between absolute humidity of the outdoor air and outdoor humidity of the indoor air
+    mj.cool_design_grains = @hpxml_bldg.header.manualj_humidity_difference
 
     # Calculate indoor enthalpy in Btu/lb for cooling
-    db_indoor_degC = UnitConversions.convert(mj.cool_setpoint, 'F', 'C')
-    mj.cool_indoor_enthalpy = (1.006 * db_indoor_degC + hr_indoor_cooling * (2501.0 + 1.86 * db_indoor_degC)) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
-
-    mj.cool_outdoor_wetbulb = weather.design.CoolingWetbulb
+    hr_indoor_cooling = calculate_indoor_hr(@hpxml_bldg.header.manualj_humidity_setpoint, mj.cool_setpoint, mj.p_atm)
+    mj.cool_indoor_enthalpy = Psychrometrics.h_fT_w(mj.cool_setpoint, hr_indoor_cooling)
 
     # Inside air density
     avg_setpoint = (mj.cool_setpoint + mj.heat_setpoint) / 2.0
-    mj.inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(avg_setpoint, 'F', 'R'))
+    mj.inside_air_dens = UnitConversions.convert(mj.p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(avg_setpoint, 'F', 'R'))
 
     # Design Temperatures
 
@@ -173,10 +169,10 @@ class HVACSizing
     end
   end
 
-  def self.calculate_indoor_hr(cool_indoor_rh, cool_indoor_setpoint, local_pressure_atm)
+  def self.calculate_indoor_hr(cool_indoor_rh, cool_indoor_setpoint, p_atm)
     cool_setpoint_c = UnitConversions.convert(cool_indoor_setpoint, 'F', 'C')
     pwsat = 6.11 * 10**(7.5 * cool_setpoint_c / (237.3 + cool_setpoint_c)) / 10.0 # kPa, using https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf
-    hr_indoor_cooling = (0.62198 * cool_indoor_rh * pwsat) / (UnitConversions.convert(local_pressure_atm, 'atm', 'kPa') - cool_indoor_rh * pwsat)
+    hr_indoor_cooling = (0.62198 * cool_indoor_rh * pwsat) / (UnitConversions.convert(p_atm, 'atm', 'kPa') - cool_indoor_rh * pwsat)
     return hr_indoor_cooling
   end
 
@@ -185,6 +181,16 @@ class HVACSizing
     cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
     cool_design_grains = cool_outdoor_grains - cool_indoor_grains
     return cool_design_grains
+  end
+
+  def self.determine_daily_temperature_range_class(daily_temperature_range)
+    if daily_temperature_range < 16.0
+      return HPXML::ManualJDailyTempRangeLow
+    elsif daily_temperature_range > 25.0
+      return HPXML::ManualJDailyTempRangeHigh
+    else
+      return HPXML::ManualJDailyTempRangeMedium
+    end
   end
 
   def self.process_design_temp_heating(mj, weather, location)
@@ -338,7 +344,7 @@ class HVACSizing
     return cool_temp
   end
 
-  def self.process_load_windows_skylights(mj, bldg_design_loads, weather)
+  def self.process_load_windows_skylights(mj, bldg_design_loads)
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -425,7 +431,7 @@ class HVACSizing
     psf_lat_horiz = nil
     slm_hr_lat = []
     slm_avg_lat = []
-    latitude = weather.header.Latitude.to_f
+    latitude = @hpxml_bldg.latitude
     for cnt in 0..8 # S/SW/W/NW/N/NE/E/SE/S
       # psf/psf_horiz
       if latitude <= psf_lats[0]
@@ -640,11 +646,11 @@ class HVACSizing
     Heating and Cooling Loads: Doors
     '''
 
-    if mj.daily_range_num == 0.0
+    if mj.daily_range_num == 0
       cltd = mj.ctd + 15.0
-    elsif mj.daily_range_num == 1.0
+    elsif mj.daily_range_num == 1
       cltd = mj.ctd + 11.0
-    elsif mj.daily_range_num == 2.0
+    elsif mj.daily_range_num == 2
       cltd = mj.ctd + 6.0
     end
 
@@ -946,8 +952,8 @@ class HVACSizing
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
 
-    sla, _, _, _, _, a_ext = Airflow.get_values_from_air_infiltration_measurements(@hpxml_bldg, @cfa, weather)
-    sla *= a_ext
+    infil_values = Airflow.get_values_from_air_infiltration_measurements(@hpxml_bldg, @cfa, weather)
+    sla = infil_values[:sla] * infil_values[:a_ext]
     ela = sla * @cfa
 
     ncfl_ag = @hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
@@ -979,10 +985,10 @@ class HVACSizing
 
     q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates()
 
-    cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
+    cfm_Heating = q_bal_Sens + (icfm_Heating**1.5 + q_unb_cfm**1.5)**0.67 - q_preheat - q_recirc
 
-    cfm_cool_load_sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
-    cfm_cool_load_lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
+    cfm_cool_load_sens = q_bal_Sens + (icfm_Cooling**1.5 + q_unb_cfm**1.5)**0.67 - q_precool - q_recirc
+    cfm_cool_load_lat = q_bal_Lat + (icfm_Cooling**1.5 + q_unb_cfm**1.5)**0.67 - q_recirc
 
     bldg_design_loads.Heat_InfilVent = 1.1 * mj.acf * cfm_Heating * mj.htd
 
@@ -1035,51 +1041,62 @@ class HVACSizing
     '''
     HVAC Temperatures
     '''
-    # Evaporative cooler temperature calculation based on Manual S Figure 4-7
-    if @cooling_type == HPXML::HVACTypeEvaporativeCooler
-      td_potential = mj.cool_design_temps[HPXML::LocationOutside] - mj.cool_outdoor_wetbulb
-      td = td_potential * hvac_cooling.additional_properties.effectiveness
-      @leaving_air_temp = mj.cool_design_temps[HPXML::LocationOutside] - td
-    else
+
+    if not hvac_cooling.nil?
+      cooling_type = get_hvac_cooling_type(hvac_cooling)
+
       # Calculate Leaving Air Temperature
-      shr = [system_design_loads.Cool_Sens / system_design_loads.Cool_Tot, 1.0].min
-      # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
-      if shr < 0.80
-        @leaving_air_temp = 54.0 # F
-      elsif shr < 0.85
-        # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
-        # continuous supply air flow rate across building efficiency levels.
-        @leaving_air_temp = ((58.0 - 54.0) / (0.85 - 0.80)) * (shr - 0.8) + 54.0 # F
+      if cooling_type == HPXML::HVACTypeEvaporativeCooler
+        # Evaporative cooler temperature calculation based on Manual S Figure 4-7
+        td_potential = mj.cool_design_temps[HPXML::LocationOutside] - mj.cool_outdoor_wetbulb
+        td = td_potential * hvac_cooling.additional_properties.effectiveness
+        hvac_cooling.additional_properties.leaving_air_temp = mj.cool_design_temps[HPXML::LocationOutside] - td
       else
-        @leaving_air_temp = 58.0 # F
+        # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
+        shr = [system_design_loads.Cool_Sens / system_design_loads.Cool_Tot, 1.0].min
+        if shr < 0.80
+          hvac_cooling.additional_properties.leaving_air_temp = 54.0 # F
+        elsif shr < 0.85
+          # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
+          # continuous supply air flow rate across building efficiency levels.
+          hvac_cooling.additional_properties.leaving_air_temp = ((58.0 - 54.0) / (0.85 - 0.80)) * (shr - 0.8) + 54.0 # F
+        else
+          hvac_cooling.additional_properties.leaving_air_temp = 58.0 # F
+        end
       end
     end
 
-    # Calculate Supply Air Temperature
-    if hvac_heating.is_a? HPXML::HeatPump
-      @supply_air_temp = 105.0 # F
-      @backup_supply_air_temp = 120.0 # F
-    else
-      @supply_air_temp = 120.0 # F
+    if not hvac_heating.nil?
+      # Calculate Supply Air Temperature
+      if hvac_heating.is_a? HPXML::HeatPump
+        hvac_heating.additional_properties.supply_air_temp = 105.0 # F
+      else
+        hvac_heating.additional_properties.supply_air_temp = 120.0 # F
+      end
+    elsif not hvac_cooling.nil? && hvac_cooling.has_integrated_heating
+      hvac_cooling.additional_properties.supply_air_temp = 120.0 # F
     end
   end
 
-  def self.apply_hvac_loads(hvac_heating, system_design_loads, bldg_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat)
+  def self.apply_hvac_loads(hvac_heating, system_design_loads, bldg_design_loads, ducts_heat_load, ducts_cool_load_sens,
+                            ducts_cool_load_lat, frac_heat_load_served, frac_cool_load_served)
     # Calculate design loads that this HVAC system serves
 
+    heating_type = get_hvac_heating_type(hvac_heating)
+
     # Heating
-    system_design_loads.Heat_Load = bldg_design_loads.Heat_Tot * @fraction_heat_load_served
-    if @heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+    system_design_loads.Heat_Load = bldg_design_loads.Heat_Tot * frac_heat_load_served
+    if heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
       # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
       # This ensures, e.g., that an appropriate heating airflow is used for duct losses.
       system_design_loads.Heat_Load = system_design_loads.Heat_Load / (1.0 / hvac_heating.heating_efficiency_cop)
     end
-    system_design_loads.Heat_Load_Supp = system_design_loads.Heat_Load * @fraction_heat_load_served
+    system_design_loads.Heat_Load_Supp = system_design_loads.Heat_Load * frac_heat_load_served
 
     # Cooling
-    system_design_loads.Cool_Load_Tot = bldg_design_loads.Cool_Tot * @fraction_cool_load_served
-    system_design_loads.Cool_Load_Sens = bldg_design_loads.Cool_Sens * @fraction_cool_load_served
-    system_design_loads.Cool_Load_Lat = bldg_design_loads.Cool_Lat * @fraction_cool_load_served
+    system_design_loads.Cool_Load_Tot = bldg_design_loads.Cool_Tot * frac_cool_load_served
+    system_design_loads.Cool_Load_Sens = bldg_design_loads.Cool_Sens * frac_cool_load_served
+    system_design_loads.Cool_Load_Lat = bldg_design_loads.Cool_Lat * frac_cool_load_served
 
     # After applying load fraction to building design loads (w/o ducts), add duct load specific to this HVAC system
     system_design_loads.Heat_Load += ducts_heat_load.to_f
@@ -1089,24 +1106,26 @@ class HVACSizing
     system_design_loads.Cool_Load_Tot += ducts_cool_load_sens.to_f + ducts_cool_load_lat.to_f
   end
 
-  def self.apply_hvac_size_limits(hvac_cooling)
-    @oversize_limit = 1.15
-    @oversize_delta = 15000.0
-    @undersize_limit = 0.9
+  def self.get_hvac_size_limits(hvac_cooling)
+    oversize_limit = 1.15
+    oversize_delta = 15000.0
+    undersize_limit = 0.9
 
     if not hvac_cooling.nil?
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
-        @oversize_limit = 1.2
+        oversize_limit = 1.2
       elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        @oversize_limit = 1.3
+        oversize_limit = 1.3
       end
     end
+
+    return oversize_limit, oversize_delta, undersize_limit
   end
 
-  def self.apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling)
+  def self.apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
     return unless hvac_cooling.is_a? HPXML::HeatPump
-    return if @fraction_cool_load_served == 0
-    return if @fraction_heat_load_served == 0
+    return if frac_cool_load_served == 0
+    return if frac_heat_load_served == 0
 
     if @hpxml_bldg.header.heat_pump_sizing_methodology != HPXML::HeatPumpSizingACCA
       # If HERS/MaxLoad methodology, use at least the larger of heating/cooling loads for heat pump sizing.
@@ -1190,15 +1209,17 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.calculate_load_ducts_heating(mj, system_design_loads, hvac_heating)
+  def self.calculate_load_ducts_heating(mj, system_design_loads, hvac_heating, frac_heat_load_served)
     '''
     Heating Duct Loads
     '''
 
     return if hvac_heating.nil? || (system_design_loads.Heat_Tot == 0) || hvac_heating.distribution_system.nil? || hvac_heating.distribution_system.ducts.empty?
-    return if @fraction_heat_load_served == 0
+    return if frac_heat_load_served == 0
 
-    init_heat_load = system_design_loads.Heat_Tot * @fraction_heat_load_served
+    supply_air_temp = hvac_heating.additional_properties.supply_air_temp
+
+    init_heat_load = system_design_loads.Heat_Tot * frac_heat_load_served
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
 
@@ -1215,7 +1236,7 @@ class HVACSizing
       heat_load_prev = heat_load_next
 
       # Calculate the new heating air flow rate
-      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, (@supply_air_temp - mj.heat_setpoint))
+      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, (supply_air_temp - mj.heat_setpoint))
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
@@ -1232,16 +1253,18 @@ class HVACSizing
     return ducts_heat_load
   end
 
-  def self.calculate_load_ducts_cooling(mj, system_design_loads, weather, hvac_cooling)
+  def self.calculate_load_ducts_cooling(mj, system_design_loads, weather, hvac_cooling, frac_cool_load_served)
     '''
     Cooling Duct Loads
     '''
 
     return if hvac_cooling.nil? || (system_design_loads.Cool_Sens == 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
-    return if @fraction_cool_load_served == 0
+    return if frac_cool_load_served == 0
 
-    init_cool_load_sens = system_design_loads.Cool_Sens * @fraction_cool_load_served
-    init_cool_load_lat = system_design_loads.Cool_Lat * @fraction_cool_load_served
+    leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
+
+    init_cool_load_sens = system_design_loads.Cool_Sens * frac_cool_load_served
+    init_cool_load_lat = system_design_loads.Cool_Lat * frac_cool_load_served
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
 
@@ -1249,13 +1272,13 @@ class HVACSizing
     dse_As, dse_Ar, supply_r, return_r, dse_Tamb_s, dse_Tamb_r, dse_Fregain_s, dse_Fregain_r = duct_values
 
     # Calculate the air enthalpy in the return duct location for DSE calculations
-    dse_h_r = (1.006 * UnitConversions.convert(dse_Tamb_r, 'F', 'C') + weather.design.CoolingHumidityRatio * (2501.0 + 1.86 * UnitConversions.convert(dse_Tamb_r, 'F', 'C'))) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
+    dse_h_r = Psychrometrics.h_fT_w(dse_Tamb_r, weather.design.CoolingHumidityRatio)
 
     # Initialize for the iteration
     delta = 1
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
-    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, (mj.cool_setpoint - @leaving_air_temp))
+    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, (mj.cool_setpoint - leaving_air_temp))
     _dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
     for _iter in 1..50
@@ -1267,11 +1290,11 @@ class HVACSizing
       cool_load_tot = cool_load_lat + cool_load_sens
 
       # Calculate the new cooling air flow rate
-      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, (mj.cool_setpoint - @leaving_air_temp))
+      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, (mj.cool_setpoint - leaving_air_temp))
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
-      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(mj, dse_Qs, dse_Qr, @leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, mj.cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
+      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(mj, dse_Qs, dse_Qr, leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, mj.cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
       cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
@@ -1302,9 +1325,13 @@ class HVACSizing
 
     # Cooling
 
-    if not hvac_cooling.nil?
+    cooling_type = get_hvac_cooling_type(hvac_cooling)
+
+    if not cooling_type.nil?
       hvac_cooling_ap = hvac_cooling.additional_properties
       is_ducted = !hvac_cooling.distribution_system.nil?
+      leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
+      oversize_limit, oversize_delta, undersize_limit = get_hvac_size_limits(hvac_cooling)
     end
 
     if hvac_sizing_values.Cool_Load_Tot <= 0
@@ -1314,9 +1341,9 @@ class HVACSizing
       hvac_sizing_values.Cool_Airflow = 0.0
 
     elsif [HPXML::HVACTypeCentralAirConditioner,
-           HPXML::HVACTypeHeatPumpAirToAir].include?(@cooling_type) ||
+           HPXML::HVACTypeHeatPumpAirToAir].include?(cooling_type) ||
           ([HPXML::HVACTypeMiniSplitAirConditioner,
-            HPXML::HVACTypeHeatPumpMiniSplit].include?(@cooling_type) && is_ducted)
+            HPXML::HVACTypeHeatPumpMiniSplit].include?(cooling_type) && is_ducted)
       # For central systems, the installer can take steps to try to meet both sensible and latent loads,
       # such as different indoor/outdoor coil combinations and different blower settings.
       # Ductless systems don't offer this flexibility.
@@ -1338,7 +1365,7 @@ class HVACSizing
       sens_cap_rated = cool_cap_rated * hvac_cooling_shr
 
       # Calculate the air flow rate required for design conditions
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp), cool_cap_rated)
+      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
 
       sensible_cap_curve_value = process_curve_fit(hvac_sizing_values.Cool_Airflow, hvac_sizing_values.Cool_Load_Tot, entering_temp)
       sens_cap_design = sens_cap_rated * sensible_cap_curve_value
@@ -1367,11 +1394,11 @@ class HVACSizing
 
         cool_load_sens_cap_design = hvac_sizing_values.Cool_Load_Lat / ((total_cap_curve_value / hvac_cooling_shr - \
                                   (b_sens + d_sens * entering_temp) / \
-                                  (1.1 * mj.acf * (mj.cool_setpoint - @leaving_air_temp))) / \
+                                  (1.1 * mj.acf * (mj.cool_setpoint - leaving_air_temp))) / \
                                   (a_sens + c_sens * entering_temp) - 1.0)
 
         # Ensure equipment is not being undersized
-        cool_load_sens_cap_design = [cool_load_sens_cap_design, @undersize_limit * hvac_sizing_values.Cool_Load_Sens].max
+        cool_load_sens_cap_design = [cool_load_sens_cap_design, undersize_limit * hvac_sizing_values.Cool_Load_Sens].max
 
         cool_cap_design = cool_load_sens_cap_design + hvac_sizing_values.Cool_Load_Lat
 
@@ -1381,11 +1408,11 @@ class HVACSizing
         # If the adjusted equipment size is negative (occurs at altitude), use oversize limit (the adjustment
         # almost always hits the oversize limit in this case, making this a safe assumption)
         if (cool_cap_design < 0) || (cool_load_sens_cap_design < 0)
-          cool_cap_design = @oversize_limit * hvac_sizing_values.Cool_Load_Tot
+          cool_cap_design = oversize_limit * hvac_sizing_values.Cool_Load_Tot
         end
 
         # Limit total capacity to oversize limit
-        cool_cap_design = [cool_cap_design, @oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
+        cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
 
         # Determine rated capacities
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
@@ -1394,11 +1421,11 @@ class HVACSizing
         # Determine the final sensible capacity at design using the SHR
         cool_load_sens_cap_design = shr_design * cool_cap_design
 
-      elsif sens_cap_design < @undersize_limit * hvac_sizing_values.Cool_Load_Sens
+      elsif sens_cap_design < undersize_limit * hvac_sizing_values.Cool_Load_Sens
         # Size by MJ8 Sensible load, return to rated conditions, find Sens with SHRRated. Limit total
         # capacity to oversizing limit
 
-        sens_cap_design = @undersize_limit * hvac_sizing_values.Cool_Load_Sens
+        sens_cap_design = undersize_limit * hvac_sizing_values.Cool_Load_Sens
 
         # Solve for the new total system capacity at design conditions:
         # sens_cap_design   = sens_cap_rated * sensible_cap_curve_value
@@ -1411,7 +1438,7 @@ class HVACSizing
                           (a_sens + c_sens * entering_temp)
 
         # Limit total capacity to oversize limit
-        cool_cap_design = [cool_cap_design, @oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
+        cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
 
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
@@ -1427,10 +1454,10 @@ class HVACSizing
       end
 
       # Calculate the final air flow rate using final sensible capacity at design
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizing_values.Cool_Capacity)
 
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
-           HPXML::HVACTypeMiniSplitAirConditioner].include?(@cooling_type) && !is_ducted
+           HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_type) && !is_ducted
 
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1453,7 +1480,7 @@ class HVACSizing
     elsif [HPXML::HVACTypeRoomAirConditioner,
            HPXML::HVACTypePTAC,
            HPXML::HVACTypeHeatPumpPTHP,
-           HPXML::HVACTypeHeatPumpRoom].include? @cooling_type
+           HPXML::HVACTypeHeatPumpRoom].include? cooling_type
 
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -1471,14 +1498,14 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Airflow = calc_airflow_rate_user(hvac_sizing_values.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[0], 1.0)
 
-    elsif HPXML::HVACTypeHeatPumpGroundToAir == @cooling_type
+    elsif HPXML::HVACTypeHeatPumpGroundToAir == cooling_type
 
       coil_bf = gshp_coil_bf
       entering_temp = hvac_cooling_ap.design_chw
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
 
       # Calculate the air flow rate required for design conditions
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp))
+      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp))
 
       # Neglecting the water flow rate for now because it's not available yet. Air flow rate is pre-adjusted values.
       design_wb_temp = UnitConversions.convert(mj.cool_indoor_wetbulb, 'f', 'k')
@@ -1502,7 +1529,7 @@ class HVACSizing
 
         cool_load_sens_cap_design = (hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value /
                                    (1.0 + (1.0 - coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - @leaving_air_temp)))
+                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
         cool_load_lat_cap_design = hvac_sizing_values.Cool_Load_Tot - cool_load_sens_cap_design
 
         # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
@@ -1511,7 +1538,7 @@ class HVACSizing
         cool_cap_design = cool_load_sens_cap_design + cool_load_lat_cap_design
 
         # Limit total capacity via oversizing limit
-        cool_cap_design = [cool_cap_design, @oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
+        cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizing_values.Cool_Load_Tot].min
         hvac_sizing_values.Cool_Capacity = cool_cap_design / total_cap_curve_value
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
       end
@@ -1519,27 +1546,27 @@ class HVACSizing
       # Recalculate the air flow rate in case the oversizing limit has been used
       cool_load_sens_cap_design = (hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value /
                                  (1.0 + (1.0 - coil_bf * bypass_factor_curve_value) *
-                                 (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - @leaving_air_temp)))
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+                                 (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
+      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizing_values.Cool_Capacity)
 
-    elsif HPXML::HVACTypeEvaporativeCooler == @cooling_type
+    elsif HPXML::HVACTypeEvaporativeCooler == cooling_type
 
       hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Load_Sens
-      if mj.cool_setpoint - @leaving_air_temp > 0
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - @leaving_air_temp))
+      if mj.cool_setpoint - leaving_air_temp > 0
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp))
       else
         hvac_sizing_values.Cool_Airflow = @cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
 
-    elsif HPXML::HVACTypeHeatPumpWaterLoopToAir == @cooling_type
+    elsif HPXML::HVACTypeHeatPumpWaterLoopToAir == cooling_type
 
       # Model only currently used for heating
       hvac_sizing_values.Cool_Capacity = 0.0
       hvac_sizing_values.Cool_Capacity_Sens = 0.0
       hvac_sizing_values.Cool_Airflow = 0.0
 
-    elsif @cooling_type.nil?
+    elsif cooling_type.nil?
 
       hvac_sizing_values.Cool_Capacity = 0.0
       hvac_sizing_values.Cool_Capacity_Sens = 0.0
@@ -1547,15 +1574,18 @@ class HVACSizing
 
     else
 
-      fail "Unexpected cooling type: #{@cooling_type}."
+      fail "Unexpected cooling type: #{cooling_type}."
 
     end
 
     # Heating
 
-    if not hvac_heating.nil?
+    heating_type = get_hvac_heating_type(hvac_heating)
+
+    if not heating_type.nil?
       hvac_heating_ap = hvac_heating.additional_properties
       is_ducted = !hvac_heating.distribution_system.nil?
+      supply_air_temp = hvac_heating.additional_properties.supply_air_temp
 
       if hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
         # Adjust heating load using the HP backup calculation
@@ -1568,6 +1598,8 @@ class HVACSizing
         hp_heating_speed = get_sizing_speed(hvac_hp.additional_properties, false)
         hvac_sizing_values.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizing_values.Heat_Load, hp_sizing_values.Heat_Capacity, hp_heating_speed)
       end
+    elsif not hvac_cooling.nil? && hvac_cooling.has_integrated_heating
+      supply_air_temp = hvac_cooling.additional_properties.supply_air_temp
     end
 
     if hvac_sizing_values.Heat_Load <= 0
@@ -1579,23 +1611,23 @@ class HVACSizing
     elsif [HPXML::HVACTypeHeatPumpAirToAir,
            HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeHeatPumpPTHP,
-           HPXML::HVACTypeHeatPumpRoom].include? @heating_type
+           HPXML::HVACTypeHeatPumpRoom].include? heating_type
 
       hvac_heating_speed = get_sizing_speed(hvac_heating_ap, false)
       if hvac_heating.is_a?(HPXML::HeatPump) && (@hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       else
-        process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed)
+        process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta)
       end
 
       hvac_sizing_values.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizing_values.Heat_Load_Supp, hvac_sizing_values.Heat_Capacity, hvac_heating_speed)
-      if (@heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (@heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
-        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
+      if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
+        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
       else
         hvac_sizing_values.Heat_Airflow = calc_airflow_rate_user(hvac_sizing_values.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed], hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed])
       end
 
-    elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? @heating_type
+    elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heating_type
 
       if @hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
@@ -1616,33 +1648,33 @@ class HVACSizing
         hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac_cooling_shr
         cool_load_sens_cap_design = (hvac_sizing_values.Cool_Capacity_Sens * sensible_cap_curve_value /
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - @leaving_air_temp)))
-        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - @leaving_air_temp), hvac_sizing_values.Cool_Capacity)
+                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
+        hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizing_values.Cool_Capacity)
       else
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
       end
-      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint))
+      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint))
 
-    elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? @heating_type
+    elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heating_type
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load_Supp
 
-      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
+      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
 
-    elsif (@heating_type == HPXML::HVACTypeFurnace) || ((not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating)
+    elsif (heating_type == HPXML::HVACTypeFurnace) || ((not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating)
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
 
-      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
+      hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
 
     elsif [HPXML::HVACTypeStove,
            HPXML::HVACTypeSpaceHeater,
            HPXML::HVACTypeWallFurnace,
            HPXML::HVACTypeFloorFurnace,
-           HPXML::HVACTypeFireplace].include? @heating_type
+           HPXML::HVACTypeFireplace].include? heating_type
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
@@ -1652,17 +1684,17 @@ class HVACSizing
         hvac_sizing_values.Heat_Airflow = UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') * hvac_heating_ap.heat_rated_cfm_per_ton[0]
       else
         # Autosized airflow rate
-        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (@supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
+        hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
       end
 
     elsif [HPXML::HVACTypeBoiler,
-           HPXML::HVACTypeElectricResistance].include? @heating_type
+           HPXML::HVACTypeElectricResistance].include? heating_type
 
       hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
       hvac_sizing_values.Heat_Airflow = 0.0
 
-    elsif @heating_type.nil?
+    elsif heating_type.nil?
 
       hvac_sizing_values.Heat_Capacity = 0.0
       hvac_sizing_values.Heat_Capacity_Supp = 0.0
@@ -1670,7 +1702,7 @@ class HVACSizing
 
     else
 
-      fail "Unexpected heating type: #{@heating_type}."
+      fail "Unexpected heating type: #{heating_type}."
 
     end
   end
@@ -1712,7 +1744,7 @@ class HVACSizing
     return odb_adj
   end
 
-  def self.apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
+  def self.apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
     # Increases the autosized heating/cooling capacities to account for any reduction
     # in capacity due to HVAC installation quality. This is done to prevent causing
     # unmet loads.
@@ -1739,18 +1771,19 @@ class HVACSizing
 
     # Cooling
 
+    cooling_type = get_hvac_cooling_type(hvac_cooling)
     f_ch = cool_charge_defect_ratio.round(3)
 
     if [HPXML::HVACTypeHeatPumpAirToAir,
         HPXML::HVACTypeCentralAirConditioner,
         HPXML::HVACTypeHeatPumpMiniSplit,
         HPXML::HVACTypeMiniSplitAirConditioner,
-        HPXML::HVACTypeHeatPumpGroundToAir].include?(@cooling_type) && @fraction_cool_load_served > 0
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(cooling_type) && frac_cool_load_served > 0
 
       hvac_cooling_ap = hvac_cooling.additional_properties
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
 
-      if @cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
+      if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
         cool_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Cool_Airflow, 'cfm', 'm^3/s')
         cool_airflow_rated_ratio = cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity * hvac_cooling_ap.cool_capacity_ratios[hvac_cooling_speed], hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
         cool_airflow_rated_defect_ratio = cool_cfm_m3s * (1 + cool_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizing_values.Cool_Capacity * hvac_cooling_ap.cool_capacity_ratios[hvac_cooling_speed], hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
@@ -1806,14 +1839,16 @@ class HVACSizing
 
     # Heating
 
+    heating_type = get_hvac_heating_type(hvac_heating)
+
     if [HPXML::HVACTypeHeatPumpAirToAir,
         HPXML::HVACTypeHeatPumpMiniSplit,
-        HPXML::HVACTypeHeatPumpGroundToAir].include?(@heating_type) && @fraction_heat_load_served > 0
+        HPXML::HVACTypeHeatPumpGroundToAir].include?(heating_type) && frac_heat_load_served > 0
 
       hvac_heating_ap = hvac_heating.additional_properties
       hvac_heating_speed = get_sizing_speed(hvac_heating_ap, false)
 
-      if @heating_type != HPXML::HVACTypeHeatPumpGroundToAir
+      if heating_type != HPXML::HVACTypeHeatPumpGroundToAir
         heat_cfm_m3s = UnitConversions.convert(hvac_sizing_values.Heat_Airflow, 'cfm', 'm^3/s')
         heat_airflow_rated_ratio = heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity * hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed], hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
         heat_airflow_rated_defect_ratio = heat_cfm_m3s * (1 + heat_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizing_values.Heat_Capacity * hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed], hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
@@ -1861,6 +1896,21 @@ class HVACSizing
       else
         hvac_sizing_values.Heat_Airflow = 0.0
       end
+    end
+  end
+
+  def self.apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
+    if not hvac_cooling.nil?
+      hvac_sizing_values.Cool_Capacity *= hvac_cooling.cooling_autosizing_factor
+      hvac_sizing_values.Cool_Airflow *= hvac_cooling.cooling_autosizing_factor
+      hvac_sizing_values.Cool_Capacity_Sens *= hvac_cooling.cooling_autosizing_factor
+    end
+    if not hvac_heating.nil?
+      hvac_sizing_values.Heat_Capacity *= hvac_heating.heating_autosizing_factor
+      hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
+    end
+    if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
+      hvac_sizing_values.Heat_Capacity_Supp *= hvac_cooling.backup_heating_autosizing_factor
     end
   end
 
@@ -1915,7 +1965,9 @@ class HVACSizing
     '''
     GSHP Ground Loop Sizing Calculations
     '''
-    return if @cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
+    cooling_type = get_hvac_cooling_type(hvac_cooling)
+
+    return if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
 
     geothermal_loop = hvac_cooling.geothermal_loop
     bore_spacing = geothermal_loop.bore_spacing
@@ -2100,7 +2152,8 @@ class HVACSizing
     end
   end
 
-  def self.process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed)
+  def self.process_heat_pump_adjustment(mj, runner, hvac_sizing_values, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed,
+                                        oversize_limit, oversize_delta)
     '''
     Adjust heat pump sizing
     '''
@@ -2150,10 +2203,10 @@ class HVACSizing
         load_shr = hvac_sizing_values.Cool_Load_Sens / hvac_sizing_values.Cool_Load_Tot
         if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
           # Mild winter or has a latent cooling load
-          hvac_sizing_values.Cool_Capacity = [(@oversize_limit * hvac_sizing_values.Cool_Load_Tot) / total_cap_curve_value, heat_cap_rated].min
+          hvac_sizing_values.Cool_Capacity = [(oversize_limit * hvac_sizing_values.Cool_Load_Tot) / total_cap_curve_value, heat_cap_rated].min
         else
           # Cold winter and no latent cooling load (add a ton rule applies)
-          hvac_sizing_values.Cool_Capacity = [(hvac_sizing_values.Cool_Load_Tot + @oversize_delta) / total_cap_curve_value, heat_cap_rated].min
+          hvac_sizing_values.Cool_Capacity = [(hvac_sizing_values.Cool_Load_Tot + oversize_delta) / total_cap_curve_value, heat_cap_rated].min
         end
       end
       hvac_sizing_values.Cool_Airflow = cfm_per_btuh * hvac_sizing_values.Cool_Capacity
@@ -2461,7 +2514,7 @@ class HVACSizing
     return true_az
   end
 
-  def self.get_space_ua_values(location, weather)
+  def self.get_space_ua_values(mj, location, weather)
     if HPXML::conditioned_locations.include? location
       fail 'Method should not be called for a conditioned space.'
     end
@@ -2521,7 +2574,7 @@ class HVACSizing
 
     # Infiltration UA
     ach = nil
-    if [HPXML::LocationCrawlspaceVented, HPXML::LocationAtticVented].include? location
+    if HPXML::vented_locations.include? location
       # Vented space
       if location == HPXML::LocationCrawlspaceVented
         vented_crawl = @hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
@@ -2540,14 +2593,14 @@ class HVACSizing
     end
     volume = Geometry.calculate_zone_volume(@hpxml_bldg, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
-    outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
+    outside_air_density = UnitConversions.convert(mj.p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
     space_UAs[HPXML::LocationOutside] += infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
 
     return space_UAs
   end
 
   def self.calculate_space_design_temps(mj, location, weather, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
-    space_UAs = get_space_ua_values(location, weather)
+    space_UAs = get_space_ua_values(mj, location, weather)
 
     # Calculate space design temp from space UAs
     design_temp = nil
@@ -2819,7 +2872,7 @@ class HVACSizing
     r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 
-    is_southern_hemisphere = (weather.header.Latitude < 0)
+    is_southern_hemisphere = (@hpxml_bldg.latitude < 0)
 
     if is_southern_hemisphere
       heating_month = 6 # July
@@ -3066,40 +3119,46 @@ class HVACSizing
     return u_value
   end
 
-  def self.set_hvac_types(hvac_heating, hvac_cooling)
+  def self.get_hvac_heating_type(hvac_heating)
     if hvac_heating.nil?
-      @heating_type = nil
+      return
     elsif hvac_heating.is_a? HPXML::HeatingSystem
-      @heating_type = hvac_heating.heating_system_type
+      return hvac_heating.heating_system_type
     else
-      @heating_type = hvac_heating.heat_pump_type
-    end
-    if hvac_cooling.nil?
-      @cooling_type = nil
-    elsif hvac_cooling.is_a? HPXML::CoolingSystem
-      @cooling_type = hvac_cooling.cooling_system_type
-    else
-      @cooling_type = hvac_cooling.heat_pump_type
+      return hvac_heating.heat_pump_type
     end
   end
 
-  def self.set_fractions_load_served(hvac_heating, hvac_cooling)
+  def self.get_hvac_cooling_type(hvac_cooling)
+    if hvac_cooling.nil?
+      return
+    elsif hvac_cooling.is_a? HPXML::CoolingSystem
+      return hvac_cooling.cooling_system_type
+    else
+      return hvac_cooling.heat_pump_type
+    end
+  end
+
+  def self.get_fractions_load_served(hvac_heating, hvac_cooling)
     if hvac_cooling.is_a?(HPXML::CoolingSystem) && hvac_cooling.has_integrated_heating
-      @fraction_heat_load_served = hvac_cooling.integrated_heating_system_fraction_heat_load_served
+      frac_heat_load_served = hvac_cooling.integrated_heating_system_fraction_heat_load_served
     elsif hvac_heating.nil?
-      @fraction_heat_load_served = 0
+      frac_heat_load_served = 0
     elsif hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
       # Use the same load fractions as the heat pump
       heat_pump = @hpxml_bldg.heat_pumps.find { |hp| hp.backup_system_idref == hvac_heating.id }
-      @fraction_heat_load_served = heat_pump.fraction_heat_load_served
+      frac_heat_load_served = heat_pump.fraction_heat_load_served
     else
-      @fraction_heat_load_served = hvac_heating.fraction_heat_load_served
+      frac_heat_load_served = hvac_heating.fraction_heat_load_served
     end
+
     if hvac_cooling.nil?
-      @fraction_cool_load_served = 0
+      frac_cool_load_served = 0
     else
-      @fraction_cool_load_served = hvac_cooling.fraction_cool_load_served
+      frac_cool_load_served = hvac_cooling.fraction_cool_load_served
     end
+
+    return frac_heat_load_served, frac_cool_load_served
   end
 
   def self.assign_to_hpxml_system(htg_sys, clg_sys, hvac_sizing_values)
@@ -3284,7 +3343,7 @@ class MJ
   end
   attr_accessor(:daily_range_temp_adjust, :cool_setpoint, :heat_setpoint, :cool_design_grains, :ctd, :htd,
                 :daily_range_num, :acf, :cool_indoor_wetbulb, :cool_indoor_enthalpy, :cool_outdoor_wetbulb,
-                :inside_air_dens, :cool_design_temps, :heat_design_temps)
+                :inside_air_dens, :cool_design_temps, :heat_design_temps, :p_atm)
 end
 
 class DesignLoads
