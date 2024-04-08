@@ -131,7 +131,7 @@ def _get_simulation_results(annual_csv_path, bills_csv_path)
       next if row.nil? || (row.size < 2)
       next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
 
-      results[row[0]] = Float(row[1])
+      results["Utility Bills: #{row[0]}"] = Float(row[1])
     end
   end
 
@@ -1050,7 +1050,7 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
   # so remove these from the comparison
   annual_results_1x = annual_results_1x.dup
   annual_results_10x = annual_results_10x.dup
-  ['System Use:', 'Temperature:', 'Bills:'].each do |key|
+  ['System Use:', 'Temperature:', 'Utility Bills:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     timeseries_results_1x.delete_if { |k, _v| k.start_with? key }
