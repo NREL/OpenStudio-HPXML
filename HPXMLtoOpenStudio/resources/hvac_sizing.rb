@@ -28,9 +28,9 @@ class HVACSizing
     aggregate_loads(bldg_design_loads)
 
     # Loop through each HVAC system and calculate equipment values.
-    @all_hvac_sizing_values = {}
+    @all_hvac_sizing_values = {} #assign hvac_sizing_values to empty hash
     system_design_loads = bldg_design_loads.dup
-    hvac_systems.each do |hvac_system|
+    hvac_systems.each do |hvac_system| #loop thru each hvac_system object
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       next if is_system_to_skip(hvac_heating, hvac_cooling)
 
