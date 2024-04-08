@@ -1200,6 +1200,10 @@ def apply_hpxml_modification(hpxml_file, hpxml)
       hpxml_bldg.foundations[0].attached_to_wall_idrefs << hpxml_bldg.walls[-1].id
       hpxml_bldg.foundation_walls[0].delete
     end
+    if ['base-foundation-conditioned-basement-slab-insulation.xml',
+        'base-foundation-conditioned-basement-slab-insulation-full.xml'].include? hpxml_file
+      hpxml_bldg.slabs[0].gap_insulation_r_value = 10.0
+    end
 
     # ---------- #
     # HPXML HVAC #
