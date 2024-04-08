@@ -240,7 +240,6 @@
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <GapInsulationRValue>10.0</GapInsulationRValue>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
