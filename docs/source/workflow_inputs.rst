@@ -1289,12 +1289,13 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``ExposedPerimeter``                                     double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
   ``DepthBelowGrade``                                      double    ft            >= 0         No         See [#]_  Depth from the top of the slab surface to grade
   ``PerimeterInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
-  ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
+  ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation (see figure below)
   ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
   ``UnderSlabInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
-  ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation
+  ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation (see figure below)
   ``UnderSlabInsulation/Layer/InsulationWidth``            double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
   ``UnderSlabInsulation/Layer/InsulationSpansEntireSlab``  boolean                              See [#]_             Whether horizontal insulation spans entire slab
+  ``extension/GapInsulationRValue``                        double    F-ft2-hr/Btu  >= 0         No         See [#]_  R-value of gap insulation (see figure below)
   ``extension/CarpetFraction``                             double    frac          >= 0, <= 1   No         See [#]_  Fraction of slab covered by carpet
   ``extension/CarpetRValue``                               double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
@@ -1309,9 +1310,15 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
          For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
   .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
+  .. [#] If GapInsulationRValue not provided, defaults to 5.0 if there is under slab (horizontal) insulation, otherwise 0.0.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
   .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
-  
+
+Slab insulation locations can be visualized in the figure below:
+
+.. image:: images/slab.png
+   :align: center
+
 .. _windowinputs:
 
 HPXML Windows
@@ -3500,7 +3507,6 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -3562,17 +3568,18 @@ Combi Boiler w/ Tankless Coil
 
 Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  Element                    Type     Units  Constraints                              Required      Default   Notes
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  ``SystemIdentifier``       id                                                       Yes                     Unique identifier
-  ``WaterHeaterType``        string          space-heating boiler with tankless coil  Yes                     Type of water heater
-  ``Location``               string          See [#]_                                 No            See [#]_  Water heater location
-  ``IsSharedSystem``         boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``FractionDHWLoadServed``  double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
-  ``HotWaterTemperature``    double   F      > 0                                      No            125       Water heater setpoint [#]_
-  ``RelatedHVACSystem``      idref           See [#]_                                 Yes                     ID of boiler
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  Element                               Type     Units  Constraints                              Required      Default   Notes
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  ``SystemIdentifier``                  id                                                       Yes                     Unique identifier
+  ``WaterHeaterType``                   string          space-heating boiler with tankless coil  Yes                     Type of water heater
+  ``Location``                          string          See [#]_                                 No            See [#]_  Water heater location
+  ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
+  ``HotWaterTemperature``               double   F      > 0                                      No            125       Water heater setpoint [#]_
+  ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
+  ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
@@ -3582,14 +3589,12 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
-         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 .. _water_heater_desuperheater:
 
@@ -3613,7 +3618,7 @@ If the water heater uses a desuperheater, additional information is entered in `
 HPXML Hot Water Distribution
 ****************************
 
-If any water heating systems are provided, a single hot water distribution system can be described:
+If any water heating systems are provided, a single hot water distribution system must be described:
 
 - :ref:`hot_water_dist_standard`
 - :ref:`hot_water_dist_recirc`
