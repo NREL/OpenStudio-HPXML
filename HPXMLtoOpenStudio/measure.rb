@@ -540,10 +540,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # original file (asset calculation).
     if @hpxml_bldg.building_occupancy.number_of_residents.nil?
       @hpxml_bldg.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
-    end
-
-    # If zero occupants, ensure end uses of interest are zeroed out
-    if (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
+    elsif (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
+      # If zero occupants, ensure end uses of interest are zeroed out
       @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
                                             begin_month: @hpxml_header.sim_begin_month,
                                             begin_day: @hpxml_header.sim_begin_day,
