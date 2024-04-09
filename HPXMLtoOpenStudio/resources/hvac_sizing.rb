@@ -1348,9 +1348,19 @@ class HVACSizing
       # such as different indoor/outdoor coil combinations and different blower settings.
       # Ductless systems don't offer this flexibility.
 
+      #per E+ docs, cap, SHR and COP inputs should be “gross” values
+
       entering_temp = @hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
-      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
+        #ADP/BF specified for Coil:Cooling:DX:SingleSpeed
+        #rated total capacity and rated SHR are used to calculate coil bypass factor (BF) at rated conditions
+        hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed] #
+        
+        #specify 5 performance curves
+        clg_cap_rated = ...
+
+      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
         odb_adj = adjust_outdoor_condition_var_speed(hvac_cooling.cooling_detailed_performance_data, entering_temp, hvac_cooling, :clg)
         total_cap_curve_value = odb_adj * idb_adj
@@ -2481,12 +2491,16 @@ class HVACSizing
     return MathTools.biquadratic(airflow_rate / capacity_tons, temp, get_shr_biquadratic)
   end
 
-  def self.get_shr_biquadratic
+  #def self.get_shr_biquadratic
     # Based on EnergyPlus's model for calculating SHR at off-rated conditions. This curve fit
     # avoids the iterations in the actual model. It does not account for altitude or variations
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
-    return [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
-  end
+    #return [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
+  #end
+  #get_shr_biquadratic will be replaced with ADP/BF method for calculating SHR at off-rated conditions
+
+  def self.get_slope_rated()
+    slope_rated = w
 
   def self.get_sizing_speed(hvac_ap, is_cooling)
     if is_cooling && hvac_ap.respond_to?(:cool_capacity_ratios)
