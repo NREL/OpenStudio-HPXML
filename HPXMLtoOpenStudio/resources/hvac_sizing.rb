@@ -1998,7 +1998,9 @@ class HVACSizing
     return if fan_watts_per_cfm.nil?
 
     # Maximum autosized airflow
-    max_airflow = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
+    autosized_cooling_airflow = hvac_sizing_values.Cool_Airflow
+    max_airflow = [autosized_heating_airflow, autosized_cooling_airflow].max
 
     # If maximum autosized airflow is not limited, do nothing
     return if max_airflow <= max_airflow_allowed
@@ -2006,11 +2008,11 @@ class HVACSizing
     # Adjust heating or cooling system size for the upgraded buildings based on max allowed airflow rate
     if hvac_sizing_values.Cool_Airflow > hvac_sizing_values.Heat_Airflow
       # Design cooling airflow rate exceeds max allowed, adjust cooling capacity
-      prev_airflow = hvac_sizing_values.Cool_Airflow
       hvac_sizing_values.Cool_Airflow = max_airflow_allowed
-      hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / prev_airflow
+      hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
+
       if hvac_sizing_values.Heat_Capacity > 0
         supply_air_temp = hvac_heating.additional_properties.supply_air_temp
 
@@ -2020,10 +2022,10 @@ class HVACSizing
       end
     else # hvac_sizing_values.Heat_Airflow > hvac_sizing_values.Cool_Airflow
       # Design heating airflow rate exceeds max allowed, adjust heating capacity
-      prev_airflow = hvac_sizing_values.Heat_Airflow
       hvac_sizing_values.Heat_Airflow = max_airflow_allowed
-      hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / prev_airflow
+      hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
       hvac_sizing_values.Heat_Airflow_isdefaulted = false
+
       if hvac_sizing_values.Cool_Capacity > 0
         leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
 
