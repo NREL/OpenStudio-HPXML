@@ -1498,13 +1498,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 703, nil, true, 500, 1.0)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 706, nil, true, 500, 1.0)
 
     # Test defaults w/o pilot
     hpxml_bldg.heating_systems[0].pilot_light = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 703, nil, false, nil, 1.0)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 706, nil, false, nil, 1.0)
   end
 
   def test_electric_resistance
