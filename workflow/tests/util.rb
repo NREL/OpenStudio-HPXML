@@ -1116,30 +1116,30 @@ end
 def _write_results(results, csv_out)
   require 'csv'
 
-  output_types = []
-  results.values.each do |xml_results|
-    xml_results.keys.each do |key|
-      output_type = key.split(':')[0]
-      next if output_types.include? output_type
+  output_groups = {
+    'energy' => ['Energy Use', 'Fuel Use', 'End Use'],
+    'loads' => ['Load', 'Component Load'],
+    'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
+    'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
+    'bills' => ['Utility Bills'],
+  }
 
-      output_types << output_type
-    end
-  end
-
-  output_types.each do |output_type|
+  output_groups.each do |output_group, key_types|
     output_keys = []
-    results.values.each do |xml_results|
-      xml_results.keys.each do |key|
-        next unless key.start_with? output_type
-        next if output_keys.include? key
+    key_types.each do |key_type|
+      results.values.each do |xml_results|
+        xml_results.keys.each do |key|
+          next if output_keys.include? key
+          next if key_type != key.split(':')[0]
 
-        output_keys << key
+          output_keys << key
+        end
       end
     end
 
-    output_type_csv_out = csv_out.gsub('.csv', "_#{output_type.downcase.gsub(' ', '_')}.csv")
+    this_csv_out = csv_out.gsub('.csv', "_#{output_group}.csv")
 
-    CSV.open(output_type_csv_out, 'w') do |csv|
+    CSV.open(this_csv_out, 'w') do |csv|
       csv << ['HPXML'] + output_keys
       results.sort.each do |xml, xml_results|
         csv_row = [xml]
