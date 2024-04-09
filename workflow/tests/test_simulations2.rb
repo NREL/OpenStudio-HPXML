@@ -12,7 +12,7 @@ class WorkflowSimulations2Test < Minitest::Test
     results_dir = File.join(File.dirname(__FILE__), 'results')
     FileUtils.mkdir_p results_dir
 
-    results_out = File.join(results_dir, 'results_workflow_simulations2.csv')
+    results_out = File.join(results_dir, 'results_simulations2.csv')
     Dir.glob("#{File.dirname(results_out)}/#{File.basename(results_out).gsub('.csv', '*.csv')}").each { |file| File.delete(file) }
 
     sample_files_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'sample_files'))
