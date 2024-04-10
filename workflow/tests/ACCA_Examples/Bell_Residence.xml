@@ -71,7 +71,7 @@
               <FloorArea>234.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>683</InternalLoadsSensible>
+                  <InternalLoadsSensible>683.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -80,7 +80,7 @@
               <FloorArea>120.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>538</InternalLoadsSensible>
+                  <InternalLoadsSensible>538.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -89,7 +89,7 @@
               <FloorArea>90.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -98,7 +98,7 @@
               <FloorArea>60.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -107,7 +107,7 @@
               <FloorArea>109.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -116,7 +116,7 @@
               <FloorArea>35.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -125,7 +125,7 @@
               <FloorArea>54.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>500</InternalLoadsSensible>
+                  <InternalLoadsSensible>500.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -134,7 +134,7 @@
               <FloorArea>170.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>1000</InternalLoadsSensible>
+                  <InternalLoadsSensible>1000.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -143,7 +143,7 @@
               <FloorArea>272.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>900</InternalLoadsSensible>
+                  <InternalLoadsSensible>900.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -152,7 +152,7 @@
               <FloorArea>144.0</FloorArea>
               <extension>
                 <ManualJInputs>
-                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
                 </ManualJInputs>
               </extension>
             </Space>
