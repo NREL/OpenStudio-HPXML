@@ -4,7 +4,6 @@ def run_simulation_tests(xmls)
   # Run simulations
   puts "Running #{xmls.size} HPXML files..."
   all_annual_results = {}
-  xmls = xmls[0..1]
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
 
