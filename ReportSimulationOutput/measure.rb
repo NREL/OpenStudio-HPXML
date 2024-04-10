@@ -1049,6 +1049,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       elcd = @model.getElectricLoadCenterDistributions.find { |elcd| elcd.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
       next if elcd.nil?
 
+      elcs = @model.getElectricLoadCenterStorageLiIonNMCBatterys.find { |elcs| elcs.additionalProperties.getFeatureAsString('HPXML_ID').to_s == battery.id }
+
       resilience_frequency = 'timestep'
       ts_per_hr = @model.getTimestep.numberOfTimestepsPerHour
       if args[:timeseries_frequency] != 'timestep'
@@ -1065,9 +1067,9 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       batt_loss = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
 
       min_soc = elcd.minimumStorageStateofChargeFraction
-      batt_kw = battery.rated_power_output / 1000.0
-      batt_roundtrip_eff = battery.round_trip_efficiency
-      batt_kwh = Battery.get_usable_capacity_kWh(battery)
+      batt_kw = elcd.designStorageControlDischargePower.get / 1000.0
+      batt_roundtrip_eff = elcs.dctoDCChargingEfficiency
+      batt_kwh = elcs.additionalProperties.getFeatureAsDouble('UsableCapacity_kWh').get
 
       batt_soc_kwh = batt_soc.map { |soc| soc - min_soc }.map { |soc| soc * batt_kwh }
       elec_prod = get_report_meter_data_timeseries(['ElectricityProduced:Facility'], UnitConversions.convert(1.0, 'J', 'kWh'), 0, resilience_frequency)
@@ -1748,7 +1750,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_total_consumptions]
       total_energy_data = []
       [TE::Total, TE::Net].each do |energy_type|
-        next if (energy_type == TE::Net) && (outputs[:elec_prod_timeseries].sum(0.0) == 0)
         next if @totals[energy_type].timeseries_output.empty?
 
         total_energy_data << [@totals[energy_type].name, @totals[energy_type].timeseries_units] + @totals[energy_type].timeseries_output.map { |v| v.round(n_digits) }
@@ -1759,8 +1760,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     if args[:include_timeseries_fuel_consumptions]
       fuel_data = @fuels.values.select { |x| x.timeseries_output.sum(0.0) != 0 }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
 
-      # Also add Net Electricity
-      if outputs[:elec_prod_annual] != 0.0
+      if outputs[:elec_net_timeseries].sum != 0
+        # Also add Net Electricity
         fuel_data.insert(1, ['Fuel Use: Electricity: Net', get_timeseries_units_from_fuel_type(FT::Elec)] + outputs[:elec_net_timeseries].map { |v| v.round(n_digits) })
       end
     else
