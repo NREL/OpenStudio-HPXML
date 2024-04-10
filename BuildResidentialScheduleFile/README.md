@@ -24,7 +24,7 @@ Absolute/relative path of the HPXML file.
 
 **Schedules: Column Names**
 
-A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: occupants, lighting_interior, lighting_garage, cooking_range, dishwasher, clothes_washer, clothes_dryer, ceiling_fan, plug_loads_other, plug_loads_tv, hot_water_dishwasher, hot_water_clothes_washer, hot_water_fixtures.
+A comma-separated list of the column names to generate. If not provided, defaults to all columns. Possible column names are: occupants, lighting_interior, lighting_garage, cooking_range, dishwasher, clothes_washer, clothes_dryer, ceiling_fan, plug_loads_other, plug_loads_tv, hot_water_dishwasher, hot_water_clothes_washer, hot_water_fixtures, hot_water_showers.
 
 - **Name:** ``schedules_column_names``
 - **Type:** ``String``
@@ -35,7 +35,7 @@ A comma-separated list of the column names to generate. If not provided, default
 
 **Schedules: Random Seed**
 
-This numeric field is the seed for the random number generator. Only applies if the schedules type is 'stochastic'.
+This numeric field is the seed for the random number generator.
 
 - **Name:** ``schedules_random_seed``
 - **Type:** ``Integer``
@@ -68,9 +68,20 @@ Absolute/relative output path of the HPXML file. This HPXML file will include th
 
 <br/>
 
+**Append Output?**
+
+If true and the output CSV file already exists, appends columns to the file rather than overwriting it. The existing output CSV file must have the same number of rows (i.e., timeseries frequency) as the new columns being appended.
+
+- **Name:** ``append_output``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Debug Mode?**
 
-Applicable when schedules type is stochastic. If true: Write extra state column(s).
+If true, writes extra column(s) for informational purposes.
 
 - **Name:** ``debug``
 - **Type:** ``Boolean``

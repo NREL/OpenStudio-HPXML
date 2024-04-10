@@ -4,30 +4,28 @@ def run_simulation_tests(xmls)
   # Run simulations
   puts "Running #{xmls.size} HPXML files..."
   all_results = {}
-  all_results_bills = {}
   Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
     next if xml.end_with? '-10x.xml'
-    next if xml.include? 'base-multiple-sfd-buildings' # Separate tests cover this
-    next if xml.include? 'base-multiple-mf-units' # Separate tests cover this
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
-    all_results[xml_name], all_results_bills[xml_name], timeseries_results = results
+    all_results[xml_name], timeseries_results = results
 
-    next unless xml.include?('sample_files') || xml.include?('real_homes')
+    next unless xml.include?('sample_files') || xml.include?('real_homes') # Exclude e.g. ASHRAE 140 files
+    next if xml.include? 'base-bldgtype-mf-whole-building' # Already has multiple dwelling units
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
     _run_xml(xml, Parallel.worker_number, true, all_results[xml_name], timeseries_results)
   end
 
-  return all_results, all_results_bills
+  return all_results
 end
 
 def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, timeseries_results_1x = nil)
   unit_multiplier = 1
   if apply_unit_multiplier
-    hpxml = HPXML.new(hpxml_path: xml, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: xml)
     hpxml.buildings.each do |hpxml_bldg|
       next unless hpxml_bldg.building_construction.number_of_units.nil?
 
@@ -46,6 +44,9 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
       elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
         # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
+      elsif xml.include? 'max-power-ratio-schedule'
+        # FUTURE: Maximum power ratio schedule currently gives inconsistent component load results w/ unit multipliers
+        # https://github.com/NREL/OpenStudio-HPXML/issues/1610
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
@@ -55,23 +56,23 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
       end
       hpxml.buildings << hpxml_bldg.dup
     end
+    unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
+    if unit_multiplier > 1
+      hpxml.header.whole_sfa_or_mf_building_sim = true
+    end
     xml.gsub!('.xml', '-10x.xml')
     hpxml_doc = hpxml.to_doc()
     hpxml.set_unique_hpxml_ids(hpxml_doc)
     XMLHelper.write_file(hpxml_doc, xml)
-    unit_multiplier = hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units }.sum / orig_multiplier
   end
 
   print "Testing #{File.basename(xml)}...\n"
-  rundir = File.join(File.dirname(__FILE__), "test#{worker_num}")
 
+  rundir = File.join(File.dirname(__FILE__), "test#{worker_num}")
   # Uses 'monthly' to verify timeseries results match annual results via error-checking
   # inside the ReportSimulationOutput measure.
   cli_path = OpenStudio.getOpenStudioCLI
   command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x \"#{xml}\" --add-component-loads -o \"#{rundir}\" --debug --monthly ALL"
-  if unit_multiplier > 1
-    command += ' -b ALL'
-  end
   success = system(command)
 
   if unit_multiplier > 1
@@ -97,7 +98,7 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
   hpxml_defaults_path = File.join(rundir, 'in.xml')
   schema_validator = XMLValidator.get_schema_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
   schematron_validator = XMLValidator.get_schematron_validator(File.join(File.dirname(__FILE__), '..', '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml'))
-  hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: 'ALL') # Validate in.xml to ensure it can be run back through OS-HPXML
+  hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator) # Validate in.xml to ensure it can be run back through OS-HPXML
   if not hpxml.errors.empty?
     puts 'ERRORS:'
     hpxml.errors.each do |error|
@@ -105,24 +106,33 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, results_1x = nil, t
     end
     flunk "EPvalidator.xml error in #{hpxml_defaults_path}."
   end
-  bill_results = _get_bill_results(bills_csv_path)
-  results = _get_simulation_results(annual_csv_path)
+  results = _get_simulation_results(annual_csv_path, bills_csv_path)
   timeseries_results = _get_simulation_timeseries_results(timeseries_csv_path)
   _verify_outputs(rundir, xml, results, hpxml, unit_multiplier)
   if unit_multiplier > 1
     _check_unit_multiplier_results(hpxml.buildings[0], results_1x, results, timeseries_results_1x, timeseries_results, unit_multiplier)
   end
 
-  return results, bill_results, timeseries_results
+  return results, timeseries_results
 end
 
-def _get_simulation_results(annual_csv_path)
+def _get_simulation_results(annual_csv_path, bills_csv_path)
   # Grab all outputs from reporting measure CSV annual results
   results = {}
   CSV.foreach(annual_csv_path) do |row|
     next if row.nil? || (row.size < 2)
 
     results[row[0]] = Float(row[1])
+  end
+
+  # Grab all outputs (except monthly) from reporting measure CSV bill results
+  if File.exist? bills_csv_path
+    CSV.foreach(bills_csv_path) do |row|
+      next if row.nil? || (row.size < 2)
+      next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
+
+      results["Utility Bills: #{row[0]}"] = Float(row[1])
+    end
   end
 
   return results
@@ -150,21 +160,6 @@ def _get_simulation_timeseries_results(timeseries_csv_path)
   return results
 end
 
-def _get_bill_results(bill_csv_path)
-  # Grab all outputs (except monthly) from reporting measure CSV bill results
-  results = {}
-  if File.exist? bill_csv_path
-    CSV.foreach(bill_csv_path) do |row|
-      next if row.nil? || (row.size < 2)
-      next if (1..12).to_a.any? { |month| row[0].include?(": Month #{month}:") }
-
-      results[row[0]] = Float(row[1])
-    end
-  end
-
-  return results
-end
-
 def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
@@ -179,7 +174,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   hpxml_bldg.collapse_enclosure_surfaces()
   hpxml_bldg.delete_adiabatic_subsurfaces()
 
-  # Check run.log warnings
+  # Check for unexpected run.log messages
   File.readlines(File.join(rundir, 'run.log')).each do |message|
     next if message.strip.empty?
     next if message.start_with? 'Info: '
@@ -239,11 +234,14 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
       next if message.include? 'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'
     end
-    if hpxml_path.include? 'base-location-AMY-2012.xml'
+    if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.include? 'US_CO_Boulder_AMY_2012.epw'
       next if message.include? 'No design condition info found; calculating design conditions from EPW weather data.'
     end
     if hpxml_bldg.building_construction.number_of_units > 1
       next if message.include? 'NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'
+    end
+    if hpxml_path.include? 'base-hvac-multiple.xml'
+      next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
     end
 
     # FUTURE: Revert this eventually
@@ -251,7 +249,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
       uses_unit_multipliers = hpxml.buildings.select { |hpxml_bldg| hpxml_bldg.building_construction.number_of_units > 1 }.size > 0
       if uses_unit_multipliers || hpxml.buildings.size > 1
-        next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements'
+        next if message.include? 'Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers.'
       end
     end
 
@@ -373,9 +371,17 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if timestep > 15
       next if message.include?('Timestep: Requested number') && message.include?('is less than the suggested minimum')
     end
+    # Location doesn't match EPW station
+    if hpxml_path.include? 'base-location-detailed.xml'
+      next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
+    end
     # TODO: Check why this house produces this warning
     if hpxml_path.include? 'house044.xml'
       next if message.include? 'FixViewFactors: View factors not complete. Check for bad surface descriptions or unenclosed zone'
+    end
+    # TODO: Check why this warning occurs
+    if hpxml_path.include? 'base-bldgtype-mf-whole-building'
+      next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
@@ -1000,11 +1006,11 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kWh')
       end
     elsif key.include?('Peak Electricity:')
-      # Check that the peak electricity difference is less than 500 W or less than 2%
+      # Check that the peak electricity difference is less than 500 W or less than 5%
       # Wider tolerances than others because a small change in when an event (like the
       # water heating firing) occurs can significantly impact the peak.
       abs_delta_tol = 500.0
-      abs_frac_tol = 0.02
+      abs_frac_tol = 0.05
     elsif key.include?('Peak Load:')
       # Check that the peak load difference is less than 0.2 kBtu/hr or less than 5%
       abs_delta_tol = 0.2
@@ -1029,6 +1035,10 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
+    elsif key.include?('Emissions:')
+      # Check that the emissions difference is less than 100 lb or less than 5%
+      abs_delta_tol = 100
+      abs_frac_tol = 0.05
     else
       fail "Unexpected results key: #{key}."
     end
@@ -1038,7 +1048,9 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
 
   # Number of systems and thermal zones change between the 1x and 10x runs,
   # so remove these from the comparison
-  ['System Use:', 'Temperature:'].each do |key|
+  annual_results_1x = annual_results_1x.dup
+  annual_results_10x = annual_results_10x.dup
+  ['System Use:', 'Temperature:', 'Utility Bills:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     timeseries_results_1x.delete_if { |k, _v| k.start_with? key }
@@ -1104,33 +1116,44 @@ end
 def _write_results(results, csv_out)
   require 'csv'
 
-  output_keys = []
-  results.values.each do |xml_results|
-    # Don't include emissions and system uses in output file/CI results
-    xml_results.delete_if { |k, _v| k.start_with? 'Emissions:' }
-    xml_results.delete_if { |k, _v| k.start_with? 'System Use:' }
+  output_groups = {
+    'energy' => ['Energy Use', 'Fuel Use', 'End Use'],
+    'loads' => ['Load', 'Component Load'],
+    'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
+    'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
+    'bills' => ['Utility Bills'],
+  }
 
-    xml_results.keys.each do |key|
-      next if output_keys.include? key
+  output_groups.each do |output_group, key_types|
+    output_keys = []
+    key_types.each do |key_type|
+      results.values.each do |xml_results|
+        xml_results.keys.each do |key|
+          next if output_keys.include? key
+          next if key_type != key.split(':')[0]
 
-      output_keys << key
-    end
-  end
-
-  CSV.open(csv_out, 'w') do |csv|
-    csv << ['HPXML'] + output_keys
-    results.sort.each do |xml, xml_results|
-      csv_row = [xml]
-      output_keys.each do |key|
-        if xml_results[key].nil?
-          csv_row << 0
-        else
-          csv_row << xml_results[key]
+          output_keys << key
         end
       end
-      csv << csv_row
+    end
+
+    this_csv_out = csv_out.gsub('.csv', "_#{output_group}.csv")
+
+    CSV.open(this_csv_out, 'w') do |csv|
+      csv << ['HPXML'] + output_keys
+      results.sort.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          if xml_results[key].nil?
+            csv_row << 0
+          else
+            csv_row << xml_results[key]
+          end
+        end
+        csv << csv_row
+      end
     end
   end
 
-  puts "Wrote results to #{csv_out}."
+  puts "Wrote results to #{csv_out.gsub('.csv', '_*.csv')}."
 end

@@ -30,7 +30,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return "Note: OS-HPXML default values can be found in the OS-HPXML documentation or can be seen by using the 'apply_defaults' argument."
+    return "The measure handles geometry by 1) translating high-level geometry inputs (conditioned floor area, number of stories, etc.) to 3D closed-form geometry in an OpenStudio model and then 2) mapping the OpenStudio surfaces to HPXML surfaces (using surface type, boundary condition, area, orientation, etc.). Like surfaces are collapsed into a single surface with aggregate surface area. Note: OS-HPXML default values can be found in the documentation or can be seen by using the 'apply_defaults' argument."
   end
 
   # define the arguments that the user will input
@@ -49,6 +49,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the existing HPXML file. If not provided, a new HPXML file with one Building element is created. If provided, a new Building element will be appended to this HPXML file (e.g., to create a multifamily HPXML file describing multiple dwelling units).')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_sfa_or_mf_building_sim', false)
+    arg.setDisplayName('Whole SFA/MF Building Simulation?')
+    arg.setDescription('If the HPXML file represents a single family-attached/multifamily building with multiple dwelling units defined, specifies whether to run the HPXML file as a single whole building model.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('software_info_program_used', false)
     arg.setDisplayName('Software Info: Program Used')
     arg.setDescription('The name of the software program used.')
@@ -64,24 +69,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative paths of csv files containing user-specified detailed schedules. If multiple files, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_period', false)
-    arg.setDisplayName('Schedules: Vacancy Period')
-    arg.setDescription('Specifies the vacancy period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_periods', false)
+    arg.setDisplayName('Schedules: Vacancy Periods')
+    arg.setDescription('Specifies the vacancy periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_period', false)
-    arg.setDisplayName('Schedules: Power Outage Period')
-    arg.setDescription('Specifies the power outage period. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24).')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_periods', false)
+    arg.setDisplayName('Schedules: Power Outage Periods')
+    arg.setDescription('Specifies the power outage periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
     args << arg
 
-    natvent_availability_choices = OpenStudio::StringVector.new
-    natvent_availability_choices << HPXML::ScheduleRegular
-    natvent_availability_choices << HPXML::ScheduleAvailable
-    natvent_availability_choices << HPXML::ScheduleUnavailable
-
-    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_power_outage_window_natvent_availability', natvent_availability_choices, false)
-    arg.setDisplayName('Schedules: Power Outage Period Window Natural Ventilation Availability')
-    arg.setDescription('The availability of the natural ventilation schedule during the outage period.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_periods_window_natvent_availability', false)
+    arg.setDisplayName('Schedules: Power Outage Periods Window Natural Ventilation Availability')
+    arg.setDescription("The availability of the natural ventilation schedule during the power outage periods. Valid choices are '#{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join("', '")}'. If multiple periods, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
@@ -136,15 +136,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
 
+    site_soil_and_moisture_type_choices = OpenStudio::StringVector.new
+    Constants.SoilTypes.each do |soil_type|
+      Constants.MoistureTypes.each do |moisture_type|
+        site_soil_and_moisture_type_choices << "#{soil_type}, #{moisture_type}"
+      end
+    end
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('site_soil_and_moisture_type', site_soil_and_moisture_type_choices, false)
+    arg.setDisplayName('Site: Soil and Moisture Type')
+    arg.setDescription("Type of soil and moisture. This is used to inform ground conductivity and diffusivity. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_conductivity', false)
     arg.setDisplayName('Site: Ground Conductivity')
-    arg.setDescription("Conductivity of the ground soil. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    arg.setDescription('Conductivity of the ground soil. If provided, overrides the previous site and moisture type input.')
     arg.setUnits('Btu/hr-ft-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
-    arg.setDisplayName('Site: Zip Code')
-    arg.setDescription('Zip code of the home address.')
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_ground_diffusivity', false)
+    arg.setDisplayName('Site: Ground Diffusivity')
+    arg.setDescription('Diffusivity of the ground soil. If provided, overrides the previous site and moisture type input.')
+    arg.setUnits('ft^2/hr')
     args << arg
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
@@ -157,6 +170,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('IECC zone of the home address.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_city', false)
+    arg.setDisplayName('Site: City')
+    arg.setDescription('City/municipality of the home address.')
+    args << arg
+
     site_state_code_choices = OpenStudio::StringVector.new
     Constants.StateCodesMap.keys.each do |sc|
       site_state_code_choices << sc
@@ -164,13 +182,36 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('site_state_code', site_state_code_choices, false)
     arg.setDisplayName('Site: State Code')
-    arg.setDescription('State code of the home address.')
+    arg.setDescription("State code of the home address. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('site_zip_code', false)
+    arg.setDisplayName('Site: Zip Code')
+    arg.setDescription('Zip code of the home address.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_time_zone_utc_offset', false)
     arg.setDisplayName('Site: Time Zone UTC Offset')
-    arg.setDescription('Time zone UTC offset of the home address. Must be between -12 and 14.')
+    arg.setDescription("Time zone UTC offset of the home address. Must be between -12 and 14. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     arg.setUnits('hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_elevation', false)
+    arg.setDisplayName('Site: Elevation')
+    arg.setDescription("Elevation of the home address. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    arg.setUnits('ft')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_latitude', false)
+    arg.setDisplayName('Site: Latitude')
+    arg.setDescription("Latitude of the home address. Must be between -90 and 90. Use negative values for southern hemisphere. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    arg.setUnits('deg')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeDoubleArgument('site_longitude', false)
+    arg.setDisplayName('Site: Longitude')
+    arg.setDescription("Longitude of the home address. Must be between -180 and 180. Use negative values for the western hemisphere. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
+    arg.setUnits('deg')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -638,20 +679,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.3)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('roof_radiant_barrier', true)
-    arg.setDisplayName('Roof: Has Radiant Barrier')
-    arg.setDescription('Presence of a radiant barrier in the attic.')
-    arg.setDefaultValue(false)
+    radiant_barrier_attic_location_choices = OpenStudio::StringVector.new
+    radiant_barrier_attic_location_choices << 'none'
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofOnly
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+    radiant_barrier_attic_location_choices << HPXML::RadiantBarrierLocationAtticFloor
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_attic_location', radiant_barrier_attic_location_choices, false)
+    arg.setDisplayName('Attic: Radiant Barrier Location')
+    arg.setDescription('The location of the radiant barrier in the attic.')
     args << arg
 
-    roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
-    roof_radiant_barrier_grade_choices << '1'
-    roof_radiant_barrier_grade_choices << '2'
-    roof_radiant_barrier_grade_choices << '3'
+    radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    radiant_barrier_grade_choices << '1'
+    radiant_barrier_grade_choices << '2'
+    radiant_barrier_grade_choices << '3'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, false)
-    arg.setDisplayName('Roof: Radiant Barrier Grade')
-    arg.setDescription("The grade of the radiant barrier. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('radiant_barrier_grade', radiant_barrier_grade_choices, false)
+    arg.setDisplayName('Attic: Radiant Barrier Grade')
+    arg.setDescription("The grade of the radiant barrier in the attic. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-roofs'>HPXML Roofs</a>) is used.")
     args << arg
 
     wall_type_choices = OpenStudio::StringVector.new
@@ -1079,6 +1125,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_autosizing_factor', false)
+    arg.setDisplayName('Heating System: Heating Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_fraction_heat_load_served', true)
     arg.setDisplayName('Heating System: Fraction Heat Load Served')
     arg.setDescription('The heating load served by the heating system.')
@@ -1131,6 +1182,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Cooling Capacity')
     arg.setDescription("The output cooling capacity of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#central-air-conditioner'>Central Air Conditioner</a>, <a href='#{docs_base_url}#room-air-conditioner'>Room Air Conditioner</a>, <a href='#{docs_base_url}#packaged-terminal-air-conditioner'>Packaged Terminal Air Conditioner</a>, <a href='#{docs_base_url}#evaporative-cooler'>Evaporative Cooler</a>, <a href='#{docs_base_url}#mini-split-air-conditioner'>Mini-Split Air Conditioner</a>) is used.")
     arg.setUnits('Btu/hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_autosizing_factor', false)
+    arg.setDisplayName('Cooling System: Cooling Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_fraction_cool_load_served', true)
@@ -1216,6 +1272,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heat_pump_sizing_choices << HPXML::HeatPumpSizingHERS
     heat_pump_sizing_choices << HPXML::HeatPumpSizingMaxLoad
 
+    heat_pump_backup_sizing_choices = OpenStudio::StringVector.new
+    heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingEmergency
+    heat_pump_backup_sizing_choices << HPXML::HeatPumpBackupSizingSupplemental
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_type', heat_pump_type_choices, true)
     arg.setDisplayName('Heat Pump: Type')
     arg.setDescription("The type of heat pump. Use 'none' if there is no heat pump.")
@@ -1263,6 +1323,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Btu/hr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_autosizing_factor', false)
+    arg.setDisplayName('Heat Pump: Heating Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_fraction', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Retention Fraction')
     arg.setDescription("The output heating capacity of the heat pump at a user-specified temperature (e.g., 17F or 5F) divided by the above nominal heating capacity. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
@@ -1279,6 +1344,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Cooling Capacity')
     arg.setDescription("The output cooling capacity of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>, <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
     arg.setUnits('Btu/hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_autosizing_factor', false)
+    arg.setDisplayName('Heat Pump: Cooling Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_fraction_heat_load_served', true)
@@ -1305,6 +1375,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Backup Type')
     arg.setDescription("The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use 'none' if there is no backup heating.")
     arg.setDefaultValue(HPXML::HeatPumpBackupTypeIntegrated)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_autosizing_factor', false)
+    arg.setDisplayName('Heat Pump: Backup Heating Autosizing Factor')
+    arg.setDescription("The scaling factor applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, 1.0 is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Factor.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_fuel', heat_pump_backup_fuel_choices, true)
@@ -1336,6 +1411,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The auto-sizing methodology to use when the heat pump capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_sizing_methodology', heat_pump_backup_sizing_choices, false)
+    arg.setDisplayName('Heat Pump: Backup Sizing Methodology')
+    arg.setDescription("The auto-sizing methodology to use when the heat pump backup capacity is not provided. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-sizing-control'>HPXML HVAC Sizing Control</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_ducted', false)
     arg.setDisplayName('Heat Pump: Is Ducted')
     arg.setDescription("Whether the heat pump is ducted or not. Only used for #{HPXML::HVACTypeHeatPumpMiniSplit}. It's assumed that #{HPXML::HVACTypeHeatPumpAirToAir} and #{HPXML::HVACTypeHeatPumpGroundToAir} are ducted, and #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom} are not ducted. If not provided, assumes not ducted.")
@@ -1357,6 +1437,154 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
     arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('W')
+    args << arg
+
+    perf_data_capacity_type_choices = OpenStudio::StringVector.new
+    perf_data_capacity_type_choices << 'Absolute capacities'
+    perf_data_capacity_type_choices << 'Normalized capacity fractions'
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('hvac_perf_data_capacity_type', perf_data_capacity_type_choices, false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Capacity Type')
+    arg.setDescription('Type of capacity values for detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps).')
+    arg.setUnits('Absolute capacities')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_outdoor_temperatures', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Outdoor Temperatures')
+    arg.setDescription('Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 deg-F. At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed Capacities')
+    arg.setDescription('Minimum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('Btu/hr or Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed Capacities')
+    arg.setDescription('Maximum speed capacities of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('Btu/hr or Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Minimum Speed COPs')
+    arg.setDescription('Minimum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('W/W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_max_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Heating Maximum Speed COPs')
+    arg.setDescription('Maximum speed efficiency COP values of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('W/W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_outdoor_temperatures', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Outdoor Temperatures')
+    arg.setDescription('Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 deg-F. At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed Capacities')
+    arg.setDescription('Minimum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('Btu/hr or Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_capacities', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed Capacities')
+    arg.setDescription('Maximum speed capacities of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('Btu/hr or Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Minimum Speed COPs')
+    arg.setDescription('Minimum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('W/W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_max_speed_cops', false)
+    arg.setDisplayName('HVAC Detailed Performance Data: Cooling Maximum Speed COPs')
+    arg.setDescription('Maximum speed efficiency COP values of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('W/W')
+    args << arg
+
+    geothermal_loop_configuration_choices = OpenStudio::StringVector.new
+    geothermal_loop_configuration_choices << 'none'
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationDiagonal
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationHorizontal
+    # geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationOther
+    geothermal_loop_configuration_choices << HPXML::GeothermalLoopLoopConfigurationVertical
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_configuration', geothermal_loop_configuration_choices, false)
+    arg.setDisplayName('Geothermal Loop: Configuration')
+    arg.setDescription("Configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#ground-to-air-heat-pump'>Ground-to-Air Heat Pump</a>) is used.")
+    args << arg
+
+    geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
+    valid_bore_configs = HVACSizing.valid_bore_configs
+    valid_bore_configs.keys.each do |valid_bore_config|
+      geothermal_loop_borefield_configuration_choices << valid_bore_config
+    end
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_borefield_configuration', geothermal_loop_borefield_configuration_choices, false)
+    arg.setDisplayName('Geothermal Loop: Borefield Configuration')
+    arg.setDescription("Borefield configuration of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_loop_flow', false)
+    arg.setDisplayName('Geothermal Loop: Loop Flow')
+    arg.setDescription("Water flow rate through the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('gpm')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geothermal_loop_boreholes_count', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Count')
+    arg.setDescription("Number of boreholes. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('#')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_length', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Length')
+    arg.setDescription("Average length of each borehole (vertical). Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('ft')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_spacing', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Spacing')
+    arg.setDescription("Distance between bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('ft')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geothermal_loop_boreholes_diameter', false)
+    arg.setDisplayName('Geothermal Loop: Boreholes Diameter')
+    arg.setDescription("Diameter of bores. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('in')
+    args << arg
+
+    geothermal_loop_grout_or_pipe_type_choices = OpenStudio::StringVector.new
+    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeStandard
+    geothermal_loop_grout_or_pipe_type_choices << HPXML::GeothermalLoopGroutOrPipeTypeThermallyEnhanced
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_grout_type', geothermal_loop_grout_or_pipe_type_choices, false)
+    arg.setDisplayName('Geothermal Loop: Grout Type')
+    arg.setDescription("Grout type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_type', geothermal_loop_grout_or_pipe_type_choices, false)
+    arg.setDisplayName('Geothermal Loop: Pipe Type')
+    arg.setDescription("Pipe type of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    args << arg
+
+    geothermal_loop_pipe_diameter_choices = OpenStudio::StringVector.new
+    geothermal_loop_pipe_diameter_choices << '3/4" pipe'
+    geothermal_loop_pipe_diameter_choices << '1" pipe'
+    geothermal_loop_pipe_diameter_choices << '1-1/4" pipe'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geothermal_loop_pipe_diameter', geothermal_loop_pipe_diameter_choices, false)
+    arg.setDisplayName('Geothermal Loop: Pipe Diameter')
+    arg.setDescription("Pipe diameter of the geothermal loop. Only applies to #{HPXML::HVACTypeHeatPumpGroundToAir} heat pump type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-geothermal-loops'>HPXML Geothermal Loops</a>) is used.")
+    arg.setUnits('in')
     args << arg
 
     heating_system_2_type_choices = OpenStudio::StringVector.new
@@ -1393,6 +1621,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heating System 2: Heating Capacity')
     arg.setDescription("The output heating capacity of the second heating system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.")
     arg.setUnits('Btu/hr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_heating_autosizing_factor', false)
+    arg.setDisplayName('Heating System 2: Heating Autosizing Factor')
+    arg.setDescription('The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_fraction_heat_load_served', true)
@@ -1572,13 +1805,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_flow_rate', false)
     arg.setDisplayName('Mechanical Ventilation: Flow Rate')
-    arg.setDescription("The flow rate of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#whole-ventilation-fan'>Whole Ventilation Fan</a>) is used.")
+    arg.setDescription("The flow rate of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_hours_in_operation', false)
     arg.setDisplayName('Mechanical Ventilation: Hours In Operation')
-    arg.setDescription("The hours in operation of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#whole-ventilation-fan'>Whole Ventilation Fan</a>) is used.")
+    arg.setDescription("The hours in operation of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
     arg.setUnits('hrs/day')
     args << arg
 
@@ -1604,7 +1837,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('mech_vent_fan_power', false)
     arg.setDisplayName('Mechanical Ventilation: Fan Power')
-    arg.setDescription("The fan power of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#whole-ventilation-fan'>Whole Ventilation Fan</a>) is used.")
+    arg.setDescription("The fan power of the mechanical ventilation. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-mechanical-ventilation-fans'>HPXML Mechanical Ventilation Fans</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -1715,61 +1948,61 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_quantity', false)
     arg.setDisplayName('Kitchen Fans: Quantity')
-    arg.setDescription("The quantity of the kitchen fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The quantity of the kitchen fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('#')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_flow_rate', false)
     arg.setDisplayName('Kitchen Fans: Flow Rate')
-    arg.setDescription("The flow rate of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The flow rate of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_hours_in_operation', false)
     arg.setDisplayName('Kitchen Fans: Hours In Operation')
-    arg.setDescription("The hours in operation of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The hours in operation of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('hrs/day')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fans_power', false)
     arg.setDisplayName('Kitchen Fans: Fan Power')
-    arg.setDescription("The fan power of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The fan power of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fans_start_hour', false)
     arg.setDisplayName('Kitchen Fans: Start Hour')
-    arg.setDescription("The start hour of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The start hour of the kitchen fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_quantity', false)
     arg.setDisplayName('Bathroom Fans: Quantity')
-    arg.setDescription("The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The quantity of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('#')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_flow_rate', false)
     arg.setDisplayName('Bathroom Fans: Flow Rate')
-    arg.setDescription("The flow rate of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The flow rate of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_hours_in_operation', false)
     arg.setDisplayName('Bathroom Fans: Hours In Operation')
-    arg.setDescription("The hours in operation of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The hours in operation of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('hrs/day')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_power', false)
     arg.setDisplayName('Bathroom Fans: Fan Power')
-    arg.setDescription("The fan power of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The fan power of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_start_hour', false)
     arg.setDisplayName('Bathroom Fans: Start Hour')
-    arg.setDescription("The start hour of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#local-ventilation-fan'>Local Ventilation Fan</a>) is used.")
+    arg.setDescription("The start hour of the bathroom fans. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-local-ventilation-fans'>HPXML Local Ventilation Fans</a>) is used.")
     arg.setUnits('hr')
     args << arg
 
@@ -1781,13 +2014,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('whole_house_fan_flow_rate', false)
     arg.setDisplayName('Whole House Fan: Flow Rate')
-    arg.setDescription("The flow rate of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#whole-house-fan'>Whole House Fan</a>) is used.")
+    arg.setDescription("The flow rate of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
     arg.setUnits('CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('whole_house_fan_power', false)
     arg.setDisplayName('Whole House Fan: Fan Power')
-    arg.setDescription("The fan power of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#whole-house-fan'>Whole House Fan</a>) is used.")
+    arg.setDescription("The fan power of the whole house fan. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-whole-house-fans'>HPXML Whole House Fans</a>) is used.")
     arg.setUnits('W')
     args << arg
 
@@ -1905,11 +2138,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_units_served', true)
-    arg.setDisplayName('Water Heater: Number of Units Served')
-    arg.setDescription("Number of dwelling units served (directly or indirectly) by the water heater. Must be 1 if #{HPXML::ResidentialTypeSFD}. Used to apportion water heater tank losses to the unit.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_bedrooms_served', false)
+    arg.setDisplayName('Water Heater: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served (directly or indirectly) by the water heater. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared water heater serving multiple dwelling units. Used to apportion water heater tank losses to the unit.")
     arg.setUnits('#')
-    arg.setDefaultValue(1)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_uses_desuperheater', false)
@@ -1952,34 +2184,34 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     recirculation_control_type_choices = OpenStudio::StringVector.new
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeNone
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeTimer
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeTemperature
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeSensor
-    recirculation_control_type_choices << HPXML::DHWRecirControlTypeManual
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeNone
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTimer
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeTemperature
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeSensor
+    recirculation_control_type_choices << HPXML::DHWRecircControlTypeManual
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('hot_water_distribution_recirc_control_type', recirculation_control_type_choices, false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Control Type')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the type of hot water recirculation control, if any.")
-    arg.setDefaultValue(HPXML::DHWRecirControlTypeNone)
+    arg.setDefaultValue(HPXML::DHWRecircControlTypeNone)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_piping_length', false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Piping Length')
     arg.setUnits('ft')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation'>Recirculation</a>) is used.")
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_branch_piping_length', false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Branch Piping Length')
     arg.setUnits('ft')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation branch piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation'>Recirculation</a>) is used.")
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation branch piping. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_recirc_pump_power', false)
     arg.setDisplayName('Hot Water Distribution: Recirculation Pump Power')
     arg.setUnits('W')
-    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation'>Recirculation</a>) is used.")
+    arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hot_water_distribution_pipe_r', false)
@@ -2027,6 +2259,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_fixtures_usage_multiplier', false)
     arg.setDisplayName('Hot Water Fixtures: Usage Multiplier')
     arg.setDescription("Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-fixtures'>HPXML Water Fixtures</a>) is used.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('general_water_use_usage_multiplier', false)
+    arg.setDisplayName('General Water Use: Usage Multiplier')
+    arg.setDescription("Multiplier on internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.) that can reflect, e.g., high/low usage occupants. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-occupancy'>HPXML Building Occupancy</a>) is used.")
     args << arg
 
     solar_thermal_system_type_choices = OpenStudio::StringVector.new
@@ -2181,7 +2418,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_num_bedrooms_served', false)
     arg.setDisplayName('PV System: Number of Bedrooms Served')
-    arg.setDescription("Number of bedrooms served by PV system. Required if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
+    arg.setDescription("Number of bedrooms served by PV system. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared PV system serving multiple dwelling units. Used to apportion PV generation to the unit of a SFA/MF building. If there are two PV systems, this will apply to both.")
     arg.setUnits('#')
     args << arg
 
@@ -2274,6 +2511,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Battery: Round Trip Efficiency')
     arg.setDescription("The round trip efficiency of the lithium ion battery. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-batteries'>HPXML Batteries</a>) is used.")
     arg.setUnits('Frac')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('battery_num_bedrooms_served', false)
+    arg.setDisplayName('Battery: Number of Bedrooms Served')
+    arg.setDescription("Number of bedrooms served by the lithium ion battery. Only needed if #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} and it is a shared battery serving multiple dwelling units. Used to apportion battery charging/discharging to the unit of a SFA/MF building.")
+    arg.setUnits('#')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('lighting_present', true)
@@ -2721,10 +2964,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(true)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_label_energy_use', false)
+    arg.setDisplayName('Ceiling Fan: Label Energy Use')
+    arg.setUnits('W')
+    arg.setDescription("The label average energy use of the ceiling fan(s). If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', false)
     arg.setDisplayName('Ceiling Fan: Efficiency')
     arg.setUnits('CFM/W')
-    arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
+    arg.setDescription("The efficiency rating of the ceiling fan(s) at medium speed. Only used if Label Energy Use not provided. If neither Efficiency nor Label Energy Use provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('ceiling_fan_quantity', false)
@@ -3233,6 +3482,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:ceiling_assembly_r] > max_uninsulated_ceiling_rvalue)
     warnings << 'Home with conditioned attic has ceiling insulation.' if warning
 
+    warning = (args[:heat_pump_type] != HPXML::HVACTypeHeatPumpGroundToAir) && (args[:geothermal_loop_configuration].is_initialized && args[:geothermal_loop_configuration].get != 'none')
+    warnings << 'Specified an attached geothermal loop but home has no ground source heat pump.' if warning
+
     return warnings
   end
 
@@ -3279,9 +3531,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << 'Must specify a boiler when modeling an indirect water heater type.' if error
 
-    error = (args[:geometry_unit_num_bedrooms] <= 0)
-    errors << 'Number of bedrooms must be greater than zero.' if error
-
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
     errors << 'Specified a shared system for a single-family detached unit.' if error
 
@@ -3290,6 +3539,60 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     error = args[:rim_joist_assembly_r].is_initialized && !args[:geometry_rim_joist_height].is_initialized
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
+
+    if args[:schedules_power_outage_periods].is_initialized && args[:schedules_power_outage_periods_window_natvent_availability].is_initialized
+      schedules_power_outage_periods_lengths = [args[:schedules_power_outage_periods].get.count(','),
+                                                args[:schedules_power_outage_periods_window_natvent_availability].get.count(',')]
+
+      error = (schedules_power_outage_periods_lengths.uniq.size != 1)
+      errors << 'One power outage periods schedule argument does not have enough comma-separated elements specified.' if error
+    end
+
+    if args[:schedules_power_outage_periods_window_natvent_availability].is_initialized
+      natvent_availabilities = args[:schedules_power_outage_periods_window_natvent_availability].get.split(',').map(&:strip)
+      natvent_availabilities.each do |natvent_availability|
+        error = ![HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].include?(natvent_availability)
+        errors << "Window natural ventilation availability '#{natvent_availability}' during a power outage is invalid." if error
+      end
+    end
+
+    hvac_perf_data_heating_args_initialized = [args[:hvac_perf_data_heating_outdoor_temperatures].is_initialized,
+                                               args[:hvac_perf_data_heating_min_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_heating_max_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_heating_min_speed_cops].is_initialized,
+                                               args[:hvac_perf_data_heating_max_speed_cops].is_initialized]
+    error = (hvac_perf_data_heating_args_initialized.uniq.size != 1)
+    errors << 'Did not specify all required heating detailed performance data arguments.' if error
+
+    if hvac_perf_data_heating_args_initialized.uniq.size == 1 && hvac_perf_data_heating_args_initialized.uniq[0]
+      heating_data_points_lengths = [args[:hvac_perf_data_heating_outdoor_temperatures].get.count(','),
+                                     args[:hvac_perf_data_heating_min_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_heating_max_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_heating_min_speed_cops].get.count(','),
+                                     args[:hvac_perf_data_heating_max_speed_cops].get.count(',')]
+
+      error = (heating_data_points_lengths.uniq.size != 1)
+      errors << 'One or more detailed heating performance data arguments does not have enough comma-separated elements specified.' if error
+    end
+
+    hvac_perf_data_cooling_args_initialized = [args[:hvac_perf_data_cooling_outdoor_temperatures].is_initialized,
+                                               args[:hvac_perf_data_cooling_min_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_cooling_max_speed_capacities].is_initialized,
+                                               args[:hvac_perf_data_cooling_min_speed_cops].is_initialized,
+                                               args[:hvac_perf_data_cooling_max_speed_cops].is_initialized]
+    error = (hvac_perf_data_cooling_args_initialized.uniq.size != 1)
+    errors << 'Did not specify all required cooling detailed performance data arguments.' if error
+
+    if hvac_perf_data_cooling_args_initialized.uniq.size == 1 && hvac_perf_data_cooling_args_initialized.uniq[0]
+      cooling_data_points_lengths = [args[:hvac_perf_data_cooling_outdoor_temperatures].get.count(','),
+                                     args[:hvac_perf_data_cooling_min_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_capacities].get.count(','),
+                                     args[:hvac_perf_data_cooling_min_speed_cops].get.count(','),
+                                     args[:hvac_perf_data_cooling_max_speed_cops].get.count(',')]
+
+      error = (cooling_data_points_lengths.uniq.size != 1)
+      errors << 'One or more detailed cooling performance data arguments does not have enough comma-separated elements specified.' if error
+    end
 
     emissions_args_initialized = [args[:emissions_scenario_names].is_initialized,
                                   args[:emissions_types].is_initialized,
@@ -3396,7 +3699,7 @@ class HPXMLFile
     sorted_surfaces = model.getSurfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
     sorted_subsurfaces = model.getSubSurfaces.sort_by { |ss| ss.additionalProperties.getFeatureAsInteger('Index').get }
 
-    hpxml = HPXML.new(hpxml_path: existing_hpxml_path, building_id: 'ALL')
+    hpxml = HPXML.new(hpxml_path: existing_hpxml_path)
 
     if not set_header(runner, hpxml, args)
       return false
@@ -3424,6 +3727,7 @@ class HPXMLFile
     set_heating_systems(hpxml_bldg, args)
     set_cooling_systems(hpxml_bldg, args)
     set_heat_pumps(hpxml_bldg, args)
+    set_geothermal_loop(hpxml_bldg, args)
     set_secondary_heating_systems(hpxml_bldg, args)
     set_hvac_distribution(hpxml_bldg, args)
     set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
@@ -3598,22 +3902,36 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
 
-    if args[:schedules_vacancy_period].is_initialized
-      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_vacancy_period].get)
+    if args[:whole_sfa_or_mf_building_sim].is_initialized
+      hpxml.header.whole_sfa_or_mf_building_sim = args[:whole_sfa_or_mf_building_sim].get
+    end
 
-      if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
-        hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
+    if args[:schedules_vacancy_periods].is_initialized
+      schedules_vacancy_periods = args[:schedules_vacancy_periods].get.split(',').map(&:strip)
+      schedules_vacancy_periods.each do |schedules_vacancy_period|
+        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(schedules_vacancy_period)
+
+        if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
+          hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
+        end
       end
     end
-    if args[:schedules_power_outage_period].is_initialized
-      begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(args[:schedules_power_outage_period].get)
+    if args[:schedules_power_outage_periods].is_initialized
+      schedules_power_outage_periods = args[:schedules_power_outage_periods].get.split(',').map(&:strip)
 
-      if args[:schedules_power_outage_window_natvent_availability].is_initialized
-        natvent_availability = args[:schedules_power_outage_window_natvent_availability].get
+      natvent_availabilities = []
+      if args[:schedules_power_outage_periods_window_natvent_availability].is_initialized
+        natvent_availabilities = args[:schedules_power_outage_periods_window_natvent_availability].get.split(',').map(&:strip)
       end
 
-      if not unavailable_period_exists(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
-        hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+      schedules_power_outage_periods = schedules_power_outage_periods.zip(natvent_availabilities)
+      schedules_power_outage_periods.each do |schedules_power_outage_period|
+        outage_period, natvent_availability = schedules_power_outage_period
+        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(outage_period)
+
+        if not unavailable_period_exists(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
+          hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
+        end
       end
     end
 
@@ -3976,8 +4294,24 @@ class HPXMLFile
       zip_code = args[:site_zip_code].get
     end
 
+    if args[:site_city].is_initialized
+      city = args[:site_city].get
+    end
+
     if args[:site_state_code].is_initialized
       state_code = args[:site_state_code].get
+    end
+
+    if args[:site_elevation].is_initialized
+      elevation = args[:site_elevation].get
+    end
+
+    if args[:site_latitude].is_initialized
+      latitude = args[:site_latitude].get
+    end
+
+    if args[:site_longitude].is_initialized
+      longitude = args[:site_longitude].get
     end
 
     if args[:site_time_zone_utc_offset].is_initialized
@@ -3998,9 +4332,13 @@ class HPXMLFile
     hpxml.buildings.add(building_id: 'MyBuilding',
                         site_id: 'SiteID',
                         event_type: 'proposed workscope',
-                        zip_code: zip_code,
+                        city: city,
                         state_code: state_code,
+                        zip_code: zip_code,
                         time_zone_utc_offset: time_zone_utc_offset,
+                        elevation: elevation,
+                        latitude: latitude,
+                        longitude: longitude,
                         dst_enabled: dst_enabled,
                         dst_begin_month: dst_begin_month,
                         dst_begin_day: dst_begin_day,
@@ -4017,6 +4355,16 @@ class HPXMLFile
 
     if args[:site_ground_conductivity].is_initialized
       hpxml_bldg.site.ground_conductivity = args[:site_ground_conductivity].get
+    end
+
+    if args[:site_ground_diffusivity].is_initialized
+      hpxml_bldg.site.ground_diffusivity = args[:site_ground_diffusivity].get
+    end
+
+    if args[:site_soil_and_moisture_type].is_initialized
+      soil_type, moisture_type = args[:site_soil_and_moisture_type].get.split(', ')
+      hpxml_bldg.site.soil_type = soil_type
+      hpxml_bldg.site.moisture_type = moisture_type
     end
 
     if args[:site_type].is_initialized
@@ -4083,6 +4431,9 @@ class HPXMLFile
     if args[:geometry_unit_num_occupants].is_initialized
       hpxml_bldg.building_occupancy.number_of_residents = args[:geometry_unit_num_occupants].get
     end
+    if args[:general_water_use_usage_multiplier].is_initialized
+      hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = args[:general_water_use_usage_multiplier].get
+    end
   end
 
   def self.set_building_construction(hpxml_bldg, args)
@@ -4109,6 +4460,9 @@ class HPXMLFile
     hpxml_bldg.building_construction.conditioned_building_volume = conditioned_building_volume
     hpxml_bldg.building_construction.average_ceiling_height = args[:geometry_average_ceiling_height]
     hpxml_bldg.building_construction.residential_facility_type = args[:geometry_unit_type]
+    if args[:geometry_building_num_units].is_initialized
+      hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units].get
+    end
 
     if args[:year_built].is_initialized
       hpxml_bldg.building_construction.year_built = args[:year_built].get
@@ -4126,6 +4480,10 @@ class HPXMLFile
 
     if args[:heat_pump_sizing_methodology].is_initialized
       hpxml_bldg.header.heat_pump_sizing_methodology = args[:heat_pump_sizing_methodology].get
+    end
+
+    if args[:heat_pump_backup_sizing_methodology].is_initialized
+      hpxml_bldg.header.heat_pump_backup_sizing_methodology = args[:heat_pump_backup_sizing_methodology].get
     end
 
     if args[:window_natvent_availability].is_initialized
@@ -4215,11 +4573,6 @@ class HPXMLFile
         roof_color = args[:roof_color].get
       end
 
-      radiant_barrier = args[:roof_radiant_barrier]
-      if args[:roof_radiant_barrier] && args[:roof_radiant_barrier_grade].is_initialized
-        radiant_barrier_grade = args[:roof_radiant_barrier_grade].get
-      end
-
       if args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof
         azimuth = nil
       else
@@ -4233,10 +4586,16 @@ class HPXMLFile
                            roof_type: roof_type,
                            roof_color: roof_color,
                            pitch: args[:geometry_roof_pitch],
-                           radiant_barrier: radiant_barrier,
-                           radiant_barrier_grade: radiant_barrier_grade,
                            insulation_assembly_r_value: args[:roof_assembly_r])
       @surface_ids[surface.name.to_s] = hpxml_bldg.roofs[-1].id
+
+      next unless [HPXML::RadiantBarrierLocationAtticRoofOnly, HPXML::RadiantBarrierLocationAtticRoofAndGableWalls].include?(args[:radiant_barrier_attic_location].to_s)
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.roofs[-1].interior_adjacent_to)
+
+      hpxml_bldg.roofs[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.roofs[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
+      end
     end
   end
 
@@ -4370,6 +4729,14 @@ class HPXMLFile
         hpxml_bldg.walls[-1].insulation_assembly_r_value = args[:wall_assembly_r]
       else
         hpxml_bldg.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
+      end
+
+      next unless hpxml_bldg.walls[-1].attic_wall_type == HPXML::AtticWallTypeGable && args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticRoofAndGableWalls
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.walls[-1].interior_adjacent_to)
+
+      hpxml_bldg.walls[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.walls[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end
@@ -4527,6 +4894,14 @@ class HPXMLFile
         end
       else
         hpxml_bldg.floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+      end
+
+      next unless args[:radiant_barrier_attic_location].to_s == HPXML::RadiantBarrierLocationAtticFloor
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(hpxml_bldg.floors[-1].exterior_adjacent_to) && hpxml_bldg.floors[-1].interior_adjacent_to == HPXML::LocationConditionedSpace
+
+      hpxml_bldg.floors[-1].radiant_barrier = true
+      if args[:radiant_barrier_grade].is_initialized
+        hpxml_bldg.floors[-1].radiant_barrier_grade = args[:radiant_barrier_grade].get
       end
     end
   end
@@ -4826,6 +5201,10 @@ class HPXMLFile
       heating_capacity = args[:heating_system_heating_capacity].get
     end
 
+    if args[:heating_system_heating_autosizing_factor].is_initialized
+      heating_autosizing_factor = args[:heating_system_heating_autosizing_factor].get
+    end
+
     if [HPXML::HVACTypeElectricResistance].include? heating_system_type
       heating_system_fuel = HPXML::FuelTypeElectricity
     else
@@ -4872,6 +5251,7 @@ class HPXMLFile
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: heating_system_fuel,
                                    heating_capacity: heating_capacity,
+                                   heating_autosizing_factor: heating_autosizing_factor,
                                    fraction_heat_load_served: fraction_heat_load_served,
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
@@ -4890,6 +5270,10 @@ class HPXMLFile
 
     if args[:cooling_system_cooling_capacity].is_initialized
       cooling_capacity = args[:cooling_system_cooling_capacity].get
+    end
+
+    if args[:cooling_system_cooling_autosizing_factor].is_initialized
+      cooling_autosizing_factor = args[:cooling_system_cooling_autosizing_factor].get
     end
 
     if args[:cooling_system_cooling_compressor_type].is_initialized
@@ -4956,6 +5340,7 @@ class HPXMLFile
                                    cooling_system_type: cooling_system_type,
                                    cooling_system_fuel: HPXML::FuelTypeElectricity,
                                    cooling_capacity: cooling_capacity,
+                                   cooling_autosizing_factor: cooling_autosizing_factor,
                                    fraction_cool_load_served: args[:cooling_system_fraction_cool_load_served],
                                    compressor_type: compressor_type,
                                    cooling_shr: cooling_shr,
@@ -4971,6 +5356,43 @@ class HPXMLFile
                                    integrated_heating_system_capacity: integrated_heating_system_capacity,
                                    integrated_heating_system_efficiency_percent: integrated_heating_system_efficiency_percent,
                                    integrated_heating_system_fraction_heat_load_served: integrated_heating_system_fraction_heat_load_served)
+
+    if args[:hvac_perf_data_cooling_outdoor_temperatures].is_initialized && [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
+      hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].get.split(',').map(&:strip)
+      hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].get.split(',').map(&:strip)
+
+      clg_perf_data = hpxml_bldg.cooling_systems[0].cooling_detailed_performance_data
+      cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
+                                                                                      hvac_perf_data_cooling_max_speed_capacities,
+                                                                                      hvac_perf_data_cooling_min_speed_cops,
+                                                                                      hvac_perf_data_cooling_max_speed_cops)
+      cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+        outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
+
+        if hvac_perf_data_capacity_type == 'Absolute capacities'
+          min_speed_capacity = Float(min_speed_cap_or_frac)
+          max_speed_capacity = Float(max_speed_cap_or_frac)
+        elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
+          min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+          max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+        end
+
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                          capacity: min_speed_capacity,
+                          capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                          capacity_description: HPXML::CapacityDescriptionMinimum,
+                          efficiency_cop: Float(min_speed_cop))
+        clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                          capacity: max_speed_capacity,
+                          capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
+                          capacity_description: HPXML::CapacityDescriptionMaximum,
+                          efficiency_cop: Float(max_speed_cop))
+      end
+    end
   end
 
   def self.set_heat_pumps(hpxml_bldg, args)
@@ -4982,12 +5404,20 @@ class HPXMLFile
       heating_capacity = args[:heat_pump_heating_capacity].get
     end
 
+    if args[:heat_pump_heating_autosizing_factor].is_initialized
+      heating_autosizing_factor = args[:heat_pump_heating_autosizing_factor].get
+    end
+
     if args[:heat_pump_heating_capacity_retention_fraction].is_initialized
       heating_capacity_retention_fraction = args[:heat_pump_heating_capacity_retention_fraction].get
     end
 
     if args[:heat_pump_heating_capacity_retention_temp].is_initialized
       heating_capacity_retention_temp = args[:heat_pump_heating_capacity_retention_temp].get
+    end
+
+    if args[:heat_pump_backup_heating_autosizing_factor].is_initialized
+      backup_heating_autosizing_factor = args[:heat_pump_backup_heating_autosizing_factor].get
     end
 
     if args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeIntegrated
@@ -5029,6 +5459,10 @@ class HPXMLFile
 
     if args[:heat_pump_cooling_capacity].is_initialized
       cooling_capacity = args[:heat_pump_cooling_capacity].get
+    end
+
+    if args[:heat_pump_cooling_autosizing_factor].is_initialized
+      cooling_autosizing_factor = args[:heat_pump_cooling_autosizing_factor].get
     end
 
     if args[:heat_pump_cooling_compressor_type].is_initialized
@@ -5088,12 +5522,15 @@ class HPXMLFile
                               heat_pump_type: heat_pump_type,
                               heat_pump_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: heating_capacity,
+                              heating_autosizing_factor: heating_autosizing_factor,
+                              backup_heating_autosizing_factor: backup_heating_autosizing_factor,
                               heating_capacity_retention_fraction: heating_capacity_retention_fraction,
                               heating_capacity_retention_temp: heating_capacity_retention_temp,
                               compressor_type: compressor_type,
                               compressor_lockout_temp: compressor_lockout_temp,
                               cooling_shr: cooling_shr,
                               cooling_capacity: cooling_capacity,
+                              cooling_autosizing_factor: cooling_autosizing_factor,
                               fraction_heat_load_served: fraction_heat_load_served,
                               fraction_cool_load_served: fraction_cool_load_served,
                               backup_type: backup_type,
@@ -5115,6 +5552,143 @@ class HPXMLFile
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
                               primary_heating_system: primary_heating_system,
                               primary_cooling_system: primary_cooling_system)
+
+    if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump_type) && compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if args[:hvac_perf_data_heating_outdoor_temperatures].is_initialized
+        hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
+        hvac_perf_data_heating_outdoor_temperatures = args[:hvac_perf_data_heating_outdoor_temperatures].get.split(',').map(&:strip)
+        hvac_perf_data_heating_min_speed_capacities = args[:hvac_perf_data_heating_min_speed_capacities].get.split(',').map(&:strip)
+        hvac_perf_data_heating_max_speed_capacities = args[:hvac_perf_data_heating_max_speed_capacities].get.split(',').map(&:strip)
+        hvac_perf_data_heating_min_speed_cops = args[:hvac_perf_data_heating_min_speed_cops].get.split(',').map(&:strip)
+        hvac_perf_data_heating_max_speed_cops = args[:hvac_perf_data_heating_max_speed_cops].get.split(',').map(&:strip)
+
+        htg_perf_data = hpxml_bldg.heat_pumps[0].heating_detailed_performance_data
+        heating_perf_data_data_points = hvac_perf_data_heating_outdoor_temperatures.zip(hvac_perf_data_heating_min_speed_capacities,
+                                                                                        hvac_perf_data_heating_max_speed_capacities,
+                                                                                        hvac_perf_data_heating_min_speed_cops,
+                                                                                        hvac_perf_data_heating_max_speed_cops)
+        heating_perf_data_data_points.each do |heating_perf_data_data_point|
+          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = heating_perf_data_data_point
+
+          if hvac_perf_data_capacity_type == 'Absolute capacities'
+            min_speed_capacity = Float(min_speed_cap_or_frac)
+            max_speed_capacity = Float(max_speed_cap_or_frac)
+          elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
+            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+          end
+
+          htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: min_speed_capacity,
+                            capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionMinimum,
+                            efficiency_cop: Float(min_speed_cop))
+          htg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: max_speed_capacity,
+                            capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionMaximum,
+                            efficiency_cop: Float(max_speed_cop))
+        end
+      end
+
+      if args[:hvac_perf_data_cooling_outdoor_temperatures].is_initialized
+        hvac_perf_data_capacity_type = args[:hvac_perf_data_capacity_type].get
+        hvac_perf_data_cooling_outdoor_temperatures = args[:hvac_perf_data_cooling_outdoor_temperatures].get.split(',').map(&:strip)
+        hvac_perf_data_cooling_min_speed_capacities = args[:hvac_perf_data_cooling_min_speed_capacities].get.split(',').map(&:strip)
+        hvac_perf_data_cooling_max_speed_capacities = args[:hvac_perf_data_cooling_max_speed_capacities].get.split(',').map(&:strip)
+        hvac_perf_data_cooling_min_speed_cops = args[:hvac_perf_data_cooling_min_speed_cops].get.split(',').map(&:strip)
+        hvac_perf_data_cooling_max_speed_cops = args[:hvac_perf_data_cooling_max_speed_cops].get.split(',').map(&:strip)
+
+        clg_perf_data = hpxml_bldg.heat_pumps[0].cooling_detailed_performance_data
+        cooling_perf_data_data_points = hvac_perf_data_cooling_outdoor_temperatures.zip(hvac_perf_data_cooling_min_speed_capacities,
+                                                                                        hvac_perf_data_cooling_max_speed_capacities,
+                                                                                        hvac_perf_data_cooling_min_speed_cops,
+                                                                                        hvac_perf_data_cooling_max_speed_cops)
+        cooling_perf_data_data_points.each do |cooling_perf_data_data_point|
+          outdoor_temperature, min_speed_cap_or_frac, max_speed_cap_or_frac, min_speed_cop, max_speed_cop = cooling_perf_data_data_point
+
+          if hvac_perf_data_capacity_type == 'Absolute capacities'
+            min_speed_capacity = Float(min_speed_cap_or_frac)
+            max_speed_capacity = Float(max_speed_cap_or_frac)
+          elsif hvac_perf_data_capacity_type == 'Normalized capacity fractions'
+            min_speed_capacity_fraction_of_nominal = Float(min_speed_cap_or_frac)
+            max_speed_capacity_fraction_of_nominal = Float(max_speed_cap_or_frac)
+          end
+
+          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: min_speed_capacity,
+                            capacity_fraction_of_nominal: min_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionMinimum,
+                            efficiency_cop: Float(min_speed_cop))
+          clg_perf_data.add(outdoor_temperature: Float(outdoor_temperature),
+                            capacity: max_speed_capacity,
+                            capacity_fraction_of_nominal: max_speed_capacity_fraction_of_nominal,
+                            capacity_description: HPXML::CapacityDescriptionMaximum,
+                            efficiency_cop: Float(max_speed_cop))
+        end
+      end
+    end
+  end
+
+  def self.set_geothermal_loop(hpxml_bldg, args)
+    return if hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size == 0
+    return if !args[:geothermal_loop_configuration].is_initialized || args[:geothermal_loop_configuration].get == 'none'
+
+    if args[:geothermal_loop_borefield_configuration].is_initialized
+      bore_config = args[:geothermal_loop_borefield_configuration].get
+    end
+
+    if args[:geothermal_loop_loop_flow].is_initialized
+      loop_flow = args[:geothermal_loop_loop_flow].get
+    end
+
+    if args[:geothermal_loop_boreholes_count].is_initialized
+      num_bore_holes = args[:geothermal_loop_boreholes_count].get
+    end
+
+    if args[:geothermal_loop_boreholes_length].is_initialized
+      bore_length = args[:geothermal_loop_boreholes_length].get
+    end
+
+    if args[:geothermal_loop_boreholes_spacing].is_initialized
+      bore_spacing = args[:geothermal_loop_boreholes_spacing].get
+    end
+
+    if args[:geothermal_loop_boreholes_diameter].is_initialized
+      bore_diameter = args[:geothermal_loop_boreholes_diameter].get
+    end
+
+    if args[:geothermal_loop_grout_type].is_initialized
+      grout_type = args[:geothermal_loop_grout_type].get
+    end
+
+    if args[:geothermal_loop_pipe_type].is_initialized
+      pipe_type = args[:geothermal_loop_pipe_type].get
+    end
+
+    if args[:geothermal_loop_pipe_diameter].is_initialized
+      pipe_diameter = args[:geothermal_loop_pipe_diameter].get
+      if pipe_diameter == '3/4" pipe'
+        pipe_diameter = 0.75
+      elsif pipe_diameter == '1" pipe'
+        pipe_diameter = 1.0
+      elsif pipe_diameter == '1-1/4" pipe'
+        pipe_diameter = 1.25
+      end
+    end
+
+    hpxml_bldg.geothermal_loops.add(id: "GeothermalLoop#{hpxml_bldg.geothermal_loops.size + 1}",
+                                    loop_configuration: args[:geothermal_loop_configuration].get,
+                                    loop_flow: loop_flow,
+                                    bore_config: bore_config,
+                                    num_bore_holes: num_bore_holes,
+                                    bore_length: bore_length,
+                                    bore_spacing: bore_spacing,
+                                    bore_diameter: bore_diameter,
+                                    grout_type: grout_type,
+                                    pipe_type: pipe_type,
+                                    pipe_diameter: pipe_diameter)
+    hpxml_bldg.heat_pumps[-1].geothermal_loop_idref = hpxml_bldg.geothermal_loops[-1].id
   end
 
   def self.set_secondary_heating_systems(hpxml_bldg, args)
@@ -5125,6 +5699,10 @@ class HPXMLFile
 
     if args[:heating_system_2_heating_capacity].is_initialized
       heating_capacity = args[:heating_system_2_heating_capacity].get
+    end
+
+    if args[:heating_system_2_heating_autosizing_factor].is_initialized
+      heating_autosizing_factor = args[:heating_system_2_heating_autosizing_factor].get
     end
 
     if args[:heating_system_2_fuel] == HPXML::HVACTypeElectricResistance
@@ -5151,6 +5729,7 @@ class HPXMLFile
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: heating_system_fuel,
                                    heating_capacity: heating_capacity,
+                                   heating_autosizing_factor: heating_autosizing_factor,
                                    fraction_heat_load_served: fraction_heat_load_served,
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent)
@@ -5387,6 +5966,8 @@ class HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
+
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
 
@@ -5402,7 +5983,7 @@ class HPXMLFile
       if args[:hvac_control_heating_season_period].is_initialized
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period].get
         if hvac_control_heating_season_period == HPXML::BuildingAmerica
-          heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+          heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
@@ -5435,7 +6016,7 @@ class HPXMLFile
       if args[:hvac_control_cooling_season_period].is_initialized
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period].get
         if hvac_control_cooling_season_period == HPXML::BuildingAmerica
-          _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather)
+          _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
@@ -5732,10 +6313,13 @@ class HPXMLFile
       end
     end
 
-    if args[:water_heater_num_units_served] > 1
-      is_shared_system = true
-      number_of_units_served = args[:water_heater_num_units_served]
+    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+      if args[:water_heater_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
+        is_shared_system = true
+        number_of_bedrooms_served = args[:water_heater_num_bedrooms_served].get
+      end
     end
+
     if args[:water_heater_uses_desuperheater].is_initialized
       uses_desuperheater = args[:water_heater_uses_desuperheater].get
       if uses_desuperheater
@@ -5788,7 +6372,7 @@ class HPXMLFile
                                          temperature: temperature,
                                          heating_capacity: heating_capacity,
                                          is_shared_system: is_shared_system,
-                                         number_of_units_served: number_of_units_served,
+                                         number_of_bedrooms_served: number_of_bedrooms_served,
                                          tank_model_type: tank_model_type,
                                          operating_mode: operating_mode)
   end
@@ -5871,7 +6455,8 @@ class HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      collector_tilt = Geometry.get_absolute_tilt(args[:solar_thermal_collector_tilt], args[:geometry_roof_pitch], epw_file)
+      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
+      collector_tilt = Geometry.get_absolute_tilt(args[:solar_thermal_collector_tilt], args[:geometry_roof_pitch], latitude)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
 
@@ -5921,18 +6506,22 @@ class HPXMLFile
       end
 
       if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
-        if args[:pv_system_num_bedrooms_served].get > args[:geometry_unit_num_bedrooms]
+        if args[:pv_system_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
           is_shared_system = true
           number_of_bedrooms_served = args[:pv_system_num_bedrooms_served].get
         end
       end
 
+      array_azimuth = [args[:pv_system_array_azimuth], args[:pv_system_2_array_azimuth]][i]
+      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
+      array_tilt = Geometry.get_absolute_tilt([args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], args[:geometry_roof_pitch], latitude)
+
       hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                                 location: location,
                                 module_type: module_type,
                                 tracking: tracking,
-                                array_azimuth: [args[:pv_system_array_azimuth], args[:pv_system_2_array_azimuth]][i],
-                                array_tilt: Geometry.get_absolute_tilt([args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], args[:geometry_roof_pitch], epw_file),
+                                array_azimuth: array_azimuth,
+                                array_tilt: array_tilt,
                                 max_power_output: max_power_output,
                                 system_losses_fraction: system_losses_fraction,
                                 is_shared_system: is_shared_system,
@@ -5975,13 +6564,22 @@ class HPXMLFile
       round_trip_efficiency = args[:battery_round_trip_efficiency].get
     end
 
+    if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
+      if args[:battery_num_bedrooms_served].to_f > args[:geometry_unit_num_bedrooms]
+        is_shared_system = true
+        number_of_bedrooms_served = args[:battery_num_bedrooms_served].get
+      end
+    end
+
     hpxml_bldg.batteries.add(id: "Battery#{hpxml_bldg.batteries.size + 1}",
                              type: HPXML::BatteryTypeLithiumIon,
                              location: location,
                              rated_power_output: rated_power_output,
                              nominal_capacity_kwh: nominal_capacity_kwh,
                              usable_capacity_kwh: usable_capacity_kwh,
-                             round_trip_efficiency: round_trip_efficiency)
+                             round_trip_efficiency: round_trip_efficiency,
+                             is_shared_system: is_shared_system,
+                             number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
   def self.set_lighting(hpxml_bldg, args)
@@ -6334,6 +6932,10 @@ class HPXMLFile
   def self.set_ceiling_fans(hpxml_bldg, args)
     return unless args[:ceiling_fan_present]
 
+    if args[:ceiling_fan_label_energy_use].is_initialized
+      label_energy_use = args[:ceiling_fan_label_energy_use].get
+    end
+
     if args[:ceiling_fan_efficiency].is_initialized
       efficiency = args[:ceiling_fan_efficiency].get
     end
@@ -6344,6 +6946,7 @@ class HPXMLFile
 
     hpxml_bldg.ceiling_fans.add(id: "CeilingFan#{hpxml_bldg.ceiling_fans.size + 1}",
                                 efficiency: efficiency,
+                                label_energy_use: label_energy_use,
                                 count: quantity)
   end
 
