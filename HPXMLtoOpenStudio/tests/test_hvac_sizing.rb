@@ -405,8 +405,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     default_tol_relative = 0.15
     # skylight excluded
     room_load_results = {
-      ['living', 'dining'] => [9939 -2207, 6531 - 2974],
-      ['kitchen'] => [6703-787, 3648-806],
+      ['living', 'dining'] => [9939 - 2207, 6531 - 2974],
+      ['kitchen'] => [6703 - 787, 3648 - 806],
       ['bedroom_3'] => [2768, 1010],
       ['bedroom_1'] => [5070, 1520],
       ['bedroom_2'] => [4722, 1428],
@@ -417,9 +417,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       ['workshop'] => [3057, 192]
     }
     room_load_results.each do |room_names, sens_loads|
-      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
-      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
-      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      spaces = hpxml_bldg.conditioned_spaces.select { |space| room_names.any? { |room_name| space.id.include? room_name } }
+      spaces_htg_load = spaces.map { |space| space.hdl_total }.sum
+      spaces_clg_load = spaces.map { |space| space.cdl_sens_total }.sum
       puts spaces
       assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
       assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
@@ -479,8 +479,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1548, hpxml_bldg.hvac_plant.cdl_sens_ceilings, default_tol_btuh)
     # skylight excluded
     room_load_results = {
-      ['living', 'dining'] => [1880 -409, 5478 - 2507],
-      ['kitchen'] => [1084-134, 4845-675],
+      ['living', 'dining'] => [1880 - 409, 5478 - 2507],
+      ['kitchen'] => [1084 - 134, 4845 - 675],
       ['bedroom_3'] => [384, 763],
       ['bedroom_1'] => [680, 1050],
       ['bedroom_2'] => [640, 1110],
@@ -488,9 +488,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       ['entry', 'hall'] => [306, 390]
     }
     room_load_results.each do |room_names, sens_loads|
-      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
-      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
-      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      spaces = hpxml_bldg.conditioned_spaces.select { |space| room_names.any? { |room_name| space.id.include? room_name } }
+      spaces_htg_load = spaces.map { |space| space.hdl_total }.sum
+      spaces_clg_load = spaces.map { |space| space.cdl_sens_total }.sum
       assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
       assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
     end
@@ -538,9 +538,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       ['bathroom'] => [351, 161]
     }
     room_load_results.each do |room_names, sens_loads|
-      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
-      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
-      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      spaces = hpxml_bldg.conditioned_spaces.select { |space| room_names.any? { |room_name| space.id.include? room_name } }
+      spaces_htg_load = spaces.map { |space| space.hdl_total }.sum
+      spaces_clg_load = spaces.map { |space| space.cdl_sens_total }.sum
       assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
       assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
     end
@@ -580,7 +580,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1000, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
     # skylight excluded
     room_load_results = {
-      ['family'] => [8931-1981, 18173-5514],
+      ['family'] => [8931 - 1981, 18173 - 5514],
       ['kitchen'] => [3007, 3272],
       ['utility'] => [970, 1181],
       ['dining'] => [4750, 3821],
@@ -592,9 +592,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       ['hall', 'closet'] => [369, 195]
     }
     room_load_results.each do |room_names, sens_loads|
-      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
-      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
-      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      spaces = hpxml_bldg.conditioned_spaces.select { |space| room_names.any? { |room_name| space.id.include? room_name } }
+      spaces_htg_load = spaces.map { |space| space.hdl_total }.sum
+      spaces_clg_load = spaces.map { |space| space.cdl_sens_total }.sum
       assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
       assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
     end

@@ -827,7 +827,7 @@ class HVACSizing
 
       htg_htm = 0.0
       clg_htm = 0.0
-      azimuths.each do |azimuth|
+      azimuths.each do |_azimuth|
         if wall.is_exterior
 
           # Adjust base Cooling Load Temperature Difference (CLTD)
@@ -840,13 +840,11 @@ class HVACSizing
             color_multiplier = 1.0
           end
 
-          true_azimuth = get_true_azimuth(azimuth)
-
           # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
           # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
           # determined using linear interpolation). Shaded walls apply to partition walls only.
           cltd_base_sun = { 'G' => 38.0, 'F-G' => 34.95, 'F' => 31.9, 'E-F' => 29.45, 'E' => 27.0, 'D-E' => 24.5, 'D' => 22.0, 'C-D' => 21.25, 'C' => 20.5, 'B-C' => 19.65, 'B' => 18.8 }
-          cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
+          # cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
 
           # Non-directional exterior walls
           # TODO: need to investigate when to apply cltd_base_shade to partitions
@@ -1261,17 +1259,17 @@ class HVACSizing
         design_loads.Heat_Doors + design_loads.Heat_Walls +
         design_loads.Heat_Floors + design_loads.Heat_Slabs +
         design_loads.Heat_Ceilings + design_loads.Heat_Roofs, 0.0].max +
-                                   design_loads.Heat_Infil + design_loads.Heat_Vent
+                              design_loads.Heat_Infil + design_loads.Heat_Vent
     end
 
     # Cooling
     (all_space_design_loads.values + [bldg_design_loads]).each do |design_loads|
       design_loads.Cool_Sens = design_loads.Cool_Windows + design_loads.Cool_Skylights +
-                                    design_loads.Cool_Doors + design_loads.Cool_Walls +
-                                    design_loads.Cool_Floors + design_loads.Cool_Ceilings +
-                                    design_loads.Cool_Roofs + design_loads.Cool_Infil_Sens +
-                                    design_loads.Cool_IntGains_Sens + design_loads.Cool_Slabs +
-                                    design_loads.Cool_AEDExcursion + design_loads.Cool_Vent_Sens
+                               design_loads.Cool_Doors + design_loads.Cool_Walls +
+                               design_loads.Cool_Floors + design_loads.Cool_Ceilings +
+                               design_loads.Cool_Roofs + design_loads.Cool_Infil_Sens +
+                               design_loads.Cool_IntGains_Sens + design_loads.Cool_Slabs +
+                               design_loads.Cool_AEDExcursion + design_loads.Cool_Vent_Sens
     end
     bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_Infil_Lat + bldg_design_loads.Cool_Vent_Lat +
                                  bldg_design_loads.Cool_IntGains_Lat

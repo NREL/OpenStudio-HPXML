@@ -1319,7 +1319,7 @@ class ReportSimulationOutputTest < Minitest::Test
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path,
                   'skip_validation' => true, }
-    annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
+    _annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
     assert(!File.exist?(timeseries_csv))
     assert(File.readlines(run_log).any? { |line| line.include?('Simulation used infinite energy; double-check inputs.') })
   end
