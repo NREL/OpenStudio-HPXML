@@ -28,7 +28,7 @@ class HVACSizing
     process_load_internal_gains(bldg_design_loads, all_space_design_loads)
 
     # Aggregate zone loads into initial loads
-    aggregate_loads(bldg_design_loads)
+    aggregate_loads(bldg_design_loads, all_space_design_loads)
 
     # Loop through each HVAC system and calculate equipment values.
     @all_hvac_sizing_values = {}
@@ -1247,25 +1247,29 @@ class HVACSizing
     end
   end
 
-  def self.aggregate_loads(bldg_design_loads)
+  def self.aggregate_loads(bldg_design_loads, all_space_design_loads)
     '''
     Building Loads (excluding ducts)
     '''
 
     # Heating
-    bldg_design_loads.Heat_Tot = [bldg_design_loads.Heat_Windows + bldg_design_loads.Heat_Skylights +
-      bldg_design_loads.Heat_Doors + bldg_design_loads.Heat_Walls +
-      bldg_design_loads.Heat_Floors + bldg_design_loads.Heat_Slabs +
-      bldg_design_loads.Heat_Ceilings + bldg_design_loads.Heat_Roofs, 0.0].max +
-                                 bldg_design_loads.Heat_Infil + bldg_design_loads.Heat_Vent
+    (all_space_design_loads.values + [bldg_design_loads]).each do |design_loads|
+      design_loads.Heat_Tot = [design_loads.Heat_Windows + design_loads.Heat_Skylights +
+        design_loads.Heat_Doors + design_loads.Heat_Walls +
+        design_loads.Heat_Floors + design_loads.Heat_Slabs +
+        design_loads.Heat_Ceilings + design_loads.Heat_Roofs, 0.0].max +
+                                   design_loads.Heat_Infil + design_loads.Heat_Vent
+    end
 
     # Cooling
-    bldg_design_loads.Cool_Sens = bldg_design_loads.Cool_Windows + bldg_design_loads.Cool_Skylights +
-                                  bldg_design_loads.Cool_Doors + bldg_design_loads.Cool_Walls +
-                                  bldg_design_loads.Cool_Floors + bldg_design_loads.Cool_Ceilings +
-                                  bldg_design_loads.Cool_Roofs + bldg_design_loads.Cool_Infil_Sens +
-                                  bldg_design_loads.Cool_IntGains_Sens + bldg_design_loads.Cool_Slabs +
-                                  bldg_design_loads.Cool_AEDExcursion + bldg_design_loads.Cool_Vent_Sens
+    (all_space_design_loads.values + [bldg_design_loads]).each do |design_loads|
+      design_loads.Cool_Sens = design_loads.Cool_Windows + design_loads.Cool_Skylights +
+                                    design_loads.Cool_Doors + design_loads.Cool_Walls +
+                                    design_loads.Cool_Floors + design_loads.Cool_Ceilings +
+                                    design_loads.Cool_Roofs + design_loads.Cool_Infil_Sens +
+                                    design_loads.Cool_IntGains_Sens + design_loads.Cool_Slabs +
+                                    design_loads.Cool_AEDExcursion + design_loads.Cool_Vent_Sens
+    end
     bldg_design_loads.Cool_Lat = bldg_design_loads.Cool_Infil_Lat + bldg_design_loads.Cool_Vent_Lat +
                                  bldg_design_loads.Cool_IntGains_Lat
     if bldg_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components

@@ -402,6 +402,28 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1651, hpxml_bldg.hvac_plant.cdl_lat_infil, default_tol_btuh)
     assert_in_delta(1755, hpxml_bldg.hvac_plant.cdl_lat_vent, default_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
+    default_tol_relative = 0.15
+    # skylight excluded
+    room_load_results = {
+      ['living', 'dining'] => [9939 -2207, 6531 - 2974],
+      ['kitchen'] => [6703-787, 3648-806],
+      ['bedroom_3'] => [2768, 1010],
+      ['bedroom_1'] => [5070, 1520],
+      ['bedroom_2'] => [4722, 1428],
+      ['bathroom'] => [2407, 560],
+      ['entry', 'hall'] => [1932, 674],
+      ['recroom'] => [15586, 7890],
+      ['laundry'] => [2292, 635],
+      ['workshop'] => [3057, 192]
+    }
+    room_load_results.each do |room_names, sens_loads|
+      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
+      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
+      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      puts spaces
+      assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
+      assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
+    end
 
     # Section 13: Walker Residence
     # Expected values from Form J1 (Note: it shows Ceiling Option 3 for some reason)
@@ -455,6 +477,23 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(820, hpxml_bldg.hvac_plant.hdl_ceilings, default_tol_btuh)
     assert_in_delta(1548, hpxml_bldg.hvac_plant.cdl_sens_ceilings, default_tol_btuh)
+    # skylight excluded
+    room_load_results = {
+      ['living', 'dining'] => [1880 -409, 5478 - 2507],
+      ['kitchen'] => [1084-134, 4845-675],
+      ['bedroom_3'] => [384, 763],
+      ['bedroom_1'] => [680, 1050],
+      ['bedroom_2'] => [640, 1110],
+      ['bathroom'] => [353, 290],
+      ['entry', 'hall'] => [306, 390]
+    }
+    room_load_results.each do |room_names, sens_loads|
+      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
+      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
+      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
+      assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
+    end
 
     # Section 14: Cobb Residence
     # Expected values from Form J1
@@ -490,6 +529,21 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1391, hpxml_bldg.hvac_plant.cdl_lat_infil, default_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, default_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
+    room_load_results = {
+      ['living', 'dining'] => [2534, 7176],
+      ['kitchen', 'utility', 'entry'] => [773, 2121],
+      ['bedroom_3'] => [1550, 3572],
+      ['bedroom_2'] => [1059, 2930],
+      ['bedroom_1'] => [2163, 6174],
+      ['bathroom'] => [351, 161]
+    }
+    room_load_results.each do |room_names, sens_loads|
+      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
+      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
+      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
+      assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
+    end
 
     # Section 15: Bell Residence
     # Expected values from Form J1
@@ -524,6 +578,26 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(241, hpxml_bldg.hvac_plant.cdl_lat_infil, default_tol_btuh)
     assert_in_delta(329, hpxml_bldg.hvac_plant.cdl_lat_vent, default_tol_btuh)
     assert_in_delta(1000, hpxml_bldg.hvac_plant.cdl_lat_intgains, default_tol_btuh)
+    # skylight excluded
+    room_load_results = {
+      ['family'] => [8931-1981, 18173-5514],
+      ['kitchen'] => [3007, 3272],
+      ['utility'] => [970, 1181],
+      ['dining'] => [4750, 3821],
+      ['bedroom_3'] => [1314, 1748],
+      ['bedroom_2'] => [2493, 2811],
+      ['bedroom_1'] => [3847, 4005],
+      ['bathroom_1'] => [793, 980],
+      ['bathroom_2'] => [58, 53],
+      ['hall', 'closet'] => [369, 195]
+    }
+    room_load_results.each do |room_names, sens_loads|
+      spaces = hpxml_bldg.conditioned_spaces.select{|space| room_names.any? {|room_name| space.id.include? room_name}}
+      spaces_htg_load = spaces.map{|space| space.hdl_total}.sum
+      spaces_clg_load = spaces.map{|space| space.cdl_sens_total}.sum
+      assert_in_epsilon(sens_loads[0], spaces_htg_load, default_tol_relative)
+      assert_in_epsilon(sens_loads[1], spaces_clg_load, default_tol_relative)
+    end
   end
 
   def test_heat_pump_separate_backup_systems
