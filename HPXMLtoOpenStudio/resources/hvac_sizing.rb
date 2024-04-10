@@ -844,15 +844,13 @@ class HVACSizing
 
           # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
           # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
-          # determined using linear interpolation). Shaded walls apply to north facing and partition walls only.
+          # determined using linear interpolation). Shaded walls apply to partition walls only.
           cltd_base_sun = { 'G' => 38.0, 'F-G' => 34.95, 'F' => 31.9, 'E-F' => 29.45, 'E' => 27.0, 'D-E' => 24.5, 'D' => 22.0, 'C-D' => 21.25, 'C' => 20.5, 'B-C' => 19.65, 'B' => 18.8 }
           cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
 
-          if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
-            cltd_base = cltd_base_shade
-          else
-            cltd_base = cltd_base_sun
-          end
+          # Non-directional exterior walls
+          # TODO: need to investigate when to apply cltd_base_shade to partitions
+          cltd_base = cltd_base_sun
           cltd = cltd_base[ashrae_wall_group] * color_multiplier
 
           if mj.ctd >= 10.0

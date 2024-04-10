@@ -340,18 +340,16 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     default_tol_relative = 0.02
     # Infiltration are specified differently in OS-HPXML using blower door method.
     # consider adding qualitative infiltration inputs: https://github.com/NREL/OpenStudio-HPXML/issues/1652
-    default_tol_relative_infil = 0.15
     # for CLTD, the example rounded up the CTD (14 to 15) and looked up CLTD @CTD15,
     # while we adjust from CLTD value @CTD20 to @CTD14, so our CLTD value is 1 smaller than the example.
-    default_tol_relative_cltd = 0.092
+    default_tol_relative_cltd = 0.1
+    default_tol_relative_infil = 0.15
     hpxml_bldg.conditioned_spaces.each do |space|
       if space.id.include? 'dining'
         assert_in_epsilon(902 + 407, space.hdl_walls, default_tol_relative)
         assert_in_epsilon(463, space.hdl_ceilings, default_tol_relative)
         assert_in_epsilon(779, space.hdl_infil, default_tol_relative_infil)
-        # We used north wall/partition CLTD values for north walls,
-        # while the example used the non-directional wall CLTD, which caused more than 50% diff for that wall
-        assert_in_epsilon(153 + 69, space.cdl_sens_walls, 0.8)
+        assert_in_epsilon(153 + 69, space.cdl_sens_walls, default_tol_relative_cltd)
         assert_in_epsilon(309, space.cdl_sens_ceilings, default_tol_relative)
         assert_in_epsilon(63, space.cdl_sens_infil, default_tol_relative_infil)
       end
