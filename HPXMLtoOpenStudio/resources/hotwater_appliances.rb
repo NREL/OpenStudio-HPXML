@@ -331,7 +331,7 @@ class HotWaterAndAppliances
       # Create shower schedule, used only for unmet load calculations
       # Create separate shower schedule: Only used for calculating unmet loads. Shower hot water usage is part of the fixtures usage.
       showers_schedule = nil
-      showers_col_name = SchedulesFile::ColumnHotWaterShowers
+      showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
       if not schedules_file.nil?
         showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
@@ -365,7 +365,7 @@ class HotWaterAndAppliances
         shower_peak_flow = nil
         if not schedules_file.nil?
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, daily_water: fx_gpd)
-          shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::ColumnHotWaterFixtures, daily_water: shower_gpd)
+          shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterShowers].name, daily_water: shower_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, daily_water: w_gpd)
         end
         if fx_peak_flow.nil?
