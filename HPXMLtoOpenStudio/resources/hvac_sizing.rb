@@ -903,9 +903,12 @@ class HVACSizing
       htg_loads = htg_htm * foundation_wall.net_area
       bldg_design_loads.Heat_Walls += htg_loads
       space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
-      foundation_wall.additional_properties.htg_htm = htg_htm
-      foundation_wall.additional_properties.htg_loads = htg_loads
-      foundation_wall.additional_properties.area_or_length = foundation_wall.net_area
+      foundation_wall.additional_properties.formj1_values = FormJ1Values.new(area: foundation_wall.net_area,
+                                                                             heat_htm: htg_htm,
+                                                                             cool_htm: 0,
+                                                                             heat_load: htg_loads,
+                                                                             cool_load_sens: 0,
+                                                                             cool_load_lat: 0)
     end
   end
 
