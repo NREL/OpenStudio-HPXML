@@ -69,42 +69,92 @@
             <Space>
               <SystemIdentifier id='bedroom_1'/>
               <FloorArea>234.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>683</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='bedroom_2'/>
               <FloorArea>120.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>538</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='bedroom_3'/>
               <FloorArea>90.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='bathroom_1'/>
               <FloorArea>60.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='hall_closets'/>
               <FloorArea>109.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='bathroom_2'/>
               <FloorArea>35.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='utility'/>
               <FloorArea>54.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>500</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='kitchen_entry'/>
               <FloorArea>170.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>1000</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='family_room'/>
               <FloorArea>272.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>900</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
             <Space>
               <SystemIdentifier id='dining'/>
               <FloorArea>144.0</FloorArea>
+              <extension>
+                <ManualJInputs>
+                  <InternalLoadsSensible>0</InternalLoadsSensible>
+                </ManualJInputs>
+              </extension>
             </Space>
           </Spaces>
         </Zone>
