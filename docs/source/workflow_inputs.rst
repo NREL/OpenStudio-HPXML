@@ -2444,10 +2444,10 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   Element                                          Type      Units   Constraints      Required  Default         Notes
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   ``SystemIdentifier``                             id                                 Yes                       Unique identifier
-  ``UnitLocation``                                 string            ground-to-air    No        See [#]_        Location of air handler
+  ``UnitLocation``                                 string            See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                           idref             See [#]_         Yes                       ID of attached distribution system
   ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
-  ``HeatPumpType``                                 string            See [#]_         Yes                       Type of heat pump
+  ``HeatPumpType``                                 string            ground-to-air    Yes                       Type of heat pump
   ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
   ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
