@@ -327,22 +327,31 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>36000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <FanPowerWattsPerCFM>0.3</FanPowerWattsPerCFM>
+                <MaxHeatingAirflowCFM>600.0</MaxHeatingAirflowCFM>
+              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>8.5</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
+              <extension>
+                <MaxCoolingAirflowCFM>600.0</MaxCoolingAirflowCFM>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>

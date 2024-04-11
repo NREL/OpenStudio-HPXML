@@ -5266,21 +5266,17 @@ class HPXMLFile
     end
 
     if args[:hvac_distribution_fan_watts_per_cfm].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeSpaceHeater, HPXML::HVACTypeFireplace].include?(heating_system_type)
         fan_watts_per_cfm = args[:hvac_distribution_fan_watts_per_cfm].get
       end
     end
 
     if args[:hvac_distribution_heating_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
-        heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
-      end
+      heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
     end
 
     if args[:hvac_distribution_max_heating_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
-        max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
-      end
+      max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
     end
 
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
@@ -5376,15 +5372,11 @@ class HPXMLFile
     end
 
     if args[:hvac_distribution_cooling_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
-        cooling_airflow_cfm = args[:hvac_distribution_cooling_airflow_cfm].get
-      end
+      cooling_airflow_cfm = args[:hvac_distribution_cooling_airflow_cfm].get
     end
 
     if args[:hvac_distribution_max_cooling_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system_type)
-        max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
-      end
+      max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
     end
 
     if [HPXML::HVACTypePTAC, HPXML::HVACTypeRoomAirConditioner].include?(cooling_system_type)
@@ -5586,27 +5578,19 @@ class HPXMLFile
     end
 
     if args[:hvac_distribution_heating_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
-        heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
-      end
+      heating_airflow_cfm = args[:hvac_distribution_heating_airflow_cfm].get
     end
 
     if args[:hvac_distribution_cooling_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
-        cooling_airflow_cfm = args[:hvac_distribution_cooling_airflow_cfm].get
-      end
+      cooling_airflow_cfm = args[:hvac_distribution_cooling_airflow_cfm].get
     end
 
     if args[:hvac_distribution_max_heating_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
-        max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
-      end
+      max_heating_airflow_cfm = args[:hvac_distribution_max_heating_airflow_cfm].get
     end
 
     if args[:hvac_distribution_max_cooling_airflow_cfm].is_initialized
-      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(heat_pump_type)
-        max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
-      end
+      max_cooling_airflow_cfm = args[:hvac_distribution_max_cooling_airflow_cfm].get
     end
 
     fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
@@ -5833,7 +5817,7 @@ class HPXMLFile
     end
 
     if args[:hvac_distribution_fan_watts_per_cfm].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeSpaceHeater, HPXML::HVACTypeFireplace].include?(heating_system_type)
         fan_watts_per_cfm = args[:hvac_distribution_fan_watts_per_cfm].get
       end
     end

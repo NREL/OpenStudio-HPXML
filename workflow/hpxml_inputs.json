@@ -1680,12 +1680,12 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow-cfm.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "hvac_distribution_heating_airflow_cfm": 800,
-    "hvac_distribution_cooling_airflow_cfm": 1000
+    "hvac_distribution_heating_airflow_cfm": 700,
+    "hvac_distribution_cooling_airflow_cfm": 900
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow-restriction.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow-max.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_distribution_fan_watts_per_cfm": 0.4,
     "hvac_distribution_max_heating_airflow_cfm": 700,
@@ -1911,6 +1911,15 @@
     "heating_system_type": "none",
     "heating_system_heating_efficiency": 0,
     "heating_system_fraction_heat_load_served": 0
+  },
+  "sample_files/base-hvac-central-ac-only-1-speed-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "hvac_distribution_cooling_airflow_cfm": 750
+  },
+  "sample_files/base-hvac-central-ac-only-1-speed-airflow-max.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "hvac_distribution_fan_watts_per_cfm": 0.35,
+    "hvac_distribution_max_cooling_airflow_cfm": 750
   },
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2145,6 +2154,17 @@
     "cooling_system_cooling_efficiency_type": "EER",
     "cooling_system_cooling_efficiency": 8.5,
     "cooling_system_cooling_sensible_heat_fraction": 0.65
+  },
+  "sample_files/base-hvac-furnace-gas-room-ac-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
+    "hvac_distribution_heating_airflow_cfm": 600,
+    "hvac_distribution_cooling_airflow_cfm": 600
+  },
+  "sample_files/base-hvac-furnace-gas-room-ac-airflow-max.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-room-ac.xml",
+    "hvac_distribution_fan_watts_per_cfm": 0.3,
+    "hvac_distribution_max_heating_airflow_cfm": 600,
+    "hvac_distribution_max_cooling_airflow_cfm": 600
   },
   "sample_files/base-hvac-furnace-oil-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2399,7 +2419,12 @@
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
   },
-  "sample_files/base-hvac-mini-split-heat-pump-ductless-airflow-restriction.xml": {
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "hvac_distribution_heating_airflow_cfm": 400,
+    "hvac_distribution_cooling_airflow_cfm": 500
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-airflow-max.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
     "hvac_distribution_fan_watts_per_cfm": 0.04,
     "hvac_distribution_max_heating_airflow_cfm": 400,

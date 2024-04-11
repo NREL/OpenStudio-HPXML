@@ -332,6 +332,9 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <HeatingAirflowCFM>600.0</HeatingAirflowCFM>
+              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
@@ -343,6 +346,9 @@
                 <Value>8.5</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.65</SensibleHeatFraction>
+              <extension>
+                <CoolingAirflowCFM>600.0</CoolingAirflowCFM>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
