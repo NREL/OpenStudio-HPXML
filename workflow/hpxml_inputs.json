@@ -1685,7 +1685,7 @@
     "hvac_distribution_heating_airflow_cfm": 800,
     "hvac_distribution_cooling_airflow_cfm": 1000
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-existing-ductwork-restriction.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow-restriction.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "hvac_distribution_fan_watts_per_cfm": 0.4,
     "hvac_distribution_max_heating_airflow_cfm": 700,
@@ -2398,6 +2398,12 @@
     "heat_pump_backup_type": "none",
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-airflow-restriction.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "hvac_distribution_fan_watts_per_cfm": 0.04,
+    "hvac_distribution_max_heating_airflow_cfm": 400,
+    "hvac_distribution_max_cooling_airflow_cfm": 500
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
