@@ -176,21 +176,6 @@
             </Space>
           </Spaces>
         </Zone>
-        <Zone>
-          <SystemIdentifier id='SmithResidenceCrawlSpace'/>
-          <ZoneType>unconditioned</ZoneType>
-          <Spaces>
-            <Space>
-              <SystemIdentifier id='crawlspace'/>
-              <FloorArea>736.0</FloorArea>
-              <extension>
-                <ManualJInputs>
-                  <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                </ManualJInputs>
-              </extension>
-            </Space>
-          </Spaces>
-        </Zone>
       </Zones>
       <Enclosure>
         <AirInfiltration>
@@ -657,7 +642,6 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallCrawlSpaceEast'/>
-            <AttachedToSpace idref='crawlspace'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Height>3.0</Height>
@@ -671,7 +655,6 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallCrawlSpaceNorth'/>
-            <AttachedToSpace idref='crawlspace'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Height>3.0</Height>
@@ -685,7 +668,6 @@
           </FoundationWall>
           <FoundationWall>
             <SystemIdentifier id='FoundationWallCrawlSpaceSouth'/>
-            <AttachedToSpace idref='crawlspace'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Height>3.0</Height>
@@ -899,7 +881,6 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='SlabCrawlSpace'/>
-            <AttachedToSpace idref='crawlspace'/>
             <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
             <Area>736.0</Area>
             <ExposedPerimeter>78.0</ExposedPerimeter>
