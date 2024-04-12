@@ -539,6 +539,36 @@
               <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
+          <Wall>
+            <SystemIdentifier id='PartitionWallWorkshopEastCrawlSpace'/>
+            <AttachedToSpace idref='workshop'/>
+            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <WallType>
+              <ConcreteMasonryUnit/>
+            </WallType>
+            <Area>60.0</Area>
+            <Orientation>east</Orientation>
+            <Insulation>
+              <SystemIdentifier id='PartitionWallWorkshopEastCrawlSpaceInsulation'/>
+              <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
+          <Wall>
+            <SystemIdentifier id='PartitionWallLaundryEquipmentEastCrawlSpace'/>
+            <AttachedToSpace idref='laundry_equipment'/>
+            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <WallType>
+              <ConcreteMasonryUnit/>
+            </WallType>
+            <Area>36.0</Area>
+            <Orientation>east</Orientation>
+            <Insulation>
+              <SystemIdentifier id='PartitionWallLaundryEquipmentEastCrawlSpaceInsulation'/>
+              <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
         </Walls>
         <FoundationWalls>
           <FoundationWall>
@@ -598,39 +628,11 @@
             </Insulation>
           </FoundationWall>
           <FoundationWall>
-            <SystemIdentifier id='FoundationWallWorkshopEastCrawlSpace'/>
-            <AttachedToSpace idref='workshop'/>
-            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>10.0</Height>
-            <Area>60.0</Area>
-            <Orientation>east</Orientation>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
-            <Insulation>
-              <SystemIdentifier id='FoundationWallWorkshopEastCrawlSpaceInsulation'/>
-              <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </FoundationWall>
-          <FoundationWall>
-            <SystemIdentifier id='FoundationWallLaundryEquipmentEastCrawlSpace'/>
-            <AttachedToSpace idref='laundry_equipment'/>
-            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>10.0</Height>
-            <Area>36.0</Area>
-            <Orientation>east</Orientation>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
-            <Insulation>
-              <SystemIdentifier id='FoundationWallLaundryEquipmentEastCrawlSpaceInsulation'/>
-              <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </FoundationWall>
-          <FoundationWall>
             <SystemIdentifier id='FoundationWallWorkshopEast'/>
             <AttachedToSpace idref='workshop'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>10.0</Height>
+            <Height>7.0</Height>
             <Area>140.0</Area>
             <Orientation>east</Orientation>
             <DepthBelowGrade>7.0</DepthBelowGrade>
@@ -644,7 +646,7 @@
             <AttachedToSpace idref='laundry_equipment'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Height>10.0</Height>
+            <Height>7.0</Height>
             <Area>84.0</Area>
             <Orientation>east</Orientation>
             <DepthBelowGrade>7.0</DepthBelowGrade>
@@ -919,7 +921,7 @@
           <Slab>
             <SystemIdentifier id='SlabRecRoom'/>
             <AttachedToSpace idref='recroom'/>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>512.0</Area>
             <ExposedPerimeter>64.0</ExposedPerimeter>
             <PerimeterInsulation>

@@ -3272,7 +3272,7 @@ class HVACSizing
         r_wall += wall_ins_rvalue_int # Interior insulation at this depth, add R-value
       end
       if (distance_to_top > wall_ins_dist_to_top_ext) && (distance_to_top <= wall_ins_dist_to_bottom_ext)
-        r_wall += wall_ins_rvalue_ext # Interior insulation at this depth, add R-value
+        r_wall += wall_ins_rvalue_ext # Exterior insulation at this depth, add R-value
       end
       if include_soil
         u_wall += 1.0 / (r_soil + r_wall)
