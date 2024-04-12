@@ -718,23 +718,28 @@ Additional autosizing factor inputs are available at the system level, see :ref:
   ===================================  ========  =====  ===========  ========  =========  ============================================
   Element                              Type      Units  Constraints  Required  Default    Description
   ===================================  ========  =====  ===========  ========  =========  ============================================
-  ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps [#]_
-  ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup [#]_
+  ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps
+  ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup
   ``AllowIncreasedFixedCapacities``    boolean                       No        false      Logic for fixed capacity HVAC equipment [#]_
   ===================================  ========  =====  ===========  ========  =========  ============================================
 
-  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
-  .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
-         If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
-         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
-  .. [#] HeatPumpBackupSizingMethodology choices are 'emergency' or 'supplemental'.
-  .. [#] Heat pump backup capacity is often sized for emergency heat so that it can meet the entire design load if the heat pump fails.
+  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad', and are described as follows:
+  
+         \- **ACCA**: autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
+         
+         \- **HERS**: autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
+         
+         \- **MaxLoad**: autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature, such that no backup heating should be necessary.
+
+  .. [#] HeatPumpBackupSizingMethodology choices are 'emergency' or 'supplemental', and are described as follows:
+
+         \- **emergency**: heat pump backup capacity will be autosized to meet the ACCA Manual J heating design load.
+         
+         \- **supplemental**: heat pump backup capacity will be autosized to meet the remainder of the ACCA Manual J heating design load not met by the heat pump at the heating design temperature.
+
+         Heat pump backup capacity is often sized for emergency heat so that it can meet the entire design load if the heat pump fails.
          Some contractors/homeowners may choose not to do so, perhaps due to insufficient panel/wiring capacity.
-
-         If HeatPumpBackupSizingMethodology is 'emergency', heat pump backup capacity will be autosized to meet the ACCA Manual J heating design load.
-         If HeatPumpBackupSizingMethodology is 'supplemental', heat pump backup capacity will be autosized to meet the remainder of the ACCA Manual J heating design load not met by the heat pump at the heating design temperature.
-
-         If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
+         Note: If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
   .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
 
 Manual J Inputs
@@ -867,10 +872,13 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   ``extension/Aext``                     double  frac   > 0          No         See [#]_                   Exterior area ratio for SFA/MF dwelling units
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
 
-  .. [#] TypeOfInfiltrationLeakage choices are "unit total" or "unit exterior only".
+  .. [#] TypeOfInfiltrationLeakage choices are "unit total" or "unit exterior only", and are described as follows:
+  
+         \- **unit total**: the provided infiltration value represents the total infiltration to the dwelling unit, as measured by a compartmentalization test, in which case it will be adjusted by ``extension/Aext``.
+         
+         \- **unit exterior only**: the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
+
   .. [#] TypeOfInfiltrationLeakage required if single-family attached or apartment unit.
-         Use "unit total" if the provided infiltration value represents the total infiltration to the dwelling unit, as measured by a compartmentalization test, in which case it will be adjusted by ``extension/Aext``.
-         Use "unit exterior only" if the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
   .. [#] If Aext not provided and TypeOfInfiltrationLeakage is "unit total", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF spaces) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
@@ -1470,7 +1478,8 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
+  .. [#] GlassType choices are "clear" or "low-e".
+         The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          
          \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
          
