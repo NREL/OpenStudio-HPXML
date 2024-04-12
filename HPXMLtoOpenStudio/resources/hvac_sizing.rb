@@ -1970,20 +1970,7 @@ class HVACSizing
     hvac_sizing_values.Heat_Airflow_isdefaulted = true
     hvac_sizing_values.Cool_Airflow_isdefaulted = true
 
-    if not hvac_heating.nil?
-      fixed_heating_airflow = hvac_heating.heating_airflow_cfm
-      max_heating_airflow = hvac_heating.max_heating_airflow_cfm
-      fixed_heating_capacity = hvac_heating.heating_capacity
-    end
-    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
-    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && max_heating_airflow.nil?
-      hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
-      hvac_sizing_values.Heat_Airflow_isdefaulted = false
-      if fixed_heating_capacity.nil?
-        hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-      end
-    end
-
+    # Override HVAC airflows if values are provided
     if not hvac_cooling.nil?
       fixed_cooling_airflow = hvac_cooling.cooling_airflow_cfm
       max_cooling_airflow = hvac_cooling.max_cooling_airflow_cfm
@@ -1996,6 +1983,29 @@ class HVACSizing
       if fixed_cooling_capacity.nil?
         hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
         hvac_sizing_values.Cool_Capacity_Sens *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
+      end
+    end
+    if not hvac_heating.nil?
+      fixed_heating_airflow = hvac_heating.heating_airflow_cfm
+      max_heating_airflow = hvac_heating.max_heating_airflow_cfm
+      fixed_heating_capacity = hvac_heating.heating_capacity
+      if hvac_heating.is_a? HPXML::HeatPump
+        if not hvac_heating.backup_heating_capacity.nil?
+          fixed_supp_heating_capacity = hvac_heating.backup_heating_capacity
+        elsif not hvac_heating.backup_system.nil?
+          fixed_supp_heating_capacity = hvac_heating.backup_system.heating_capacity
+        end
+      end
+    end
+    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
+    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && max_heating_airflow.nil?
+      hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
+      hvac_sizing_values.Heat_Airflow_isdefaulted = false
+      if fixed_heating_capacity.nil?
+        hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
+      end
+      if fixed_supp_heating_capacity.nil?
+        hvac_sizing_values.Heat_Capacity_Supp *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
       end
     end
   end
@@ -2041,6 +2051,7 @@ class HVACSizing
         if autosized_heating_capacity > 0
           # supply_air_temp = hvac_heating.additional_properties.supply_air_temp
           hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
+          # hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Cool_Capacity
           # hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
           hvac_sizing_values.Heat_Airflow *= hvac_sizing_values.Heat_Capacity / autosized_heating_capacity
           hvac_sizing_values.Heat_Airflow_isdefaulted = false
@@ -2049,6 +2060,7 @@ class HVACSizing
         # Design heating airflow rate exceeds max allowed, adjust heating capacity
         hvac_sizing_values.Heat_Airflow = max_airflow_allowed
         hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
+        # hvac_sizing_values.Heat_Capacity_Supp *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
         hvac_sizing_values.Heat_Airflow_isdefaulted = false
 
         if autosized_cooling_capacity > 0

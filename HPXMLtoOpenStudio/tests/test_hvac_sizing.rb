@@ -103,6 +103,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           clg_cap = hp.cooling_capacity
           charge_defect_ratio = hp.charge_defect_ratio.to_f
           airflow_defect_ratio = hp.airflow_defect_ratio.to_f
+          htg_cfm = hp.heating_airflow_cfm
+          clg_cfm = hp.cooling_airflow_cfm
           max_htg_cfm = hp.max_heating_airflow_cfm
           max_clg_cfm = hp.max_cooling_airflow_cfm
           if not hp.backup_heating_switchover_temp.nil?
@@ -136,13 +138,17 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
               elsif hp.fraction_cool_load_served == 0
                 assert_in_delta(htg_cap, htg_load, 1.0)
               else
-                if max_htg_cfm.nil? && max_clg_cfm.nil?
+                if (not htg_cfm.nil?) || (not clg_cfm.nil?)
+                  # Check capacity is not the max(htg_load, clg_load)
+                  refute_equal(htg_cap, [htg_load, clg_load].max)
+                  refute_equal(clg_cap, [htg_load, clg_load].max)
+                elsif (not max_htg_cfm.nil?) || (not max_clg_cfm.nil?)
+                  # Check capacity is less than max(htg_load, clg_load)
+                  assert_operator(htg_cap, :<, [htg_load, clg_load].max)
+                  assert_operator(clg_cap, :<, [htg_load, clg_load].max)
+                else
                   assert_in_delta(htg_cap, [htg_load, clg_load].max, 1.0)
                   assert_in_delta(clg_cap, [htg_load, clg_load].max, 1.0)
-                else
-                  # Check HP capacity is less than max(htg_load, clg_load)
-                  assert_operator(htg_cap, :<, [htg_load, clg_load].max, 1.0)
-                  assert_operator(clg_cap, :<, [htg_load, clg_load].max, 1.0)
                 end
               end
             end
