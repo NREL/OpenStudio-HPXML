@@ -2905,24 +2905,23 @@ Additional information is entered in each ``Ducts``.
          
          \- **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
          
-         \- **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
+         \- **Supply, Partially Buried**: 3.46 + 1.05 * DuctInsulationRValue
          
-         \- **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
+         \- **Supply, Fully Buried**: 7.14 + 1.0 * DuctInsulationRValue
          
-         \- **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
+         \- **Supply, Deeply Buried**: 14.94 + 0.76 * DuctInsulationRValue
          
          \- **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
          
-         \- **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
+         \- **Return, Partially Buried**: 4.62 + 1.31 * DuctInsulationRValue
          
-         \- **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
+         \- **Return, Fully Buried**: 8.91 + 1.29 * DuctInsulationRValue
          
-         \- **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
+         \- **Return, Deeply Buried**: 18.64 + 1.0 * DuctInsulationRValue       
          
          The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals.
          The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_.
-         The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_.
-         The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter.
+         The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_., where the average supply and return ducts have diameters of 8-inch and 14-in, respectively.
          
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
@@ -4557,7 +4556,7 @@ If not entered, the simulation will not include a pool heater.
          
          \- **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         \- **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         \- **heat pump [kWh/year]**: (electric resistance [kWh/year]) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
@@ -4680,7 +4679,7 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
          
-         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         If NumberofResidents provided, any value based on NumberofBedrooms will be adjusted using the :ref:`buildingoccupancy`.
          
   .. [#] If FracSensible not provided, defaults as:
          
