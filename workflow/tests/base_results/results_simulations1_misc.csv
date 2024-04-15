@@ -177,6 +177,8 @@ base-foundation-unvented-crawlspace.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1656
 base-foundation-vented-crawlspace-above-grade.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1674.1,3132.6,3132.6,16.627,16.433,0.0
 base-foundation-vented-crawlspace.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1673.7,3100.7,3100.7,16.634,16.104,0.0
 base-foundation-walkout-basement.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2068.7,3982.0,3982.0,26.434,20.057,0.0
+base-hvac-air-to-air-heat-pump-1-speed-airflow-max.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7125.8,3567.9,7125.8,25.007,18.787,0.0
+base-hvac-air-to-air-heat-pump-1-speed-airflow.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7156.1,3802.9,7156.1,25.042,16.986,0.0
 base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,6657.8,3529.0,6657.8,23.137,14.461,0.0
 base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.9,3316.8,3316.8,0.0,15.634,0.0
 base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,6904.8,3688.3,6904.8,23.921,15.915,0.0
@@ -200,6 +202,8 @@ base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,16
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,23.0,1.0,1354.7,998.0,11171.6,2563.5,5178.5,4008.1,5178.5,26.095,19.032,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml,156.0,2.0,1354.7,998.0,11171.6,2563.5,5568.4,3148.4,5568.4,24.296,17.734,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5637.1,3148.5,5637.1,23.957,17.735,0.0
+base-hvac-airflow-max.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2030.0,3713.1,3713.1,23.717,18.892,0.0
+base-hvac-airflow.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2040.8,3802.1,3802.1,23.14,18.435,0.0
 base-hvac-autosize-sizing-controls.xml,0.0,0.0,2180.8,1715.9,21140.4,3685.8,2485.0,3558.2,3558.2,17.077,14.804,0.0
 base-hvac-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2052.9,3847.1,3847.1,23.514,18.914,0.0
 base-hvac-boiler-coal-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1975.9,1785.9,1975.9,16.778,0.0,0.0
@@ -210,6 +214,8 @@ base-hvac-boiler-gas-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1958.4,1785.9,
 base-hvac-boiler-oil-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1975.9,1785.9,1975.9,16.778,0.0,0.0
 base-hvac-boiler-propane-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1954.4,1785.9,1954.4,16.778,0.0,0.0
 base-hvac-boiler-wood-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1954.4,1785.9,1954.4,16.778,0.0,0.0
+base-hvac-central-ac-only-1-speed-airflow-max.xml,0.0,6.0,1354.7,998.0,11171.5,2563.5,1974.9,3097.8,3097.8,0.0,17.324,0.0
+base-hvac-central-ac-only-1-speed-airflow.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.9,3615.9,3615.9,0.0,18.783,0.0
 base-hvac-central-ac-only-1-speed-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.9,3333.2,3333.2,0.0,15.592,0.0
 base-hvac-central-ac-only-1-speed-seer2.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.9,3567.4,3567.4,0.0,18.008,0.0
 base-hvac-central-ac-only-1-speed.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.9,3573.7,3573.7,0.0,18.008,0.0
@@ -248,6 +254,8 @@ base-hvac-furnace-gas-only-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563
 base-hvac-furnace-gas-only-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1987.1,1804.8,1987.1,18.088,0.0,0.0
 base-hvac-furnace-gas-only-pilot.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2043.5,1786.0,2043.5,23.735,0.0,0.0
 base-hvac-furnace-gas-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2043.5,1786.0,2043.5,23.735,0.0,0.0
+base-hvac-furnace-gas-room-ac-airflow-max.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1989.6,3808.5,3808.5,26.743,12.094,0.0
+base-hvac-furnace-gas-room-ac-airflow.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2021.6,3829.6,3829.6,25.023,12.094,0.0
 base-hvac-furnace-gas-room-ac.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2044.2,3821.2,3821.2,23.735,12.094,0.0
 base-hvac-furnace-oil-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2043.5,1786.0,2043.5,23.735,0.0,0.0
 base-hvac-furnace-propane-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2043.5,1786.0,2043.5,23.735,0.0,0.0
@@ -279,6 +287,8 @@ base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4354.4,1785.9,4354.4,19.362,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,100.0,0.0,1354.7,998.0,11171.6,2563.5,4081.6,2863.5,4081.6,19.316,14.06,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4294.7,2863.5,4294.7,19.185,14.06,0.0
+base-hvac-mini-split-heat-pump-ductless-airflow-max.xml,240.0,0.0,1354.7,998.0,11171.5,2563.5,3062.6,2961.1,3062.6,14.275,12.092,0.0
+base-hvac-mini-split-heat-pump-ductless-airflow.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3607.8,3119.2,3607.8,16.734,12.094,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4413.1,3100.7,4413.1,16.762,12.092,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,2.0,0.0,1354.7,998.0,11171.6,2563.5,2953.5,3118.8,3118.8,17.599,12.255,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml,1.0,0.0,1354.7,998.0,11171.6,2563.5,2871.7,3100.7,3100.7,17.829,12.092,0.0
