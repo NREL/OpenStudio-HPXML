@@ -70,7 +70,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -80,7 +80,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -90,7 +90,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -100,7 +100,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -110,7 +110,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -120,7 +120,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -130,7 +130,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -140,7 +140,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>300.0</InternalLoadsSensible>
-                  <NumberofOccupants>2</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -150,7 +150,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>1000.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -160,7 +160,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -170,7 +170,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>600.0</InternalLoadsSensible>
-                  <NumberofOccupants>2</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -180,7 +180,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>500.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -1168,7 +1168,7 @@
             <SHGC>0.64</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningSouthExteriorShading'/>
-              <SummerShadingCoefficient>0.80</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningSouthInteriorShading'/>

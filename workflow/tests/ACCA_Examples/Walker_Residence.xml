@@ -68,7 +68,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>407.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -78,7 +78,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>407.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -88,7 +88,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>407.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -98,7 +98,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -108,7 +108,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -118,7 +118,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -128,7 +128,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0</NumberofOccupants>
+                  <NumberofOccupants>0.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -138,7 +138,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
-                  <NumberofOccupants>2</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -148,7 +148,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>2500.0</InternalLoadsSensible>
-                  <NumberofOccupants>2</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
