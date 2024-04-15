@@ -926,16 +926,17 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       assert_operator(space.cdl_sens_windows + space.cdl_sens_skylights, :>=, base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_skylights * 1.3 + base_space.cdl_sens_aedexcursion)
     end
 
-    # Test space internal gain
+    # Test space internal gain & number of occupants
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml, hpxml_bldg = _create_hpxml(acca_test_file_name, acca_files_path)
     hpxml_bldg.conditioned_spaces.each do |space|
       space.manualj_internal_loads_sensible = 200
+      space.manualj_num_occupants = 1
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     test_hpxml_bldg.conditioned_spaces.each do |space|
-      assert_equal(space.cdl_sens_intgains, 200)
+      assert_equal(200 + 230, space.cdl_sens_intgains)
     end
   end
 
