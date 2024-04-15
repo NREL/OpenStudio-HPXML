@@ -1022,7 +1022,7 @@ class HVACSizing
     Heating and Cooling Loads: Floors
     '''
 
-    has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
+    has_radiant_floor = get_has_radiant_floor()
 
     @hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
@@ -1104,7 +1104,7 @@ class HVACSizing
     Heating and Cooling Loads: Floors
     '''
 
-    has_radiant_floor = @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
+    has_radiant_floor = get_has_radiant_floor()
 
     @hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
@@ -3423,6 +3423,18 @@ class HVACSizing
     end
 
     return frac_heat_load_served, frac_cool_load_served
+  end
+
+  def self.get_has_radiant_floor()
+    # FUTURE: Allow specifying presence of radiant floors on a floor-by-floor basis
+    if @hpxml_bldg.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
+      return true
+    end
+    if @hpxml_bldg.hvac_distributions.count { |hvac_dist| hvac_dist.hydronic_type == HPXML::HydronicTypeRadiantFloor } > 0
+      return true
+    end
+
+    return false
   end
 
   def self.assign_to_hpxml_system(htg_sys, clg_sys, hvac_sizing_values)
