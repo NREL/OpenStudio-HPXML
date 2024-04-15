@@ -3639,10 +3639,12 @@ class HVACSizing
     ceilings = hpxml_bldg.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_ceiling } + hpxml_bldg.roofs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     floors = hpxml_bldg.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_floor } + hpxml_bldg.slabs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
 
-    col_names = ['Entire House'] + all_space_design_loads.keys.map { |space_id| "Space: #{space_id}" }
+    # Note: Every report name must have the HPXML BuildingID in it in case we are running a whole MF building
+    # with multiple Building elements.
+    col_names = ["#{hpxml_bldg.building_id}: Loads"] + all_space_design_loads.keys.map { |space_id| "#{hpxml_bldg.building_id}: #{space_id}: Loads" }
 
     # Summary Results
-    results_out << ['Report: Summary', 'Orientation', 'Heating HTM', 'Cooling HTM', 'Heating CFM', 'Cooling CFM']
+    results_out << ["Report: #{hpxml_bldg.building_id}: Summary", 'Orientation', 'Heating HTM', 'Cooling HTM', 'Heating CFM', 'Cooling CFM']
     windows.each do |window|
       fj1 = window.additional_properties.formj1_values
       results_out << ["Windows: #{window.id}", orientation_map[window.orientation], fj1.Heat_HTM, fj1.Cool_HTM]
@@ -3675,30 +3677,30 @@ class HVACSizing
     results_out << ["Report: #{col_names[0]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
     windows.each do |window|
       fj1 = window.additional_properties.formj1_values
-      results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     skylights.each do |skylight|
       fj1 = skylight.additional_properties.formj1_values
-      results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     doors.each do |door|
       fj1 = door.additional_properties.formj1_values
-      results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     walls.each do |wall|
       fj1 = wall.additional_properties.formj1_values
-      results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     ceilings.each do |ceiling|
       fj1 = ceiling.additional_properties.formj1_values
-      results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     floors.each do |floor|
       fj1 = floor.additional_properties.formj1_values
-      results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+      results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
     end
     results_out << ['Infiltration', nil, nil, 1.0, bldg_design_loads.Heat_Infil.round, bldg_design_loads.Cool_Infil_Sens.round, bldg_design_loads.Cool_Infil_Lat.round]
-    results_out << ['Internal Gains', nil, nil, nil, 0, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
+    results_out << ['Internal Gains', nil, nil, nil, nil, bldg_design_loads.Cool_IntGains_Sens.round, bldg_design_loads.Cool_IntGains_Lat.round]
     results_out << ['Ducts', nil, nil, nil, bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
     results_out << ['Ventilation', nil, nil, nil, bldg_design_loads.Heat_Vent.round, bldg_design_loads.Cool_Vent_Sens.round, bldg_design_loads.Cool_Vent_Lat.round]
     results_out << ['AED Excursion', nil, nil, nil, nil, bldg_design_loads.Cool_AEDExcursion.round, nil]
@@ -3735,16 +3737,17 @@ class HVACSizing
       end
       space_design_load = all_space_design_loads[space_id]
       results_out << ['Infiltration', nil, nil, space.additional_properties.wall_area_ratio.round(3), space_design_load.Heat_Infil.round, space_design_load.Cool_Infil_Sens.round]
-      results_out << ['Internal Gains', nil, nil, nil, 0, space_design_load.Cool_IntGains_Sens.round]
+      results_out << ['Internal Gains', nil, nil, nil, nil, space_design_load.Cool_IntGains_Sens.round]
       results_out << ['Ducts', nil, nil, nil, space_design_load.Heat_Ducts.round, space_design_load.Cool_Ducts_Sens.round]
-      results_out << ['AED Excursion', nil, nil, nil, 0, space_design_load.Cool_AEDExcursion.round]
+      results_out << ['AED Excursion', nil, nil, nil, nil, space_design_load.Cool_AEDExcursion.round]
       results_out << ['Total', nil, nil, nil, space_design_load.Heat_Tot.round, space_design_load.Cool_Sens.round]
     end
 
     # AED curve
     results_out << [line_break]
-    results_out << ['Report: AED Curve'] + [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map { |hr| "Hr #{hr} (Btuh)" }
+    results_out << ["Report: #{hpxml_bldg.building_id}: AED Curve"] + [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].map { |hr| "Hr #{hr} (Btuh)" }
     col_names.each_with_index do |col_name, i|
+      col_name = col_name.gsub(': Loads', '')
       if i == 0
         results_out << [col_name] + bldg_design_loads.HourlyFenestrationLoads.map { |l| l.round }
       else
@@ -3754,7 +3757,11 @@ class HVACSizing
     end
 
     if ['csv'].include? output_format
-      CSV.open(output_file_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
+      if File.exist? output_file_path
+        # Separate from existing data
+        results_out.insert(0, [line_break])
+      end
+      CSV.open(output_file_path, 'a') { |csv| results_out.to_a.each { |elem| csv << elem } }
     elsif ['json', 'msgpack'].include? output_format
       h = {}
       report, columns = nil, nil
@@ -3779,6 +3786,10 @@ class HVACSizing
           items[columns[i - 1]] = out[i]
         end
         h[report][name] = items
+      end
+
+      if File.exist? output_file_path
+        h = JSON.parse(File.read(output_file_path)).merge(h)
       end
 
       if output_format == 'json'

@@ -638,10 +638,10 @@ The file includes values pertaining to ACCA Form J1 (see example on page 2 of `h
 
 The file is organized into a few different reports described below.
 
-Report: Summary
-~~~~~~~~~~~~~~~
+Report: <BuildingID>: Summary
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Depending on the building, the following output types may be included.
+For each HPXML Building, the following output types are reported.
 
    =======================  ===========  ================  ================  ================  ================
    Type                     Orientation  Heating HTM [#]_  Cooling HTM [#]_  Heating CFM [#]_  Cooling CFM [#]_
@@ -663,61 +663,63 @@ Depending on the building, the following output types may be included.
 
 .. _report_entire_house:
 
-Report: Entire House
-~~~~~~~~~~~~~~~~~~~~
+Report: <BuildingID>: Loads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Depending on the building (or space, see :ref:`zones_spaces`), the following output types may be included.
+For each HPXML Building, the following output types are reported.
 
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
    Type                     Area (ft^2)  Length (ft)  Wall Area Ratio  Heating (Btuh)  Cooling Sensible (Btuh)  Cooling Latent (Btuh)
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
-   Windows: <WindowID>      X                                          X               X                        X  
-   Skylights: <SkylightID>  X                                          X               X                        X  
-   Doors: <DoorID>          X                                          X               X                        X  
-   Walls: <WallID>          X                                          X               X                        X  
-   Ceilings: <CeilingID>    X                                          X               X                        X  
-   Floors: <FloorID>        X            See [#]_                      X               X                        X  
+   Windows: <WindowID>      X                                          X               X
+   Skylights: <SkylightID>  X                                          X               X
+   Doors: <DoorID>          X                                          X               X
+   Walls: <WallID>          X                                          X               X
+   Ceilings: <CeilingID>    X                                          X               X
+   Floors: <FloorID>        X            See [#]_                      X               X
    Infiltration                                       X                X               X                        X  
-   Internal Gains                                                      X               X                        X  
+   Internal Gains                                                                      X                        X  
    Ducts                                                               X               X                        X  
    Ventilation                                                         X               X                        X  
    AED Excursion                                                                       X                          
+   Total                                                               X               X                        X
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
 
    .. [#] Length will be provided for a slab floor under conditioned space.
 
-Report: Space: <SpaceID>
-~~~~~~~~~~~~~~~~~~~~~~~~
+Report: <BuildingID>: <SpaceID>: Loads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each space in a conditioned zone (see :ref:`zones_spaces`), the following output types may be included.
+For each HPXML Space (see :ref:`zones_spaces`), the following output types are reported.
 Only those surfaces attached to the given space will be included.
 
-   =======================  ===========  ===========  ===============  ==============  =======================  =====================
-   Type                     Area (ft^2)  Length (ft)  Wall Area Ratio  Heating (Btuh)  Cooling Sensible (Btuh)  Cooling Latent (Btuh)
-   =======================  ===========  ===========  ===============  ==============  =======================  =====================
-   Windows: <WindowID>      X                                          X               X                        X  
-   Skylights: <SkylightID>  X                                          X               X                        X  
-   Doors: <DoorID>          X                                          X               X                        X  
-   Walls: <WallID>          X                                          X               X                        X  
-   Ceilings: <CeilingID>    X                                          X               X                        X  
-   Floors: <FloorID>        X            See [#]_                      X               X                        X  
-   Infiltration                                       X [#]_           X               X                        X  
-   Internal Gains                                                      X               X                        X  
-   Ducts                                                               X               X                        X  
-   AED Excursion                                                                       X                          
-   =======================  ===========  ===========  ===============  ==============  =======================  =====================
+   =======================  ===========  ===========  ===============  ==============  =======================
+   Type                     Area (ft^2)  Length (ft)  Wall Area Ratio  Heating (Btuh)  Cooling Sensible (Btuh)
+   =======================  ===========  ===========  ===============  ==============  =======================
+   Windows: <WindowID>      X                                          X               X
+   Skylights: <SkylightID>  X                                          X               X
+   Doors: <DoorID>          X                                          X               X
+   Walls: <WallID>          X                                          X               X
+   Ceilings: <CeilingID>    X                                          X               X
+   Floors: <FloorID>        X            See [#]_                      X               X
+   Infiltration                                       X [#]_           X               X
+   Internal Gains                                                                      X
+   Ducts                                                               X               X
+   AED Excursion                                                                       X
+   Total                                                               X               X
+   =======================  ===========  ===========  ===============  ==============  =======================
 
    .. [#] Length will be provided for a slab floor under conditioned space.
    .. [#] Infiltration is apportioned to the space using a wall area ratio (the space's exposed wall area divided by the entire house's exposed wall area).
 
-Report: AED Curve
-~~~~~~~~~~~~~~~~~
+Report: <BuildingID>: AED Curve
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For the building (and any spaces in conditioned zones, see :ref:`zones_spaces`), the hourly cooling fenestration load curve (AED curve) from 8am to 8pm is provided.
+For each HPXML Building (and any HPXML spaces, see :ref:`zones_spaces`), the hourly cooling fenestration load curve (AED curve) from 8am to 8pm is provided.
 
-  ================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
-  Type              Hr 8 (Btuh)  Hr 9 (Btuh)  Hr 10 (Btuh)  Hr 11 (Btuh)  Hr 12 (Btuh)  Hr 13 (Btuh)  Hr 14 (Btuh)  Hr 15 (Btuh)  Hr 16 (Btuh)  Hr 17 (Btuh)  Hr 18 (Btuh)  Hr 19 (Btuh)
-  ================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
-  Entire House      X            X            X             X             X             X             X             X             X             X             X             X  
-  Space: <SpaceID>  X            X            X             X             X             X             X             X             X             X             X             X  
-  ================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
+  =======================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
+  Type                     Hr 8 (Btuh)  Hr 9 (Btuh)  Hr 10 (Btuh)  Hr 11 (Btuh)  Hr 12 (Btuh)  Hr 13 (Btuh)  Hr 14 (Btuh)  Hr 15 (Btuh)  Hr 16 (Btuh)  Hr 17 (Btuh)  Hr 18 (Btuh)  Hr 19 (Btuh)
+  =======================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
+  <BuildingID>             X            X            X             X             X             X             X             X             X             X             X             X  
+  <BuildingID>: <SpaceID>  X            X            X             X             X             X             X             X             X             X             X             X  
+  =======================  ===========  ===========  ============  ============  ============  ============  ============  ============  ============  ============  ============  ============
