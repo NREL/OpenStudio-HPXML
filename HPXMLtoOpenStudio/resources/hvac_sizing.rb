@@ -2277,9 +2277,9 @@ class HVACSizing
       # Recommendation by Hugh Henderson.
       rated_capacity_tons = UnitConversions.convert(rated_capacity, 'Btu/hr', 'ton')
       if airflow_rate / rated_capacity_tons > 400
-        airflow_rate = 399.0 * rated_capacity_tons
+        airflow_rate = 400.0 * rated_capacity_tons
       elsif airflow_rate / rated_capacity_tons < 300
-        airflow_rate = 301.0 * rated_capacity_tons
+        airflow_rate = 300.0 * rated_capacity_tons
       end
     end
 
