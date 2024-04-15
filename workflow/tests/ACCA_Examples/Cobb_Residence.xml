@@ -44,9 +44,7 @@
               <CoolingSetpoint>75.0</CoolingSetpoint>
               <HumiditySetpoint>0.5</HumiditySetpoint>
               <HumidityDifference>53.0</HumidityDifference>
-              <InternalLoadsSensible>4304.0</InternalLoadsSensible>
               <InternalLoadsLatent>0.0</InternalLoadsLatent>
-              <NumberofOccupants>4</NumberofOccupants>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -71,6 +69,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>683.0</InternalLoadsSensible>
+                  <NumberofOccupants>2</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -80,6 +79,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>683.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -89,6 +89,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>538.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -98,6 +99,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -107,6 +109,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -116,6 +119,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -125,6 +129,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
+                  <NumberofOccupants>2</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -134,6 +139,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>1500.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -313,9 +319,13 @@
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom2WestExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2WestInteriorShading'/>
-              <SummerShadingCoefficient>0.7335</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom2West'/>
           </Window>
@@ -325,9 +335,13 @@
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom3WestExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3WestInteriorShading'/>
-              <SummerShadingCoefficient>0.7335</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom3West'/>
           </Window>
@@ -337,6 +351,10 @@
             <Orientation>west</Orientation>
             <UFactor>0.69</UFactor>
             <SHGC>0.69</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowLivingDiningWestExteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowLivingDiningWestInteriorShading'/>
               <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
@@ -349,9 +367,13 @@
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='GlassDoorLivingDiningWestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningWestInteriorShading'/>
-              <SummerShadingCoefficient>0.652</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallLivingDiningWest'/>
           </Window>
@@ -361,9 +383,13 @@
             <Orientation>west</Orientation>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='GlassDoorBedroom1WestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorBedroom1WestInteriorShading'/>
-              <SummerShadingCoefficient>0.652</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom1West'/>
           </Window>

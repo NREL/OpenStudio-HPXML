@@ -2298,7 +2298,7 @@ class HPXML < Object
   end
 
   class Space < BaseElement
-    ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible, :fenestration_load_procedure] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
+    ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible, :manualj_num_occupants, :fenestration_load_procedure] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2330,9 +2330,10 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
-      if (not @manualj_internal_loads_sensible.nil?) || (not @fenestration_load_procedure.nil?)
+      if (not @manualj_internal_loads_sensible.nil?) || (not @manualj_num_occupants.nil?) || (not @fenestration_load_procedure.nil?)
         mj_extension = XMLHelper.add_extension(space, 'ManualJInputs')
         XMLHelper.add_element(mj_extension, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
+        XMLHelper.add_element(mj_extension, 'NumberofOccupants', @manualj_num_occupants, :float, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
         XMLHelper.add_element(mj_extension, 'FenestrationLoadProcedure', @fenestration_load_procedure, :string, @fenestration_load_procedure_isdefaulted) unless @fenestration_load_procedure.nil?
       end
       if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map { |key| send(key) }.any?
@@ -2346,6 +2347,7 @@ class HPXML < Object
       @id = HPXML::get_id(space)
       @floor_area = XMLHelper.get_value(space, 'FloorArea', :float)
       @manualj_internal_loads_sensible = XMLHelper.get_value(space, 'extension/ManualJInputs/InternalLoadsSensible', :float)
+      @manualj_num_occupants = XMLHelper.get_value(space, 'extension/ManualJInputs/NumberofOccupants', :float)
       @fenestration_load_procedure = XMLHelper.get_value(space, 'extension/ManualJInputs/FenestrationLoadProcedure', :string)
       HPXML.design_loads_from_doc(self, space)
     end

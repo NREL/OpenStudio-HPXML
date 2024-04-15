@@ -759,7 +759,7 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
   ``HumidityDifference``             double    grains               No        See [#]_      Difference between absolute humidity of the outdoor/indoor air during the summer
   ``InternalLoadsSensible``          double    Btu/hr  >= 0         No        See [#]_      Sensible internal loads for cooling design load
   ``InternalLoadsLatent``            double    Btu/hr  >= 0         No        0             Latent internal loads for cooling design load
-  ``NumberofOccupants``              integer           >= 0         No        #Beds+1 [#]_  Number of occupants for cooling design load
+  ``NumberofOccupants``              integer           >= 0         No        See [#]_      Number of occupants for cooling design load
   =================================  ========  ======  ===========  ========  ============  ============================================
 
   .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
@@ -774,10 +774,12 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
   .. [#] If HumiditySetpoint not provided, defaults to 0.45 in a dry climate, otherwise 0.5.
   .. [#] If HumidityDifference not provided, it is calculated from the other inputs/defaults and the cooling humidity ratio.
          The cooling humidity ratio is calculated from the DESIGN CONDITIONS header section inside the EPW weather file or, if not available, the 8760 hourly temperatures in the EPW.
-  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
+  .. [#] If InternalLoadsSensible not provided, defaults to the sum of conditioned spaces' InternalLoadsSensible values if provided (see :ref:`zones_spaces`).
+         Otherwise defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
-  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
+  .. [#] If NumberofOccupants not provided, defaults to the sum of conditioned spaces' NumberofOccupants values if provided (see :ref:`zones_spaces`).
+         Otherwise defaults to the number of bedrooms plus one per Manual J.
          Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
 
 .. _shadingcontrol:
@@ -827,17 +829,20 @@ If spaces in conditioned zones are provided, as well as wall/roof/etc. surfaces 
 
 Each space (representing a room or block of rooms) within a zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone/Spaces/Space``.
 
-  =====================================================  ======  =======  ===========  ========  ========  ==============================================
-  Element                                                Type    Units    Constraints  Required  Default   Notes
-  =====================================================  ======  =======  ===========  ========  ========  ==============================================
-  ``SystemIdentifier``                                   id                            Yes                 Unique identifier
-  ``FloorArea``                                          double  ft2      > 0          Yes                 Space floor area
-  ``extension/ManualJInputs/InternalLoadsSensible``      double  Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space sensible internal loads
-  ``extension/ManualJInputs/FenestrationLoadProcedure``  string           See [#]_     No        standard  Conditioned space fenestration load procedure [#]_
-  =====================================================  ======  =======  ===========  ========  ========  ==============================================
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
+  Element                                                Type     Units    Constraints  Required  Default   Notes
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
+  ``SystemIdentifier``                                   id                             Yes                 Unique identifier
+  ``FloorArea``                                          double   ft2      > 0          Yes                 Space floor area
+  ``extension/ManualJInputs/InternalLoadsSensible``      double   Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space sensible internal loads for cooling design load
+  ``extension/ManualJInputs/NumberofOccupants``          integer           >= 0         No [#]_   See [#]_  Conditioned space number of occupants for cooling design load
+  ``extension/ManualJInputs/FenestrationLoadProcedure``  string            See [#]_     No        standard  Conditioned space fenestration load procedure [#]_
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
 
   .. [#] InternalLoadsSensible must be provided for all spaces or no spaces.
   .. [#] If InternalLoadsSensible not provided for a conditioned space, the home's total internal sensible loads are apportioned to each space by floor area.
+  .. [#] NumberofOccupants must be provided for all spaces or no spaces.
+  .. [#] If NumberofOccupants not provided for a conditioned space, the home's total number of occupants are apportioned to each space by floor area.
   .. [#] FenestrationLoadProcedure choices are "standard" or "peak".
   .. [#] The "standard" choice should be used for cooling individual rooms and spaces with a single-zone, central air system, where the local fenestration load equals the daily average fenestration load for the room/space plus the AED (Adequate Exposure Diversity) excursion value for the room/space.
          The "peak" choice should be used for room and space cooling by any time of multi-zone system or local unitary equipment (in which the HVAC system has the ability to adjust cooling capacity on a room or zone basis), where the local fenestration load equals the peak value on the AED curve.

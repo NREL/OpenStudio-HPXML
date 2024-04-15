@@ -208,13 +208,25 @@ class HPXMLDefaults
       hpxml_bldg.header.manualj_humidity_difference_isdefaulted = true
     end
 
+    sum_space_manualj_internal_loads_sensible = hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_sensible.to_f }.sum.round
     if hpxml_bldg.header.manualj_internal_loads_sensible.nil?
-      if hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
+      if sum_space_manualj_internal_loads_sensible > 0
+        hpxml_bldg.header.manualj_internal_loads_sensible = sum_space_manualj_internal_loads_sensible
+      elsif hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
         hpxml_bldg.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
       else
         hpxml_bldg.header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
       end
       hpxml_bldg.header.manualj_internal_loads_sensible_isdefaulted = true
+    elsif sum_space_manualj_internal_loads_sensible == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_sensible = (hpxml_bldg.header.manualj_internal_loads_sensible * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_sensible_isdefaulted = true
+      end
+    elsif sum_space_manualj_internal_loads_sensible > 0 && (hpxml_bldg.header.manualj_internal_loads_sensible - sum_space_manualj_internal_loads_sensible) > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsSensible (#{hpxml_bldg.header.manualj_internal_loads_sensible}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_sensible}).")
     end
 
     if hpxml_bldg.header.manualj_internal_loads_latent.nil?
@@ -222,9 +234,23 @@ class HPXMLDefaults
       hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
     end
 
+    sum_space_manualj_num_occupants = hpxml_bldg.conditioned_spaces.map { |space| space.manualj_num_occupants.to_f }.sum.round
     if hpxml_bldg.header.manualj_num_occupants.nil?
-      hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      if sum_space_manualj_num_occupants > 0
+        hpxml_bldg.header.manualj_num_occupants = sum_space_manualj_num_occupants
+      else
+        hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
+    elsif sum_space_manualj_num_occupants == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_num_occupants = (hpxml_bldg.header.manualj_num_occupants * space.floor_area / total_floor_area).round(2)
+        space.manualj_num_occupants_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_num_occupants - sum_space_manualj_num_occupants) > 1 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/NumberofOccupants (#{hpxml_bldg.header.manualj_num_occupants}) does not match sum of conditioned spaces (#{sum_space_manualj_num_occupants}).")
     end
   end
 

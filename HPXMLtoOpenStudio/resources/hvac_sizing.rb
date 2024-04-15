@@ -519,7 +519,8 @@ class HVACSizing
         fenestration_load_procedure = wall.space.fenestration_load_procedure
       end
 
-      window_summer_sf = window.interior_shading_factor_summer * window.exterior_shading_factor_summer
+      window_isc = window.interior_shading_factor_summer
+      window_esc = window.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -536,7 +537,7 @@ class HVACSizing
         # clf_d: Average Cooling Load Factor for the given window direction
         # clf_n: Average Cooling Load Factor for a window facing North (fully shaded)
         if hr == -1
-          if window_summer_sf < 1
+          if window_isc < 1
             clf_d = clf_avg_is[cnt45]
             clf_n = clf_avg_is[4]
           else
@@ -544,7 +545,7 @@ class HVACSizing
             clf_n = clf_avg_nois[4]
           end
         else
-          if window_summer_sf < 1
+          if window_isc < 1
             clf_d = clf_hr_is[cnt45][hr]
             clf_n = clf_hr_is[4][hr]
           else
@@ -560,10 +561,12 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given window Direction
-        htm_d = psf_lat[cnt45] * clf_d * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
+        htm_d = psf_lat[cnt45] * clf_d * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
+        htm_d *= window_esc
 
         # Hourly Heat Transfer Multiplier for a window facing North (fully shaded)
-        htm_n = psf_lat[4] * clf_n * window_shgc * window_summer_sf / 0.87 + window_ufactor * ctd_adj
+        htm_n = psf_lat[4] * clf_n * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
+        htm_n *= window_esc
 
         if window.overhangs_depth.to_f > 0
           if hr == -1
@@ -636,7 +639,8 @@ class HVACSizing
         fenestration_load_procedure = roof.space.fenestration_load_procedure
       end
 
-      skylight_summer_sf = skylight.interior_shading_factor_summer * skylight.exterior_shading_factor_summer
+      skylight_isc = skylight.interior_shading_factor_summer
+      skylight_esc = skylight.exterior_shading_factor_summer
       cnt45 = (get_true_azimuth(skylight.azimuth) / 45.0).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 
@@ -657,7 +661,7 @@ class HVACSizing
         # clf_d: Average Cooling Load Factor for the given skylight direction
         # clf_horiz: Average Cooling Load Factor for horizontal
         if hr == -1
-          if skylight_summer_sf < 1
+          if skylight_isc < 1
             clf_d = clf_avg_is[cnt45]
             clf_horiz = clf_avg_is_horiz
           else
@@ -665,7 +669,7 @@ class HVACSizing
             clf_horiz = clf_avg_nois_horiz
           end
         else
-          if skylight_summer_sf < 1
+          if skylight_isc < 1
             clf_d = clf_hr_is[cnt45][hr]
             clf_horiz = clf_hr_is_horiz[hr]
           else
@@ -684,7 +688,8 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given skylight Direction
-        htm = (sol_h + sol_v) * (skylight_shgc * skylight_summer_sf / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        htm *= skylight_esc
 
         # Block load
         clg_loads_tmp = htm * skylight.area
@@ -821,8 +826,10 @@ class HVACSizing
       end
       if not wall.attached_to_space_idref.nil?
         space_design_loads = all_space_design_loads[wall.attached_to_space_idref]
-        # Store exposed wall gross area for infiltration calculation
-        wall.space.additional_properties.total_exposed_wall_area += wall.area if wall.is_exterior
+        if wall.is_exterior
+          # Store exposed wall gross area for infiltration calculation
+          wall.space.additional_properties.total_exposed_wall_area += wall.area
+        end
       end
 
       htg_htm = 0.0
@@ -888,6 +895,11 @@ class HVACSizing
 
       if not foundation_wall.attached_to_space_idref.nil?
         space_design_loads = all_space_design_loads[foundation_wall.attached_to_space_idref]
+        if foundation_wall.is_exterior
+          # Store exposed wall gross area for infiltration calculation
+          ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
+          foundation_wall.space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
+        end
       end
 
       if foundation_wall.is_exterior
@@ -1110,14 +1122,30 @@ class HVACSizing
         htg_loads = htg_htm * slab.exposed_perimeter
         slab_length = slab.exposed_perimeter
       elsif HPXML::conditioned_below_grade_locations.include? slab.interior_adjacent_to
-        ext_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.is_exterior }
-        z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum # Weighted-average (by length) below-grade depth
+        ext_fnd_walls = @hpxml_bldg.foundation_walls.select { |fw| fw.interior_adjacent_to == slab.interior_adjacent_to && fw.is_exterior }
 
-        sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
-        length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
-        width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
-        w_b = [length, width].min
-        w_b = [w_b, 1.0].max # handle zero exposed perimeter
+        # Calculate weighted-average (by length) below-grade depth
+        z_f = ext_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
+
+        # Calculate width of shortest side
+        lengths_by_azimuth = {}
+        ext_fnd_walls.each do |fnd_wall|
+          if fnd_wall.azimuth.nil?
+            azimuths = [0, 90, 180, 270]
+          else
+            azimuths = [fnd_wall.azimuth]
+          end
+          azimuths.each do |azimuth|
+            lengths_by_azimuth[azimuth] = 0 if lengths_by_azimuth[azimuth].nil?
+            if not fnd_wall.length.nil?
+              length = fnd_wall.length
+            else
+              length = fnd_wall.area / fnd_wall.height
+            end
+            lengths_by_azimuth[azimuth] += length / azimuths.size
+          end
+        end
+        w_b = lengths_by_azimuth.values.min
 
         slab_is_insulated = false
         if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
@@ -1229,22 +1257,15 @@ class HVACSizing
     '''
     Cooling Load: Internal Gains
     '''
-    clg_loads_sens = @hpxml_bldg.header.manualj_internal_loads_sensible + 230.0 * @hpxml_bldg.header.manualj_num_occupants
-    clg_loads_lat = @hpxml_bldg.header.manualj_internal_loads_latent + 200.0 * @hpxml_bldg.header.manualj_num_occupants
-    bldg_design_loads.Cool_IntGains_Sens = clg_loads_sens
-    bldg_design_loads.Cool_IntGains_Lat = clg_loads_lat
+    bldg_design_loads.Cool_IntGains_Sens = @hpxml_bldg.header.manualj_internal_loads_sensible + 230.0 * @hpxml_bldg.header.manualj_num_occupants
+    bldg_design_loads.Cool_IntGains_Lat = @hpxml_bldg.header.manualj_internal_loads_latent + 200.0 * @hpxml_bldg.header.manualj_num_occupants
 
     # Area weighted space assignment
     @hpxml_bldg.conditioned_spaces.each do |space|
       space_design_loads = all_space_design_loads[space.id]
       next if space_design_loads.nil?
 
-      total_floor_area = @hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
-      if space.manualj_internal_loads_sensible.nil?
-        space_design_loads.Cool_IntGains_Sens = clg_loads_sens * space.floor_area / total_floor_area
-      else
-        space_design_loads.Cool_IntGains_Sens = space.manualj_internal_loads_sensible
-      end
+      space_design_loads.Cool_IntGains_Sens = space.manualj_internal_loads_sensible + 230.0 * space.manualj_num_occupants
     end
   end
 
@@ -3681,41 +3702,43 @@ class HVACSizing
     results_out << ['Ducts', nil, nil, nil, bldg_design_loads.Heat_Ducts.round, bldg_design_loads.Cool_Ducts_Sens.round, bldg_design_loads.Cool_Ducts_Lat.round]
     results_out << ['Ventilation', nil, nil, nil, bldg_design_loads.Heat_Vent.round, bldg_design_loads.Cool_Vent_Sens.round, bldg_design_loads.Cool_Vent_Lat.round]
     results_out << ['AED Excursion', nil, nil, nil, nil, bldg_design_loads.Cool_AEDExcursion.round, nil]
+    results_out << ['Total', nil, nil, nil, bldg_design_loads.Heat_Tot.round, bldg_design_loads.Cool_Sens.round, bldg_design_loads.Cool_Lat.round]
 
     # Space results
     all_space_design_loads.keys.each_with_index do |space_id, i|
       space = hpxml_bldg.conditioned_spaces.find { |s| s.id == space_id }
       results_out << [line_break]
-      results_out << ["Report: #{col_names[i + 1]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
+      results_out << ["Report: #{col_names[i + 1]}", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)']
       windows.select { |s| s.wall.attached_to_space_idref == space_id }.each do |window|
         fj1 = window.additional_properties.formj1_values
-        results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       skylights.select { |s| s.roof.attached_to_space_idref == space_id }.each do |skylight|
         fj1 = skylight.additional_properties.formj1_values
-        results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       doors.select { |s| s.wall.attached_to_space_idref == space_id }.each do |door|
         fj1 = door.additional_properties.formj1_values
-        results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       walls.select { |s| s.attached_to_space_idref == space_id }.each do |wall|
         fj1 = wall.additional_properties.formj1_values
-        results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       ceilings.select { |s| s.attached_to_space_idref == space_id }.each do |ceiling|
         fj1 = ceiling.additional_properties.formj1_values
-        results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       floors.select { |s| s.attached_to_space_idref == space_id }.each do |floor|
         fj1 = floor.additional_properties.formj1_values
-        results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens, fj1.Cool_Load_Lat]
+        results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       space_design_load = all_space_design_loads[space_id]
-      results_out << ['Infiltration', nil, nil, space.additional_properties.wall_area_ratio.round(2), space_design_load.Heat_Infil.round, space_design_load.Cool_Infil_Sens.round, space_design_load.Cool_Infil_Lat.round]
-      results_out << ['Internal Gains', nil, nil, nil, 0, space_design_load.Cool_IntGains_Sens.round, space_design_load.Cool_IntGains_Lat.round]
-      results_out << ['Ducts', nil, nil, nil, space_design_load.Heat_Ducts.round, space_design_load.Cool_Ducts_Sens.round, space_design_load.Cool_Ducts_Lat.round]
-      results_out << ['AED Excursion', nil, nil, nil, nil, space_design_load.Cool_AEDExcursion.round, nil]
+      results_out << ['Infiltration', nil, nil, space.additional_properties.wall_area_ratio.round(3), space_design_load.Heat_Infil.round, space_design_load.Cool_Infil_Sens.round]
+      results_out << ['Internal Gains', nil, nil, nil, 0, space_design_load.Cool_IntGains_Sens.round]
+      results_out << ['Ducts', nil, nil, nil, space_design_load.Heat_Ducts.round, space_design_load.Cool_Ducts_Sens.round]
+      results_out << ['AED Excursion', nil, nil, nil, 0, space_design_load.Cool_AEDExcursion.round]
+      results_out << ['Total', nil, nil, nil, space_design_load.Heat_Tot.round, space_design_load.Cool_Sens.round]
     end
 
     # AED curve

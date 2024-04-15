@@ -45,9 +45,7 @@
               <CoolingSetpoint>75.0</CoolingSetpoint>
               <HumiditySetpoint>0.5</HumiditySetpoint>
               <HumidityDifference>27.0</HumidityDifference>
-              <InternalLoadsSensible>3621.0</InternalLoadsSensible>
               <InternalLoadsLatent>200.0</InternalLoadsLatent>
-              <NumberofOccupants>4</NumberofOccupants>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -72,6 +70,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>683.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -81,6 +81,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>538.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -90,6 +92,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -99,6 +103,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -108,6 +114,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -117,6 +125,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -126,6 +136,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>500.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -135,6 +147,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>1000.0</InternalLoadsSensible>
+                  <NumberofOccupants>0</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -144,6 +158,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
+                  <NumberofOccupants>2</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -153,6 +169,8 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
+                  <NumberofOccupants>2</NumberofOccupants>
+                  <FenestrationLoadProcedure>peak</FenestrationLoadProcedure>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -772,9 +790,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom1Northeast1ExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1Northeast1InteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom1Northeast'/>
           </Window>
@@ -784,9 +806,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom1Northeast2ExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1Northeast2InteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom1Northeast'/>
           </Window>
@@ -796,9 +822,13 @@
             <Orientation>southeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom1SoutheastExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1SoutheastInteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom1Northeast'/>
           </Window>
@@ -808,9 +838,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowUtilityNortheastExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowUtilityNortheastInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallUtilityNortheast'/>
           </Window>
@@ -820,9 +854,13 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom2SouthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2SouthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom2Southwest'/>
           </Window>
@@ -832,9 +870,13 @@
             <Orientation>southeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom2SoutheastExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2SoutheastInteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom2Southeast'/>
           </Window>
@@ -844,9 +886,13 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBedroom3SouthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3SouthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.72</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBedroom3Southwest'/>
           </Window>
@@ -856,9 +902,13 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowBathroom1SouthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom1SouthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallBathroom1Southwest'/>
           </Window>
@@ -868,9 +918,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowKitchenEntryNortheast1ExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenEntryNortheast1InteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallKitchenEntryNortheast'/>
           </Window>
@@ -880,9 +934,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowKitchenEntryNortheast2ExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenEntryNortheast2InteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallKitchenEntryNortheast'/>
           </Window>
@@ -892,9 +950,13 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowFamilyRoomSouthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowFamilyRoomSouthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallFamilyRoomSouthwest'/>
           </Window>
@@ -904,9 +966,13 @@
             <Orientation>northwest</Orientation>
             <UFactor>0.61</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='GlassDoorFamilyRoomNorthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorFamilyRoomNorthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallFamilyRoomNorthwest'/>
           </Window>
@@ -916,6 +982,10 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.98</UFactor>
             <SHGC>0.74</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='GlassDoorFamilyRoomSouthwestExteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorFamilyRoomSouthwestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
@@ -928,9 +998,13 @@
             <Orientation>southwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowDiningSouthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowDiningSouthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallDiningSouthwest'/>
           </Window>
@@ -940,9 +1014,13 @@
             <Orientation>northeast</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowDiningNortheastExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowDiningNortheastInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallDiningNortheast'/>
           </Window>
@@ -952,9 +1030,13 @@
             <Orientation>northwest</Orientation>
             <UFactor>0.64</UFactor>
             <SHGC>0.65</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='WindowDiningNorthwestExteriorShading'/>
+              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowDiningNorthwestInteriorShading'/>
-              <SummerShadingCoefficient>0.744</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='WallDiningNorthwest'/>
           </Window>
