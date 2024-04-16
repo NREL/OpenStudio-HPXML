@@ -46,12 +46,13 @@ class HVACSizing
       apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
       apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
-      apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_airflow_adjustments(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
+      # apply_hvac_airflow_adjustments(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
+      # apply_hvac_fan_power_adjustment() # TODO
 
       if update_hpxml
         # Assign capacities, airflows, etc. to HPXML systems
@@ -1900,18 +1901,39 @@ class HVACSizing
     end
   end
 
-  def self.apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
+  def self.apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
     if not hvac_cooling.nil?
-      hvac_sizing_values.Cool_Capacity *= hvac_cooling.cooling_autosizing_factor
-      hvac_sizing_values.Cool_Airflow *= hvac_cooling.cooling_autosizing_factor
-      hvac_sizing_values.Cool_Capacity_Sens *= hvac_cooling.cooling_autosizing_factor
+      cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
+      if cooling_autosizing_limit.nil?
+        cooling_autosizing_limit = hvac_sizing_values.Cool_Capacity
+      end
+
+      cooling_autosizing_factor = [hvac_cooling.cooling_autosizing_factor, cooling_autosizing_limit / hvac_sizing_values.Cool_Capacity].min
+
+      hvac_sizing_values.Cool_Capacity *= cooling_autosizing_factor
+      hvac_sizing_values.Cool_Airflow *= cooling_autosizing_factor
+      hvac_sizing_values.Cool_Capacity_Sens *= cooling_autosizing_factor
     end
     if not hvac_heating.nil?
-      hvac_sizing_values.Heat_Capacity *= hvac_heating.heating_autosizing_factor
-      hvac_sizing_values.Heat_Airflow *= hvac_heating.heating_autosizing_factor
+      heating_autosizing_limit = hvac_heating.heating_autosizing_limit
+      if heating_autosizing_limit.nil?
+        heating_autosizing_limit = hvac_sizing_values.Heat_Capacity
+      end
+
+      heating_autosizing_factor = [hvac_heating.heating_autosizing_factor, heating_autosizing_limit / hvac_sizing_values.Heat_Capacity].min
+
+      hvac_sizing_values.Heat_Capacity *= heating_autosizing_factor
+      hvac_sizing_values.Heat_Airflow *= heating_autosizing_factor
     end
     if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
-      hvac_sizing_values.Heat_Capacity_Supp *= hvac_cooling.backup_heating_autosizing_factor
+      backup_heating_autosizing_limit = hvac_cooling.backup_heating_autosizing_limit
+      if backup_heating_autosizing_limit.nil?
+        backup_heating_autosizing_limit = hvac_sizing_values.Heat_Capacity_Supp
+      end
+
+      backup_heating_autosizing_factor = [hvac_cooling.backup_heating_autosizing_factor, backup_heating_autosizing_limit / hvac_sizing_values.Heat_Capacity_Supp].min
+
+      hvac_sizing_values.Heat_Capacity_Supp *= backup_heating_autosizing_factor
     end
   end
 
@@ -1973,40 +1995,19 @@ class HVACSizing
     # Override HVAC airflows if values are provided
     if not hvac_cooling.nil?
       fixed_cooling_airflow = hvac_cooling.cooling_airflow_cfm
-      max_cooling_airflow = hvac_cooling.max_cooling_airflow_cfm
-      fixed_cooling_capacity = hvac_cooling.cooling_capacity
+      cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
     end
-    autosized_cooling_airflow = hvac_sizing_values.Cool_Airflow
-    if (not fixed_cooling_airflow.nil?) && (hvac_sizing_values.Cool_Airflow > 0) && max_cooling_airflow.nil?
+    if (not fixed_cooling_airflow.nil?) && (hvac_sizing_values.Cool_Airflow > 0) && cooling_autosizing_limit.nil?
       hvac_sizing_values.Cool_Airflow = fixed_cooling_airflow
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
-      if fixed_cooling_capacity.nil?
-        hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
-        hvac_sizing_values.Cool_Capacity_Sens *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
-      end
     end
     if not hvac_heating.nil?
       fixed_heating_airflow = hvac_heating.heating_airflow_cfm
-      max_heating_airflow = hvac_heating.max_heating_airflow_cfm
-      fixed_heating_capacity = hvac_heating.heating_capacity
-      if hvac_heating.is_a? HPXML::HeatPump
-        if not hvac_heating.backup_heating_capacity.nil?
-          fixed_supp_heating_capacity = hvac_heating.backup_heating_capacity
-        elsif not hvac_heating.backup_system.nil?
-          fixed_supp_heating_capacity = hvac_heating.backup_system.heating_capacity
-        end
-      end
+      heating_autosizing_limit = hvac_heating.heating_autosizing_limit
     end
-    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
-    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && max_heating_airflow.nil?
+    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && heating_autosizing_limit.nil?
       hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
       hvac_sizing_values.Heat_Airflow_isdefaulted = false
-      if fixed_heating_capacity.nil?
-        hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-      end
-      if fixed_supp_heating_capacity.nil?
-        hvac_sizing_values.Heat_Capacity_Supp *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-      end
     end
   end
 

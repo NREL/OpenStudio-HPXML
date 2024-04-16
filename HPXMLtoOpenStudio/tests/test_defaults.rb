@@ -1583,16 +1583,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 1000, 12345, true, 999, 1.0)
 
     # Test autosizing with factors
+    hpxml_bldg.heating_systems[0].heating_airflow_cfm = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 1000, nil, true, 999, 1.2)
+    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 847, nil, true, 999, 1.2)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
-    hpxml_bldg.heating_systems[0].heating_airflow_cfm = nil
-    hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].pilot_light_btuh = nil
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
