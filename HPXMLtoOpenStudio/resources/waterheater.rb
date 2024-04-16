@@ -63,11 +63,15 @@ class Waterheater
   def self.apply_heatpump(model, runner, loc_space, loc_schedule, elevation, water_heating_system, ec_adj, solar_thermal_system, conditioned_zone, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
     #TODO: flag for testing, need to add whether this is 120 V or 240 V, shared or dedicated circuit, to the HPXML files. Extension elements?
     hpwh_120V = true
-    hpwh_120V_type = 'dedicated' #'shared'
+    hpwh_120V_type = 'shared' #'dedicated' 
 	
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    if hpwh_120V and hpwh_120V_type == 'shared'
+      t_set_c = 60.0 #FIXME: To account for higher setpoint + tempering valve. Leave delivery temperatures alone. Should specify tempering in OS-HPXML?
+    else
+      t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
+    end
     loop = create_new_loop(model, t_set_c, eri_version, unit_multiplier)
 
     h_tank = 0.0188 * water_heating_system.tank_volume + 0.0935 # Linear relationship that gets GE height at 50 gal and AO Smith height at 80 gal
@@ -127,7 +131,7 @@ class Waterheater
     coil = setup_hpwh_dxcoil(model, runner, water_heating_system, elevation, obj_name_hpwh, airflow_rate, unit_multiplier, hpwh_120V, hpwh_120V_type)
 
     # WaterHeater:Stratified
-    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule, unit_multiplier, nbeds, hpwh_120V, hpwh_120V_type)
+    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule, unit_multiplier, nbeds, hpwh_120V)
     loop.addSupplyBranchForComponent(tank)
 
     add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, unit_multiplier)
@@ -720,16 +724,15 @@ class Waterheater
         hpwh_cop.setMinimumValueofy(0)
         hpwh_cop.setMaximumValueofy(100)
       else
-        #FIXME: Update when performance mapping of shared circuit 120V HPWH is complete
-        cap = 0.3 * unit_multiplier# kW
+        cap = 0.357 * unit_multiplier# kW
         hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
         hpwh_cap.setName('HPWH-Cap-fT')
-        hpwh_cap.setCoefficient1Constant(0.636)
-        hpwh_cap.setCoefficient2x(0.0227)
-        hpwh_cap.setCoefficient3xPOW2(0.000406)
-        hpwh_cap.setCoefficient4y(-0.000437)
-        hpwh_cap.setCoefficient5yPOW2(0.0)
-        hpwh_cap.setCoefficient6xTIMESY(0.0)
+        hpwh_cap.setCoefficient1Constant(0.813229356)
+        hpwh_cap.setCoefficient2x(0.0159673030632523)
+        hpwh_cap.setCoefficient3xPOW2(0.000537186311098498)
+        hpwh_cap.setCoefficient4y(0.00203190805032679)
+        hpwh_cap.setCoefficient5yPOW2(-0.0000859752506704333)
+        hpwh_cap.setCoefficient6xTIMESY(-0.0000686226937803693)
         hpwh_cap.setMinimumValueofx(0)
         hpwh_cap.setMaximumValueofx(100)
         hpwh_cap.setMinimumValueofy(0)
@@ -737,12 +740,12 @@ class Waterheater
 
         hpwh_cop = OpenStudio::Model::CurveBiquadratic.new(model)
         hpwh_cop.setName('HPWH-COP-fT')
-        hpwh_cop.setCoefficient1Constant(1.0877)
-        hpwh_cop.setCoefficient2x(0.02076)
-        hpwh_cop.setCoefficient3xPOW2(0.0004093)
-        hpwh_cop.setCoefficient4y(-0.01123)
-        hpwh_cop.setCoefficient5yPOW2(0.00007281)
-        hpwh_cop.setCoefficient6xTIMESY(-0.0004776)
+        hpwh_cop.setCoefficient1Constant(1.01320210461835)
+        hpwh_cop.setCoefficient2x(0.0436532624576874)
+        hpwh_cop.setCoefficient3xPOW2(0.0000117316476697918)
+        hpwh_cop.setCoefficient4y(-0.0111263487690818)
+        hpwh_cop.setCoefficient5yPOW2(0.0000368768084560584)
+        hpwh_cop.setCoefficient6xTIMESY(-0.000498493870520354)
         hpwh_cop.setMinimumValueofx(0)
         hpwh_cop.setMaximumValueofx(100)
         hpwh_cop.setMinimumValueofy(0)
@@ -780,7 +783,6 @@ class Waterheater
     # Assumptions and values
     shr = 0.88 # unitless
     
-
     # Calculate an altitude adjusted rated evaporator wetbulb temperature
     rated_ewb_F = 56.4
     rated_edb_F = 67.5
@@ -797,7 +799,7 @@ class Waterheater
       if hpwh_120V_type == 'dedicated'
         cop = 3.6
       else
-        cop = 3.6
+        cop = 4.2
       end
     else
       if not water_heating_system.energy_factor.nil?
@@ -836,7 +838,7 @@ class Waterheater
     return coil
   end
 
-  def self.setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, hpwh_bottom_element_sp, hpwh_top_element_sp, unit_multiplier, nbeds, hpwh_120V, hpwh_120V_type)
+  def self.setup_hpwh_stratified_tank(model, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, hpwh_bottom_element_sp, hpwh_top_element_sp, unit_multiplier, nbeds, hpwh_120V)
     # Calculate some geometry parameters for UA, the location of sensors and heat sources in the tank
     v_actual = calc_storage_tank_actual_vol(water_heating_system.tank_volume, water_heating_system.fuel_type) # gal
     a_tank, a_side = calc_tank_areas(v_actual, UnitConversions.convert(h_tank, 'm', 'ft')) # sqft
