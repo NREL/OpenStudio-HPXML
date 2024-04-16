@@ -331,6 +331,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(8.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_floor_height_above_grade', false)
+    arg.setDisplayName('Geometry: Floor Height Above Grade')
+    arg.setUnits('ft')
+    arg.setDescription("Describes the above-grade height of, e.g., apartment units on upper floors or homes above pier and beam (ambient) foundation. It is defined as the height of the lowest above-grade point within the infiltration pressure boundary and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_garage_width', true)
     arg.setDisplayName('Geometry: Garage Width')
     arg.setUnits('ft')
@@ -4470,6 +4476,10 @@ class HPXMLFile
 
     if args[:unit_multiplier].is_initialized
       hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier].get
+    end
+
+    if args[:geometry_floor_height_above_grade].is_initialized
+      hpxml_bldg.building_construction.floor_height_above_grade = args[:geometry_floor_height_above_grade].get
     end
   end
 

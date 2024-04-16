@@ -26,7 +26,7 @@ class HPXMLDefaults
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
-    apply_building_construction(hpxml_bldg, cfa, nbeds)
+    apply_building_construction(hpxml.header, hpxml_bldg, cfa, nbeds)
     apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
@@ -663,7 +663,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_construction(hpxml_bldg, cfa, nbeds)
+  def self.apply_building_construction(hpxml_header, hpxml_bldg, cfa, nbeds)
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
       # ASHRAE 62.2 default for average floor to ceiling height
@@ -681,6 +681,16 @@ class HPXMLDefaults
     if hpxml_bldg.building_construction.number_of_units.nil?
       hpxml_bldg.building_construction.number_of_units = 1
       hpxml_bldg.building_construction.number_of_units_isdefaulted = true
+    end
+    if hpxml_bldg.building_construction.floor_height_above_grade.nil?
+      floors = hpxml_bldg.floors.select { |floor| floor.is_floor }
+      exterior_floors = floors.select { |floor| floor.is_exterior }
+      if floors.size > 0 && floors.size == exterior_floors.size && !hpxml_header.apply_ashrae140_assumptions
+        hpxml_bldg.building_construction.floor_height_above_grade = 2.0
+      else
+        hpxml_bldg.building_construction.floor_height_above_grade = 0.0
+      end
+      hpxml_bldg.building_construction.floor_height_above_grade_isdefaulted = true
     end
   end
 
