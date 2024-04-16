@@ -49,10 +49,9 @@ class HVACSizing
       apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      # apply_hvac_airflow_adjustments(mj, hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      # apply_hvac_fan_power_adjustment() # TODO
+      apply_hvac_fan_power_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
 
       if update_hpxml
         # Assign capacities, airflows, etc. to HPXML systems
@@ -1902,6 +1901,9 @@ class HVACSizing
   end
 
   def self.apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
+    @Cool_Airflow = hvac_sizing_values.Cool_Airflow
+    @Heat_Airflow = hvac_sizing_values.Heat_Airflow
+
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
       if cooling_autosizing_limit.nil?
@@ -1995,147 +1997,20 @@ class HVACSizing
     # Override HVAC airflows if values are provided
     if not hvac_cooling.nil?
       fixed_cooling_airflow = hvac_cooling.cooling_airflow_cfm
-      cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
     end
-    if (not fixed_cooling_airflow.nil?) && (hvac_sizing_values.Cool_Airflow > 0) && cooling_autosizing_limit.nil?
+    autosized_cooling_airflow = hvac_sizing_values.Cool_Airflow
+    if (not fixed_cooling_airflow.nil?) && (autosized_cooling_airflow > 0)
       hvac_sizing_values.Cool_Airflow = fixed_cooling_airflow
       hvac_sizing_values.Cool_Airflow_isdefaulted = false
     end
     if not hvac_heating.nil?
       fixed_heating_airflow = hvac_heating.heating_airflow_cfm
-      heating_autosizing_limit = hvac_heating.heating_autosizing_limit
     end
-    if (not fixed_heating_airflow.nil?) && (hvac_sizing_values.Heat_Airflow > 0) && heating_autosizing_limit.nil?
+    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
+    if (not fixed_heating_airflow.nil?) && (autosized_heating_airflow > 0)
       hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
       hvac_sizing_values.Heat_Airflow_isdefaulted = false
     end
-  end
-
-  def self.apply_hvac_airflow_adjustments(_mj, hvac_sizing_values, hvac_heating, hvac_cooling)
-    '''
-    Airflow Adjustments
-    '''
-
-    # Maximum airflow rate allowed for the duct system
-    max_heating_airflow, max_cooling_airflow = get_max_airflow(hvac_sizing_values, hvac_heating, hvac_cooling)
-    return if max_heating_airflow.nil? && max_cooling_airflow.nil?
-
-    max_airflow_allowed = [max_heating_airflow, max_cooling_airflow].max
-
-    # Maximum autosized airflow
-    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
-    autosized_cooling_airflow = hvac_sizing_values.Cool_Airflow
-    max_airflow = [autosized_heating_airflow, autosized_cooling_airflow].max
-
-    # If maximum autosized airflow is not limited, do nothing
-    return if max_airflow <= max_airflow_allowed
-
-    # Autosized capacities
-    autosized_heating_capacity = hvac_sizing_values.Heat_Capacity
-    autosized_cooling_capacity = hvac_sizing_values.Cool_Capacity
-
-    heating_type = get_hvac_heating_type(hvac_heating)
-
-    if [HPXML::HVACTypeHeatPumpAirToAir,
-        HPXML::HVACTypeHeatPumpMiniSplit,
-        HPXML::HVACTypeHeatPumpPTHP,
-        HPXML::HVACTypeHeatPumpRoom,
-        HPXML::HVACTypeHeatPumpGroundToAir].include? heating_type
-
-      if autosized_cooling_airflow > autosized_heating_airflow
-        # Design cooling airflow rate exceeds max allowed, adjust cooling capacity
-        hvac_sizing_values.Cool_Airflow = max_airflow_allowed
-        hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Cool_Airflow_isdefaulted = false
-
-        if autosized_heating_capacity > 0
-          # supply_air_temp = hvac_heating.additional_properties.supply_air_temp
-          hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Cool_Capacity
-          # hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Cool_Capacity
-          # hvac_sizing_values.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizing_values.Heat_Capacity)
-          hvac_sizing_values.Heat_Airflow *= hvac_sizing_values.Heat_Capacity / autosized_heating_capacity
-          hvac_sizing_values.Heat_Airflow_isdefaulted = false
-        end
-      else
-        # Design heating airflow rate exceeds max allowed, adjust heating capacity
-        hvac_sizing_values.Heat_Airflow = max_airflow_allowed
-        hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-        # hvac_sizing_values.Heat_Capacity_Supp *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-        hvac_sizing_values.Heat_Airflow_isdefaulted = false
-
-        if autosized_cooling_capacity > 0
-          # leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
-          hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Heat_Capacity
-          hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-          # hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Capacity_Sens, (mj.cool_setpoint - leaving_air_temp), hvac_sizing_values.Cool_Capacity)
-          hvac_sizing_values.Cool_Airflow *= hvac_sizing_values.Cool_Capacity / autosized_cooling_capacity
-          hvac_sizing_values.Cool_Airflow_isdefaulted = false
-        end
-      end
-    else # not a heat pump; heating/cooling capacities don't need to be the same
-      if autosized_cooling_capacity > 0
-        hvac_sizing_values.Cool_Airflow = max_cooling_airflow
-        hvac_sizing_values.Cool_Capacity *= hvac_sizing_values.Cool_Airflow / autosized_cooling_airflow
-        hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * @hvac_cooling_shr
-        hvac_sizing_values.Cool_Airflow_isdefaulted = false
-      end
-      if autosized_heating_capacity > 0
-        hvac_sizing_values.Heat_Airflow = max_heating_airflow
-        hvac_sizing_values.Heat_Capacity *= hvac_sizing_values.Heat_Airflow / autosized_heating_airflow
-        hvac_sizing_values.Heat_Airflow_isdefaulted = false
-      end
-    end
-
-    # W/cfm of the blower fan
-    fan_watts_per_cfm = get_fan_watts_per_cfm(hvac_heating, hvac_cooling)
-    return if fan_watts_per_cfm.nil?
-
-    hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = get_adjusted_fan_watts_per_cfm(hvac_sizing_values, max_airflow, fan_watts_per_cfm)
-  end
-
-  def self.get_max_airflow(hvac_sizing_values, htg_sys, clg_sys)
-    if !htg_sys.nil? && !clg_sys.nil?
-      if !htg_sys.max_heating_airflow_cfm.nil? && !clg_sys.max_cooling_airflow_cfm.nil?
-        return htg_sys.max_heating_airflow_cfm, clg_sys.max_cooling_airflow_cfm
-      elsif !htg_sys.max_heating_airflow_cfm.nil?
-        return htg_sys.max_heating_airflow_cfm, hvac_sizing_values.Cool_Airflow
-      elsif !clg_sys.max_cooling_airflow_cfm.nil?
-        return hvac_sizing_values.Heat_Airflow, clg_sys.max_cooling_airflow_cfm
-      end
-    elsif !htg_sys.nil?
-      if !htg_sys.max_heating_airflow_cfm.nil?
-        return htg_sys.max_heating_airflow_cfm, 0.0
-      end
-    elsif !clg_sys.nil?
-      if !clg_sys.max_cooling_airflow_cfm.nil?
-        return 0.0, clg_sys.max_cooling_airflow_cfm
-      end
-    end
-    return nil, nil
-  end
-
-  def self.get_fan_watts_per_cfm(htg_sys, clg_sys)
-    if !htg_sys.nil? && !clg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil? && !clg_sys.fan_watts_per_cfm.nil?
-      return if htg_sys.fan_watts_per_cfm != clg_sys.fan_watts_per_cfm
-
-      return htg_sys.fan_watts_per_cfm
-    elsif !htg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil?
-      return htg_sys.fan_watts_per_cfm
-    elsif !clg_sys.nil? && !clg_sys.fan_watts_per_cfm.nil?
-      return clg_sys.fan_watts_per_cfm
-    end
-    return
-  end
-
-  def self.get_adjusted_fan_watts_per_cfm(hvac_sizing_values, max_airflow, fan_watts_per_cfm)
-    v_baseline = max_airflow
-    v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-
-    p_int = v_baseline * fan_watts_per_cfm
-    p_upgrade = p_int * (v_upgrade / v_baseline)**3
-    adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
-    return adjusted_fan_watts_per_cfm
   end
 
   def self.apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
@@ -2290,6 +2165,38 @@ class HVACSizing
         hvac_sizing_values.Cool_Airflow *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
       end
     end
+  end
+
+  def self.apply_hvac_fan_power_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
+    # W/cfm of the blower fan
+    fan_watts_per_cfm = get_fan_watts_per_cfm(hvac_heating, hvac_cooling)
+    return if fan_watts_per_cfm.nil?
+
+    max_airflow = [@Heat_Airflow, @Cool_Airflow].max
+    max_airflow_allowed = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+    return if max_airflow <= max_airflow_allowed
+
+    v_baseline = max_airflow
+    v_upgrade = max_airflow_allowed
+
+    p_int = v_baseline * fan_watts_per_cfm
+    p_upgrade = p_int * (v_upgrade / v_baseline)**3
+    adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
+
+    hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
+  end
+
+  def self.get_fan_watts_per_cfm(htg_sys, clg_sys)
+    if !htg_sys.nil? && !clg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil? && !clg_sys.fan_watts_per_cfm.nil?
+      return if htg_sys.fan_watts_per_cfm != clg_sys.fan_watts_per_cfm
+
+      return htg_sys.fan_watts_per_cfm
+    elsif !htg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil?
+      return htg_sys.fan_watts_per_cfm
+    elsif !clg_sys.nil? && !clg_sys.fan_watts_per_cfm.nil?
+      return clg_sys.fan_watts_per_cfm
+    end
+    return
   end
 
   def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
