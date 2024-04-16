@@ -1901,9 +1901,6 @@ class HVACSizing
   end
 
   def self.apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
-    @Cool_Airflow = hvac_sizing_values.Cool_Airflow
-    @Heat_Airflow = hvac_sizing_values.Heat_Airflow
-
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
       if cooling_autosizing_limit.nil?
@@ -1911,7 +1908,7 @@ class HVACSizing
       end
 
       cooling_autosizing_factor = [hvac_cooling.cooling_autosizing_factor, cooling_autosizing_limit / hvac_sizing_values.Cool_Capacity].min
-
+      puts "cooling_autosizing_factor #{cooling_autosizing_factor}"
       hvac_sizing_values.Cool_Capacity *= cooling_autosizing_factor
       hvac_sizing_values.Cool_Airflow *= cooling_autosizing_factor
       hvac_sizing_values.Cool_Capacity_Sens *= cooling_autosizing_factor
@@ -2172,12 +2169,23 @@ class HVACSizing
     fan_watts_per_cfm = get_fan_watts_per_cfm(hvac_heating, hvac_cooling)
     return if fan_watts_per_cfm.nil?
 
-    max_airflow = [@Heat_Airflow, @Cool_Airflow].max
-    max_airflow_allowed = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-    return if max_airflow <= max_airflow_allowed
+    heating_autosizing_limit = hvac_heating.heating_autosizing_limit
+    cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
+    return if heating_autosizing_limit.nil? && cooling_autosizing_limit.nil?
 
-    v_baseline = max_airflow
-    v_upgrade = max_airflow_allowed
+    if (not heating_autosizing_limit.nil?) && (not cooling_autosizing_limit.nil?)
+      max_autosizing_limit = [heating_autosizing_limit, cooling_autosizing_limit].max
+    elsif (not heating_autosizing_limit.nil?)
+      max_autosizing_limit = heating_autosizing_limit
+    elsif (not cooling_autosizing_limit.nil?)
+      max_autosizing_limit = cooling_autosizing_limit
+    end
+
+    # FIXME: should v_baseline and v_upgrade be switched here?
+    v_baseline = UnitConversions.convert(max_autosizing_limit, 'Btu/hr', 'ton') * 400.0
+    v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
+    # v_upgrade = UnitConversions.convert(max_autosizing_limit, 'Btu/hr', 'ton') * 400.0
+    # v_baseline = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
 
     p_int = v_baseline * fan_watts_per_cfm
     p_upgrade = p_int * (v_upgrade / v_baseline)**3
