@@ -683,9 +683,10 @@ class HPXMLDefaults
       hpxml_bldg.building_construction.number_of_units_isdefaulted = true
     end
     if hpxml_bldg.building_construction.floor_height_above_grade.nil?
-      floors = hpxml_bldg.floors.select { |floor| floor.is_floor }
+      # Check if all floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
+      floors = hpxml_bldg.floors.select { |floor| floor.is_floor && floor.is_thermal_boundary }
       exterior_floors = floors.select { |floor| floor.is_exterior }
-      if floors.size > 0 && floors.size == exterior_floors.size && !hpxml_header.apply_ashrae140_assumptions
+      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && !hpxml_header.apply_ashrae140_assumptions
         hpxml_bldg.building_construction.floor_height_above_grade = 2.0
       else
         hpxml_bldg.building_construction.floor_height_above_grade = 0.0
