@@ -953,8 +953,7 @@ class HVACSizing
     '''
 
     infil_values = Airflow.get_values_from_air_infiltration_measurements(@hpxml_bldg, @cfa, weather)
-    sla = infil_values[:sla] * infil_values[:a_ext]
-    ela = sla * @cfa
+    ela = infil_values[:sla] * @cfa * infil_values[:a_ext] # Account for exterior exposure
 
     ncfl_ag = @hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
