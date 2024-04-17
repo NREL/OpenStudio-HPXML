@@ -1614,11 +1614,26 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, true, 999, 1.2)
 
+    # Test autosizing with limits
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 5000, true, 999, 1.0)
+
+    # Test autosizing with limits 2
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 24200, true, 999, 1.0)
+
     # Test defaults w/ in-unit boiler
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].pilot_light_btuh = nil
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 170.0, nil, true, 500, 1.0)

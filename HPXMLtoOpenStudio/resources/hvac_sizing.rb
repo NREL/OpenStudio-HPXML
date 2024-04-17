@@ -1926,7 +1926,7 @@ class HVACSizing
     if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
       backup_heating_autosizing_limit = hvac_cooling.backup_heating_autosizing_limit
       if backup_heating_autosizing_limit.nil?
-        backup_heating_autosizing_limit = hvac_sizing_values.Heat_Capacity_Supp
+        backup_heating_autosizing_limit = 1 / Constants.small
       end
 
       backup_heating_autosizing_factor = [hvac_cooling.backup_heating_autosizing_factor, backup_heating_autosizing_limit / hvac_sizing_values.Heat_Capacity_Supp].min
