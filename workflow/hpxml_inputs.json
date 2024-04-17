@@ -2162,7 +2162,7 @@
   "sample_files/base-hvac-furnace-gas-only-autosize-limit.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
     "heating_system_heating_capacity": null,
-    "heating_system_heating_autosizing_limit": 15000
+    "heating_system_heating_autosizing_limit": 25000
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
