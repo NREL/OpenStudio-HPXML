@@ -332,7 +332,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-                <HeatingAutosizingLimit>10000.0</HeatingAutosizingLimit>
+                <HeatingAutosizingLimit>15000.0</HeatingAutosizingLimit>
               </extension>
             </HeatingSystem>
           </HVACPlant>

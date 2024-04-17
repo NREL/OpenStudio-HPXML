@@ -332,7 +332,7 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
               <extension>
-                <CoolingAutosizingLimit>10000.0</CoolingAutosizingLimit>
+                <CoolingAutosizingLimit>15000.0</CoolingAutosizingLimit>
               </extension>
             </CoolingSystem>
           </HVACPlant>

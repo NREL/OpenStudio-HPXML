@@ -1699,9 +1699,9 @@
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
     "heat_pump_backup_heating_capacity": null,
-    "heat_pump_cooling_autosizing_limit": 10000,
-    "heat_pump_heating_autosizing_limit": 10000,
-    "heat_pump_backup_heating_autosizing_limit": 10000
+    "heat_pump_cooling_autosizing_limit": 15000,
+    "heat_pump_heating_autosizing_limit": 15000,
+    "heat_pump_backup_heating_autosizing_limit": 15000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
@@ -1796,9 +1796,9 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
-    "heat_pump_cooling_autosizing_limit": 10000,
-    "heat_pump_heating_autosizing_limit": 10000,
-    "heating_system_2_heating_autosizing_limit": 10000
+    "heat_pump_cooling_autosizing_limit": 15000,
+    "heat_pump_heating_autosizing_limit": 15000,
+    "heating_system_2_heating_autosizing_limit": 15000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1941,7 +1941,7 @@
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-limit.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "cooling_system_cooling_capacity": null,
-    "cooling_system_cooling_autosizing_limit": 10000
+    "cooling_system_cooling_autosizing_limit": 15000
   },
   "sample_files/base-hvac-central-ac-only-1-speed-seer2.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2162,7 +2162,7 @@
   "sample_files/base-hvac-furnace-gas-only-autosize-limit.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
     "heating_system_heating_capacity": null,
-    "heating_system_heating_autosizing_limit": 10000
+    "heating_system_heating_autosizing_limit": 15000
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2441,8 +2441,10 @@
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-autosize-limit.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
-    "heat_pump_heating_autosizing_limit": 400,
-    "heat_pump_cooling_autosizing_limit": 500
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_heating_autosizing_limit": 15000,
+    "heat_pump_cooling_autosizing_limit": 15000
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",

@@ -1453,8 +1453,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = nil
     hpxml_bldg.heating_systems[0].heating_airflow_cfm = nil
-    hpxml_bldg.heating_systems[0].max_heating_airflow_cfm = nil
-    hpxml_bldg.cooling_systems[0].max_cooling_airflow_cfm = nil
     hpxml_bldg.heating_systems[0].airflow_defect_ratio = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].pilot_light_btuh = nil
