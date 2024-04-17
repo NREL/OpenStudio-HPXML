@@ -1788,6 +1788,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
+    "heating_system_2_heating_capacity": null,
     "heat_pump_cooling_autosizing_factor": 1.7,
     "heat_pump_heating_autosizing_factor": 1.4,
     "heating_system_2_heating_autosizing_factor": 0.9
@@ -1796,6 +1797,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
+    "heating_system_2_heating_capacity": null,
     "heat_pump_cooling_autosizing_limit": 15000,
     "heat_pump_heating_autosizing_limit": 15000,
     "heating_system_2_heating_autosizing_limit": 15000
