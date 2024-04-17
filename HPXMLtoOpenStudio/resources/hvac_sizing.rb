@@ -51,7 +51,6 @@ class HVACSizing
       apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
-      apply_hvac_fan_power_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
 
       if update_hpxml
         # Assign capacities, airflows, etc. to HPXML systems
@@ -1904,11 +1903,11 @@ class HVACSizing
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
       if cooling_autosizing_limit.nil?
-        cooling_autosizing_limit = hvac_sizing_values.Cool_Capacity
+        cooling_autosizing_limit = 1 / Constants.small
       end
 
       cooling_autosizing_factor = [hvac_cooling.cooling_autosizing_factor, cooling_autosizing_limit / hvac_sizing_values.Cool_Capacity].min
-      puts "cooling_autosizing_factor #{cooling_autosizing_factor}"
+
       hvac_sizing_values.Cool_Capacity *= cooling_autosizing_factor
       hvac_sizing_values.Cool_Airflow *= cooling_autosizing_factor
       hvac_sizing_values.Cool_Capacity_Sens *= cooling_autosizing_factor
@@ -1916,7 +1915,7 @@ class HVACSizing
     if not hvac_heating.nil?
       heating_autosizing_limit = hvac_heating.heating_autosizing_limit
       if heating_autosizing_limit.nil?
-        heating_autosizing_limit = hvac_sizing_values.Heat_Capacity
+        heating_autosizing_limit = 1 / Constants.small
       end
 
       heating_autosizing_factor = [hvac_heating.heating_autosizing_factor, heating_autosizing_limit / hvac_sizing_values.Heat_Capacity].min
@@ -2162,49 +2161,6 @@ class HVACSizing
         hvac_sizing_values.Cool_Airflow *= (1.0 + hvac_cooling.airflow_defect_ratio.to_f)
       end
     end
-  end
-
-  def self.apply_hvac_fan_power_adjustment(hvac_sizing_values, hvac_heating, hvac_cooling)
-    # W/cfm of the blower fan
-    fan_watts_per_cfm = get_fan_watts_per_cfm(hvac_heating, hvac_cooling)
-    return if fan_watts_per_cfm.nil?
-
-    heating_autosizing_limit = hvac_heating.heating_autosizing_limit
-    cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
-    return if heating_autosizing_limit.nil? && cooling_autosizing_limit.nil?
-
-    if (not heating_autosizing_limit.nil?) && (not cooling_autosizing_limit.nil?)
-      max_autosizing_limit = [heating_autosizing_limit, cooling_autosizing_limit].max
-    elsif (not heating_autosizing_limit.nil?)
-      max_autosizing_limit = heating_autosizing_limit
-    elsif (not cooling_autosizing_limit.nil?)
-      max_autosizing_limit = cooling_autosizing_limit
-    end
-
-    # FIXME: should v_baseline and v_upgrade be switched here?
-    v_baseline = UnitConversions.convert(max_autosizing_limit, 'Btu/hr', 'ton') * 400.0
-    v_upgrade = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-    # v_upgrade = UnitConversions.convert(max_autosizing_limit, 'Btu/hr', 'ton') * 400.0
-    # v_baseline = [hvac_sizing_values.Heat_Airflow, hvac_sizing_values.Cool_Airflow].max
-
-    p_int = v_baseline * fan_watts_per_cfm
-    p_upgrade = p_int * (v_upgrade / v_baseline)**3
-    adjusted_fan_watts_per_cfm = p_upgrade / v_upgrade
-
-    hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM = adjusted_fan_watts_per_cfm
-  end
-
-  def self.get_fan_watts_per_cfm(htg_sys, clg_sys)
-    if !htg_sys.nil? && !clg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil? && !clg_sys.fan_watts_per_cfm.nil?
-      return if htg_sys.fan_watts_per_cfm != clg_sys.fan_watts_per_cfm
-
-      return htg_sys.fan_watts_per_cfm
-    elsif !htg_sys.nil? && !htg_sys.fan_watts_per_cfm.nil?
-      return htg_sys.fan_watts_per_cfm
-    elsif !clg_sys.nil? && !clg_sys.fan_watts_per_cfm.nil?
-      return clg_sys.fan_watts_per_cfm
-    end
-    return
   end
 
   def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)

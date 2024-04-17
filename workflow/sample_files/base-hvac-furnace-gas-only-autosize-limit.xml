@@ -332,7 +332,6 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-                <FanPowerWattsPerCFM>0.4</FanPowerWattsPerCFM>
                 <HeatingAutosizingLimit>10000.0</HeatingAutosizingLimit>
               </extension>
             </HeatingSystem>

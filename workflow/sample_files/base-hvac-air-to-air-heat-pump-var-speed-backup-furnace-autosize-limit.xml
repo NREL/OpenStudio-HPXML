@@ -357,7 +357,6 @@
                 <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <FanPowerWattsPerCFM>0.4</FanPowerWattsPerCFM>
                 <HeatingCapacityRetention>
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>
