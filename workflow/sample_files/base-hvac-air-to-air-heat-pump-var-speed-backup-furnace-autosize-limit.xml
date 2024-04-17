@@ -333,7 +333,7 @@
               </AnnualHeatingEfficiency>
               <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
               <extension>
-                <HeatingAutosizingLimit>15000.0</HeatingAutosizingLimit>
+                <HeatingAutosizingLimit>25000.0</HeatingAutosizingLimit>
               </extension>
             </HeatingSystem>
             <HeatPump>

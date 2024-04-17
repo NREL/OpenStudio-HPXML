@@ -1800,7 +1800,7 @@
     "heating_system_2_heating_capacity": null,
     "heat_pump_cooling_autosizing_limit": 15000,
     "heat_pump_heating_autosizing_limit": 15000,
-    "heating_system_2_heating_autosizing_limit": 15000
+    "heating_system_2_heating_autosizing_limit": 25000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
