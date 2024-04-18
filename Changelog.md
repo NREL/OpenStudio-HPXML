@@ -58,6 +58,8 @@ __New Features__
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
   - TV plug load schedules now use TV schedule fractions from the American Time Use Survey and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
   - Ceiling fan schedules now use ceiling fan schedule fractions and monthly multipliers from ANSI/RESNET/ICC 301-2022 Addendum C.
+  - Added calculations of unmet water heating load.
+  - Added capability to model 120V HPWHs
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
@@ -109,7 +111,10 @@ __New Features__
 - Allows above-grade basements/crawlspaces defined solely with Wall (not FoundationWall) elements.
 - Updates to 2022 EIA energy costs.
 - Added README.md documentation for all OpenStudio measures.
+<<<<<<< HEAD
+=======
 - Added metrics for unmet hot water loads
+>>>>>>> 6421080f9a642df9c9d7e3ae032c8467af5a1a4d
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.

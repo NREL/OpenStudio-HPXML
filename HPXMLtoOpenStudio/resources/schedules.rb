@@ -948,7 +948,7 @@ class Schedule
   def self.ShowersMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
-  
+
   def self.GeneralWaterUseWeekdayFractions
     return '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
   end
@@ -1433,7 +1433,7 @@ class SchedulesFile
     HotWaterDishwasher: Column.new('hot_water_dishwasher', false, true, :frac),
     HotWaterClothesWasher: Column.new('hot_water_clothes_washer', false, true, :frac),
     HotWaterFixtures: Column.new('hot_water_fixtures', true, true, :frac),
-	HotWaterShowers: Column.new('hot_water_showers', true, true, :frac),
+    HotWaterShowers: Column.new('hot_water_showers', true, true, :frac),
     HotWaterRecirculationPump: Column.new('hot_water_recirculation_pump', true, false, :frac),
     GeneralWaterUse: Column.new('general_water_use', true, false, :frac),
     Sleeping: Column.new('sleeping', false, false, nil),
