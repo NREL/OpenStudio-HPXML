@@ -53,6 +53,9 @@
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
         <extension>
+          <HVACGEBControl>
+            <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
+          </HVACGEBControl>
           <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
@@ -360,9 +363,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <extension>
-              <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
-            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

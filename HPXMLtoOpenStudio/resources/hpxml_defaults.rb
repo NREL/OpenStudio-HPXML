@@ -247,6 +247,14 @@ class HPXMLDefaults
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
     end
 
+    # override temperature capacitance multiplier default
+    if (not hpxml_bldg.header.geb_onoff_thermostat_deadband.nil?) && hpxml_header.temperature_capacitance_multiplier_isdefaulted
+      hpxml_header.temperature_capacitance_multiplier = 7
+    end
+    if (not hpxml_bldg.header.geb_onoff_thermostat_deadband.nil?) && hpxml_header.timestep_isdefaulted
+      hpxml_header.timestep = 1
+    end
+
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
       if not weather.nil?
         # Default based on Building America seasons
@@ -1882,16 +1890,6 @@ class HPXMLDefaults
       if hvac_control.cooling_setup_start_hour.nil? && (not hvac_control.cooling_setup_temp.nil?) && !schedules_file_includes_cooling_setpoint_temp
         hvac_control.cooling_setup_start_hour = 9 # 9 am
         hvac_control.cooling_setup_start_hour_isdefaulted = true
-      end
-
-      if hvac_control.onoff_thermostat_deadband.nil?
-        hvac_control.onoff_thermostat_deadband = 0.0
-        hvac_control.onoff_thermostat_deadband_isdefaulted = true
-      end
-
-      if hvac_control.realistic_staging.nil?
-        hvac_control.realistic_staging = false
-        hvac_control.onoff_thermostat_deadband_isdefaulted = true
       end
 
       if hvac_control.seasons_heating_begin_month.nil? || hvac_control.seasons_heating_begin_day.nil? ||

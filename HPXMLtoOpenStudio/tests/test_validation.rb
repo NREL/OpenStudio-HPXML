@@ -117,6 +117,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
+                            'hvac-geb-timestep-ten-mins' => ['Expected SoftwareInfo/extension/SimulationControl/Timestep to be 1.0'],
+                            'hvac-geb-onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
+                            'hvac-geb-onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
+                            'hvac-geb-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
+                            'hvac-geb-onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support dx systems'],
+                            'hvac-geb-onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system',
+                                                                           'Expected at maximum one heating system'],
                             'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
                             'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 79 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
@@ -223,16 +230,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'multifamily-reference-duct' => ['There are references to "other multifamily buffer space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-surface' => ['There are references to "other heated space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
                             'multifamily-reference-water-heater' => ['There are references to "other non-freezing space" but ResidentialFacilityType is not "single-family attached" or "apartment unit".'],
-                            'onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
-                            'onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
-                            'onoff-thermostat-negative-value' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0'],
-                            'onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support dx systems'],
-                            'onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system',
-                                                                  'Expected at maximum one heating system'],
-                            'realistic-staging-missiong-ddb' => ['Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature',
-                                                                 'Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
-                            'realistic-staging-wrong-num-speeds' => ["Expected ../../HVACPlant/*/CompressorType to be 'two stage'."],
-                            'realistic-staging-zero-ddb' => ['Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.'],
                             'negative-autosizing-factors' => ['CoolingAutosizingFactor should be greater than 0.0',
                                                               'HeatingAutosizingFactor should be greater than 0.0',
                                                               'BackupHeatingAutosizingFactor should be greater than 0.0'],
@@ -414,6 +411,30 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.cooling_systems[0].fraction_cool_load_served += 0.2
         hpxml_bldg.heating_systems[0].primary_system = true
         hpxml_bldg.cooling_systems[0].primary_system = true
+        hpxml_bldg.heat_pumps[-1].primary_heating_system = false
+        hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
+      elsif ['hvac-geb-timestep-ten-mins'].include? error_case
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml.header.timestep = 10
+      elsif ['hvac-geb-onoff-thermostat-heat-load-fraction'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
+      elsif ['hvac-geb-onoff-thermostat-cool-load-fraction'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
+      elsif ['hvac-geb-onoff-thermostat-negative-value'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml_bldg.header.geb_onoff_thermostat_deadband = -1.0
+      elsif ['hvac-geb-onoff-thermostat-wrong-cooling-system-type'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
+        hpxml_bldg.heat_pumps[0].compressor_type = nil
+      elsif ['hvac-geb-onoff-thermostat-two-heat-pumps'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
+        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
+        hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
+        hpxml_bldg.heat_pumps[-1].id = 'HeatPump2'
         hpxml_bldg.heat_pumps[-1].primary_heating_system = false
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-gshp-invalid-bore-config'].include? error_case
@@ -672,36 +693,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['multifamily-reference-water-heater'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
-      elsif ['onoff-thermostat-heat-load-fraction'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
-      elsif ['onoff-thermostat-cool-load-fraction'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
-      elsif ['onoff-thermostat-negative-value'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = -1.0
-      elsif ['onoff-thermostat-wrong-cooling-system-type'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
-        hpxml_bldg.heat_pumps[0].compressor_type = nil
-      elsif ['onoff-thermostat-two-heat-pumps'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
-        hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
-        hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
-        hpxml_bldg.heat_pumps[-1].id = 'HeatPump2'
-        hpxml_bldg.heat_pumps[-1].primary_heating_system = false
-        hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
-      elsif ['realistic-staging-missiong-ddb'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
-        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = nil
-      elsif ['realistic-staging-wrong-num-speeds'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml_bldg.hvac_controls[0].realistic_staging = true
-      elsif ['realistic-staging-zero-ddb'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-realistic-control-2-speed-central-ac.xml')
-        hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 0.0
       elsif ['negative-autosizing-factors'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml')
         hpxml_bldg.heat_pumps[0].heating_autosizing_factor = -0.5
@@ -800,6 +791,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                           'HSPF should typically be greater than or equal to 6.',
                                                           'EER should typically be greater than or equal to 8.',
                                                           'COP should typically be greater than or equal to 2.'],
+                              'hvac-geb-onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
                               'hvac-setpoints-high' => ['Heating setpoint should typically be less than or equal to 76 deg-F.',
                                                         'Cooling setpoint should typically be less than or equal to 86 deg-F.'],
                               'hvac-setpoints-low' => ['Heating setpoint should typically be greater than or equal to 58 deg-F.',
@@ -809,7 +801,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                             'No exterior lighting specified, the model will not include exterior lighting energy use.',
                                                             'No garage lighting specified, the model will not include garage lighting energy use.'],
                               'missing-attached-surfaces' => ['ResidentialFacilityType is single-family attached or apartment unit, but no attached surfaces were found. This may result in erroneous results (e.g., for infiltration).'],
-                              'onoff-thermostat-temperature-capacitance-multiplier-one' => ['TemperatureCapacitanceMultiplier should typically be greater than 1.'],
                               'plug-load-type-sauna' => ["Plug load type 'sauna' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-aquarium' => ["Plug load type 'aquarium' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-water-bed' => ["Plug load type 'water bed' is not currently handled, the plug load will not be modeled."],
@@ -937,8 +928,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
-      elsif ['onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
-        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+      elsif ['hvac-geb-onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
         hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1543,12 +1534,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'duct-lto-percent' => ['Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.'],
                               'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
+                              'hvac-geb-onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems. Simulation continues without on-off thermostat deadband control.'],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
-                              'onoff-thermostat-timestep-ten-mins' => ['On-off thermostat deadband currently is only supported for 1 min timestep. Simulation continues without on-off thermostat deadband control.'],
-                              'onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems. Simulation continues without on-off thermostat deadband control.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -1698,11 +1688,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-setpoint-adjustments-daily-schedules'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
-      elsif ['onoff-thermostat-timestep-ten-mins'].include? warning_case
-        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
-        hpxml.header.timestep = 10
-      elsif ['onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml')
+      elsif ['hvac-geb-onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')

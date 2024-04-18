@@ -155,14 +155,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         check_schedule_references(hpxml_bldg.header, hpxml_path)
         in_schedules_csv = 'in.schedules.csv'
         in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
-        # Fixme: do we need to check system number of speed?
-        offset_db = hpxml_bldg.hvac_controls.size == 0 ? nil : hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband
+        # Fixme: do we need to check system number of speed? Default hasn't been applied yet, so compressor can be unknown.
         schedules_file = SchedulesFile.new(runner: runner,
                                            schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(output_dir, in_schedules_csv),
-                                           offset_db: offset_db)
+                                           offset_db: hpxml_bldg.header.geb_onoff_thermostat_deadband)
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
@@ -1784,7 +1783,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
     has_ceiling_fan = (@hpxml_bldg.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml_header.sim_calendar_year, @schedules_file)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml_header.sim_calendar_year, @schedules_file, @hpxml_bldg.header)
   end
 
   def add_ceiling_fans(runner, model, weather, spaces)
@@ -2116,9 +2115,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       hvac_control = hpxml_bldg.hvac_controls[0]
       next if hvac_control.nil?
+      onoff_deadbands[unit] = hpxml_bldg.header.geb_onoff_thermostat_deadband.to_f
 
-      if (hvac_control.onoff_thermostat_deadband.to_f > 0)
-        onoff_deadbands[unit] = hvac_control.onoff_thermostat_deadband.to_f
+      if (onoff_deadbands[unit] > 0)
         zone_air_temp_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
         zone_air_temp_sensors[unit].setName('living_space_temp')
         zone_air_temp_sensors[unit].setKeyName(conditioned_zone_name)

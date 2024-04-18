@@ -1395,12 +1395,8 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     elsif ['base-hvac-ducts-area-fractions.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
       hpxml_bldg.hvac_distributions[0].ducts[2].duct_insulation_r_value = 4.0
-    elsif (hpxml_file.include? 'onoff-thermostat-deadband') || (hpxml_file.include? 'hvac-realistic-control')
-      hpxml_bldg.hvac_controls[0].onoff_thermostat_deadband = 2.0
-      if ['base-hvac-realistic-control-2-speed-ashp.xml',
-          'base-hvac-realistic-control-2-speed-central-ac.xml'].include? hpxml_file
-        hpxml_bldg.hvac_controls[0].realistic_staging = true
-      end
+    elsif (hpxml_file.include? 'geb')
+      hpxml_bldg.header.geb_onoff_thermostat_deadband = 2.0
     elsif ['base-enclosure-2stories.xml',
            'base-enclosure-2stories-garage.xml'].include? hpxml_file
       hpxml_bldg.hvac_distributions[0].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup

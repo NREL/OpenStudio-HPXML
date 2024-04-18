@@ -2449,19 +2449,19 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
-  "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000
   },
-  "sample_files/base-hvac-onoff-thermostat-deadband-room-air-conditioner.xml": {
+  "sample_files/base-hvac-room-air-conditioner-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7
   },
-  "sample_files/base-hvac-onoff-thermostat-deadband-detailed-setpoints.xml": {
-    "parent_hpxml": "sample_files/base-hvac-onoff-thermostat-deadband-air-to-air-heat-pump-1-speed.xml",
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff-detailed-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml",
     "hvac_control_heating_weekday_setpoint": null,
     "hvac_control_heating_weekend_setpoint": null,
     "hvac_control_cooling_weekday_setpoint": null,
@@ -2503,13 +2503,13 @@
   "sample_files/base-hvac-pthp-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-pthp.xml"
   },
-  "sample_files/base-hvac-realistic-control-2-speed-ashp.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000
   },
-  "sample_files/base-hvac-realistic-control-2-speed-central-ac.xml": {
+  "sample_files/base-hvac-central-ac-only-2-speed-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,

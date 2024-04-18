@@ -288,8 +288,30 @@
       <sch:assert role='ERROR' test='count(h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
       <sch:assert role='ERROR' test='count(h:extension/h:ShadingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ShadingControl</sch:assert> <!-- See [ShadingControl] -->
       <sch:assert role='ERROR' test='count(h:extension/h:NaturalVentilationAvailabilityDaysperWeek) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/NaturalVentilationAvailabilityDaysperWeek</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:HVACGEBControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/HVACGEBControl</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NaturalVentilationAvailabilityDaysperWeek) &gt;= 0 or not(h:extension/h:NaturalVentilationAvailabilityDaysperWeek)'>Expected extension/NaturalVentilationAvailabilityDaysperWeek to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:extension/h:NaturalVentilationAvailabilityDaysperWeek) &lt;= 7 or not(h:extension/h:NaturalVentilationAvailabilityDaysperWeek)'>Expected extension/NaturalVentilationAvailabilityDaysperWeek to be less than or equal to 7</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HVACGEBControl]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:extension/h:HVACGEBControl'>
+      <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: OnOffThermostatDeadbandTemperature</sch:assert>
+      <sch:assert role='ERROR' test='number(h:OnOffThermostatDeadbandTemperature) &gt; 0 or not(h:OnOffThermostatDeadbandTemperature)'>Expected OnOffThermostatDeadbandTemperature to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) = 1 or not(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep)'>Expected SoftwareInfo/extension/SimulationControl/Timestep to be 1.0</sch:assert> <!-- minutes; must be a divisor of 60 -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HVACGEBControl=DeadbandControl]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:extension/h:HVACGEBControl[h:OnOffThermostatDeadbandTemperature]'>
+      <sch:assert role='ERROR' test='count(../../../h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:FractionCoolLoadServed > 0]) + count(../../../h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionCoolLoadServed > 0]) &lt;= 1'>Expected at maximum one cooling system</sch:assert>
+      <sch:assert role='ERROR' test='count(../../../h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:FractionHeatLoadServed > 0]) + count(../../../h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionHeatLoadServed > 0]) &lt;= 1'>Expected at maximum one heating system</sch:assert>
+      <sch:assert role='ERROR' test='../../../h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="packaged terminal air conditioner"] or ../../../h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:HeatPumpType[text() = "air-to-air"] or count(../../../h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Unexpected cooling system types, only support dx systems</sch:assert>
+      <sch:assert role='ERROR' test='sum(../../../h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(../../../h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(../../../h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../../../h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
+      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
     </sch:rule>
   </sch:pattern>
 
@@ -1549,36 +1571,6 @@
       <sch:assert role='ERROR' test='number(h:extension/h:AirflowDefectRatio) = 0 or not(h:extension/h:AirflowDefectRatio)'>Expected extension/AirflowDefectRatio to be 0</sch:assert>
     </sch:rule>
   </sch:pattern>      
-
-  <sch:pattern>
-    <sch:title>[HVACControl]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl'>
-      <sch:assert role='ERROR' test='count(h:extension/h:OnOffThermostatDeadbandTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/OnOffThermostatDeadbandTemperature</sch:assert> <!-- deg F, specify a positive value of deadband between setpoint and cutout temperature to model on/off thermostat behavior. The same value applies to both heating and cooling. See [HVACControl=DeadbandControl] -->
-      <sch:assert role='ERROR' test='number(h:extension/h:OnOffThermostatDeadbandTemperature) &gt;= 0 or not(h:extension/h:OnOffThermostatDeadbandTemperature)'>Expected extension/OnOffThermostatDeadbandTemperature to be greater than or equal to 0</sch:assert>
-      <sch:assert role='ERROR' test='count(h:extension/h:TwospeedRealisticStaging) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TwospeedRealisticStaging</sch:assert> <!-- See [TwospeedRealisticStaging=true] -->
-    </sch:rule>
-  </sch:pattern>
-  
-  <sch:pattern>
-    <sch:title>[HVACControl=DeadbandControl]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[number(h:extension/h:OnOffThermostatDeadbandTemperature) &gt; 0]'>
-      <sch:assert role='ERROR' test='count(../h:HVACPlant/h:CoolingSystem[h:FractionCoolLoadServed > 0]) + count(../h:HVACPlant/h:HeatPump[h:FractionCoolLoadServed > 0]) &lt;= 1'>Expected at maximum one cooling system</sch:assert>
-      <sch:assert role='ERROR' test='count(../h:HVACPlant/h:HeatingSystem[h:FractionHeatLoadServed > 0]) + count(../h:HVACPlant/h:HeatPump[h:FractionHeatLoadServed > 0]) &lt;= 1'>Expected at maximum one heating system</sch:assert>
-      <sch:assert role='ERROR' test='../h:HVACPlant/h:CoolingSystem/h:CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="packaged terminal air conditioner"] or ../h:HVACPlant/h:HeatPump/h:HeatPumpType[text() = "air-to-air"] or count(../h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Unexpected cooling system types, only support dx systems</sch:assert>
-      <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
-      <sch:assert role='ERROR' test='sum(../h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
-      <sch:report role='WARN' test='number(../../../../../h:SoftwareInfo/h:extension/h:SimulationControl/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[TwospeedRealisticStaging=true]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:extension[h:TwospeedRealisticStaging="true"]'>
-      <sch:assert role='ERROR' test='count(../../h:HVACPlant/*/h:CompressorType[text()="two stage"]) = count(../../h:HVACPlant/*/h:CompressorType)'>Expected ../../HVACPlant/*/CompressorType to be 'two stage'.</sch:assert>
-      <sch:assert role='ERROR' test='count(h:OnOffThermostatDeadbandTemperature) = 1'>Expected 1 element(s) for xpath: OnOffThermostatDeadbandTemperature</sch:assert>
-      <sch:assert role='ERROR' test='number(h:OnOffThermostatDeadbandTemperature) &gt; 0'>Expected extension/OnOffThermostatDeadbandTemperature to be greater than 0.</sch:assert>
-    </sch:rule>
-  </sch:pattern>
 
   <sch:pattern>
     <sch:title>[HVACControl=Heating]</sch:title>

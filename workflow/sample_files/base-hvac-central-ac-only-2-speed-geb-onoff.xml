@@ -52,6 +52,11 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <HVACGEBControl>
+            <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
+          </HVACGEBControl>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -338,10 +343,6 @@
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
-            <extension>
-              <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
-              <TwospeedRealisticStaging>true</TwospeedRealisticStaging>
-            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

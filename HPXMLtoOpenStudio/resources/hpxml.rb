@@ -1974,7 +1974,7 @@ class HPXML < Object
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
              :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
              :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants,
-             :manualj_daily_temp_range, :manualj_humidity_difference]
+             :manualj_daily_temp_range, :manualj_humidity_difference, :geb_onoff_thermostat_deadband]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2005,6 +2005,10 @@ class HPXML < Object
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
+      end
+      if (not @geb_onoff_thermostat_deadband.nil?)
+        hvac_geb_control = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACGEBControl'])
+        XMLHelper.add_element(hvac_geb_control, 'OnOffThermostatDeadbandTemperature', @geb_onoff_thermostat_deadband, :float, @geb_onoff_thermostat_deadband_isdefaulted)
       end
       XMLHelper.add_extension(building_summary, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
       if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
@@ -2052,6 +2056,7 @@ class HPXML < Object
       @manualj_internal_loads_sensible = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
       @manualj_internal_loads_latent = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
       @manualj_num_occupants = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
+      @geb_onoff_thermostat_deadband = XMLHelper.get_value(building_summary, 'extension/HVACGEBControl/OnOffThermostatDeadbandTemperature', :float)
       @extension_properties = {}
       XMLHelper.get_elements(building_summary, 'extension/AdditionalProperties').each do |property|
         property.children.each do |child|
@@ -5000,8 +5005,7 @@ class HPXML < Object
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
-             :ceiling_fan_cooling_setpoint_temp_offset, :onoff_thermostat_deadband,
-             :realistic_staging, :weekday_heating_setpoints, :weekend_heating_setpoints,
+             :ceiling_fan_cooling_setpoint_temp_offset, :weekday_heating_setpoints, :weekend_heating_setpoints,
              :weekday_cooling_setpoints, :weekend_cooling_setpoints,
              :seasons_heating_begin_month, :seasons_heating_begin_day, :seasons_heating_end_month, :seasons_heating_end_day,
              :seasons_cooling_begin_month, :seasons_cooling_begin_day, :seasons_cooling_end_month, :seasons_cooling_end_day]
@@ -5055,8 +5059,6 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsHeatingSeason', @weekend_heating_setpoints, :string) unless @weekend_heating_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekdaySetpointTempsCoolingSeason', @weekday_cooling_setpoints, :string) unless @weekday_cooling_setpoints.nil?
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
-      XMLHelper.add_extension(hvac_control, 'OnOffThermostatDeadbandTemperature', @onoff_thermostat_deadband, :float, @onoff_thermostat_deadband_isdefaulted) unless @onoff_thermostat_deadband.nil?
-      XMLHelper.add_extension(hvac_control, 'TwospeedRealisticStaging', @realistic_staging, :boolean, @realistic_staging_isdefaulted) unless @realistic_staging.nil?
     end
 
     def from_doc(hvac_control)
@@ -5085,8 +5087,6 @@ class HPXML < Object
       @weekend_heating_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsHeatingSeason', :string)
       @weekday_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekdaySetpointTempsCoolingSeason', :string)
       @weekend_cooling_setpoints = XMLHelper.get_value(hvac_control, 'extension/WeekendSetpointTempsCoolingSeason', :string)
-      @onoff_thermostat_deadband = XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadbandTemperature', :float)
-      @realistic_staging = XMLHelper.get_value(hvac_control, 'extension/TwospeedRealisticStaging', :boolean)
     end
   end
 
