@@ -768,7 +768,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     _check_onoff_thermostat_EMS(model, htg_coil, 0.694, 0.474, -0.168, 2.185, -1.943, 0.757)
     _check_onoff_thermostat_EMS(model, clg_coil, 0.719, 0.418, -0.137, 1.143, -0.139, -0.00405)
 
-
     # Onoff thermostat with detailed setpoints
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-geb-onoff-detailed-setpoints.xml'))

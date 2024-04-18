@@ -2109,6 +2109,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       hvac_control = hpxml_bldg.hvac_controls[0]
       next if hvac_control.nil?
+
       onoff_deadbands[unit] = hpxml_bldg.header.geb_onoff_thermostat_deadband.to_f
 
       if (onoff_deadbands[unit] > 0)
