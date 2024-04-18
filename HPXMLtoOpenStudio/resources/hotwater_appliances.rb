@@ -417,6 +417,14 @@ class HotWaterAndAppliances
         end
       end
 
+      # FIXME: quick fix for tempering valves. Since the tempering valves are set to the setpoint of the normal WH, this only affects 120V Shared HPWHs with higher tank setpoints
+      # TODO: Formal support of tempering valves? Probably requires an HPXML change?
+      t_hot = 125.0 # F
+      hw_temp_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+      hw_temp_schedule.setName('hot water temperature schedule')
+      hw_temp_schedule.setValue(UnitConversions.convert(t_hot, 'F', 'C'))
+      Schedule.set_schedule_type_limits(model, hw_temp_schedule, Constants.ScheduleTypeLimitsTemperature)
+
       # Clothes washer
       if not clothes_washer.nil?
         gpd_frac = nil
@@ -438,7 +446,7 @@ class HotWaterAndAppliances
             cw_peak_flow = cw_schedule_obj.calc_design_level_from_daily_gpm(cw_gpd)
             water_cw_schedule = cw_schedule_obj.schedule
           end
-          add_water_use_equipment(model, cw_object_name, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
+          add_water_use_equipment(model, cw_object_name, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id], unit_multiplier, hw_temp_schedule)
         end
       end
 
@@ -465,7 +473,7 @@ class HotWaterAndAppliances
         dw_peak_flow = dw_schedule_obj.calc_design_level_from_daily_gpm(dw_gpd)
         water_dw_schedule = dw_schedule_obj.schedule
       end
-      add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
+      add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id], unit_multiplier, hw_temp_schedule)
     end
 
     if not apply_ashrae140_assumptions

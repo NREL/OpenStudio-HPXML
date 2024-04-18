@@ -61,14 +61,15 @@ class Waterheater
   end
 
   def self.apply_heatpump(model, runner, loc_space, loc_schedule, elevation, water_heating_system, ec_adj, solar_thermal_system, conditioned_zone, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
-    #TODO: flag for testing, need to add whether this is 120 V or 240 V, shared or dedicated circuit, to the HPXML files. Extension elements?
+    # TODO: flag for testing, need to add whether this is 120 V or 240 V, shared or dedicated circuit, to the HPXML files. Extension elements?
     hpwh_120V = true
-    hpwh_120V_type = 'shared' #'dedicated' 
-	
+    hpwh_120V_type = 'shared' # 'dedicated'
+
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    if hpwh_120V and hpwh_120V_type == 'shared'
-      t_set_c = 60.0 #FIXME: To account for higher setpoint + tempering valve. Leave delivery temperatures alone. Should specify tempering in OS-HPXML?
+    if hpwh_120V && (hpwh_120V_type == 'shared')
+      t_set_c = UnitConversions.convert(140.0, 'F', 'C') # FIXME: To account for higher setpoint + tempering valve. Leave delivery temperatures alone. Should specify tempering in OS-HPXML?
+      puts("t_set_c=#{t_set_c}")
     else
       t_set_c = get_t_set_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     end
@@ -90,8 +91,8 @@ class Waterheater
     top_element_setpoint_schedule.setName("#{obj_name_hpwh} TopElementSetpoint")
     bottom_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     bottom_element_setpoint_schedule.setName("#{obj_name_hpwh} BottomElementSetpoint")
-    
-    if hpwh_120V #no elements, HP only
+
+    if hpwh_120V # no elements, HP only
       top_element_setpoint_schedule.setValue(0.0)
       bottom_element_setpoint_schedule.setValue(0.0)
     end
@@ -148,7 +149,7 @@ class Waterheater
 
     # EMS for the HPWH control logic
     op_mode = water_heating_system.operating_mode
-    if not hpwh_120V #No EMS required when there's no elements
+    if not hpwh_120V # No EMS required when there's no elements
       hpwh_ctrl_program = add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, top_element_setpoint_schedule, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
     end
     # ProgramCallingManagers
@@ -652,9 +653,9 @@ class Waterheater
 
   private
 
-  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier, hpwh_120V, hpwh_120V_type)
+  def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier, hpwh_120V, _hpwh_120V_type)
     h_tank = get_tank_height()
-	h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
+    h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 * unit_multiplier # bottom node
     h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
     h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
@@ -724,7 +725,7 @@ class Waterheater
         hpwh_cop.setMinimumValueofy(0)
         hpwh_cop.setMaximumValueofy(100)
       else
-        cap = 0.357 * unit_multiplier# kW
+        cap = 0.357 * unit_multiplier # kW
         hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
         hpwh_cap.setName('HPWH-Cap-fT')
         hpwh_cap.setCoefficient1Constant(0.813229356)
@@ -752,7 +753,7 @@ class Waterheater
         hpwh_cop.setMaximumValueofy(100)
       end
     else
-      cap = 0.5 * unit_multiplier# kW
+      cap = 0.5 * unit_multiplier # kW
       hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
       hpwh_cap.setName('HPWH-Cap-fT')
       hpwh_cap.setCoefficient1Constant(0.563)
@@ -765,7 +766,7 @@ class Waterheater
       hpwh_cap.setMaximumValueofx(100)
       hpwh_cap.setMinimumValueofy(0)
       hpwh_cap.setMaximumValueofy(100)
-  
+
       hpwh_cop = OpenStudio::Model::CurveBiquadratic.new(model)
       hpwh_cop.setName('HPWH-COP-fT')
       hpwh_cop.setCoefficient1Constant(1.1332)
@@ -779,10 +780,10 @@ class Waterheater
       hpwh_cop.setMinimumValueofy(0)
       hpwh_cop.setMaximumValueofy(100)
     end
-    
+
     # Assumptions and values
     shr = 0.88 # unitless
-    
+
     # Calculate an altitude adjusted rated evaporator wetbulb temperature
     rated_ewb_F = 56.4
     rated_edb_F = 67.5
@@ -848,10 +849,10 @@ class Waterheater
     else
       e_cap = 4.5 # kW
     end
-    
+
     parasitics = 3.0 # W
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
-    #FIXME: Is this close enough to the right value for 120V, or do we need new UA values?
+    # FIXME: Is this close enough to the right value for 120V, or do we need new UA values?
     if water_heating_system.tank_volume <= 58.0
       tank_ua = 3.6 # Btu/h-R
     elsif water_heating_system.tank_volume <= 73.0
