@@ -194,16 +194,9 @@ class Outputs
     line_break = nil
 
     # Summary HVAC capacities
-    htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
-    hpxml_bldgs.each do |hpxml_bldg|
-      capacities = Outputs.get_total_hvac_capacities(hpxml_bldg)
-      htg_cap += capacities[0]
-      clg_cap += capacities[1]
-      hp_backup_cap += capacities[2]
-    end
-    results_out << ['HVAC Capacity: Heating (Btu/h)', htg_cap.round(1)]
-    results_out << ['HVAC Capacity: Cooling (Btu/h)', clg_cap.round(1)]
-    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hp_backup_cap.round(1)]
+    results_out << ['HVAC Capacity: Heating (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[0] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Cooling (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[1] }.sum(0.0).round(1)]
+    results_out << ['HVAC Capacity: Heat Pump Backup (Btu/h)', hpxml_bldgs.map { |hpxml_bldg| Outputs.get_total_hvac_capacities(hpxml_bldg)[2] }.sum(0.0).round(1)]
 
     # HVAC design temperatures
     results_out << [line_break]
@@ -277,6 +270,14 @@ class Outputs
         results_out << ["HVAC Space Design Load: #{space.id}: Cooling Sensible: AED Excursion (Btu/h)", space.cdl_sens_aedexcursion.round(1)]
       end
     end
+
+    # Geothermal loop
+    results_out << [line_break]
+    geothermal_loops = hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.geothermal_loops }.flatten
+    num_boreholes = geothermal_loops.map { |loop| loop.num_bore_holes }.sum(0)
+    total_length = geothermal_loops.map { |loop| loop.bore_length * loop.num_bore_holes }.sum(0.0)
+    results_out << ['Geothermal Loop: Borehole/Trench Count', num_boreholes]
+    results_out << ['Geothermal Loop: Borehole/Trench Length (ft)', (total_length / [num_boreholes, 1].max).round(1)] # [num_boreholes, 1].max to prevent divide by zero
 
     return results_out
   end

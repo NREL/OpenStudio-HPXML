@@ -541,6 +541,20 @@ Additional detail related to space design loads can be found in the :ref:`design
    HVAC Space Design Load: <SpaceID>: Cooling Sensible: AED Excursion (Btu/h)             Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
    =====================================================================================  ====================
 
+HVAC Geothermal Loop
+~~~~~~~~~~~~~~~~~~~~
+
+Geothermal loop outputs are listed below.
+Outputs for individual geothermal loops can be found in the ``in.xml`` file.
+
+   =====================================================================  ====================
+   Type                                                                   Notes
+   =====================================================================  ====================
+   Geothermal Loop: Borehole/Trench Count                                 Total number of vertical boreholes
+   Geothermal Loop: Borehole/Trench Length (ft)                           Length (i.e., average depth) of each borehole
+   =====================================================================  ====================
+
+
 .. _timeseries_outputs:
 
 Timeseries Outputs
