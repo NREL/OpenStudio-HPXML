@@ -370,7 +370,7 @@ class HVACSizing
         all_space_design_loads[space.id] = DesignLoads.new
       end
       space.additional_properties.total_exposed_wall_area = 0.0
-      space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed excursion
+      space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
       space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
       space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
     end
@@ -618,6 +618,7 @@ class HVACSizing
           end
         elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
           # Store AED curve values for peak value
+          wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp # aed curve, skylight and windows combined, store for reporting aed curve
           wall.space.additional_properties.afl_hr_windows[hr] += clg_loads_tmp unless hr == -1
         end
       end
@@ -712,7 +713,8 @@ class HVACSizing
           end
         elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
           # Store AED curve values for peak value
-          roof.space.additional_properties.afl_hr_skylights[hr] += htm * skylight.area unless hr == -1
+          roof.space.additional_properties.afl_hr[hr] += clg_loads_tmp # aed curve, skylight and windows combined, store for reporting aed curve
+          roof.space.additional_properties.afl_hr_skylights[hr] += clg_loads_tmp unless hr == -1
         end
       end
       skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
@@ -3600,6 +3602,7 @@ class HVACSizing
     hpxml_object.cdl_sens_vent = Float(design_loads.Cool_Vent_Sens.round)
     hpxml_object.cdl_sens_ducts = Float(design_loads.Cool_Ducts_Sens.round)
     hpxml_object.cdl_sens_intgains = Float(design_loads.Cool_IntGains_Sens.round)
+    hpxml_object.cdl_sens_aed_curve = design_loads.HourlyFenestrationLoads.map { |f| f.round(2) }.join(', ')
     if hpxml_object.cdl_sens_total != 0
       # Error-checking to ensure we captured all the design load components
       cdl_sens_sum = (hpxml_object.cdl_sens_walls + hpxml_object.cdl_sens_ceilings +

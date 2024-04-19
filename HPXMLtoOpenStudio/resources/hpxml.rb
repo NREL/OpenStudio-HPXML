@@ -507,7 +507,8 @@ class HPXML < Object
                      cdl_sens_infil: 'Infiltration',
                      cdl_sens_vent: 'Ventilation',
                      cdl_sens_intgains: 'InternalLoads',
-                     cdl_sens_aedexcursion: 'AEDExcursion' }
+                     cdl_sens_aedexcursion: 'AEDExcursion',
+                     cdl_sens_aed_curve: 'AEDCurve' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
                     cdl_lat_ducts: 'Ducts',
                     cdl_lat_infil: 'Infiltration',
@@ -8165,7 +8166,11 @@ class HPXML < Object
       XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
       dl_child = XMLHelper.add_element(dl_extension, dl_child_name)
       attrs.each do |attr, element_name|
-        XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :float)
+        if element_name.include? 'AEDCurve'
+          XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :string)
+        else
+          XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :float)
+        end
       end
     end
   end
@@ -8175,7 +8180,11 @@ class HPXML < Object
       CDL_SENS_ATTRS => 'CoolingSensible',
       CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
       attrs.each do |attr, element_name|
-        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
+        if element_name.include? 'AEDCurve'
+          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :string))
+        else
+          hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
+        end
       end
     end
   end
