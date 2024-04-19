@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
-- Updates to HPXML v4.0-rc3.
+- Updates to HPXML v4.0-rc4.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
   - **Breaking change**: Replaces `WaterHeatingSystem/NumberofUnitsServed` with `WaterHeatingSystem/extension/NumberofBedroomsServed` for apportioning shared water heater tank losses.
   - **Breaking change**: Replaces `HotWaterDistribution/extension/SharedRecirculation/NumberofUnitsServed` with `HotWaterDistribution/extension/SharedRecirculation/NumberofBedroomsServed` for apportioning shared recirculation pump energy.
@@ -74,6 +74,7 @@ __Bugfixes__
 - Prevents errors due to incorrect `Floor/FloorOrCeiling` input; issues a warning when detected.
 - Apportion shared water heater tank losses for HPWHs and combi systems.
 - Fixes buried duct effective R-values.
+- Fixes shared boiler default location (which could result in assuming there's a flue in conditioned space impacting infiltration).
 
 ## OpenStudio-HPXML v1.7.0
 
