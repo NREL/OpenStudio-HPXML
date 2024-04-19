@@ -3292,10 +3292,15 @@ class HPXMLDefaults
   def self.get_nbeds_adjusted_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
     unit_type = hpxml_bldg.building_construction.residential_facility_type
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      return -0.68 + 1.09 * n_occs
-    elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
-      return -1.47 + 1.69 * n_occs
+    # Relations below come from 2020 RECS weighted regressions between NBEDS and NHSHLDMEM (sample weights = NWEIGHT)
+    if [HPXML::ResidentialTypeApartment].include? unit_type
+      return 1.09 + 0.28 * n_occs
+    elsif [HPXML::ResidentialTypeSFA].include? unit_type
+      return 2.03 + 0.22 * n_occs
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      return 2.73 + 0.2 * n_occs
+    elsif [HPXML::ResidentialTypeManufactured].include? unit_type
+      return 2.23 + 0.17 * n_occs
     else
       fail "Unexpected residential facility type: #{unit_type}."
     end
