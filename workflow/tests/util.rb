@@ -1034,7 +1034,7 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:')
+    elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('Geothermal Loop:')
       # Check that there is no difference
       abs_delta_tol = 0
       abs_frac_tol = nil
@@ -1078,8 +1078,9 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
       vals_1x.zip(vals_10x).each do |val_1x, val_10x|
         if not (key.include?('Unmet Hours') ||
                 key.include?('HVAC Design Temperature') ||
-                key.include?('Weather'))
-          # These outputs shouldn't change based on the unit multiplier
+                key.include?('Weather') ||
+                key.include?('Geothermal Loop: Borehole/Trench Length'))
+          # The above output types shouldn't change based on the unit multiplier
           val_1x *= unit_multiplier
         end
 
