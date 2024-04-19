@@ -3602,7 +3602,7 @@ class HVACSizing
     hpxml_object.cdl_sens_vent = Float(design_loads.Cool_Vent_Sens.round)
     hpxml_object.cdl_sens_ducts = Float(design_loads.Cool_Ducts_Sens.round)
     hpxml_object.cdl_sens_intgains = Float(design_loads.Cool_IntGains_Sens.round)
-    hpxml_object.cdl_sens_aed_curve = design_loads.HourlyFenestrationLoads.map { |f| f.round(2) }.join(', ')
+    hpxml_object.cdl_sens_aed_curve = design_loads.HourlyFenestrationLoads.map { |f| f.round }.join(', ')
     if hpxml_object.cdl_sens_total != 0
       # Error-checking to ensure we captured all the design load components
       cdl_sens_sum = (hpxml_object.cdl_sens_walls + hpxml_object.cdl_sens_ceilings +
