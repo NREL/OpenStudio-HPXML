@@ -276,8 +276,8 @@ class Outputs
     geothermal_loops = hpxml_bldgs.map { |hpxml_bldg| hpxml_bldg.geothermal_loops }.flatten
     num_boreholes = geothermal_loops.map { |loop| loop.num_bore_holes }.sum(0)
     total_length = geothermal_loops.map { |loop| loop.bore_length * loop.num_bore_holes }.sum(0.0)
-    results_out << ['Geothermal Loop: Borehole/Trench Count', num_boreholes]
-    results_out << ['Geothermal Loop: Borehole/Trench Length (ft)', (total_length / [num_boreholes, 1].max).round(1)] # [num_boreholes, 1].max to prevent divide by zero
+    results_out << ['HVAC Geothermal Loop: Borehole/Trench Count', num_boreholes]
+    results_out << ['HVAC Geothermal Loop: Borehole/Trench Length (ft)', (total_length / [num_boreholes, 1].max).round(1)] # [num_boreholes, 1].max to prevent divide by zero
 
     return results_out
   end

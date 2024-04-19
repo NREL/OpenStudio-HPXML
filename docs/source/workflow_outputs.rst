@@ -550,8 +550,8 @@ Outputs for individual geothermal loops can be found in the ``in.xml`` file.
    =====================================================================  ====================
    Type                                                                   Notes
    =====================================================================  ====================
-   Geothermal Loop: Borehole/Trench Count                                 Total number of vertical boreholes
-   Geothermal Loop: Borehole/Trench Length (ft)                           Length (i.e., average depth) of each borehole
+   HVAC Geothermal Loop: Borehole/Trench Count                            Total number of vertical boreholes
+   HVAC Geothermal Loop: Borehole/Trench Length (ft)                      Length (i.e., average depth) of each borehole
    =====================================================================  ====================
 
 

@@ -237,8 +237,8 @@ class ReportSimulationOutputTest < Minitest::Test
     'HVAC Design Load: Cooling Latent: Infiltration (Btu/h)',
     'HVAC Design Load: Cooling Latent: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)',
-    'Geothermal Loop: Borehole/Trench Count',
-    'Geothermal Loop: Borehole/Trench Length (ft)'
+    'HVAC Geothermal Loop: Borehole/Trench Count',
+    'HVAC Geothermal Loop: Borehole/Trench Length (ft)'
   ]
 
   BaseHPXMLTimeseriesColsEnergy = [
@@ -1333,8 +1333,8 @@ class ReportSimulationOutputTest < Minitest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     actual_annual_rows = _get_annual_values(annual_csv)
-    assert_equal(9.0, actual_annual_rows['Geothermal Loop: Borehole/Trench Count'])
-    assert_equal(315.0, actual_annual_rows['Geothermal Loop: Borehole/Trench Length (ft)'])
+    assert_equal(9.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Count'])
+    assert_equal(315.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Length (ft)'])
   end
 
   def _test_measure(args_hash, expect_success: true)
