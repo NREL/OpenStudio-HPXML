@@ -28,7 +28,7 @@ base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml,0.0,0.0,1354.7,998.0,11
 base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1508.3,1950.2,1950.2,3.926,6.271,0.0
 base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1514.5,1818.7,1818.7,4.235,4.793,0.0
 base-bldgtype-mf-unit-infil-compartmentalization-test.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1612.1,2253.4,2253.4,3.618,7.758,0.0
-base-bldgtype-mf-unit-residents-1.xml,0.0,0.0,817.1,530.8,4684.1,1314.5,1088.9,1700.7,1700.7,4.017,7.292,0.0
+base-bldgtype-mf-unit-residents-1.xml,0.0,0.0,1016.4,704.0,7088.8,2208.3,1410.3,1792.0,1792.0,4.017,7.348,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml,0.0,2.0,1354.7,998.0,11171.6,3093.4,1632.6,2107.2,2107.2,3.816,7.196,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml,0.0,6.0,1354.7,998.0,11171.6,3093.4,1660.6,2298.4,2298.4,3.978,8.314,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil.xml,0.0,2.0,1354.7,998.0,11171.6,3093.4,1643.1,2161.2,2161.2,3.814,7.196,0.0
@@ -200,7 +200,7 @@ base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,16
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,23.0,1.0,1354.7,998.0,11171.6,2563.5,5178.5,4008.1,5178.5,26.095,19.032,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml,156.0,2.0,1354.7,998.0,11171.6,2563.5,5568.4,3148.4,5568.4,24.296,17.734,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5637.1,3148.5,5637.1,23.957,17.735,0.0
-base-hvac-autosize-sizing-controls.xml,0.0,0.0,2180.8,1715.9,21140.4,3685.8,2485.0,3558.2,3558.2,17.077,14.804,0.0
+base-hvac-autosize-sizing-controls.xml,0.0,0.0,1506.3,1129.7,13000.0,2815.2,2005.1,3360.6,3360.6,17.054,14.762,0.0
 base-hvac-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2052.9,3847.1,3847.1,23.514,18.914,0.0
 base-hvac-boiler-coal-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1975.9,1785.9,1975.9,16.778,0.0,0.0
 base-hvac-boiler-elec-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5998.2,1785.9,5998.2,16.778,0.0,0.0
