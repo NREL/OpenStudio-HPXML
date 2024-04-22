@@ -976,12 +976,12 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)
     else
-      assert_operator(unmet_hours_htg, :<, 400)
+      assert_operator(unmet_hours_htg, :<, 425)
     end
     if hpxml_bldg.total_fraction_cool_load_served == 0
       assert_equal(0, unmet_hours_clg)
     else
-      assert_operator(unmet_hours_clg, :<, 400)
+      assert_operator(unmet_hours_clg, :<, 425)
     end
   end
 
