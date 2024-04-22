@@ -530,13 +530,13 @@ class HVACSizing
       bldg_design_loads.Heat_Windows += htg_loads
       space_design_loads.Heat_Windows += htg_loads unless space_design_loads.nil?
 
-      for hr in -1..11
-        # If hr == -1: Calculate the Average Load Procedure (ALP) Load
+      for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        # If hr == nil: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
 
         # clf_d: Average Cooling Load Factor for the given window direction
         # clf_n: Average Cooling Load Factor for a window facing North (fully shaded)
-        if hr == -1
+        if hr.nil?
           if window_isc < 1
             clf_d = clf_avg_is[cnt45]
             clf_n = clf_avg_is[4]
@@ -555,7 +555,7 @@ class HVACSizing
         end
 
         ctd_adj = mj.ctd
-        if hr > -1
+        if not hr.nil?
           # Calculate hourly CTD adjusted value for mid-summer
           ctd_adj += hta[mj.daily_range_num][hr]
         end
@@ -569,7 +569,7 @@ class HVACSizing
         htm_n *= window_esc
 
         if window.overhangs_depth.to_f > 0
-          if hr == -1
+          if hr.nil?
             slm = slm_avg_lat[cnt45]
           elsif [0, 1, 2].include? hr # 8, 9, and 10 am: use 09:00 hours
             slm = slm_hr_lat[cnt45][0]
@@ -597,37 +597,31 @@ class HVACSizing
           htm = htm_d
         end
 
-        # Block load
-        clg_loads_tmp = htm * window.area
-        if hr == -1
+        # Block/space loads
+        clg_loads = htm * window.area
+        if hr.nil?
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          clg_loads = clg_loads_tmp
           bldg_design_loads.Cool_Windows += clg_loads
-        else
-          afl_hr[hr] += clg_loads_tmp
-        end
-        # Space load
-        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-          if hr == -1
-            # Store average window loads
+          window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
+                                                                        heat_htm: htg_htm,
+                                                                        cool_htm: clg_htm,
+                                                                        heat_load: htg_loads,
+                                                                        cool_load_sens: clg_loads,
+                                                                        cool_load_lat: 0)
+          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
             space_design_loads.Cool_Windows += clg_loads
-          else
-            # Store AED curve values for excursion
-            wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp
           end
-        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-          # Store AED curve values for peak value
-          wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp unless hr == -1# aed curve, skylight and windows combined, store for reporting aed curve
-          wall.space.additional_properties.afl_hr_windows[hr] += clg_loads_tmp unless hr == -1
+        else
+          afl_hr[hr] += clg_loads
+          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            wall.space.additional_properties.afl_hr[hr] += clg_loads
+          elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
+            wall.space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
+            wall.space.additional_properties.afl_hr_windows[hr] += clg_loads
+          end
         end
       end
-      window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
-                                                                    heat_htm: htg_htm,
-                                                                    cool_htm: clg_htm,
-                                                                    heat_load: htg_loads,
-                                                                    cool_load_sens: clg_loads,
-                                                                    cool_load_lat: 0)
     end # window
 
     # Skylights
@@ -655,13 +649,13 @@ class HVACSizing
       bldg_design_loads.Heat_Skylights += htg_loads
       space_design_loads.Heat_Skylights += htg_loads unless space_design_loads.nil?
 
-      for hr in -1..11
-        # If hr == -1: Calculate the Average Load Procedure (ALP) Load
+      for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        # If hr == nil: Calculate the Average Load Procedure (ALP) Load
         # Else: Calculate the hourly Aggregate Fenestration Load (AFL)
 
         # clf_d: Average Cooling Load Factor for the given skylight direction
         # clf_horiz: Average Cooling Load Factor for horizontal
-        if hr == -1
+        if hr.nil?
           if skylight_isc < 1
             clf_d = clf_avg_is[cnt45]
             clf_horiz = clf_avg_is_horiz
@@ -683,7 +677,7 @@ class HVACSizing
         sol_v = Math::sin(UnitConversions.convert(inclination_angle, 'deg', 'rad')) * (psf_lat[cnt45] * clf_d)
 
         ctd_adj = mj.ctd
-        if hr > -1
+        if not hr.nil?
           # Calculate hourly CTD adjusted value for mid-summer
           ctd_adj += hta[mj.daily_range_num][hr]
         end
@@ -692,37 +686,31 @@ class HVACSizing
         htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
         htm *= skylight_esc
 
-        # Block load
-        clg_loads_tmp = htm * skylight.area
-        if hr == -1
+        # Block/space loads
+        clg_loads = htm * skylight.area
+        if hr.nil?
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          clg_loads = clg_loads_tmp
           bldg_design_loads.Cool_Skylights += clg_loads
-        else
-          afl_hr[hr] += clg_loads_tmp
-        end
-        # Space load
-        if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-          if hr == -1
-            # Store average skylight loads
+          skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
+                                                                          heat_htm: htg_htm,
+                                                                          cool_htm: clg_htm,
+                                                                          heat_load: htg_loads,
+                                                                          cool_load_sens: clg_loads,
+                                                                          cool_load_lat: 0)
+          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
             space_design_loads.Cool_Skylights += clg_loads
-          else
-            # Store AED curve values for excursion
-            roof.space.additional_properties.afl_hr[hr] += clg_loads_tmp
           end
-        elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-          # Store AED curve values for peak value
-          roof.space.additional_properties.afl_hr[hr] += clg_loads_tmp # aed curve, skylight and windows combined, store for reporting aed curve
-          roof.space.additional_properties.afl_hr_skylights[hr] += clg_loads_tmp unless hr == -1
+        else
+          afl_hr[hr] += clg_loads
+          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            roof.space.additional_properties.afl_hr[hr] += clg_loads
+          elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
+            roof.space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
+            roof.space.additional_properties.afl_hr_skylights[hr] += clg_loads
+          end
         end
       end
-      skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
-                                                                      heat_htm: htg_htm,
-                                                                      cool_htm: clg_htm,
-                                                                      heat_load: htg_loads,
-                                                                      cool_load_sens: clg_loads,
-                                                                      cool_load_lat: 0)
     end # skylight
 
     # Check for Adequate Exposure Diversity (AED)
