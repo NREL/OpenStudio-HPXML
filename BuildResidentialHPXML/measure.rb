@@ -5808,18 +5808,6 @@ class HPXMLFile
       fraction_heat_load_served = args[:heating_system_2_fraction_heat_load_served]
     end
 
-    if args[:hvac_distribution_heating_airflow_rate].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
-        heating_airflow_cfm = args[:hvac_distribution_heating_airflow_rate].get
-      end
-    end
-
-    if args[:hvac_distribution_fan_watts_per_cfm].is_initialized
-      if [HPXML::HVACTypeFurnace].include?(heating_system_type)
-        fan_watts_per_cfm = args[:hvac_distribution_fan_watts_per_cfm].get
-      end
-    end
-
     hpxml_bldg.heating_systems.add(id: "HeatingSystem#{hpxml_bldg.heating_systems.size + 1}",
                                    heating_system_type: heating_system_type,
                                    heating_system_fuel: heating_system_fuel,
@@ -5913,7 +5901,7 @@ class HPXMLFile
       end
     end
 
-    # Airflow & Fan W/cfm
+    # Blower airflow & fan W/cfm
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       distribution_system_type = hvac_distribution.distribution_system_type
 
