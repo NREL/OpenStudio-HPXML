@@ -1803,22 +1803,9 @@ The output heating capacity of the heating system. If not provided, the OS-HPXML
 
 <br/>
 
-**Heating System: Heating Airflow**
-
-The output heating airflow of the heating system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
-
-- **Name:** ``heating_system_heating_airflow``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heating System: Heating Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
 
 - **Name:** ``heating_system_heating_autosizing_factor``
 - **Type:** ``Double``
@@ -1955,22 +1942,9 @@ The output cooling capacity of the cooling system. If not provided, the OS-HPXML
 
 <br/>
 
-**Cooling System: Cooling Airflow**
-
-The output cooling airflow of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
-
-- **Name:** ``cooling_system_cooling_airflow``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Cooling System: Cooling Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
 
 - **Name:** ``cooling_system_cooling_autosizing_factor``
 - **Type:** ``Double``
@@ -2207,22 +2181,9 @@ The output heating capacity of the heat pump. If not provided, the OS-HPXML auto
 
 <br/>
 
-**Heat Pump: Heating Airflow**
-
-The output heating airflow of the heat pump. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
-
-- **Name:** ``heat_pump_heating_airflow``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heat Pump: Heating Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
 
 - **Name:** ``heat_pump_heating_autosizing_factor``
 - **Type:** ``Double``
@@ -2283,22 +2244,9 @@ The output cooling capacity of the heat pump. If not provided, the OS-HPXML auto
 
 <br/>
 
-**Heat Pump: Cooling Airflow**
-
-The output cooling airflow of the cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
-
-- **Name:** ``heat_pump_cooling_airflow``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heat Pump: Cooling Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
 
 - **Name:** ``heat_pump_cooling_autosizing_factor``
 - **Type:** ``Double``
@@ -2374,7 +2322,7 @@ The backup type of the heat pump. If 'integrated', represents e.g. built-in elec
 
 **Heat Pump: Backup Heating Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, 1.0 is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Factor.
+The capacity scaling factor applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, 1.0 is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Factor.
 
 - **Name:** ``heat_pump_backup_heating_autosizing_factor``
 - **Type:** ``Double``
@@ -2389,6 +2337,8 @@ The maximum capacity limit applied to the auto-sizing methodology if Backup Type
 
 - **Name:** ``heat_pump_backup_heating_autosizing_limit``
 - **Type:** ``Double``
+
+- **Units:** ``Btu/hr``
 
 - **Required:** ``false``
 
@@ -2825,22 +2775,9 @@ The output heating capacity of the second heating system. If not provided, the O
 
 <br/>
 
-**Heating System 2: Heating Airflow**
-
-The output heating airflow of the second heating system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
-
-- **Name:** ``heating_system_2_heating_airflow``
-- **Type:** ``Double``
-
-- **Units:** ``CFM``
-
-- **Required:** ``false``
-
-<br/>
-
 **Heating System 2: Heating Autosizing Factor**
 
-The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The capacity scaling factor applied to the auto-sizing methodology. If not provided, 1.0 is used.
 
 - **Name:** ``heating_system_2_heating_autosizing_factor``
 - **Type:** ``Double``
@@ -2856,6 +2793,8 @@ The maximum capacity limit applied to the auto-sizing methodology. If not provid
 - **Name:** ``heating_system_2_heating_autosizing_limit``
 - **Type:** ``Double``
 
+- **Units:** ``Btu/hr``
+
 - **Required:** ``false``
 
 <br/>
@@ -2870,19 +2809,6 @@ The heat load served fraction of the second heating system. Ignored if this heat
 - **Units:** ``Frac``
 
 - **Required:** ``true``
-
-<br/>
-
-**HVAC Distribution: Blower Fan Efficiency**
-
-The blower fan efficiency at maximum fan speed. Applies only to Furnace heating system, central air conditioner and mini-split cooling systems, and air-to-air, mini-split, and ground-to-air heat pumps. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
-
-- **Name:** ``hvac_distribution_fan_watts_per_cfm``
-- **Type:** ``Double``
-
-- **Units:** ``W/CFM``
-
-- **Required:** ``false``
 
 <br/>
 
@@ -2947,6 +2873,45 @@ Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <
 
 - **Name:** ``hvac_control_cooling_season_period``
 - **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC: Blower Heating Airflow Rate**
+
+The heating airflow rate of the central heating system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
+
+- **Name:** ``hvac_distribution_heating_airflow_rate``
+- **Type:** ``Double``
+
+- **Units:** ``CFM``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC: Blower Cooling Airflow Rate**
+
+The cooling airflow rate of the central cooling system. If not provided, the OS-HPXML autosized default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
+
+- **Name:** ``hvac_distribution_cooling_airflow_rate``
+- **Type:** ``Double``
+
+- **Units:** ``CFM``
+
+- **Required:** ``false``
+
+<br/>
+
+**HVAC: Blower Fan Efficiency**
+
+The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless mini-split systems). If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.
+
+- **Name:** ``hvac_distribution_fan_watts_per_cfm``
+- **Type:** ``Double``
+
+- **Units:** ``W/CFM``
 
 - **Required:** ``false``
 

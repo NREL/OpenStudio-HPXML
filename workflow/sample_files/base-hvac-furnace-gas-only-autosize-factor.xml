@@ -333,6 +333,7 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
                 <HeatingAutosizingFactor>1.4</HeatingAutosizingFactor>
+                <HeatingAutosizingLimit>45000.0</HeatingAutosizingLimit>
               </extension>
             </HeatingSystem>
           </HVACPlant>

@@ -1706,7 +1706,6 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                  double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                 double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAirflowCFM``                             double   cfm     >= 0             No        autosized
   ``extension/HeatingAutosizingFactor``                       double   frac    > 0              No        1.0             Heating autosizing scaling factor
   ``extension/HeatingAutosizingLimit``                        double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ==========================================================  =======  ======  ===============  ========  ==============  ================
@@ -1736,7 +1735,6 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                   double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                  double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAirflowCFM``                              double   cfm     >= 0             No        autosized
   ``extension/HeatingAutosizingFactor``                        double   frac    > 0              No        1.0             Heating autosizing scaling factor
   ``extension/HeatingAutosizingLimit``                         double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ===========================================================  =======  ======  ===============  ========  ==============  ================
@@ -1856,7 +1854,6 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                            double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                           double   W       >= 0             No        40              Fan power
-  ``extension/HeatingAirflowCFM``                       double   cfm     >= 0             No        autosized
   ``extension/HeatingAutosizingFactor``                 double   frac    > 0              No        1.0             Heating autosizing scaling factor
   ``extension/HeatingAutosizingLimit``                  double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ====================================================  =======  ======  ===============  ========  ==============  ===================
@@ -1884,7 +1881,6 @@ Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                         double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAirflowCFM``                     double   cfm     >= 0             No        autosized
   ``extension/HeatingAutosizingFactor``               double   frac    > 0              No        1.0             Heating autosizing scaling factor
   ``extension/HeatingAutosizingLimit``                double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ==================================================  =======  ======  ===============  ========  ==============  ===================
@@ -1915,7 +1911,6 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                                double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                               double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAirflowCFM``                           double   cfm     >= 0             No        autosized
   ``extension/HeatingAutosizingFactor``                     double   frac    > 0              No        1.0             Heating autosizing scaling factor
   ``extension/HeatingAutosizingLimit``                      double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ========================================================  =======  ======  ===============  ========  ==============  ===================

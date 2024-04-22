@@ -333,9 +333,6 @@
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
-              <extension>
-                <HeatingAirflowCFM>600.0</HeatingAirflowCFM>
-              </extension>
             </HeatingSystem>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
