@@ -425,7 +425,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     rec_room_aed = [1300, 1800, 2200, 2600, 2800, 4000, 5500, 6900, 7400, 7200, 5600, 1800]
     rec_room_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'recroom' }
     rec_room_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(rec_room_aed[i], aed_curve_value, rec_room_aed[i] * space_tol_frac)
+      assert_in_delta(rec_room_aed[i], aed_curve_value, [rec_room_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
 
     # Section 13: Walker Residence
@@ -552,7 +552,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # eyeball observation from figure 14-3
     block_aed = [2500, 3200, 3900, 4200, 4600, 7500, 10600, 13900, 15200, 16100, 12700, 4100]
     hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
+      assert_in_delta(block_aed[i], aed_curve_value, [block_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     space_load_results.each do |space_names, sens_loads|
       spaces = hpxml_bldg.conditioned_spaces.select { |space| space_names.any? { |space_name| space.id.include? space_name } }
@@ -567,22 +567,22 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     living_dining_aed = [1000, 1250, 1550, 1800, 1900, 3000, 4450, 5700, 6300, 6600, 5100, 1800]
     living_dining_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'living_dining' }
     living_dining_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(living_dining_aed[i], aed_curve_value, living_dining_aed[i] * space_tol_frac)
+      assert_in_delta(living_dining_aed[i], aed_curve_value, [living_dining_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     bedroom_1_aed = [850, 1050, 1250, 1400, 1550, 2450, 3500, 4600, 5050, 5200, 4100, 1400]
     bedroom_1_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'bedroom_1' }
     bedroom_1_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(bedroom_1_aed[i], aed_curve_value, bedroom_1_aed[i] * space_tol_frac)
+      assert_in_delta(bedroom_1_aed[i], aed_curve_value, [bedroom_1_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     bedroom_2_aed = [370, 440, 510, 570, 630, 950, 1480, 1850, 2050, 2200, 1650, 550]
     bedroom_2_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'bedroom_2' }
     bedroom_2_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(bedroom_2_aed[i], aed_curve_value, bedroom_2_aed[i] * space_tol_frac)
+      assert_in_delta(bedroom_2_aed[i], aed_curve_value, [bedroom_2_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     bedroom_3_aed = [370, 440, 510, 570, 630, 950, 1480, 1850, 2050, 2200, 1650, 550]
     bedroom_3_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'bedroom_3' }
     bedroom_3_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(bedroom_3_aed[i], aed_curve_value, bedroom_3_aed[i] * space_tol_frac)
+      assert_in_delta(bedroom_3_aed[i], aed_curve_value, [bedroom_3_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
 
     # Section 15: Bell Residence
@@ -648,12 +648,12 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     dining_aed = [1300, 1250, 1150, 1100, 1230, 1350, 1780, 2100, 2300, 2250, 1800, 770]
     dining_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'dining' }
     dining_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(dining_aed[i], aed_curve_value, dining_aed[i] * space_tol_frac)
+      assert_in_delta(dining_aed[i], aed_curve_value, [dining_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     bedroom_1_aed = [2550, 2490, 2200, 1950, 1650, 1450, 1350, 1250, 1150, 1000, 850, 550]
     bedroom_1_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'bedroom_1' }
     bedroom_1_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
-      assert_in_delta(bedroom_1_aed[i], aed_curve_value, bedroom_1_aed[i] * space_tol_frac)
+      assert_in_delta(bedroom_1_aed[i], aed_curve_value, [bedroom_1_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
   end
 

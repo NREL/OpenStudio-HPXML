@@ -618,7 +618,7 @@ class HVACSizing
           end
         elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
           # Store AED curve values for peak value
-          wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp # aed curve, skylight and windows combined, store for reporting aed curve
+          wall.space.additional_properties.afl_hr[hr] += clg_loads_tmp unless hr == -1# aed curve, skylight and windows combined, store for reporting aed curve
           wall.space.additional_properties.afl_hr_windows[hr] += clg_loads_tmp unless hr == -1
         end
       end
