@@ -1138,7 +1138,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_autosizing_limit', false)
     arg.setDisplayName('Heating System: Heating Autosizing Limit')
-    arg.setDescription('The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.')
+    arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1209,7 +1209,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_autosizing_limit', false)
     arg.setDisplayName('Cooling System: Cooling Autosizing Limit')
-    arg.setDescription('The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.')
+    arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1360,7 +1360,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_autosizing_limit', false)
     arg.setDisplayName('Heat Pump: Heating Autosizing Limit')
-    arg.setDescription('The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.')
+    arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1395,7 +1395,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_autosizing_limit', false)
     arg.setDisplayName('Heat Pump: Cooling Autosizing Limit')
-    arg.setDescription('The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.')
+    arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     arg.setUnits('Btu/hr')
     args << arg
 
@@ -1432,7 +1432,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_autosizing_limit', false)
     arg.setDisplayName('Heat Pump: Backup Heating Autosizing Limit')
-    arg.setDescription("The scaling limit applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, 1.0 is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Factor.")
+    arg.setDescription("The maximum capacity limit applied to the auto-sizing methodology if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. If not provided, no limit is used. If Backup Type is '#{HPXML::HeatPumpBackupTypeSeparate}', use Heating System 2: Heating Autosizing Limit.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_fuel', heat_pump_backup_fuel_choices, true)
@@ -1689,7 +1689,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_heating_autosizing_limit', false)
     arg.setDisplayName('Heating System 2: Heating Autosizing Limit')
-    arg.setDescription('The scaling limit applied to the auto-sizing methodology. If not provided, 1.0 is used.')
+    arg.setDescription('The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_2_fraction_heat_load_served', true)

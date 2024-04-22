@@ -1829,7 +1829,7 @@ The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 
 
 **Heating System: Heating Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.
+The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
 
 - **Name:** ``heating_system_heating_autosizing_limit``
 - **Type:** ``Double``
@@ -1981,7 +1981,7 @@ The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 
 
 **Cooling System: Cooling Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.
+The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
 
 - **Name:** ``cooling_system_cooling_autosizing_limit``
 - **Type:** ``Double``
@@ -2233,7 +2233,7 @@ The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 
 
 **Heat Pump: Heating Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.
+The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
 
 - **Name:** ``heat_pump_heating_autosizing_limit``
 - **Type:** ``Double``
@@ -2309,7 +2309,7 @@ The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 
 
 **Heat Pump: Cooling Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology. If not provided, autosized default is used.
+The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
 
 - **Name:** ``heat_pump_cooling_autosizing_limit``
 - **Type:** ``Double``
@@ -2385,7 +2385,7 @@ The scaling factor applied to the auto-sizing methodology if Backup Type is 'int
 
 **Heat Pump: Backup Heating Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, 1.0 is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Factor.
+The maximum capacity limit applied to the auto-sizing methodology if Backup Type is 'integrated'. If not provided, no limit is used. If Backup Type is 'separate', use Heating System 2: Heating Autosizing Limit.
 
 - **Name:** ``heat_pump_backup_heating_autosizing_limit``
 - **Type:** ``Double``
@@ -2851,7 +2851,7 @@ The scaling factor applied to the auto-sizing methodology. If not provided, 1.0 
 
 **Heating System 2: Heating Autosizing Limit**
 
-The scaling limit applied to the auto-sizing methodology. If not provided, 1.0 is used.
+The maximum capacity limit applied to the auto-sizing methodology. If not provided, no limit is used.
 
 - **Name:** ``heating_system_2_heating_autosizing_limit``
 - **Type:** ``Double``
