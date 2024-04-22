@@ -5,6 +5,7 @@
 
 require 'rake'
 require 'rake/testtask'
+require 'yard'
 
 desc 'Run all tests'
 Rake::TestTask.new('test_all') do |t|
@@ -39,4 +40,10 @@ Rake::TestTask.new('test_documentation') do |t|
   t.test_files = Dir['workflow/tests/test_documentation.rb']
   t.warning = false
   t.verbose = true
+end
+
+YARD::Rake::YardocTask.new do |t|
+  t.files   = ['**/*.rb'] # optional
+  t.options = ['--no-output'] # optional
+  # t.stats_options = ['--list-undoc']         # optional
 end

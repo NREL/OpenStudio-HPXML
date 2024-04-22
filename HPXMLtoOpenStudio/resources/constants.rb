@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 class Constants
-  #--
   # Numbers --------------------
-  #++
 
   def self.AssumedInsideTemp
     return 73.5 # deg-F
@@ -35,9 +33,7 @@ class Constants
     return num_hours_in_year
   end
 
-  #--
   # Strings --------------------
-  #++
 
   def self.AirFilm
     return 'AirFilm'
