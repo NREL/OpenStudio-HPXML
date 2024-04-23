@@ -37,8 +37,7 @@ jobs:
         shell: bash
         run: |
           out=$(openstudio tasks.rb update_measures)
-          echo "$out"
-          if [[ "$out" == *"RuboCop failed"* ]]; then exit 1; fi
+          if [[ "$out" == *"RuboCop failed"* ]]; then echo "$out" && exit 1; fi
           echo "Checking for file differences..."
           git config --global --add safe.directory $(realpath .)
           git diff --exit-code --ignore-cr-at-eol *.rb *.xml
