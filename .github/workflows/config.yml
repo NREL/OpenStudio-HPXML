@@ -46,10 +46,6 @@ jobs:
         run: |
           bundle exec rake test_measures
 
-      - name: Run documentation checks
-        run: |
-          bundle exec rake test_documentation
-
       - name: Store code coverage
         uses: actions/upload-artifact@v4
         with:

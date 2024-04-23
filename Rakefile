@@ -30,20 +30,7 @@ end
 
 desc 'Run workflow2 tests'
 Rake::TestTask.new('test_workflow2') do |t|
-  t.test_files = Dir['workflow/tests/*.rb'] - Dir['workflow/tests/test_simulations1.rb'] - Dir['workflow/tests/test_documentation.rb']
+  t.test_files = Dir['workflow/tests/*.rb'] - Dir['workflow/tests/test_simulations1.rb']
   t.warning = false
   t.verbose = true
-end
-
-desc 'Run documentation tests'
-Rake::TestTask.new('test_documentation') do |t|
-  t.test_files = Dir['workflow/tests/test_documentation.rb']
-  t.warning = false
-  t.verbose = true
-end
-
-YARD::Rake::YardocTask.new do |t|
-  t.files   = ['**/*.rb'] # optional
-  t.options = ['--no-output'] # optional
-  # t.stats_options = ['--list-undoc']         # optional
 end
