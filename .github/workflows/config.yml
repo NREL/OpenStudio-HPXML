@@ -36,7 +36,7 @@ jobs:
       - name: Check measures
         shell: bash
         run: |
-          out=$(openstudio tasks.rb update_measures)
+          out=$(openstudio tasks.rb update_measures 2>&1)
           if [[ "$out" == *"RuboCop failed"* ]]; then echo "$out" && exit 1; fi
           echo "Checking for file differences..."
           git config --global --add safe.directory $(realpath .)
