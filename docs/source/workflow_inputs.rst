@@ -2905,8 +2905,8 @@ Additional information is entered in each ``Ducts``.
   .. [#] It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue.
          DuctInsulationRValue represents the nominal insulation R-value and should not include interior/exterior air films (i.e., use 0 for an uninsulated duct).
          For ducts buried in insulation (i.e., DuctBuriedInsulationLevel is any value but "not buried"), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value.
-         DuctEffectiveRValue is used in the actual duct heat transfer calculation, and should all effects (i.e., interior/exterior air films, adjustments for presence of round ducts, and adjustments when buried in loose-fill attic insulation).
-         When DuctEffectiveRValue is not provided, it is calculated from DuctEffectiveRValue, DuctFractionRectangular, and DuctBuriedInsulationLevel based on ANSI/RESNET/ICC 301-2025 (not yet published) assuming any round supply ducts are 6-in on average and any round return ducts are 14-in on average.
+         DuctEffectiveRValue is used in the actual duct heat transfer calculation, and should include all effects (i.e., interior/exterior air films, adjustments for presence of round ducts, and adjustments when buried in loose-fill attic insulation).
+         When DuctEffectiveRValue is not provided, it is calculated from DuctInsulationRValue, DuctFractionRectangular, and DuctBuriedInsulationLevel based on ANSI/RESNET/ICC 301-2025 (not yet published) assuming round supply ducts are 6-in on average and round return ducts are 14-in on average.
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.

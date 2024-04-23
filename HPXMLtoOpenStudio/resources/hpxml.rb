@@ -5502,7 +5502,7 @@ class HPXML < Object
       XMLHelper.add_element(ducts_el, 'DuctSurfaceArea', @duct_surface_area, :float, @duct_surface_area_isdefaulted) unless @duct_surface_area.nil?
       XMLHelper.add_element(ducts_el, 'DuctShape', @duct_shape, :string, @duct_shape_isdefaulted) unless @duct_shape.nil?
       XMLHelper.add_extension(ducts_el, 'DuctSurfaceAreaMultiplier', @duct_surface_area_multiplier, :float, @duct_surface_area_multiplier_isdefaulted) unless @duct_surface_area_multiplier.nil?
-      XMLHelper.add_extension(ducts_el, 'DuctFractionRectangular', @duct_fraction_rectangular, :float, @duct_fraction_rectangular_isdefaulted) unless @duct_fraction_rectangular_multiplier.nil?
+      XMLHelper.add_extension(ducts_el, 'DuctFractionRectangular', @duct_fraction_rectangular, :float, @duct_fraction_rectangular_isdefaulted) unless @duct_fraction_rectangular.nil?
     end
 
     def from_doc(duct)
