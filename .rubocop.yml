@@ -53,6 +53,12 @@ Style/ArgumentsForwarding:
   Enabled: true
 Style/CollectionCompact:
   Enabled: true
+Style/Documentation:
+  Exclude:
+    - '**/test_*.rb'
+Style/DocumentationMethod:
+  Exclude:
+    - '**/test_*.rb'
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
 Style/EndlessMethod:
