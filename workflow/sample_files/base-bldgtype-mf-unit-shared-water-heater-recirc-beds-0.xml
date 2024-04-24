@@ -47,7 +47,7 @@
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
-          <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBedrooms>0</NumberofBedrooms>
           <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>900.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>7200.0</ConditionedBuildingVolume>
@@ -315,7 +315,7 @@
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <extension>
-              <NumberofBedroomsServed>18</NumberofBedroomsServed>
+              <NumberofBedroomsServed>6</NumberofBedroomsServed>
             </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
@@ -330,13 +330,10 @@
             </PipeInsulation>
             <extension>
               <SharedRecirculation>
-                <NumberofBedroomsServed>18</NumberofBedroomsServed>
+                <NumberofBedroomsServed>6</NumberofBedroomsServed>
                 <PumpPower>220.0</PumpPower>
                 <ControlType>timer</ControlType>
               </SharedRecirculation>
-              <RecirculationPumpWeekdayScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekdayScheduleFractions>
-              <RecirculationPumpWeekendScheduleFractions>0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042</RecirculationPumpWeekendScheduleFractions>
-              <RecirculationPumpMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</RecirculationPumpMonthlyScheduleMultipliers>
             </extension>
           </HotWaterDistribution>
           <WaterFixture>
