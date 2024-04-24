@@ -1,26 +1,4 @@
 HPXML,Unmet Hours: Heating (hr),Unmet Hours: Cooling (hr),Hot Water: Clothes Washer (gal),Hot Water: Dishwasher (gal),Hot Water: Fixtures (gal),Hot Water: Distribution Waste (gal),Peak Electricity: Winter Total (W),Peak Electricity: Summer Total (W),Peak Electricity: Annual Total (W),Peak Load: Heating: Delivered (kBtu/hr),Peak Load: Cooling: Delivered (kBtu/hr),Resilience: Battery (hr)
-base-hvac-dse.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2075.3,3087.3,3087.3,16.762,12.09,0.0
-base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-lockout-temperatures.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3657.9,3704.1,3704.1,24.75,16.294,0.0
-base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3489.3,3704.1,3704.1,24.748,16.294,0.0
-base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2822.2,3222.2,3222.2,24.747,17.264,0.0
-base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2818.8,3149.3,3149.3,24.807,18.109,0.0
-base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2607.1,2875.6,2875.6,19.34,14.184,0.0
-base-hvac-ducts-area-fractions.xml,5.0,98.0,1354.7,998.0,11171.5,2410.9,2660.2,5183.3,5183.3,49.901,35.162,0.0
-base-hvac-ducts-area-multipliers.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2102.9,3655.4,3655.4,22.684,17.73,0.0
-base-hvac-ducts-buried.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2094.7,3408.2,3408.2,20.759,15.392,0.0
-base-hvac-ducts-defaults.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,3015.1,3821.1,3821.1,18.532,12.093,0.0
-base-hvac-ducts-effective-rvalue.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2106.7,3720.2,3720.2,23.355,18.37,0.0
-base-hvac-ducts-leakage-cfm50.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2106.9,3812.3,3812.3,23.617,19.274,0.0
-base-hvac-ducts-leakage-percent.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2110.7,3818.5,3818.5,24.245,19.312,0.0
-base-hvac-ducts-shape-mixed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2106.7,3720.2,3720.2,23.355,18.37,0.0
-base-hvac-ducts-shape-rectangular.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2105.3,3687.4,3687.4,23.062,18.051,0.0
-base-hvac-ducts-shape-round.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2107.2,3731.0,3731.0,23.451,18.474,0.0
-base-hvac-elec-resistance-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5891.0,1785.9,5891.0,16.762,0.0,0.0
-base-hvac-evap-cooler-furnace-gas.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2056.7,2173.5,2173.5,23.355,12.103,0.0
-base-hvac-evap-cooler-only-ducted.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.9,2061.1,2061.1,0.0,14.938,0.0
-base-hvac-evap-cooler-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.9,2033.1,2033.1,0.0,11.885,0.0
-base-hvac-fireplace-wood-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1931.3,1806.9,1931.3,17.317,0.0,0.0
-base-hvac-floor-furnace-propane-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1931.3,1806.9,1931.3,17.317,0.0,0.0
 base-hvac-furnace-coal-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2055.9,1786.0,2055.9,23.355,0.0,0.0
 base-hvac-furnace-elec-central-ac-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7867.9,3720.2,7867.9,23.355,18.37,0.0
 base-hvac-furnace-elec-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7948.6,1786.0,7948.6,23.355,0.0,0.0
