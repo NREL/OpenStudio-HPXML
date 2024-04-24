@@ -4671,7 +4671,7 @@ class HPXMLFile
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
       next unless ['Outdoors', 'Adiabatic'].include? surface.outsideBoundaryCondition
-      next unless Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next unless Geometry.surface_is_rim_joist(surface: surface, height: args[:geometry_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
       next unless [HPXML::LocationBasementConditioned,
@@ -4731,7 +4731,7 @@ class HPXMLFile
   def self.set_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
-      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next if Geometry.surface_is_rim_joist(surface: surface, height: args[:geometry_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
       next unless [HPXML::LocationConditionedSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
@@ -4826,7 +4826,7 @@ class HPXMLFile
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
       next unless ['Foundation', 'Adiabatic'].include? surface.outsideBoundaryCondition
-      next if Geometry.surface_is_rim_joist(surface, args[:geometry_rim_joist_height])
+      next if Geometry.surface_is_rim_joist(surface: surface, height: args[:geometry_rim_joist_height])
 
       interior_adjacent_to = Geometry.get_adjacent_to(surface: surface)
       next unless [HPXML::LocationBasementConditioned,
@@ -5015,7 +5015,7 @@ class HPXMLFile
           HPXML::LocationBasementConditioned].include? interior_adjacent_to
         has_foundation_walls = true
       end
-      exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_foundation_walls).round(1)
+      exposed_perimeter = Geometry.calculate_exposed_perimeter(model: model, ground_floor_surfaces: [surface], has_foundation_walls: has_foundation_walls).round(1)
       next if exposed_perimeter == 0
 
       if [HPXML::LocationCrawlspaceVented,
@@ -5082,8 +5082,8 @@ class HPXMLFile
 
       surface = sub_surface.surface.get
 
-      sub_surface_height = Geometry.get_surface_height(sub_surface)
-      sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
+      sub_surface_height = Geometry.get_surface_height(surface: sub_surface)
+      sub_surface_facade = Geometry.get_facade_for_surface(surface: sub_surface)
 
       if (sub_surface_facade == Constants.FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
         overhangs_depth = args[:overhangs_front_depth]
@@ -5105,7 +5105,7 @@ class HPXMLFile
         # Get max z coordinate of eaves
         eaves_z = args[:geometry_average_ceiling_height] * args[:geometry_unit_num_floors_above_grade] + args[:geometry_rim_joist_height]
         if args[:geometry_attic_type] == HPXML::AtticTypeConditioned
-          eaves_z += Geometry.get_conditioned_attic_height(model.getSpaces)
+          eaves_z += Geometry.get_conditioned_attic_height(spaces: model.getSpaces)
         end
         if args[:geometry_foundation_type] == HPXML::FoundationTypeAmbient
           eaves_z += args[:geometry_foundation_height]
@@ -6678,7 +6678,7 @@ class HPXMLFile
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
       latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
-      collector_tilt = Geometry.get_absolute_tilt(args[:solar_thermal_collector_tilt], args[:geometry_roof_pitch], latitude)
+      collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
 
@@ -6746,7 +6746,7 @@ class HPXMLFile
 
       array_azimuth = [args[:pv_system_array_azimuth], args[:pv_system_2_array_azimuth]][i]
       latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude].is_initialized ? args[:site_latitude].get : nil, epw_file)
-      array_tilt = Geometry.get_absolute_tilt([args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], args[:geometry_roof_pitch], latitude)
+      array_tilt = Geometry.get_absolute_tilt(tilt_str: [args[:pv_system_array_tilt], args[:pv_system_2_array_tilt]][i], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
 
       hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                                 location: location,

@@ -493,7 +493,7 @@ class Geometry
     return yrange
   end
 
-  def self.get_surface_height(surface)
+  def self.get_surface_height(surface:)
     zvalues = get_surface_z_values([surface])
     zrange = zvalues.max - zvalues.min
     return zrange
