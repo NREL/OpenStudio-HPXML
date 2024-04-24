@@ -213,7 +213,4 @@ class Battery
     end
     return usable_capacity_kwh
   end
-
-  def self.get_min_max_state_of_charge()
-  end
 end

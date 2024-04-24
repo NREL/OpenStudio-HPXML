@@ -1607,7 +1607,7 @@ class HVAC
     return heating_season, cooling_season
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.set_fan_power_ems_program(model, fan, hp_min_temp)
     # EMS is used to disable the fan power below the hp_min_temp; the backup heating

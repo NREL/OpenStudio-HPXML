@@ -897,7 +897,7 @@ class HotWaterAndAppliances
     return UnitConversions.convert(pump_kw, 'kW', 'W')
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
     return if design_level_w == 0.0

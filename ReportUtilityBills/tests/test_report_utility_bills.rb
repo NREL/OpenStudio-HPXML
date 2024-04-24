@@ -1085,6 +1085,8 @@ class ReportUtilityBillsTest < Minitest::Test
     end
   end
 
+  private
+
   def _get_expected_bills(expected_bills)
     expected_bills['Test: Electricity: Total (USD)'] = expected_bills['Test: Electricity: Fixed (USD)'] + expected_bills['Test: Electricity: Energy (USD)'] + expected_bills['Test: Electricity: PV Credit (USD)']
     expected_bills['Test: Natural Gas: Total (USD)'] = expected_bills['Test: Natural Gas: Fixed (USD)'] + expected_bills['Test: Natural Gas: Energy (USD)']

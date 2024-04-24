@@ -172,13 +172,17 @@ class Geometry
     return new_vertices
   end
 
+  # Reverse the vertices after calling create_floor_vertices with the same argument values.
   def self.create_ceiling_vertices(length, width, z_origin, default_azimuths)
     return OpenStudio::reverse(create_floor_vertices(length, width, z_origin, default_azimuths))
   end
 
+  # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
+  #
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param walls_top [Double] the total height of the dwelling unit
+  # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
   def self.explode_surfaces(model, hpxml_bldg, walls_top)
-    # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
-
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth
     rad90 = UnitConversions.convert(90, 'deg', 'rad')
 
@@ -475,10 +479,12 @@ class Geometry
     return zValueArray
   end
 
-  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  # Return an array of x values for surfaces passed in.
+  # The values will be relative to the parent origin.
+  # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return xValueArray [Array<Double>] array of x-coordinates in ft
+  # @return [Array<Double>] array of x-coordinates in ft
   def self.get_surface_x_values(surfaceArray)
     xValueArray = []
     surfaceArray.each do |surface|
@@ -489,10 +495,12 @@ class Geometry
     return xValueArray
   end
 
-  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  # Return an array of y values for surfaces passed in.
+  # The values will be relative to the parent origin.
+  # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return xValueArray [Array<Double>] array of y-coordinates in ft
+  # @return [Array<Double>] array of y-coordinates in ft
   def self.get_surface_y_values(surfaceArray)
     yValueArray = []
     surfaceArray.each do |surface|
@@ -515,7 +523,7 @@ class Geometry
     return yrange
   end
 
-  def self.get_surface_height(surface:)
+  def self.get_surface_height(surface)
     zvalues = get_surface_z_values([surface])
     zrange = zvalues.max - zvalues.min
     return zrange
@@ -529,6 +537,10 @@ class Geometry
     return z_origins.min
   end
 
+  # For an array of roof surfaces, get the maximum tilt.
+  #
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @return [Double] the maximum of surface tilts in degrees
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
@@ -594,8 +606,10 @@ class Geometry
     return Float(nbeds)
   end
 
+  # Table 4.2.2(3). Internal Gains for Reference Homes
+  #
+  # @return heat_gain [Double], hrs_per_day [Double], sens_frac [Double], lat_frac [Double]
   def self.get_occupancy_default_values()
-    # Table 4.2.2(3). Internal Gains for Reference Homes
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day
     lat_gains = 2884.0 # Btu/person/day
@@ -606,8 +620,8 @@ class Geometry
     return heat_gain, hrs_per_day, sens_frac, lat_frac
   end
 
+  # Tear down the existing model if it exists
   def self.tear_down_model(model, runner)
-    # Tear down the existing model if it exists
     handles = OpenStudio::UUIDVector.new
     model.objects.each do |obj|
       handles << obj.handle
@@ -618,10 +632,14 @@ class Geometry
     end
   end
 
+  # Calculates the minimum buffer distance that the parent surface
+  # needs relative to the subsurface in order to prevent E+ warnings
+  # about "Very small surface area".
+  #
+  # @param length [Double] length of the subsurface in m
+  # @param width [Double] width of the subsurface in m
+  # @return [Double] minimum needed buffer distance in m
   def self.calculate_subsurface_parent_buffer(length, width)
-    # Calculates the minimum buffer distance that the parent surface
-    # needs relative to the subsurface in order to prevent E+ warnings
-    # about "Very small surface area".
     min_surface_area = 0.005 # m^2
     return 0.5 * (((length + width)**2 + 4.0 * min_surface_area)**0.5 - length - width)
   end

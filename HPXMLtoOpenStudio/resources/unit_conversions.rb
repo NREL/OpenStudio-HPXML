@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
+# As there is a performance penalty to using OpenStudio's built-in unit convert()
+# method, we use our own approach here.
 class UnitConversions
-  # As there is a performance penalty to using OpenStudio's built-in unit convert()
-  # method, we use our own approach here.
-
   # Hash value is [scalar, delta]
   @Scalars = {
     # Energy

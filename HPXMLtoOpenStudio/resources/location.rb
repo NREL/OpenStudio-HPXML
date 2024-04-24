@@ -8,7 +8,7 @@ class Location
     apply_ground_temps(model, weather, hpxml_bldg)
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.apply_site(model, hpxml_bldg)
     site = model.getSite

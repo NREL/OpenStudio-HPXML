@@ -36,6 +36,7 @@ jobs:
       - name: Check measures
         shell: bash
         run: |
+          bundle exec rake test_documentation
           out=$(openstudio tasks.rb update_measures 2>&1)
           if [[ "$out" == *"RuboCop failed"* ]]; then echo "$out" && exit 1; fi
           echo "Checking for file differences..."

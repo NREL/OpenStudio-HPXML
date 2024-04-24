@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 class HVACSizing
+  # Calculates heating/cooling design loads, and selects equipment
+  # values (e.g., capacities, airflows) specific to each HVAC system.
+  # Calculations generally follow ACCA Manual J/S.
   def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true)
-    # Calculates heating/cooling design loads, and selects equipment
-    # values (e.g., capacities, airflows) specific to each HVAC system.
-    # Calculations generally follow ACCA Manual J/S.
-
     @hpxml_bldg = hpxml_bldg
     @cfa = cfa
 
@@ -67,7 +66,7 @@ class HVACSizing
     return @all_hvac_sizing_values
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.is_system_to_skip(hvac_heating, hvac_cooling)
     # These shared systems should be converted to other equivalent

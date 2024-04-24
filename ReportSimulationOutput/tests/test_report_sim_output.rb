@@ -1321,6 +1321,8 @@ class ReportSimulationOutputTest < Minitest::Test
     assert(File.readlines(run_log).any? { |line| line.include?('Simulation used infinite energy; double-check inputs.') })
   end
 
+  private
+
   def _test_measure(args_hash, expect_success: true)
     # Run measure via OSW
     require 'json'

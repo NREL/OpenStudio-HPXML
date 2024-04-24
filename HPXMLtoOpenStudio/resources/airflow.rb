@@ -238,7 +238,7 @@ class Airflow
     return q_fan
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.set_wind_speed_correction(model, site)
     site_ap = site.additional_properties

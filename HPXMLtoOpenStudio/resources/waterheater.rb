@@ -629,7 +629,7 @@ class Waterheater
     program_calling_manager.addProgram(swh_program)
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.setup_hpwh_wrapped_condenser(model, obj_name_hpwh, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, setpoint_schedule, unit_multiplier)
     h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)

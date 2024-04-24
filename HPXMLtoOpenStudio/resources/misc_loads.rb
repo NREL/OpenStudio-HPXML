@@ -239,7 +239,7 @@ class MiscLoads
     mel.setSchedule(pump_sch)
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa

@@ -212,7 +212,7 @@ class Lighting
     return ltg_fracs
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.calc_interior_energy(eri_version, cfa, f_int_cfl, f_int_lfl, f_int_led)
     return if f_int_cfl.nil? || f_int_lfl.nil? || f_int_led.nil?

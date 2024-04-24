@@ -1506,7 +1506,7 @@ class Constructions
     fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window_or_skylight.id}'."
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.get_roof_color_and_solar_absorptance_map
     return { # asphalt or fiberglass shingles
@@ -2606,10 +2606,10 @@ class Construction
       if layer_materials.size == 1
         next if layer_materials[0].name == Constants.AirFilm # Do not include air films in construction
 
-        mat = Construction.create_os_material(model, layer_materials[0])
+        mat = create_os_material(model, layer_materials[0])
       else
         parallel_path_mat = get_parallel_material(layer_num, @layers_names[layer_num])
-        mat = Construction.create_os_material(model, parallel_path_mat)
+        mat = create_os_material(model, parallel_path_mat)
       end
       materials << mat
     end
@@ -2706,7 +2706,7 @@ class Construction
   end
 
   # Creates (or returns an existing) OpenStudio Material from our own Material object
-  def self.create_os_material(model, material)
+  def create_os_material(model, material)
     name = material.name
     tolerance = 0.0001
     if material.is_a? GlazingMaterial

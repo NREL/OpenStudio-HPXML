@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
+# @note Each HPXML object (e.g., HPXML::Wall) has an additional_properties
+#   child object where custom information can be attached to the object without
+#   being written to the HPXML file. This will allow the custom information to
+#   be used by subsequent calculations/logic.
 class HPXMLDefaults
-  # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-  # child object where custom information can be attached to the object without
-  # being written to the HPXML file. This will allow the custom information to
-  # be used by subsequent calculations/logic.
-
   def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
@@ -105,7 +104,7 @@ class HPXMLDefaults
             sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
-  private
+  # The following class methods are meant to be private.
 
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
