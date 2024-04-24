@@ -50,6 +50,7 @@ __New Features__
   - Allows optional room-by-room design load calculations using HPXML `Space` elements.
   - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
+- Updates default `ShieldingofHome` to be "well-shielded" for single-family attached and multifamily dwelling units.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.

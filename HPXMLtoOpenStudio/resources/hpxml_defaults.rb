@@ -628,7 +628,11 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.site.shielding_of_home.nil?
-      hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
+      else
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
     end
 
@@ -636,8 +640,6 @@ class HPXMLDefaults
       hpxml_bldg.site.ground_conductivity = 1.0 # Btu/hr-ft-F
       hpxml_bldg.site.ground_conductivity_isdefaulted = true
     end
-
-    hpxml_bldg.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml_bldg.site.shielding_of_home)
   end
 
   def self.apply_neighbor_buildings(hpxml_bldg)

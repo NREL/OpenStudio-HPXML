@@ -23,6 +23,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <ShieldingofHome>well-shielded</ShieldingofHome>
           <Soil>
             <Conductivity>0.8</Conductivity>
           </Soil>
@@ -154,7 +155,7 @@
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>4.4</AirLeakage>
+              <AirLeakage>5.9</AirLeakage>
             </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>

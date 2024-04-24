@@ -373,7 +373,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.site.soil_type = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.201923076923077, 0.025, nil, nil)
+    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingNormal, 1.202, 0.025, nil, nil)
+
+    # Test defaults w/ apartment unit
+    hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit.xml')
+    hpxml_bldg.site.site_type = nil
+    hpxml_bldg.site.shielding_of_home = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_site_values(default_hpxml_bldg, HPXML::SiteTypeSuburban, HPXML::ShieldingWellShielded, 1.0, 0.0208, HPXML::SiteSoilTypeUnknown, HPXML::SiteSoilMoistureTypeMixed)
   end
 
   def test_neighbor_buildings
@@ -4200,8 +4208,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   def _test_default_site_values(hpxml_bldg, site_type, shielding_of_home, ground_conductivity, ground_diffusivity, soil_type, moisture_type)
     assert_equal(site_type, hpxml_bldg.site.site_type)
     assert_equal(shielding_of_home, hpxml_bldg.site.shielding_of_home)
-    assert_equal(ground_conductivity, hpxml_bldg.site.ground_conductivity)
-    assert_equal(ground_diffusivity, hpxml_bldg.site.ground_diffusivity)
+    assert_in_epsilon(ground_conductivity, hpxml_bldg.site.ground_conductivity, 0.01)
+    assert_in_epsilon(ground_diffusivity, hpxml_bldg.site.ground_diffusivity, 0.01)
     if soil_type.nil?
       assert_nil(hpxml_bldg.site.soil_type)
     else

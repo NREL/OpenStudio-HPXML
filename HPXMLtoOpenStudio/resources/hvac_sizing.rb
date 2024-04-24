@@ -1187,10 +1187,24 @@ class HVACSizing
       q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
     end
 
+    # Determine if we are in a higher or lower shielding class
+    # Combines the effects of terrain and wind shielding
+    shielding_class = 4
+    if @hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
+      shielding_class += 1
+    elsif @hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
+      shielding_class -= 1
+    end
+    if @hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
+      shielding_class += 1
+    elsif @hpxml_bldg.site.site_type == HPXML::SiteTypeRural
+      shielding_class -= 1
+    end
+    shielding_class = [[shielding_class, 5].min, 1].max
+
     # Set stack/wind coefficients from Tables 5D/5E
     c_s = 0.015 * ncfl_ag
-    c_w_base = [0.0133 * @hpxml_bldg.site.additional_properties.aim2_shelter_coeff - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
-    c_w = c_w_base * ncfl_ag**0.4
+    c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
 
     ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
     windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
