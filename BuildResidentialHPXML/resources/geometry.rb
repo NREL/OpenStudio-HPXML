@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
 class Geometry
   # Get the absolute azimuth based on relative azimuth and building orientation.
   #

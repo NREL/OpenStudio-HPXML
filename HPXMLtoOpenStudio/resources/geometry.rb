@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
+# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
 class Geometry
+  # Create space and zone based on contents of spaces and value of location.
+  # Set a "dwelling unit multiplier" equal to the number of similar units represented.
+  #
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param location [String] HPXML location
+  # @param zone_multiplier [Integer] the number of similar zones represented
+  # @return [OpenStudio::Model::Space, nil] updated spaces hash if location is not already a key
   def self.create_space_and_zone(model, spaces, location, zone_multiplier)
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
@@ -16,6 +24,14 @@ class Geometry
     end
   end
 
+  # Get the surface transformation using the translation matrix defined by an offset multiplied by 3D translation vector (x, y, z).
+  # Applying the affine transformation will shift a set of vertices.
+  #
+  # @param offset [Double] the magnitude of the vector in ft
+  # @param x [Double] the x-coordinate of the translation vector
+  # @param y [Double] the y-coordinate of the translation vector
+  # @param z [Double] the z-coordinate of the translation vector
+  # @return [OpenStudio::Transformation] the OpenStudio transformation object
   def self.get_surface_transformation(offset, x, y, z)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
@@ -460,6 +476,9 @@ class Geometry
   end
 
   # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  #
+  # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @return xValueArray [Array<Double>] array of x-coordinates in ft
   def self.get_surface_x_values(surfaceArray)
     xValueArray = []
     surfaceArray.each do |surface|
@@ -471,6 +490,9 @@ class Geometry
   end
 
   # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
+  #
+  # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @return xValueArray [Array<Double>] array of y-coordinates in ft
   def self.get_surface_y_values(surfaceArray)
     yValueArray = []
     surfaceArray.each do |surface|
