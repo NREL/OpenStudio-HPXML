@@ -376,7 +376,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
     end
     # Coil speed level EMS
-    if hpxml_bldg.hvac_controls[0].realistic_staging
+    if hpxml_bldg.header.geb_onoff_thermostat_deadband
       next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # FIXME: speed level actuator throws this error when speed is set to 1 but no load
     end
     # TODO: Check why this house produces this warning
