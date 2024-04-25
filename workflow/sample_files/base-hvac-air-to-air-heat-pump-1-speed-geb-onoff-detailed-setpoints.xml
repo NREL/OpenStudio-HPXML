@@ -10,6 +10,7 @@
     <extension>
       <SimulationControl>
         <Timestep>1</Timestep>
+        <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -53,8 +54,9 @@
         </BuildingConstruction>
         <extension>
           <HVACGEBControl>
-            <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
+            <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
           </HVACGEBControl>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv</SchedulesFilePath>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -330,7 +332,7 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>10000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
@@ -340,7 +342,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>34121.4</BackupHeatingCapacity>
+              <BackupHeatingCapacity>36000.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -361,8 +363,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
-            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>

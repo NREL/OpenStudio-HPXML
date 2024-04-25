@@ -116,6 +116,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geb_onoff_thermostat_deadband', false)
+    arg.setDisplayName('HVAC GEB Control: On-Off Thermostat Deadband')
+    arg.setDescription("On-off thermostat deadband for hvac systems. Only applies to single speed or two speed air source HVAC systems.")
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geb_backup_heating_capacity_increment', false)
+    arg.setDisplayName('HVAC GEB Control: Backup Heating Capacity Increment')
+    arg.setDescription("Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'.")
+    arg.setUnits('deg-F')
+    args << arg
+
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
@@ -1404,12 +1416,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Backup Heating Lockout Temperature')
     arg.setDescription("The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies for both Backup Type of '#{HPXML::HeatPumpBackupTypeIntegrated}' and '#{HPXML::HeatPumpBackupTypeSeparate}'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#backup'>Backup</a>) is used.")
     arg.setUnits('deg-F')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_capacity_increment', false)
-    arg.setDisplayName('Heat Pump: Backup Heating Capacity Increment')
-    arg.setDescription("Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'.")
-    arg.setUnits('Btu/hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
@@ -3537,9 +3543,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = ((args[:water_heater_type] == HPXML::WaterHeaterTypeCombiStorage) || (args[:water_heater_type] == HPXML::WaterHeaterTypeCombiTankless)) && (args[:heating_system_type] != HPXML::HVACTypeBoiler)
     errors << 'Must specify a boiler when modeling an indirect water heater type.' if error
 
-    error = (args[:geometry_unit_num_bedrooms] <= 0)
-    errors << 'Number of bedrooms must be greater than zero.' if error
-
     error = [HPXML::ResidentialTypeSFD].include?(args[:geometry_unit_type]) && args[:heating_system_type].include?('Shared')
     errors << 'Specified a shared system for a single-family detached unit.' if error
 
@@ -4495,6 +4498,14 @@ class HPXMLFile
       hpxml_bldg.header.heat_pump_backup_sizing_methodology = args[:heat_pump_backup_sizing_methodology].get
     end
 
+    if args[:geb_onoff_thermostat_deadband].is_initialized
+      hpxml_bldg.header.geb_onoff_thermostat_deadband = args[:geb_onoff_thermostat_deadband].get
+    end
+
+    if args[:geb_backup_heating_capacity_increment].is_initialized
+      hpxml_bldg.header.geb_backup_heating_capacity_increment = args[:geb_backup_heating_capacity_increment].get
+    end
+
     if args[:window_natvent_availability].is_initialized
       hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability].get
     end
@@ -5439,9 +5450,6 @@ class HPXMLFile
 
       if backup_heating_fuel == HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = args[:heat_pump_backup_heating_efficiency]
-        if args[:heat_pump_backup_heating_capacity_increment].is_initialized
-          backup_heating_capacity_increment = args[:heat_pump_backup_heating_capacity_increment]
-        end
       else
         backup_heating_efficiency_afue = args[:heat_pump_backup_heating_efficiency]
       end
@@ -5553,7 +5561,6 @@ class HPXMLFile
                               backup_heating_efficiency_percent: backup_heating_efficiency_percent,
                               backup_heating_switchover_temp: backup_heating_switchover_temp,
                               backup_heating_lockout_temp: backup_heating_lockout_temp,
-                              backup_heating_capacity_increment: backup_heating_capacity_increment,
                               heating_efficiency_hspf: heating_efficiency_hspf,
                               heating_efficiency_hspf2: heating_efficiency_hspf2,
                               cooling_efficiency_seer: cooling_efficiency_seer,
