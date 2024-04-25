@@ -10,7 +10,8 @@ class HVAC
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg, conditioned_space)
+                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg,
+                                         conditioned_space, unit_multiplier)
     is_heatpump = false
 
     if not cooling_system.nil?
@@ -119,10 +120,10 @@ class HVAC
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
         # Defrost calculations
-        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system)
+        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, unit_multiplier)
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost * unit_multiplier)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -3569,16 +3570,16 @@ class HVAC
     program_calling_manager.addProgram(fault_program)
   end
 
-  def self.calculate_heat_pump_defrost_load_power_watts(heat_pump)
+  def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier)
     return [nil, nil] unless heat_pump.advanced_defrost_approach
 
     # Fixme: fan power?
     p_dot_odu_fan = 0.0
     p_dot_blower = 0.0
-    rated_clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W')
+    rated_clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') / unit_multiplier
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
-    q_dot_defrost = rated_clg_capacity * 1.127 # defrost cooling rate, 1.127 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
-    cop_defrost = rated_clg_cop / 1.917 # defrost cooling cop, 1.917 is from Jon's adjusted extrapolation, cutler curve at 60EWB, 40ODB
+    q_dot_defrost = rated_clg_capacity * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
+    cop_defrost = rated_clg_cop / 1.0 # defrost cooling cop, 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
     p_dot_defrost = q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower
     return q_dot_defrost, p_dot_defrost
   end
