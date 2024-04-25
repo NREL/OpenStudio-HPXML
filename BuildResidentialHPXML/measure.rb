@@ -1705,18 +1705,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{HPXML::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_heating_airflow_rate', false)
-    arg.setDisplayName('HVAC Blower: Heating Airflow Rate')
-    arg.setDescription("The heating airflow rate of the central heating system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_cooling_airflow_rate', false)
-    arg.setDisplayName('HVAC Blower: Cooling Airflow Rate')
-    arg.setDescription("The cooling airflow rate of the central cooling system. If not provided, the OS-HPXML autosized default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.")
-    arg.setUnits('CFM')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
     arg.setDisplayName('HVAC Blower: Fan Efficiency')
     arg.setDescription("The blower fan efficiency at maximum fan speed. Applies only to split (not packaged) systems (i.e., applies to ducted systems as well as ductless #{HPXML::HVACTypeHeatPumpMiniSplit} systems). If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>, <a href='#{docs_base_url}#hpxml-cooling-systems'>HPXML Cooling Systems</a>, <a href='#{docs_base_url}#hpxml-heat-pumps'>HPXML Heat Pumps</a>) is used.")
@@ -5914,20 +5902,12 @@ class HPXMLFile
   end
 
   def self.set_hvac_blower(hpxml_bldg, args)
-    # Blower airflow & fan W/cfm
+    # Blower fan W/cfm
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       distribution_system_type = hvac_distribution.distribution_system_type
 
       hvac_distribution.hvac_systems.each do |hvac_system|
         next unless (distribution_system_type == HPXML::HVACDistributionTypeAir) || (hvac_system.is_a?(HPXML::HeatPump) && [HPXML::HVACTypeHeatPumpMiniSplit].include?(hvac_system.heat_pump_type))
-
-        if args[:hvac_blower_heating_airflow_rate].is_initialized
-          heating_airflow_cfm = args[:hvac_blower_heating_airflow_rate].get
-        end
-
-        if args[:hvac_blower_cooling_airflow_rate].is_initialized
-          cooling_airflow_cfm = args[:hvac_blower_cooling_airflow_rate].get
-        end
 
         if args[:hvac_blower_fan_watts_per_cfm].is_initialized
           fan_watts_per_cfm = args[:hvac_blower_fan_watts_per_cfm].get
@@ -5935,18 +5915,14 @@ class HPXMLFile
 
         if hvac_system.is_a?(HPXML::HeatingSystem)
           if [HPXML::HVACTypeFurnace].include?(hvac_system.heating_system_type)
-            hvac_system.heating_airflow_cfm = heating_airflow_cfm
             hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
           end
         elsif hvac_system.is_a?(HPXML::CoolingSystem)
           if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac_system.cooling_system_type)
-            hvac_system.cooling_airflow_cfm = cooling_airflow_cfm
             hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
           end
         elsif hvac_system.is_a?(HPXML::HeatPump)
           if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac_system.heat_pump_type)
-            hvac_system.heating_airflow_cfm = heating_airflow_cfm
-            hvac_system.cooling_airflow_cfm = cooling_airflow_cfm
             hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
           end
         end
