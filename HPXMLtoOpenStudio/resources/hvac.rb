@@ -59,6 +59,13 @@ class HVAC
     else
       fail "Unexpected heating system type: #{heating_system.heating_system_type}, expect central air source hvac systems."
     end
+    if fan_watts_per_cfm.nil?
+      if (not cooling_system.nil?) && (not cooling_system.fan_watts_per_cfm.nil?)
+        fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
+      else
+        fan_watts_per_cfm = heating_system.fan_watts_per_cfm
+      end
+    end
 
     # Calculate max rated cfm
     max_rated_fan_cfm = -9999
@@ -119,19 +126,20 @@ class HVAC
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
+        htg_ap.heat_fan_speed_ratios.each do |r|
+          fan_cfms << htg_cfm * r
+        end
         # Defrost calculations
-        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, unit_multiplier)
+        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, unit_multiplier, fan_cfms.max, htg_cfm * htg_ap.heat_fan_speed_ratios[-1], fan_watts_per_cfm)
 
         # Heating Coil
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost * unit_multiplier)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
-        htg_ap.heat_fan_speed_ratios.each do |r|
-          fan_cfms << htg_cfm * r
-        end
       else
         # Heating Coil
+        fan_cfms << htg_cfm
         if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
           htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
           htg_coil.setEfficiency(heating_system.heating_efficiency_afue)
@@ -146,18 +154,10 @@ class HVAC
         htg_coil.setName(obj_name + ' htg coil')
         htg_coil.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
         htg_coil.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
-        fan_cfms << htg_cfm
       end
     end
 
     # Fan
-    if fan_watts_per_cfm.nil?
-      if (not cooling_system.nil?) && (not cooling_system.fan_watts_per_cfm.nil?)
-        fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
-      else
-        fan_watts_per_cfm = heating_system.fan_watts_per_cfm
-      end
-    end
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
     if heating_system.is_a?(HPXML::HeatPump) && (not heating_system.backup_system.nil?) && (not htg_ap.hp_min_temp.nil?)
       # Disable blower fan power below compressor lockout temperature if separate backup heating system
@@ -3570,13 +3570,15 @@ class HVAC
     program_calling_manager.addProgram(fault_program)
   end
 
-  def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier)
+  def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
     return [nil, nil] unless heat_pump.advanced_defrost_approach
 
-    # Fixme: fan power?
-    p_dot_odu_fan = 0.0
-    p_dot_blower = 0.0
+    defrost_flow_fraction = max_heating_airflow / design_airflow
+    defrost_power_fraction = defrost_flow_fraction**3
+    power_design = fan_watts_per_cfm * design_airflow
+    p_dot_blower = power_design * defrost_power_fraction
     rated_clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') / unit_multiplier
+    p_dot_odu_fan = 44.348 * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') + 62.452
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
     q_dot_defrost = rated_clg_capacity * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
     cop_defrost = rated_clg_cop / 1.0 # defrost cooling cop, 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
