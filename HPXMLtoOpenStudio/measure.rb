@@ -78,7 +78,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    Geometry.tear_down_model(model, runner)
+    Geometry.tear_down_model(model: model, runner: runner)
 
     Version.check_openstudio_version()
 
@@ -440,8 +440,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_skylights(model, spaces)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
-    Geometry.set_zone_volumes(spaces, @hpxml_bldg, @apply_ashrae140_assumptions)
-    Geometry.explode_surfaces(model, @hpxml_bldg, @walls_top)
+    Geometry.set_zone_volumes(spaces: spaces, hpxml_bldg: @hpxml_bldg, apply_ashrae140_assumptions: @apply_ashrae140_assumptions)
+    Geometry.explode_surfaces(model: model, hpxml_bldg: @hpxml_bldg, walls_top: @walls_top)
     add_num_occupants(model, runner, spaces)
 
     # HVAC
@@ -539,7 +539,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # file, you would get different results (operational calculation) relative to the
     # original file (asset calculation).
     if @hpxml_bldg.building_occupancy.number_of_residents.nil?
-      @hpxml_bldg.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
+      @hpxml_bldg.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds: @nbeds)
     elsif (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
       # If zero occupants, ensure end uses of interest are zeroed out
       @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
@@ -568,7 +568,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def create_or_get_space(model, spaces, location)
     if spaces[location].nil?
-      Geometry.create_space_and_zone(model, spaces, location, @hpxml_bldg.building_construction.number_of_units)
+      Geometry.create_space_and_zone(model: model, spaces: spaces, location: location, zone_multiplier: @hpxml_bldg.building_construction.number_of_units)
     end
     return spaces[location]
   end
@@ -595,7 +595,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         tilt = roof.pitch / 12.0
         z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
-        vertices = Geometry.create_roof_vertices(length, width, z_origin, azimuth, tilt)
+        vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: azimuth, tilt: tilt)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
@@ -706,7 +706,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
 
-        vertices = Geometry.create_wall_vertices(length, height, z_origin, azimuth)
+        vertices = Geometry.create_wall_vertices(length: length, height: height, z_origin: z_origin, azimuth: azimuth)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
@@ -776,7 +776,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         length = (rim_joist.area / height) / azimuths.size
         z_origin = @foundation_top
 
-        vertices = Geometry.create_wall_vertices(length, height, z_origin, azimuth)
+        vertices = Geometry.create_wall_vertices(length: length, height: height, z_origin: z_origin, azimuth: azimuth)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
@@ -841,11 +841,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       if floor.is_ceiling
-        vertices = Geometry.create_ceiling_vertices(length, width, z_origin, @default_azimuths)
+        vertices = Geometry.create_ceiling_vertices(length: length, width: width, z_origin: z_origin, default_azimuths: @default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
       else
-        vertices = Geometry.create_floor_vertices(length, width, z_origin, @default_azimuths)
+        vertices = Geometry.create_floor_vertices(length: length, width: width, z_origin: z_origin, default_azimuths: @default_azimuths)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
@@ -976,7 +976,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           azimuth = fnd_wall.azimuth
         end
 
-        vertices = Geometry.create_wall_vertices(length, ag_height, z_origin, azimuth)
+        vertices = Geometry.create_wall_vertices(length: length, height: ag_height, z_origin: z_origin, azimuth: azimuth)
         surface = OpenStudio::Model::Surface.new(vertices, model)
         surface.additionalProperties.setFeature('Length', length)
         surface.additionalProperties.setFeature('Azimuth', azimuth)
@@ -1047,7 +1047,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       subsurface_area = 0
     end
 
-    vertices = Geometry.create_wall_vertices(exposed_length, height, z_origin, azimuth, subsurface_area: subsurface_area)
+    vertices = Geometry.create_wall_vertices(length: exposed_length, height: height, z_origin: z_origin, azimuth: azimuth, subsurface_area: subsurface_area)
     surface = OpenStudio::Model::Surface.new(vertices, model)
     surface.additionalProperties.setFeature('Length', exposed_length)
     surface.additionalProperties.setFeature('Azimuth', azimuth)
@@ -1118,7 +1118,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
     slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
-    vertices = Geometry.create_floor_vertices(slab_length, slab_width, z_origin, @default_azimuths)
+    vertices = Geometry.create_floor_vertices(length: slab_length, width: slab_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     surface = OpenStudio::Model::Surface.new(vertices, model)
     surface.setName(slab.id)
     surface.setSurfaceType('Floor')
@@ -1224,7 +1224,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
     # Add floor surface
-    vertices = Geometry.create_floor_vertices(floor_length, floor_width, z_origin, @default_azimuths)
+    vertices = Geometry.create_floor_vertices(length: floor_length, width: floor_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     floor_surface = OpenStudio::Model::Surface.new(vertices, model)
 
     floor_surface.setSunExposure('NoSun')
@@ -1237,7 +1237,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     floor_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     # Add ceiling surface
-    vertices = Geometry.create_ceiling_vertices(floor_length, floor_width, z_origin, @default_azimuths)
+    vertices = Geometry.create_ceiling_vertices(length: floor_length, width: floor_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     ceiling_surface = OpenStudio::Model::Surface.new(vertices, model)
 
     ceiling_surface.setSunExposure('NoSun')
@@ -1312,7 +1312,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       if window.is_exterior
 
         # Create parent surface slightly bigger than window
-        vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth, add_buffer: true)
+        vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth, add_buffer: true)
         surface = OpenStudio::Model::Surface.new(vertices, model)
 
         surface.additionalProperties.setFeature('Length', window_length)
@@ -1323,7 +1323,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, window.wall)
 
-        vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
+        vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
@@ -1348,7 +1348,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         # heat transfer; there is no solar gains anyway.
 
         # Create parent surface slightly bigger than window
-        vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth, add_buffer: true)
+        vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth, add_buffer: true)
         surface = OpenStudio::Model::Surface.new(vertices, model)
 
         surface.additionalProperties.setFeature('Length', window_length)
@@ -1359,7 +1359,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, window.wall)
 
-        vertices = Geometry.create_wall_vertices(window_length, window_height, z_origin, window.azimuth)
+        vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
@@ -1391,7 +1391,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
 
       # Create parent surface slightly bigger than skylight
-      vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt, add_buffer: true)
+      vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt, add_buffer: true)
       surface = OpenStudio::Model::Surface.new(vertices, model)
       surface.additionalProperties.setFeature('Length', length)
       surface.additionalProperties.setFeature('Width', width)
@@ -1404,7 +1404,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
-      vertices = Geometry.create_roof_vertices(length, width, z_origin, skylight.azimuth, tilt)
+      vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
       sub_surface.setName(skylight.id)
       sub_surface.setSurface(surface)
@@ -1428,7 +1428,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       z_origin = @foundation_top
 
       # Create parent surface slightly bigger than door
-      vertices = Geometry.create_wall_vertices(door_length, door_height, z_origin, door.azimuth, add_buffer: true)
+      vertices = Geometry.create_wall_vertices(length: door_length, height: door_height, z_origin: z_origin, azimuth: door.azimuth, add_buffer: true)
       surface = OpenStudio::Model::Surface.new(vertices, model)
 
       surface.additionalProperties.setFeature('Length', door_length)
@@ -1439,7 +1439,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, door.wall)
 
-      vertices = Geometry.create_wall_vertices(door_length, door_height, z_origin, door.azimuth)
+      vertices = Geometry.create_wall_vertices(length: door_length, height: door_height, z_origin: z_origin, azimuth: door.azimuth)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
       sub_surface.setName(door.id)
       sub_surface.setSurface(surface)
@@ -2737,7 +2737,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     sch.setName(location)
     sch.additionalProperties.setFeature('ObjectType', location)
 
-    space_values = Geometry.get_temperature_scheduled_space_values(location)
+    space_values = Geometry.get_temperature_scheduled_space_values(location: location)
 
     htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
     if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq

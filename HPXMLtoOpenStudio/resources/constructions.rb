@@ -1506,7 +1506,7 @@ class Constructions
     fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window_or_skylight.id}'."
   end
 
-  # The following class methods are meant to be private.
+  # FIXME: The following class methods are meant to be private.
 
   def self.get_roof_color_and_solar_absorptance_map
     return { # asphalt or fiberglass shingles

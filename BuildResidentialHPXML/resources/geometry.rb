@@ -757,8 +757,8 @@ class Geometry
         next unless adb_facades.include? os_facade
 
         x_ft = UnitConversions.convert(x, 'm', 'ft')
-        max_x = get_surface_x_values([surface]).max
-        min_x = get_surface_x_values([surface]).min
+        max_x = get_surface_x_values(surfaceArray: [surface]).max
+        min_x = get_surface_x_values(surfaceArray: [surface]).min
         next if ((max_x - x_ft).abs >= 0.01) && (min_x > 0)
 
         surface.setOutsideBoundaryCondition('Adiabatic')
@@ -858,7 +858,7 @@ class Geometry
           os_facade = get_facade_for_surface(surface: surface)
           if adb_facades.include? os_facade
             surface.setOutsideBoundaryCondition('Adiabatic')
-          elsif get_surface_z_values([surface]).min < 0
+          elsif get_surface_z_values(surfaceArray: [surface]).min < 0
             surface.setOutsideBoundaryCondition('Foundation') if foundation_type != HPXML::FoundationTypeAmbient
             surface.setOutsideBoundaryCondition('Outdoors') if foundation_type == HPXML::FoundationTypeAmbient
           else
@@ -911,8 +911,8 @@ class Geometry
         next unless adb_facades.include? os_facade
 
         x_ft = UnitConversions.convert(x, 'm', 'ft')
-        max_x = get_surface_x_values([surface]).max
-        min_x = get_surface_x_values([surface]).min
+        max_x = get_surface_x_values(surfaceArray: [surface]).max
+        min_x = get_surface_x_values(surfaceArray: [surface]).min
         next if ((max_x - x_ft).abs >= 0.01) && (min_x > 0)
 
         surface.setOutsideBoundaryCondition('Adiabatic')
@@ -1064,8 +1064,8 @@ class Geometry
         if surface.surfaceType == 'Wall'
           if adb_facades.include? os_facade
             x_ft = UnitConversions.convert(x, 'm', 'ft')
-            max_x = get_surface_x_values([surface]).max
-            min_x = get_surface_x_values([surface]).min
+            max_x = get_surface_x_values(surfaceArray: [surface]).max
+            min_x = get_surface_x_values(surfaceArray: [surface]).min
             next if ((max_x - x_ft).abs >= 0.01) && (min_x > 0)
 
             surface.setOutsideBoundaryCondition('Adiabatic')
@@ -1148,7 +1148,7 @@ class Geometry
           os_facade = get_facade_for_surface(surface: surface)
           if adb_facades.include?(os_facade) && (os_facade != 'RoofCeiling') && (os_facade != 'Floor')
             surface.setOutsideBoundaryCondition('Adiabatic')
-          elsif get_surface_z_values([surface]).min < 0
+          elsif get_surface_z_values(surfaceArray: [surface]).min < 0
             surface.setOutsideBoundaryCondition('Foundation') if foundation_type != HPXML::FoundationTypeAmbient
             surface.setOutsideBoundaryCondition('Outdoors') if foundation_type == HPXML::FoundationTypeAmbient
           else
@@ -1198,8 +1198,8 @@ class Geometry
         next unless adb_facades.include? os_facade
 
         x_ft = UnitConversions.convert(x, 'm', 'ft')
-        max_x = get_surface_x_values([surface]).max
-        min_x = get_surface_x_values([surface]).min
+        max_x = get_surface_x_values(surfaceArray: [surface]).max
+        min_x = get_surface_x_values(surfaceArray: [surface]).min
         next if ((max_x - x_ft).abs >= 0.01) && (min_x > 0)
 
         surface.setOutsideBoundaryCondition('Adiabatic')
@@ -1269,7 +1269,7 @@ class Geometry
     min_story_avail_walls = []
     min_story_avail_wall_minz = 99999
     avail_walls.each do |avail_wall|
-      zvalues = get_surface_z_values([avail_wall])
+      zvalues = get_surface_z_values(surfaceArray: [avail_wall])
       minz = zvalues.min + avail_wall.space.get.zOrigin
       if minz < min_story_avail_wall_minz
         min_story_avail_walls.clear
@@ -1330,13 +1330,13 @@ class Geometry
         multy = 1
       end
       if (facade == Constants.FacadeBack) || (facade == Constants.FacadeLeft)
-        leftx = get_surface_x_values([min_story_avail_wall]).max
-        lefty = get_surface_y_values([min_story_avail_wall]).max
+        leftx = get_surface_x_values(surfaceArray: [min_story_avail_wall]).max
+        lefty = get_surface_y_values(surfaceArray: [min_story_avail_wall]).max
       else
-        leftx = get_surface_x_values([min_story_avail_wall]).min
-        lefty = get_surface_y_values([min_story_avail_wall]).min
+        leftx = get_surface_x_values(surfaceArray: [min_story_avail_wall]).min
+        lefty = get_surface_y_values(surfaceArray: [min_story_avail_wall]).min
       end
-      bottomz = get_surface_z_values([min_story_avail_wall]).min
+      bottomz = get_surface_z_values(surfaceArray: [min_story_avail_wall]).min
 
       [upperleft, lowerleft, lowerright, upperright].each do |coord|
         newx = UnitConversions.convert(leftx + multx * coord[0], 'ft', 'm')
@@ -1671,10 +1671,10 @@ class Geometry
       end
 
       surfaces.each do |surface|
-        if (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface)) > get_surface_length(surface)
-          skylight_aspect_ratio = get_surface_length(surface) / (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface)) # aspect ratio of the roof surface
+        if (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface: surface)) > get_surface_length(surface: surface)
+          skylight_aspect_ratio = get_surface_length(surface: surface) / (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface: surface)) # aspect ratio of the roof surface
         else
-          skylight_aspect_ratio = (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface)) / get_surface_length(surface) # aspect ratio of the roof surface
+          skylight_aspect_ratio = (UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / get_surface_length(surface: surface)) / get_surface_length(surface: surface) # aspect ratio of the roof surface
         end
 
         skylight_width = Math.sqrt(UnitConversions.convert(skylight_area, 'ft^2', 'm^2') / skylight_aspect_ratio)
@@ -1739,7 +1739,7 @@ class Geometry
   def self.surface_is_rim_joist(surface:,
                                 height:)
     return false unless (height - get_surface_height(surface: surface)).abs < 0.00001
-    return false unless get_surface_z_values([surface]).max > 0
+    return false unless get_surface_z_values(surfaceArray: [surface]).max > 0
 
     return true
   end
@@ -1931,7 +1931,7 @@ class Geometry
     return false
   end
 
-  # The following class methods are meant to be private.
+  # FIXME: The following class methods are meant to be private.
 
   # Get the absolute azimuth based on relative azimuth and building orientation.
   #
@@ -2076,9 +2076,9 @@ class Geometry
 
   def self.has_same_vertices(surface1:,
                              surface2:)
-    if get_surface_x_values([surface1]).sort == get_surface_x_values([surface2]).sort &&
-       get_surface_y_values([surface1]).sort == get_surface_y_values([surface2]).sort &&
-       get_surface_z_values([surface1]).sort == get_surface_z_values([surface2]).sort &&
+    if get_surface_x_values(surfaceArray: [surface1]).sort == get_surface_x_values(surfaceArray: [surface2]).sort &&
+       get_surface_y_values(surfaceArray: [surface1]).sort == get_surface_y_values(surfaceArray: [surface2]).sort &&
+       get_surface_z_values(surfaceArray: [surface1]).sort == get_surface_z_values(surfaceArray: [surface2]).sort &&
        surface1.space.get.zOrigin.round(5) == surface2.space.get.zOrigin.round(5)
       return true
     end
@@ -2114,7 +2114,7 @@ class Geometry
     space.surfaces.each do |surface|
       next unless surface.surfaceType.downcase == 'floor'
 
-      return get_surface_z_values([surface])[0]
+      return get_surface_z_values(surfaceArray: [surface])[0]
     end
   end
 
@@ -2132,7 +2132,7 @@ class Geometry
     end
 
     # Can't fit the smallest window?
-    if get_surface_length(surface) < min_window_width
+    if get_surface_length(surface: surface) < min_window_width
       return 0.0
     end
 
@@ -2159,7 +2159,7 @@ class Geometry
                                facade:,
                                model:,
                                runner:)
-    wall_width = get_surface_length(surface) # ft
+    wall_width = get_surface_length(surface: surface) # ft
     average_ceiling_height = get_surface_height(surface: surface) # ft
 
     # Calculate number of windows needed
@@ -2272,13 +2272,13 @@ class Geometry
       multy = 1
     end
     if (facade == Constants.FacadeBack) || (facade == Constants.FacadeLeft)
-      leftx = get_surface_x_values([surface]).max
-      lefty = get_surface_y_values([surface]).max
+      leftx = get_surface_x_values(surfaceArray: [surface]).max
+      lefty = get_surface_y_values(surfaceArray: [surface]).max
     else
-      leftx = get_surface_x_values([surface]).min
-      lefty = get_surface_y_values([surface]).min
+      leftx = get_surface_x_values(surfaceArray: [surface]).min
+      lefty = get_surface_y_values(surfaceArray: [surface]).min
     end
-    bottomz = get_surface_z_values([surface]).min
+    bottomz = get_surface_z_values(surfaceArray: [surface]).min
     [upperleft, lowerleft, lowerright, upperright].each do |coord|
       newx = UnitConversions.convert(leftx + multx * coord[0], 'ft', 'm')
       newy = UnitConversions.convert(lefty + multy * coord[0], 'ft', 'm')
@@ -2320,9 +2320,9 @@ class Geometry
       return false
     end
 
-    xvalues = get_surface_x_values([surface])
-    yvalues = get_surface_y_values([surface])
-    zvalues = get_surface_z_values([surface])
+    xvalues = get_surface_x_values(surfaceArray: [surface])
+    yvalues = get_surface_y_values(surfaceArray: [surface])
+    zvalues = get_surface_z_values(surfaceArray: [surface])
     if not (((xvalues.uniq.size == 1) && (yvalues.uniq.size == 2)) ||
             ((xvalues.uniq.size == 2) && (yvalues.uniq.size == 1)))
       return false
@@ -2550,9 +2550,9 @@ class Geometry
     edge_counter = 0
     surfaces.each do |surface|
       if use_top_edge
-        matchz = get_surface_z_values([surface]).max
+        matchz = get_surface_z_values(surfaceArray: [surface]).max
       else
-        matchz = get_surface_z_values([surface]).min
+        matchz = get_surface_z_values(surfaceArray: [surface]).min
       end
 
       # get vertices

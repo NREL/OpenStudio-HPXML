@@ -66,7 +66,7 @@ class HVACSizing
     return @all_hvac_sizing_values
   end
 
-  # The following class methods are meant to be private.
+  # FIXME: The following class methods are meant to be private.
 
   def self.is_system_to_skip(hvac_heating, hvac_cooling)
     # These shared systems should be converted to other equivalent

@@ -3391,7 +3391,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    Geometry.tear_down_model(model, runner)
+    Geometry.tear_down_model(model: model, runner: runner)
 
     Version.check_openstudio_version()
 
@@ -5094,7 +5094,7 @@ class HPXMLFile
 
       surface = sub_surface.surface.get
 
-      sub_surface_height = Geometry.get_surface_height(sub_surface)
+      sub_surface_height = Geometry.get_surface_height(surface: sub_surface)
       sub_surface_facade = Geometry.get_facade_for_surface(surface: sub_surface)
 
       if (sub_surface_facade == Constants.FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
@@ -5190,7 +5190,7 @@ class HPXMLFile
 
       surface = sub_surface.surface.get
 
-      sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
+      sub_surface_facade = Geometry.get_facade_for_surface(surface: sub_surface)
       azimuth = Geometry.get_azimuth_from_facade(facade: sub_surface_facade, orientation: args[:geometry_unit_orientation])
 
       if args[:skylight_storm_type].is_initialized

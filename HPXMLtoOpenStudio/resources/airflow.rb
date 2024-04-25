@@ -238,7 +238,7 @@ class Airflow
     return q_fan
   end
 
-  # The following class methods are meant to be private.
+  # FIXME: The following class methods are meant to be private.
 
   def self.set_wind_speed_correction(model, site)
     site_ap = site.additional_properties
@@ -862,7 +862,7 @@ class Airflow
       equip_act_infos = []
 
       if duct_location.is_a? OpenStudio::Model::ScheduleConstant
-        space_values = Geometry.get_temperature_scheduled_space_values(duct_location.name.to_s)
+        space_values = Geometry.get_temperature_scheduled_space_values(location: duct_location.name.to_s)
         f_regain = space_values[:f_regain]
       else
         f_regain = 0.0
@@ -1299,7 +1299,7 @@ class Airflow
     return if @spaces[HPXML::LocationCrawlspaceVented].nil?
 
     space = @spaces[HPXML::LocationCrawlspaceVented]
-    height = Geometry.get_height_of_spaces([space])
+    height = Geometry.get_height_of_spaces(spaces: [space])
     sla = vented_crawl.vented_crawlspace_sla
     ach = get_infiltration_ACH_from_SLA(sla, height, weather)
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
@@ -2088,9 +2088,9 @@ class Airflow
   def self.calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space, space_height = nil)
     site_ap = site.additional_properties
     if space_height.nil?
-      space_height = Geometry.get_height_of_spaces([space])
+      space_height = Geometry.get_height_of_spaces(spaces: [space])
     end
-    coord_z = Geometry.get_z_origin_for_zone(space.thermalZone.get)
+    coord_z = Geometry.get_z_origin_for_zone(zone: space.thermalZone.get)
     f_t_SG = site_ap.site_terrain_multiplier * ((space_height + coord_z) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
     f_s_SG = 2.0 / 3.0 * (1 + hor_lk_frac / 2.0) * (2.0 * neutral_level * (1.0 - neutral_level))**0.5 / (neutral_level**0.5 + (1.0 - neutral_level)**0.5)
     f_w_SG = site_ap.s_g_shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG

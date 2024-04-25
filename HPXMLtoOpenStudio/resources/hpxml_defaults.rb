@@ -104,7 +104,7 @@ class HPXMLDefaults
             sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
-  # The following class methods are meant to be private.
+  # FIXME: The following class methods are meant to be private.
 
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
