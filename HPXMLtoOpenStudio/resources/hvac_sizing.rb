@@ -48,6 +48,7 @@ class HVACSizing
       apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, frac_heat_load_served, frac_cool_load_served)
       apply_hvac_autosizing_factors(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
 
@@ -1960,6 +1961,33 @@ class HVACSizing
     end
   end
 
+  def self.apply_hvac_fixed_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
+    '''
+    Fixed Airflows
+    '''
+
+    hvac_sizing_values.Heat_Airflow_isdefaulted = true
+    hvac_sizing_values.Cool_Airflow_isdefaulted = true
+
+    # Override HVAC airflows if values are provided
+    if not hvac_cooling.nil?
+      fixed_cooling_airflow = hvac_cooling.cooling_airflow_cfm
+    end
+    autosized_cooling_airflow = hvac_sizing_values.Cool_Airflow
+    if (not fixed_cooling_airflow.nil?) && (autosized_cooling_airflow > 0)
+      hvac_sizing_values.Cool_Airflow = fixed_cooling_airflow
+      hvac_sizing_values.Cool_Airflow_isdefaulted = false
+    end
+    if not hvac_heating.nil?
+      fixed_heating_airflow = hvac_heating.heating_airflow_cfm
+    end
+    autosized_heating_airflow = hvac_sizing_values.Heat_Airflow
+    if (not fixed_heating_airflow.nil?) && (autosized_heating_airflow > 0)
+      hvac_sizing_values.Heat_Airflow = fixed_heating_airflow
+      hvac_sizing_values.Heat_Airflow_isdefaulted = false
+    end
+  end
+
   def self.apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
     '''
     GSHP Ground Loop Sizing Calculations
@@ -3220,7 +3248,7 @@ class HVACSizing
               [HPXML::HVACTypeBoiler,
                HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
         htg_sys.heating_airflow_cfm = Float(hvac_sizing_values.Heat_Airflow.round)
-        htg_sys.heating_airflow_cfm_isdefaulted = true
+        htg_sys.heating_airflow_cfm_isdefaulted = hvac_sizing_values.Heat_Airflow_isdefaulted
       end
 
       # Heating geothermal loop
@@ -3284,7 +3312,7 @@ class HVACSizing
 
       # Cooling airflow
       clg_sys.cooling_airflow_cfm = Float(hvac_sizing_values.Cool_Airflow.round)
-      clg_sys.cooling_airflow_cfm_isdefaulted = true
+      clg_sys.cooling_airflow_cfm_isdefaulted = hvac_sizing_values.Cool_Airflow_isdefaulted
     end
   end
 
@@ -3368,7 +3396,7 @@ end
 class HVACSizingValues
   def initialize
   end
-  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
-                :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
+  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow, :Cool_Airflow_isdefaulted,
+                :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow, :Heat_Airflow_isdefaulted,
                 :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 end

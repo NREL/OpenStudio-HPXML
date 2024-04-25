@@ -1680,6 +1680,11 @@
     "heat_pump_backup_heating_efficiency": 1,
     "heat_pump_backup_heating_capacity": 36000
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "hvac_blower_heating_airflow_rate": 700,
+    "hvac_blower_cooling_airflow_rate": 900
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_cooling_capacity": null,
@@ -1763,6 +1768,11 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
+    "hvac_blower_heating_airflow_rate": 600,
+    "hvac_blower_cooling_airflow_rate": 600
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
@@ -1900,6 +1910,10 @@
     "heating_system_type": "none",
     "heating_system_heating_efficiency": 0,
     "heating_system_fraction_heat_load_served": 0
+  },
+  "sample_files/base-hvac-central-ac-only-1-speed-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
+    "hvac_blower_cooling_airflow_rate": 750
   },
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2127,6 +2141,10 @@
     "cooling_system_type": "none",
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
+  },
+  "sample_files/base-hvac-furnace-gas-only-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
+    "hvac_blower_heating_airflow_rate": 600
   },
   "sample_files/base-hvac-furnace-gas-only-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2391,6 +2409,11 @@
     "heat_pump_backup_type": "none",
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-airflow.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "hvac_blower_heating_airflow_rate": 400,
+    "hvac_blower_cooling_airflow_rate": 500
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
