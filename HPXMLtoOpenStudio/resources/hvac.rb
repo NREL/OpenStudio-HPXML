@@ -133,7 +133,7 @@ class HVAC
         q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, unit_multiplier, fan_cfms.max, htg_cfm * htg_ap.heat_fan_speed_ratios[-1], fan_watts_per_cfm)
 
         # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost * unit_multiplier)
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -3582,7 +3582,7 @@ class HVAC
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
     q_dot_defrost = rated_clg_capacity * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
     cop_defrost = rated_clg_cop / 1.0 # defrost cooling cop, 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
-    p_dot_defrost = q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower
+    p_dot_defrost = (q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower) * unit_multiplier # p_dot_defrost is used in coil object, which needs to be scaled up for unit multiplier
     return q_dot_defrost, p_dot_defrost
   end
 
