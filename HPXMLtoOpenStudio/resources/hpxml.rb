@@ -4548,8 +4548,8 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
-             :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
+    ATTRS = [:id, :attached_to_zone_idref, :distribution_system_idref, :year_installed,
+             :heating_system_type, :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
@@ -4557,6 +4557,16 @@ class HPXML < Object
              :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
+
+    def zone
+      return if @attached_to_zone_idref.nil?
+
+      @parent_object.zones.each do |z|
+        return z if z.id == @attached_to_zone_idref
+      end
+
+      fail "Attached zone '#{@attached_to_zone_idref}' not found for heating system '#{@id}'."
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4629,6 +4639,10 @@ class HPXML < Object
       primary_systems = XMLHelper.create_elements_as_needed(hvac_plant, ['PrimarySystems']) unless @parent_object.primary_hvac_systems.empty?
       heating_system = XMLHelper.add_element(hvac_plant, 'HeatingSystem')
       sys_id = XMLHelper.add_element(heating_system, 'SystemIdentifier')
+      if not @attached_to_zone_idref.nil?
+        zone_attached = XMLHelper.add_element(heating_system, 'AttachedToZone')
+        XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
+      end
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(heating_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heating_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
@@ -4691,6 +4705,8 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
+      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
+      @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heating_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heating_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heating_system, 'ThirdPartyCertification', :string)
@@ -4757,7 +4773,7 @@ class HPXML < Object
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
+    ATTRS = [:id, :attached_to_zone_idref, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
              :cooling_capacity, :compressor_type, :fraction_cool_load_served, :cooling_efficiency_seer,
              :cooling_efficiency_seer2, :cooling_efficiency_eer, :cooling_efficiency_ceer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :third_party_certification, :clg_seed_id, :is_shared_system, :number_of_units_served,
@@ -4768,6 +4784,16 @@ class HPXML < Object
              :cooling_autosizing_factor]
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
+
+    def zone
+      return if @attached_to_zone_idref.nil?
+
+      @parent_object.zones.each do |z|
+        return z if z.id == @attached_to_zone_idref
+      end
+
+      fail "Attached zone '#{@attached_to_zone_idref}' not found for cooling system '#{@id}'."
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -4823,6 +4849,10 @@ class HPXML < Object
       cooling_system = XMLHelper.add_element(hvac_plant, 'CoolingSystem')
       sys_id = XMLHelper.add_element(cooling_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_zone_idref.nil?
+        zone_attached = XMLHelper.add_element(cooling_system, 'AttachedToZone')
+        XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
+      end
       XMLHelper.add_element(cooling_system, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(cooling_system, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(cooling_system, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -4894,6 +4924,8 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
+      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
+      @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(cooling_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(cooling_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(cooling_system, 'ThirdPartyCertification', :string)
@@ -5070,7 +5102,7 @@ class HPXML < Object
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
+    ATTRS = [:id, :attached_to_zone_idref, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type, :compressor_lockout_temp,
              :cooling_shr, :backup_type, :backup_system_idref, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue, :backup_heating_lockout_temp,
@@ -5085,6 +5117,16 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
+
+    def zone
+      return if @attached_to_zone_idref.nil?
+
+      @parent_object.zones.each do |z|
+        return z if z.id == @attached_to_zone_idref
+      end
+
+      fail "Attached zone '#{@attached_to_zone_idref}' not found for heat pump '#{@id}'."
+    end
 
     def distribution_system
       return if @distribution_system_idref.nil?
@@ -5167,6 +5209,10 @@ class HPXML < Object
       heat_pump = XMLHelper.add_element(hvac_plant, 'HeatPump')
       sys_id = XMLHelper.add_element(heat_pump, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      if not @attached_to_zone_idref.nil?
+        zone_attached = XMLHelper.add_element(heat_pump, 'AttachedToZone')
+        XMLHelper.add_attribute(zone_attached, 'idref', @attached_to_zone_idref)
+      end
       XMLHelper.add_element(heat_pump, 'UnitLocation', @location, :string, @location_isdefaulted) unless @location.nil?
       XMLHelper.add_element(heat_pump, 'YearInstalled', @year_installed, :integer) unless @year_installed.nil?
       XMLHelper.add_element(heat_pump, 'ThirdPartyCertification', @third_party_certification, :string) unless @third_party_certification.nil?
@@ -5279,6 +5325,8 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
+      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
+      @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heat_pump, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heat_pump, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
       @third_party_certification = XMLHelper.get_value(heat_pump, 'ThirdPartyCertification', :string)

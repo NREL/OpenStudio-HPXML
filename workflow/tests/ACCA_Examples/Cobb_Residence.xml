@@ -409,6 +409,7 @@
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
+              <AttachedToZone idref='CobbResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
