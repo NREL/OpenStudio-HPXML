@@ -3,8 +3,8 @@
 # The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
 class Geometry
   # Tear down the existing model if it exists
-  def tear_down_model(model:,
-                      runner:)
+  def self.tear_down_model(model:,
+                           runner:)
     handles = OpenStudio::UUIDVector.new
     model.objects.each do |obj|
       handles << obj.handle
@@ -15,7 +15,7 @@ class Geometry
     end
   end
 
-  def get_surface_height(surface:)
+  def self.get_surface_height(surface:)
     zvalues = get_surface_z_values(surfaceArray: [surface])
     zrange = zvalues.max - zvalues.min
     return zrange
@@ -27,7 +27,7 @@ class Geometry
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @return [Array<Double>] array of x-coordinates in ft
-  def get_surface_x_values(surfaceArray:)
+  def self.get_surface_x_values(surfaceArray:)
     xValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
@@ -43,7 +43,7 @@ class Geometry
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @return [Array<Double>] array of y-coordinates in ft
-  def get_surface_y_values(surfaceArray:)
+  def self.get_surface_y_values(surfaceArray:)
     yValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
@@ -59,7 +59,7 @@ class Geometry
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @return [Array<Double>] array of z-coordinates in ft
-  def get_surface_z_values(surfaceArray:)
+  def self.get_surface_z_values(surfaceArray:)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
     surfaceArray.each do |surface|
@@ -70,7 +70,7 @@ class Geometry
     return zValueArray
   end
 
-  def get_occupancy_default_num(nbeds:)
+  def self.get_occupancy_default_num(nbeds:)
     return Float(nbeds)
   end
 
@@ -81,10 +81,10 @@ class Geometry
   # @param location [String] HPXML location
   # @param zone_multiplier [Integer] the number of similar zones represented
   # @return [OpenStudio::Model::Space, nil] updated spaces hash if location is not already a key
-  def create_space_and_zone(model:,
-                            spaces:,
-                            location:,
-                            zone_multiplier:)
+  def self.create_space_and_zone(model:,
+                                 spaces:,
+                                 location:,
+                                 zone_multiplier:)
     if not spaces.keys.include? location
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(location)
@@ -99,12 +99,12 @@ class Geometry
     end
   end
 
-  def create_roof_vertices(length:,
-                           width:,
-                           z_origin:,
-                           azimuth:,
-                           tilt:,
-                           add_buffer: false)
+  def self.create_roof_vertices(length:,
+                                width:,
+                                z_origin:,
+                                azimuth:,
+                                tilt:,
+                                add_buffer: false)
     length = UnitConversions.convert(length, 'ft', 'm')
     width = UnitConversions.convert(width, 'ft', 'm')
     z_origin = UnitConversions.convert(z_origin, 'ft', 'm')
@@ -159,7 +159,7 @@ class Geometry
   #
   # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @return [Double] the maximum of surface tilts in degrees
-  def get_roof_pitch(surfaces)
+  def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
       next if surface.surfaceType.downcase != 'roofceiling'
@@ -170,12 +170,12 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
-  def create_wall_vertices(length:,
-                           height:,
-                           z_origin:,
-                           azimuth:,
-                           add_buffer: false,
-                           subsurface_area: 0)
+  def self.create_wall_vertices(length:,
+                                height:,
+                                z_origin:,
+                                azimuth:,
+                                add_buffer: false,
+                                subsurface_area: 0)
     length = UnitConversions.convert(length, 'ft', 'm')
     height = UnitConversions.convert(height, 'ft', 'm')
     z_origin = UnitConversions.convert(z_origin, 'ft', 'm')
@@ -221,17 +221,17 @@ class Geometry
   end
 
   # Reverse the vertices after calling create_floor_vertices with the same argument values.
-  def create_ceiling_vertices(length:,
-                              width:,
-                              z_origin:,
-                              default_azimuths:)
+  def self.create_ceiling_vertices(length:,
+                                   width:,
+                                   z_origin:,
+                                   default_azimuths:)
     return OpenStudio::reverse(create_floor_vertices(length: length, width: width, z_origin: z_origin, default_azimuths: default_azimuths))
   end
 
-  def create_floor_vertices(length:,
-                            width:,
-                            z_origin:,
-                            default_azimuths:)
+  def self.create_floor_vertices(length:,
+                                 width:,
+                                 z_origin:,
+                                 default_azimuths:)
     length = UnitConversions.convert(length, 'ft', 'm')
     width = UnitConversions.convert(width, 'ft', 'm')
     z_origin = UnitConversions.convert(z_origin, 'ft', 'm')
@@ -258,9 +258,9 @@ class Geometry
     return transformation * vertices
   end
 
-  def set_zone_volumes(spaces:,
-                       hpxml_bldg:,
-                       apply_ashrae140_assumptions:)
+  def self.set_zone_volumes(spaces:,
+                            hpxml_bldg:,
+                            apply_ashrae140_assumptions:)
     # Conditioned space
     volume = UnitConversions.convert(hpxml_bldg.building_construction.conditioned_building_volume, 'ft^3', 'm^3')
     spaces[HPXML::LocationConditionedSpace].thermalZone.get.setVolume(volume)
@@ -295,9 +295,9 @@ class Geometry
   # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param walls_top [Double] the total height of the dwelling unit
   # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
-  def explode_surfaces(model:,
-                       hpxml_bldg:,
-                       walls_top:)
+  def self.explode_surfaces(model:,
+                            hpxml_bldg:,
+                            walls_top:)
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth
     rad90 = UnitConversions.convert(90, 'deg', 'rad')
 
@@ -434,7 +434,7 @@ class Geometry
     end
   end
 
-  def apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
+  def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
@@ -484,7 +484,7 @@ class Geometry
     occ.setNumberofPeopleSchedule(people_sch)
   end
 
-  def get_z_origin_for_zone(zone:)
+  def self.get_z_origin_for_zone(zone:)
     z_origins = []
     zone.spaces.each do |space|
       z_origins << UnitConversions.convert(space.zOrigin, 'm', 'ft')
@@ -502,10 +502,10 @@ class Geometry
   # @param y [Double] the y-coordinate of the translation vector
   # @param z [Double] the z-coordinate of the translation vector
   # @return [OpenStudio::Transformation] the OpenStudio transformation object
-  def get_surface_transformation(offset:,
-                                 x:,
-                                 y:,
-                                 z:)
+  def self.get_surface_transformation(offset:,
+                                      x:,
+                                      y:,
+                                      z:)
     x = UnitConversions.convert(x, 'ft', 'm')
     y = UnitConversions.convert(y, 'ft', 'm')
     z = UnitConversions.convert(z, 'ft', 'm')
@@ -522,10 +522,10 @@ class Geometry
     return OpenStudio::Transformation.new(m)
   end
 
-  def add_neighbor_shading(model:,
-                           length:,
-                           hpxml_bldg:,
-                           walls_top:)
+  def self.add_neighbor_shading(model:,
+                                length:,
+                                hpxml_bldg:,
+                                walls_top:)
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -550,8 +550,8 @@ class Geometry
     end
   end
 
-  def calculate_zone_volume(hpxml_bldg:,
-                            location:)
+  def self.calculate_zone_volume(hpxml_bldg:,
+                                 location:)
     if [HPXML::LocationBasementUnconditioned,
         HPXML::LocationCrawlspaceUnvented,
         HPXML::LocationCrawlspaceVented,
@@ -577,7 +577,7 @@ class Geometry
     end
   end
 
-  def get_temperature_scheduled_space_values(location:)
+  def self.get_temperature_scheduled_space_values(location:)
     if location == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of heating setpoint
       return { temp_min: 68,
@@ -633,7 +633,7 @@ class Geometry
     fail "Unhandled location: #{location}."
   end
 
-  def get_height_of_spaces(spaces:)
+  def self.get_height_of_spaces(spaces:)
     # Calculates space heights as the max z coordinate minus the min z coordinate
     minzs = []
     maxzs = []
@@ -645,7 +645,7 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
-  def get_surface_length(surface:)
+  def self.get_surface_length(surface:)
     xvalues = get_surface_x_values(surfaceArray: [surface])
     yvalues = get_surface_y_values(surfaceArray: [surface])
     xrange = xvalues.max - xvalues.min
@@ -660,7 +660,7 @@ class Geometry
   # Table 4.2.2(3). Internal Gains for Reference Homes
   #
   # @return heat_gain [Double], hrs_per_day [Double], sens_frac [Double], lat_frac [Double]
-  def get_occupancy_default_values()
+  def self.get_occupancy_default_values()
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day
     lat_gains = 2884.0 # Btu/person/day
@@ -678,8 +678,8 @@ class Geometry
   # @param length [Double] length of the subsurface in m
   # @param width [Double] width of the subsurface in m
   # @return [Double] minimum needed buffer distance in m
-  def calculate_subsurface_parent_buffer(length:,
-                                         width:)
+  def self.calculate_subsurface_parent_buffer(length:,
+                                              width:)
     min_surface_area = 0.005 # m^2
     return 0.5 * (((length + width)**2 + 4.0 * min_surface_area)**0.5 - length - width)
   end
