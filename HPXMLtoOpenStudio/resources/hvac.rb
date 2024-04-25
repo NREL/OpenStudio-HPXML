@@ -3573,14 +3573,16 @@ class HVAC
   def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
     return [nil, nil] unless heat_pump.advanced_defrost_approach
 
-    defrost_flow_fraction = max_heating_airflow / design_airflow
+    nominal_cooling_capacity_1x = heat_pump.cooling_capacity / unit_multiplier
+    max_heating_airflow_1x = max_heating_airflow / unit_multiplier
+    design_airflow_1x = design_airflow / unit_multiplier
+    defrost_flow_fraction = max_heating_airflow_1x / design_airflow_1x
     defrost_power_fraction = defrost_flow_fraction**3
-    power_design = fan_watts_per_cfm * design_airflow
+    power_design = fan_watts_per_cfm * design_airflow_1x
     p_dot_blower = power_design * defrost_power_fraction
-    rated_clg_capacity = UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'W') / unit_multiplier
-    p_dot_odu_fan = 44.348 * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton') + 62.452
+    p_dot_odu_fan = 44.348 * UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'ton') + 62.452
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
-    q_dot_defrost = rated_clg_capacity * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
+    q_dot_defrost = UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'W') * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
     cop_defrost = rated_clg_cop / 1.0 # defrost cooling cop, 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
     p_dot_defrost = (q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower) * unit_multiplier # p_dot_defrost is used in coil object, which needs to be scaled up for unit multiplier
     return q_dot_defrost, p_dot_defrost
