@@ -1194,7 +1194,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 747, -0.11, -0.22, nil, 12.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 750, -0.11, -0.22, nil, 12.0, 40.0, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
@@ -1208,7 +1208,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 623, -0.11, -0.22, 23954, 12.0, 40.0, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 625, -0.11, -0.22, 24026, 12.0, 40.0, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1433,21 +1433,21 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 768, -0.22, nil, true, 999, 1.2)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 770, -0.22, nil, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 97, -0.22, 5000, true, 999, 1.0)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 98, -0.22, 5000, true, 999, 1.0)
 
     # Test autosizing with limits 2
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 640, -0.22, 32811, true, 999, 1.0)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 641, -0.22, 32885, true, 999, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = nil
@@ -1826,7 +1826,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 1065, 1213, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, 0.528, 5.0, 40.0, 1.5, 1.2, 1.1)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 1068, 1216, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, 0.528, 5.0, 40.0, 1.5, 1.2, 1.1)
 
     # Test autosizing with limits
     hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 6000
@@ -1848,7 +1848,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 888, 809, -0.11, -0.22, 34144, 32870, nil, 31719, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 890, 810, -0.11, -0.22, 34215, 32939, nil, 31786, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
