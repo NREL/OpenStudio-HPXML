@@ -629,8 +629,10 @@ class HPXMLDefaults
 
     if hpxml_bldg.site.shielding_of_home.nil?
       if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        # Shielding Class 5 is ACCA MJ8 default for Table 5B/5E for townhouses and condos
         hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
       else
+        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET 301 default
         hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
       end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
