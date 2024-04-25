@@ -1188,27 +1188,29 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 780, -0.11, -0.22, 12345, 12.0, 40.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.cooling_systems[0].cooling_airflow_cfm = nil
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 30000
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, nil, -0.11, -0.22, nil, 12.0, 40.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.cooling_systems[0].cooling_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 750, -0.11, -0.22, nil, 12.0, 40.0, 1.2)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, cooling_airflow_cfm * 1.2, -0.11, -0.22, cooling_capacity * 1.2, 12.0, 40.0, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 130, -0.11, -0.22, 5000, 12.0, 40.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 625, -0.11, -0.22, 24026, 12.0, 40.0, 1.0)
+    _test_default_central_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 5000 / cooling_capacity * cooling_airflow_cfm, -0.11, -0.22, 5000, 12.0, 40.0, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1236,26 +1238,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, 321, 12345, 40.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, nil, nil, 40.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.cooling_systems[0].cooling_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, 464, nil, 40.0, 1.2)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, cooling_airflow_cfm * 1.2, cooling_capacity * 1.2, 40.0, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, 130, 5000, 40.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, 387, 14880, 40.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.88, 5000 / cooling_capacity * cooling_airflow_cfm, 5000, 40.0, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1276,26 +1280,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], 2231, 12345, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], nil, nil, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.cooling_systems[0].cooling_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], 3012, nil, 1.2)
+    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], cooling_airflow_cfm * 1.2, cooling_capacity * 1.2, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], 904, 5000, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], 2510, 13885, 1.0)
+    _test_default_evap_cooler_values(default_hpxml_bldg.cooling_systems[0], 5000 / cooling_capacity * cooling_airflow_cfm, 5000, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
@@ -1321,27 +1327,29 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, 780, -0.11, -0.22, 12345, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.cooling_systems[0].cooling_airflow_cfm = nil
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, nil, -0.11, -0.22, nil, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.cooling_systems[0].cooling_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, 628, -0.11, -0.22, nil, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.2)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, cooling_airflow_cfm * 1.2, -0.11, -0.22, cooling_capacity * 1.2, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, 130, -0.11, -0.22, 5000, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, 523, -0.11, -0.22, 20117, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
+    _test_default_mini_split_air_conditioner_values(default_hpxml_bldg.cooling_systems[0], 0.78, 0.66, 5000 / cooling_capacity * cooling_airflow_cfm, -0.11, -0.22, 5000, 19.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1382,26 +1390,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, 321, 12345, 40.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
+    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, nil, nil, 40.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.cooling_systems[0].cooling_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, 464, nil, 40.0, 1.2)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, cooling_airflow_cfm * 1.2, cooling_capacity * 1.2, 40.0, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 5000
     hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, 130, 5000, 40.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = 25000
-    hpxml_bldg.cooling_systems[0].cooling_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, 387, 14880, 40.0, 1.0)
+    _test_default_room_air_conditioner_ptac_values(default_hpxml_bldg.cooling_systems[0], 0.75, 5000 / cooling_capacity * cooling_airflow_cfm, 5000, 40.0, 1.0)
 
     # Test defaults
     hpxml_bldg.cooling_systems[0].cooling_shr = nil
@@ -1427,27 +1437,29 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 780, -0.22, 12345, true, 999, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_airflow_cfm = nil
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, nil, -0.22, nil, true, 999, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 770, -0.22, nil, true, 999, 1.2)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, heating_airflow_cfm * 1.2, -0.22, heating_capacity * 1.2, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 98, -0.22, 5000, true, 999, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 641, -0.22, 32885, true, 999, 1.0)
+    _test_default_furnace_values(default_hpxml_bldg.heating_systems[0], 0.66, 5000 / heating_capacity * heating_airflow_cfm, -0.22, 5000, true, 999, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts_per_cfm = nil
@@ -1487,26 +1499,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 360, 12345, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 847, nil, 1.2)
+    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, heating_airflow_cfm * 1.2, heating_capacity * 1.2, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 146, 5000, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 706, 24200, 1.0)
+    _test_default_wall_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 5000 / heating_capacity * heating_airflow_cfm, 5000, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1535,26 +1549,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 360, 12345, true, 999, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, true, 999, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 847, nil, true, 999, 1.2)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, heating_airflow_cfm * 1.2, heating_capacity * 1.2, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 146, 5000, true, 999, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 706, 24200, true, 999, 1.0)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 22, 5000 / heating_capacity * heating_airflow_cfm, 5000, true, 999, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1598,12 +1614,20 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 12345, true, 999, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, true, 999, 1.0)
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, nil, true, 999, 1.2)
+    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, heating_capacity * 1.2, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
@@ -1611,13 +1635,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 5000, true, 999, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_boiler_values(default_hpxml_bldg.heating_systems[0], 99.9, 24200, true, 999, 1.0)
 
     # Test defaults w/ in-unit boiler
     hpxml_bldg.heating_systems[0].electric_auxiliary_energy = nil
@@ -1649,26 +1666,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 360, 12345, true, 999, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, true, 999, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 847, nil, true, 999, 1.2)
+    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, heating_airflow_cfm * 1.2, heating_capacity * 1.2, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 146, 5000, true, 999, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 706, 24200, true, 999, 1.0)
+    _test_default_stove_values(default_hpxml_bldg.heating_systems[0], 22, 5000 / heating_capacity * heating_airflow_cfm, 5000, true, 999, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1695,26 +1714,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, 360, 12345, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, 847, nil, 1.2)
+    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, heating_airflow_cfm * 1.2, heating_capacity * 1.2, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, 146, 5000, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, 706, 24200, 1.0)
+    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, 5000 / heating_capacity * heating_airflow_cfm, 5000, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1737,26 +1758,28 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, 360, 12345, true, 999, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heating_systems[0].heating_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, true, 999, 1.0)
+    heating_airflow_cfm = default_hpxml_bldg.heating_systems[0].heating_airflow_cfm
+    heating_capacity = default_hpxml_bldg.heating_systems[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, 888, nil, true, 999, 1.2)
+    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, heating_airflow_cfm * 1.2, heating_capacity * 1.2, true, 999, 1.2)
 
     # Test autosizing with limits
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = 5000
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, 146, 5000, true, 999, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heating_systems[0].heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, 740, 25377, true, 999, 1.0)
+    _test_default_fireplace_values(default_hpxml_bldg.heating_systems[0], 22, 5000 / heating_capacity * heating_airflow_cfm, 5000, true, 999, 1.0)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1814,19 +1837,35 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 936, 780, -0.11, -0.22, 12345, 23456, 9876, 34567, 14.0, 8.0, nil, nil, 40.0, 1.0, 1.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = nil
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = nil
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 60000
+    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
+    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    heating_airflow_cfm = default_hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.heat_pumps[0].cooling_capacity
+    heating_capacity = default_hpxml_bldg.heat_pumps[0].heating_capacity
+    backup_heating_capacity = default_hpxml_bldg.heat_pumps[0].backup_heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].heating_autosizing_factor = 1.5
     hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = 1.2
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 1068, 1216, -0.11, -0.22, nil, nil, nil, nil, 14.0, 8.0, 0.528, 5.0, 40.0, 1.5, 1.2, 1.1)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, cooling_airflow_cfm * 1.2, heating_airflow_cfm * 1.5, -0.11, -0.22, cooling_capacity * 1.2, heating_capacity * 1.5, nil, backup_heating_capacity * 1.1, 14.0, 8.0, 0.528, 5.0, 40.0, 1.5, 1.2, 1.1)
 
     # Test autosizing with limits
     hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 6000
@@ -1837,18 +1876,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 156, 123, -0.11, -0.22, 6000, 5000, nil, 7000, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 60000
-    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 890, 810, -0.11, -0.22, 34215, 32939, nil, 31786, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
+    _test_default_air_to_air_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.88, HPXML::HVACCompressorTypeVariableSpeed, 0.66, 6000 / cooling_capacity * cooling_airflow_cfm, 5000 / heating_capacity * heating_airflow_cfm, -0.11, -0.22, 6000, 5000, nil, 7000, 14.0, 8.0, 0.528, 5.0, 40.0, 1.0, 1.0, 1.0)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
@@ -1954,17 +1982,30 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, 684, 321, 12345, 23456, 9876, nil, nil, 40.0, 1.0, 1.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
-    hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 60000
+    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 50000
+    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
+    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, nil, nil, nil, nil, nil, 0.425, 5.0, 40.0, 1.0, 1.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    heating_airflow_cfm = default_hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.heat_pumps[0].cooling_capacity
+    heating_capacity = default_hpxml_bldg.heat_pumps[0].heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].heating_autosizing_factor = 1.5
     hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = 1.2
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, 1059, 755, nil, nil, nil, 0.425, 5.0, 40.0, 1.5, 1.2, 1.1)
+    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, heating_airflow_cfm * 1.5, cooling_airflow_cfm * 1.2, cooling_capacity * 1.2, heating_capacity * 1.5, nil, 0.425, 5.0, 40.0, 1.5, 1.2, 1.1)
 
     # Test autosizing with limits
     hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 6000
@@ -1975,18 +2016,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, 146, 156, 6000, 5000, nil, 0.425, 5.0, 40.0, 1.0, 1.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 60000
-    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 50000
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, 706, 629, 24200, 24200, nil, 0.425, 5.0, 40.0, 1.0, 1.0, 1.0)
+    _test_default_pthp_values(default_hpxml_bldg.heat_pumps[0], 0.88, 5000 / heating_capacity * heating_airflow_cfm, 6000 / cooling_capacity * cooling_airflow_cfm, 6000, 5000, nil, 0.425, 5.0, 40.0, 1.0, 1.0, 1.0)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
@@ -2034,19 +2064,35 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, 780, 936, -0.11, -0.22, 12345, 23456, 9876, 34567, 19.0, 10.0, nil, nil, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0)
 
-    # Test autosizing with factors
+    # Test autosizing w/out limits
     hpxml_bldg.heat_pumps[0].cooling_airflow_cfm = nil
     hpxml_bldg.heat_pumps[0].heating_airflow_cfm = nil
     hpxml_bldg.heat_pumps[0].cooling_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity = nil
     hpxml_bldg.heat_pumps[0].heating_capacity_17F = nil
     hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 50000
+    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 60000
+    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
+    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
+    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, nil, nil, -0.11, -0.22, nil, nil, nil, nil, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0)
+    cooling_airflow_cfm = default_hpxml_bldg.heat_pumps[0].cooling_airflow_cfm
+    heating_airflow_cfm = default_hpxml_bldg.heat_pumps[0].heating_airflow_cfm
+    cooling_capacity = default_hpxml_bldg.heat_pumps[0].cooling_capacity
+    heating_capacity = default_hpxml_bldg.heat_pumps[0].heating_capacity
+    backup_heating_capacity = default_hpxml_bldg.heat_pumps[0].backup_heating_capacity
+
+    # Test autosizing with factors
     hpxml_bldg.heat_pumps[0].heating_autosizing_factor = 1.5
     hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = 1.2
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = 1.1
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, 1023, 898, -0.11, -0.22, nil, nil, nil, nil, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.5, 1.2, 1.1)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, heating_airflow_cfm * 1.5, cooling_airflow_cfm * 1.2, -0.11, -0.22, cooling_capacity * 1.2, heating_capacity * 1.5, nil, backup_heating_capacity * 1.1, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.5, 1.2, 1.1)
 
     # Test autosizing with limits
     hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 5000
@@ -2057,18 +2103,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, 148, 130, -0.11, -0.22, 5000, 6000, nil, 7000, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0)
-
-    # Test autosizing with limits 2
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 50000
-    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 60000
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = 70000
-    hpxml_bldg.heat_pumps[0].cooling_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].heating_autosizing_factor = nil
-    hpxml_bldg.heat_pumps[0].backup_heating_autosizing_factor = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, 682, 748, -0.11, -0.22, 28788, 27713, nil, 26743, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0)
+    _test_default_mini_split_heat_pump_values(default_hpxml_bldg.heat_pumps[0], 0.78, 0.66, 6000 / heating_capacity * heating_airflow_cfm, 5000 / cooling_capacity * cooling_airflow_cfm, -0.11, -0.22, 5000, 6000, nil, 7000, 19.0, 10.0, 0.62, 5.0, 40.0, HPXML::HVACCompressorTypeVariableSpeed, 1.0, 1.0, 1.0)
 
     # Test defaults
     hpxml_bldg.heat_pumps[0].cooling_shr = nil
@@ -4739,7 +4774,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(cooling_system.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
@@ -4748,7 +4783,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
+      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(cooling_system.cooling_efficiency_seer)
@@ -4762,14 +4797,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(cooling_system.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
     end
     assert_equal(crankcase_heater_watts, cooling_system.crankcase_heater_watts)
     assert_equal(cooling_autosizing_factor, cooling_system.cooling_autosizing_factor)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
+      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
     end
   end
 
@@ -4777,13 +4812,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(cooling_system.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
     end
     assert_equal(cooling_autosizing_factor, cooling_system.cooling_autosizing_factor)
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_equal(cooling_system.cooling_capacity, cooling_capacity)
+      assert_in_delta(cooling_system.cooling_capacity, cooling_capacity, 1.0)
     end
   end
 
@@ -4794,7 +4829,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(cooling_system.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, cooling_system.cooling_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, cooling_system.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, cooling_system.airflow_defect_ratio)
@@ -4803,7 +4838,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
+      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(cooling_system.cooling_efficiency_seer)
@@ -4819,14 +4854,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(airflow_defect_ratio, heating_system.airflow_defect_ratio)
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4841,13 +4876,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
   end
 
@@ -4856,13 +4891,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4882,7 +4917,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4897,13 +4932,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4918,13 +4953,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
   end
 
@@ -4947,13 +4982,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
+      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4978,12 +5013,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
     end
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heat_pump.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
@@ -4994,22 +5029,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
+      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heat_pump.heating_capacity)
+      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
+      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
     end
     if backup_heating_capacity.nil?
       assert(heat_pump.backup_heating_capacity > 0)
     else
-      assert_equal(backup_heating_capacity, heat_pump.backup_heating_capacity)
+      assert_in_delta(backup_heating_capacity, heat_pump.backup_heating_capacity, 1.0)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(heat_pump.cooling_efficiency_seer)
@@ -5064,12 +5099,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heat_pump.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
     end
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
     end
     assert_equal(crankcase_heater_watts, heat_pump.crankcase_heater_watts)
     assert_equal(heating_autosizing_factor, heat_pump.heating_autosizing_factor)
@@ -5078,17 +5113,17 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
+      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heat_pump.heating_capacity)
+      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
+      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
     end
     if heating_capacity_retention_fraction.nil?
       assert_nil(heat_pump.heating_capacity_retention_fraction)
@@ -5114,12 +5149,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.heating_airflow_cfm > 0)
     else
-      assert_equal(heating_airflow_cfm, heat_pump.heating_airflow_cfm)
+      assert_in_delta(heating_airflow_cfm, heat_pump.heating_airflow_cfm, 1.0)
     end
     if cooling_airflow_cfm.nil? # nil implies an autosized value
       assert(heat_pump.cooling_airflow_cfm > 0)
     else
-      assert_equal(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm)
+      assert_in_delta(cooling_airflow_cfm, heat_pump.cooling_airflow_cfm, 1.0)
     end
     assert_equal(charge_defect_ratio, heat_pump.charge_defect_ratio)
     assert_equal(airflow_defect_ratio, heat_pump.airflow_defect_ratio)
@@ -5130,22 +5165,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
+      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_equal(heating_capacity, heat_pump.heating_capacity)
+      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
+      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
     end
     if backup_heating_capacity.nil?
       assert(heat_pump.backup_heating_capacity > 0)
     else
-      assert_equal(backup_heating_capacity, heat_pump.backup_heating_capacity)
+      assert_in_delta(backup_heating_capacity, heat_pump.backup_heating_capacity, 1.0)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(heat_pump.cooling_efficiency_seer)
