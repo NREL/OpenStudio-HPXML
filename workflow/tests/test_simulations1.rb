@@ -12,8 +12,8 @@ class WorkflowSimulations1Test < Minitest::Test
     results_dir = File.join(File.dirname(__FILE__), 'results')
     FileUtils.mkdir_p results_dir
 
-    results_out = File.join(results_dir, 'results_simulations1.csv')
-    Dir.glob("#{File.dirname(results_out)}/#{File.basename(results_out).gsub('.csv', '*.csv')}").each { |file| File.delete(file) }
+    test_results_csv = File.join(results_dir, 'results_simulations1.csv')
+    Dir.glob("#{File.dirname(test_results_csv)}/#{File.basename(test_results_csv).gsub('.csv', '*.csv')}").each { |file| File.delete(file) }
 
     sample_files_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'sample_files'))
     real_homes_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'real_homes'))
@@ -32,6 +32,6 @@ class WorkflowSimulations1Test < Minitest::Test
     xmls = xmls[0..split_at_file - 1]
     all_annual_results = run_simulation_tests(xmls)
 
-    _write_results(all_annual_results.sort_by { |k, _v| k.downcase }.to_h, results_out)
+    _write_results(all_annual_results.sort_by { |k, _v| k.downcase }.to_h, test_results_csv)
   end
 end
