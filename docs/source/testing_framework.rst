@@ -31,7 +31,7 @@ Or individual tests can be run by specifying the name of the test. For example:
 | ``openstudio test_hers.rb --name=test_hers_hvac``
 | 
 
-Test results in CSV format are created at ``workflow/tests/results`` and can be used to populate RESNET Excel spreadsheet forms. 
+Test results in CSV format are created at ``workflow/tests/test_results`` and can be used to populate RESNET Excel spreadsheet forms. 
 RESNET acceptance criteria are also implemented as part of the tests to check for test failures.
 
 At the completion of the test, there will be output that denotes the number of failures/errors like so:

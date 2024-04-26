@@ -263,6 +263,9 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
   # Set detailed HPXML values for HERS Hot Water test files
   hpxml_bldg = hpxml.buildings[0]
 
+  hpxml.header.xml_generated_by = 'tasks.rb'
+  hpxml.header.created_date_and_time = Time.new(2000, 1, 1, 0, 0, 0, '-07:00').strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
+
   (hpxml_bldg.roofs + hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |surface|
     surface.solar_absorptance = 0.75
     surface.emittance = 0.9

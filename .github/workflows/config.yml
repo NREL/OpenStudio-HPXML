@@ -46,7 +46,7 @@ jobs:
       - name: Store results
         uses: actions/upload-artifact@v4
         with:
-          path: workflow/tests/results
+          path: workflow/tests/test_results
           name: results-unit-tests
 
       - name: Build documentation
@@ -85,7 +85,7 @@ jobs:
       - name: Store results
         uses: actions/upload-artifact@v4
         with:
-          path: workflow/tests/results
+          path: workflow/tests/test_results
           name: results-workflow1-tests
 
   run-workflow2-tests:
@@ -108,7 +108,7 @@ jobs:
       - name: Store results
         uses: actions/upload-artifact@v4
         with:
-          path: workflow/tests/results
+          path: workflow/tests/test_results
           name: results-workflow2-tests
 
   run-windows-tests:
@@ -133,7 +133,7 @@ jobs:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
-          name: results
+          name: test_results
           pattern: results-*
           delete-merged: true
 
@@ -165,14 +165,14 @@ jobs:
       - name: Download feature results
         uses: actions/download-artifact@v4
         with:
-          path: results
-          name: results
+          path: test_results
+          name: test_results
 
       - name: Compare results
         run: |
           cp -r base_results/results*.csv workflow/tests/base_results
-          mkdir workflow/tests/results
-          cp -r results/results* workflow/tests/results
+          mkdir workflow/tests/test_results
+          cp -r results/results* workflow/tests/test_results
           
           pip install numpy
           pip install pandas

@@ -10,7 +10,7 @@ require_relative 'util.rb'
 
 class WorkflowHERSTest < Minitest::Test
   def test_hers_hvac
-    results_dir = File.join(File.dirname(__FILE__), 'results')
+    results_dir = File.join(File.dirname(__FILE__), 'test_results')
     FileUtils.mkdir_p results_dir
 
     test_results_csv = File.join(results_dir, 'results_hers_hvac.csv')
@@ -43,7 +43,7 @@ class WorkflowHERSTest < Minitest::Test
   end
 
   def test_hers_dse
-    results_dir = File.join(File.dirname(__FILE__), 'results')
+    results_dir = File.join(File.dirname(__FILE__), 'test_results')
     FileUtils.mkdir_p results_dir
 
     test_results_csv = File.join(results_dir, 'results_hers_dse.csv')
@@ -73,7 +73,7 @@ class WorkflowHERSTest < Minitest::Test
   end
 
   def test_hers_hot_water
-    results_dir = File.join(File.dirname(__FILE__), 'results')
+    results_dir = File.join(File.dirname(__FILE__), 'test_results')
     FileUtils.mkdir_p results_dir
 
     test_results_csv = File.join(results_dir, 'results_hers_hot_water.csv')
