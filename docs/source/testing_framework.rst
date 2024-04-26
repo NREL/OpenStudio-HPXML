@@ -45,5 +45,5 @@ This allows issuing the commands above to generate test results.
 Official Test Results
 ---------------------
 
-The official OpenStudio-ERI test results can be found in any release or any checkout of the code at ``workflow/tests/base_results``.
+The official OpenStudio-HPXML test results can be found in any release or any checkout of the code at ``workflow/tests/base_results``.
 The results are based on using the HPXML files found under ``workflow/tests``.
