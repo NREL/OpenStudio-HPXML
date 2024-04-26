@@ -172,7 +172,7 @@ jobs:
         run: |
           cp -r base_results/results*.csv workflow/tests/base_results
           mkdir workflow/tests/test_results
-          cp -r results/results* workflow/tests/test_results
+          cp -r test_results/results* workflow/tests/test_results
           
           pip install numpy
           pip install pandas
@@ -199,15 +199,15 @@ jobs:
       - name: Download feature results
         uses: actions/download-artifact@v4
         with:
-          path: results
-          name: results
+          path: test_results
+          name: test_results
 
       - name: Commit latest results
         shell: bash        
         run: |
           branch_name="${{ github.head_ref }}"
           git pull origin $branch_name
-          cp -r results/results* workflow/tests/base_results
+          cp -r test_results/results* workflow/tests/base_results
           git add workflow/tests/base_results
           git status
           if [[ $(git diff --cached --exit-code) ]]; then
