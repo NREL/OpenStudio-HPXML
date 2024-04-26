@@ -36,9 +36,9 @@ base-hvac-mini-split-air-conditioner-only-ductless.xml,0.0,0.0,1354.7,998.0,1117
 base-hvac-mini-split-heat-pump-ducted-cooling-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.9,2511.4,2511.4,0.0,13.962,0.0
 base-hvac-mini-split-heat-pump-ducted-detailed-performance-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4135.6,3256.7,4135.6,19.356,14.211,0.0
 base-hvac-mini-split-heat-pump-ducted-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4039.3,3116.5,4039.3,19.162,14.106,0.0
-base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,97.0,0.0,1354.7,998.0,11171.6,2563.5,4116.0,1785.9,4116.0,19.491,0.0,0.0
+base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,111.0,0.0,1354.7,998.0,11171.6,2563.5,4111.4,1785.9,4111.4,16.359,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4354.4,1785.9,4354.4,19.362,0.0,0.0
-base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,97.0,0.0,1354.7,998.0,11171.6,2563.5,4128.4,2875.6,4128.4,19.47,14.183,0.0
+base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,111.0,0.0,1354.7,998.0,11171.6,2563.5,4102.4,2875.5,4102.4,16.342,14.183,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4347.1,2875.6,4347.1,19.341,14.184,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4413.1,3100.7,4413.1,16.762,12.092,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,2.0,0.0,1354.7,998.0,11171.6,2563.5,2953.5,3118.8,3118.8,17.575,12.255,0.0
@@ -61,6 +61,7 @@ base-hvac-room-ac-only-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.6,2563.
 base-hvac-room-ac-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.9,3457.6,3457.6,0.0,11.876,0.0
 base-hvac-room-ac-with-heating.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5891.0,3821.1,5891.0,16.762,12.093,0.0
 base-hvac-room-ac-with-reverse-cycle.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4855.9,3369.3,4855.9,16.762,12.093,0.0
+base-hvac-room-air-conditioner-geb-onoff.xml,0.0,0.0,1354.7,998.0,11171.8,2563.6,6757.1,9616.0,9616.0,0.0,23.71,0.0
 base-hvac-seasons.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2106.7,3382.1,3382.1,23.355,18.363,0.0
 base-hvac-setpoints-daily-schedules.xml,112.0,29.0,1354.7,998.0,11171.5,2563.5,2152.0,3664.9,3664.9,35.167,20.722,0.0
 base-hvac-setpoints-daily-setbacks.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2115.1,3656.2,3656.2,25.686,21.113,0.0
