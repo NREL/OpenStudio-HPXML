@@ -36,13 +36,15 @@ class HVACSizing
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       next if is_system_to_skip(hvac_heating, hvac_cooling)
+      # FIXME: Need to make sure heating and cooling systems serve the same zone
+      zone = hvac_heating.zone
 
       # Apply duct loads as needed
       frac_heat_load_served, frac_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling)
       apply_hvac_temperatures(mj, system_design_loads, hvac_heating, hvac_cooling)
       ducts_heat_load = calculate_load_ducts_heating(mj, system_design_loads, hvac_heating, frac_heat_load_served)
       ducts_cool_load_sens, ducts_cool_load_lat = calculate_load_ducts_cooling(mj, system_design_loads, weather, hvac_cooling, frac_cool_load_served)
-      apply_load_ducts(bldg_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat) # Update duct loads in reported building design loads
+      apply_load_ducts(bldg_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat, zone, all_space_design_loads) # Update duct loads in reported building design loads
 
       hvac_sizing_values = HVACSizingValues.new
       apply_hvac_loads(hvac_heating, hvac_sizing_values, system_design_loads, ducts_heat_load, ducts_cool_load_sens, ducts_cool_load_lat, frac_heat_load_served, frac_cool_load_served)
@@ -1562,7 +1564,7 @@ class HVACSizing
     return ducts_cool_load_sens, ducts_cool_load_lat
   end
 
-  def self.apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat)
+  def self.apply_load_ducts(bldg_design_loads, total_ducts_heat_load, total_ducts_cool_load_sens, total_ducts_cool_load_lat, zone, all_space_design_loads)
     bldg_design_loads.Heat_Ducts += total_ducts_heat_load.to_f
     bldg_design_loads.Heat_Tot += total_ducts_heat_load.to_f
     bldg_design_loads.Cool_Ducts_Sens += total_ducts_cool_load_sens.to_f
@@ -1570,6 +1572,20 @@ class HVACSizing
     bldg_design_loads.Cool_Ducts_Lat += total_ducts_cool_load_lat.to_f
     bldg_design_loads.Cool_Lat += total_ducts_cool_load_lat.to_f
     bldg_design_loads.Cool_Tot += total_ducts_cool_load_sens.to_f + total_ducts_cool_load_lat.to_f
+    return if zone.nil?
+    zone_htg_loads_sum = zone.spaces.map{|space| all_space_design_loads[space.id].Heat_Tot}.sum
+    zone_clg_loads_sens_sum = zone.spaces.map{|space| all_space_design_loads[space.id].Cool_Sens}.sum
+    zone.spaces.each do |space|
+      space_design_loads = all_space_design_loads[space.id]
+      next if space_design_loads.nil?
+
+      space_htg_duct_loads = total_ducts_heat_load.to_f * space_design_loads.Heat_Tot / zone_htg_loads_sum
+      space_clg_duct_loads = total_ducts_cool_load_sens.to_f * space_design_loads.Cool_Sens / zone_clg_loads_sens_sum
+      space_design_loads.Heat_Ducts += space_htg_duct_loads
+      space_design_loads.Heat_Tot += space_htg_duct_loads
+      space_design_loads.Cool_Ducts_Sens += space_clg_duct_loads
+      space_design_loads.Cool_Sens += space_clg_duct_loads
+    end
   end
 
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system)
