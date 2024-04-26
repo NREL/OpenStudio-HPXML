@@ -1165,7 +1165,7 @@ def _write_ashrae_140_results(all_results, test_results_csv)
   htg_loads = {}
   clg_loads = {}
   CSV.open(test_results_csv, 'w') do |csv|
-    csv << ['Test', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
+    csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
     all_results.each do |xml, results|
       next unless xml.include? 'C.xml'
 
