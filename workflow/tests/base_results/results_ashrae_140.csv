@@ -1,4 +1,4 @@
-Test Case,Annual Heating Load [MMBtu],Annual Cooling Load [MMBtu]
+Test,Annual Heating Load [MMBtu],Annual Cooling Load [MMBtu]
 L100AC.xml,51.41,N/A
 L110AC.xml,77.05,N/A
 L120AC.xml,39.84,N/A
