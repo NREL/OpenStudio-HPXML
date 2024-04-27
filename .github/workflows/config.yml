@@ -156,7 +156,7 @@ jobs:
       - name: Store results
         uses: actions/upload-artifact@v4
         with:
-          path: workflow/tests/test_results
+          path: test_results
           name: test_results
 
   compare-results:
