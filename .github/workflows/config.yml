@@ -150,7 +150,6 @@ jobs:
 
       - name: Merge results
         run: |
-          cd workflow/tests
           for csv in test_results/*1_*.csv; do csv2="${csv/1_/2_}"; csv_out="${csv/1_/_}"; python merge.py $csv $csv2 $csv_out; rm $csv; rm $csv2; done
 
       - name: Store results
