@@ -1677,8 +1677,7 @@ def apply_hpxml_modification(hpxml_file, hpxml)
     end
     if ['base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml',
         'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-airflow.xml',
-        'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml',
-        'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-limit.xml'].include? hpxml_file
+        'base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml'].include? hpxml_file
       # Switch backup boiler with hydronic distribution to backup furnace with air distribution
       hpxml_bldg.heating_systems[0].heating_system_type = HPXML::HVACTypeFurnace
       hpxml_bldg.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeAir
