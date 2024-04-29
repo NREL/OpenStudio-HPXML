@@ -1687,7 +1687,10 @@
     "heat_pump_backup_heating_capacity": null,
     "heat_pump_cooling_autosizing_factor": 1.7,
     "heat_pump_heating_autosizing_factor": 1.4,
-    "heat_pump_backup_heating_autosizing_factor": 0.9
+    "heat_pump_backup_heating_autosizing_factor": 0.9,
+    "heat_pump_cooling_autosizing_limit": 53000,
+    "heat_pump_heating_autosizing_limit": 44000,
+    "heat_pump_backup_heating_autosizing_limit": 28000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
@@ -1768,9 +1771,13 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml",
     "heat_pump_cooling_capacity": null,
     "heat_pump_heating_capacity": null,
+    "heating_system_2_heating_capacity": null,
     "heat_pump_cooling_autosizing_factor": 1.7,
     "heat_pump_heating_autosizing_factor": 1.4,
-    "heating_system_2_heating_autosizing_factor": 0.9
+    "heating_system_2_heating_autosizing_factor": 0.9,
+    "heat_pump_cooling_autosizing_limit": 53000,
+    "heat_pump_heating_autosizing_limit": 44000,
+    "heating_system_2_heating_autosizing_limit": 29000
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -1904,7 +1911,8 @@
   "sample_files/base-hvac-central-ac-only-1-speed-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "cooling_system_cooling_capacity": null,
-    "cooling_system_cooling_autosizing_factor": 1.7
+    "cooling_system_cooling_autosizing_factor": 1.7,
+    "cooling_system_cooling_autosizing_limit": 37000
   },
   "sample_files/base-hvac-central-ac-only-1-speed-seer2.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2131,7 +2139,8 @@
   "sample_files/base-hvac-furnace-gas-only-autosize-factor.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
     "heating_system_heating_capacity": null,
-    "heating_system_heating_autosizing_factor": 1.4
+    "heating_system_heating_autosizing_factor": 1.4,
+    "heating_system_heating_autosizing_limit": 45000
   },
   "sample_files/base-hvac-furnace-gas-only-pilot.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
@@ -2217,59 +2226,70 @@
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-1-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-1-speed.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "heating_system_airflow_defect_ratio": -0.25,
     "cooling_system_airflow_defect_ratio": -0.25,
-    "cooling_system_charge_defect_ratio": -0.25
+    "cooling_system_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-2-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-2-speed.xml",
     "heating_system_airflow_defect_ratio": -0.25,
     "cooling_system_airflow_defect_ratio": -0.25,
-    "cooling_system_charge_defect_ratio": -0.25
+    "cooling_system_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-central-ac-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-central-ac-var-speed.xml",
     "heating_system_airflow_defect_ratio": -0.25,
     "cooling_system_airflow_defect_ratio": -0.25,
-    "cooling_system_charge_defect_ratio": -0.25
+    "cooling_system_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-furnace-gas-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
-    "heating_system_airflow_defect_ratio": -0.25
+    "heating_system_airflow_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-ground-to-air-heat-pump.xml": {
     "parent_hpxml": "sample_files/base-hvac-ground-to-air-heat-pump.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml",
     "cooling_system_airflow_defect_ratio": -0.25,
-    "cooling_system_charge_defect_ratio": -0.25
+    "cooling_system_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-install-quality-mini-split-heat-pump-ducted.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ducted.xml",
     "heat_pump_airflow_defect_ratio": -0.25,
-    "heat_pump_charge_defect_ratio": -0.25
+    "heat_pump_charge_defect_ratio": -0.25,
+    "hvac_blower_fan_watts_per_cfm": 0.365
   },
   "sample_files/base-hvac-mini-split-air-conditioner-only-ducted.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2391,6 +2411,15 @@
     "heat_pump_backup_type": "none",
     "heat_pump_backup_heating_efficiency": 0,
     "heat_pump_is_ducted": false
+  },
+  "sample_files/base-hvac-mini-split-heat-pump-ductless-autosize-factor.xml": {
+    "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",
+    "heat_pump_cooling_capacity": null,
+    "heat_pump_heating_capacity": null,
+    "heat_pump_cooling_autosizing_factor": 1.7,
+    "heat_pump_heating_autosizing_factor": 1.4,
+    "heat_pump_cooling_autosizing_limit": 41000,
+    "heat_pump_heating_autosizing_limit": 33000
   },
   "sample_files/base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml": {
     "parent_hpxml": "sample_files/base-hvac-mini-split-heat-pump-ductless.xml",

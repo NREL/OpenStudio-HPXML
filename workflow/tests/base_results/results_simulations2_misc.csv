@@ -5,7 +5,7 @@ base-hvac-furnace-elec-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7948.6,1786.
 base-hvac-furnace-gas-central-ac-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2106.7,3366.8,3366.8,23.355,18.967,0.0
 base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml,0.0,6.0,1354.7,998.0,11171.6,2563.5,2106.7,3378.2,3378.2,23.355,20.429,0.0
 base-hvac-furnace-gas-central-ac-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2106.7,3174.0,3174.0,23.355,18.742,0.0
-base-hvac-furnace-gas-only-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2048.1,1786.0,2048.1,21.712,0.0,0.0
+base-hvac-furnace-gas-only-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2048.8,1786.0,2048.8,21.843,0.0,0.0
 base-hvac-furnace-gas-only-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1998.1,1804.8,1998.1,17.795,0.0,0.0
 base-hvac-furnace-gas-only-pilot.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2055.9,1786.0,2055.9,23.355,0.0,0.0
 base-hvac-furnace-gas-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2055.9,1786.0,2055.9,23.355,0.0,0.0
@@ -40,6 +40,7 @@ base-hvac-mini-split-heat-pump-ducted-heating-only-max-power-ratio-schedule.xml,
 base-hvac-mini-split-heat-pump-ducted-heating-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4354.4,1785.9,4354.4,19.362,0.0,0.0
 base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml,97.0,0.0,1354.7,998.0,11171.6,2563.5,4128.4,2875.6,4128.4,19.47,14.183,0.0
 base-hvac-mini-split-heat-pump-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4347.1,2875.6,4347.1,19.341,14.184,0.0
+base-hvac-mini-split-heat-pump-ductless-autosize-factor.xml,1.0,0.0,1354.7,998.0,11171.6,2563.5,3643.8,2803.3,3643.8,16.151,12.088,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-baseboard.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4413.1,3100.7,4413.1,16.762,12.092,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace-ducts-defaults.xml,2.0,0.0,1354.7,998.0,11171.6,2563.5,2953.5,3118.8,3118.8,17.575,12.255,0.0
 base-hvac-mini-split-heat-pump-ductless-backup-furnace.xml,1.0,0.0,1354.7,998.0,11171.6,2563.5,2871.7,3100.7,3100.7,17.772,12.092,0.0
