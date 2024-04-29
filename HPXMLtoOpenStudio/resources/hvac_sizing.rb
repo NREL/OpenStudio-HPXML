@@ -1148,7 +1148,7 @@ class HVACSizing
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
            HPXML::LocationManufacturedHomeBelly].include? duct.duct_location
-      space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
+      space_values = Geometry.get_temperature_scheduled_space_values(location: duct.duct_location)
       dse_Fregain = space_values[:f_regain]
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.duct_location
@@ -2665,7 +2665,7 @@ class HVACSizing
   end
 
   def self.calculate_scheduled_space_design_temps(location, setpoint, oa_db, gnd_db)
-    space_values = Geometry.get_temperature_scheduled_space_values(location)
+    space_values = Geometry.get_temperature_scheduled_space_values(location: location)
     design_temp = setpoint * space_values[:indoor_weight] + oa_db * space_values[:outdoor_weight] + gnd_db * space_values[:ground_weight]
     if not space_values[:temp_min].nil?
       design_temp = [design_temp, space_values[:temp_min]].max
