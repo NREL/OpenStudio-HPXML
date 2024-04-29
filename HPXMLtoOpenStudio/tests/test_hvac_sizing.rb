@@ -738,6 +738,122 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, clg_cap_orig * 1.5, 0.001)
   end
 
+  def test_autosizing_limits
+    clg_autosizing_limits = [1000, 100000]
+    htg_autosizing_limits = [1200, 120000]
+    for cal in clg_autosizing_limits
+      for hal in htg_autosizing_limits
+        args_hash = {}
+        args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+        # Test air conditioner + furnace
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.heating_systems[0].heating_capacity = nil
+        hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        htg_cap_orig = hpxml_bldg.heating_systems[0].heating_capacity
+        clg_cap_orig = hpxml_bldg.cooling_systems[0].cooling_capacity
+        # apply autosizing limit
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.heating_systems[0].heating_capacity = nil
+        hpxml_bldg.cooling_systems[0].cooling_capacity = nil
+        hpxml_bldg.heating_systems[0].heating_autosizing_limit = hal
+        hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = cal
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        assert_in_epsilon(hpxml_bldg.heating_systems[0].heating_capacity, [hal, htg_cap_orig].min, 0.001)
+        assert_in_epsilon(hpxml_bldg.cooling_systems[0].cooling_capacity, [cal, clg_cap_orig].min, 0.001)
+
+        # Test heat pump
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        htg_cap_orig = hpxml_bldg.heat_pumps[0].heating_capacity
+        clg_cap_orig = hpxml_bldg.heat_pumps[0].cooling_capacity
+        backup_htg_cap_orig = hpxml_bldg.heat_pumps[0].backup_heating_capacity
+        # apply autosizing limit
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+        hpxml_bldg.heat_pumps[0].heating_autosizing_limit = hal
+        # use a similar limit for backup heating sizing
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = hal + 500.0
+        hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = cal
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].heating_capacity, [hal, htg_cap_orig].min, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, [hal + 500.0, backup_htg_cap_orig].min, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, [cal, clg_cap_orig].min, 0.001)
+
+        # Test heat pump w/ detailed performance
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        htg_cap_orig = hpxml_bldg.heat_pumps[0].heating_capacity
+        clg_cap_orig = hpxml_bldg.heat_pumps[0].cooling_capacity
+        backup_htg_cap_orig = hpxml_bldg.heat_pumps[0].backup_heating_capacity
+        # apply autosizing limit
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-autosize.xml')
+        hpxml_bldg.heat_pumps[0].backup_heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].heating_capacity = nil
+        hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+        hpxml_bldg.heat_pumps[0].heating_autosizing_limit = hal
+        hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = cal
+        # use a similar limit for backup heating sizing
+        hpxml_bldg.heat_pumps[0].backup_heating_autosizing_limit = hal + 500.0
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].heating_capacity, [hal, htg_cap_orig].min, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].backup_heating_capacity, [hal + 500.0, backup_htg_cap_orig].min, 0.001)
+        assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, [cal, clg_cap_orig].min, 0.001)
+
+        # Test allow fixed capacity
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-undersized.xml')
+        hpxml_bldg.header.allow_increased_fixed_capacities = true
+        # apply autosizing limit
+        hpxml_bldg.heating_systems[0].heating_autosizing_limit = hal
+        hpxml_bldg.cooling_systems[0].cooling_autosizing_limit = cal
+        htg_cap = hpxml_bldg.heating_systems[0].heating_capacity
+        clg_cap = hpxml_bldg.cooling_systems[0].cooling_capacity
+        XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+        _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+        assert_operator(hpxml_bldg.heating_systems[0].heating_capacity, :>=, htg_cap)
+        assert_operator(hpxml_bldg.cooling_systems[0].cooling_capacity, :>=, clg_cap)
+      end
+    end
+
+    # Test heat pump with separate back up heating
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml')
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_capacity = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    htg_cap_orig = hpxml_bldg.heat_pumps[0].heating_capacity
+    clg_cap_orig = hpxml_bldg.heat_pumps[0].cooling_capacity
+    backup_htg_cap_orig = hpxml_bldg.heating_systems[0].heating_capacity
+    # apply autosizing factor
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-furnace.xml')
+    hpxml_bldg.heat_pumps[0].heating_capacity = nil
+    hpxml_bldg.heat_pumps[0].cooling_capacity = nil
+    hpxml_bldg.heating_systems[0].heating_capacity = nil
+    # use a reverse factor for backup heating sizing
+    hpxml_bldg.heat_pumps[0].heating_autosizing_limit = 1000
+    hpxml_bldg.heat_pumps[0].cooling_autosizing_limit = 100000
+    hpxml_bldg.heating_systems[0].heating_autosizing_limit = 50000
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    assert_in_epsilon(hpxml_bldg.heat_pumps[0].heating_capacity, [1000, htg_cap_orig].min, 0.001)
+    assert_in_epsilon(hpxml_bldg.heating_systems[0].heating_capacity, [50000, backup_htg_cap_orig].min, 0.001)
+    assert_in_epsilon(hpxml_bldg.heat_pumps[0].cooling_capacity, [100000, clg_cap_orig].min, 0.001)
+  end
+
   def test_manual_j_detailed_sizing_inputs
     # Run base
     args_hash = {}
