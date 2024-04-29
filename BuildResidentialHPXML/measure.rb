@@ -5903,28 +5903,24 @@ class HPXMLFile
 
   def self.set_hvac_blower(hpxml_bldg, args)
     # Blower fan W/cfm
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      distribution_system_type = hvac_distribution.distribution_system_type
+    hpxml_bldg.hvac_systems.each do |hvac_system|
+      next unless (!hvac_system.distribution_system.nil? && hvac_system.distribution_system.distribution_system_type == HPXML::HVACDistributionTypeAir) || (hvac_system.is_a?(HPXML::HeatPump) && [HPXML::HVACTypeHeatPumpMiniSplit].include?(hvac_system.heat_pump_type))
 
-      hvac_distribution.hvac_systems.each do |hvac_system|
-        next unless (distribution_system_type == HPXML::HVACDistributionTypeAir) || (hvac_system.is_a?(HPXML::HeatPump) && [HPXML::HVACTypeHeatPumpMiniSplit].include?(hvac_system.heat_pump_type))
+      if args[:hvac_blower_fan_watts_per_cfm].is_initialized
+        fan_watts_per_cfm = args[:hvac_blower_fan_watts_per_cfm].get
+      end
 
-        if args[:hvac_blower_fan_watts_per_cfm].is_initialized
-          fan_watts_per_cfm = args[:hvac_blower_fan_watts_per_cfm].get
+      if hvac_system.is_a?(HPXML::HeatingSystem)
+        if [HPXML::HVACTypeFurnace].include?(hvac_system.heating_system_type)
+          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
         end
-
-        if hvac_system.is_a?(HPXML::HeatingSystem)
-          if [HPXML::HVACTypeFurnace].include?(hvac_system.heating_system_type)
-            hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-          end
-        elsif hvac_system.is_a?(HPXML::CoolingSystem)
-          if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac_system.cooling_system_type)
-            hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-          end
-        elsif hvac_system.is_a?(HPXML::HeatPump)
-          if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac_system.heat_pump_type)
-            hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
-          end
+      elsif hvac_system.is_a?(HPXML::CoolingSystem)
+        if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeMiniSplitAirConditioner].include?(hvac_system.cooling_system_type)
+          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
+        end
+      elsif hvac_system.is_a?(HPXML::HeatPump)
+        if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpGroundToAir].include?(hvac_system.heat_pump_type)
+          hvac_system.fan_watts_per_cfm = fan_watts_per_cfm
         end
       end
     end
