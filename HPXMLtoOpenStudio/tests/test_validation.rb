@@ -974,6 +974,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                     'Heating detailed performance data for outdoor temperature = 4.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.'],
                             'heat-pump-lockout-temps-elec-backup' => ['Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.'],
+                            'hvac-distribution-different-zones' => ["HVAC distribution system 'HVACDistribution1' has HVAC systems attached to different zones."],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
@@ -1038,6 +1039,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unattached-shared-dishwasher-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for dishwasher"],
                             'unattached-shared-dishwasher-water-heater' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window' => ["Attached wall 'foobar' not found for window 'Window1'."],
+                            'unattached-zone' => ["Attached zone 'foobar' not found for heating system 'HeatingSystem1'.",
+                                                  "Attached zone 'foobar' not found for cooling system 'CoolingSystem1'."],
                             'unavailable-period-missing-column' => ["Could not find column='foobar' in unavailable_periods.csv."],
                             'unique-objects-vary-across-units-epw' => ['Weather station EPW filepath has different values across dwelling units.'],
                             'unique-objects-vary-across-units-dst' => ['Unique object (OS:RunPeriodControl:DaylightSavingTime) has different values across dwelling units.'],
@@ -1152,6 +1155,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                           distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                           hydronic_type: HPXML::HydronicTypeBaseboard)
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+      elsif ['hvac-distribution-different-zones'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml_bldg.heating_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[0].id
+        hpxml_bldg.cooling_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[1].id
       elsif ['hvac-distribution-multiple-attached-cooling'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-multiple.xml')
         hpxml_bldg.heat_pumps[0].distribution_system_idref = 'HVACDistribution2'
@@ -1443,6 +1450,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['unattached-window'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.windows[0].wall_idref = 'foobar'
+      elsif ['unattached-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml_bldg.heating_systems[0].attached_to_zone_idref = 'foobar'
+        hpxml_bldg.cooling_systems[0].attached_to_zone_idref = 'foobar'
       elsif ['unavailable-period-missing-column'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-vacancy.xml')
         hpxml.header.unavailable_periods[0].column_name = 'foobar'

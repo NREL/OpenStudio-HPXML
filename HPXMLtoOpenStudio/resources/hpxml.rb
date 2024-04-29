@@ -1471,8 +1471,12 @@ class HPXML < Object
       return window_area_operable / window_area_total
     end
 
+    def conditioned_zones()
+      return zones.select { |z| z.zone_type == ZoneTypeConditioned }
+    end
+
     def conditioned_spaces()
-      return zones.select { |z| z.zone_type == ZoneTypeConditioned }.map { |z| z.spaces }.flatten
+      return conditioned_zones.map { |z| z.spaces }.flatten
     end
 
     def calculate_space_design_loads?
@@ -1683,6 +1687,19 @@ class HPXML < Object
         next if num_attached <= 1
 
         errors << "RelatedHVACSystem '#{hvac_system.id}' is attached to multiple water heating systems."
+      end
+
+      # Check for HVAC systems on the same distribution system that are attached to different zones
+      @hvac_distributions.each do |hvac_distribution|
+        zone_ids = []
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          next if hvac_system.attached_to_zone_idref.nil?
+
+          zone_ids << hvac_system.attached_to_zone_idref
+        end
+        if zone_ids.uniq.size > 1
+          errors << "HVAC distribution system '#{hvac_distribution.id}' has HVAC systems attached to different zones."
+        end
       end
 
       # Check for the sum of CFA served by distribution systems <= CFA
@@ -4628,6 +4645,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      begin; zone; rescue StandardError => e; errors << e.message; end
       errors += @heating_detailed_performance_data.check_for_errors
       return errors
     end
@@ -4705,7 +4723,6 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
-      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heating_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heating_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heating_system, 'YearInstalled', :integer)
@@ -4837,6 +4854,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      begin; zone; rescue StandardError => e; errors << e.message; end
       errors += @cooling_detailed_performance_data.check_for_errors
       return errors
     end
@@ -4924,7 +4942,6 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
-      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(cooling_system, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(cooling_system, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(cooling_system, 'YearInstalled', :integer)
@@ -4966,111 +4983,6 @@ class HPXML < Object
       else
         @primary_system = false
       end
-    end
-  end
-
-  class GeothermalLoops < BaseArrayElement
-    def add(**kwargs)
-      self << GeothermalLoop.new(@parent_object, **kwargs)
-    end
-
-    def from_doc(building)
-      return if building.nil?
-
-      XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop').each do |geothermal_loop|
-        self << GeothermalLoop.new(@parent_object, geothermal_loop)
-      end
-    end
-  end
-
-  class GeothermalLoop < BaseElement
-    ATTRS = [:id, :loop_configuration, :loop_flow, :bore_config, :num_bore_holes, :bore_spacing,
-             :bore_length, :bore_diameter, :grout_type, :grout_conductivity, :pipe_type,
-             :pipe_conductivity, :pipe_diameter, :shank_spacing]
-    attr_accessor(*ATTRS)
-
-    def heat_pump
-      list = []
-      @parent_object.heat_pumps.each do |heat_pump|
-        next if heat_pump.geothermal_loop_idref.nil?
-        next unless heat_pump.geothermal_loop_idref == @id
-
-        list << heat_pump
-      end
-
-      if list.size == 0
-        fail "Geothermal loop '#{@id}' found but no heat pump attached to it."
-      elsif list.size > 1
-        fail "Multiple heat pumps found attached to geothermal loop '#{@id}'."
-      end
-    end
-
-    def delete
-      @parent_object.geothermal_loops.delete(self)
-      @parent_object.heat_pumps.each do |heat_pump|
-        next unless heat_pump.geothermal_loop_idref == @id
-
-        heat_pump.geothermal_loop_idref = nil
-      end
-    end
-
-    def check_for_errors
-      errors = []
-      begin; heat_pump; rescue StandardError => e; errors << e.message; end
-      return errors
-    end
-
-    def to_doc(building)
-      return if nil?
-
-      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      geothermal_loop = XMLHelper.add_element(hvac_plant, 'GeothermalLoop')
-      sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
-      XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(geothermal_loop, 'LoopConfiguration', @loop_configuration, :string, @loop_configuration_isdefaulted) unless @loop_configuration.nil?
-      XMLHelper.add_element(geothermal_loop, 'LoopFlow', @loop_flow, :float, @loop_flow_isdefaulted) unless @loop_flow.nil?
-      if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?) || (not @bore_diameter.nil?)
-        boreholes_or_trenches = XMLHelper.add_element(geothermal_loop, 'BoreholesOrTrenches')
-        XMLHelper.add_element(boreholes_or_trenches, 'Count', @num_bore_holes, :integer, @num_bore_holes_isdefaulted) unless @num_bore_holes.nil?
-        XMLHelper.add_element(boreholes_or_trenches, 'Length', @bore_length, :float, @bore_length_isdefaulted) unless @bore_length.nil?
-        XMLHelper.add_element(boreholes_or_trenches, 'Spacing', @bore_spacing, :float, @bore_spacing_isdefaulted) unless @bore_spacing.nil?
-        XMLHelper.add_element(boreholes_or_trenches, 'Diameter', @bore_diameter, :float, @bore_diameter_isdefaulted) unless @bore_diameter.nil?
-      end
-      if (not @grout_type.nil?) || (not @grout_conductivity.nil?)
-        grout = XMLHelper.add_element(geothermal_loop, 'Grout')
-        XMLHelper.add_element(grout, 'Type', @grout_type, :string, @grout_type_isdefaulted) unless @grout_type.nil?
-        XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
-      end
-      if (not @pipe_type.nil?) || (not @pipe_conductivity.nil?) || (not @pipe_diameter.nil?) || (not @shank_spacing.nil?)
-        pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
-        XMLHelper.add_element(pipe, 'Type', @pipe_type, :string, @pipe_type_isdefaulted) unless @pipe_type.nil?
-        XMLHelper.add_element(pipe, 'Conductivity', @pipe_conductivity, :float, @pipe_conductivity_isdefaulted) unless @pipe_conductivity.nil?
-        XMLHelper.add_element(pipe, 'Diameter', @pipe_diameter, :float, @pipe_diameter_isdefaulted) unless @pipe_diameter.nil?
-        XMLHelper.add_element(pipe, 'ShankSpacing', @shank_spacing, :float, @shank_spacing_isdefaulted) unless @shank_spacing.nil?
-      end
-      if not @bore_config.nil?
-        extension = XMLHelper.create_elements_as_needed(geothermal_loop, ['extension'])
-        XMLHelper.add_element(extension, 'BorefieldConfiguration', @bore_config, :string, @bore_config_isdefaulted) unless @bore_config.nil?
-      end
-    end
-
-    def from_doc(geothermal_loop)
-      return if geothermal_loop.nil?
-
-      @id = HPXML::get_id(geothermal_loop)
-      @loop_configuration = XMLHelper.get_value(geothermal_loop, 'LoopConfiguration', :string)
-      @loop_flow = XMLHelper.get_value(geothermal_loop, 'LoopFlow', :float)
-      @num_bore_holes = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Count', :integer)
-      @bore_length = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Length', :float)
-      @bore_spacing = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Spacing', :float)
-      @bore_diameter = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Diameter', :float)
-      @grout_type = XMLHelper.get_value(geothermal_loop, 'Grout/Type', :string)
-      @grout_conductivity = XMLHelper.get_value(geothermal_loop, 'Grout/Conductivity', :float)
-      @pipe_type = XMLHelper.get_value(geothermal_loop, 'Pipe/Type', :string)
-      @pipe_conductivity = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
-      @pipe_diameter = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
-      @shank_spacing = XMLHelper.get_value(geothermal_loop, 'Pipe/ShankSpacing', :float)
-      @bore_config = XMLHelper.get_value(geothermal_loop, 'extension/BorefieldConfiguration', :string)
     end
   end
 
@@ -5195,6 +5107,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      begin; zone; rescue StandardError => e; errors << e.message; end
       begin; geothermal_loop; rescue StandardError => e; errors << e.message; end
       errors += @cooling_detailed_performance_data.check_for_errors
       errors += @heating_detailed_performance_data.check_for_errors
@@ -5325,7 +5238,6 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
-      # Fixme: attached to space and attached to zone is only allowed for one occurance, do we really need to use get_elements?
       @attached_to_zone_idref = HPXML::get_idref(XMLHelper.get_elements(heat_pump, 'AttachedToZone')[0])
       @location = XMLHelper.get_value(heat_pump, 'UnitLocation', :string)
       @year_installed = XMLHelper.get_value(heat_pump, 'YearInstalled', :integer)
@@ -5389,6 +5301,111 @@ class HPXML < Object
       else
         @primary_cooling_system = false
       end
+    end
+  end
+
+  class GeothermalLoops < BaseArrayElement
+    def add(**kwargs)
+      self << GeothermalLoop.new(@parent_object, **kwargs)
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop').each do |geothermal_loop|
+        self << GeothermalLoop.new(@parent_object, geothermal_loop)
+      end
+    end
+  end
+
+  class GeothermalLoop < BaseElement
+    ATTRS = [:id, :loop_configuration, :loop_flow, :bore_config, :num_bore_holes, :bore_spacing,
+             :bore_length, :bore_diameter, :grout_type, :grout_conductivity, :pipe_type,
+             :pipe_conductivity, :pipe_diameter, :shank_spacing]
+    attr_accessor(*ATTRS)
+
+    def heat_pump
+      list = []
+      @parent_object.heat_pumps.each do |heat_pump|
+        next if heat_pump.geothermal_loop_idref.nil?
+        next unless heat_pump.geothermal_loop_idref == @id
+
+        list << heat_pump
+      end
+
+      if list.size == 0
+        fail "Geothermal loop '#{@id}' found but no heat pump attached to it."
+      elsif list.size > 1
+        fail "Multiple heat pumps found attached to geothermal loop '#{@id}'."
+      end
+    end
+
+    def delete
+      @parent_object.geothermal_loops.delete(self)
+      @parent_object.heat_pumps.each do |heat_pump|
+        next unless heat_pump.geothermal_loop_idref == @id
+
+        heat_pump.geothermal_loop_idref = nil
+      end
+    end
+
+    def check_for_errors
+      errors = []
+      begin; heat_pump; rescue StandardError => e; errors << e.message; end
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      geothermal_loop = XMLHelper.add_element(hvac_plant, 'GeothermalLoop')
+      sys_id = XMLHelper.add_element(geothermal_loop, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(geothermal_loop, 'LoopConfiguration', @loop_configuration, :string, @loop_configuration_isdefaulted) unless @loop_configuration.nil?
+      XMLHelper.add_element(geothermal_loop, 'LoopFlow', @loop_flow, :float, @loop_flow_isdefaulted) unless @loop_flow.nil?
+      if (not @num_bore_holes.nil?) || (not @bore_spacing.nil?) || (not @bore_length.nil?) || (not @bore_diameter.nil?)
+        boreholes_or_trenches = XMLHelper.add_element(geothermal_loop, 'BoreholesOrTrenches')
+        XMLHelper.add_element(boreholes_or_trenches, 'Count', @num_bore_holes, :integer, @num_bore_holes_isdefaulted) unless @num_bore_holes.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Length', @bore_length, :float, @bore_length_isdefaulted) unless @bore_length.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Spacing', @bore_spacing, :float, @bore_spacing_isdefaulted) unless @bore_spacing.nil?
+        XMLHelper.add_element(boreholes_or_trenches, 'Diameter', @bore_diameter, :float, @bore_diameter_isdefaulted) unless @bore_diameter.nil?
+      end
+      if (not @grout_type.nil?) || (not @grout_conductivity.nil?)
+        grout = XMLHelper.add_element(geothermal_loop, 'Grout')
+        XMLHelper.add_element(grout, 'Type', @grout_type, :string, @grout_type_isdefaulted) unless @grout_type.nil?
+        XMLHelper.add_element(grout, 'Conductivity', @grout_conductivity, :float, @grout_conductivity_isdefaulted) unless @grout_conductivity.nil?
+      end
+      if (not @pipe_type.nil?) || (not @pipe_conductivity.nil?) || (not @pipe_diameter.nil?) || (not @shank_spacing.nil?)
+        pipe = XMLHelper.add_element(geothermal_loop, 'Pipe')
+        XMLHelper.add_element(pipe, 'Type', @pipe_type, :string, @pipe_type_isdefaulted) unless @pipe_type.nil?
+        XMLHelper.add_element(pipe, 'Conductivity', @pipe_conductivity, :float, @pipe_conductivity_isdefaulted) unless @pipe_conductivity.nil?
+        XMLHelper.add_element(pipe, 'Diameter', @pipe_diameter, :float, @pipe_diameter_isdefaulted) unless @pipe_diameter.nil?
+        XMLHelper.add_element(pipe, 'ShankSpacing', @shank_spacing, :float, @shank_spacing_isdefaulted) unless @shank_spacing.nil?
+      end
+      if not @bore_config.nil?
+        extension = XMLHelper.create_elements_as_needed(geothermal_loop, ['extension'])
+        XMLHelper.add_element(extension, 'BorefieldConfiguration', @bore_config, :string, @bore_config_isdefaulted) unless @bore_config.nil?
+      end
+    end
+
+    def from_doc(geothermal_loop)
+      return if geothermal_loop.nil?
+
+      @id = HPXML::get_id(geothermal_loop)
+      @loop_configuration = XMLHelper.get_value(geothermal_loop, 'LoopConfiguration', :string)
+      @loop_flow = XMLHelper.get_value(geothermal_loop, 'LoopFlow', :float)
+      @num_bore_holes = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Count', :integer)
+      @bore_length = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Length', :float)
+      @bore_spacing = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Spacing', :float)
+      @bore_diameter = XMLHelper.get_value(geothermal_loop, 'BoreholesOrTrenches/Diameter', :float)
+      @grout_type = XMLHelper.get_value(geothermal_loop, 'Grout/Type', :string)
+      @grout_conductivity = XMLHelper.get_value(geothermal_loop, 'Grout/Conductivity', :float)
+      @pipe_type = XMLHelper.get_value(geothermal_loop, 'Pipe/Type', :string)
+      @pipe_conductivity = XMLHelper.get_value(geothermal_loop, 'Pipe/Conductivity', :float)
+      @pipe_diameter = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
+      @shank_spacing = XMLHelper.get_value(geothermal_loop, 'Pipe/ShankSpacing', :float)
+      @bore_config = XMLHelper.get_value(geothermal_loop, 'extension/BorefieldConfiguration', :string)
     end
   end
 
