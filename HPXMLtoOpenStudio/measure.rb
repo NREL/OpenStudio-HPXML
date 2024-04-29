@@ -2312,9 +2312,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
           if (surface_type == 'Window') || (surface_type == 'Skylight')
-            vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
-                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
+            vars = { 'Surface Window Inside Face Glazing Zone Convection Heat Gain Rate' => 'ss_glaz',
+                     'Surface Window Inside Face Glazing Net Infrared Heat Transfer Rate' => 'ss_infra' }
           else
             vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
                      'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
@@ -2336,10 +2335,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
           key = { 'Window' => :windows_solar,
                   'Skylight' => :skylights_solar }[surface_type]
-          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+          vars = { 'Surface Window Transmitted Solar Radiation Rate' => 'ss_trans_in',
                    'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
-                   'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
-                   'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
                    'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
 
           surfaces_sensors[key] << []
@@ -2562,10 +2559,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface_sensors.each do |sensors|
           s = "Set hr_#{k} = hr_#{k}"
           sensors.each do |sensor|
-            # remove ss_net if switch
-            if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
-              s += " - #{sensor.name}"
-            elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
+            if sensor.name.to_s.start_with?('ss_trans_in', 'ss_infra', 'ss_glaz')
+              s += " - #{sensor.name} * ZoneTimestep * 3600"
+            elsif sensor.name.to_s.start_with?('ss_trans_out', 'ss_back_out')
               s += " + #{sensor.name} * ZoneTimestep * 3600"
             else
               s += " + #{sensor.name}"
