@@ -2596,7 +2596,7 @@ class HVACSizing
     else # Unvented space
       ach = Airflow.get_default_unvented_space_ach()
     end
-    volume = Geometry.calculate_zone_volume(@hpxml_bldg, location)
+    volume = Geometry.calculate_zone_volume(hpxml_bldg: @hpxml_bldg, location: location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(mj.p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
     space_UAs[HPXML::LocationOutside] += infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
