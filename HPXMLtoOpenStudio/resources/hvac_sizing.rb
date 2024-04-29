@@ -3242,12 +3242,6 @@ class HVACSizing
                HPXML::HVACTypeElectricResistance].include?(htg_sys.heating_system_type))
         htg_sys.heating_airflow_cfm = Float(hvac_sizing_values.Heat_Airflow.round)
         htg_sys.heating_airflow_cfm_isdefaulted = true
-
-        # Blower fan adjustment
-        if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
-          htg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
-          htg_sys.fan_watts_per_cfm_isdefaulted = true
-        end
       end
 
       # Heating geothermal loop
@@ -3312,12 +3306,6 @@ class HVACSizing
       # Cooling airflow
       clg_sys.cooling_airflow_cfm = Float(hvac_sizing_values.Cool_Airflow.round)
       clg_sys.cooling_airflow_cfm_isdefaulted = true
-
-      # Blower fan adjustment
-      if not hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.nil?
-        clg_sys.fan_watts_per_cfm = hvac_sizing_values.Adjusted_Fan_Watts_Per_CFM.round(3)
-        clg_sys.fan_watts_per_cfm_isdefaulted = true
-      end
     end
   end
 
@@ -3403,6 +3391,5 @@ class HVACSizingValues
   end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config,
-                :Adjusted_Fan_Watts_Per_CFM)
+                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 end
