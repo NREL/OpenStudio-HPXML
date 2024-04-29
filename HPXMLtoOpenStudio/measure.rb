@@ -190,8 +190,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # Output
-      add_unmet_hours_output(model, hpxml_osm_map)
-      add_loads_output(model, add_component_loads, hpxml_osm_map)
+      season_day_nums = add_unmet_hours_output(model, hpxml_osm_map)
+      loads_data = add_total_loads_output(model, hpxml_osm_map)
+      if add_component_loads
+        add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
+      end
       set_output_files(model)
       add_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, hpxml_defaults_path)
       # Uncomment to debug EMS
@@ -2076,7 +2079,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Create sensors and gather data
     htg_sensors, clg_sensors = {}, {}
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
-    htg_start_days, htg_end_days, clg_start_days, clg_end_days = {}, {}, {}, {}
+    season_day_nums = {}
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       conditioned_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }.name.to_s
 
@@ -2096,10 +2099,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       next unless not hvac_control.nil?
 
       sim_year = @hpxml_header.sim_calendar_year
-      htg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day)
-      htg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day)
-      clg_start_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day)
-      clg_end_days[unit] = Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+      season_day_nums[unit] = {
+        htg_start: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
+        htg_end: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
+        clg_start: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
+        clg_end: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+      }
     end
 
     hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameHVACAvailabilitySensor }
@@ -2114,10 +2119,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program.addLine("Set #{clg_hrs} = 0")
     for unit in 0..hpxml_osm_map.size - 1
       if total_heat_load_serveds[unit] > 0
-        if htg_end_days[unit] >= htg_start_days[unit]
-          line = "If ((DayOfYear >= #{htg_start_days[unit]}) && (DayOfYear <= #{htg_end_days[unit]}))"
+        if season_day_nums[unit][:htg_end] >= season_day_nums[unit][:htg_start]
+          line = "If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) && (DayOfYear <= #{season_day_nums[unit][:htg_end]}))"
         else
-          line = "If ((DayOfYear >= #{htg_start_days[unit]}) || (DayOfYear <= #{htg_end_days[unit]}))"
+          line = "If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) || (DayOfYear <= #{season_day_nums[unit][:htg_end]}))"
         end
         line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
         program.addLine(line)
@@ -2128,10 +2133,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       next unless total_cool_load_serveds[unit] > 0
 
-      if clg_end_days[unit] >= clg_start_days[unit]
-        line = "If ((DayOfYear >= #{clg_start_days[unit]}) && (DayOfYear <= #{clg_end_days[unit]}))"
+      if season_day_nums[unit][:clg_end] >= season_day_nums[unit][:clg_start]
+        line = "If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) && (DayOfYear <= #{season_day_nums[unit][:clg_end]}))"
       else
-        line = "If ((DayOfYear >= #{clg_start_days[unit]}) || (DayOfYear <= #{clg_end_days[unit]}))"
+        line = "If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) || (DayOfYear <= #{season_day_nums[unit][:clg_end]}))"
       end
       line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
       program.addLine(line)
@@ -2146,13 +2151,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program_calling_manager.setName("#{program.name} calling manager")
     program_calling_manager.setCallingPoint('EndOfZoneTimestepBeforeZoneReporting')
     program_calling_manager.addProgram(program)
-  end
 
-  def add_loads_output(model, add_component_loads, hpxml_osm_map)
-    loads_data = add_total_loads_output(model, hpxml_osm_map)
-    return unless add_component_loads
-
-    add_component_loads_output(model, hpxml_osm_map, loads_data)
+    return season_day_nums
   end
 
   def add_total_loads_output(model, hpxml_osm_map)
@@ -2240,7 +2240,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors
   end
 
-  def add_component_loads_output(model, hpxml_osm_map, loads_data)
+  def add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
     htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors = loads_data
 
     # Output diagnostics needed for some output variables used below
@@ -2594,6 +2594,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # EMS Sensors: Indoor temperature, setpoints
+      tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Zone Mean Air Temperature')
+      tin_sensor.setName('tin s')
+      tin_sensor.setKeyName(conditioned_zone.name.to_s)
       if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
         thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
 
@@ -2604,10 +2607,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Schedule Value')
         clg_sp_sensor.setName('clg sp s')
         clg_sp_sensor.setKeyName(thermostat.coolingSetpointTemperatureSchedule.get.name.to_s)
-
-        tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Zone Mean Air Temperature')
-        tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
-        tin_sensor.setKeyName(conditioned_zone.name.to_s)
       end
 
       # EMS program: Heating vs Cooling logic
@@ -2617,26 +2616,44 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("  Set htg_mode = #{total_heat_load_serveds[unit]}")
       program.addLine("ElseIf (#{clg_cond_load_sensors[unit].name} > 0)") # Assign hour to cooling if cooling load
       program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
-      natvent_sensors.each do |natvent_sensor|
-        program.addLine("ElseIf (#{natvent_sensor.name} <> 0)") # Assign hour to cooling if natural ventilation is operating (can only operate during cooling season currently)
-        program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
+      program.addLine('Else')
+      # Determine whether we're in the heating or cooling season
+      program.addLine('  Set htg_season = 0')
+      program.addLine('  Set clg_season = 0')
+      if season_day_nums[unit][:clg_end] >= season_day_nums[unit][:clg_start]
+        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) && (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
+      else
+        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) || (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
+      end
+      program.addLine('    Set clg_season = 1')
+      program.addLine('  EndIf')
+      if season_day_nums[unit][:htg_end] >= season_day_nums[unit][:htg_start]
+        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) && (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
+      else
+        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) || (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
+      end
+      program.addLine('    Set htg_season = 1')
+      program.addLine('  EndIf')
+      natvent_sensors.each_with_index do |natvent_sensor, i|
+        program.addLine("  #{i == 0 ? 'If' : 'ElseIf'} (#{natvent_sensor.name} <> 0) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating (can only operate during cooling season currently)
+        program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       end
       whf_sensors.each do |whf_sensor|
-        program.addLine("ElseIf (#{whf_sensor.name} <> 0)") # Assign hour to cooling if whole house fan is operating
-        program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
+        program.addLine("  ElseIf (#{whf_sensor.name} <> 0) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
+        program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       end
-      program.addLine('Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
-      # FIXME: Check logic when e.g. no cooling system
-      # FIXME: Check logic when heating/cooling seasons (HVAC availability)
+      program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
       if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
-        program.addLine("  Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
+        program.addLine("    Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
       else
-        program.addLine("  Set Tmid_setpoint = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
+        program.addLine("    Set Tmid_setpoint = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
       end
-      program.addLine("  If #{tin_sensor.name} > Tmid_setpoint")
-      program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      program.addLine('  Else')
-      program.addLine("    Set htg_mode = #{total_heat_load_serveds[unit]}")
+      program.addLine("    If (#{tin_sensor.name} > Tmid_setpoint) && (clg_season == 1)")
+
+      program.addLine("      Set clg_mode = #{total_cool_load_serveds[unit]}")
+      program.addLine("    ElseIf (#{tin_sensor.name} < Tmid_setpoint) && (htg_season == 1)")
+      program.addLine("      Set htg_mode = #{total_heat_load_serveds[unit]}")
+      program.addLine('    EndIf')
       program.addLine('  EndIf')
       program.addLine('EndIf')
 
