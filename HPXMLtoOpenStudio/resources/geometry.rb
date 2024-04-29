@@ -2,7 +2,10 @@
 
 # The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
 class Geometry
-  # Tear down the existing model if it exists
+  # Tear down the existing model if it exists.
+  #
+  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
   def self.tear_down_model(model:,
                            runner:)
     handles = OpenStudio::UUIDVector.new
@@ -15,6 +18,10 @@ class Geometry
     end
   end
 
+  # Get the largest z difference for a surface.
+  #
+  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
+  # @return [Double] the max z value minus the min x value
   def self.get_surface_height(surface:)
     zvalues = get_surface_z_values(surfaceArray: [surface])
     zrange = zvalues.max - zvalues.min
@@ -70,6 +77,10 @@ class Geometry
     return zValueArray
   end
 
+  # Get the default number of occupants.
+  #
+  # @param nbeds [Integer] the number of bedrooms
+  # @return [Double] the number of occupants, which is equal to the number of bedrooms
   def self.get_occupancy_default_num(nbeds:)
     return Float(nbeds)
   end
@@ -77,6 +88,7 @@ class Geometry
   # Create space and zone based on contents of spaces and value of location.
   # Set a "dwelling unit multiplier" equal to the number of similar units represented.
   #
+  # @param model [OpenStudio::Model::Model] model object
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param location [String] HPXML location
   # @param zone_multiplier [Integer] the number of similar zones represented
@@ -170,6 +182,15 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
+  # Create vertices for a vertical plane based on length, height, z origin, azimuth, presence of a buffer, and any subsurface area.
+  #
+  # @param length [Double] length of the wall in ft
+  # @param height [Double] height of the wall in ft
+  # @param z_origin [Double] The z-coordinate for which the length and height are relative, in ft
+  # @param azimuth [Double] azimuth in degrees
+  # @param add_buffer [Boolean] whether to use a buffer on each side of a subsurface
+  # @param subsurface_area [Double] the area of a subsurface within the parent surface, in ft^2
+  # @return [OpenStudio::Point3dVector] an array of points
   def self.create_wall_vertices(length:,
                                 height:,
                                 z_origin:,

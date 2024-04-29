@@ -4,6 +4,8 @@
 class Geometry
   # Create a 3D representation of a single-family detached home using the following arguments.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] model object
   # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
   # @param geometry_average_ceiling_height [Double] average ceiling height in ft
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
@@ -647,6 +649,7 @@ class Geometry
 
   # Create a 3D representation of a single-family attached home using the following arguments.
   #
+  # @param model [OpenStudio::Model::Model] model object
   # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
   # @param geometry_average_ceiling_height [Double] average ceiling height in ft
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
@@ -946,6 +949,7 @@ class Geometry
 
   # Create a 3D representation of an apartment (dwelling unit in a multifamily building) home using the following arguments.
   #
+  # @param model [OpenStudio::Model::Model] model object
   # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
   # @param geometry_average_ceiling_height [Double] average ceiling height in ft
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
