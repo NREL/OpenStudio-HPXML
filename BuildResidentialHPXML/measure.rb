@@ -6986,10 +6986,14 @@ class HPXMLFile
       usage_multiplier = args[:refrigerator_usage_multiplier].get
     end
 
+    if args[:extra_refrigerator_present]
+      primary_indicator = true
+    end
+
     hpxml_bldg.refrigerators.add(id: "Refrigerator#{hpxml_bldg.refrigerators.size + 1}",
                                  location: location,
                                  rated_annual_kwh: rated_annual_kwh,
-                                 primary_indicator: true,
+                                 primary_indicator: primary_indicator,
                                  usage_multiplier: usage_multiplier)
   end
 

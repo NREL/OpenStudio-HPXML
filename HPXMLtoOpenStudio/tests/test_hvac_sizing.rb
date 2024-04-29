@@ -13,7 +13,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     @test_files_path = File.join(@root_path, 'workflow', 'tests')
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
-    @results_dir = File.join(@test_files_path, 'results')
+    @results_dir = File.join(@test_files_path, 'test_results')
     FileUtils.mkdir_p @results_dir
   end
 
