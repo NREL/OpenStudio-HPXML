@@ -2594,17 +2594,17 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # EMS Sensors: Indoor temperature, setpoints
-      tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Zone Mean Air Temperature')
+      tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       tin_sensor.setName('tin s')
       tin_sensor.setKeyName(conditioned_zone.name.to_s)
       if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
         thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
 
-        htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Schedule Value')
+        htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         htg_sp_sensor.setName('htg sp s')
         htg_sp_sensor.setKeyName(thermostat.heatingSetpointTemperatureSchedule.get.name.to_s)
 
-        clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(unit_model, 'Schedule Value')
+        clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
         clg_sp_sensor.setName('clg sp s')
         clg_sp_sensor.setKeyName(thermostat.coolingSetpointTemperatureSchedule.get.name.to_s)
       end
@@ -2634,14 +2634,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       program.addLine('    Set htg_season = 1')
       program.addLine('  EndIf')
-      natvent_sensors.each_with_index do |natvent_sensor, i|
-        program.addLine("  #{i == 0 ? 'If' : 'ElseIf'} (#{natvent_sensor.name} <> 0) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating (can only operate during cooling season currently)
-        program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      end
-      whf_sensors.each do |whf_sensor|
-        program.addLine("  ElseIf (#{whf_sensor.name} <> 0) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
-        program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      end
+      program.addLine("  If (#{natvent_sensors[0].name} <> 0) && (#{natvent_sensors[1].name} <> 0) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating (can only operate during cooling season currently)
+      program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
+      program.addLine("  ElseIf (#{whf_sensors[0].name} <> 0) && (#{whf_sensors[1].name} <> 0) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
+      program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
       if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
         program.addLine("    Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
