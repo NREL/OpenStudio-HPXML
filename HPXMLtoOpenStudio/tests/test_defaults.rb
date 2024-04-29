@@ -4603,7 +4603,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(cooling_system.cooling_efficiency_seer)
@@ -4624,7 +4624,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
     end
   end
 
@@ -4638,7 +4638,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_system.cooling_capacity, cooling_capacity, 1.0)
+      assert_equal(cooling_system.cooling_capacity, cooling_capacity)
     end
   end
 
@@ -4658,7 +4658,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(cooling_system.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, cooling_system.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, cooling_system.cooling_capacity)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(cooling_system.cooling_efficiency_seer)
@@ -4681,7 +4681,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4702,7 +4702,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
   end
 
@@ -4717,7 +4717,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4737,7 +4737,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4758,7 +4758,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4779,7 +4779,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
   end
 
@@ -4808,7 +4808,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heating_system.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heating_system.heating_capacity)
     end
     assert_equal(pilot_light, heating_system.pilot_light)
     if pilot_light_btuh.nil?
@@ -4849,22 +4849,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heat_pump.heating_capacity)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
+      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
     end
     if backup_heating_capacity.nil?
       assert(heat_pump.backup_heating_capacity > 0)
     else
-      assert_in_delta(backup_heating_capacity, heat_pump.backup_heating_capacity, 1.0)
+      assert_equal(backup_heating_capacity, heat_pump.backup_heating_capacity)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(heat_pump.cooling_efficiency_seer)
@@ -4933,17 +4933,17 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heat_pump.heating_capacity)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
+      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
     end
     if heating_capacity_retention_fraction.nil?
       assert_nil(heat_pump.heating_capacity_retention_fraction)
@@ -4985,22 +4985,22 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     if cooling_capacity.nil?
       assert(heat_pump.cooling_capacity > 0)
     else
-      assert_in_delta(cooling_capacity, heat_pump.cooling_capacity, 1.0)
+      assert_equal(cooling_capacity, heat_pump.cooling_capacity)
     end
     if heating_capacity.nil?
       assert(heat_pump.heating_capacity > 0)
     else
-      assert_in_delta(heating_capacity, heat_pump.heating_capacity, 1.0)
+      assert_equal(heating_capacity, heat_pump.heating_capacity)
     end
     if heating_capacity_17F.nil?
       assert_nil(heat_pump.heating_capacity_17F)
     else
-      assert_in_delta(heating_capacity_17F, heat_pump.heating_capacity_17F, 1.0)
+      assert_equal(heating_capacity_17F, heat_pump.heating_capacity_17F)
     end
     if backup_heating_capacity.nil?
       assert(heat_pump.backup_heating_capacity > 0)
     else
-      assert_in_delta(backup_heating_capacity, heat_pump.backup_heating_capacity, 1.0)
+      assert_equal(backup_heating_capacity, heat_pump.backup_heating_capacity)
     end
     if cooling_efficiency_seer.nil?
       assert_nil(heat_pump.cooling_efficiency_seer)
