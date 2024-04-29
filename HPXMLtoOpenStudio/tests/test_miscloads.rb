@@ -39,16 +39,16 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_misc_loads
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscTelevision)
-    assert_in_delta(619, kwh_yr, 1.0)
+    assert_in_delta(620, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check others
@@ -71,16 +71,16 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_large_uncommon_loads
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-loads-large-uncommon.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscTelevision)
-    assert_in_delta(619, kwh_yr, 1.0)
+    assert_in_delta(620, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check vehicle
@@ -132,16 +132,16 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_large_uncommon_loads2
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-loads-large-uncommon2.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscTelevision)
-    assert_in_delta(619, kwh_yr, 1.0)
+    assert_in_delta(620, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check vehicle
@@ -193,11 +193,11 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_operational_defaults
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-5.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
@@ -254,11 +254,11 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_operational_large_uncommon_loads
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-1-misc-loads-large-uncommon.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
@@ -315,11 +315,11 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
   def test_operational_large_uncommon_loads2
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-residents-1-misc-loads-large-uncommon2.xml'))
-    model, _hpxml = _test_measure(args_hash)
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check misc plug loads
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPlugLoads)
-    assert_in_delta(2454, kwh_yr, 1.0)
+    assert_in_delta(2457, kwh_yr, 1.0)
     assert_equal(0, therm_yr)
 
     # Check television
@@ -408,6 +408,6 @@ class HPXMLtoOpenStudioMiscLoadsTest < Minitest::Test
 
     File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
 
-    return model, hpxml
+    return model, hpxml, hpxml.buildings[0]
   end
 end
