@@ -2597,6 +2597,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       tin_sensor.setName('tin s')
       tin_sensor.setKeyName(conditioned_zone.name.to_s)
+      thermostat = nil
       if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
         thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
 
@@ -2640,18 +2641,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       program.addLine("  ElseIf ((#{whf_sensors[0].name} <> 0) || (#{whf_sensors[1].name} <> 0)) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
       program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
-      if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
+      if not thermostat.nil?
+        program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
         program.addLine("    Set Tmid_setpoint = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
-      else
-        program.addLine("    Set Tmid_setpoint = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
+        program.addLine("    If (#{tin_sensor.name} > Tmid_setpoint) && (clg_season == 1)")
+        program.addLine("      Set clg_mode = #{total_cool_load_serveds[unit]}")
+        program.addLine("    ElseIf (#{tin_sensor.name} < Tmid_setpoint) && (htg_season == 1)")
+        program.addLine("      Set htg_mode = #{total_heat_load_serveds[unit]}")
+        program.addLine('    EndIf')
       end
-      program.addLine("    If (#{tin_sensor.name} > Tmid_setpoint) && (clg_season == 1)")
-
-      program.addLine("      Set clg_mode = #{total_cool_load_serveds[unit]}")
-      program.addLine("    ElseIf (#{tin_sensor.name} < Tmid_setpoint) && (htg_season == 1)")
-      program.addLine("      Set htg_mode = #{total_heat_load_serveds[unit]}")
-      program.addLine('    EndIf')
       program.addLine('  EndIf')
       program.addLine('EndIf')
 
