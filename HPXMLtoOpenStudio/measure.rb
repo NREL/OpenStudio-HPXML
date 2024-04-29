@@ -2617,26 +2617,28 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine("ElseIf (#{clg_cond_load_sensors[unit].name} > 0)") # Assign hour to cooling if cooling load
       program.addLine("  Set clg_mode = #{total_cool_load_serveds[unit]}")
       program.addLine('Else')
-      # Determine whether we're in the heating or cooling season
       program.addLine('  Set htg_season = 0')
       program.addLine('  Set clg_season = 0')
-      if season_day_nums[unit][:clg_end] >= season_day_nums[unit][:clg_start]
-        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) && (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
-      else
-        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) || (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
+      if not season_day_nums[unit].nil?
+        # Determine whether we're in the heating and/or cooling season
+        if season_day_nums[unit][:clg_end] >= season_day_nums[unit][:clg_start]
+          program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) && (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
+        else
+          program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) || (DayOfYear <= #{season_day_nums[unit][:clg_end]}))")
+        end
+        program.addLine('    Set clg_season = 1')
+        program.addLine('  EndIf')
+        if season_day_nums[unit][:htg_end] >= season_day_nums[unit][:htg_start]
+          program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) && (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
+        else
+          program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) || (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
+        end
+        program.addLine('    Set htg_season = 1')
+        program.addLine('  EndIf')
       end
-      program.addLine('    Set clg_season = 1')
-      program.addLine('  EndIf')
-      if season_day_nums[unit][:htg_end] >= season_day_nums[unit][:htg_start]
-        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) && (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
-      else
-        program.addLine("  If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) || (DayOfYear <= #{season_day_nums[unit][:htg_end]}))")
-      end
-      program.addLine('    Set htg_season = 1')
-      program.addLine('  EndIf')
-      program.addLine("  If (#{natvent_sensors[0].name} <> 0) && (#{natvent_sensors[1].name} <> 0) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating (can only operate during cooling season currently)
+      program.addLine("  If ((#{natvent_sensors[0].name} <> 0) || (#{natvent_sensors[1].name} <> 0)) && (clg_season == 1)") # Assign hour to cooling if natural ventilation is operating
       program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
-      program.addLine("  ElseIf (#{whf_sensors[0].name} <> 0) && (#{whf_sensors[1].name} <> 0) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
+      program.addLine("  ElseIf ((#{whf_sensors[0].name} <> 0) || (#{whf_sensors[1].name} <> 0)) && (clg_season == 1)") # Assign hour to cooling if whole house fan is operating
       program.addLine("    Set clg_mode = #{total_cool_load_serveds[unit]}")
       program.addLine('  Else') # Indoor temperature floating between setpoints; determine assignment by comparing to average of heating/cooling setpoints
       if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
