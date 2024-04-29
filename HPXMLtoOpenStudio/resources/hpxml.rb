@@ -2301,7 +2301,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(zone)
       @zone_type = XMLHelper.get_value(zone, 'ZoneType', :string)
-      @spaces = Spaces.new(self, zone)
+      @spaces.from_doc(zone)
     end
   end
 
@@ -2334,7 +2334,7 @@ class HPXML < Object
 
     def attached_surfaces
       surfaces = []
-      hpxml_bldg = @parent_object.parent_object
+      hpxml_bldg = @parent_object
       (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs).each do |s|
         if s.attached_to_space_idref == @id
           surfaces << s

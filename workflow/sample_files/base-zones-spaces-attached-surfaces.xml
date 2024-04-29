@@ -67,21 +67,11 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <SystemIdentifier id='AGConditionedZone'/>
+          <SystemIdentifier id='ConditionedZone'/>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
-              <SystemIdentifier id='AGConditionedSpace'/>
-              <FloorArea>1350.0</FloorArea>
-            </Space>
-          </Spaces>
-        </Zone>
-        <Zone>
-          <SystemIdentifier id='BGConditionedZone'/>
-          <ZoneType>conditioned</ZoneType>
-          <Spaces>
-            <Space>
-              <SystemIdentifier id='BGConditionedSpace'/>
+              <SystemIdentifier id='ConditionedSpace'/>
               <FloorArea>1350.0</FloorArea>
             </Space>
           </Spaces>
@@ -155,7 +145,7 @@
         <RimJoists>
           <RimJoist>
             <SystemIdentifier id='RimJoist1'/>
-            <AttachedToSpace idref='BGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>115.6</Area>
@@ -188,7 +178,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall2'/>
-            <AttachedToSpace idref='AGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -208,7 +198,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall3'/>
-            <AttachedToSpace idref='AGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -246,7 +236,7 @@
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall1'/>
-            <AttachedToSpace idref='BGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
@@ -289,7 +279,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='Floor2'/>
-            <AttachedToSpace idref='AGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
@@ -335,7 +325,7 @@
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab2'/>
-            <AttachedToSpace idref='BGConditionedSpace'/>
+            <AttachedToSpace idref='ConditionedSpace'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
@@ -444,6 +434,7 @@
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
+              <AttachedToZone idref='ConditionedZone'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -458,6 +449,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
+              <AttachedToZone idref='ConditionedZone'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>

@@ -67,21 +67,11 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <SystemIdentifier id='AGConditionedZone'/>
+          <SystemIdentifier id='ConditionedZone'/>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
-              <SystemIdentifier id='AGConditionedSpace'/>
-              <FloorArea>1350.0</FloorArea>
-            </Space>
-          </Spaces>
-        </Zone>
-        <Zone>
-          <SystemIdentifier id='BGConditionedZone'/>
-          <ZoneType>conditioned</ZoneType>
-          <Spaces>
-            <Space>
-              <SystemIdentifier id='BGConditionedSpace'/>
+              <SystemIdentifier id='ConditionedSpace'/>
               <FloorArea>1350.0</FloorArea>
             </Space>
           </Spaces>

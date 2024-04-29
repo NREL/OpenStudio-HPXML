@@ -69,7 +69,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
   def test_schema_schematron_error_messages
     # Test case => Error message
-    all_expected_errors = { 'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
+    all_expected_errors = { 'attached-to-space-missing-attached-to-zone' => ['Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system',
+                                                                             'Expected AttachedToZone for each HVAC system'],
+                            'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'clothes-washer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'cooking-range-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -238,7 +247,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
-      if ['boiler-invalid-afue'].include? error_case
+      if ['attached-to-space-missing-attached-to-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml_bldg.hvac_systems.each do |sys|
+          sys.attached_to_zone_idref = nil
+        end
+      elsif ['boiler-invalid-afue'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
         hpxml_bldg.heating_systems[0].heating_efficiency_afue *= 100.0
       elsif ['clothes-dryer-location'].include? error_case
@@ -1157,8 +1171,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
       elsif ['hvac-distribution-different-zones'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
+                             zone_type: HPXML::ZoneTypeConditioned)
         hpxml_bldg.heating_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[0].id
-        hpxml_bldg.cooling_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[1].id
+        hpxml_bldg.cooling_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[-1].id
       elsif ['hvac-distribution-multiple-attached-cooling'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-multiple.xml')
         hpxml_bldg.heat_pumps[0].distribution_system_idref = 'HVACDistribution2'
@@ -1516,10 +1532,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
-                              'manualj-sum-space-num-occupants' => ['Multiple conditioned zones specified but the model will only include a single thermal zone.',
-                                                                    'ManualJInputs/NumberofOccupants (4) does not match sum of conditioned spaces (5).'],
-                              'manualj-sum-space-internal-loads' => ['Multiple conditioned zones specified but the model will only include a single thermal zone.',
-                                                                     'ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
+                              'manualj-sum-space-num-occupants' => ['ManualJInputs/NumberofOccupants (4) does not match sum of conditioned spaces (5).'],
+                              'manualj-sum-space-internal-loads' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
+                              'multiple-conditioned-zone' => ['Multiple conditioned zones specified but the model will only include a single thermal zone.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
@@ -1681,6 +1696,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
           space.manualj_internal_loads_sensible = (i == 0 ? hpxml_bldg.header.manualj_internal_loads_sensible + 200.0 : 0)
         end
+      elsif ['multiple-conditioned-zone'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
+                             zone_type: HPXML::ZoneTypeConditioned)
+        hpxml_bldg.zones[-1].spaces << hpxml_bldg.zones[0].spaces[0].dup
+        hpxml_bldg.zones[-1].spaces[-1].id += 'Dup'
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case

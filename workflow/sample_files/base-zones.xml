@@ -67,11 +67,7 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <SystemIdentifier id='AGConditionedZone'/>
-          <ZoneType>conditioned</ZoneType>
-        </Zone>
-        <Zone>
-          <SystemIdentifier id='BGConditionedZone'/>
+          <SystemIdentifier id='ConditionedZone'/>
           <ZoneType>conditioned</ZoneType>
         </Zone>
         <Zone>
