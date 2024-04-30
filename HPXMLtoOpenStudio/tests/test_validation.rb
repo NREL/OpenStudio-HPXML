@@ -69,15 +69,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
   def test_schema_schematron_error_messages
     # Test case => Error message
-    all_expected_errors = { 'attached-to-space-missing-attached-to-zone' => ['Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system',
-                                                                             'Expected AttachedToZone for each HVAC system'],
+    all_expected_errors = { 'attached-to-space-missing-attached-to-zone' => ['Expected AttachedToZone for each HVAC system'],
                             'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'clothes-washer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
