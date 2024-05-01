@@ -17,6 +17,7 @@ class HPXMLDefaults
 
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+    added_zone = add_conditioned_zone_if_needed(hpxml_bldg, cfa)
 
     apply_header(hpxml.header, epw_file)
     apply_building(hpxml_bldg, epw_file)
@@ -65,10 +66,14 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
+    apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
     # default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+
+    if added_zone
+      hpxml_bldg.zones[0].delete
+    end
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -88,8 +93,9 @@ class HPXMLDefaults
     # area, plus azimuths that are offset by 90/180/270 degrees. Used for
     # surfaces that may not have an azimuth defined (e.g., walls).
     azimuth_areas = {}
-    (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls +
-     hpxml_bldg.windows + hpxml_bldg.skylights + hpxml_bldg.doors).each do |surface|
+    (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surface|
+      next unless surface.respond_to?(:azimuth)
+
       az = surface.azimuth
       next if az.nil?
 
@@ -108,6 +114,26 @@ class HPXMLDefaults
   end
 
   private
+
+  def self.add_conditioned_zone_if_needed(hpxml_bldg, cfa)
+    if hpxml_bldg.conditioned_zones.empty?
+      # Add a conditioned zone for the entire home to simplify the sizing code
+      hpxml_bldg.zones.add(id: 'EntireHomeZone',
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[0].id
+      end
+      hpxml_bldg.zones[0].spaces.add(id: 'EntireHomeSpace',
+                                     floor_area: cfa)
+      hpxml_bldg.surfaces.each do |surface|
+        if HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+          surface.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
+        end
+      end
+      return true
+    end
+    return false
+  end
 
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
@@ -3305,10 +3331,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
+  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     # Calculate building design loads and equipment capacities/airflows
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
+    HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
   def self.get_azimuth_from_orientation(orientation)

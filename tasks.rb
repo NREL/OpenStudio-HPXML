@@ -381,14 +381,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                            zone_type: HPXML::ZoneTypeConditioned)
       hpxml_bldg.zones.add(id: 'GarageZone',
                            zone_type: HPXML::ZoneTypeUnconditioned)
-      all_surfaces = (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs)
-      all_hvac_systems = (hpxml_bldg.heating_systems + hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps)
 
       if ['base-zones-spaces.xml',
           'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
         hpxml_bldg.zones[0].spaces.add(id: 'ConditionedSpace',
                                        floor_area: 0.0)
-        all_surfaces.each do |s|
+        hpxml_bldg.surfaces.each do |s|
           next unless s.interior_adjacent_to == HPXML::LocationConditionedSpace || s.interior_adjacent_to == HPXML::LocationBasementConditioned
 
           if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
@@ -400,7 +398,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         end
         hpxml_bldg.zones[1].spaces.add(id: 'GarageSpace',
                                        floor_area: 0.0)
-        all_surfaces.each do |s|
+        hpxml_bldg.surfaces.each do |s|
           next unless s.interior_adjacent_to == HPXML::LocationGarage
 
           if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
@@ -410,7 +408,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
             hpxml_bldg.zones[1].spaces[0].floor_area += s.area
           end
         end
-        all_hvac_systems.each do |sys|
+        hpxml_bldg.hvac_systems.each do |sys|
           next unless hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
 
           sys.attached_to_zone_idref = hpxml_bldg.zones[0].id

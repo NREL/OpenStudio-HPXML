@@ -1391,13 +1391,21 @@ class HPXML < Object
       @fuel_loads = FuelLoads.new(self, building)
     end
 
+    def surfaces
+      return (@roofs + @rim_joists + @walls + @foundation_walls + @floors + @slabs)
+    end
+
+    def subsurfaces
+      return (@windows + @skylights + @doors)
+    end
+
     def hvac_systems
       return (@heating_systems + @cooling_systems + @heat_pumps)
     end
 
     def has_location(location)
       # Search for surfaces attached to this location
-      (@roofs + @rim_joists + @walls + @foundation_walls + @floors + @slabs).each do |surface|
+      surfaces.each do |surface|
         return true if surface.interior_adjacent_to == location
         return true if surface.exterior_adjacent_to == location
       end
@@ -1481,7 +1489,7 @@ class HPXML < Object
 
     def calculate_space_design_loads?
       # Only calculate space design loads if there are conditioned spaces w/ attached surfaces
-      return conditioned_spaces.map { |s| s.attached_surfaces.size }.sum > 0
+      return conditioned_spaces.map { |s| s.surfaces.size }.sum > 0
     end
 
     def primary_hvac_systems()
@@ -2285,6 +2293,77 @@ class HPXML < Object
       return errors
     end
 
+    def delete
+      @parent_object.hvac_systems.each do |hvac_system|
+        hvac_system.attached_to_zone_idref = nil
+      end
+      @parent_object.zones.delete(self)
+    end
+
+    def heating_systems
+      return @parent_object.heating_systems.select { |s| s.attached_to_zone_idref == @id }
+    end
+
+    def cooling_systems
+      return @parent_object.cooling_systems.select { |s| s.attached_to_zone_idref == @id }
+    end
+
+    def heat_pumps
+      return @parent_object.heat_pumps.select { |s| s.attached_to_zone_idref == @id }
+    end
+
+    def hvac_systems
+      return @parent_object.hvac_systems.select { |s| s.attached_to_zone_idref == @id }
+    end
+
+    def hvac_distributions
+      return hvac_systems.select { |s| !s.distribution_system.nil? }.map { |s| s.distribution_system }.uniq
+    end
+
+    def floor_area
+      return spaces.map { |space| space.floor_area }.sum
+    end
+
+    def roofs
+      return spaces.map { |space| space.roofs }.flatten
+    end
+
+    def rim_joists
+      return spaces.map { |space| space.rim_joists }.flatten
+    end
+
+    def walls
+      return spaces.map { |space| space.walls }.flatten
+    end
+
+    def foundation_walls
+      return spaces.map { |space| space.foundation_walls }.flatten
+    end
+
+    def floors
+      return spaces.map { |space| space.floors }.flatten
+    end
+
+    def slabs
+      return spaces.map { |space| space.slabs }.flatten
+    end
+
+    def windows
+      return spaces.map { |space| space.windows }.flatten
+    end
+
+    def doors
+      return spaces.map { |space| space.doors }.flatten
+    end
+
+    def skylights
+      return spaces.map { |space| space.skylights }.flatten
+    end
+
+    def surfaces
+      return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
+    end
+
     def to_doc(building)
       return if nil?
 
@@ -2329,19 +2408,50 @@ class HPXML < Object
     end
 
     def delete
+      @parent_object.surfaces.each do |surface|
+        surface.attached_to_space_idref = nil
+      end
       @parent_object.spaces.delete(self)
     end
 
-    def attached_surfaces
-      surfaces = []
-      hpxml_bldg = @parent_object
-      (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls + hpxml_bldg.floors + hpxml_bldg.slabs).each do |s|
-        if s.attached_to_space_idref == @id
-          surfaces << s
-        end
-      end
+    def roofs
+      return @parent_object.roofs.select { |s| s.attached_to_space_idref == @id }
+    end
 
-      return surfaces
+    def rim_joists
+      return @parent_object.rim_joists.select { |s| s.attached_to_space_idref == @id }
+    end
+
+    def walls
+      return @parent_object.walls.select { |s| s.attached_to_space_idref == @id }
+    end
+
+    def foundation_walls
+      return @parent_object.foundation_walls.select { |s| s.attached_to_space_idref == @id }
+    end
+
+    def floors
+      return @parent_object.floors.select { |s| s.attached_to_space_idref == @id }
+    end
+
+    def slabs
+      return @parent_object.slabs.select { |s| s.attached_to_space_idref == @id }
+    end
+
+    def windows
+      return @parent_object.windows.select { |s| s.wall.attached_to_space_idref == @id }
+    end
+
+    def doors
+      return @parent_object.doors.select { |s| s.wall.attached_to_space_idref == @id }
+    end
+
+    def skylights
+      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id }
+    end
+
+    def surfaces
+      return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
     end
 
     def to_doc(zone)
