@@ -3571,8 +3571,23 @@ class HVAC
   end
 
   def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
+    # Calculate q_dot and p_dot
+    # q_dot is used for EMS program to account for introduced cooling load and supp coil power consumption by actuating other equipment objects
+    # p_dot is used for calculating coil defrost compressor power consumption
     return [nil, nil] unless heat_pump.advanced_defrost_approach
 
+    is_ducted = !heat_pump.distribution_system_idref.nil?
+    # determine defrost cooling rate and defrost cooling cop based on whether ducted
+    if is_ducted
+      # 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
+      # 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
+      # Transient effect already accounted
+      capacity_defrost_multiplier = 0.45
+      cop_defrost_multiplier = 1.0
+    else
+      capacity_defrost_multiplier = 0.1
+      cop_defrost_multiplier = 0.08
+    end
     nominal_cooling_capacity_1x = heat_pump.cooling_capacity / unit_multiplier
     max_heating_airflow_1x = max_heating_airflow / unit_multiplier
     design_airflow_1x = design_airflow / unit_multiplier
@@ -3582,8 +3597,8 @@ class HVAC
     p_dot_blower = power_design * defrost_power_fraction
     p_dot_odu_fan = 44.348 * UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'ton') + 62.452
     rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1] # Fixme: assume highest stage cop?
-    q_dot_defrost = UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'W') * 0.45 # defrost cooling rate, 0.45 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
-    cop_defrost = rated_clg_cop / 1.0 # defrost cooling cop, 1.0 is from Jon's lab and field data analysis, defrost is too short to reach steady state so using cutler curve is not correct
+    q_dot_defrost = UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'W') * capacity_defrost_multiplier
+    cop_defrost = rated_clg_cop * cop_defrost_multiplier
     p_dot_defrost = (q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower) * unit_multiplier # p_dot_defrost is used in coil object, which needs to be scaled up for unit multiplier
     return q_dot_defrost, p_dot_defrost
   end
@@ -3603,11 +3618,19 @@ class HVAC
         supp_sys_power_level = [supp_sys_capacity, q_dot_defrost].min / supp_sys_efficiency # Assume perfect tempering
       end
     else
-      supp_sys_fuel = heat_pump.backup_heating_fuel
-      supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
-      supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
-      supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
-      supp_sys_power_level = [supp_sys_capacity, q_dot_defrost].min / supp_sys_efficiency # Assume perfect tempering
+      is_ducted = !heat_pump.distribution_system_idref.nil?
+      if is_ducted
+        supp_sys_fuel = heat_pump.backup_heating_fuel
+        supp_sys_capacity = UnitConversions.convert(heat_pump.backup_heating_capacity, 'Btu/hr', 'W')
+        supp_sys_efficiency = heat_pump.backup_heating_efficiency_percent
+        supp_sys_efficiency = heat_pump.backup_heating_efficiency_afue if supp_sys_efficiency.nil?
+        supp_sys_power_level = [supp_sys_capacity, q_dot_defrost].min / supp_sys_efficiency # Assume perfect tempering
+      else
+        # Practically no integrated supplemental system for ductless
+        # Sometimes integrated backup systems are added to ductless to avoid unmet loads, so it shouldn't count here to avoid overestimating backup system energy use
+        supp_sys_capacity = 0.0
+        supp_sys_power_level = 0.0
+      end
     end
     # other equipment actuator
     defrost_heat_load_oed = OpenStudio::Model::OtherEquipmentDefinition.new(model)
