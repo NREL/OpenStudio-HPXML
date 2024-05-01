@@ -131,7 +131,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -181,7 +181,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
