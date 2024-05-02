@@ -1231,7 +1231,7 @@ class HVACSizing
     icfm_heat += q_fireplace
 
     # Apportion infiltration to zone by exterior wall area
-    bldg_exposed_wall_area = hpxml_bldg.zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
+    bldg_exposed_wall_area = hpxml_bldg.conditioned_zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
     zone_exposed_wall_area = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
     icfm_heat *= zone_exposed_wall_area / bldg_exposed_wall_area
     icfm_cool *= zone_exposed_wall_area / bldg_exposed_wall_area
