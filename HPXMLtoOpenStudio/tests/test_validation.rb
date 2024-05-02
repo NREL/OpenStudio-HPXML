@@ -232,6 +232,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'refrigerator-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'refrigerator-schedule' => ['Expected either schedule fractions/multipliers or schedule coefficients but not both.'],
                             'solar-fraction-one' => ['Expected SolarFraction to be less than 1 [context: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction], id: "SolarThermalSystem1"]'],
+                            'sum-space-floor-area' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
+                            'sum-space-floor-area2' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'] }
@@ -240,7 +242,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
       if ['attached-to-space-missing-attached-to-zone'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.hvac_systems.each do |sys|
           sys.attached_to_zone_idref = nil
         end
@@ -685,6 +687,16 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['solar-fraction-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-solar-fraction.xml')
         hpxml_bldg.solar_thermal_systems[0].solar_fraction = 1.0
+      elsif ['sum-space-floor-area'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.conditioned_spaces.each do |space|
+          space.floor_area /= 2.0
+        end
+      elsif ['sum-space-floor-area2'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.conditioned_spaces.each do |space|
+          space.floor_area *= 2.0
+        end
       elsif ['water-heater-location'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.water_heating_systems[0].location = HPXML::LocationCrawlspaceVented
@@ -1677,19 +1689,19 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
       elsif ['manualj-sum-space-num-occupants'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_num_occupants = 4
         hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
           space.manualj_num_occupants = (i == 0 ? hpxml_bldg.header.manualj_num_occupants + 1 : 0)
         end
       elsif ['manualj-sum-space-internal-loads'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_sensible = 1000.0
         hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
           space.manualj_internal_loads_sensible = (i == 0 ? hpxml_bldg.header.manualj_internal_loads_sensible + 200.0 : 0)
         end
       elsif ['multiple-conditioned-zone'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-attached-surfaces.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
                              zone_type: HPXML::ZoneTypeConditioned)
         hpxml_bldg.zones[-1].spaces << hpxml_bldg.zones[0].spaces[0].dup

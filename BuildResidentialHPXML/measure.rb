@@ -7339,7 +7339,7 @@ class HPXMLFile
     # Renumber surfaces
     indexes = {}
     (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surf|
-      surf_name = surf.class.to_s
+      surf_name = surf.class.to_s.gsub('HPXML::', '')
       indexes[surf_name] = 0 if indexes[surf_name].nil?
       indexes[surf_name] += 1
       (hpxml_bldg.attics + hpxml_bldg.foundations).each do |attic_or_fnd|

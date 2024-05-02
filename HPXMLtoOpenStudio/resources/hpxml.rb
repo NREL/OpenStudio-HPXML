@@ -1487,11 +1487,6 @@ class HPXML < Object
       return conditioned_zones.map { |z| z.spaces }.flatten
     end
 
-    def calculate_space_design_loads?
-      # Only calculate space design loads if there are conditioned spaces w/ attached surfaces
-      return conditioned_spaces.map { |s| s.surfaces.size }.sum > 0
-    end
-
     def primary_hvac_systems()
       return hvac_systems.select { |h| h.primary_system }
     end
@@ -2411,7 +2406,11 @@ class HPXML < Object
       @parent_object.surfaces.each do |surface|
         surface.attached_to_space_idref = nil
       end
-      @parent_object.spaces.delete(self)
+      @parent_object.zones.each do |zone|
+        next unless zone.spaces.include? self
+
+        zone.spaces.delete(self)
+      end
     end
 
     def roofs

@@ -375,43 +375,28 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # ------------------ #
 
     if ['base-zones.xml',
-        'base-zones-spaces.xml',
-        'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
+        'base-zones-spaces.xml'].include? hpxml_file
       hpxml_bldg.zones.add(id: 'ConditionedZone',
                            zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.hvac_systems.each do |sys|
+        sys.attached_to_zone_idref = hpxml_bldg.zones[0].id
+      end
       hpxml_bldg.zones.add(id: 'GarageZone',
                            zone_type: HPXML::ZoneTypeUnconditioned)
-
-      if ['base-zones-spaces.xml',
-          'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
+      if ['base-zones-spaces.xml'].include? hpxml_file
         hpxml_bldg.zones[0].spaces.add(id: 'ConditionedSpace',
-                                       floor_area: 0.0)
+                                       floor_area: hpxml_bldg.building_construction.conditioned_floor_area)
         hpxml_bldg.surfaces.each do |s|
           next unless s.interior_adjacent_to == HPXML::LocationConditionedSpace || s.interior_adjacent_to == HPXML::LocationBasementConditioned
 
-          if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
-            s.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
-          end
-          if s.is_a?(HPXML::Slab)
-            hpxml_bldg.zones[0].spaces[0].floor_area += s.area
-          end
+          s.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
         end
         hpxml_bldg.zones[1].spaces.add(id: 'GarageSpace',
-                                       floor_area: 0.0)
+                                       floor_area: hpxml_bldg.slabs.find { |s| s.interior_adjacent_to == HPXML::LocationGarage }.area)
         hpxml_bldg.surfaces.each do |s|
           next unless s.interior_adjacent_to == HPXML::LocationGarage
 
-          if hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
-            s.attached_to_space_idref = hpxml_bldg.zones[1].spaces[0].id
-          end
-          if s.is_a?(HPXML::Slab)
-            hpxml_bldg.zones[1].spaces[0].floor_area += s.area
-          end
-        end
-        hpxml_bldg.hvac_systems.each do |sys|
-          next unless hpxml_file == 'base-zones-spaces-attached-surfaces.xml'
-
-          sys.attached_to_zone_idref = hpxml_bldg.zones[0].id
+          s.attached_to_space_idref = hpxml_bldg.zones[1].spaces[0].id
         end
       end
     end
@@ -1281,8 +1266,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     if ['base-enclosure-2stories-garage.xml',
         'base-enclosure-garage.xml',
         'base-zones.xml',
-        'base-zones-spaces.xml',
-        'base-zones-spaces-attached-surfaces.xml'].include? hpxml_file
+        'base-zones-spaces.xml'].include? hpxml_file
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside

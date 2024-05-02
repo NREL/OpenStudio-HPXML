@@ -246,8 +246,6 @@ class Outputs
 
     # HVAC Space design loads
     hpxml_bldgs.each do |hpxml_bldg|
-      next unless hpxml_bldg.calculate_space_design_loads?
-
       hpxml_bldg.conditioned_spaces.each do |space|
         results_out << [line_break]
         # Note: Latent loads are not calculated for spaces

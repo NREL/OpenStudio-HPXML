@@ -3662,8 +3662,5 @@
   },
   "sample_files/base-zones-spaces.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml"
-  },
-  "sample_files/base-zones-spaces-attached-surfaces.xml": {
-    "parent_hpxml": "sample_files/base-enclosure-garage.xml"
   }
 }

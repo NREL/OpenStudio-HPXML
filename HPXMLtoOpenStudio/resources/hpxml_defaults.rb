@@ -17,7 +17,8 @@ class HPXMLDefaults
 
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
-    added_zone = add_conditioned_zone_if_needed(hpxml_bldg, cfa)
+
+    add_zones_spaces_if_needed(hpxml_bldg, cfa)
 
     apply_header(hpxml.header, epw_file)
     apply_building(hpxml_bldg, epw_file)
@@ -68,12 +69,8 @@ class HPXMLDefaults
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
-    # default detailed performance has to be after sizing to have autosized capacity information
+    # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
-
-    if added_zone
-      hpxml_bldg.zones[0].delete
-    end
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -115,24 +112,36 @@ class HPXMLDefaults
 
   private
 
-  def self.add_conditioned_zone_if_needed(hpxml_bldg, cfa)
+  def self.add_zones_spaces_if_needed(hpxml_bldg, cfa)
+    # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
     if hpxml_bldg.conditioned_zones.empty?
-      # Add a conditioned zone for the entire home to simplify the sizing code
-      hpxml_bldg.zones.add(id: 'EntireHomeZone',
+      added_zone = true
+      hpxml_bldg.zones.add(id: 'ConditionedZone',
                            zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.zones[0].additional_properties.automatically_added = true
       hpxml_bldg.hvac_systems.each do |hvac_system|
         hvac_system.attached_to_zone_idref = hpxml_bldg.zones[0].id
       end
-      hpxml_bldg.zones[0].spaces.add(id: 'EntireHomeSpace',
+    else
+      added_zone = false
+      hpxml_bldg.zones.each do |zone|
+        zone.additional_properties.automatically_added = false
+      end
+    end
+    if hpxml_bldg.conditioned_spaces.empty? || added_zone
+      hpxml_bldg.zones[0].spaces.add(id: "#{hpxml_bldg.zones[0]}Space",
                                      floor_area: cfa)
+      hpxml_bldg.zones[0].spaces[0].additional_properties.automatically_added = true
       hpxml_bldg.surfaces.each do |surface|
         if HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
           surface.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
         end
       end
-      return true
+    else
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.additional_properties.automatically_added = false
+      end
     end
-    return false
   end
 
   def self.apply_header(hpxml_header, epw_file)
@@ -741,12 +750,10 @@ class HPXMLDefaults
   end
 
   def self.apply_zone_spaces(hpxml_bldg)
-    if hpxml_bldg.calculate_space_design_loads?
-      hpxml_bldg.conditioned_spaces.each do |space|
-        if space.fenestration_load_procedure.nil?
-          space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
-          space.fenestration_load_procedure_isdefaulted = true
-        end
+    hpxml_bldg.conditioned_spaces.each do |space|
+      if space.fenestration_load_procedure.nil?
+        space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
+        space.fenestration_load_procedure_isdefaulted = true
       end
     end
   end
