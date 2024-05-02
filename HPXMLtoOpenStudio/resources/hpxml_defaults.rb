@@ -18,7 +18,7 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
-    add_zones_spaces_if_needed(hpxml_bldg, cfa)
+    add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
     apply_header(hpxml.header, epw_file)
     apply_building(hpxml_bldg, epw_file)
@@ -112,11 +112,12 @@ class HPXMLDefaults
 
   private
 
-  def self.add_zones_spaces_if_needed(hpxml_bldg, cfa)
+  def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
     # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
     if hpxml_bldg.conditioned_zones.empty?
       added_zone = true
-      hpxml_bldg.zones.add(id: 'ConditionedZone',
+      bldg_idx = hpxml.buildings.index(hpxml_bldg)
+      hpxml_bldg.zones.add(id: "ConditionedZone#{bldg_idx + 1}",
                            zone_type: HPXML::ZoneTypeConditioned)
       hpxml_bldg.zones[0].additional_properties.automatically_added = true
       hpxml_bldg.hvac_systems.each do |hvac_system|
