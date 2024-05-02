@@ -7,14 +7,12 @@ class HVACSizing
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
 
-    # For each conditioned thermal zone (and any spaces within)...
-    @all_hvac_sizing_values = {}
-    all_system_design_loads = {}
+    mj = MJ.new
+    process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
+
+    # For each conditioned thermal zone...
     all_zone_design_loads, all_space_design_loads = initialize_zone_and_space_design_loads(hpxml_bldg)
     all_zone_design_loads.each do |zone, zone_design_loads|
-      mj = MJ.new
-      process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
-
       # Calculate individual design load components for the zone (block)
       process_load_windows_skylights(mj, zone, zone_design_loads, all_space_design_loads)
       process_load_doors(mj, zone, zone_design_loads, all_space_design_loads)
@@ -24,45 +22,52 @@ class HVACSizing
       process_load_floors(mj, zone, zone_design_loads, all_space_design_loads, hpxml_bldg)
       process_load_slabs(mj, zone, zone_design_loads, all_space_design_loads, hpxml_bldg)
       process_load_infiltration_ventilation(mj, zone, zone_design_loads, all_space_design_loads, weather, hpxml_bldg)
-      process_load_internal_gains(zone, zone_design_loads, all_space_design_loads, hpxml_bldg)
+      process_load_internal_gains(zone, zone_design_loads, all_space_design_loads)
 
-      # Aggregate into zone loads
-      aggregate_zone_loads(zone_design_loads, all_space_design_loads)
+      # Calculate heating/cooling totals
+      aggregate_loads(zone_design_loads)
+      zone.spaces.each do |space|
+        aggregate_loads(all_space_design_loads[space])
+      end
+    end
 
-      # For each system serving this conditioned zone...
-      hvac_systems.each do |hvac_system|
-        hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
-        next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
+    # For each HVAC system...
+    all_system_design_loads = {}
+    @all_system_sizing_values = {}
+    hvac_systems.each do |hvac_system|
+      hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
+      zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
+      next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
 
-        apply_hvac_temperatures(mj, zone_design_loads, hvac_heating, hvac_cooling)
+      zone_design_loads = all_zone_design_loads[zone]
+      apply_hvac_temperatures(mj, zone_design_loads, hvac_heating, hvac_cooling)
 
-        # Calculate fraction of zone load served by this HVAC system
-        zone_frac_heat_load_served, zone_frac_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, zone, hvac_systems)
+      # Calculate fraction of zone load served by this HVAC system
+      zone_frac_heat_load_served, zone_frac_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, zone, hvac_systems)
 
-        # Calculate system loads (zone load served by this system plus duct loads)
-        system_design_loads = zone_design_loads.dup
-        apply_zone_loads(hvac_heating, system_design_loads, zone_frac_heat_load_served, zone_frac_cool_load_served)
-        apply_hvac_duct_loads_heating(mj, zone, system_design_loads, all_space_design_loads, hvac_heating, hpxml_bldg)
-        apply_hvac_duct_loads_cooling(mj, zone, system_design_loads, all_space_design_loads, hvac_cooling, hpxml_bldg, weather)
+      # Calculate system loads (zone load served by this system plus duct loads)
+      system_design_loads = zone_design_loads.dup
+      apply_zone_loads(hvac_heating, system_design_loads, zone_frac_heat_load_served, zone_frac_cool_load_served)
+      apply_hvac_duct_loads_heating(mj, zone, system_design_loads, all_space_design_loads, hvac_heating, hpxml_bldg)
+      apply_hvac_duct_loads_cooling(mj, zone, system_design_loads, all_space_design_loads, hvac_cooling, hpxml_bldg, weather)
 
-        # Calculate HVAC equipment sizes
-        hvac_sizing_values = HVACSizingValues.new
-        apply_hvac_loads(hvac_sizing_values, system_design_loads)
-        apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling, zone_frac_heat_load_served, zone_frac_cool_load_served, hpxml_bldg)
-        apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
-        apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, zone_frac_heat_load_served, zone_frac_cool_load_served, hpxml_bldg)
-        apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
-        apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling, hpxml_bldg)
-        apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
-        apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
+      # Calculate HVAC equipment sizes
+      hvac_sizing_values = HVACSizingValues.new
+      apply_hvac_loads(hvac_sizing_values, system_design_loads)
+      apply_hvac_heat_pump_logic(hvac_sizing_values, hvac_cooling, zone_frac_heat_load_served, zone_frac_cool_load_served, hpxml_bldg)
+      apply_hvac_equipment_adjustments(mj, runner, hvac_sizing_values, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
+      apply_hvac_installation_quality(mj, hvac_sizing_values, hvac_heating, hvac_cooling, zone_frac_heat_load_served, zone_frac_cool_load_served, hpxml_bldg)
+      apply_hvac_autosizing_factors_and_limits(hvac_sizing_values, hvac_heating, hvac_cooling)
+      apply_hvac_fixed_capacities(hvac_sizing_values, hvac_heating, hvac_cooling, hpxml_bldg)
+      apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
+      apply_hvac_finalize_airflows(hvac_sizing_values, hvac_heating, hvac_cooling)
 
-        all_system_design_loads[hvac_system] = system_design_loads
-        @all_hvac_sizing_values[hvac_system] = hvac_sizing_values
+      all_system_design_loads[hvac_system] = system_design_loads
+      @all_system_sizing_values[hvac_system] = hvac_sizing_values
 
-        if update_hpxml
-          # Assign capacities, airflows, etc. to HPXML systems
-          assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizing_values)
-        end
+      if update_hpxml
+        # Assign capacities, airflows, etc. to HPXML systems
+        assign_to_hpxml_system(hvac_heating, hvac_cooling, hvac_sizing_values)
       end
     end
 
@@ -92,7 +97,7 @@ class HVACSizing
       write_detailed_output(output_format, output_file_path, hpxml_bldg, bldg_design_loads, all_space_design_loads)
     end
 
-    return @all_hvac_sizing_values
+    return @all_system_sizing_values
   end
 
   private
@@ -556,7 +561,7 @@ class HVACSizing
       htg_htm = window_ufactor * mj.htd
       htg_loads = htg_htm * window.area
       zone_design_loads.Heat_Windows += htg_loads
-      space_design_loads.Heat_Windows += htg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Windows += htg_loads
 
       for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         # If hr == nil: Calculate the Average Load Procedure (ALP) Load
@@ -675,7 +680,7 @@ class HVACSizing
       htg_htm = skylight_ufactor * mj.htd
       htg_loads = htg_htm * skylight.area
       zone_design_loads.Heat_Skylights += htg_loads
-      space_design_loads.Heat_Skylights += htg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Skylights += htg_loads
 
       for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         # If hr == nil: Calculate the Average Load Procedure (ALP) Load
@@ -747,8 +752,6 @@ class HVACSizing
     # Loop spaces to calculate adjustment for each space
     zone.spaces.each do |space|
       space_design_loads = all_space_design_loads[space]
-      next if space_design_loads.nil?
-
       space_design_loads.HourlyFenestrationLoads = space.additional_properties.afl_hr
       if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
         space_design_loads.Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
@@ -809,8 +812,8 @@ class HVACSizing
       clg_loads = clg_htm * door.area
       zone_design_loads.Heat_Doors += htg_loads
       zone_design_loads.Cool_Doors += clg_loads
-      space_design_loads.Heat_Doors += htg_loads unless space_design_loads.nil?
-      space_design_loads.Cool_Doors += clg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Doors += htg_loads
+      space_design_loads.Cool_Doors += clg_loads
       door.additional_properties.formj1_values = FormJ1Values.new(area: door.area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
@@ -897,8 +900,8 @@ class HVACSizing
       htg_loads = htg_htm * wall_area
       zone_design_loads.Cool_Walls += clg_loads
       zone_design_loads.Heat_Walls += htg_loads
-      space_design_loads.Cool_Walls += clg_loads unless space_design_loads.nil?
-      space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
+      space_design_loads.Cool_Walls += clg_loads
+      space_design_loads.Heat_Walls += htg_loads
       wall.additional_properties.formj1_values = FormJ1Values.new(area: wall_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
@@ -930,7 +933,7 @@ class HVACSizing
       end
       htg_loads = htg_htm * foundation_wall.net_area
       zone_design_loads.Heat_Walls += htg_loads
-      space_design_loads.Heat_Walls += htg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Walls += htg_loads
       foundation_wall.additional_properties.formj1_values = FormJ1Values.new(area: foundation_wall.net_area,
                                                                              heat_htm: htg_htm,
                                                                              cool_htm: 0,
@@ -994,8 +997,8 @@ class HVACSizing
       htg_loads = (1.0 / roof.insulation_assembly_r_value) * roof.net_area * mj.htd
       zone_design_loads.Cool_Roofs += clg_loads
       zone_design_loads.Heat_Roofs += htg_loads
-      space_design_loads.Cool_Roofs += clg_loads unless space_design_loads.nil?
-      space_design_loads.Heat_Roofs += htg_loads unless space_design_loads.nil?
+      space_design_loads.Cool_Roofs += clg_loads
+      space_design_loads.Heat_Roofs += htg_loads
     end
   end
 
@@ -1024,8 +1027,8 @@ class HVACSizing
       htg_loads = htg_htm * floor.area
       zone_design_loads.Cool_Ceilings += clg_loads
       zone_design_loads.Heat_Ceilings += htg_loads
-      space_design_loads.Cool_Ceilings += clg_loads unless space_design_loads.nil?
-      space_design_loads.Heat_Ceilings += htg_loads unless space_design_loads.nil?
+      space_design_loads.Cool_Ceilings += clg_loads
+      space_design_loads.Heat_Ceilings += htg_loads
       floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
@@ -1106,8 +1109,8 @@ class HVACSizing
       htg_loads = htg_htm * floor.area
       zone_design_loads.Cool_Floors += clg_loads
       zone_design_loads.Heat_Floors += htg_loads
-      space_design_loads.Cool_Roofs += clg_loads unless space_design_loads.nil?
-      space_design_loads.Heat_Roofs += htg_loads unless space_design_loads.nil?
+      space_design_loads.Cool_Roofs += clg_loads
+      space_design_loads.Heat_Roofs += htg_loads
       floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
@@ -1180,7 +1183,7 @@ class HVACSizing
         slab_area = slab.area
       end
       zone_design_loads.Heat_Slabs += htg_loads
-      space_design_loads.Heat_Slabs += htg_loads unless space_design_loads.nil?
+      space_design_loads.Heat_Slabs += htg_loads
       slab.additional_properties.formj1_values = FormJ1Values.new(area: slab_area,
                                                                   length: slab_length,
                                                                   heat_htm: htg_htm,
@@ -1247,94 +1250,93 @@ class HVACSizing
     q_recirc *= zone.floor_area / cfa
 
     # Calculate adjusted infiltration cfm (combined with ventilation)
-    bldg_infil_cfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
-    bldg_infil_cfm_cool = (icfm_cool**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
+    infil_cfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
+    infil_cfm_cool = (icfm_cool**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
 
-    hpxml_bldg.additional_properties.infil_heat_cfm = bldg_infil_cfm_heat
-    hpxml_bldg.additional_properties.infil_cool_cfm = bldg_infil_cfm_cool
+    hpxml_bldg.additional_properties.infil_heat_cfm = infil_cfm_heat
+    hpxml_bldg.additional_properties.infil_cool_cfm = infil_cfm_cool
 
     # Infiltration load
-    zone_design_loads.Heat_Infil = 1.1 * mj.acf * bldg_infil_cfm_heat * mj.htd
-    zone_design_loads.Cool_Infil_Sens = 1.1 * mj.acf * bldg_infil_cfm_cool * mj.ctd
-    zone_design_loads.Cool_Infil_Lat = 0.68 * mj.acf * bldg_infil_cfm_cool * mj.cool_design_grains
+    zone_design_loads.Heat_Infil = 1.1 * mj.acf * infil_cfm_heat * mj.htd
+    zone_design_loads.Cool_Infil_Sens = 1.1 * mj.acf * infil_cfm_cool * mj.ctd
+    zone_design_loads.Cool_Infil_Lat = 0.68 * mj.acf * infil_cfm_cool * mj.cool_design_grains
 
     # Calculate vent cfm
-    bldg_vent_cfm_heat = q_unb_cfm + q_bal_cfm
-    bldg_vent_cfm_cool = bldg_vent_cfm_heat
+    vent_cfm_heat = q_unb_cfm + q_bal_cfm
+    vent_cfm_cool = vent_cfm_heat
 
-    hpxml_bldg.additional_properties.vent_heat_cfm = bldg_vent_cfm_heat
-    hpxml_bldg.additional_properties.vent_cool_cfm = bldg_vent_cfm_cool
+    hpxml_bldg.additional_properties.vent_heat_cfm = vent_cfm_heat
+    hpxml_bldg.additional_properties.vent_cool_cfm = vent_cfm_cool
 
     # Calculate vent cfm incorporating sens/lat effectiveness, preheat/precool, and recirc
-    bldg_vent_cfm_heat = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_preheat - q_recirc
-    bldg_vent_cfm_cool_sens = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_precool - q_recirc
-    bldg_vent_cfm_cool_lat = q_unb_cfm + q_bal_cfm * (1.0 - bal_lat_eff) - q_recirc
+    vent_cfm_heat = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_preheat - q_recirc
+    vent_cfm_cool_sens = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_precool - q_recirc
+    vent_cfm_cool_lat = q_unb_cfm + q_bal_cfm * (1.0 - bal_lat_eff) - q_recirc
 
-    zone_design_loads.Heat_Vent = 1.1 * mj.acf * bldg_vent_cfm_heat * mj.htd
-    zone_design_loads.Cool_Vent_Sens = 1.1 * mj.acf * bldg_vent_cfm_cool_sens * mj.ctd
-    zone_design_loads.Cool_Vent_Lat = 0.68 * mj.acf * bldg_vent_cfm_cool_lat * mj.cool_design_grains
+    zone_design_loads.Heat_Vent = 1.1 * mj.acf * vent_cfm_heat * mj.htd
+    zone_design_loads.Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
+    zone_design_loads.Cool_Vent_Lat = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
 
     zone.spaces.each do |space|
       space_design_loads = all_space_design_loads[space]
-      next if space_design_loads.nil?
-
       # Exterior wall area weighted space assignment
       space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
-      space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
+      if zone_exposed_wall_area > 0
+        space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
+      else
+        space.additional_properties.wall_area_ratio = 0.0
+      end
       space_design_loads.Heat_Infil = space.additional_properties.wall_area_ratio * zone_design_loads.Heat_Infil
       space_design_loads.Cool_Infil_Sens = space.additional_properties.wall_area_ratio * zone_design_loads.Cool_Infil_Sens
     end
   end
 
-  def self.process_load_internal_gains(zone, zone_design_loads, all_space_design_loads, hpxml_bldg)
+  def self.process_load_internal_gains(zone, zone_design_loads, all_space_design_loads)
     '''
     Cooling Load: Internal Gains
     '''
-    # FIXME: What values to use for the zone? Can we always sum the spaces?
-    zone_design_loads.Cool_IntGains_Sens = hpxml_bldg.header.manualj_internal_loads_sensible + 230.0 * hpxml_bldg.header.manualj_num_occupants
-    zone_design_loads.Cool_IntGains_Lat = hpxml_bldg.header.manualj_internal_loads_latent + 200.0 * hpxml_bldg.header.manualj_num_occupants
+    zone_manualj_num_occupants = zone.spaces.map { |space| space.manualj_num_occupants }.sum
+    zone_manualj_internal_loads_sensible = zone.spaces.map { |space| space.manualj_internal_loads_sensible }.sum
+    # FIXME: Is it a good idea to introduce a *latent* internal loads input for spaces? Only really needed for the zone...
+    zone_manualj_internal_loads_latent = zone.spaces.map { |space| space.manualj_internal_loads_latent }.sum
 
-    # Area weighted space assignment
+    zone_design_loads.Cool_IntGains_Sens = zone_manualj_internal_loads_sensible + 230.0 * zone_manualj_num_occupants
+    zone_design_loads.Cool_IntGains_Lat = zone_manualj_internal_loads_latent + 200.0 * zone_manualj_num_occupants
+
     zone.spaces.each do |space|
       space_design_loads = all_space_design_loads[space]
-      next if space_design_loads.nil?
-
       space_design_loads.Cool_IntGains_Sens = space.manualj_internal_loads_sensible + 230.0 * space.manualj_num_occupants
     end
   end
 
-  def self.aggregate_zone_loads(zone_design_loads, all_space_design_loads)
+  def self.aggregate_loads(design_loads)
     '''
-    Building Loads (excluding ducts)
+    Aggregate Loads
     '''
 
     # Heating
-    (all_space_design_loads.values + [zone_design_loads]).each do |design_loads|
-      design_loads.Heat_Tot = [design_loads.Heat_Windows + design_loads.Heat_Skylights +
-        design_loads.Heat_Doors + design_loads.Heat_Walls +
-        design_loads.Heat_Floors + design_loads.Heat_Slabs +
-        design_loads.Heat_Ceilings + design_loads.Heat_Roofs, 0.0].max +
-                              design_loads.Heat_Infil + design_loads.Heat_Vent
-    end
+    design_loads.Heat_Tot = [design_loads.Heat_Windows + design_loads.Heat_Skylights +
+      design_loads.Heat_Doors + design_loads.Heat_Walls +
+      design_loads.Heat_Floors + design_loads.Heat_Slabs +
+      design_loads.Heat_Ceilings + design_loads.Heat_Roofs, 0.0].max +
+                            design_loads.Heat_Infil + design_loads.Heat_Vent
 
     # Cooling
-    (all_space_design_loads.values + [zone_design_loads]).each do |design_loads|
-      design_loads.Cool_Sens = design_loads.Cool_Windows + design_loads.Cool_Skylights +
-                               design_loads.Cool_Doors + design_loads.Cool_Walls +
-                               design_loads.Cool_Floors + design_loads.Cool_Ceilings +
-                               design_loads.Cool_Roofs + design_loads.Cool_Infil_Sens +
-                               design_loads.Cool_IntGains_Sens + design_loads.Cool_Slabs +
-                               design_loads.Cool_AEDExcursion + design_loads.Cool_Vent_Sens
+    design_loads.Cool_Sens = design_loads.Cool_Windows + design_loads.Cool_Skylights +
+                             design_loads.Cool_Doors + design_loads.Cool_Walls +
+                             design_loads.Cool_Floors + design_loads.Cool_Ceilings +
+                             design_loads.Cool_Roofs + design_loads.Cool_Infil_Sens +
+                             design_loads.Cool_IntGains_Sens + design_loads.Cool_Slabs +
+                             design_loads.Cool_AEDExcursion + design_loads.Cool_Vent_Sens
+    design_loads.Cool_Lat = design_loads.Cool_Infil_Lat + design_loads.Cool_Vent_Lat +
+                            design_loads.Cool_IntGains_Lat
+    if design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
+      design_loads.Cool_Lat = 0.0
+      design_loads.Cool_Infil_Lat = 0.0
+      design_loads.Cool_Vent_Lat = 0.0
+      design_loads.Cool_IntGains_Lat = 0.0
     end
-    zone_design_loads.Cool_Lat = zone_design_loads.Cool_Infil_Lat + zone_design_loads.Cool_Vent_Lat +
-                                 zone_design_loads.Cool_IntGains_Lat
-    if zone_design_loads.Cool_Lat < 0 # No latent loads; also zero out individual components
-      zone_design_loads.Cool_Lat = 0.0
-      zone_design_loads.Cool_Infil_Lat = 0.0
-      zone_design_loads.Cool_Vent_Lat = 0.0
-      zone_design_loads.Cool_IntGains_Lat = 0.0
-    end
-    zone_design_loads.Cool_Tot = zone_design_loads.Cool_Sens + zone_design_loads.Cool_Lat
+    design_loads.Cool_Tot = design_loads.Cool_Sens + design_loads.Cool_Lat
   end
 
   def self.apply_hvac_temperatures(mj, zone_design_loads, hvac_heating, hvac_cooling)
@@ -1578,8 +1580,6 @@ class HVACSizing
 
     zone.spaces.each do |space|
       space_design_loads = all_space_design_loads[space]
-      next if space_design_loads.nil?
-
       zone_htg_load = zone.spaces.map { |space| all_space_design_loads[space].Heat_Tot }.sum
       space_htg_duct_load = ducts_heat_load * space_design_loads.Heat_Tot / zone_htg_load
       space_design_loads.Heat_Ducts += space_htg_duct_load
@@ -1646,8 +1646,6 @@ class HVACSizing
 
     zone.spaces.each do |space|
       space_design_loads = all_space_design_loads[space]
-      next if space_design_loads.nil?
-
       zone_clg_load_sens = zone.spaces.map { |space| all_space_design_loads[space].Cool_Sens }.sum
       space_clg_duct_load = ducts_cool_load_sens * space_design_loads.Cool_Sens / zone_clg_load_sens
       space_design_loads.Cool_Ducts_Sens += space_clg_duct_load
@@ -1928,7 +1926,7 @@ class HVACSizing
       if hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
         # Adjust heating load using the HP backup calculation
         hvac_hp = hvac_heating.primary_heat_pump
-        hp_sizing_values = @all_hvac_sizing_values[{ heating: hvac_hp, cooling: hvac_hp }]
+        hp_sizing_values = @all_system_sizing_values[{ heating: hvac_hp, cooling: hvac_hp }]
         if hp_sizing_values.nil?
           fail 'Primary heat pump should have been sized already.'
         end
@@ -2528,8 +2526,8 @@ class HVACSizing
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = hpxml_bldg.header.manualj_heating_design_temp
       hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
-      alternate_all_hvac_sizing_values = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)
-      heating_load = alternate_all_hvac_sizing_values[hvac_system].Heat_Load
+      alternate_all_system_sizing_values = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)
+      heating_load = alternate_all_system_sizing_values[hvac_system].Heat_Load
       heating_db = min_compressor_temp
       hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp
     else

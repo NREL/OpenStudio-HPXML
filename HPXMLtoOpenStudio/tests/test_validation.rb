@@ -1706,6 +1706,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                              zone_type: HPXML::ZoneTypeConditioned)
         hpxml_bldg.zones[-1].spaces << hpxml_bldg.zones[0].spaces[0].dup
         hpxml_bldg.zones[-1].spaces[-1].id += 'Dup'
+        hpxml_bldg.conditioned_spaces.each do |space|
+          space.floor_area /= 2.0
+        end
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
