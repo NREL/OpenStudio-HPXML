@@ -92,8 +92,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
           next if hpxml_bldg.heat_pumps.size != 1
 
           # Get more values for heat pump checks
-          htg_load = autosized_bldg.zones[0].hdl_total
-          clg_load = autosized_bldg.zones[0].cdl_sens_total + autosized_bldg.zones[0].cdl_lat_total
+          htg_load = autosized_bldg.hvac_plant.hdl_total
+          clg_load = autosized_bldg.hvac_plant.cdl_sens_total + autosized_bldg.hvac_plant.cdl_lat_total
           hp = autosized_bldg.heat_pumps[0]
           # Test the sizing results before applying autosizing factors
           htg_cap = hp.heating_capacity
@@ -212,33 +212,33 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Vatilo_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(9147, hpxml_bldg.zones[0].hdl_ducts, 1500)
-    assert_in_delta(4234, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh)
-    assert_in_delta(574, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(2874, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(7415, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(1498, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(3089, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(9973, hpxml_bldg.zones[0].cdl_sens_ducts, 2000)
-    assert_in_delta(5295, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh)
-    assert_in_delta(456, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(1715, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(2112, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(769, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(1890, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(2488, hpxml_bldg.zones[0].cdl_lat_ducts, 1500)
-    assert_in_delta(1276, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(600, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(9147, hpxml_bldg.hvac_plant.hdl_ducts, 1500)
+    assert_in_delta(4234, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_in_delta(574, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(2874, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(7415, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(1498, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(3089, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(9973, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2000)
+    assert_in_delta(5295, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_in_delta(456, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(1715, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(2112, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(769, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(1890, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(2488, hpxml_bldg.hvac_plant.cdl_lat_ducts, 1500)
+    assert_in_delta(1276, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(600, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # Vatilo Residence - Improved Ducts
     puts 'Testing Vatilo Residence - Improved Ducts...'
@@ -252,9 +252,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(3170, hpxml_bldg.zones[0].hdl_ducts, 2000)
-    assert_in_delta(3449, hpxml_bldg.zones[0].cdl_sens_ducts, block_tol_btuh)
-    assert_in_delta(563, hpxml_bldg.zones[0].cdl_lat_ducts, block_tol_btuh)
+    assert_in_delta(3170, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
+    assert_in_delta(3449, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
+    assert_in_delta(563, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
 
     # Section 8: Victor Residence
     # Expected values from Figure 8-3
@@ -262,33 +262,33 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Victor_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(29137, hpxml_bldg.zones[0].hdl_ducts, 3000)
-    assert_in_delta(9978, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    assert_in_delta(471, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh)
-    assert_in_delta(984, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(6305, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(7069, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(6044, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(19981, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(1445, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(5602, hpxml_bldg.zones[0].cdl_sens_ducts, 3500)
-    assert_in_delta(4706, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(1409, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh)
-    assert_in_delta(382, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(1130, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(2743, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(1393, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(2181, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(323, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(3320, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(6282, hpxml_bldg.zones[0].cdl_lat_ducts, 4500)
-    assert_in_delta(4044, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(600, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(800, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(29137, hpxml_bldg.hvac_plant.hdl_ducts, 3000)
+    assert_in_delta(9978, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    assert_in_delta(471, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_in_delta(984, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(6305, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(7069, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(6044, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(19981, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(1445, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(5602, hpxml_bldg.hvac_plant.cdl_sens_ducts, 3500)
+    assert_in_delta(4706, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    assert_in_delta(1409, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_in_delta(382, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(1130, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(2743, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(1393, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(2181, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(323, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(6282, hpxml_bldg.hvac_plant.cdl_lat_ducts, 4500)
+    assert_in_delta(4044, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(600, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # Section 8: Victor Residence - Improved Ducts
     puts 'Testing Victor Residence - Improved Ducts...'
@@ -302,9 +302,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(5640, hpxml_bldg.zones[0].hdl_ducts, 4500) # Note Manual J Figure 8-1 has a typo
-    assert_in_delta(1263, hpxml_bldg.zones[0].cdl_sens_ducts, 2500)
-    assert_in_delta(1442, hpxml_bldg.zones[0].cdl_lat_ducts, 1000)
+    assert_in_delta(5640, hpxml_bldg.hvac_plant.hdl_ducts, 4500) # Note Manual J Figure 8-1 has a typo
+    assert_in_delta(1263, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2500)
+    assert_in_delta(1442, hpxml_bldg.hvac_plant.cdl_lat_ducts, 1000)
 
     # Section 9: Long Residence
     # Modeled as a fully conditioned basement (e.g., no duct losses) for block load calculation
@@ -313,33 +313,33 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Long_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_ducts, block_tol_btuh)
-    assert_in_delta(8315, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh)
-    assert_in_delta(1006, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(16608, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(2440, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(5435, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(6944, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_ducts, block_tol_btuh)
-    assert_in_delta(5962, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh)
-    assert_in_delta(349, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(1730, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(3624, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(565, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(3320, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_lat_ducts, block_tol_btuh)
-    assert_in_delta(998, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(1200, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh)
+    assert_in_delta(8315, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_in_delta(1006, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(16608, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(2440, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(5435, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(6944, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
+    assert_in_delta(5962, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_in_delta(349, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(1730, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(3624, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(565, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
+    assert_in_delta(998, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(1200, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     space_tol_btuh = 100 # Individual space load components
     dining_space = hpxml_bldg.conditioned_spaces.find { |s| s.id.include? 'dining' }
     assert_in_delta(902 + 407, dining_space.hdl_walls, space_tol_btuh)
@@ -371,38 +371,38 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Smith_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(2561, hpxml_bldg.zones[0].hdl_ducts, 2000)
-    assert_in_delta(9634, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    # assert_in_delta(2994, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(1118, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(17440, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(1788, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(3692, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(4261, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(11237, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(1987, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(530, hpxml_bldg.zones[0].cdl_sens_ducts, block_tol_btuh)
-    assert_in_delta(6187, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    # assert_in_delta(3780, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(382, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(2669, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(352, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(2803, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(1054, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(459, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(3320, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(565, hpxml_bldg.zones[0].cdl_lat_ducts, 1500)
-    assert_in_delta(1651, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(1755, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(800, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(2561, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
+    assert_in_delta(9634, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    # assert_in_delta(2994, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(1118, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(17440, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(1788, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(3692, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(4261, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(11237, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(1987, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(530, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
+    assert_in_delta(6187, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    # assert_in_delta(3780, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(382, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(2669, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(352, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(2803, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(1054, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(459, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(565, hpxml_bldg.hvac_plant.cdl_lat_ducts, 1500)
+    assert_in_delta(1651, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(1755, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # eyeball observation from figure 13-5
     # Fixme: Skylight not included so disable for now
     # block_aed = [6800, 8800, 11000, 13000, 14000, 15800, 16900, 17200, 16900, 15900, 13000, 6800]
-    # hpxml_bldg.zones[0].cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
+    # hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
     #  assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
     # end
 
@@ -449,36 +449,36 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Walker_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_ducts, block_tol_btuh)
-    assert_in_delta(1608, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    # assert_in_delta(543, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(264, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(1446, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(2172, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(820, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(456, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(990, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(851, hpxml_bldg.zones[0].cdl_sens_ducts, 2500)
-    assert_in_delta(1776, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    # assert_in_delta(3182, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(442, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(1173, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(865, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    # assert_in_delta(825, hpxml_bldg.zones[0].cdl_sens_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
-    assert_in_delta(5541, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(655, hpxml_bldg.zones[0].cdl_lat_ducts, block_tol_btuh)
-    # assert_in_delta(0, hpxml_bldg.zones[0].cdl_lat_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
-    assert_in_delta(800, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh)
+    assert_in_delta(1608, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    # assert_in_delta(543, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(264, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(1446, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(2172, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(820, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(456, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(990, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(851, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2500)
+    assert_in_delta(1776, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    # assert_in_delta(3182, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(442, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(1173, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(865, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    # assert_in_delta(825, hpxml_bldg.hvac_plant.cdl_sens_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
+    assert_in_delta(5541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(655, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
+    # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
+    assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # Fixme: Skylight not included so disable for now
     # eyeball observation from figure 13-5
     # block_aed = [3800, 4600, 5400, 6200, 6900, 7200, 7250, 7250, 7000, 6500, 5800, 4100]
-    # hpxml_bldg.zones[0].cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
+    # hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
     #  assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
     # end
 
@@ -518,8 +518,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(820, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(2003, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(820, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(2003, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
 
     # Section 13: Walker Residence - Ceiling Option 2
     puts 'Testing Walker Residence - Ceiling Option 2...'
@@ -529,8 +529,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     args_hash['hpxml_path'] = @tmp_hpxml_path
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(820, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(1548, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(820, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(1548, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
 
     # Section 14: Cobb Residence
     # Expected values from Form J1
@@ -538,37 +538,37 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Cobb_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    # assert_in_delta(499, hpxml_bldg.zones[0].hdl_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
-    assert_in_delta(3015, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh)
-    assert_in_delta(169, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(1975, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(1770, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    # assert_in_delta(1631, hpxml_bldg.zones[0].cdl_sens_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
-    assert_in_delta(7654, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh)
-    assert_in_delta(228, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(1236, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(764, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(5224, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(5516, hpxml_bldg.zones[0].cdl_sens_aedexcursion, block_tol_btuh)
-    # assert_in_delta(1189, hpxml_bldg.zones[0].cdl_lat_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
-    assert_in_delta(1391, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(800, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    # assert_in_delta(499, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
+    assert_in_delta(3015, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_in_delta(169, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(1975, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(1770, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    # assert_in_delta(1631, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
+    assert_in_delta(7654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_in_delta(228, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(1236, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(764, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(5224, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(5516, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
+    # assert_in_delta(1189, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
+    assert_in_delta(1391, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     # eyeball observation from figure 14-3
     block_aed = [2500, 3200, 3900, 4200, 4600, 7500, 10600, 13900, 15200, 16100, 12700, 4100]
-    hpxml_bldg.zones[0].cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
+    hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
       assert_in_delta(block_aed[i], aed_curve_value, [block_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
     space_load_results = {
@@ -625,33 +625,33 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bell_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(1340, hpxml_bldg.zones[0].hdl_ducts, 2000)
-    assert_in_delta(10912, hpxml_bldg.zones[0].hdl_windows, block_tol_btuh)
-    # assert_in_delta(1981, hpxml_bldg.zones[0].hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(1538, hpxml_bldg.zones[0].hdl_doors, block_tol_btuh)
-    assert_in_delta(3672, hpxml_bldg.zones[0].hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].hdl_floors, block_tol_btuh)
-    assert_in_delta(3431, hpxml_bldg.zones[0].hdl_slabs, block_tol_btuh)
-    assert_in_delta(1992, hpxml_bldg.zones[0].hdl_ceilings, block_tol_btuh)
-    assert_in_delta(1760, hpxml_bldg.zones[0].hdl_infil, block_tol_btuh)
-    assert_in_delta(1562, hpxml_bldg.zones[0].hdl_vent, block_tol_btuh)
-    assert_in_delta(1673, hpxml_bldg.zones[0].cdl_sens_ducts, block_tol_btuh)
-    assert_in_delta(11654, hpxml_bldg.zones[0].cdl_sens_windows, block_tol_btuh) # Excludes 2045 Btuh for AED excursion since skylight is not modeled
-    # assert_in_delta(5514, hpxml_bldg.zones[0].cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
-    assert_in_delta(782, hpxml_bldg.zones[0].cdl_sens_doors, block_tol_btuh)
-    assert_in_delta(939, hpxml_bldg.zones[0].cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.zones[0].cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(1796, hpxml_bldg.zones[0].cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(317, hpxml_bldg.zones[0].cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(493, hpxml_bldg.zones[0].cdl_sens_vent, block_tol_btuh)
-    assert_in_delta(4541, hpxml_bldg.zones[0].cdl_sens_intgains, block_tol_btuh)
-    assert_in_delta(64, hpxml_bldg.zones[0].cdl_lat_ducts, block_tol_btuh)
-    assert_in_delta(241, hpxml_bldg.zones[0].cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(329, hpxml_bldg.zones[0].cdl_lat_vent, block_tol_btuh)
-    assert_in_delta(1000, hpxml_bldg.zones[0].cdl_lat_intgains, block_tol_btuh)
+    assert_in_delta(1340, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
+    assert_in_delta(10912, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
+    # assert_in_delta(1981, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(1538, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
+    assert_in_delta(3672, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_in_delta(3431, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(1992, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_in_delta(1760, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
+    assert_in_delta(1562, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
+    assert_in_delta(1673, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
+    assert_in_delta(11654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh) # Excludes 2045 Btuh for AED excursion since skylight is not modeled
+    # assert_in_delta(5514, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(782, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
+    assert_in_delta(939, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_in_delta(1796, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_in_delta(317, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(493, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_in_delta(4541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(64, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
+    assert_in_delta(241, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
+    assert_in_delta(329, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_in_delta(1000, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     # skylight excluded
     space_load_results = {
       ['family'] => [8931 - 1981, 18173 - 5514],
@@ -711,7 +711,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that boiler capacity equals building heating design load w/o duct load.
-    htg_design_load_without_ducts = hpxml_bldg.zones[0].hdl_total - hpxml_bldg.zones[0].hdl_ducts
+    htg_design_load_without_ducts = hpxml_bldg.hvac_plant.hdl_total - hpxml_bldg.hvac_plant.hdl_ducts
     htg_capacity = hpxml_bldg.heating_systems[0].heating_capacity
     assert_in_epsilon(htg_design_load_without_ducts, htg_capacity, 0.001) # 0.001 to handle rounding
 
@@ -725,7 +725,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # The building heating design load includes HP duct loads, while the furnace capacity includes
     # furnace duct loads. Since the furnace has a higher supply air temperature, it will experience
     # higher duct loads than the HP.
-    htg_design_load_with_ducts = hpxml_bldg.zones[0].hdl_total
+    htg_design_load_with_ducts = hpxml_bldg.hvac_plant.hdl_total
     htg_capacity = hpxml_bldg.heating_systems[0].heating_capacity
     assert_operator(htg_capacity, :>, htg_design_load_with_ducts * 1.01)
 
@@ -736,7 +736,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Check that stove capacity equals building heating design load
-    htg_design_load = hpxml_bldg.zones[0].hdl_total
+    htg_design_load = hpxml_bldg.hvac_plant.hdl_total
     htg_capacity = hpxml_bldg.heating_systems[0].heating_capacity
     assert_in_epsilon(htg_design_load, htg_capacity, 0.001) # 0.001 to handle rounding
   end
@@ -754,7 +754,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, hpxml_bldg.zones[0].hdl_total)
+    assert_equal(hpxml_bldg.heat_pumps[0].backup_heating_capacity, hpxml_bldg.hvac_plant.hdl_total)
   end
 
   def test_allow_increased_fixed_capacities
@@ -1114,8 +1114,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml_bldg.header.manualj_cooling_design_temp = 100.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    assert_operator(test_hpxml_bldg.zones[0].hdl_total, :>, base_hpxml_bldg.zones[0].hdl_total)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_sens_total, :>, base_hpxml_bldg.zones[0].cdl_sens_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.hdl_total, :>, base_hpxml_bldg.hvac_plant.hdl_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_total, :>, base_hpxml_bldg.hvac_plant.cdl_sens_total)
 
     # Test heating/cooling setpoints
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
@@ -1124,8 +1124,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml_bldg.header.manualj_cooling_setpoint = 72.5
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    assert_operator(test_hpxml_bldg.zones[0].hdl_total, :>, base_hpxml_bldg.zones[0].hdl_total)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_sens_total, :>, base_hpxml_bldg.zones[0].cdl_sens_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.hdl_total, :>, base_hpxml_bldg.hvac_plant.hdl_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_total, :>, base_hpxml_bldg.hvac_plant.cdl_sens_total)
 
     # Test internal loads
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
@@ -1134,9 +1134,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml_bldg.header.manualj_internal_loads_latent = 500.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    assert_equal(test_hpxml_bldg.zones[0].hdl_total, base_hpxml_bldg.zones[0].hdl_total)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_sens_intgains, :<, base_hpxml_bldg.zones[0].cdl_sens_intgains)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_lat_intgains, :>, base_hpxml_bldg.zones[0].cdl_lat_intgains)
+    assert_equal(test_hpxml_bldg.hvac_plant.hdl_total, base_hpxml_bldg.hvac_plant.hdl_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_intgains, :<, base_hpxml_bldg.hvac_plant.cdl_sens_intgains)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_lat_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_lat_intgains)
 
     # Test number of occupants
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
@@ -1144,9 +1144,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     hpxml_bldg.header.manualj_num_occupants = 10
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
-    assert_equal(test_hpxml_bldg.zones[0].hdl_total, base_hpxml_bldg.zones[0].hdl_total)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_sens_intgains, :>, base_hpxml_bldg.zones[0].cdl_sens_intgains)
-    assert_operator(test_hpxml_bldg.zones[0].cdl_lat_intgains, :>, base_hpxml_bldg.zones[0].cdl_lat_intgains)
+    assert_equal(test_hpxml_bldg.hvac_plant.hdl_total, base_hpxml_bldg.hvac_plant.hdl_total)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_sens_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_sens_intgains)
+    assert_operator(test_hpxml_bldg.hvac_plant.cdl_lat_intgains, :>, base_hpxml_bldg.hvac_plant.cdl_lat_intgains)
 
     # Test room by room calculations
     # Run ACCA test file base

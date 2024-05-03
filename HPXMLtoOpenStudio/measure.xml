@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>35a3b61f-47bd-4152-81db-dcc94be41f2c</version_id>
-  <version_modified>2024-05-03T00:52:05Z</version_modified>
+  <version_id>f92cfa01-a116-4d30-a1f0-d32ff812ab3a</version_id>
+  <version_modified>2024-05-03T16:09:20Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -343,13 +343,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>290A5800</checksum>
+      <checksum>F4E70D9E</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B7282A92</checksum>
+      <checksum>6749B109</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -385,7 +385,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E7EB13CC</checksum>
+      <checksum>7132B5CB</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -427,7 +427,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B0A44F0E</checksum>
+      <checksum>2988F957</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -625,7 +625,7 @@
       <filename>in.schedules.csv</filename>
       <filetype>csv</filetype>
       <usage_type>test</usage_type>
-      <checksum>2B9C5C95</checksum>
+      <checksum>6244F711</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
@@ -673,7 +673,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>50F4ED86</checksum>
+      <checksum>4F76742F</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>

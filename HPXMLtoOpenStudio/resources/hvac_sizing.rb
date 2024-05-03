@@ -10,30 +10,28 @@ class HVACSizing
     mj = MJValues.new
     process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
 
-    # For each conditioned thermal zone...
-    all_zone_loads, all_space_loads = initialize_zone_and_space_loads(hpxml_bldg)
-    all_zone_loads.each do |zone, zone_loads|
-      # Calculate individual design load components for the zone (block)
-      process_load_windows_skylights(mj, zone, zone_loads, all_space_loads)
-      process_load_doors(mj, zone, zone_loads, all_space_loads)
-      process_load_walls(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
-      process_load_roofs(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
-      process_load_ceilings(mj, zone, zone_loads, all_space_loads)
-      process_load_floors(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
-      process_load_slabs(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
-      process_load_infiltration_ventilation(mj, zone, zone_loads, all_space_loads, weather, hpxml_bldg)
-      process_load_internal_gains(zone, zone_loads, all_space_loads)
+    # Calculate individual design load components
+    all_zone_loads, all_space_loads = init_loads(hpxml_bldg)
+    process_load_windows_skylights(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_roofs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_slabs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
+    process_load_internal_gains(hpxml_bldg, all_zone_loads, all_space_loads)
 
-      # Calculate heating/cooling totals
-      aggregate_loads_to_totals(zone_loads)
+    # Calculate heating/cooling totals
+    hpxml_bldg.conditioned_zones.each do |zone|
+      aggregate_loads_to_totals(all_zone_loads[zone])
       zone.spaces.each do |space|
         aggregate_loads_to_totals(all_space_loads[space])
       end
     end
 
-    # For each HVAC system...
+    # Assign initial loads for each HVAC system (before duct loads)
     all_hvac_loads = {}
-    @all_hvac_sizings = {}
     hvac_systems.each do |hvac_system|
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
@@ -43,21 +41,29 @@ class HVACSizing
         fail 'HVAC system found attached to an unconditioned zone.'
       end
 
-      zone_loads = all_zone_loads[zone]
-      apply_hvac_air_temperatures(mj, zone_loads, hvac_heating, hvac_cooling)
+      all_hvac_loads[hvac_system] = all_zone_loads[zone].dup
+    end
+
+    # Calculate final loads and capacities for each HVAC system
+    @all_hvac_sizings = {}
+    hvac_systems.each do |hvac_system|
+      hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
+      zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
+      next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
 
       # Calculate fraction of zone load served by this HVAC system
       frac_zone_heat_load_served, frac_zone_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, zone, hvac_systems)
 
       # Calculate system loads (zone load served by this system plus duct loads)
-      hvac_loads = zone_loads.dup
-      apply_zone_loads(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
-      apply_hvac_duct_loads_heating(mj, zone, hvac_loads, all_space_loads, hvac_heating, hpxml_bldg)
-      apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
+      hvac_loads = all_hvac_loads[hvac_system]
+      apply_hvac_air_temperatures(mj, hvac_loads, hvac_heating, hvac_cooling)
+      apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
+      apply_hvac_duct_loads_heating(mj, zone, hvac_loads, all_zone_loads[zone], all_space_loads, hvac_heating, hpxml_bldg)
+      apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, all_zone_loads[zone], all_space_loads, hvac_cooling, hpxml_bldg, weather)
 
       # Calculate HVAC equipment sizes
       hvac_sizings = HVACSizingValues.new
-      apply_hvac_loads(hvac_sizings, hvac_loads)
+      apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
       apply_hvac_heat_pump_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
       apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
@@ -65,8 +71,6 @@ class HVACSizing
       apply_hvac_fixed_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
       apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling)
       apply_hvac_finalize_airflows(hvac_sizings, hvac_heating, hvac_cooling)
-
-      all_hvac_loads[hvac_system] = hvac_loads
       @all_hvac_sizings[hvac_system] = hvac_sizings
 
       if update_hpxml
@@ -75,19 +79,22 @@ class HVACSizing
       end
     end
 
-    # Remove any automatically created spaces from output
-    space = all_space_loads.keys.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
-    if not space.nil?
-      all_space_loads.delete(space)
-    end
+    # Calculate building loads (sum of all zone loads)
+    bldg_loads = aggregate_zone_loads_to_bldg(all_zone_loads)
 
-    # Calculate final zone loads (sum of system design loads for systems serving the zone)
-    all_final_zone_loads = aggregate_hvac_loads_to_zone(hpxml_bldg, all_hvac_loads)
+    # Remove any automatically created spaces from output files
+    auto_space = all_space_loads.keys.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    all_space_loads.delete(auto_space) if not auto_space.nil?
 
     # Assign design loads to HPXML objects for output
     if update_hpxml
+      # HPXML Building
+      assign_to_hpxml_obj(hpxml_bldg.hvac_plant, bldg_loads)
+
       # HPXML Zones
-      all_final_zone_loads.each do |zone, zone_loads|
+      all_zone_loads.each do |zone, zone_loads|
+        next if zone.id.start_with? Constants.AutomaticallyAdded
+
         assign_to_hpxml_obj(zone, zone_loads)
       end
 
@@ -99,7 +106,7 @@ class HVACSizing
 
     # Write detailed outputs (useful for Form J1)
     if not output_file_path.nil?
-      write_detailed_output(output_format, output_file_path, hpxml_bldg, all_final_zone_loads, all_space_loads)
+      write_detailed_output(output_format, output_file_path, hpxml_bldg, all_zone_loads, all_space_loads)
     end
 
     return @all_hvac_sizings
@@ -395,7 +402,7 @@ class HVACSizing
     return cool_temp
   end
 
-  def self.initialize_zone_and_space_loads(hpxml_bldg)
+  def self.init_loads(hpxml_bldg)
     '''
     Initial Zone/Space design loads
     '''
@@ -404,20 +411,19 @@ class HVACSizing
 
     hpxml_bldg.conditioned_zones.each do |zone|
       all_zone_loads[zone] = DesignLoadValues.new
-    end
-
-    hpxml_bldg.conditioned_spaces.each do |space|
-      all_space_loads[space] = DesignLoadValues.new
-      space.additional_properties.total_exposed_wall_area = 0.0
-      space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
-      space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
-      space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
+      zone.spaces.each do |space|
+        all_space_loads[space] = DesignLoadValues.new
+        space.additional_properties.total_exposed_wall_area = 0.0
+        space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
+        space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
+        space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
+      end
     end
 
     return all_zone_loads, all_space_loads
   end
 
-  def self.process_load_windows_skylights(mj, zone, zone_loads, all_space_loads)
+  def self.process_load_windows_skylights(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -547,9 +553,12 @@ class HVACSizing
     afl_hr = [0.0] * 12
 
     # Windows
-    zone.windows.each do |window|
+    hpxml_bldg.windows.each do |window|
       wall = window.wall
       next unless wall.is_exterior_thermal_boundary
+
+      space = wall.space
+      zone = space.zone
 
       window_isc = window.interior_shading_factor_summer
       window_esc = window.exterior_shading_factor_summer
@@ -559,13 +568,8 @@ class HVACSizing
 
       htg_htm = window_ufactor * mj.htd
       htg_loads = htg_htm * window.area
-      zone_loads.Heat_Windows += htg_loads
-
-      if not wall.space.nil?
-        space_loads = all_space_loads[wall.space]
-        space_loads.Heat_Windows += htg_loads
-        fenestration_load_procedure = wall.space.fenestration_load_procedure
-      end
+      all_zone_loads[zone].Heat_Windows += htg_loads
+      all_space_loads[space].Heat_Windows += htg_loads
 
       for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         # If hr == nil: Calculate the Average Load Procedure (ALP) Load
@@ -639,31 +643,33 @@ class HVACSizing
         if hr.nil?
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          zone_loads.Cool_Windows += clg_loads
+          all_zone_loads[zone].Cool_Windows += clg_loads
           window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
                                                                         heat_htm: htg_htm,
                                                                         cool_htm: clg_htm,
                                                                         heat_load: htg_loads,
                                                                         cool_load_sens: clg_loads,
                                                                         cool_load_lat: 0)
-          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space_loads.Cool_Windows += clg_loads
+          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            all_space_loads[space].Cool_Windows += clg_loads
           end
         else
           afl_hr[hr] += clg_loads
-          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            wall.space.additional_properties.afl_hr[hr] += clg_loads
-          elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            wall.space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            wall.space.additional_properties.afl_hr_windows[hr] += clg_loads
+          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            space.additional_properties.afl_hr[hr] += clg_loads
+          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
+            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
+            space.additional_properties.afl_hr_windows[hr] += clg_loads
           end
         end
       end
     end # window
 
     # Skylights
-    zone.skylights.each do |skylight|
+    hpxml_bldg.skylights.each do |skylight|
       roof = skylight.roof
+      space = roof.space
+      zone = space.zone
 
       skylight_isc = skylight.interior_shading_factor_summer
       skylight_esc = skylight.exterior_shading_factor_summer
@@ -677,13 +683,8 @@ class HVACSizing
 
       htg_htm = skylight_ufactor * mj.htd
       htg_loads = htg_htm * skylight.area
-      zone_loads.Heat_Skylights += htg_loads
-
-      if not roof.space.nil?
-        space_loads = all_space_loads[roof.space]
-        space_loads.Heat_Skylights += htg_loads
-        fenestration_load_procedure = roof.space.fenestration_load_procedure
-      end
+      all_zone_loads[zone].Heat_Skylights += htg_loads
+      all_space_loads[space].Heat_Skylights += htg_loads
 
       for hr in [nil, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         # If hr == nil: Calculate the Average Load Procedure (ALP) Load
@@ -727,23 +728,23 @@ class HVACSizing
         if hr.nil?
           # Average Load Procedure (ALP) load
           clg_htm = htm
-          zone_loads.Cool_Skylights += clg_loads
+          all_zone_loads[zone].Cool_Skylights += clg_loads
           skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
                                                                           heat_htm: htg_htm,
                                                                           cool_htm: clg_htm,
                                                                           heat_load: htg_loads,
                                                                           cool_load_sens: clg_loads,
                                                                           cool_load_lat: 0)
-          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space_loads.Cool_Skylights += clg_loads
+          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            all_space_loads[space].Cool_Skylights += clg_loads
           end
         else
           afl_hr[hr] += clg_loads
-          if fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            roof.space.additional_properties.afl_hr[hr] += clg_loads
-          elsif fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            roof.space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            roof.space.additional_properties.afl_hr_skylights[hr] += clg_loads
+          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+            space.additional_properties.afl_hr[hr] += clg_loads
+          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
+            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
+            space.additional_properties.afl_hr_skylights[hr] += clg_loads
           end
         end
       end
@@ -752,21 +753,22 @@ class HVACSizing
     # Check for Adequate Exposure Diversity (AED)
     # If not adequate, add AED Excursion to windows cooling load
 
-    # Loop spaces to calculate adjustment for each space
-    zone.spaces.each do |space|
-      space_loads = all_space_loads[space]
-      space_loads.HourlyFenestrationLoads = space.additional_properties.afl_hr
-      if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-        space_loads.Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
-      else
-        space_loads.Cool_AEDExcursion = 0.0
-        space_loads.Cool_Windows = space.additional_properties.afl_hr_windows.max
-        space_loads.Cool_Skylights = space.additional_properties.afl_hr_skylights.max
+    hpxml_bldg.conditioned_zones.each do |zone|
+      # Loop spaces to calculate adjustment for each space
+      zone.spaces.each do |space|
+        all_space_loads[space].HourlyFenestrationLoads = space.additional_properties.afl_hr
+        if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
+          all_space_loads[space].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
+        else
+          all_space_loads[space].Cool_AEDExcursion = 0.0
+          all_space_loads[space].Cool_Windows = space.additional_properties.afl_hr_windows.max
+          all_space_loads[space].Cool_Skylights = space.additional_properties.afl_hr_skylights.max
+        end
       end
-    end
 
-    zone_loads.HourlyFenestrationLoads = afl_hr
-    zone_loads.Cool_AEDExcursion = calculate_aed_excursion(afl_hr)
+      all_zone_loads[zone].HourlyFenestrationLoads = afl_hr
+      all_zone_loads[zone].Cool_AEDExcursion = calculate_aed_excursion(afl_hr)
+    end
   end
 
   def self.calculate_aed_excursion(afl_hr)
@@ -783,7 +785,7 @@ class HVACSizing
     return [0.0, pfl - ell].max
   end
 
-  def self.process_load_doors(mj, zone, zone_loads, all_space_loads)
+  def self.process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Doors
     '''
@@ -796,8 +798,12 @@ class HVACSizing
       cltd = mj.ctd + 6.0
     end
 
-    zone.doors.each do |door|
+    hpxml_bldg.doors.each do |door|
       next unless door.is_thermal_boundary
+
+      wall = door.wall
+      space = wall.space
+      zone = space.zone
 
       if door.wall.is_exterior
         htg_htm = (1.0 / door.r_value) * mj.htd
@@ -809,15 +815,10 @@ class HVACSizing
       end
       htg_loads = htg_htm * door.area
       clg_loads = clg_htm * door.area
-      zone_loads.Heat_Doors += htg_loads
-      zone_loads.Cool_Doors += clg_loads
-
-      if not door.wall.space.nil?
-        space_loads = all_space_loads[door.wall.space]
-        space_loads.Heat_Doors += htg_loads
-        space_loads.Cool_Doors += clg_loads
-      end
-
+      all_zone_loads[zone].Heat_Doors += htg_loads
+      all_zone_loads[zone].Cool_Doors += clg_loads
+      all_space_loads[space].Heat_Doors += htg_loads
+      all_space_loads[space].Cool_Doors += clg_loads
       door.additional_properties.formj1_values = FormJ1Values.new(area: door.area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
@@ -827,14 +828,17 @@ class HVACSizing
     end
   end
 
-  def self.process_load_walls(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
+  def self.process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Walls
     '''
 
     # Above-Grade Walls
-    (zone.walls + zone.rim_joists).each do |wall|
+    (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
       next unless wall.is_thermal_boundary
+
+      space = wall.space
+      zone = space.zone
 
       ashrae_wall_group = get_ashrae_wall_group(wall)
 
@@ -887,6 +891,9 @@ class HVACSizing
 
           clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * cltd
           htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * mj.htd
+
+          # Store exposed wall gross area for infiltration calculation
+          space.additional_properties.total_exposed_wall_area += wall_area / azimuths.size
         else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
           clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
@@ -895,19 +902,10 @@ class HVACSizing
       end
       clg_loads = clg_htm * wall_area
       htg_loads = htg_htm * wall_area
-      zone_loads.Cool_Walls += clg_loads
-      zone_loads.Heat_Walls += htg_loads
-
-      if not wall.space.nil?
-        space_loads = all_space_loads[wall.space]
-        space_loads.Cool_Walls += clg_loads
-        space_loads.Heat_Walls += htg_loads
-        if wall.is_exterior
-          # Store exposed wall gross area for infiltration calculation
-          wall.space.additional_properties.total_exposed_wall_area += wall_area
-        end
-      end
-
+      all_zone_loads[zone].Cool_Walls += clg_loads
+      all_zone_loads[zone].Heat_Walls += htg_loads
+      all_space_loads[space].Cool_Walls += clg_loads
+      all_space_loads[space].Heat_Walls += htg_loads
       wall.additional_properties.formj1_values = FormJ1Values.new(area: wall_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
@@ -917,29 +915,27 @@ class HVACSizing
     end
 
     # Foundation walls
-    zone.foundation_walls.each do |foundation_wall|
+    hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
 
-      if not foundation_wall.space.nil?
-        space_loads = all_space_loads[foundation_wall.space]
-        if foundation_wall.is_exterior
-          # Store exposed wall gross area for infiltration calculation
-          ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
-          foundation_wall.space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
-        end
-      end
+      space = foundation_wall.space
+      zone = space.zone
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true, mj.ground_conductivity)
         htg_htm = u_wall_with_soil * mj.htd
+
+        # Store exposed wall gross area for infiltration calculation
+        ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
+        space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
         u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false, mj.ground_conductivity)
         htg_htm = u_wall_without_soil * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
       end
       htg_loads = htg_htm * foundation_wall.net_area
-      zone_loads.Heat_Walls += htg_loads
-      space_loads.Heat_Walls += htg_loads
+      all_zone_loads[zone].Heat_Walls += htg_loads
+      all_space_loads[space].Heat_Walls += htg_loads
       foundation_wall.additional_properties.formj1_values = FormJ1Values.new(area: foundation_wall.net_area,
                                                                              heat_htm: htg_htm,
                                                                              cool_htm: 0,
@@ -949,14 +945,17 @@ class HVACSizing
     end
   end
 
-  def self.process_load_roofs(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
+  def self.process_load_roofs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Roofs
     '''
 
     # Roofs
-    zone.roofs.each do |roof|
+    hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
+
+      space = roof.space
+      zone = space.zone
 
       # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
       if roof.insulation_assembly_r_value <= 6
@@ -999,15 +998,10 @@ class HVACSizing
       htg_htm = (1.0 / roof.insulation_assembly_r_value) * mj.htd
       clg_loads = clg_htm * roof.net_area
       htg_loads = htg_htm * roof.net_area
-      zone_loads.Cool_Roofs += clg_loads
-      zone_loads.Heat_Roofs += htg_loads
-
-      if not roof.space.nil?
-        space_loads = all_space_loads[roof.space]
-        space_loads.Cool_Roofs += clg_loads
-        space_loads.Heat_Roofs += htg_loads
-      end
-
+      all_zone_loads[zone].Cool_Roofs += clg_loads
+      all_zone_loads[zone].Heat_Roofs += htg_loads
+      all_space_loads[space].Cool_Roofs += clg_loads
+      all_space_loads[space].Heat_Roofs += htg_loads
       roof.additional_properties.formj1_values = FormJ1Values.new(area: roof.net_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
@@ -1017,14 +1011,17 @@ class HVACSizing
     end
   end
 
-  def self.process_load_ceilings(mj, zone, zone_loads, all_space_loads)
+  def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Ceilings
     '''
 
-    zone.floors.each do |floor|
+    hpxml_bldg.floors.each do |floor|
       next unless floor.is_ceiling
       next unless floor.is_thermal_boundary
+
+      space = floor.space
+      zone = space.zone
 
       if floor.is_exterior
         clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.ctd - 5.0 + mj.daily_range_temp_adjust[mj.daily_range_num])
@@ -1036,15 +1033,10 @@ class HVACSizing
       end
       clg_loads = clg_htm * floor.area
       htg_loads = htg_htm * floor.area
-      zone_loads.Cool_Ceilings += clg_loads
-      zone_loads.Heat_Ceilings += htg_loads
-
-      if not floor.space.nil?
-        space_loads = all_space_loads[floor.space]
-        space_loads.Cool_Ceilings += clg_loads
-        space_loads.Heat_Ceilings += htg_loads
-      end
-
+      all_zone_loads[zone].Cool_Ceilings += clg_loads
+      all_zone_loads[zone].Heat_Ceilings += htg_loads
+      all_space_loads[space].Cool_Ceilings += clg_loads
+      all_space_loads[space].Heat_Ceilings += htg_loads
       floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
@@ -1054,16 +1046,19 @@ class HVACSizing
     end
   end
 
-  def self.process_load_floors(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
+  def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Floors
     '''
 
-    has_radiant_floor = get_has_radiant_floor(zone)
-
-    zone.floors.each do |floor|
+    hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
       next unless floor.is_thermal_boundary
+
+      space = floor.space
+      zone = space.zone
+
+      has_radiant_floor = get_has_radiant_floor(zone)
 
       if floor.is_exterior
         htd_adj = mj.htd
@@ -1119,15 +1114,10 @@ class HVACSizing
       end
       clg_loads = clg_htm * floor.area
       htg_loads = htg_htm * floor.area
-      zone_loads.Cool_Floors += clg_loads
-      zone_loads.Heat_Floors += htg_loads
-
-      if not floor.space.nil?
-        space_loads = all_space_loads[floor.space]
-        space_loads.Cool_Roofs += clg_loads
-        space_loads.Heat_Roofs += htg_loads
-      end
-
+      all_zone_loads[zone].Cool_Floors += clg_loads
+      all_zone_loads[zone].Heat_Floors += htg_loads
+      all_space_loads[space].Cool_Roofs += clg_loads
+      all_space_loads[space].Heat_Roofs += htg_loads
       floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
@@ -1137,15 +1127,18 @@ class HVACSizing
     end
   end
 
-  def self.process_load_slabs(mj, zone, zone_loads, all_space_loads, hpxml_bldg)
+  def self.process_load_slabs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Heating and Cooling Loads: Floors
     '''
 
-    has_radiant_floor = get_has_radiant_floor(zone)
-
-    zone.slabs.each do |slab|
+    hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
+
+      space = slab.space
+      zone = space.zone
+
+      has_radiant_floor = get_has_radiant_floor(zone)
 
       htd_adj = mj.htd
       htd_adj += 25.0 if has_radiant_floor # Table 4A: Radiant slab floor: HTM = F-Value × (HTD + 25)
@@ -1195,13 +1188,8 @@ class HVACSizing
         htg_loads = htg_htm * slab.area
         slab_area = slab.area
       end
-      zone_loads.Heat_Slabs += htg_loads
-
-      if not slab.space.nil?
-        space_loads = all_space_loads[slab.space]
-        space_loads.Heat_Slabs += htg_loads
-      end
-
+      all_zone_loads[zone].Heat_Slabs += htg_loads
+      all_space_loads[space].Heat_Slabs += htg_loads
       slab.additional_properties.formj1_values = FormJ1Values.new(area: slab_area,
                                                                   length: slab_length,
                                                                   heat_htm: htg_htm,
@@ -1212,7 +1200,7 @@ class HVACSizing
     end
   end
 
-  def self.process_load_infiltration_ventilation(mj, zone, zone_loads, all_space_loads, weather, hpxml_bldg)
+  def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
@@ -1229,7 +1217,7 @@ class HVACSizing
     if hpxml_bldg.fuel_loads.count { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace } > 0
       has_fireplace = true
     end
-    if zone.heating_systems.count { |htg| htg.heating_system_type == HPXML::HVACTypeFireplace } > 0
+    if hpxml_bldg.heating_systems.count { |htg| htg.heating_system_type == HPXML::HVACTypeFireplace } > 0
       has_fireplace = true
     end
     q_fireplace = 0.0
@@ -1251,21 +1239,8 @@ class HVACSizing
     icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
     icfm_heat += q_fireplace
 
-    # Apportion infiltration to zone by exterior wall area
-    bldg_exposed_wall_area = hpxml_bldg.conditioned_zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
-    zone_exposed_wall_area = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
-    icfm_heat *= zone_exposed_wall_area / bldg_exposed_wall_area
-    icfm_cool *= zone_exposed_wall_area / bldg_exposed_wall_area
-
     # Calculate ventilation airflow rates
     q_unb_cfm, q_bal_cfm, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff = get_ventilation_data(hpxml_bldg)
-
-    # Apportion ventilation to zone by floor area
-    q_unb_cfm *= zone.floor_area / cfa
-    q_bal_cfm *= zone.floor_area / cfa
-    q_preheat *= zone.floor_area / cfa
-    q_precool *= zone.floor_area / cfa
-    q_recirc *= zone.floor_area / cfa
 
     # Calculate adjusted infiltration cfm (combined with ventilation)
     infil_cfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67 - q_unb_cfm
@@ -1275,9 +1250,9 @@ class HVACSizing
     hpxml_bldg.additional_properties.infil_cool_cfm = infil_cfm_cool
 
     # Infiltration load
-    zone_loads.Heat_Infil = 1.1 * mj.acf * infil_cfm_heat * mj.htd
-    zone_loads.Cool_Infil_Sens = 1.1 * mj.acf * infil_cfm_cool * mj.ctd
-    zone_loads.Cool_Infil_Lat = 0.68 * mj.acf * infil_cfm_cool * mj.cool_design_grains
+    bldg_Heat_Infil = 1.1 * mj.acf * infil_cfm_heat * mj.htd
+    bldg_Cool_Infil_Sens = 1.1 * mj.acf * infil_cfm_cool * mj.ctd
+    bldg_Cool_Infil_Lat = 0.68 * mj.acf * infil_cfm_cool * mj.cool_design_grains
 
     # Calculate vent cfm
     vent_cfm_heat = q_unb_cfm + q_bal_cfm
@@ -1291,39 +1266,54 @@ class HVACSizing
     vent_cfm_cool_sens = q_unb_cfm + q_bal_cfm * (1.0 - bal_sens_eff) - q_precool - q_recirc
     vent_cfm_cool_lat = q_unb_cfm + q_bal_cfm * (1.0 - bal_lat_eff) - q_recirc
 
-    zone_loads.Heat_Vent = 1.1 * mj.acf * vent_cfm_heat * mj.htd
-    zone_loads.Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
-    zone_loads.Cool_Vent_Lat = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
+    bldg_Heat_Vent = 1.1 * mj.acf * vent_cfm_heat * mj.htd
+    bldg_Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
+    bldg_Cool_Vent_Lat = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
 
-    zone.spaces.each do |space|
-      space_loads = all_space_loads[space]
-      # Exterior wall area weighted space assignment
-      space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
-      if zone_exposed_wall_area > 0
-        space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
-      else
-        space.additional_properties.wall_area_ratio = 0.0
+    # Apportion to zones/spaces
+    bldg_exposed_wall_area = hpxml_bldg.conditioned_zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
+    hpxml_bldg.conditioned_zones.each do |zone|
+      zone_exposed_wall_area = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
+
+      # Infiltration assignment by exterior wall area
+      all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_exposed_wall_area / bldg_exposed_wall_area
+      all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_exposed_wall_area / bldg_exposed_wall_area
+      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_exposed_wall_area / bldg_exposed_wall_area
+
+      # Ventilation assignment by floor area
+      all_zone_loads[zone].Heat_Vent = bldg_Heat_Vent * zone.floor_area / cfa
+      all_zone_loads[zone].Cool_Vent_Sens = bldg_Cool_Vent_Sens * zone.floor_area / cfa
+      all_zone_loads[zone].Cool_Vent_Lat = bldg_Cool_Vent_Lat * zone.floor_area / cfa
+
+      zone.spaces.each do |space|
+        # Infiltration assignment by exterior wall area
+        space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
+        if zone_exposed_wall_area > 0
+          space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
+        else
+          space.additional_properties.wall_area_ratio = 0.0
+        end
+        all_space_loads[space].Heat_Infil = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Heat_Infil
+        all_space_loads[space].Cool_Infil_Sens = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Cool_Infil_Sens
       end
-      space_loads.Heat_Infil = space.additional_properties.wall_area_ratio * zone_loads.Heat_Infil
-      space_loads.Cool_Infil_Sens = space.additional_properties.wall_area_ratio * zone_loads.Cool_Infil_Sens
     end
   end
 
-  def self.process_load_internal_gains(zone, zone_loads, all_space_loads)
+  def self.process_load_internal_gains(hpxml_bldg, all_zone_loads, all_space_loads)
     '''
     Cooling Load: Internal Gains
     '''
-    zone_manualj_num_occupants = zone.spaces.map { |space| space.manualj_num_occupants }.sum
-    zone_manualj_internal_loads_sensible = zone.spaces.map { |space| space.manualj_internal_loads_sensible }.sum
-    # FIXME: Is it a good idea to introduce a *latent* internal loads input for spaces? Only really needed for the zone...
-    zone_manualj_internal_loads_latent = zone.spaces.map { |space| space.manualj_internal_loads_latent }.sum
+    hpxml_bldg.conditioned_zones.each do |zone|
+      zone_manualj_num_occupants = zone.spaces.map { |space| space.manualj_num_occupants }.sum
+      zone_manualj_internal_loads_sensible = zone.spaces.map { |space| space.manualj_internal_loads_sensible }.sum
+      zone_manualj_internal_loads_latent = zone.spaces.map { |space| space.manualj_internal_loads_latent }.sum
 
-    zone_loads.Cool_IntGains_Sens = zone_manualj_internal_loads_sensible + 230.0 * zone_manualj_num_occupants
-    zone_loads.Cool_IntGains_Lat = zone_manualj_internal_loads_latent + 200.0 * zone_manualj_num_occupants
+      all_zone_loads[zone].Cool_IntGains_Sens = zone_manualj_internal_loads_sensible + 230.0 * zone_manualj_num_occupants
+      all_zone_loads[zone].Cool_IntGains_Lat = zone_manualj_internal_loads_latent + 200.0 * zone_manualj_num_occupants
 
-    zone.spaces.each do |space|
-      space_loads = all_space_loads[space]
-      space_loads.Cool_IntGains_Sens = space.manualj_internal_loads_sensible + 230.0 * space.manualj_num_occupants
+      zone.spaces.each do |space|
+        all_space_loads[space].Cool_IntGains_Sens = space.manualj_internal_loads_sensible + 230.0 * space.manualj_num_occupants
+      end
     end
   end
 
@@ -1397,7 +1387,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_zone_loads(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
+  def self.apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
     # Calculate design loads that this HVAC system serves
 
     # Heating Loads
@@ -1458,8 +1448,7 @@ class HVACSizing
     return oversize_limit, oversize_delta, undersize_limit
   end
 
-  def self.apply_hvac_loads(hvac_sizings, hvac_loads)
-    # FIXME: Can we remove this transfer of data and just use hvac_loads data directly?
+  def self.apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
     hvac_sizings.Cool_Load_Sens = hvac_loads.Cool_Sens
     hvac_sizings.Cool_Load_Lat = hvac_loads.Cool_Lat
     hvac_sizings.Cool_Load_Tot = hvac_loads.Cool_Tot
@@ -1554,7 +1543,7 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.apply_hvac_duct_loads_heating(mj, zone, hvac_loads, all_space_loads, hvac_heating, hpxml_bldg)
+  def self.apply_hvac_duct_loads_heating(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_heating, hpxml_bldg)
     '''
     Heating Duct Loads
     '''
@@ -1597,6 +1586,13 @@ class HVACSizing
     hvac_loads.Heat_Ducts += ducts_heat_load
     hvac_loads.Heat_Tot += ducts_heat_load
 
+    # Don't assign HP backup system duct loads to the zone/spaces; we already have the HP
+    # duct loads assigned and don't want to double-count.
+    return if hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
+
+    zone_loads.Heat_Ducts += ducts_heat_load
+    zone_loads.Heat_Tot += ducts_heat_load
+
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
       zone_htg_load = zone.spaces.map { |space| all_space_loads[space].Heat_Tot }.sum
@@ -1606,7 +1602,7 @@ class HVACSizing
     end
   end
 
-  def self.apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
+  def self.apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
     '''
     Cooling Duct Loads
     '''
@@ -1662,6 +1658,12 @@ class HVACSizing
     hvac_loads.Cool_Ducts_Lat += ducts_cool_load_lat
     hvac_loads.Cool_Lat += ducts_cool_load_lat
     hvac_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
+
+    zone_loads.Cool_Ducts_Sens += ducts_cool_load_sens
+    zone_loads.Cool_Sens += ducts_cool_load_sens
+    zone_loads.Cool_Ducts_Lat += ducts_cool_load_lat
+    zone_loads.Cool_Lat += ducts_cool_load_lat
+    zone_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
 
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
@@ -3700,57 +3702,46 @@ class HVACSizing
     end
   end
 
-  def self.aggregate_hvac_loads_to_zone(hpxml_bldg, all_hvac_loads)
-    all_final_zone_loads = {}
-    hpxml_bldg.conditioned_zones.each do |zone|
-      all_final_zone_loads[zone] = DesignLoadValues.new
-    end
-
-    all_hvac_loads.each do |hvac_system, hvac_loads|
-      hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
-      if (hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system)
-        next
-      end
-
-      zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
-
-      all_final_zone_loads[zone].Cool_Sens += hvac_loads.Cool_Sens
-      all_final_zone_loads[zone].Cool_Lat += hvac_loads.Cool_Lat
-      all_final_zone_loads[zone].Cool_Tot += hvac_loads.Cool_Tot
-      all_final_zone_loads[zone].Cool_Ducts_Sens += hvac_loads.Cool_Ducts_Sens
-      all_final_zone_loads[zone].Cool_Ducts_Lat += hvac_loads.Cool_Ducts_Lat
-      all_final_zone_loads[zone].Cool_Windows += hvac_loads.Cool_Windows
-      all_final_zone_loads[zone].Cool_Skylights += hvac_loads.Cool_Skylights
-      all_final_zone_loads[zone].Cool_Doors += hvac_loads.Cool_Doors
-      all_final_zone_loads[zone].Cool_Walls += hvac_loads.Cool_Walls
-      all_final_zone_loads[zone].Cool_Roofs += hvac_loads.Cool_Roofs
-      all_final_zone_loads[zone].Cool_Floors += hvac_loads.Cool_Floors
-      all_final_zone_loads[zone].Cool_Slabs += hvac_loads.Cool_Slabs
-      all_final_zone_loads[zone].Cool_Ceilings += hvac_loads.Cool_Ceilings
-      all_final_zone_loads[zone].Cool_Infil_Sens += hvac_loads.Cool_Infil_Sens
-      all_final_zone_loads[zone].Cool_Vent_Sens += hvac_loads.Cool_Vent_Sens
-      all_final_zone_loads[zone].Cool_Infil_Lat += hvac_loads.Cool_Infil_Lat
-      all_final_zone_loads[zone].Cool_Vent_Lat += hvac_loads.Cool_Vent_Lat
-      all_final_zone_loads[zone].Cool_IntGains_Sens += hvac_loads.Cool_IntGains_Sens
-      all_final_zone_loads[zone].Cool_IntGains_Lat += hvac_loads.Cool_IntGains_Lat
-      all_final_zone_loads[zone].Cool_AEDExcursion += hvac_loads.Cool_AEDExcursion
-      all_final_zone_loads[zone].Heat_Tot += hvac_loads.Heat_Tot
-      all_final_zone_loads[zone].Heat_Ducts += hvac_loads.Heat_Ducts
-      all_final_zone_loads[zone].Heat_Windows += hvac_loads.Heat_Windows
-      all_final_zone_loads[zone].Heat_Skylights += hvac_loads.Heat_Skylights
-      all_final_zone_loads[zone].Heat_Doors += hvac_loads.Heat_Doors
-      all_final_zone_loads[zone].Heat_Walls += hvac_loads.Heat_Walls
-      all_final_zone_loads[zone].Heat_Roofs += hvac_loads.Heat_Roofs
-      all_final_zone_loads[zone].Heat_Floors += hvac_loads.Heat_Floors
-      all_final_zone_loads[zone].Heat_Slabs += hvac_loads.Heat_Slabs
-      all_final_zone_loads[zone].Heat_Ceilings += hvac_loads.Heat_Ceilings
-      all_final_zone_loads[zone].Heat_Infil += hvac_loads.Heat_Infil
-      all_final_zone_loads[zone].Heat_Vent += hvac_loads.Heat_Vent
-      hvac_loads.HourlyFenestrationLoads.each_with_index do |load, i|
-        all_final_zone_loads[zone].HourlyFenestrationLoads[i] += load
+  def self.aggregate_zone_loads_to_bldg(all_zone_loads)
+    bldg_loads = DesignLoadValues.new
+    all_zone_loads.values.each do |zone_load|
+      bldg_loads.Cool_Sens += zone_load.Cool_Sens
+      bldg_loads.Cool_Lat += zone_load.Cool_Lat
+      bldg_loads.Cool_Tot += zone_load.Cool_Tot
+      bldg_loads.Cool_Ducts_Sens += zone_load.Cool_Ducts_Sens
+      bldg_loads.Cool_Ducts_Lat += zone_load.Cool_Ducts_Lat
+      bldg_loads.Cool_Windows += zone_load.Cool_Windows
+      bldg_loads.Cool_Skylights += zone_load.Cool_Skylights
+      bldg_loads.Cool_Doors += zone_load.Cool_Doors
+      bldg_loads.Cool_Walls += zone_load.Cool_Walls
+      bldg_loads.Cool_Roofs += zone_load.Cool_Roofs
+      bldg_loads.Cool_Floors += zone_load.Cool_Floors
+      bldg_loads.Cool_Slabs += zone_load.Cool_Slabs
+      bldg_loads.Cool_Ceilings += zone_load.Cool_Ceilings
+      bldg_loads.Cool_Infil_Sens += zone_load.Cool_Infil_Sens
+      bldg_loads.Cool_Vent_Sens += zone_load.Cool_Vent_Sens
+      bldg_loads.Cool_Infil_Lat += zone_load.Cool_Infil_Lat
+      bldg_loads.Cool_Vent_Lat += zone_load.Cool_Vent_Lat
+      bldg_loads.Cool_IntGains_Sens += zone_load.Cool_IntGains_Sens
+      bldg_loads.Cool_IntGains_Lat += zone_load.Cool_IntGains_Lat
+      bldg_loads.Cool_AEDExcursion += zone_load.Cool_AEDExcursion
+      bldg_loads.Heat_Tot += zone_load.Heat_Tot
+      bldg_loads.Heat_Ducts += zone_load.Heat_Ducts
+      bldg_loads.Heat_Windows += zone_load.Heat_Windows
+      bldg_loads.Heat_Skylights += zone_load.Heat_Skylights
+      bldg_loads.Heat_Doors += zone_load.Heat_Doors
+      bldg_loads.Heat_Walls += zone_load.Heat_Walls
+      bldg_loads.Heat_Roofs += zone_load.Heat_Roofs
+      bldg_loads.Heat_Floors += zone_load.Heat_Floors
+      bldg_loads.Heat_Slabs += zone_load.Heat_Slabs
+      bldg_loads.Heat_Ceilings += zone_load.Heat_Ceilings
+      bldg_loads.Heat_Infil += zone_load.Heat_Infil
+      bldg_loads.Heat_Vent += zone_load.Heat_Vent
+      zone_load.HourlyFenestrationLoads.each_with_index do |load, i|
+        bldg_loads.HourlyFenestrationLoads[i] += load
       end
     end
-    return all_final_zone_loads
+    return bldg_loads
   end
 
   def self.assign_to_hpxml_obj(hpxml_object, loads)

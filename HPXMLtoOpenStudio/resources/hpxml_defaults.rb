@@ -72,11 +72,7 @@ class HPXMLDefaults
     # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
 
-    # Remove any automatically created spaces
-    space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
-    if not space.nil?
-      space.delete
-    end
+    cleanup_zones_spaces(hpxml_bldg)
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -3473,5 +3469,13 @@ class HPXMLDefaults
     return state_code unless state_code.nil?
 
     return epw_file.stateProvinceRegion.upcase
+  end
+
+  def self.cleanup_zones_spaces(hpxml_bldg)
+    # Remove any automatically created zones/spaces
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    auto_space.delete if not auto_space.nil?
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }
+    auto_zone.delete if not auto_zone.nil?
   end
 end

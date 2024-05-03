@@ -1176,7 +1176,7 @@ class HPXML < Object
                    :climate_and_risk_zones, :zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
-                   :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_controls, :hvac_distributions,
+                   :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_plant, :hvac_controls, :hvac_distributions,
                    :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
                    :water_heating, :solar_thermal_systems, :pv_systems, :inverters, :generators,
                    :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
@@ -1278,6 +1278,7 @@ class HPXML < Object
       @cooling_systems.to_doc(building)
       @heat_pumps.to_doc(building)
       @geothermal_loops.to_doc(building)
+      @hvac_plant.to_doc(building)
       @hvac_controls.to_doc(building)
       @hvac_distributions.to_doc(building)
       @ventilation_fans.to_doc(building)
@@ -1359,6 +1360,7 @@ class HPXML < Object
       @cooling_systems = CoolingSystems.new(self, building)
       @heat_pumps = HeatPumps.new(self, building)
       @geothermal_loops = GeothermalLoops.new(self, building)
+      @hvac_plant = HVACPlant.new(self, building)
       @hvac_controls = HVACControls.new(self, building)
       @hvac_distributions = HVACDistributions.new(self, building)
       @ventilation_fans = VentilationFans.new(self, building)
@@ -2287,7 +2289,7 @@ class HPXML < Object
     end
 
     def delete
-      @parent_object.hvac_systems.each do |hvac_system|
+      hvac_systems.reverse_each do |hvac_system|
         hvac_system.attached_to_zone_idref = nil
       end
       @parent_object.zones.delete(self)
@@ -2406,14 +2408,14 @@ class HPXML < Object
     end
 
     def delete
-      @parent_object.surfaces.each do |surface|
+      surfaces.reverse_each do |surface|
         surface.attached_to_space_idref = nil
       end
-      @parent_object.zones.each do |zone|
-        next unless zone.spaces.include? self
+      zone.spaces.delete(self)
+    end
 
-        zone.spaces.delete(self)
-      end
+    def zone
+      return @parent_object.zones.find { |zone| zone.spaces.include? self }
     end
 
     def roofs
@@ -5534,6 +5536,32 @@ class HPXML < Object
     end
   end
 
+  class HVACPlant < BaseElement
+    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_doc(building)
+      return if nil?
+
+      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
+      HPXML.design_loads_to_doc(self, hvac_plant)
+    end
+
+    def from_doc(building)
+      return if building.nil?
+
+      hvac_plant = XMLHelper.get_element(building, 'BuildingDetails/Systems/HVAC/HVACPlant')
+      return if hvac_plant.nil?
+
+      HPXML.design_loads_from_doc(self, hvac_plant)
+    end
+  end
+
   class HVACControls < BaseArrayElement
     def add(**kwargs)
       self << HVACControl.new(@parent_object, **kwargs)
@@ -8332,7 +8360,7 @@ class HPXML < Object
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
       CDL_LAT_ATTRS => 'CoolingLatent' }.each do |attrs, dl_child_name|
-      next if dl_child_name == 'CoolingLatent' && hpxml_object.is_a?(HPXML::Space) # Latent loads are not calculated for spaces
+      next if hpxml_object.is_a?(HPXML::Space) && dl_child_name == 'CoolingLatent' # Latent loads are not calculated for spaces
 
       dl_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'DesignLoads'])
       XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
