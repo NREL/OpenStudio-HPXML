@@ -2367,10 +2367,10 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(zone, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(zone, 'ZoneType', @zone_type, :string) unless @zone_type.nil?
+      @spaces.to_doc(zone)
       if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map { |key| send(key) }.any?
         HPXML.design_loads_to_doc(self, zone)
       end
-      @spaces.to_doc(zone)
     end
 
     def from_doc(zone)
@@ -2378,8 +2378,8 @@ class HPXML < Object
 
       @id = HPXML::get_id(zone)
       @zone_type = XMLHelper.get_value(zone, 'ZoneType', :string)
-      HPXML.design_loads_from_doc(self, zone)
       @spaces.from_doc(zone)
+      HPXML.design_loads_from_doc(self, zone)
     end
   end
 
