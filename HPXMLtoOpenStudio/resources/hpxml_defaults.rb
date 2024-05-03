@@ -3294,13 +3294,13 @@ class HPXMLDefaults
     unit_type = hpxml_bldg.building_construction.residential_facility_type
     # Relations below come from 2020 RECS weighted regressions between NBEDS and NHSHLDMEM (sample weights = NWEIGHT)
     if [HPXML::ResidentialTypeApartment].include? unit_type
-      return 1.09 + 0.28 * n_occs
+      return -1.36 + 1.49 * n_occs 
     elsif [HPXML::ResidentialTypeSFA].include? unit_type
-      return 2.03 + 0.22 * n_occs
+      return -1.98 + 1.89 * n_occs
     elsif [HPXML::ResidentialTypeSFD].include? unit_type
-      return 2.73 + 0.2 * n_occs
+      return -2.19 + 2.08 * n_occs
     elsif [HPXML::ResidentialTypeManufactured].include? unit_type
-      return 2.23 + 0.17 * n_occs
+      return -1.26 + 1.61 * n_occs
     else
       fail "Unexpected residential facility type: #{unit_type}."
     end

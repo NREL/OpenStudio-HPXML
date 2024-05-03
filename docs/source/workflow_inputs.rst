@@ -555,13 +555,13 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which various end use defaults (e.g., plug loads, appliances, and hot water usage) are calculated based on NumberofBedrooms and ConditionedFloorArea per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
          If NumberofResidents is provided, an *operational* calculation is instead performed in which the end use defaults are adjusted using the relationship between NumberofBedrooms and NumberofResidents from `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/csv/recs2020_public_v7.csv>`_:
 
-         \- **manufactured home**: NumberofBedrooms = 2.23 + 0.17 * NumberofResidents
+         \- **manufactured home**: NumberofBedrooms = -1.26 + 1.61 * NumberofResidents
 
-         \- **single-family detached**: NumberofBedrooms = 2.73 + 0.20 * NumberofResidents
+         \- **single-family detached**: NumberofBedrooms = -2.19 + 2.08 * NumberofResidents
 
-         \- **single-family attached**: NumberofBedrooms = 2.03 + 0.22 * NumberofResidents
+         \- **single-family attached**: NumberofBedrooms = -1.98 + 1.89 * NumberofResidents
 
-         \- **apartment unit or multifamily**: NumberofBedrooms = 1.09 + 0.28 * NumberofResidents
+         \- **apartment unit or multifamily**: NumberofBedrooms = -1.36 + 1.49 * NumberofResidents
 
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
