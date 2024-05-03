@@ -5135,13 +5135,21 @@ class HPXMLFile
       roof_idref = @surface_ids[surface.name.to_s]
       next if roof_idref.nil?
 
+      roof = hpxml_bldg.roofs.find { |roof| roof.id == roof_idref }
+      if roof.interior_adjacent_to != HPXML::LocationConditionedSpace
+        # This is the roof of an attic, so the skylight must have a shaft; attach it to the attic floor as well.
+        floor = hpxml_bldg.floors.find { |floor| floor.interior_adjacent_to == HPXML::LocationConditionedSpace && floor.exterior_adjacent_to == roof.interior_adjacent_to }
+        floor_idref = floor.id
+      end
+
       hpxml_bldg.skylights.add(id: "Skylight#{hpxml_bldg.skylights.size + 1}",
                                area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2'),
                                azimuth: azimuth,
                                ufactor: args[:skylight_ufactor],
                                shgc: args[:skylight_shgc],
                                storm_type: skylight_storm_type,
-                               roof_idref: roof_idref)
+                               roof_idref: roof_idref,
+                               floor_idref: floor_idref)
     end
   end
 

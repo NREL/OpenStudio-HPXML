@@ -1701,6 +1701,11 @@
     "skylight_area_front": 15,
     "skylight_area_back": 15
   },
+  "sample_files/base-enclosure-skylights-cathedral.xml": {
+    "parent_hpxml": "sample_files/base-atticroof-cathedral.xml",
+    "skylight_area_front": 15,
+    "skylight_area_back": 15
+  },
   "sample_files/base-enclosure-skylights-physical-properties.xml": {
     "parent_hpxml": "sample_files/base-enclosure-skylights.xml"
   },

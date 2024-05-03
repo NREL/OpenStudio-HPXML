@@ -668,7 +668,10 @@ class HVACSizing
     # Skylights
     hpxml_bldg.skylights.each do |skylight|
       roof = skylight.roof
-      space = roof.space
+      floor = skylight.floor # For skylights with attic shafts
+      next unless roof.is_exterior_thermal_boundary || (!floor.nil? && floor.is_thermal_boundary)
+
+      space = floor.nil? ? roof.space : floor.space
       zone = space.zone
 
       skylight_isc = skylight.interior_shading_factor_summer
@@ -1031,13 +1034,13 @@ class HVACSizing
         clg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
         htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
       end
-      clg_loads = clg_htm * floor.area
-      htg_loads = htg_htm * floor.area
+      clg_loads = clg_htm * floor.net_area
+      htg_loads = htg_htm * floor.net_area
       all_zone_loads[zone].Cool_Ceilings += clg_loads
       all_zone_loads[zone].Heat_Ceilings += htg_loads
       all_space_loads[space].Cool_Ceilings += clg_loads
       all_space_loads[space].Heat_Ceilings += htg_loads
-      floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
+      floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.net_area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
                                                                    heat_load: htg_loads,
@@ -1112,13 +1115,13 @@ class HVACSizing
           htg_htm = (1.0 / floor.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
         end
       end
-      clg_loads = clg_htm * floor.area
-      htg_loads = htg_htm * floor.area
+      clg_loads = clg_htm * floor.net_area
+      htg_loads = htg_htm * floor.net_area
       all_zone_loads[zone].Cool_Floors += clg_loads
       all_zone_loads[zone].Heat_Floors += htg_loads
       all_space_loads[space].Cool_Roofs += clg_loads
       all_space_loads[space].Heat_Roofs += htg_loads
-      floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.area,
+      floor.additional_properties.formj1_values = FormJ1Values.new(area: floor.net_area,
                                                                    heat_htm: htg_htm,
                                                                    cool_htm: clg_htm,
                                                                    heat_load: htg_loads,

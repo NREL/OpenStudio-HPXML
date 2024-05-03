@@ -867,7 +867,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_floors(runner, model, spaces)
     @hpxml_bldg.floors.each do |floor|
-      area = floor.area
+      next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
+      area = floor.net_area
       width = Math::sqrt(area)
       length = area / width
       if floor.interior_adjacent_to.include?('attic') || floor.exterior_adjacent_to.include?('attic')
@@ -1436,7 +1438,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType('RoofCeiling')
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)) # Ensures it is included in Manual J sizing
+      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)) # Ensure it is included in the conditioned space heat transfer
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 

@@ -69,8 +69,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
   def test_schema_schematron_error_messages
     # Test case => Error message
-    all_expected_errors = { 'attached-to-space-missing-attached-to-zone' => ['Expected AttachedToZone for each HVAC system'],
-                            'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
+    all_expected_errors = { 'boiler-invalid-afue' => ['Expected AnnualHeatingEfficiency[Units="AFUE"]/Value to be less than or equal to 1'],
                             'clothes-dryer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'clothes-washer-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
                             'cooking-range-location' => ['A location is specified as "garage" but no surfaces were found adjacent to this space type.'],
@@ -214,6 +213,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                            "Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'manufactured-home-reference-floor' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
                                                                     'There must be at least one ceiling adjacent to "crawlspace - vented".'],
+                            'missing-attached-to-space' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
+                            'missing-attached-to-zone' => ['Expected 1 element(s) for xpath: AttachedToZone'],
                             'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
                                                                         'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
                             'missing-cfis-supplemental-fan' => ['Expected 1 element(s) for xpath: SupplementalFan'],
@@ -241,12 +242,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
       # Create HPXML object
-      if ['attached-to-space-missing-attached-to-zone'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.hvac_systems.each do |sys|
-          sys.attached_to_zone_idref = nil
-        end
-      elsif ['boiler-invalid-afue'].include? error_case
+      if ['boiler-invalid-afue'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-oil-only.xml')
         hpxml_bldg.heating_systems[0].heating_efficiency_afue *= 100.0
       elsif ['clothes-dryer-location'].include? error_case
@@ -634,6 +630,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             break
           end
         end
+      elsif ['missing-attached-to-space'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.surfaces.find { |s| s.interior_adjacent_to == HPXML::LocationConditionedSpace }.attached_to_space_idref = nil
+      elsif ['missing-attached-to-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.hvac_systems[0].attached_to_zone_idref = nil
       elsif ['missing-capacity-detailed-performance'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-detailed-performance.xml')
         hpxml_bldg.heat_pumps[0].cooling_capacity = nil
@@ -1027,7 +1029,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'inverter-unequal-efficiencies' => ['Expected all InverterEfficiency values to be equal.'],
                             'leap-year-TMY' => ['Specified a leap year (2008) but weather data has 8760 hours.'],
                             'net-area-negative-wall' => ["Calculated a negative net surface area for surface 'Wall1'."],
-                            'net-area-negative-roof' => ["Calculated a negative net surface area for surface 'Roof1'."],
+                            'net-area-negative-roof-floor' => ["Calculated a negative net surface area for surface 'Roof1'.",
+                                                               "Calculated a negative net surface area for surface 'Floor1'."],
                             'orphaned-geothermal-loop' => ["Geothermal loop 'GeothermalLoop1' found but no heat pump attached to it."],
                             'orphaned-hvac-distribution' => ["Distribution system 'HVACDistribution1' found but no HVAC system attached to it."],
                             'refrigerators-multiple-primary' => ['More than one refrigerator designated as the primary.'],
@@ -1051,7 +1054,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unattached-gshp' => ["Attached geothermal loop 'foobar' not found for heat pump 'HeatPump1'."],
                             'unattached-hvac-distribution' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem1'."],
                             'unattached-pv-system' => ["Attached inverter 'foobar' not found for pv system 'PVSystem1'."],
-                            'unattached-skylight' => ["Attached roof 'foobar' not found for skylight 'Skylight1'."],
+                            'unattached-skylight' => ["Attached roof 'foobar' not found for skylight 'Skylight1'.",
+                                                      "Attached floor 'foobar' not found for skylight 'Skylight1'."],
                             'unattached-solar-thermal-system' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem1'."],
                             'unattached-shared-clothes-washer-dhw-distribution' => ["Attached hot water distribution 'foobar' not found for clothes washer"],
                             'unattached-shared-clothes-washer-water-heater' => ["Attached water heating system 'foobar' not found for clothes washer"],
@@ -1321,7 +1325,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['leap-year-TMY'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-simcontrol-calendar-year-custom.xml')
         hpxml.header.sim_calendar_year = 2008
-      elsif ['net-area-negative-roof'].include? error_case
+      elsif ['net-area-negative-roof-floor'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].area = 4000
       elsif ['net-area-negative-wall'].include? error_case
@@ -1456,6 +1460,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['unattached-skylight'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
         hpxml_bldg.skylights[0].roof_idref = 'foobar'
+        hpxml_bldg.skylights[0].floor_idref = 'foobar'
       elsif ['unattached-solar-thermal-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-solar-indirect-flat-plate.xml')
         hpxml_bldg.solar_thermal_systems[0].water_heating_system_idref = 'foobar'

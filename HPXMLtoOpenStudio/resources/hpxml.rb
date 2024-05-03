@@ -3860,6 +3860,10 @@ class HPXML < Object
              :insulation_cavity_material, :insulation_continuous_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    def skylights
+      return @parent_object.skylights.select { |skylight| skylight.floor_idref == @id }
+    end
+
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3879,6 +3883,19 @@ class HPXML < Object
       else
         return @floor_or_ceiling == FloorOrCeilingCeiling
       end
+    end
+
+    def net_area
+      return if nil?
+      return if @area.nil?
+
+      val = @area
+      skylights.each do |skylight|
+        val -= skylight.area
+      end
+      fail "Calculated a negative net surface area for surface '#{@id}'." if val < 0
+
+      return val
     end
 
     def is_floor
@@ -3911,6 +3928,9 @@ class HPXML < Object
 
     def delete
       @parent_object.floors.delete(self)
+      skylights.reverse_each do |skylight|
+        skylight.delete
+      end
       @parent_object.attics.each do |attic|
         attic.attached_to_floor_idrefs.delete(@id) unless attic.attached_to_floor_idrefs.nil?
       end
@@ -3924,6 +3944,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      begin; net_area; rescue StandardError => e; errors << e.message; end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -4383,7 +4404,7 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :roof_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :roof_idref, :floor_idref]
     attr_accessor(*ATTRS)
 
     def roof
@@ -4395,6 +4416,17 @@ class HPXML < Object
         return roof
       end
       fail "Attached roof '#{@roof_idref}' not found for skylight '#{@id}'."
+    end
+
+    def floor
+      return if @floor_idref.nil?
+
+      @parent_object.floors.each do |floor|
+        next unless floor.id == @floor_idref
+
+        return floor
+      end
+      fail "Attached floor '#{@floor_idref}' not found for skylight '#{@id}'."
     end
 
     def is_exterior
@@ -4424,6 +4456,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; roof; rescue StandardError => e; errors << e.message; end
+      begin; floor; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -4475,6 +4508,10 @@ class HPXML < Object
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
         XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
       end
+      if not @floor_idref.nil?
+        attached_to_floor = XMLHelper.add_element(skylight, 'AttachedToFloor')
+        XMLHelper.add_attribute(attached_to_floor, 'idref', @floor_idref)
+      end
     end
 
     def from_doc(skylight)
@@ -4502,6 +4539,7 @@ class HPXML < Object
       @interior_shading_factor_summer = XMLHelper.get_value(skylight, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(skylight, 'InteriorShading/WinterShadingCoefficient', :float)
       @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
+      @floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
       @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
     end
   end
