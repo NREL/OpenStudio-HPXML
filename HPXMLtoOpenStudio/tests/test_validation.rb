@@ -992,6 +992,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                     'Heating detailed performance data for outdoor temperature = 4.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.'],
                             'heat-pump-lockout-temps-elec-backup' => ['Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.'],
+                            'hvac-attached-to-uncond-zone' => ['HVAC system found attached to an unconditioned zone.'],
                             'hvac-distribution-different-zones' => ["HVAC distribution system 'HVACDistribution1' has HVAC systems attached to different zones."],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
@@ -1173,6 +1174,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                           distribution_system_type: HPXML::HVACDistributionTypeHydronic,
                                           hydronic_type: HPXML::HydronicTypeBaseboard)
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+      elsif ['hvac-attached-to-uncond-zone'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml_bldg.hvac_systems.each do |hvac_system|
+          hvac_system.attached_to_zone_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.id
+        end
       elsif ['hvac-distribution-different-zones'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
         hpxml_bldg.zones.add(id: 'ConditionedZoneDup',

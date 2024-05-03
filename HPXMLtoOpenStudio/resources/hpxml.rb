@@ -1176,7 +1176,7 @@ class HPXML < Object
                    :climate_and_risk_zones, :zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
                    :skylights, :doors, :partition_wall_mass, :furniture_mass, :heating_systems,
-                   :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_plant, :hvac_controls, :hvac_distributions,
+                   :cooling_systems, :heat_pumps, :geothermal_loops, :hvac_controls, :hvac_distributions,
                    :ventilation_fans, :water_heating_systems, :hot_water_distributions, :water_fixtures,
                    :water_heating, :solar_thermal_systems, :pv_systems, :inverters, :generators,
                    :batteries, :clothes_washers, :clothes_dryers, :dishwashers, :refrigerators,
@@ -1278,7 +1278,6 @@ class HPXML < Object
       @cooling_systems.to_doc(building)
       @heat_pumps.to_doc(building)
       @geothermal_loops.to_doc(building)
-      @hvac_plant.to_doc(building)
       @hvac_controls.to_doc(building)
       @hvac_distributions.to_doc(building)
       @ventilation_fans.to_doc(building)
@@ -1360,7 +1359,6 @@ class HPXML < Object
       @cooling_systems = CoolingSystems.new(self, building)
       @heat_pumps = HeatPumps.new(self, building)
       @geothermal_loops = GeothermalLoops.new(self, building)
-      @hvac_plant = HVACPlant.new(self, building)
       @hvac_controls = HVACControls.new(self, building)
       @hvac_distributions = HVACDistributions.new(self, building)
       @ventilation_fans = VentilationFans.new(self, building)
@@ -2280,7 +2278,7 @@ class HPXML < Object
       @spaces = Spaces.new(hpxml_bldg)
       super(hpxml_bldg, *args)
     end
-    ATTRS = [:id, :zone_type, :spaces]
+    ATTRS = [:id, :zone_type, :spaces] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2367,6 +2365,9 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(zone, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(zone, 'ZoneType', @zone_type, :string) unless @zone_type.nil?
+      if (HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys).map { |key| send(key) }.any?
+        HPXML.design_loads_to_doc(self, zone)
+      end
       @spaces.to_doc(zone)
     end
 
@@ -2375,6 +2376,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(zone)
       @zone_type = XMLHelper.get_value(zone, 'ZoneType', :string)
+      HPXML.design_loads_from_doc(self, zone)
       @spaces.from_doc(zone)
     end
   end
@@ -5529,32 +5531,6 @@ class HPXML < Object
       @pipe_diameter = XMLHelper.get_value(geothermal_loop, 'Pipe/Diameter', :float)
       @shank_spacing = XMLHelper.get_value(geothermal_loop, 'Pipe/ShankSpacing', :float)
       @bore_config = XMLHelper.get_value(geothermal_loop, 'extension/BorefieldConfiguration', :string)
-    end
-  end
-
-  class HVACPlant < BaseElement
-    ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
-    attr_accessor(*ATTRS)
-
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    def to_doc(building)
-      return if nil?
-
-      hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
-      HPXML.design_loads_to_doc(self, hvac_plant)
-    end
-
-    def from_doc(building)
-      return if building.nil?
-
-      hvac_plant = XMLHelper.get_element(building, 'BuildingDetails/Systems/HVAC/HVACPlant')
-      return if hvac_plant.nil?
-
-      HPXML.design_loads_from_doc(self, hvac_plant)
     end
   end
 

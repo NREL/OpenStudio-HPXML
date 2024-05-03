@@ -71,6 +71,12 @@ class HPXMLDefaults
 
     # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+
+    # Remove any automatically created spaces
+    space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    if not space.nil?
+      space.delete
+    end
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -114,33 +120,24 @@ class HPXMLDefaults
 
   def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
     # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
+    bldg_idx = hpxml.buildings.index(hpxml_bldg)
     if hpxml_bldg.conditioned_zones.empty?
       added_zone = true
-      bldg_idx = hpxml.buildings.index(hpxml_bldg)
-      hpxml_bldg.zones.add(id: "ConditionedZone#{bldg_idx + 1}",
+      hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
                            zone_type: HPXML::ZoneTypeConditioned)
-      hpxml_bldg.zones[0].additional_properties.automatically_added = true
       hpxml_bldg.hvac_systems.each do |hvac_system|
         hvac_system.attached_to_zone_idref = hpxml_bldg.zones[0].id
       end
     else
       added_zone = false
-      hpxml_bldg.zones.each do |zone|
-        zone.additional_properties.automatically_added = false
-      end
     end
     if hpxml_bldg.conditioned_spaces.empty? || added_zone
-      hpxml_bldg.zones[0].spaces.add(id: "#{hpxml_bldg.zones[0]}Space",
+      hpxml_bldg.zones[0].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
                                      floor_area: cfa)
-      hpxml_bldg.zones[0].spaces[0].additional_properties.automatically_added = true
       hpxml_bldg.surfaces.each do |surface|
         if HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
           surface.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
         end
-      end
-    else
-      hpxml_bldg.conditioned_spaces.each do |space|
-        space.additional_properties.automatically_added = false
       end
     end
   end
