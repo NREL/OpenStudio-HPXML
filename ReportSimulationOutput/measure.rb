@@ -305,6 +305,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     return result
   end
 
+  def get_arguments(runner, arguments, user_arguments)
+    args = runner.getArgumentValues(arguments, user_arguments)
+    if args[:timeseries_frequency] == 'none'
+      # Override all timeseries arguments
+      args.keys.each do |key|
+        next unless key.start_with?('include_timeseries')
+
+        args[key] = false
+      end
+    end
+    return args
+  end
+
   # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
@@ -330,7 +343,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     heated_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
     cooled_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
 
-    args = runner.getArgumentValues(arguments(model), user_arguments)
+    args = get_arguments(runner, arguments(model), user_arguments)
 
     setup_outputs(false, args[:user_output_variables])
     args = setup_timeseries_includes(@emissions, args)
@@ -529,7 +542,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       return false
     end
 
-    args = runner.getArgumentValues(arguments(model), user_arguments)
+    args = get_arguments(runner, arguments(model), user_arguments)
 
     if args[:output_format] == 'csv_dview'
       args[:output_format] = 'csv'
