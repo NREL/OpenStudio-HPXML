@@ -1052,7 +1052,11 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
   # so remove these from the comparison
   annual_results_1x = annual_results_1x.dup
   annual_results_10x = annual_results_10x.dup
-  ['System Use:', 'Temperature:', 'Utility Bills:', 'HVAC Space Design Load:'].each do |key|
+  ['System Use:',
+   'Temperature:',
+   'Utility Bills:',
+   'HVAC Zone Design Load:',
+   'HVAC Space Design Load:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     monthly_results_1x.delete_if { |k, _v| k.start_with? key }
