@@ -7,6 +7,8 @@ class HVACSizing
     # values (e.g., capacities, airflows) specific to each HVAC system.
     # Calculations generally follow ACCA Manual J/S.
 
+    check_for_errors(hpxml_bldg, hvac_systems)
+
     mj = MJValues.new
     process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
 
@@ -36,10 +38,6 @@ class HVACSizing
       hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
       zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
       next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
-
-      if zone.zone_type != HPXML::ZoneTypeConditioned
-        fail 'HVAC system found attached to an unconditioned zone.'
-      end
 
       all_hvac_loads[hvac_system] = all_zone_loads[zone].dup
     end
@@ -139,6 +137,33 @@ class HVACSizing
     end
 
     return false
+  end
+
+  def self.check_for_errors(hpxml_bldg, hvac_systems)
+    # Check all surfaces adjacent to conditioned space (and not adiabatic) are
+    # not attached to spaces of unconditioned zones.
+    hpxml_bldg.surfaces.each do |surface|
+      next unless HPXML::conditioned_locations_this_unit.include?(surface.interior_adjacent_to)
+      next if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
+      if surface.space.zone.zone_type != HPXML::ZoneTypeConditioned
+        fail "Surface '#{surface.id}' is attached to the space of an unconditioned zone."
+      end
+    end
+
+    # Check all HVAC systems are not attached to unconditioned zones.
+    hvac_systems.each do |hvac_system|
+      hvac_heating, hvac_cooling = hvac_system[:heating], hvac_system[:cooling]
+      zone = hvac_heating.nil? ? hvac_cooling.zone : hvac_heating.zone
+      next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
+
+      if (not hvac_heating.nil?) && (hvac_heating.zone.zone_type != HPXML::ZoneTypeConditioned)
+        fail "HVAC system '#{hvac_heating.id}' is attached to an unconditioned zone."
+      end
+      if (not hvac_cooling.nil?) && (hvac_cooling.zone.zone_type != HPXML::ZoneTypeConditioned)
+        fail "HVAC system '#{hvac_cooling.id}' is attached to an unconditioned zone."
+      end
+    end
   end
 
   def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)

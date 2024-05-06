@@ -2466,7 +2466,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(space, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(space, 'FloorArea', @floor_area, :float) unless @floor_area.nil?
-      if (not @manualj_internal_loads_sensible.nil?) || (not @manualj_num_occupants.nil?) || (not @fenestration_load_procedure.nil?)
+      if (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?) || (not @fenestration_load_procedure.nil?)
         mj_extension = XMLHelper.add_extension(space, 'ManualJInputs')
         XMLHelper.add_element(mj_extension, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
         XMLHelper.add_element(mj_extension, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?

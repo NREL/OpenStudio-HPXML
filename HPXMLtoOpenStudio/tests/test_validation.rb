@@ -994,7 +994,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                                     'Heating detailed performance data for outdoor temperature = 4.0 is incomplete; there must be exactly one minimum and one maximum capacity datapoint.'],
                             'heat-pump-switchover-temp-elec-backup' => ['Switchover temperature should only be used for a heat pump with fossil fuel backup; use compressor lockout temperature instead.'],
                             'heat-pump-lockout-temps-elec-backup' => ['Similar compressor/backup lockout temperatures should only be used for a heat pump with fossil fuel backup.'],
-                            'hvac-attached-to-uncond-zone' => ['HVAC system found attached to an unconditioned zone.'],
+                            'hvac-attached-to-uncond-zone' => ["HVAC system 'HeatingSystem1' is attached to an unconditioned zone."],
                             'hvac-distribution-different-zones' => ["HVAC distribution system 'HVACDistribution1' has HVAC systems attached to different zones."],
                             'hvac-distribution-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution2'."],
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
@@ -1049,6 +1049,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'storm-windows-unexpected-window-ufactor' => ['Unexpected base window U-Factor (0.33) for a storm window.'],
+                            'surface-attached-to-uncond-space' => ["Surface 'Wall2' is attached to the space of an unconditioned zone."],
+                            'surface-attached-to-uncond-space2' => ["Surface 'Slab2' is attached to the space of an unconditioned zone."],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
                             'unattached-door' => ["Attached wall 'foobar' not found for door 'Door1'."],
                             'unattached-gshp' => ["Attached geothermal loop 'foobar' not found for heat pump 'HeatPump1'."],
@@ -1437,6 +1439,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['storm-windows-unexpected-window-ufactor'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.windows[0].storm_type = 'clear'
+      elsif ['surface-attached-to-uncond-space'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.walls[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
+      elsif ['surface-attached-to-uncond-space2'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.slabs[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
       elsif ['unattached-cfis'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
@@ -1548,7 +1556,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'manualj-sum-space-num-occupants' => ['ManualJInputs/NumberofOccupants (4) does not match sum of conditioned spaces (5).'],
-                              'manualj-sum-space-internal-loads' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
+                              'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
+                              'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
                               'multiple-conditioned-zone' => ['Multiple conditioned zones specified but the model will only include a single thermal zone.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
@@ -1705,12 +1714,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
           space.manualj_num_occupants = (i == 0 ? hpxml_bldg.header.manualj_num_occupants + 1 : 0)
         end
-      elsif ['manualj-sum-space-internal-loads'].include? warning_case
+      elsif ['manualj-sum-space-internal-loads-sensible'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_sensible = 1000.0
-        hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
-          space.manualj_internal_loads_sensible = (i == 0 ? hpxml_bldg.header.manualj_internal_loads_sensible + 200.0 : 0)
-        end
+        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_sensible = 1200.0
+      elsif ['manualj-sum-space-internal-loads-latent'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.header.manualj_internal_loads_latent = 200.0
+        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_latent = 100.0
       elsif ['multiple-conditioned-zone'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
