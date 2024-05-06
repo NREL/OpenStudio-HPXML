@@ -1320,7 +1320,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
   ``FloorOrCeiling``                      string                  See [#]_     See [#]_            Floor or ceiling from the perspective of the conditioned space
   ``FloorType``                           element                 See [#]_     Yes                 Floor type (for thermal mass)
-  ``Area``                                double    ft2           > 0          Yes                 Gross area
+  ``Area``                                double    ft2           > 0          Yes                 Gross area (including skylights for ceilings)
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
   ``InteriorFinish/Thickness``            double    in            >= 0         No        0.5       Interior finish thickness
   ``RadiantBarrier``                      boolean                              No        false     Presence of radiant barrier [#]_
