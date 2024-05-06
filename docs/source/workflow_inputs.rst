@@ -805,10 +805,12 @@ The remainder of the year is winter.
 HPXML Zones
 -----------
 
-Currently the only purpose for creating (conditioned) ``Zones`` is to determine whether :ref:`hvac_space_design_loads` are produced.
-``Zones`` are not currently used to construct the model.
-Rather all conditioned space in a dwelling unit is modeled as a single EnergyPlus thermal zone.
-Some buffer spaces are also modeled as separate EnergyPlus thermal zones; see :ref:`hpxmllocations` for more information.
+If conditioned zones are provided, then :ref:`hvac_zone_design_loads` are produced.
+
+.. note::
+
+  ``Zones`` are not currently used for the energy model; all conditioned space in a dwelling unit is currently modeled as a single EnergyPlus thermal zone.
+  Some buffer spaces are also modeled as separate EnergyPlus thermal zones; see :ref:`hpxmllocations` for more information.
 
 One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone``.
 
@@ -825,9 +827,9 @@ One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zo
 HPXML Spaces
 ************
 
-If spaces in conditioned zones are provided, as well as wall/roof/etc. surfaces with ``AttachedToSpace`` references, then :ref:`hvac_space_design_loads` will be produced.
+If spaces in conditioned zones are provided, then :ref:`hvac_space_design_loads` will be produced.
 
-Each space (representing a room or block of rooms) within a zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone/Spaces/Space``.
+Each space within a zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone/Spaces/Space``.
 
   =====================================================  =======  =======  ===========  ========  ========  ==============================================
   Element                                                Type     Units    Constraints  Required  Default   Notes
@@ -835,12 +837,15 @@ Each space (representing a room or block of rooms) within a zone can be entered 
   ``SystemIdentifier``                                   id                             Yes                 Unique identifier
   ``FloorArea``                                          double   ft2      > 0          Yes                 Space floor area
   ``extension/ManualJInputs/InternalLoadsSensible``      double   Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space sensible internal loads for cooling design load
+  ``extension/ManualJInputs/InternalLoadsLatent``        double   Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space latent internal loads for cooling design load
   ``extension/ManualJInputs/NumberofOccupants``          integer           >= 0         No [#]_   See [#]_  Conditioned space number of occupants for cooling design load
   ``extension/ManualJInputs/FenestrationLoadProcedure``  string            See [#]_     No        standard  Conditioned space fenestration load procedure [#]_
   =====================================================  =======  =======  ===========  ========  ========  ==============================================
 
   .. [#] InternalLoadsSensible must be provided for all spaces or no spaces.
   .. [#] If InternalLoadsSensible not provided for a conditioned space, the home's total internal sensible loads are apportioned to each space by floor area.
+  .. [#] InternalLoadsLatent must be provided for all spaces or no spaces.
+  .. [#] If InternalLoadsLatent not provided for a conditioned space, the home's total internal latent loads are apportioned to each space by floor area.
   .. [#] NumberofOccupants must be provided for all spaces or no spaces.
   .. [#] If NumberofOccupants not provided for a conditioned space, the home's total number of occupants are apportioned to each space by floor area.
   .. [#] FenestrationLoadProcedure choices are "standard" or "peak".
