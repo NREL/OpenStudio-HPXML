@@ -427,7 +427,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Initial output data w/ Time column(s)
     data = ['Time', nil] + timestamps
 
-    return if (monthly_data.size) == 0
+    return if monthly_data.size == 0
 
     fail 'Unable to obtain timestamps.' if timestamps.empty?
 
