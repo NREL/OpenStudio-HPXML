@@ -51,7 +51,7 @@ __New Features__
 - HVAC Manual J design load calculations:
   - **Breaking change**: Outputs for "Infiltration/Ventilation" category disaggregated into "Infiltration" and "Ventilation".
   - **Breaking change**: Outputs for "Windows" category no longer includes AED excursion; now a separate "AED Excursion" category.
-  - Allows optional zone-level and space-level design load calculations using HPXML `Zone` and `Space` elements.
+  - Allows optional zone-level and space-level design load calculations using HPXML `Zones/Zone[ZoneType="conditioned"]/Spaces/Space` elements.
   - Allows additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
