@@ -374,8 +374,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Zones/Spaces #
     # ------------------ #
 
-    if ['base-zones.xml',
-        'base-zones-spaces.xml'].include? hpxml_file
+    if ['base-zones-spaces.xml'].include? hpxml_file
       hpxml_bldg.zones.add(id: 'ConditionedZone',
                            zone_type: HPXML::ZoneTypeConditioned)
       hpxml_bldg.hvac_systems.each do |sys|
@@ -1265,7 +1264,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if ['base-enclosure-2stories-garage.xml',
         'base-enclosure-garage.xml',
-        'base-zones.xml',
         'base-zones-spaces.xml'].include? hpxml_file
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&

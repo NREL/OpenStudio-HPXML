@@ -802,15 +802,15 @@ The remainder of the year is winter.
 
 .. _zones_spaces:
 
-HPXML Zones
------------
+HPXML Zones/Spaces
+------------------
 
-If conditioned zones are provided, then :ref:`hvac_zone_design_loads` are produced.
+Conditioned zones can be provided to produce :ref:`hvac_zone_design_loads` and :ref:`hvac_space_design_loads`.
 
 .. note::
 
-  ``Zones`` are currently only used if zone-level (and potentially space-level) design loads are desired.
-  They are not currently used for the energy model; all conditioned space in a dwelling unit is currently modeled as a single EnergyPlus thermal zone.
+  The specification of conditioned zones does not currently affect the energy simulation as all conditioned space in a dwelling unit is currently modeled as a single EnergyPlus conditioned thermal zone.
+  If multiple conditioned zones are specified, the HVAC systems attached to a given zone are assumed to fully condition it for the HVAC design load calculations.
 
 One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone``.
 
@@ -819,17 +819,12 @@ One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zo
   =========================  =======  =======  ===========  ========  =======  ==============================================
   ``SystemIdentifier``       id                             Yes                Unique identifier
   ``ZoneType``               string            See [#]_     Yes                Type of zone
-  ``Spaces/Space``           element                        No                 One or more spaces within the zone
+  ``Spaces/Space``           element                        Yes                One or more spaces within the zone
   =========================  =======  =======  ===========  ========  =======  ==============================================
 
   .. [#] ZoneType choices are "unconditioned" or "conditioned".
 
-HPXML Spaces
-************
-
-If spaces in conditioned zones are provided, then :ref:`hvac_space_design_loads` will be produced.
-
-Each space within a zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone/Spaces/Space``.
+Each space within a conditioned zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone[ZoneType="conditioned"]/Spaces/Space``.
 
   =====================================================  =======  =======  ===========  ========  ========  ==============================================
   Element                                                Type     Units    Constraints  Required  Default   Notes
@@ -1117,7 +1112,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ======================================  =================  ================  ========================  =========  ==============================  ==================================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
   .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "conditioned space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -1174,7 +1169,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ======================================  =================  ================  ========================  ========  ===========  ==============================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1225,7 +1220,7 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   ======================================  =================  ================  ========================  =============  ===========  ====================================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1281,7 +1276,7 @@ Any wall surface in contact with the ground is considered a foundation wall.
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1339,7 +1334,7 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ======================================  ========  ============  ===========  ========  ========  ============================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home underbelly".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1381,7 +1376,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
-  .. [#] Only required if space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
@@ -1715,7 +1710,7 @@ Each electric resistance heating system is entered as a ``/HPXML/Building/Buildi
   =============================================================  =======  ======  ==================  ========  ==============  ==========
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] ElectricDistribution choices are "baseboard", "radiant floor", or "radiant ceiling".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1750,7 +1745,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -1794,7 +1789,7 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ==========================================================  =======  ======  ===============  ========  ==============  ================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1826,7 +1821,7 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ===========================================================  =======  ======  ===============  ========  ==============  ================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1860,7 +1855,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -1910,7 +1905,7 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ============================================================  =======  ===========  ===============  ========  ==================  =========================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
@@ -1954,7 +1949,7 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   ====================================================  =======  ======  ===============  ========  ==============  ===================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1984,7 +1979,7 @@ Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ==================================================  =======  ======  ===============  ========  ==============  ===================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2017,7 +2012,7 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   ========================================================  =======  ======  ===============  ========  ==============  ===================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2070,7 +2065,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2119,7 +2114,7 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ==============================================================  ======  ======  ====================  ========  ==============  ============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -2163,7 +2158,7 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   ==============================================================  ======  ======  =================================  ========  ==============  ==========================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -2204,7 +2199,7 @@ Each evaporative cooler is entered as a ``/HPXML/Building/BuildingDetails/System
   ======================================  ========  ======  ==================  ========  ==============  ==================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2240,7 +2235,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2289,7 +2284,7 @@ Each shared chiller (serving multiple dwelling units) is entered as a ``/HPXML/B
   =================================================  ========  ======  ===============  ========  =========  =========================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the chiller has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2323,7 +2318,7 @@ Each shared cooling tower (serving multiple dwelling units) is entered as a ``/H
   =====================================  ========  ======  ===============  ========  =========  =========================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "water loop").
          A :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2387,7 +2382,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2470,7 +2465,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2538,7 +2533,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
@@ -2585,7 +2580,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
@@ -2638,7 +2633,7 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2700,7 +2695,7 @@ Each water-loop-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ===============================================  ========  ======  =================  ========  ==============  ==============================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
-  .. [#] Only required if zone-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          

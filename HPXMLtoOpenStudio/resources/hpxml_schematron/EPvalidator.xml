@@ -257,8 +257,11 @@
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &lt;= 1.01'>Expected sum(FractionCoolLoadServed) to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Appliances/h:Dehumidifier/h:FractionDehumidificationLoadServed) &lt;= 1.01'>Expected sum(FractionDehumidificationLoadServed) to be less than or equal to 1</sch:assert>
       <sch:assert role='ERROR' test='(sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &lt;= 1.01 and sum(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) &gt;= 0.99) or count(h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:FractionDHWLoadServed) = 0'>Expected sum(FractionDHWLoadServed) to be 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) &gt;= 0.99 * number(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea) or not(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) or not(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea)'>Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) &lt;= 1.01 * number(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea) or not(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) or not(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea)'>Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea</sch:assert>
+
       <!-- Warnings -->
-      <sch:report role='WARN' test='count(h:Zones/h:Zone[h:ZoneType="conditioned"]) > 1'>Multiple conditioned zones specified but the model will only include a single thermal zone.</sch:report>
+      <sch:report role='WARN' test='count(h:Zones/h:Zone[h:ZoneType="conditioned"]) > 1'>While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.</sch:report>
       <sch:report role='WARN' test='count(h:Enclosure/h:Windows/h:Window) = 0'>No windows specified, the model will not include window heat transfer.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) + sum(h:Systems/h:HVAC/h:HVACPlant/*/h:IntegratedHeatingSystemFractionHeatLoadServed) = 0'>No space heating specified, the model will not include space heating energy use.</sch:report>
       <sch:report role='WARN' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>No space cooling specified, the model will not include space cooling energy use.</sch:report>
@@ -441,7 +444,7 @@
   <sch:pattern>
     <sch:title>[Zones]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Zones'>
-      <sch:assert role='ERROR' test='count(h:Zone) &gt;= 1'>Expected 1 or more element(s) for xpath: Zone</sch:assert> <!-- See [Zone] and [HasConditionedZones=HVACSystem] -->
+      <sch:assert role='ERROR' test='count(h:Zone) &gt;= 1'>Expected 1 or more element(s) for xpath: Zone</sch:assert> <!-- See [Zone] and [HasConditionedZones=HVACSystem] and [HasConditionedZones=Surface] -->
     </sch:rule>
   </sch:pattern>
 
@@ -449,7 +452,7 @@
     <sch:title>[Zone]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Zones/h:Zone'>
       <sch:assert role='ERROR' test='count(h:ZoneType) = 1'>Expected 1 element(s) for xpath: ZoneType</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Spaces/h:Space) &gt;= 0'>Expected 0 or more element(s) for xpath: Spaces/Space</sch:assert> <!-- See [Space=Conditioned] and [HasConditionedSpaces] and [HasConditionedSpaces=SurfaceAdjacentToConditionedSpace] -->
+      <sch:assert role='ERROR' test='count(h:Spaces/h:Space) &gt;= 1'>Expected 1 or more element(s) for xpath: Spaces/Space</sch:assert> <!-- See [Space=Conditioned] -->
     </sch:rule>
   </sch:pattern>
 
@@ -457,6 +460,13 @@
     <sch:title>[HasConditionedZones=HVACSystem]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Zones/h:Zone[h:ZoneType="conditioned"]]/h:Systems/h:HVAC/h:HVACPlant/*[h:AnnualHeatingEfficiency | h:AnnualCoolingEfficiency]'>
       <sch:assert role='ERROR' test='count(h:AttachedToZone) = 1'>Expected 1 element(s) for xpath: AttachedToZone</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HasConditionedZones=Surface]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Zones/h:Zone[h:ZoneType="conditioned"]]/h:Enclosure/*/*[contains(h:InteriorAdjacentTo, "conditioned") and h:ExteriorAdjacentTo!="other housing unit"]'>
+      <sch:assert role='ERROR' test='count(h:AttachedToSpace) = 1'>Expected 1 element(s) for xpath: AttachedToSpace</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -475,22 +485,6 @@
       <sch:assert role='ERROR' test='count(../*/h:extension/h:ManualJInputs/h:NumberofOccupants) = count(../h:Space) or count(../*/h:extension/h:ManualJInputs/h:NumberofOccupants) = 0'>Expected extension/ManualJInputs/NumberofOccupants for all Spaces or no Spaces</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:ManualJInputs/h:FenestrationLoadProcedure) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ManualJInputs/FenestrationLoadProcedure</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:ManualJInputs/h:FenestrationLoadProcedure[text()="standard" or text()="peak"] or not(h:extension/h:ManualJInputs/h:FenestrationLoadProcedure)'>Expected extension/ManualJInputs/FenestrationLoadProcedure to be 'standard' or 'peak'</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[HasConditionedSpaces]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space]'>
-      <!-- Sum Checks -->
-      <sch:assert role='ERROR' test='sum(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) &gt;= 0.99 * number(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea) or not(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea)'>Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea</sch:assert>
-      <sch:assert role='ERROR' test='sum(h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space/h:FloorArea) &lt;= 1.01 * number(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea) or not(h:BuildingSummary/h:BuildingConstruction/h:ConditionedFloorArea)'>Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea</sch:assert>
-    </sch:rule>
-  </sch:pattern>
-
-  <sch:pattern>
-    <sch:title>[HasConditionedSpaces=SurfaceAdjacentToConditionedSpace]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Zones/h:Zone[h:ZoneType="conditioned"]/h:Spaces/h:Space]/h:Enclosure/*/*[contains(h:InteriorAdjacentTo, "conditioned") and h:ExteriorAdjacentTo!="other housing unit"]'>
-      <sch:assert role='ERROR' test='count(h:AttachedToSpace) = 1'>Expected 1 element(s) for xpath: AttachedToSpace</sch:assert>
     </sch:rule>
   </sch:pattern>
 

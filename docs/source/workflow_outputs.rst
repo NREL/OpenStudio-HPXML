@@ -510,7 +510,7 @@ HVAC Zone Design Loads
 
 For each conditioned zone (see :ref:`zones_spaces`), zone-level design loads are available as listed below.
 Zone design loads can also be found in the ``in.xml`` file.
-Additional detail related to zone  design loads can be found in the :ref:`design_load_details`:.
+Additional detail related to zone design loads can be found in the :ref:`design_load_details`:.
 
    =====================================================================  ====================
    Type                                                                   Notes
@@ -734,7 +734,7 @@ Report: <BuildingID>: <ZoneID>: Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each HPXML conditioned Zone (see :ref:`zones_spaces`), the following output types are reported.
-Only those surfaces attached to a space in the zone will be included.
+Only those surfaces attached to a space in the given zone will be included.
 
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
    Type                     Area (ft^2)  Length (ft)  Wall Area Ratio  Heating (Btuh)  Cooling Sensible (Btuh)  Cooling Latent (Btuh)
@@ -758,7 +758,7 @@ Only those surfaces attached to a space in the zone will be included.
 Report: <BuildingID>: <SpaceID>: Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each HPXML Space (see :ref:`zones_spaces`), the following output types are reported.
+For each HPXML Space in a conditioned zone (see :ref:`zones_spaces`), the following output types are reported.
 Only those surfaces attached to the given space will be included.
 
    =======================  ===========  ===========  ===============  ==============  =======================

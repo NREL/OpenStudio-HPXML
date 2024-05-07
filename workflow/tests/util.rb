@@ -246,7 +246,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
     end
     if hpxml_path.include? 'base-zones'
-      next if message.include? 'Multiple conditioned zones specified but the model will only include a single thermal zone.'
+      next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
 
     # FUTURE: Revert this eventually

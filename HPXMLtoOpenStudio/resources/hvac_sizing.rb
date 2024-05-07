@@ -50,7 +50,7 @@ class HVACSizing
       next if is_system_to_skip(hvac_heating, hvac_cooling, zone)
 
       # Calculate fraction of zone load served by this HVAC system
-      frac_zone_heat_load_served, frac_zone_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, zone, hvac_systems)
+      frac_zone_heat_load_served, frac_zone_cool_load_served = get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
 
       # Calculate system loads (zone load served by this system plus duct loads)
       hvac_loads = all_hvac_loads[hvac_system]
@@ -3549,7 +3549,7 @@ class HVACSizing
     end
   end
 
-  def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, zone, hvac_systems)
+  def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
     if hvac_cooling.is_a?(HPXML::CoolingSystem) && hvac_cooling.has_integrated_heating
       frac_heat_load_served = hvac_cooling.integrated_heating_system_fraction_heat_load_served
     elsif hvac_heating.nil?
@@ -3572,25 +3572,33 @@ class HVACSizing
       frac_cool_load_served = hvac_cooling.fraction_cool_load_served
     end
 
-    if not hvac_systems.nil?
-      # Divide (fraction load served by this system) by (the fraction load served by all systems attached to this zone)
-      # to calculate the fraction of the zone load served by this system
-      sum_frac_heat_load_served = 0.0
-      sum_frac_cool_load_served = 0.0
-      hvac_systems.each do |hvac_system2|
-        hvac_heating2, hvac_cooling2 = hvac_system2[:heating], hvac_system2[:cooling]
-        next if is_system_to_skip(hvac_heating2, hvac_cooling2, zone)
+    if hpxml_bldg.conditioned_zones.size == 1
+      # One conditioned zone, use the heating/cooling fractions as provided.
+    else
+      # There are multiple conditioned zones, so assume the HVAC systems attached to
+      # the zone fully conditions it. Determine the fraction of the zone load each
+      # HVAC system serves by dividing (fraction load served by this system) by
+      # (fraction load served by all the zone's systems).
+      if not hvac_systems.nil?
+        sum_frac_heat_load_served = 0.0
+        sum_frac_cool_load_served = 0.0
+        hvac_systems.each do |hvac_system2|
+          hvac_heating2, hvac_cooling2 = hvac_system2[:heating], hvac_system2[:cooling]
+          zone2 = hvac_heating2.nil? ? hvac_cooling2.zone : hvac_heating2.zone
+          next if is_system_to_skip(hvac_heating2, hvac_cooling2, zone)
+          next if zone2 != zone
 
-        fracs = get_fractions_load_served(hvac_heating2, hvac_cooling2, hpxml_bldg, zone, nil)
-        sum_frac_heat_load_served += fracs[0]
-        sum_frac_cool_load_served += fracs[1]
-      end
+          fracs = get_fractions_load_served(hvac_heating2, hvac_cooling2, hpxml_bldg, nil, nil)
+          sum_frac_heat_load_served += fracs[0]
+          sum_frac_cool_load_served += fracs[1]
+        end
 
-      if sum_frac_heat_load_served > 0
-        frac_heat_load_served /= sum_frac_heat_load_served
-      end
-      if sum_frac_cool_load_served > 0
-        frac_cool_load_served /= sum_frac_cool_load_served
+        if sum_frac_heat_load_served > 0
+          frac_heat_load_served /= sum_frac_heat_load_served
+        end
+        if sum_frac_cool_load_served > 0
+          frac_cool_load_served /= sum_frac_cool_load_served
+        end
       end
     end
 

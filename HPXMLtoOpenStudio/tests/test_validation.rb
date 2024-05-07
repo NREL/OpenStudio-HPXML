@@ -1181,14 +1181,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                           hydronic_type: HPXML::HydronicTypeBaseboard)
         hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
       elsif ['hvac-attached-to-uncond-zone'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.hvac_systems.each do |hvac_system|
           hvac_system.attached_to_zone_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.id
         end
       elsif ['hvac-distribution-different-zones'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
                              zone_type: HPXML::ZoneTypeConditioned)
+        hpxml_bldg.zones[0].spaces[0].floor_area /= 2.0
+        hpxml_bldg.zones[-1].spaces.add(id: 'ConditionedSpaceDup',
+                                        floor_area: hpxml_bldg.zones[0].spaces[0].floor_area)
         hpxml_bldg.heating_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[0].id
         hpxml_bldg.cooling_systems[0].attached_to_zone_idref = hpxml_bldg.conditioned_zones[-1].id
       elsif ['hvac-distribution-multiple-attached-cooling'].include? error_case
@@ -1490,7 +1493,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.windows[0].wall_idref = 'foobar'
       elsif ['unattached-zone'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.heating_systems[0].attached_to_zone_idref = 'foobar'
         hpxml_bldg.cooling_systems[0].attached_to_zone_idref = 'foobar'
       elsif ['unavailable-period-missing-column'].include? error_case
@@ -1558,7 +1561,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'manualj-sum-space-num-occupants' => ['ManualJInputs/NumberofOccupants (4) does not match sum of conditioned spaces (5).'],
                               'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],
                               'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
-                              'multiple-conditioned-zone' => ['Multiple conditioned zones specified but the model will only include a single thermal zone.'],
+                              'multiple-conditioned-zone' => ['While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
                                                  'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
