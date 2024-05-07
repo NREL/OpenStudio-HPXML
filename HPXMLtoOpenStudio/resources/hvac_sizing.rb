@@ -816,7 +816,7 @@ class HVACSizing
       end
       if not wall.attached_to_space_idref.nil?
         space_design_loads = all_space_design_loads[wall.attached_to_space_idref]
-        if wall.is_exterior
+        if wall.is_exposed
           # Store exposed wall gross area for infiltration calculation
           wall.space.additional_properties.total_exposed_wall_area += wall.area
         end
@@ -885,7 +885,7 @@ class HVACSizing
 
       if not foundation_wall.attached_to_space_idref.nil?
         space_design_loads = all_space_design_loads[foundation_wall.attached_to_space_idref]
-        if foundation_wall.is_exterior
+        if foundation_wall.is_exposed
           # Store exposed wall gross area for infiltration calculation
           ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
           foundation_wall.space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
