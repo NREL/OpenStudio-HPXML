@@ -1358,7 +1358,7 @@ class HVACSizing
         hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed] #
         
         #specify 5 performance curves
-        clg_cap_rated = ...
+        
 
       elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
