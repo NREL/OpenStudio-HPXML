@@ -2274,9 +2274,9 @@ class HPXML < Object
   end
 
   class Zone < BaseElement
-    def initialize(hpxml_bldg, *args)
+    def initialize(hpxml_bldg, *args, **kwargs)
       @spaces = Spaces.new(hpxml_bldg)
-      super(hpxml_bldg, *args)
+      super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:id, :zone_type, :spaces]
     attr_accessor(*ATTRS)
