@@ -117,15 +117,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       args[:output_dir] = File.expand_path(args[:output_dir])
     end
 
-    unless File.extname(args[:annual_output_file_name].size > 0)
+    unless File.extname(args[:annual_output_file_name]).length > 0
       args[:annual_output_file_name] = "#{args[:annual_output_file_name]}.#{args[:output_format]}"
     end
     annual_output_file_path = File.join(args[:output_dir], args[:annual_output_file_name])
 
-    unless File.extname(args[:design_load_details_output_file_name].size > 0)
+    unless File.extname(args[:design_load_details_output_file_name]).length > 0
       args[:design_load_details_output_file_name] = "#{args[:design_load_details_output_file_name]}.#{args[:output_format]}"
     end
-   design_load_details_output_file_path = File.join(args[:output_dir], args[:design_load_details_output_file_name])
+    design_load_details_output_file_path = File.join(args[:output_dir], args[:design_load_details_output_file_name])
 
     begin
       if args[:skip_validation]
@@ -201,7 +201,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # they might be using the run_simulation.rb --skip-simulation argument.
       results_out = []
       Outputs.append_sizing_results(hpxml.buildings, results_out)
-      Outputs.write_results_out_to_file(results_out, output_format, annual_output_file_path)
+      Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_file_path)
 
       # Create OpenStudio model
       hpxml_osm_map = {}
