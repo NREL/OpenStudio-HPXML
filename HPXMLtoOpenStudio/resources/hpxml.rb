@@ -3133,6 +3133,17 @@ class HPXML < Object
       return false
     end
 
+    def is_exposed
+      if HPXML::is_conditioned(self) &&
+         (@exterior_adjacent_to == LocationOutside ||
+          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
+          @exterior_adjacent_to == LocationGarage)
+        return true
+      end
+
+      return false
+    end
+
     def is_interior
       return !is_exterior
     end
