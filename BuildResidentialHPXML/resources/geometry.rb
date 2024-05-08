@@ -1245,7 +1245,7 @@ class Geometry
       return true
     end
 
-    door_height = 7 # ft
+    door_height = 7.0 # ft
     door_width = door_area / door_height
     door_offset = 0.5 # ft
 
