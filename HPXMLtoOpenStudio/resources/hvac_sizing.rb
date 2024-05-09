@@ -947,14 +947,14 @@ class HVACSizing
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
 
+      space = foundation_wall.space
+      zone = space.zone
+
       if foundation_wall.is_exposed
         # Store exposed wall gross area for infiltration calculation
         ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
         space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
       end
-
-      space = foundation_wall.space
-      zone = space.zone
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true, mj.ground_conductivity)

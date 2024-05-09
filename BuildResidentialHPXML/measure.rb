@@ -4982,7 +4982,7 @@ class HPXMLFile
                                azimuth: azimuth,
                                ufactor: args[:skylight_ufactor],
                                shgc: args[:skylight_shgc],
-                               storm_type: args[:skylight_storm_type,
+                               storm_type: args[:skylight_storm_type],
                                roof_idref: roof_idref,
                                floor_idref: floor_idref)
     end
