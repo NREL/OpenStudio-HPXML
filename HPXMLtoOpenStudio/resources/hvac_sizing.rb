@@ -87,6 +87,7 @@ class HVACSizing
     return false
   end
 
+    return 1.0
   def self.process_site_calcs_and_design_temps(mj, weather, runner)
     '''
     Site Calculations and Design Temperatures
@@ -1352,12 +1353,9 @@ class HVACSizing
       entering_temp = @hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
-        #ADP/BF specified for Coil:Cooling:DX:SingleSpeed
+        #ADP/BF specified for Coil:Cooling:DX:SingleSpeed, but should be implemented for all coils
         #rated total capacity and rated SHR are used to calculate coil bypass factor (BF) at rated conditions
-        hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed] #
-        
-        #specify 5 performance curves
-        
+        hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed] #        
 
       elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
@@ -1375,9 +1373,30 @@ class HVACSizing
 
       # Calculate the air flow rate required for design conditions
       hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
+      #calculate coil bypass factor HERE, then use BF to calc SHR_design
 
-      sensible_cap_curve_value = process_curve_fit(hvac_sizing_values.Cool_Airflow, hvac_sizing_values.Cool_Load_Tot, entering_temp)
-      sens_cap_design = sens_cap_rated * sensible_cap_curve_value
+
+      barometric_pressure = MJ.pressure #psi
+      Tdb = #coil entering temperature, cooling setpoint
+
+
+      A_o = psychometrics.CoilAoFactor(runner, dBin, p, qdot, cfm, shr, win)
+
+
+      m_dot_design = hvac_sizing_values.Cool_Airflow #cooling design air mass flow rate, currently cfm, needs to be [kg/s]
+      BF_design = exp(-1*A_o/m_dot_design)
+
+      #enthalpies using BF method
+      h_t_in_w_adp = psychometrics.h_fT_w_SI(t_db_dp, w_dp) #enthalpy of air at apparatus dewpoint condition
+      h_in = psychometrics.h_fT_w_SI(t_db_in, w_in) #enthalpy of air entering cooling coil
+      Q_dot_total = cool_cap_design #needs to be [J/s], currently xxx units?
+      h_ADP = h_in - (Q_dot_total/m_dot_design)/(1-BF_design) 
+
+      enthalpy_ratios = (h_t_in_w_adp - h_adp)/(h_in-h_adp)
+      hvac_cooling_shr_design = min(enthalpy_ratios,1)
+
+      sens_cap_design = cool_cap_design*hvac_cooling_shr_design
+
       lat_cap_design = [hvac_sizing_values.Cool_Load_Tot - sens_cap_design, 1.0].max
 
       shr_biquadratic = get_shr_biquadratic
@@ -2521,14 +2540,12 @@ class HVACSizing
 
   #def self.get_shr_biquadratic
     # Based on EnergyPlus's model for calculating SHR at off-rated conditions. This curve fit
-    # avoids the iterations in the actual model. It does not account for altitude or variations
+    # avoids the iterations in the actual model. The ADP/BF method incorporates these iterations. It does not account for altitude or variations
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
     #return [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
   #end
   #get_shr_biquadratic will be replaced with ADP/BF method for calculating SHR at off-rated conditions
 
-  def self.get_slope_rated()
-    slope_rated = w
 
   def self.get_sizing_speed(hvac_ap, is_cooling)
     if is_cooling && hvac_ap.respond_to?(:cool_capacity_ratios)
