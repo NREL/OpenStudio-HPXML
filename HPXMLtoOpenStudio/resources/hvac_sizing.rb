@@ -885,6 +885,10 @@ class HVACSizing
       htg_htm = 0.0
       clg_htm = 0.0
       azimuths.each do |_azimuth|
+        if wall.is_exposed
+          # Store exposed wall gross area for infiltration calculation
+          space.additional_properties.total_exposed_wall_area += wall_area / azimuths.size
+        end
         if wall.is_exterior
 
           # Adjust base Cooling Load Temperature Difference (CLTD)
@@ -919,9 +923,6 @@ class HVACSizing
 
           clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * cltd
           htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * mj.htd
-
-          # Store exposed wall gross area for infiltration calculation
-          space.additional_properties.total_exposed_wall_area += wall_area / azimuths.size
         else # Partition wall
           adjacent_space = wall.exterior_adjacent_to
           clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
@@ -946,16 +947,18 @@ class HVACSizing
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
 
+      if foundation_wall.is_exposed
+        # Store exposed wall gross area for infiltration calculation
+        ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
+        space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
+      end
+
       space = foundation_wall.space
       zone = space.zone
 
       if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true, mj.ground_conductivity)
         htg_htm = u_wall_with_soil * mj.htd
-
-        # Store exposed wall gross area for infiltration calculation
-        ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
-        space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
       else # Partition wall
         adjacent_space = foundation_wall.exterior_adjacent_to
         u_wall_without_soil = get_foundation_wall_ufactor(foundation_wall, false, mj.ground_conductivity)

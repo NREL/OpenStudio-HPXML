@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
+- Updates to OpenStudio 3.8/EnergyPlus 24.1.
 - Updates to HPXML v4.0-rc4.
 - Adds BPI-2400 HPXML test files and results; see [Testing Framework](https://openstudio-hpxml.readthedocs.io/en/latest/testing_framework.html) for more information.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
@@ -55,6 +56,7 @@ __New Features__
   - Allows additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
+- Improves heating/cooling component loads; for timesteps where there is no heating/cooling load, assigns heat transfer to heating or cooling by comparing indoor temperature to the average of heating/cooling setpoints.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
