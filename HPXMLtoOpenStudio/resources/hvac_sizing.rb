@@ -1341,12 +1341,12 @@ class HVACSizing
 
     # Heating
     system_design_loads.Heat_Load = bldg_design_loads.Heat_Tot * frac_heat_load_served
+    system_design_loads.Heat_Load_Supp = bldg_design_loads.Heat_Load * frac_heat_load_served
     if heating_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
       # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
       # This ensures, e.g., that an appropriate heating airflow is used for duct losses.
       system_design_loads.Heat_Load = system_design_loads.Heat_Load / (1.0 / hvac_heating.heating_efficiency_cop)
     end
-    system_design_loads.Heat_Load_Supp = system_design_loads.Heat_Load * frac_heat_load_served
 
     # Cooling
     system_design_loads.Cool_Load_Tot = bldg_design_loads.Cool_Tot * frac_cool_load_served
