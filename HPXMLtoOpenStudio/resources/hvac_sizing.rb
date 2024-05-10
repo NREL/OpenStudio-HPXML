@@ -1378,10 +1378,10 @@ class HVACSizing
       #units of Cool_Airflow are cfm
       #calculate rated coil bypass factor HERE, then use rated BF --> design BF --> design SHR?
 
-      A_o_rated = Psychometrics.CoilAoFactor(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated,"Btu/hr","kBtu/hr"), hvac_sizing_values.Cool_Airflow, hvac_cooling_shr, hr_indoor_cooling)
+      A_o = Psychometrics.CoilAoFactor(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated,"Btu/hr","kBtu/hr"), hvac_sizing_values.Cool_Airflow, hvac_cooling_shr, hr_indoor_cooling)
       #note: using MJ cooling setpoint as EDB ignores return duct losses
 
-      m_dot_design = hvac_sizing_values.Cool_Airflow #cooling design air mass flow rate, currently cfm, needs to be [kg/s]
+      m_dot_design = hvac_sizing_values.Cool_Airflow #cooling design air flow rate? need to unit convert to kg/s
       BF_design = exp(-1*A_o/m_dot_design)
 
       #enthalpies using BF method
