@@ -226,7 +226,7 @@
           <Wall>
             <SystemIdentifier id='WallBathroom1East'/>
             <AttachedToSpace idref='bathroom_1'/>
-            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
               <ConcreteMasonryUnit/>
@@ -241,7 +241,7 @@
           <Wall>
             <SystemIdentifier id='WallBathroom2East'/>
             <AttachedToSpace idref='bathroom_2'/>
-            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
               <ConcreteMasonryUnit/>
@@ -256,7 +256,7 @@
           <Wall>
             <SystemIdentifier id='WallKitchenUtilityEntryEast'/>
             <AttachedToSpace idref='kitchen_utility_entry'/>
-            <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
               <ConcreteMasonryUnit/>
