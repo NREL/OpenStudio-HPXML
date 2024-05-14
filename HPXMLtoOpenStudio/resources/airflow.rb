@@ -4,8 +4,8 @@ class Airflow
   # Constants
   InfilPressureExponent = 0.65
 
-  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa, nbeds,
-                 ncfl_ag, duct_systems, airloop_map, clg_ssn_sensor, eri_version,
+  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa,
+                 ncfl_ag, duct_systems, airloop_map, eri_version,
                  frac_windows_operable, apply_ashrae140_assumptions, schedules_file,
                  unavailable_periods, hvac_availability_sensor)
 
@@ -16,7 +16,6 @@ class Airflow
     @year = hpxml_header.sim_calendar_year
     @conditioned_space = spaces[HPXML::LocationConditionedSpace]
     @conditioned_zone = @conditioned_space.thermalZone.get
-    @nbeds = nbeds
     @ncfl_ag = ncfl_ag
     @eri_version = eri_version
     @apply_ashrae140_assumptions = apply_ashrae140_assumptions
@@ -115,6 +114,15 @@ class Airflow
     conditioned_const_ach *= infil_values[:a_ext] unless conditioned_const_ach.nil?
     conditioned_ach50 *= infil_values[:a_ext] unless conditioned_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
+
+    # Cooling season schedule
+    # Applies to natural ventilation, not HVAC equipment.
+    # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round).
+    _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
+    clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), default_cooling_months, Constants.ScheduleTypeLimitsFraction)
+    clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    clg_ssn_sensor.setName('cool_season')
+    clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
 
     apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_bldg.header.natvent_days_per_week,
                                                   infil_values[:volume], infil_values[:height], unavailable_periods)
@@ -2142,61 +2150,51 @@ class Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  def self.get_duct_effective_r_value(nominal_rvalue, side, buried_level)
+  def self.get_duct_effective_r_value(r_nominal, side, buried_level, f_rect)
     if buried_level == HPXML::DuctBuriedInsulationNone
-      # Insulated duct values based on "True R-Values of Round Residential Ductwork"
-      # by Palmiter & Kruse 2006. Linear extrapolation from SEEM's "DuctTrueRValues"
-      # worksheet in, e.g., ExistingResidentialSingleFamily_SEEMRuns_v05.xlsm.
-      #
-      # Nominal | 4.2 | 6.0 | 8.0 | 11.0
-      # --------|-----|-----|-----|----
-      # Supply  | 4.5 | 5.7 | 6.8 | 8.4
-      # Return  | 4.9 | 6.3 | 7.8 | 9.7
-      #
-      # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
-
-      if nominal_rvalue <= 0
+      if r_nominal <= 0
+        # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
         return 1.7
-      end
-      if side == HPXML::DuctTypeSupply
-        return 2.2438 + 0.5619 * nominal_rvalue
-      elsif side == HPXML::DuctTypeReturn
-        return 2.0388 + 0.7053 * nominal_rvalue
+      else
+        # Insulated duct equations based on "True R-Values of Round Residential Ductwork"
+        # by Palmiter & Kruse 2006.
+        if side == HPXML::DuctTypeSupply
+          d_round = 6.0 # in, assumed average diameter
+        elsif side == HPXML::DuctTypeReturn
+          d_round = 14.0 # in, assumed average diameter
+        end
+        f_round = 1.0 - f_rect # Fraction of duct length for round ducts (not rectangular)
+        r_ext = 0.667 # Exterior film R-value
+        r_int_rect = 0.333 # Interior film R-value for rectangular ducts
+        r_int_round = 0.3429 * (d_round**0.1974) # Interior film R-value for round ducts
+        k_ins = 2.8 # Thermal resistivity of duct insulation (R-value per inch, assumed fiberglass)
+        t = r_nominal / k_ins # Duct insulation thickness
+        r_actual = r_nominal / t * (d_round / 2.0) * Math::log(1.0 + (2.0 * t) / d_round) # Actual R-value for round duct
+        r_rect = r_int_rect + r_nominal + r_ext # Total R-value for rectangular ducts, including air films
+        r_round = r_int_round + r_actual + r_ext * (d_round / (d_round + 2 * t)) # Total R-value for round ducts, including air films
+        r_effective = 1.0 / (f_rect / r_rect + f_round / r_round) # Combined effective R-value
+        return r_effective.round(2)
       end
     else
       if side == HPXML::DuctTypeSupply
         # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
-        # assuming 8-in supply diameter
-        #
-        # Duct configuration | 4.2  | 6.0  | 8.0
-        # -------------------|------|------|-----
-        # Partially-buried   | 7.8  | 9.9  | 11.8
-        # Fully buried       | 11.3 | 13.2 | 15.1
-        # Deeply buried      | 18.1 | 19.6 | 21.0
-
+        # assuming 6-in supply diameter
         if buried_level == HPXML::DuctBuriedInsulationPartial
-          return 5.83 + 2.0 * nominal_rvalue
+          return (4.28 + 0.65 * r_nominal).round(2)
         elsif buried_level == HPXML::DuctBuriedInsulationFull
-          return 9.4 + 1.9 * nominal_rvalue
+          return (6.22 + 0.89 * r_nominal).round(2)
         elsif buried_level == HPXML::DuctBuriedInsulationDeep
-          return 16.67 + 1.45 * nominal_rvalue
+          return (13.41 + 0.63 * r_nominal).round(2)
         end
       elsif side == HPXML::DuctTypeReturn
         # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
         # assuming 14-in return diameter
-        #
-        # Duct configuration | 4.2  | 6.0  | 8.0
-        # -------------------|------|------|-----
-        # Partially-buried   | 10.1 | 12.6 | 15.1
-        # Fully buried       | 14.3 | 16.7 | 19.2
-        # Deeply buried      | 22.8 | 24.7 | 26.6
-
         if buried_level == HPXML::DuctBuriedInsulationPartial
-          return 7.6 + 2.5 * nominal_rvalue
+          return (4.62 + 1.31 * r_nominal).round(2)
         elsif buried_level == HPXML::DuctBuriedInsulationFull
-          return 11.83 + 2.45 * nominal_rvalue
+          return (8.91 + 1.29 * r_nominal).round(2)
         elsif buried_level == HPXML::DuctBuriedInsulationDeep
-          return 20.9 + 1.9 * nominal_rvalue
+          return (18.64 + 1.0 * r_nominal).round(2)
         end
       end
     end
