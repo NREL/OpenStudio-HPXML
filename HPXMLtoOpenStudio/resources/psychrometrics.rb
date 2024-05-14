@@ -395,7 +395,7 @@ class Psychrometrics
     '''
     Description:
     ------------
-        Find the coil Ao factor at the given incoming air state (entering drybubl and wetbulb) and CFM,
+        Find the coil Ao factor at the given incoming air state (entering drybulb and wetbulb) and CFM,
         total capacity and SHR
 
 
