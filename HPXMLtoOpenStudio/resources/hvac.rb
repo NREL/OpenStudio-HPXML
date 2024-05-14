@@ -136,7 +136,7 @@ class HVAC
                                                                                       fan_watts_per_cfm)
           # Heating Coil
           htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost)
-        elsif hpxml_header.defrost_model_type == AdvancedResearchDefrostModelTypeStandard
+        elsif hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
           # Heating Coil
           htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, nil)
         else
