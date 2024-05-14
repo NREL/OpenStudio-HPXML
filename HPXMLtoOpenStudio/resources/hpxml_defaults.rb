@@ -394,7 +394,7 @@ class HPXMLDefaults
           scenario.coal_fixed_charge_isdefaulted = true
         end
         if scenario.coal_marginal_rate.nil?
-          scenario.coal_marginal_rate = 0.015
+          scenario.coal_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeCoal, nil)
           scenario.coal_marginal_rate_isdefaulted = true
         end
       end

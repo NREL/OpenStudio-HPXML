@@ -16,7 +16,7 @@ class UtilityBills
         average_rate = get_eia_seds_rate(state_code, fuel_type)
         marginal_rate = average_rate_to_marginal_rate(average_rate, fixed_charge, household_consumption)
       end
-    elsif [HPXML::FuelTypeOil, HPXML::FuelTypePropane, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? fuel_type
+    elsif [HPXML::FuelTypeOil, HPXML::FuelTypePropane, HPXML::FuelTypeCoal, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets].include? fuel_type
       marginal_rate = get_eia_seds_rate(state_code, fuel_type)
     end
 
@@ -50,6 +50,7 @@ class UtilityBills
       HPXML::FuelTypeNaturalGas => 'NGRCD',
       HPXML::FuelTypeOil => 'DFRCD',
       HPXML::FuelTypePropane => 'PQRCD',
+      HPXML::FuelTypeCoal => 'CLRCD',
       HPXML::FuelTypeWoodCord => 'WDRCD',
       HPXML::FuelTypeWoodPellets => 'WDRCD'
     }
@@ -58,6 +59,7 @@ class UtilityBills
       HPXML::FuelTypeNaturalGas => 0.1, # convert $/MMBtu to $/therms
       HPXML::FuelTypeOil => 0.139, # convert $/MMBtu to $/gallons of oil
       HPXML::FuelTypePropane => 0.0916, # convert $/MMBtu to $/gallons of propane
+      HPXML::FuelTypeCoal => 1, # $/MMBtu
       HPXML::FuelTypeWoodCord => 1, # $/MMBtu
       HPXML::FuelTypeWoodPellets => 1 # $/MMBtu
     }

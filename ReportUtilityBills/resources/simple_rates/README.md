@@ -6,4 +6,5 @@ EIA SEDS Prices
 * Natural Gas: NGRCD ($/MMBtu)
 * Distillate Fuel Oil: DFRCD ($/MMBtu)
 * Propane: PQRCD ($/MMBtu)
+* Coal: CLRCD ($/MMBtu)
 * Wood: WDRCD ($/MMBtu)

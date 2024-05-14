@@ -682,7 +682,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
       unit_conv /= 139.0 if fuel_type == FT::Oil # Convert kBtu to gallons of oil
       unit_conv /= 91.6 if fuel_type == FT::Propane # Convert kBtu to gallons of propane
-      unit_conv /= 1000.0 if [FT::WoodCord, FT::WoodPellets].include? fuel_type # Convert kBtu to MMBtu
+      unit_conv /= 1000.0 if [FT::Coal, FT::WoodCord, FT::WoodPellets].include? fuel_type # Convert kBtu to MMBtu
 
       timeseries_freq = 'monthly'
       timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
