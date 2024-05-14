@@ -428,7 +428,7 @@ class Psychrometrics
     '''
     Description:
     ------------
-        Find the coil bypass factor at the given incoming air state (entering drybubl and wetbulb) and CFM,
+        Find the coil bypass factor at the given incoming air state (entering drybulb and wetbulb) and CFM,
         total capacity and SHR
 
 
@@ -514,7 +514,7 @@ class Psychrometrics
     '''
     Description:
     ------------
-        Calculate the mass flow rate at the given incoming air state (entering drybubl and wetbulb) and CFM
+        Calculate the mass flow rate at the given incoming air state (entering drybul and wetbulb) and CFM
 
     Source:
     -------
