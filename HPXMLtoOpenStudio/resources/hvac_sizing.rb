@@ -87,7 +87,6 @@ class HVACSizing
     return false
   end
 
-    return 1.0
   def self.process_site_calcs_and_design_temps(mj, weather, runner)
     '''
     Site Calculations and Design Temperatures
@@ -1373,25 +1372,29 @@ class HVACSizing
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
       sens_cap_rated = cool_cap_rated * hvac_cooling_shr
 
-      # Calculate the air flow rate required for rated conditions
+      # Calculate the air flow rate required for design conditions
       hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
       #units of Cool_Airflow are cfm
-      #calculate rated coil bypass factor HERE, then use rated BF --> design BF --> design SHR?
+      #calculate rated coil bypass factor HERE, then use rated BF --> design BF --> design SHR --> design sensible capacity
 
-      A_o = Psychometrics.CoilAoFactor(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated,"Btu/hr","kBtu/hr"), hvac_sizing_values.Cool_Airflow, hvac_cooling_shr, hr_indoor_cooling)
+      cool_airflow_rated = UnitConversions.convert(cool_cap_rated, "Btu/hr", "tons")*hvac_cooling.additional_properties.cool_rated_cfm_per_ton[-1] #rated cfm, check whether cfm/ton is net or gross?
+
+      assert(h)
+
+      a_o = Psychometrics.CoilAoFactor(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated,"Btu/hr","kBtu/hr"), cool_airflow_rated, hvac_cooling_shr, hr_indoor_cooling)
       #note: using MJ cooling setpoint as EDB ignores return duct losses
 
-      m_dot_design = hvac_sizing_values.Cool_Airflow #cooling design air flow rate? need to unit convert to kg/s
-      BF_design = exp(-1*A_o/m_dot_design)
+      m_dot_design = UnitConversions.convert(Psychometrics.CalculateMassflowRate(mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), hvac_sizing_values.Cool_Airflow, hr_indoor_cooling), 'lbm/min', 'kg/s') #cooling design air flow rate
+      bf_design = exp(-1*a_o/m_dot_design)
 
       #enthalpies using BF method
       h_t_in_w_adp = Psychometrics.h_fT_w_SI(t_db_dp, w_dp) #enthalpy of air at apparatus dewpoint condition
       h_in = Psychometrics.h_fT_w_SI(t_db_in, w_in) #enthalpy of air entering cooling coil
-      Q_dot_total = cool_cap_design #needs to be [J/s], currently xxx units?
-      h_ADP = h_in - (Q_dot_total/m_dot_design)/(1-BF_design) 
+      q_dot_total = cool_cap_design #needs to be [J/s], currently xxx units?
+      h_ADP = h_in - (q_dot_total/m_dot_design)/(1-bf_design) 
 
       enthalpy_ratios = (h_t_in_w_adp - h_adp)/(h_in-h_adp)
-      hvac_cooling_shr_design = min(enthalpy_ratios,1)
+      hvac_cooling_shr_design = [enthalpy_ratios,1].min
 
       sens_cap_design = cool_cap_design*hvac_cooling_shr_design
 
