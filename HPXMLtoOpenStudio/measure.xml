@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>6f468215-dca5-4f71-ba94-ab414381bece</version_id>
-  <version_modified>2024-05-07T22:08:33Z</version_modified>
+  <version_id>d291a71c-61b2-493f-a2fe-de00dd53551f</version_id>
+  <version_modified>2024-05-14T04:27:25Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -142,13 +142,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B7B8A8CB</checksum>
+      <checksum>1A05A7A1</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>81518569</checksum>
+      <checksum>93C49D9A</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -304,13 +304,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7EC57841</checksum>
+      <checksum>F178B7A6</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A41981FB</checksum>
+      <checksum>7DC72E4B</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -328,7 +328,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6AC00EE1</checksum>
+      <checksum>35DB638F</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -340,7 +340,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>16D1DFD1</checksum>
+      <checksum>C40E0CD2</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>

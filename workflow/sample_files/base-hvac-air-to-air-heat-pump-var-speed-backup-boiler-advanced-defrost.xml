@@ -10,6 +10,9 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <AdvancedResearchFeatures>
+          <DefrostModelType>advanced</DefrostModelType>
+        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -360,7 +363,6 @@
                   <Fraction>0.6</Fraction>
                   <Temperature>17.0</Temperature>
                 </HeatingCapacityRetention>
-                <AdvancedDefrostApproach>true</AdvancedDefrostApproach>
               </extension>
             </HeatPump>
           </HVACPlant>

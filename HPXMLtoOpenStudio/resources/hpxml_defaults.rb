@@ -146,6 +146,11 @@ class HPXMLDefaults
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
+    if hpxml_header.defrost_model_type.nil?
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
+    end
+
     hpxml_header.unavailable_periods.each do |unavailable_period|
       if unavailable_period.begin_hour.nil?
         unavailable_period.begin_hour = 0
@@ -1431,10 +1436,8 @@ class HPXMLDefaults
 
     # Default advanced defrost
     hpxml_bldg.heat_pumps.each do |heat_pump|
-      next unless heat_pump.advanced_defrost_approach.nil?
       next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
 
-      heat_pump.advanced_defrost_approach = false
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 

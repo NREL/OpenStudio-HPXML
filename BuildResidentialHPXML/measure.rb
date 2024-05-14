@@ -116,6 +116,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Affects the transient calculation of indoor air temperatures. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
+    defrost_model_type_choices = OpenStudio::StringVector.new
+    defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeStandard
+    defrost_model_type_choices << HPXML::AdvancedResearchDefrostModelTypeAdvanced
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('simulation_control_defrost_model_type', defrost_model_type_choices, false)
+    arg.setDisplayName('Simulation Control: Defrost Model Type')
+    arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for improved model that better accounts for loads and energy uses during defrost, using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, defaults to #{HPXML::AdvancedResearchDefrostModelTypeStandard}.")
+    args << arg
+
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
@@ -1467,11 +1475,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Crankcase Heater Power Watts')
     arg.setDescription("Heat Pump crankcase heater power consumption in Watts. Applies only to #{HPXML::HVACTypeHeatPumpAirToAir}, #{HPXML::HVACTypeHeatPumpMiniSplit}, #{HPXML::HVACTypeHeatPumpPTHP} and #{HPXML::HVACTypeHeatPumpRoom}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
     arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_advanced_defrost_approach', false)
-    arg.setDisplayName('Heat Pump: Advanced Defrost Approach')
-    arg.setDescription('Whether to apply advanced defrost approach.')
     args << arg
 
     perf_data_capacity_type_choices = OpenStudio::StringVector.new
@@ -4027,6 +4030,13 @@ class HPXMLFile
       hpxml.header.temperature_capacitance_multiplier = args[:simulation_control_temperature_capacitance_multiplier]
     end
 
+    if not args[:simulation_control_defrost_model_type].nil?
+      if (not hpxml.header.defrost_model_type.nil?) && (hpxml.header.defrost_model_type != args[:simulation_control_defrost_model_type])
+        errors << "'Simulation Control: Defrost Model Type' cannot vary across dwelling units."
+      end
+      hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
+    end
+
     if not args[:emissions_scenario_names].nil?
       emissions_scenario_names = args[:emissions_scenario_names].split(',').map(&:strip)
       emissions_types = args[:emissions_types].split(',').map(&:strip)
@@ -5310,7 +5320,6 @@ class HPXMLFile
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpPTHP, HPXML::HVACTypeHeatPumpRoom].include?(heat_pump_type)
       heat_pump_crankcase_heater_watts = args[:heat_pump_crankcase_heater_watts]
-      heat_pump_advanced_defrost_approach = args[:heat_pump_advanced_defrost_approach]
     end
 
     hpxml_bldg.heat_pumps.add(id: "HeatPump#{hpxml_bldg.heat_pumps.size + 1}",
@@ -5348,7 +5357,6 @@ class HPXMLFile
                               airflow_defect_ratio: airflow_defect_ratio,
                               charge_defect_ratio: args[:heat_pump_charge_defect_ratio],
                               crankcase_heater_watts: heat_pump_crankcase_heater_watts,
-                              advanced_defrost_approach: heat_pump_advanced_defrost_approach,
                               primary_heating_system: args[:heat_pump_fraction_heat_load_served] > 0,
                               primary_cooling_system: args[:heat_pump_fraction_cool_load_served] > 0)
 

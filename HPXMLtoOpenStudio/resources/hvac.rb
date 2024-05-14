@@ -11,7 +11,7 @@ class HVAC
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
                                          control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg,
-                                         conditioned_space, unit_multiplier)
+                                         conditioned_space, hpxml_header)
     is_heatpump = false
 
     if not cooling_system.nil?
@@ -130,10 +130,18 @@ class HVAC
           fan_cfms << htg_cfm * r
         end
         # Defrost calculations
-        q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, unit_multiplier, fan_cfms.max, htg_cfm * htg_ap.heat_fan_speed_ratios[-1], fan_watts_per_cfm)
-
-        # Heating Coil
-        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
+        if hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
+          q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, hpxml_bldg.building_construction.number_of_units,
+                                                                                      fan_cfms.max, htg_cfm * htg_ap.heat_fan_speed_ratios[-1],
+                                                                                      fan_watts_per_cfm)
+          # Heating Coil
+          htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost)
+        elsif hpxml_header.defrost_model_type == AdvancedResearchDefrostModelTypeStandard
+          # Heating Coil
+          htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, nil)
+        else
+          fail 'unknown defrost model type.'
+        end
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -207,7 +215,7 @@ class HVAC
 
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
-    if is_heatpump && heating_system.advanced_defrost_approach
+    if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
     end
 
@@ -2890,7 +2898,7 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, p_dot_defrost)
+  def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, defrost_model_type, p_dot_defrost)
     htg_ap = heating_system.additional_properties
 
     if heating_system.heating_detailed_performance_data.empty?
@@ -2946,7 +2954,7 @@ class HVAC
         end
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         htg_coil.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[0]))
-        defrost_time_fraction = 0.1 if heating_system.advanced_defrost_approach # 6min/hr
+        defrost_time_fraction = 0.1 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 6min/hr
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -2961,7 +2969,7 @@ class HVAC
         stage.setGrossRatedHeatingCapacity(UnitConversions.convert(htg_ap.heat_rated_capacities_gross[i], 'Btu/hr', 'W'))
         stage.setRatedAirFlowRate(calc_rated_airflow(htg_ap.heat_rated_capacities_net[i], htg_ap.heat_rated_cfm_per_ton[i]))
         htg_coil.addStage(stage)
-        defrost_time_fraction = 0.06667 if heating_system.advanced_defrost_approach # 4min/hr
+        defrost_time_fraction = 0.06667 if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced # 4min/hr
       end
     end
 
@@ -2969,14 +2977,16 @@ class HVAC
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(htg_ap.hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
     htg_coil.setDefrostControl('Timed')
-    if heating_system.advanced_defrost_approach
+    if defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       htg_coil.setDefrostStrategy('Resistive')
       htg_coil.setDefrostTimePeriodFraction(defrost_time_fraction)
       htg_coil.setResistiveDefrostHeaterCapacity(p_dot_defrost)
-    else
+    elsif defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
       defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')
+    else
+      fail 'unknown defrost model type.'
     end
     if heating_system.fraction_heat_load_served == 0
       htg_coil.setResistiveDefrostHeaterCapacity(0)
@@ -3574,8 +3584,6 @@ class HVAC
     # Calculate q_dot and p_dot
     # q_dot is used for EMS program to account for introduced cooling load and supp coil power consumption by actuating other equipment objects
     # p_dot is used for calculating coil defrost compressor power consumption
-    return [nil, nil] unless heat_pump.advanced_defrost_approach
-
     is_ducted = !heat_pump.distribution_system_idref.nil?
     # determine defrost cooling rate and defrost cooling cop based on whether ducted
     if is_ducted
