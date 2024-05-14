@@ -1795,28 +1795,10 @@ class Waterheater
       shower_flow_sensor.setName('Shower Volume')
       shower_flow_sensor.setKeyName('hot_water_showers') # FIXME: use constant name here
 
-      # We'll only need these if we want to calculate unmet WH loads for all end uses, not just showers
-      # cw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      # cw_flow_sensor.setName('Clothes Washer Volume')
-      # cw_flow_sensor.setKeyName('clothes washer')
-
-      # dw_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      # dw_flow_sensor.setName('Dishwasher Volume')
-      # dw_flow_sensor.setKeyName('dishwasher')
-
-      # fx_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Use Equipment Hot Water Volume')
-      # fx_flow_sensor.setName('Fixture Volume')
-      # fx_flow_sensor.setKeyName('dhw fixtures')
-
       # EMS program
       # FIXME: we want one program where the lines are extensible based on number of water heaters?
       unmet_wh_loads_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       unmet_wh_loads_program.setName(Constants.ObjectNameUnmetLoadsProgram)
-      unmet_wh_loads_program.addLine("If #{shower_flow_sensor.name} > 0")
-      unmet_wh_loads_program.addLine('Set ShowerTime=SystemTimeStep')
-      unmet_wh_loads_program.addLine('Else')
-      unmet_wh_loads_program.addLine('Set ShowerTime=0')
-      unmet_wh_loads_program.addLine('EndIf')
       unmet_wh_loads_program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
       unmet_wh_loads_program.addLine('Set ShowerSagTime=SystemTimeStep')
       unmet_wh_loads_program.addLine("Set ShowerE=#{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 4141170 * (#{wh_temp_sensor.name} - #{mixed_setpoint_sensor.name})")
@@ -1830,14 +1812,6 @@ class Waterheater
       program_calling_manager.setName("#{unmet_wh_loads_program.name} calling manager")
       program_calling_manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
       program_calling_manager.addProgram(unmet_wh_loads_program)
-
-      # # output variables
-      # shower_time_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ShowerTime')
-      # shower_time_output_var.setName('ShowerTime')
-      # shower_time_output_var.setTypeOfDataInVariable('Summed')
-      # shower_time_output_var.setUpdateFrequency('SystemTimestep')
-      # shower_time_output_var.setEMSProgramOrSubroutineName(unmet_wh_loads_program)
-      # shower_time_output_var.setUnits('hr')
 
       # # output variables
       # shower_unmet_energy_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'ShowerE')

@@ -110,7 +110,6 @@ end
 
 class ULT
   # Unmet Loads Types
-  HotWaterShowerTime = 'Hot Water Shower Time'
   HotWaterShowerE = 'Hot Water Shower Energy'
   HotWaterShowerUnmetTime = 'Hot Water Shower Unmet Time'
 end
