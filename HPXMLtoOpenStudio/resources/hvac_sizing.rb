@@ -1609,9 +1609,9 @@ class HVACSizing
     zone_loads.Heat_Ducts += ducts_heat_load
     zone_loads.Heat_Tot += ducts_heat_load
 
+    zone_htg_load = zone.spaces.map { |space| all_space_loads[space].Heat_Tot }.sum
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
-      zone_htg_load = zone.spaces.map { |space| all_space_loads[space].Heat_Tot }.sum
       space_htg_duct_load = ducts_heat_load * space_loads.Heat_Tot / zone_htg_load
       space_loads.Heat_Ducts += space_htg_duct_load
       space_loads.Heat_Tot += space_htg_duct_load
@@ -1681,9 +1681,9 @@ class HVACSizing
     zone_loads.Cool_Lat += ducts_cool_load_lat
     zone_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
 
+    zone_clg_load_sens = zone.spaces.map { |space| all_space_loads[space].Cool_Sens }.sum
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
-      zone_clg_load_sens = zone.spaces.map { |space| all_space_loads[space].Cool_Sens }.sum
       space_clg_duct_load = ducts_cool_load_sens * space_loads.Cool_Sens / zone_clg_load_sens
       space_loads.Cool_Ducts_Sens += space_clg_duct_load
       space_loads.Cool_Sens += space_clg_duct_load
