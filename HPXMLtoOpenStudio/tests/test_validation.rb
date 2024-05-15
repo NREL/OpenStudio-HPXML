@@ -1648,7 +1648,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'schedule-file-and-operating-mode' => ["Both 'water_heater_operating_mode' schedule file and operating mode provided; the latter will be ignored."],
                               'schedule-file-max-power-ratio-with-single-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
                               'schedule-file-max-power-ratio-with-two-speed-system' => ['Maximum power ratio schedule is only supported for variable speed systems.'],
-                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'] }
+                              'schedule-file-max-power-ratio-with-separate-backup-system' => ['Maximum power ratio schedule is only supported for integrated backup system. Schedule is ignored for heating.'],
+                              'skylight-not-connected-to-cond-space' => ["Skylight 'Skylight1' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space."] }
 
     all_expected_warnings.each_with_index do |(warning_case, expected_warnings), i|
       puts "[#{i + 1}/#{all_expected_warnings.size}] Testing #{warning_case}..."
@@ -1775,6 +1776,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['schedule-file-max-power-ratio-with-separate-backup-system'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml')
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
+      elsif ['skylight-not-connected-to-cond-space'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
+        hpxml_bldg.skylights[0].floor_idref = nil
       else
         fail "Unhandled case: #{warning_case}."
       end

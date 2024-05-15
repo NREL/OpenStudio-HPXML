@@ -4480,7 +4480,11 @@ class HPXML < Object
     end
 
     def is_conditioned
-      return HPXML::is_conditioned(self)
+      if not floor.nil?
+        return HPXML::is_conditioned(floor)
+      else
+        return HPXML::is_conditioned(roof)
+      end
     end
 
     def delete
