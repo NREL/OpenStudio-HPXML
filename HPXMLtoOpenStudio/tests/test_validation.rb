@@ -1470,8 +1470,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.pv_systems[0].inverter_idref = 'foobar'
       elsif ['unattached-skylight'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
-        hpxml_bldg.skylights[0].roof_idref = 'foobar'
-        hpxml_bldg.skylights[0].floor_idref = 'foobar'
+        hpxml_bldg.skylights[0].attached_to_roof_idref = 'foobar'
+        hpxml_bldg.skylights[0].attached_to_floor_idref = 'foobar'
       elsif ['unattached-solar-thermal-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-solar-indirect-flat-plate.xml')
         hpxml_bldg.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
@@ -1778,7 +1778,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.header.schedules_filepaths << File.join(File.dirname(__FILE__), '../resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv')
       elsif ['skylight-not-connected-to-cond-space'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
-        hpxml_bldg.skylights[0].floor_idref = nil
+        hpxml_bldg.skylights[0].attached_to_floor_idref = nil
       else
         fail "Unhandled case: #{warning_case}."
       end
