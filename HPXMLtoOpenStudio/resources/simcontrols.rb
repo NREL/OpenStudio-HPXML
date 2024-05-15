@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
+# TODO
 class SimControls
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] model object
+  # @param hpxml_header [TODO] TODO
+  # @return [TODO] TODO
   def self.apply(model, hpxml_header)
     sim = model.getSimulationControl
     sim.setRunSimulationforSizingPeriods(false)

@@ -2,9 +2,9 @@ new_folder = 'documented'
 FileUtils.rm_rf(new_folder) if File.exist?(new_folder)
 
 files = []
-# files = ['HPXMLtoOpenStudio/resources/geometry.rb']
+# files = ['BuildResidentialScheduleFile/resources/schedules.rb']
 ['BuildResidentialHPXML', 'BuildResidentialScheduleFile', 'HPXMLtoOpenStudio', 'ReportSimulationOutput', 'ReportUtilityBills'].each do |folder|
-  files += Dir[File.join(folder, 'resources/[!test_*]*.rb')]
+  files += Dir[File.join(folder, 'resources/*.rb')]
 end
 
 def get_params(lines, idx)

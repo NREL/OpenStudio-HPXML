@@ -3,6 +3,7 @@
 require 'csv'
 require 'matrix'
 
+# TODO
 class ScheduleGenerator
   def initialize(runner:,
                  state:,
@@ -33,6 +34,10 @@ class ScheduleGenerator
     @append_output = append_output
   end
 
+  # TODO
+  #
+  # @param columns [TODO] TODO
+  # @return [TODO] TODO
   def self.export_columns
     return SchedulesFile::Columns.values.select { |c| c.can_be_stochastic }.map { |c| c.name }
   end
