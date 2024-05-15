@@ -4954,7 +4954,7 @@ class HPXMLFile
                              exterior_shading_factor_winter: args[:window_exterior_shading_winter],
                              exterior_shading_factor_summer: args[:window_exterior_shading_summer],
                              fraction_operable: args[:window_fraction_operable],
-                             wall_idref: wall_idref)
+                             attached_to_wall_idref: wall_idref)
     end
   end
 
@@ -4983,8 +4983,8 @@ class HPXMLFile
                                ufactor: args[:skylight_ufactor],
                                shgc: args[:skylight_shgc],
                                storm_type: args[:skylight_storm_type],
-                               roof_idref: roof_idref,
-                               floor_idref: floor_idref)
+                               attached_to_roof_idref: roof_idref,
+                               attached_to_floor_idref: floor_idref)
     end
   end
 
@@ -5005,7 +5005,7 @@ class HPXMLFile
       next if wall_idref.nil?
 
       hpxml_bldg.doors.add(id: "Door#{hpxml_bldg.doors.size + 1}",
-                           wall_idref: wall_idref,
+                           attached_to_wall_idref: wall_idref,
                            area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2'),
                            azimuth: args[:geometry_unit_orientation],
                            r_value: args[:door_rvalue])
@@ -6595,13 +6595,13 @@ class HPXMLFile
         end
       end
       (hpxml_bldg.windows + hpxml_bldg.doors).each do |subsurf|
-        if subsurf.respond_to?(:wall_idref) && (subsurf.wall_idref == surf.id)
-          subsurf.wall_idref = "#{surf_name}#{indexes[surf_name]}"
+        if subsurf.respond_to?(:attached_to_wall_idref) && (subsurf.attached_to_wall_idref == surf.id)
+          subsurf.attached_to_wall_idref = "#{surf_name}#{indexes[surf_name]}"
         end
       end
       hpxml_bldg.skylights.each do |subsurf|
-        if subsurf.respond_to?(:roof_idref) && (subsurf.roof_idref == surf.id)
-          subsurf.roof_idref = "#{surf_name}#{indexes[surf_name]}"
+        if subsurf.respond_to?(:attached_to_roof_idref) && (subsurf.attached_to_roof_idref == surf.id)
+          subsurf.attached_to_roof_idref = "#{surf_name}#{indexes[surf_name]}"
         end
       end
       surf.id = "#{surf_name}#{indexes[surf_name]}"
