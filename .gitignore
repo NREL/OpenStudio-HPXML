@@ -1,6 +1,7 @@
 .ruby-version
 /coverage
 /docs/_build
+/documented
 /results
 /run
 /workflow/generated_files

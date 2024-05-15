@@ -113,12 +113,18 @@ files.each do |file|
 
         (params2 - params1.collect { |x| x.first }).reverse.each do |needed_param|
           type = '[TODO]'
-          type = '[OpenStudio::Model::Model]' if needed_param == 'model'
+          type = '[OpenStudio::Model::Model]' if needed_param == 'model' # get these by doing var.class
           type = '[OpenStudio::Measure::OSRunner]' if needed_param == 'runner'
+          type = '[HPXML]' if needed_param == 'hpxml'
+          type = '[HPXML::Building]' if needed_param == 'hpxml_bldg'
+          type = '[WeatherProcess]' if needed_param == 'weather'
+          type = '[OpenStudio::EpwFile]' if needed_param == 'epw_file'
 
           des = 'TODO'
           des = 'model object' if needed_param == 'model'
           des = 'runner object' if needed_param == 'runner'
+          des = 'HPXML object' if needed_param == 'hpxml'
+          des == 'individual HPXML Building dwelling unit object' if needed_param == 'hpxml_bldg'
 
           params1 << [needed_param, type, des]
         end

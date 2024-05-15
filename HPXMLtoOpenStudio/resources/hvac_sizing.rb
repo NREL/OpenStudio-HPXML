@@ -7,8 +7,8 @@ class HVACSizing
   # Calculations generally follow ACCA Manual J/S.
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param hvac_systems [TODO] TODO
   # @param update_hpxml [TODO] TODO
@@ -103,7 +103,7 @@ class HVACSizing
   # TODO
   #
   # @param mj [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @return [TODO] TODO
   def self.process_site_calcs_and_design_temps(mj, weather, runner)
@@ -230,7 +230,7 @@ class HVACSizing
   # TODO
   #
   # @param mj [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param location [TODO] TODO
   # @return [TODO] TODO
   def self.process_design_temp_heating(mj, weather, location)
@@ -273,7 +273,7 @@ class HVACSizing
   # TODO
   #
   # @param mj [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param location [TODO] TODO
   # @return [TODO] TODO
   def self.process_design_temp_cooling(mj, weather, location)
@@ -1032,7 +1032,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param bldg_design_loads [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.process_load_infiltration_ventilation(mj, bldg_design_loads, weather)
     '''
@@ -1391,7 +1391,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param system_design_loads [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_cooling [TODO] TODO
   # @param frac_cool_load_served [TODO] TODO
   # @return [TODO] TODO
@@ -1471,7 +1471,7 @@ class HVACSizing
   # @param mj [TODO] TODO
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param hvac_sizing_values [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_heating [TODO] TODO
   # @param hvac_cooling [TODO] TODO
   # @param hvac_system [TODO] TODO
@@ -2180,7 +2180,7 @@ class HVACSizing
   # @param mj [TODO] TODO
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param hvac_sizing_values [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_cooling [TODO] TODO
   # @return [TODO] TODO
   def self.apply_hvac_ground_loop(mj, runner, hvac_sizing_values, weather, hvac_cooling)
@@ -2411,7 +2411,7 @@ class HVACSizing
   # @param mj [TODO] TODO
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param hvac_sizing_values [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_heating [TODO] TODO
   # @param total_cap_curve_value [TODO] TODO
   # @param hvac_system [TODO] TODO
@@ -2945,7 +2945,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param location [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.get_space_ua_values(mj, location, weather)
     if HPXML::conditioned_locations.include? location
@@ -3036,7 +3036,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param location [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param conditioned_design_temp [TODO] TODO
   # @param design_db [TODO] TODO
   # @param ground_db [TODO] TODO
@@ -3323,7 +3323,7 @@ class HVACSizing
   # TODO
   #
   # @param mj [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_cooling_ap [TODO] TODO
   # @param bore_spacing [TODO] TODO
   # @param bore_diameter [TODO] TODO

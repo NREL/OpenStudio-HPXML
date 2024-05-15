@@ -1612,7 +1612,7 @@ class Waterheater
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param climate_zone_iecc [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_location(hpxml_bldg, climate_zone_iecc)

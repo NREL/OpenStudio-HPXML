@@ -1788,7 +1788,7 @@ class Geometry
 
   # Takes in a list of floor surfaces for which to calculate the exposed perimeter.
   # Returns the total exposed perimeter.
-  # NOTE: Does not work for buildings with non-orthogonal walls.
+  # @note Does not work for buildings with non-orthogonal walls.
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param ground_floor_surfaces [TODO] TODO
@@ -2199,6 +2199,7 @@ class Geometry
   # Creates a polygon using an array of points.
   #
   # @param pts [TODO] TODO
+  # @param point [OpenStudio::Point3d] OpenStudio Point3d object
   # @return [OpenStudio::Point3dVector] OpenStudio Point3dVector object
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new

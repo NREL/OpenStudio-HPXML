@@ -7,8 +7,8 @@ class HotWaterAndAppliances
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @param spaces [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
@@ -1168,7 +1168,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param nbeds [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
@@ -1416,7 +1416,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,

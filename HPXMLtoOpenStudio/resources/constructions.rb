@@ -2121,7 +2121,7 @@ class Constructions
   #
   # @param foundation [TODO] TODO
   # @param slab [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param conditioned_zone [TODO] TODO
   # @param sim_begin_month [TODO] TODO
   # @param sim_begin_day [TODO] TODO
@@ -2290,7 +2290,7 @@ class Constructions
   # @param sub_surface [TODO] TODO
   # @param shading_schedules [TODO] TODO
   # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml_header, hpxml_bldg)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer

@@ -8,11 +8,11 @@ class HPXMLDefaults
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param eri_version [TODO] TODO
-  # @param weather [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @param schedules_file [TODO] TODO
   # @param convert_shared_systems [TODO] TODO
   # @return [TODO] TODO
@@ -81,7 +81,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_default_azimuths(hpxml_bldg)
     def self.sanitize_azimuth(azimuth)
@@ -124,7 +124,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param hpxml_header [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
@@ -183,8 +183,8 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @param nbeds [TODO] TODO
   # @return [TODO] TODO
   def self.apply_building_header_sizing(hpxml_bldg, weather, nbeds)
@@ -254,8 +254,8 @@ class HPXMLDefaults
   # TODO
   #
   # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_bldg.header.natvent_days_per_week.nil?
@@ -382,7 +382,7 @@ class HPXMLDefaults
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param has_fuel [TODO] TODO
   # @return [TODO] TODO
   def self.apply_utility_bill_scenarios(runner, hpxml_header, hpxml_bldg, has_fuel)
@@ -498,8 +498,8 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.apply_building(hpxml_bldg, epw_file)
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
@@ -641,7 +641,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_site(hpxml_bldg)
     if hpxml_bldg.site.site_type.nil?
@@ -664,7 +664,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_neighbor_buildings(hpxml_bldg)
     hpxml_bldg.neighbor_buildings.each do |neighbor_building|
@@ -681,7 +681,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
   def self.apply_building_occupancy(hpxml_bldg, schedules_file)
@@ -726,7 +726,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
   # @return [TODO] TODO
@@ -753,8 +753,8 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     if (not epw_file.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
@@ -770,7 +770,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_attics(hpxml_bldg)
     hpxml_bldg.attics.each do |attic|
@@ -801,7 +801,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_foundations(hpxml_bldg)
     hpxml_bldg.foundations.each do |foundation|
@@ -849,7 +849,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_infiltration(hpxml_bldg)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
@@ -873,7 +873,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_roofs(hpxml_bldg)
     hpxml_bldg.roofs.each do |roof|
@@ -933,7 +933,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_rim_joists(hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
@@ -972,7 +972,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_walls(hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
@@ -1035,7 +1035,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_foundation_walls(hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
@@ -1095,7 +1095,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
@@ -1153,7 +1153,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_slabs(hpxml_bldg)
     hpxml_bldg.slabs.each do |slab|
@@ -1190,7 +1190,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param eri_version [TODO] TODO
   # @return [TODO] TODO
   def self.apply_windows(hpxml_bldg, eri_version)
@@ -1271,7 +1271,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_skylights(hpxml_bldg)
     hpxml_bldg.skylights.each do |skylight|
@@ -1346,7 +1346,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_doors(hpxml_bldg)
     hpxml_bldg.doors.each do |door|
@@ -1373,7 +1373,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_partition_wall_mass(hpxml_bldg)
     if hpxml_bldg.partition_wall_mass.area_fraction.nil?
@@ -1392,7 +1392,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_furniture_mass(hpxml_bldg)
     if hpxml_bldg.furniture_mass.area_fraction.nil?
@@ -1408,9 +1408,9 @@ class HPXMLDefaults
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @param convert_shared_systems [TODO] TODO
   # @return [TODO] TODO
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
@@ -1933,7 +1933,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
@@ -2002,7 +2002,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
   # @return [TODO] TODO
@@ -2070,7 +2070,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param ncfl [TODO] TODO
   # @param ncfl_ag [TODO] TODO
   # @return [TODO] TODO
@@ -2205,7 +2205,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_hvac_location(hpxml_bldg)
     # This needs to come after we have applied defaults for ducts
@@ -2268,8 +2268,8 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
   # @param eri_version [TODO] TODO
@@ -2383,7 +2383,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param nbeds [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param schedules_file [TODO] TODO
@@ -2456,7 +2456,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_flue_or_chimney(hpxml_bldg)
     # This needs to come after we have applied defaults for HVAC/DHW systems
@@ -2468,7 +2468,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param ncfl [TODO] TODO
   # @param has_uncond_bsmnt [TODO] TODO
@@ -2552,7 +2552,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
   def self.apply_water_fixtures(hpxml_bldg, schedules_file)
@@ -2588,7 +2588,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_solar_thermal_systems(hpxml_bldg)
     hpxml_bldg.solar_thermal_systems.each do |solar_thermal_system|
@@ -2609,7 +2609,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_pv_systems(hpxml_bldg)
     hpxml_bldg.pv_systems.each do |pv_system|
@@ -2652,7 +2652,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_generators(hpxml_bldg)
     hpxml_bldg.generators.each do |generator|
@@ -2665,7 +2665,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_batteries(hpxml_bldg)
     default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
@@ -2730,7 +2730,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param nbeds [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param schedules_file [TODO] TODO
@@ -3039,7 +3039,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
   def self.apply_lighting(hpxml_bldg, schedules_file)
@@ -3135,9 +3135,9 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param nbeds [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
   def self.apply_ceiling_fans(hpxml_bldg, nbeds, weather, schedules_file)
@@ -3169,7 +3169,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
@@ -3290,7 +3290,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
@@ -3415,7 +3415,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param cfa [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @return [TODO] TODO
@@ -3511,8 +3511,8 @@ class HPXMLDefaults
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_bldg [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param weather [WeatherProcess] TODO
   # @param cfa [TODO] TODO
   # @return [TODO] TODO
   def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
@@ -3577,7 +3577,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_nbeds_adjusted_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
@@ -3593,7 +3593,7 @@ class HPXMLDefaults
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
     # Check for atmospheric heating system in conditioned space
@@ -3638,7 +3638,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param latitude [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.get_default_latitude(latitude, epw_file)
     return latitude unless latitude.nil?
@@ -3649,7 +3649,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param longitude [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.get_default_longitude(longitude, epw_file)
     return longitude unless longitude.nil?
@@ -3660,7 +3660,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param time_zone [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.get_default_time_zone(time_zone, epw_file)
     return time_zone unless time_zone.nil?
@@ -3671,7 +3671,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param state_code [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.get_default_state_code(state_code, epw_file)
     return state_code unless state_code.nil?

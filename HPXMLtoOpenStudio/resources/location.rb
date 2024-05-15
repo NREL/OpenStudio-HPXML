@@ -5,10 +5,10 @@ class Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param weather [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply(model, weather, epw_file, hpxml_header, hpxml_bldg)
     apply_year(model, hpxml_header, epw_file)
@@ -22,7 +22,7 @@ class Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_site(model, hpxml_bldg)
     site = model.getSite
@@ -37,7 +37,7 @@ class Location
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param hpxml_header [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.apply_year(model, hpxml_header, epw_file)
     if Date.leap?(hpxml_header.sim_calendar_year)
@@ -54,7 +54,7 @@ class Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_dst(model, hpxml_bldg)
     return unless hpxml_bldg.dst_enabled
@@ -71,8 +71,8 @@ class Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param weather [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_ground_temps(model, weather, hpxml_bldg)
     # Shallow ground temperatures only currently used for ducts located under slab
@@ -117,7 +117,7 @@ class Location
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param hpxml_path [TODO] TODO
   # @return [TODO] TODO
   def self.get_epw_path(hpxml_bldg, hpxml_path)
@@ -154,7 +154,7 @@ class Location
   # TODO
   #
   # @param sim_calendar_year [TODO] TODO
-  # @param epw_file [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.get_sim_calendar_year(sim_calendar_year, epw_file)
     if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY

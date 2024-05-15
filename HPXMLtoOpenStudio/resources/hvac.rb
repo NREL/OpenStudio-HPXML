@@ -21,7 +21,7 @@ class HVAC
   # @param control_zone [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
   # @param schedules_file [TODO] TODO
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
@@ -286,7 +286,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -941,7 +941,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [TODO] TODO
@@ -1001,7 +1001,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param hvac_control [TODO] TODO
   # @param conditioned_zone [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
@@ -1155,7 +1155,7 @@ class HVAC
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
     num_days = Constants.NumDaysInYear(year)
@@ -1763,7 +1763,7 @@ class HVAC
 
   # TODO
   #
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
@@ -1778,7 +1778,7 @@ class HVAC
 
   # TODO
   #
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @param latitude [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_heating_and_cooling_seasons(weather, latitude)
@@ -2081,7 +2081,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param air_loop_unitary [TODO] TODO
   # @param control_zone [TODO] TODO
   # @param heating_system [TODO] TODO
@@ -3619,7 +3619,7 @@ class HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param weather [TODO] TODO
+  # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties
@@ -3838,7 +3838,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_default_duct_locations(hpxml_bldg)
     primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
@@ -4164,7 +4164,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_shared_systems(hpxml_bldg)
     applied_clg = apply_shared_cooling_systems(hpxml_bldg)
@@ -4197,7 +4197,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_shared_cooling_systems(hpxml_bldg)
     applied = false
@@ -4322,7 +4322,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_shared_heating_systems(hpxml_bldg)
     applied = false
@@ -4368,7 +4368,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @param heating_system [TODO] TODO
   # @param cooling_system [TODO] TODO
   # @return [TODO] TODO
@@ -4386,7 +4386,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_hpxml_hvac_systems(hpxml_bldg)
     # Returns a list of heating/cooling systems, incorporating whether
@@ -4433,7 +4433,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
     min_capacity = 1.0 # Btuh
@@ -4481,7 +4481,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.apply_unit_multiplier(hpxml_bldg)
     # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
