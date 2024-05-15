@@ -1457,7 +1457,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.ventilation_fans[0].distribution_system_idref = 'foobar'
       elsif ['unattached-door'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.doors[0].wall_idref = 'foobar'
+        hpxml_bldg.doors[0].attached_to_wall_idref = 'foobar'
       elsif ['unattached-gshp'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml')
         hpxml_bldg.heat_pumps[0].geothermal_loop_idref = 'foobar'
@@ -1491,7 +1491,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.dishwashers[0].water_heating_system_idref = 'foobar'
       elsif ['unattached-window'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.windows[0].wall_idref = 'foobar'
+        hpxml_bldg.windows[0].attached_to_wall_idref = 'foobar'
       elsif ['unattached-zone'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.heating_systems[0].attached_to_zone_idref = 'foobar'
