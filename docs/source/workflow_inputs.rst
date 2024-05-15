@@ -2877,7 +2877,7 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
   .. [#] BoreholesOrTrenches/Count calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by BoreholesOrTrenches/Length if BoreholesOrTrenches/Length is provided, otherwise autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
-  .. [#] The minimum depth in the g-function library is 79 ft.
+  .. [#] The minimum depth in the g-function library is 80 ft.
          The maximum realistic depth to be used in residential applications is 500 ft.
   .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
