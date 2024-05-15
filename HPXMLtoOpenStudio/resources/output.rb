@@ -7,6 +7,7 @@ class TE
   Net = 'Net'
 end
 
+# TODO
 class FT
   # Fuel Types
   Elec = 'Electricity'
@@ -70,6 +71,7 @@ class HWT
   DistributionWaste = 'Distribution Waste'
 end
 
+# TODO
 class LT
   # Load Types
   Heating = 'Heating: Delivered'

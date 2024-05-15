@@ -2,11 +2,22 @@
 
 # Annual constant schedule
 class ScheduleConstant
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, unavailable_periods: [])
     year = model.getYearDescription.assumedYear
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedule
     return @schedule
   end
@@ -48,6 +59,13 @@ end
 class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -61,20 +79,36 @@ class HourlyByMonthSchedule
     @schedule = create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
   end
 
+  # TODO
+  #
+  # @param val [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedule
     return @schedule
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def maxval
     return @maxval
   end
 
   private
 
+  # TODO
+  #
+  # @param values [TODO] TODO
+  # @param num_values [TODO] TODO
+  # @param sch_name [TODO] TODO
+  # @return [TODO] TODO
   def validate_values(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
@@ -211,6 +245,13 @@ end
 class HourlyByDaySchedule
   # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -225,20 +266,36 @@ class HourlyByDaySchedule
     @schedule = create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
   end
 
+  # TODO
+  #
+  # @param val [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedule
     return @schedule
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def maxval
     return @maxval
   end
 
   private
 
+  # TODO
+  #
+  # @param values [TODO] TODO
+  # @param num_values [TODO] TODO
+  # @param sch_name [TODO] TODO
+  # @return [TODO] TODO
   def validate_values(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
@@ -373,6 +430,13 @@ class MonthWeekdayWeekendSchedule
   # weekday_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
                  begin_day = 1, end_month = 12, end_day = 31, unavailable_periods: nil)
@@ -394,20 +458,35 @@ class MonthWeekdayWeekendSchedule
                                 schedule_type_limits_name, unavailable_periods)
   end
 
+  # TODO
+  #
+  # @param daily_kwh [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_daily_kwh(daily_kwh)
     design_level_kw = daily_kwh * @maxval * @schadjust
     return UnitConversions.convert(design_level_kw, 'kW', 'W')
   end
 
+  # TODO
+  #
+  # @param daily_therm [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_daily_therm(daily_therm)
     return calc_design_level_from_daily_kwh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
   end
 
+  # TODO
+  #
+  # @param daily_water [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedule
     return @schedule
   end
@@ -599,6 +678,10 @@ class Schedule
   end
 
   # return [Double] The total number of full load hours for this schedule.
+  #
+  # @param modelYear [TODO] TODO
+  # @param schedule [TODO] TODO
+  # @return [TODO] TODO
   def self.annual_equivalent_full_load_hrs(modelYear, schedule)
     if schedule.to_ScheduleInterval.is_initialized
       timeSeries = schedule.to_ScheduleInterval.get.timeSeries
@@ -751,6 +834,13 @@ class Schedule
     return unavailable_periods.select { |p| Schedule.unavailable_period_applies(runner, schedule_name, p.column_name) }
   end
 
+  # TODO
+  #
+  # @param schedule [TODO] TODO
+  # @param sch_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @param year [TODO] TODO
+  # @return [TODO] TODO
   def self.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
     return if unavailable_periods.nil?
 
@@ -934,6 +1024,9 @@ class Schedule
     return '0.023, 0.019, 0.015, 0.017, 0.021, 0.031, 0.042, 0.041, 0.034, 0.029, 0.027, 0.025, 0.021, 0.021, 0.021, 0.026, 0.031, 0.044, 0.084, 0.117, 0.113, 0.096, 0.063, 0.039'
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.LightingMonthlyMultipliers
     return '1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20'
   end
@@ -1134,22 +1227,37 @@ class Schedule
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.RefrigeratorWeekdayFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.RefrigeratorWeekendFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.RefrigeratorMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.RefrigeratorConstantCoefficients
     return '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544' # Table C.3(2) Daily Refrigerator Coefficient Schedules
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.RefrigeratorTemperatureCoefficients
     return '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020' # Table C.3(2) Daily Refrigerator Coefficient Schedules
   end
@@ -1732,6 +1840,14 @@ end
 # TODO
 class SchedulesFile
   class Column
+    # TODO
+    #
+    # @param model [OpenStudio::Model::Model] TODO
+    # @param sch_name [TODO] TODO
+    # @param val [TODO] TODO
+    # @param schedule_type_limits_name [TODO] TODO
+    # @param unavailable_periods [TODO] TODO
+    # @return [TODO] TODO
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
       @used_by_unavailable_periods = used_by_unavailable_periods
@@ -1792,6 +1908,14 @@ class SchedulesFile
     WholeHouseFan: Column.new('whole_house_fan', true, false, nil),
   }
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def initialize(runner: nil,
                  schedules_paths:,
                  year:,
@@ -1810,6 +1934,9 @@ class SchedulesFile
     export()
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def nil?
     if @schedules.nil?
       return true
@@ -1818,6 +1945,10 @@ class SchedulesFile
     return false
   end
 
+  # TODO
+  #
+  # @param col_name [TODO] TODO
+  # @return [TODO] TODO
   def includes_col_name(col_name)
     if @schedules.keys.include?(col_name)
       return true
@@ -1826,6 +1957,10 @@ class SchedulesFile
     return false
   end
 
+  # TODO
+  #
+  # @param schedules_paths [TODO] TODO
+  # @return [TODO] TODO
   def import(schedules_paths)
     num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
@@ -1885,6 +2020,9 @@ class SchedulesFile
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def export()
     return false if @output_schedules_path.nil?
 
@@ -1899,14 +2037,24 @@ class SchedulesFile
     return true
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedules
     return @schedules
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def tmp_schedules
     return @tmp_schedules
   end
 
+  # TODO
+  #
+  # @param col_name [TODO] TODO
+  # @return [TODO] TODO
   def get_col_index(col_name:)
     headers = @tmp_schedules.keys
 
@@ -1914,6 +2062,13 @@ class SchedulesFile
     return col_num
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param col_name [TODO] TODO
+  # @param rows_to_skip [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @return [TODO] TODO
   def create_schedule_file(model, col_name:, rows_to_skip: 1,
                            schedule_type_limits_name: nil)
     model.getScheduleFiles.each do |schedule_file|
@@ -1963,6 +2118,11 @@ class SchedulesFile
   end
 
   # the equivalent number of hours in the period, if the schedule was at full load (1.0)
+  #
+  # @param col_name [TODO] TODO
+  # @param schedules [TODO] TODO
+  # @param period [TODO] TODO
+  # @return [TODO] TODO
   def period_equivalent_full_load_hrs(col_name:,
                                       schedules: nil,
                                       period: nil)
@@ -2017,6 +2177,10 @@ class SchedulesFile
   # the power in watts the equipment needs to consume so that, if it were to run annual_equivalent_full_load_hrs hours,
   # it would consume the annual_kwh energy in the year. Essentially, returns the watts for the equipment when schedule
   # is at 1.0, so that, for the given schedule values, the equipment will consume annual_kwh energy in a year.
+  #
+  # @param col_name [TODO] TODO
+  # @param annual_kwh [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_annual_kwh(col_name:,
                                         annual_kwh:)
     if @schedules[col_name].nil?
@@ -2032,6 +2196,10 @@ class SchedulesFile
   end
 
   # Similar to ann_equiv_full_load_hrs, but for thermal energy
+  #
+  # @param col_name [TODO] TODO
+  # @param annual_therm [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_annual_therm(col_name:,
                                           annual_therm:)
     if @schedules[col_name].nil?
@@ -2046,6 +2214,9 @@ class SchedulesFile
 
   # similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design
   # level
+  #
+  # @param daily_kwh [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_level_from_daily_kwh(col_name:,
                                        daily_kwh:)
     if @schedules[col_name].nil?
@@ -2063,6 +2234,10 @@ class SchedulesFile
   end
 
   # similar to calc_design_level_from_daily_kwh but for water usage
+  #
+  # @param col_name [TODO] TODO
+  # @param daily_water [TODO] TODO
+  # @return [TODO] TODO
   def calc_peak_flow_from_daily_gpm(col_name:,
                                     daily_water:)
     if @schedules[col_name].nil?
@@ -2080,6 +2255,11 @@ class SchedulesFile
     return peak_flow
   end
 
+  # TODO
+  #
+  # @param col_name [TODO] TODO
+  # @param periods [TODO] TODO
+  # @return [TODO] TODO
   def create_column_values_from_periods(col_name, periods)
     # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
@@ -2110,6 +2290,9 @@ class SchedulesFile
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def expand_schedules
     # Expand schedules with fewer elements such that all the schedules have the same number of elements
     max_size = @schedules.map { |_k, v| v.size }.uniq.max
@@ -2165,6 +2348,9 @@ class SchedulesFile
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def convert_setpoints
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
@@ -2180,6 +2366,9 @@ class SchedulesFile
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def create_battery_charging_discharging_schedules
     battery_col_name = Columns[:Battery].name
     return if !@schedules.keys.include?(battery_col_name)

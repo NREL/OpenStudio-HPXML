@@ -1485,7 +1485,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param constr_name [TODO] TODO
   # @param under_r [TODO] TODO
   # @param under_width [TODO] TODO
@@ -1715,7 +1715,7 @@ class Constructions
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param object_name [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param area [TODO] TODO
   # @return [TODO] TODO
   def self.create_os_int_mass_and_def(model, object_name, space, area)
@@ -2588,7 +2588,7 @@ class Constructions
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param model [OpenStudio::Model::Model] model object
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param floor_id [TODO] TODO
   # @param floor_type [TODO] TODO
   # @param is_ceiling [TODO] TODO
@@ -3006,6 +3006,9 @@ class Construction
   # Facilitates creating and assigning an OpenStudio construction (with accompanying
   # OpenStudio Materials) from Material objects. Handles parallel path calculations.
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(name, path_widths)
     @name = name
     @path_widths = path_widths
@@ -3018,6 +3021,11 @@ class Construction
     @layers_materials = []
   end
 
+  # TODO
+  #
+  # @param materials [TODO] TODO
+  # @param name [TODO] TODO
+  # @return [TODO] TODO
   def add_layer(materials, name = nil)
     # materials: Either a Material object or a list of Material objects
     # include_in_construction: false if the layer that should not be included in the
@@ -3042,6 +3050,9 @@ class Construction
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def assembly_rvalue()
     # Calculate overall R-value for assembly
     validate
@@ -3067,6 +3078,10 @@ class Construction
 
   # Creates constructions as needed and assigns to surfaces.
   # Leave name as nil if the materials (e.g., exterior finish) apply to multiple constructions.
+  #
+  # @param surfaces [TODO] TODO
+  # @param model [OpenStudio::Model::Model] TODO
+  # @return [TODO] TODO
   def create_and_assign_constructions(surfaces, model)
     validate
 
@@ -3094,6 +3109,11 @@ class Construction
     end
   end
 
+  # TODO
+  #
+  # @param solar_absorptance [TODO] TODO
+  # @param emittance [TODO] TODO
+  # @return [TODO] TODO
   def set_exterior_material_properties(solar_absorptance = 0.75, emittance = 0.9)
     @layers_materials[1].each do |exterior_material|
       exterior_material.sAbs = solar_absorptance
@@ -3101,6 +3121,11 @@ class Construction
     end
   end
 
+  # TODO
+  #
+  # @param solar_absorptance [TODO] TODO
+  # @param emittance [TODO] TODO
+  # @return [TODO] TODO
   def set_interior_material_properties(solar_absorptance = 0.6, emittance = 0.9)
     if @layers_materials.size > 3 # Only apply if there is a separate interior material
       @layers_materials[-2].each do |interior_material|
@@ -3335,6 +3360,9 @@ end
 
 # TODO
 class WoodStudConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
@@ -3348,6 +3376,9 @@ end
 
 # TODO
 class SteelStudConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @cavity_thick_in = cavity_thick_in
     @corr_factor = corr_factor
@@ -3362,6 +3393,9 @@ end
 
 # TODO
 class DoubleStudConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
@@ -3376,6 +3410,9 @@ end
 
 # TODO
 class SIPConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @framing_factor = framing_factor
@@ -3390,6 +3427,9 @@ end
 
 # TODO
 class CMUConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(thick_in, cond_in, framing_factor, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @cond_in = cond_in
@@ -3404,6 +3444,9 @@ end
 
 # TODO
 class ICFConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @ins_thick_in = ins_thick_in
     @concrete_thick_in = concrete_thick_in
@@ -3418,6 +3461,9 @@ end
 
 # TODO
 class GenericConstructionSet
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in

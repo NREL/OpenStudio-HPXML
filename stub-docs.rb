@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 debug = false
 
 new_folder = 'documented'
@@ -46,7 +48,6 @@ def set_params(lines, idx, params, descs, ret, tab, is_method)
   descs.each do |desc|
     lines.insert(idx, "#{tab}#{desc}")
   end
-
   return lines
 end
 
@@ -69,6 +70,8 @@ def common_parameters(param, type, desc)
 end
 
 files.each do |file|
+  next if file.include?('hpxml.rb')
+
   puts "File: #{file}"
 
   lines = File.readlines(file)
@@ -77,24 +80,30 @@ files.each do |file|
   new_parent_folder = File.dirname(new_path)
   FileUtils.mkdir_p(new_parent_folder) if !File.exist?(new_parent_folder)
 
-  previous_classes = ObjectSpace.each_object(Class).to_a
+  # previous_classes = ObjectSpace.each_object(Class).to_a
+  previous_classes = []
 
   require_relative file
 
   new_classes = ObjectSpace.each_object(Class).to_a - previous_classes
+
   new_classes.each do |new_class|
+    # next if new_class.to_s != 'HPXML::HeatingDetailedPerformanceData'
+
     # classes
     class_found = false
     start_idx = nil
     end_idx = nil
     descs = []
     lines.each_with_index do |line, i|
-      next if not (line.strip.start_with?('class ') && line.strip.include?("#{new_class} "))
+      next if not (line.strip.start_with?("class #{new_class.to_s.gsub('HPXML::', '')}") && (line.strip.include?("#{new_class.to_s.gsub('HPXML::', '')} ") || line.strip.end_with?("#{new_class.to_s.gsub('HPXML::', '')}")))
 
       class_found = true
       end_idx = i
       _params, descs, _ret, start_idx = get_params(lines, end_idx)
     end
+
+    next if not class_found
 
     if not end_idx.nil? # class found in file
       (start_idx..end_idx - 1).to_a.reverse.each do |idx|
@@ -105,15 +114,24 @@ files.each do |file|
     end
 
     # methods
-    methods = new_class.methods(false)
+    methods = new_class.instance_methods() + new_class.methods(false) + new_class.private_methods() + new_class.public_methods() + new_class.protected_methods()
+
     methods.each do |method|
-      # next if method.to_s != 'is_adiabatic'
+      # next if method.to_s != 'check_for_errors'
 
       all_params = []
-      new_class.method(method).parameters.each do |req, param|
-        next if req == :keyrest
+      begin
+        new_class.instance_method(method).parameters.each do |req, param|
+          next if req == :keyrest
 
-        all_params << param.to_s
+          all_params << param.to_s
+        end
+      rescue
+        new_class.method(method).parameters.each do |req, param|
+          next if req == :keyrest
+
+          all_params << param.to_s
+        end
       end
 
       start_idx = nil
@@ -123,9 +141,8 @@ files.each do |file|
       descs = []
       ret = nil
       lines.each_with_index do |line, i|
-        next if not (line.strip.start_with?('def ') && (line.strip.include?("#{method}(") || line.strip.end_with?("#{method}")) && class_found)
+        next if not ((line.strip.end_with?("def self.#{method}") || line.strip.end_with?("def #{method}") || line.strip.start_with?("def self.#{method}(") || line.strip.start_with?("def #{method}(")) && class_found)
 
-        class_found = false
         end_idx = i
         documented_params, descs, ret, start_idx = get_params(lines, end_idx)
 
@@ -133,7 +150,7 @@ files.each do |file|
           puts
           puts "Method: #{method}"
           puts "Parameters: #{all_params}"
-          puts "@params: #{params1}"
+          puts "@params: #{documented_params}"
           puts "Description: #{descs}"
         end
 
@@ -149,15 +166,13 @@ files.each do |file|
           type, desc = common_parameters(param, type, desc)
           new_params << [param, type, desc]
         end
+
+        (start_idx..end_idx - 1).to_a.reverse.each do |idx|
+          lines.delete_at(idx)
+        end
+
+        set_params(lines, start_idx, new_params.uniq, descs, ret, '  ', true)
       end
-
-      next if end_idx.nil? # method not found in file
-
-      (start_idx..end_idx - 1).to_a.reverse.each do |idx|
-        lines.delete_at(idx)
-      end
-
-      set_params(lines, start_idx, new_params, descs, ret, '  ', true)
     end # end methods
   end # end new_classes
 

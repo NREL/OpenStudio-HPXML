@@ -6,6 +6,7 @@ class Geometry
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @return [TODO] TODO
   def self.tear_down_model(model:,
                            runner:)
     handles = OpenStudio::UUIDVector.new
@@ -111,6 +112,15 @@ class Geometry
     end
   end
 
+  # TODO
+  #
+  # @param length [TODO] TODO
+  # @param width [TODO] TODO
+  # @param z_origin [TODO] TODO
+  # @param azimuth [TODO] TODO
+  # @param tilt [TODO] TODO
+  # @param add_buffer [TODO] TODO
+  # @return [TODO] TODO
   def self.create_roof_vertices(length:,
                                 width:,
                                 z_origin:,
@@ -242,6 +252,12 @@ class Geometry
   end
 
   # Reverse the vertices after calling create_floor_vertices with the same argument values.
+  #
+  # @param length [TODO] TODO
+  # @param width [TODO] TODO
+  # @param z_origin [TODO] TODO
+  # @param default_azimuths [TODO] TODO
+  # @return [TODO] TODO
   def self.create_ceiling_vertices(length:,
                                    width:,
                                    z_origin:,
@@ -249,6 +265,13 @@ class Geometry
     return OpenStudio::reverse(create_floor_vertices(length: length, width: width, z_origin: z_origin, default_azimuths: default_azimuths))
   end
 
+  # TODO
+  #
+  # @param length [TODO] TODO
+  # @param width [TODO] TODO
+  # @param z_origin [TODO] TODO
+  # @param default_azimuths [TODO] TODO
+  # @return [TODO] TODO
   def self.create_floor_vertices(length:,
                                  width:,
                                  z_origin:,
@@ -279,6 +302,12 @@ class Geometry
     return transformation * vertices
   end
 
+  # TODO
+  #
+  # @param spaces [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param apply_ashrae140_assumptions [TODO] TODO
+  # @return [TODO] TODO
   def self.set_zone_volumes(spaces:,
                             hpxml_bldg:,
                             apply_ashrae140_assumptions:)
@@ -313,6 +342,7 @@ class Geometry
 
   # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
   #
+  # @param model [OpenStudio::Model::Model] TODO
   # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param walls_top [Double] the total height of the dwelling unit
   # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
@@ -455,6 +485,16 @@ class Geometry
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param num_occ [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
+  # @param schedules_file [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
@@ -505,6 +545,10 @@ class Geometry
     occ.setNumberofPeopleSchedule(people_sch)
   end
 
+  # TODO
+  #
+  # @param zone [TODO] TODO
+  # @return [TODO] TODO
   def self.get_z_origin_for_zone(zone:)
     z_origins = []
     zone.spaces.each do |space|
@@ -543,6 +587,13 @@ class Geometry
     return OpenStudio::Transformation.new(m)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param length [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param walls_top [TODO] TODO
+  # @return [TODO] TODO
   def self.add_neighbor_shading(model:,
                                 length:,
                                 hpxml_bldg:,
@@ -571,6 +622,11 @@ class Geometry
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param location [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_zone_volume(hpxml_bldg:,
                                  location:)
     if [HPXML::LocationBasementUnconditioned,
@@ -598,6 +654,10 @@ class Geometry
     end
   end
 
+  # TODO
+  #
+  # @param location [TODO] TODO
+  # @return [TODO] TODO
   def self.get_temperature_scheduled_space_values(location:)
     if location == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of heating setpoint
@@ -654,6 +714,10 @@ class Geometry
     fail "Unhandled location: #{location}."
   end
 
+  # TODO
+  #
+  # @param spaces [TODO] TODO
+  # @return [TODO] TODO
   def self.get_height_of_spaces(spaces:)
     # Calculates space heights as the max z coordinate minus the min z coordinate
     minzs = []
@@ -666,6 +730,10 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
+  # TODO
+  #
+  # @param surface [OpenStudio::Model::Surface] TODO
+  # @return [TODO] TODO
   def self.get_surface_length(surface:)
     xvalues = get_surface_x_values(surfaceArray: [surface])
     yvalues = get_surface_y_values(surfaceArray: [surface])

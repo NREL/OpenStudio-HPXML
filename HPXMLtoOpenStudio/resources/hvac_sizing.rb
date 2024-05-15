@@ -3878,6 +3878,9 @@ end
 
 # TODO
 class MJ
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
   end
   attr_accessor(:daily_range_temp_adjust, :cool_setpoint, :heat_setpoint, :cool_design_grains, :ctd, :htd,
@@ -3887,6 +3890,9 @@ end
 
 # TODO
 class DesignLoads
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
   end
   attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
@@ -3898,6 +3904,9 @@ end
 
 # TODO
 class HVACSizingValues
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
   end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,

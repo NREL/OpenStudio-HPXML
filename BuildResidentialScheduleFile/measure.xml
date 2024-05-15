@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>3229a80e-544b-485e-ab2c-0c571ae1949e</version_id>
-  <version_modified>2024-05-15T05:28:05Z</version_modified>
+  <version_id>dcec64a7-1868-4af1-a735-f7c99e92908e</version_id>
+  <version_modified>2024-05-15T18:30:42Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -223,7 +223,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B2BACF76</checksum>
+      <checksum>F223F85E</checksum>
     </file>
     <file>
       <filename>schedules_config.md</filename>

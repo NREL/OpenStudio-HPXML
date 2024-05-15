@@ -1752,7 +1752,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @return [TODO] TODO
   def self.get_adjacent_to(surface:)
     space = surface.space.get
@@ -1764,7 +1764,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param orientation [TODO] TODO
   # @return [TODO] TODO
   def self.get_surface_azimuth(surface:,
@@ -1775,7 +1775,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param height [TODO] TODO
   # @return [TODO] TODO
   def self.surface_is_rim_joist(surface:,
@@ -1875,7 +1875,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @return [TODO] TODO
   def self.get_facade_for_surface(surface:)
     tol = 0.001
@@ -1928,7 +1928,7 @@ class Geometry
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @return [TODO] TODO
   def self.get_adiabatic_adjacent_surface(model:,
                                           surface:)
@@ -2028,7 +2028,7 @@ class Geometry
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param polygon [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param rim_joist_height [TODO] TODO
   # @param z [TODO] TODO
   # @return [TODO] TODO
@@ -2074,7 +2074,7 @@ class Geometry
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param footprint_polygon [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @return [TODO] TODO
   def self.assign_indexes(model:,
                           footprint_polygon:,
@@ -2199,7 +2199,6 @@ class Geometry
   # Creates a polygon using an array of points.
   #
   # @param pts [TODO] TODO
-  # @param point [OpenStudio::Point3d] OpenStudio Point3d object
   # @return [OpenStudio::Point3dVector] OpenStudio Point3dVector object
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new
@@ -2223,7 +2222,7 @@ class Geometry
 
   # TODO
   #
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @return [TODO] TODO
   def self.get_space_floor_z(space:)
     space.surfaces.each do |surface|
@@ -2235,7 +2234,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param min_average_ceiling_height_for_window [TODO] TODO
   # @param min_window_width [TODO] TODO
   # @return [TODO] TODO
@@ -2273,7 +2272,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param window_area [TODO] TODO
   # @param window_gap_y [TODO] TODO
   # @param window_gap_x [TODO] TODO
@@ -2377,7 +2376,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @param win_width [TODO] TODO
   # @param win_height [TODO] TODO
   # @param win_center_x [TODO] TODO
@@ -2466,7 +2465,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @return [TODO] TODO
   def self.is_rectangular_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
@@ -2492,7 +2491,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [TODO] TODO
+  # @param surface [OpenStudio::Model::Surface] TODO
   # @return [TODO] TODO
   def self.is_gable_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
@@ -2515,7 +2514,7 @@ class Geometry
 
   # TODO
   #
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @return [TODO] TODO
   def self.space_has_roof(space:)
     space.surfaces.each do |surface|
@@ -2655,7 +2654,7 @@ class Geometry
 
   # Returns true if space is either fully or partially below grade.
   #
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @return [TODO] TODO
   def self.space_is_below_grade(space:)
     space.surfaces.each do |surface|

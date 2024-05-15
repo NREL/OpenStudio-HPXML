@@ -1042,7 +1042,7 @@ class HotWaterAndAppliances
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param obj_name [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
   # @param frac_lat [TODO] TODO
@@ -1070,7 +1070,7 @@ class HotWaterAndAppliances
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param obj_name [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
   # @param frac_lat [TODO] TODO

@@ -5,6 +5,22 @@ require 'matrix'
 
 # TODO
 class ScheduleGenerator
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] TODO
+  # @param state [TODO] TODO
+  # @param minutes_per_step [TODO] TODO
+  # @param steps_in_day [TODO] TODO
+  # @param mkc_ts_per_day [TODO] TODO
+  # @param mkc_ts_per_hour [TODO] TODO
+  # @param total_days_in_year [TODO] TODO
+  # @param sim_year [TODO] TODO
+  # @param sim_start_day [TODO] TODO
+  # @param debug [TODO] TODO
+  # @param append_output [TODO] TODO
+  # @param column_names [TODO] TODO
+  # @param random_seed [TODO] TODO
+  # @return [TODO] TODO
   def initialize(runner:,
                  state:,
                  column_names: nil,
@@ -36,16 +52,23 @@ class ScheduleGenerator
 
   # TODO
   #
-  # @param columns [TODO] TODO
   # @return [TODO] TODO
   def self.export_columns
     return SchedulesFile::Columns.values.select { |c| c.can_be_stochastic }.map { |c| c.name }
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def schedules
     return @schedules
   end
 
+  # TODO
+  #
+  # @param args [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @return [TODO] TODO
   def create(args:,
              weather:)
     @schedules = {}
@@ -70,6 +93,11 @@ class ScheduleGenerator
     return true
   end
 
+  # TODO
+  #
+  # @param args [TODO] TODO
+  # @param weather [WeatherProcess] TODO
+  # @return [TODO] TODO
   def create_stochastic_schedules(args:,
                                   weather:)
     # initialize a random number generator
@@ -591,6 +619,11 @@ class ScheduleGenerator
     return true
   end
 
+  # TODO
+  #
+  # @param array [TODO] TODO
+  # @param group_size [TODO] TODO
+  # @return [TODO] TODO
   def aggregate_array(array, group_size)
     new_array_size = array.size / group_size
     new_array = [0] * new_array_size
@@ -600,6 +633,12 @@ class ScheduleGenerator
     return new_array
   end
 
+  # TODO
+  #
+  # @param array [TODO] TODO
+  # @param weekday_monthly_shift_dict [TODO] TODO
+  # @param weekend_monthly_shift_dict [TODO] TODO
+  # @return [TODO] TODO
   def apply_monthly_offsets(array:, weekday_monthly_shift_dict:, weekend_monthly_shift_dict:)
     month_strs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     new_array = []
@@ -623,6 +662,11 @@ class ScheduleGenerator
     return new_array
   end
 
+  # TODO
+  #
+  # @param resources_path [TODO] TODO
+  # @param daytype [TODO] TODO
+  # @return [TODO] TODO
   def read_monthly_shift_minutes(resources_path:, daytype:)
     shift_file = resources_path + "/#{daytype}/state_and_monthly_schedule_shift.csv"
     shifts = CSV.read(shift_file)
@@ -634,6 +678,10 @@ class ScheduleGenerator
     return monthly_shifts_dict
   end
 
+  # TODO
+  #
+  # @param resources_path [TODO] TODO
+  # @return [TODO] TODO
   def read_appliance_power_dist(resources_path:)
     activity_names = ['clothes_washer', 'dishwasher', 'clothes_dryer', 'cooking']
     power_dist_map = {}
@@ -649,6 +697,12 @@ class ScheduleGenerator
     return power_dist_map
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param power_dist_map [TODO] TODO
+  # @param appliance_name [TODO] TODO
+  # @return [TODO] TODO
   def sample_appliance_duration_power(prng, power_dist_map, appliance_name)
     # returns number number of 15-min interval the appliance runs, and the average 15-min power
     duration_vals, consumption_vals = power_dist_map[appliance_name]
@@ -668,6 +722,10 @@ class ScheduleGenerator
     return [duration, power]
   end
 
+  # TODO
+  #
+  # @param resources_path [TODO] TODO
+  # @return [TODO] TODO
   def read_activity_cluster_size_probs(resources_path:)
     activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     cluster_size_prob_map = {}
@@ -680,6 +738,10 @@ class ScheduleGenerator
     return cluster_size_prob_map
   end
 
+  # TODO
+  #
+  # @param resources_path [TODO] TODO
+  # @return [TODO] TODO
   def read_event_duration_probs(resources_path:)
     activity_names = ['hot_water_clothes_washer', 'hot_water_dishwasher', 'shower']
     event_duration_probabilites_map = {}
@@ -693,6 +755,10 @@ class ScheduleGenerator
     return event_duration_probabilites_map
   end
 
+  # TODO
+  #
+  # @param resources_path [TODO] TODO
+  # @return [TODO] TODO
   def read_activity_duration_prob(resources_path:)
     cluster_types = ['0', '1', '2', '3']
     day_types = ['weekday', 'weekend']
@@ -715,17 +781,38 @@ class ScheduleGenerator
     return activity_duration_prob_map
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param cluster_size_prob_map [TODO] TODO
+  # @param activity_type_name [TODO] TODO
+  # @return [TODO] TODO
   def sample_activity_cluster_size(prng, cluster_size_prob_map, activity_type_name)
     cluster_size_probabilities = cluster_size_prob_map[activity_type_name]
     return weighted_random(prng, cluster_size_probabilities) + 1
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param duration_probabilites_map [TODO] TODO
+  # @param event_type [TODO] TODO
+  # @return [TODO] TODO
   def sample_event_duration(prng, duration_probabilites_map, event_type)
     durations = duration_probabilites_map[event_type][0]
     probabilities = duration_probabilites_map[event_type][1]
     return durations[weighted_random(prng, probabilities)]
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param activity_duration_prob_map [TODO] TODO
+  # @param occ_type_id [TODO] TODO
+  # @param activity [TODO] TODO
+  # @param day_type [TODO] TODO
+  # @param hour [TODO] TODO
+  # @return [TODO] TODO
   def sample_activity_duration(prng, activity_duration_prob_map, occ_type_id, activity, day_type, hour)
     # States are: 'sleeping', 'shower', 'laundry', 'cooking', 'dishwashing', 'absent', 'nothingAtHome'
     if hour < 8
@@ -752,6 +839,10 @@ class ScheduleGenerator
     return durations[weighted_random(prng, probabilities)]
   end
 
+  # TODO
+  #
+  # @param schedules_path [TODO] TODO
+  # @return [TODO] TODO
   def export(schedules_path:)
     (SchedulesFile::Columns.values.map { |c| c.name } - @column_names).each do |col_to_remove|
       @schedules.delete(col_to_remove)
@@ -776,6 +867,14 @@ class ScheduleGenerator
     return true
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param mean [TODO] TODO
+  # @param std [TODO] TODO
+  # @param min [TODO] TODO
+  # @param max [TODO] TODO
+  # @return [TODO] TODO
   def gaussian_rand(prng, mean, std, min = nil, max = nil)
     t = 2 * Math::PI * prng.rand
     r = Math.sqrt(-2 * Math.log(1 - prng.rand))
@@ -787,6 +886,13 @@ class ScheduleGenerator
     return x
   end
 
+  # TODO
+  #
+  # @param all_simulated_values [TODO] TODO
+  # @param activity_index [TODO] TODO
+  # @param time_index [TODO] TODO
+  # @param max_clip [TODO] TODO
+  # @return [TODO] TODO
   def sum_across_occupants(all_simulated_values, activity_index, time_index, max_clip: nil)
     sum = 0
     all_simulated_values.size.times do |i|
@@ -798,12 +904,22 @@ class ScheduleGenerator
     return sum
   end
 
+  # TODO
+  #
+  # @param arr [TODO] TODO
+  # @return [TODO] TODO
   def normalize(arr)
     m = arr.max
     arr = arr.map { |a| a / m }
     return arr
   end
 
+  # TODO
+  #
+  # @param sch [TODO] TODO
+  # @param minute [TODO] TODO
+  # @param active_occupant_percentage [TODO] TODO
+  # @return [TODO] TODO
   def scale_lighting_by_occupancy(sch, minute, active_occupant_percentage)
     day_start = minute / 1440
     day_sch = sch[day_start * 24, 24]
@@ -811,12 +927,27 @@ class ScheduleGenerator
     return day_sch.min + (current_val - day_sch.min) * active_occupant_percentage
   end
 
+  # TODO
+  #
+  # @param weekday_sch [TODO] TODO
+  # @param weekend_sch [TODO] TODO
+  # @param monthly_multiplier [TODO] TODO
+  # @param month [TODO] TODO
+  # @param is_weekday [TODO] TODO
+  # @param minute [TODO] TODO
+  # @param active_occupant_percentage [TODO] TODO
+  # @return [TODO] TODO
   def get_value_from_daily_sch(weekday_sch, weekend_sch, monthly_multiplier, month, is_weekday, minute, active_occupant_percentage)
     is_weekday ? sch = weekday_sch : sch = weekend_sch
     full_occupancy_current_val = sch[((minute % 1440) / 60).to_i].to_f * monthly_multiplier[month - 1].to_f
     return sch.min + (full_occupancy_current_val - sch.min) * active_occupant_percentage
   end
 
+  # TODO
+  #
+  # @param prng [TODO] TODO
+  # @param weights [TODO] TODO
+  # @return [TODO] TODO
   def weighted_random(prng, weights)
     n = prng.rand
     cum_weights = 0
@@ -829,6 +960,12 @@ class ScheduleGenerator
     return weights.size - 1 # If the prob weight don't sum to n, return last index
   end
 
+  # TODO
+  #
+  # @param time_zone_utc_offset [TODO] TODO
+  # @param latitude [TODO] TODO
+  # @param longitude [TODO] TODO
+  # @return [TODO] TODO
   def get_building_america_lighting_schedule(time_zone_utc_offset, latitude, longitude)
     # Sunrise and sunset hours
     sunrise_hour = []

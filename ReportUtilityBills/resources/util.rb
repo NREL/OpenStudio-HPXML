@@ -2,6 +2,10 @@
 
 # TODO
 class Fuel
+  # TODO
+  #
+  # @param meters [TODO] TODO
+  # @return [TODO] TODO
   def initialize(meters: [])
     @meters = meters
     @timeseries = []
@@ -11,6 +15,10 @@ end
 
 # TODO
 class UtilityRate
+  # TODO
+  #
+  # @param meters [TODO] TODO
+  # @return [TODO] TODO
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
@@ -35,7 +43,12 @@ class UtilityRate
                 :energyratestructure, :energyweekdayschedule, :energyweekendschedule)
 end
 
+# TODO
 class UtilityBill
+  # TODO
+  #
+  # @param meters [TODO] TODO
+  # @return [TODO] TODO
   def initialize()
     @annual_energy_charge = 0.0
     @annual_fixed_charge = 0.0
@@ -487,12 +500,20 @@ class CalculateUtilityBill
   end
 end
 
+# TODO
+#
+# @param x [TODO] TODO
+# @return [TODO] TODO
 def valid_filename(x)
   x = "#{x}".gsub(/[^0-9A-Za-z\s]/, '') # remove non-alphanumeric
   x = "#{x}".gsub(/\s+/, ' ').strip # remove multiple spaces
   return x
 end
 
+# TODO
+#
+# @param filepath [TODO] TODO
+# @return [TODO] TODO
 def process_usurdb(filepath)
   # Map csv found at https://openei.org/apps/USURDB/download/usurdb.csv.gz to
   # https://openei.org/services/doc/rest/util_rates/?version=7#response-fields

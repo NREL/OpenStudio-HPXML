@@ -366,7 +366,7 @@ class Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param ach [TODO] TODO
   # @param ela [TODO] TODO
   # @param c_w_SG [TODO] TODO
@@ -716,7 +716,7 @@ class Airflow
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param name [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param frac_lat [TODO] TODO
   # @param frac_lost [TODO] TODO
   # @param hpxml_fuel_type [TODO] TODO
@@ -2408,7 +2408,7 @@ class Airflow
   # @param site [TODO] TODO
   # @param hor_lk_frac [TODO] TODO
   # @param neutral_level [TODO] TODO
-  # @param space [TODO] TODO
+  # @param space [OpenStudio::Model::Space] TODO
   # @param space_height [TODO] TODO
   # @return [TODO] TODO
   def self.calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space, space_height = nil)
@@ -2640,6 +2640,9 @@ end
 
 # TODO
 class Duct
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space

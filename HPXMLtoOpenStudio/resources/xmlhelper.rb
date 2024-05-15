@@ -309,6 +309,12 @@ class XMLHelper
   end
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_float(value, parent, element_name)
   begin
     return Float(value)
@@ -317,6 +323,12 @@ def to_float(value, parent, element_name)
   end
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_integer(value, parent, element_name)
   begin
     value = Float(value)
@@ -330,6 +342,12 @@ def to_integer(value, parent, element_name)
   end
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_boolean(value, parent, element_name)
   if value.is_a? TrueClass
     return true
@@ -344,18 +362,36 @@ def to_boolean(value, parent, element_name)
   fail "Cannot convert '#{value}' to boolean for #{parent.name}/#{element_name}."
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_float_or_nil(value, parent, element_name)
   return if value.nil?
 
   return to_float(value, parent, element_name)
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_integer_or_nil(value, parent, element_name)
   return if value.nil?
 
   return to_integer(value, parent, element_name)
 end
 
+# TODO
+#
+# @param value [TODO] TODO
+# @param parent [TODO] TODO
+# @param element_name [TODO] TODO
+# @return [TODO] TODO
 def to_boolean_or_nil(value, parent, element_name)
   return if value.nil?
 

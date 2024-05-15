@@ -56,11 +56,11 @@ Style/CollectionCompact:
 Style/Documentation:
   Exclude:
     - '**/test_*.rb'
-    - 'documented/**/*.rb'
+    - 'documented/**/resources/*.rb'
 Style/DocumentationMethod:
   Exclude:
     - '**/test_*.rb'
-    - 'documented/**/*.rb'
+    - 'documented/**/resources/*.rb'
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
 Style/EndlessMethod:
