@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# @note Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-#   child object where custom information can be attached to the object without
-#   being written to the HPXML file. This will allow the custom information to
-#   be used by subsequent calculations/logic.
+# Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
+# child object where custom information can be attached to the object without
+# being written to the HPXML file. This will allow the custom information to
+# be used by subsequent calculations/logic.
 class HPXMLDefaults
   # TODO
   #
@@ -84,6 +84,10 @@ class HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] TODO
   # @return [TODO] TODO
   def self.get_default_azimuths(hpxml_bldg)
+    # TODO
+    #
+    # @param azimuth [TODO] TODO
+    # @return [TODO] TODO
     def self.sanitize_azimuth(azimuth)
       # Ensure 0 <= orientation < 360
       while azimuth < 0

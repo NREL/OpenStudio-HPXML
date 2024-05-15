@@ -24,6 +24,15 @@ class ScheduleConstant
 
   private
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param val [TODO] TODO
+  # @param year [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
     if unavailable_periods.empty?
       if val == 1.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
@@ -134,6 +143,9 @@ class HourlyByMonthSchedule
     return vals
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def calc_max_val()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -142,6 +154,14 @@ class HourlyByMonthSchedule
     return maxval
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param year [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
     day_startm = Schedule.day_start_months(year)
     day_endm = Schedule.day_end_months(year)
@@ -321,6 +341,9 @@ class HourlyByDaySchedule
     return vals
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def calc_max_val()
     maxval = [@weekday_day_by_hour_values.flatten.max, @weekend_day_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -329,6 +352,15 @@ class HourlyByDaySchedule
     return maxval
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param year [TODO] TODO
+  # @param num_days [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
     time = []
     for h in 1..24
@@ -493,6 +525,10 @@ class MonthWeekdayWeekendSchedule
 
   private
 
+  # TODO
+  #
+  # @param values [TODO] TODO
+  # @return [TODO] TODO
   def normalize_sum_to_one(values)
     sum = values.reduce(:+).to_f
     if sum == 0.0
@@ -502,6 +538,10 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / sum }
   end
 
+  # TODO
+  #
+  # @param values [TODO] TODO
+  # @return [TODO] TODO
   def normalize_avg_to_one(values)
     avg = values.reduce(:+).to_f / values.size
     if avg == 0.0
@@ -511,6 +551,9 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / avg }
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def calc_max_val()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
       maxval = @monthly_values.max * @weekday_hourly_values.max
@@ -523,6 +566,9 @@ class MonthWeekdayWeekendSchedule
     return maxval
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def calc_sch_adjust()
     # if sum != 1, normalize to get correct max val
     sum_wkdy = 0
@@ -540,6 +586,18 @@ class MonthWeekdayWeekendSchedule
     return 1 / sum_wkdy
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] TODO
+  # @param sch_name [TODO] TODO
+  # @param year [TODO] TODO
+  # @param begin_month [TODO] TODO
+  # @param begin_day [TODO] TODO
+  # @param end_month [TODO] TODO
+  # @param end_day [TODO] TODO
+  # @param schedule_type_limits_name [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def create_schedule(model, sch_name, year, begin_month, begin_day, end_month, end_day,
                       schedule_type_limits_name, unavailable_periods)
     month_num_days = Constants.NumDaysInMonths(year)
@@ -1839,6 +1897,7 @@ end
 
 # TODO
 class SchedulesFile
+  # TODO
   class Column
     # TODO
     #
@@ -2106,8 +2165,8 @@ class SchedulesFile
 
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   #
-  # @param modelYear [TODO] TODO
-  # @param schedule [TODO] TODO
+  # @param col_name [TODO] TODO
+  # @param schedules [TODO] TODO
   # @return [TODO] TODO
   def annual_equivalent_full_load_hrs(col_name:,
                                       schedules: nil)
@@ -2215,6 +2274,7 @@ class SchedulesFile
   # similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design
   # level
   #
+  # @param col_name [TODO] TODO
   # @param daily_kwh [TODO] TODO
   # @return [TODO] TODO
   def calc_design_level_from_daily_kwh(col_name:,
@@ -2305,10 +2365,8 @@ class SchedulesFile
 
   # TODO
   #
-  # @param schedule [TODO] TODO
-  # @param sch_name [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] TODO
   # @param unavailable_periods [TODO] TODO
-  # @param year [TODO] TODO
   # @return [TODO] TODO
   def set_unavailable_periods(runner, unavailable_periods)
     if @unavailable_periods_csv_data.nil?
