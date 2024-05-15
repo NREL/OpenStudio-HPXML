@@ -17,7 +17,6 @@ end
 class UtilityRate
   # TODO
   #
-  # @param meters [TODO] TODO
   # @return [TODO] TODO
   def initialize()
     @fixedmonthlycharge = nil
@@ -47,7 +46,6 @@ end
 class UtilityBill
   # TODO
   #
-  # @param meters [TODO] TODO
   # @return [TODO] TODO
   def initialize()
     @annual_energy_charge = 0.0
