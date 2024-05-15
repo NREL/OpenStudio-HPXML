@@ -4,6 +4,14 @@ class HVACSizing
   # Calculates heating/cooling design loads, and selects equipment
   # values (e.g., capacities, airflows) specific to each HVAC system.
   # Calculations generally follow ACCA Manual J/S.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param weather [TODO] TODO
+  # @param hpxml_bldg [TODO] TODO
+  # @param cfa [TODO] TODO
+  # @param hvac_systems [TODO] TODO
+  # @param update_hpxml [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true)
     @hpxml_bldg = hpxml_bldg
     @cfa = cfa

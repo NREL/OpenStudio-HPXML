@@ -1793,7 +1793,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] model object
   # @param ground_floor_surfaces [TODO] TODO
   # @param has_foundation_walls [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.calculate_exposed_perimeter(model:,
                                        ground_floor_surfaces:,
                                        has_foundation_walls: false)
@@ -2122,7 +2122,7 @@ class Geometry
   # We can't deterministically assign indexes to these surfaces
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.assign_remaining_surface_indexes(model:)
     model.getSurfaces.each do |surface|
       next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized

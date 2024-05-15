@@ -3,6 +3,13 @@
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
+  #
+  # @param parent [TODO] TODO
+  # @param element_name [TODO] TODO
+  # @param value [TODO] TODO
+  # @param datatype [TODO] TODO
+  # @param defaulted [TODO] TODO
+  # @return [TODO] TODO
   def self.add_element(parent, element_name, value = nil, datatype = nil, defaulted = false)
     added = XMLHelper.insert_element(parent, element_name, -1, value, datatype, defaulted)
     return added
@@ -10,6 +17,14 @@ class XMLHelper
 
   # Inserts the child element with 'element_name' and sets its value. Returns the
   # child element.
+  #
+  # @param parent [TODO] TODO
+  # @param element_name [TODO] TODO
+  # @param index [TODO] TODO
+  # @param value [TODO] TODO
+  # @param datatype [TODO] TODO
+  # @param defaulted [TODO] TODO
+  # @return [TODO] TODO
   def self.insert_element(parent, element_name, index = 0, value = nil, datatype = nil, defaulted = false)
     added = Oga::XML::Element.new(name: element_name)
     if index == -1
@@ -38,6 +53,13 @@ class XMLHelper
 
   # Adds the child element with 'element_name' to a single extension element and
   # sets its value. Returns the extension element.
+  #
+  # @param parent [TODO] TODO
+  # @param element_name [TODO] TODO
+  # @param value [TODO] TODO
+  # @param datatype [TODO] TODO
+  # @param defaulted [TODO] TODO
+  # @return [TODO] TODO
   def self.add_extension(parent, element_name, value = nil, datatype = nil, defaulted = false)
     extension = XMLHelper.create_elements_as_needed(parent, ['extension'])
     return XMLHelper.add_element(extension, element_name, value, datatype, defaulted)
@@ -46,6 +68,10 @@ class XMLHelper
   # Creates a hierarchy of elements under the parent element based on the supplied
   # list of element names. If a given child element already exists, it is reused.
   # Returns the final element.
+  #
+  # @param parent [TODO] TODO
+  # @param element_names [TODO] TODO
+  # @return [TODO] TODO
   def self.create_elements_as_needed(parent, element_names)
     this_parent = parent
     element_names.each do |element_name|
@@ -145,6 +171,10 @@ class XMLHelper
 
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
+  #
+  # @param parent [TODO] TODO
+  # @param element_name [TODO] TODO
+  # @return [TODO] TODO
   def self.get_child_name(parent, element_name)
     element = parent.at_xpath(element_name)
     return if element.nil? || element.children.nil?
