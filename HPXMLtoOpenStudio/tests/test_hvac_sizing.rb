@@ -721,14 +721,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
-    # Check that furnace capacity is between the building heating design load w/o duct load
-    # and the building heating design load w/ duct load. This is because the building duct
-    # load is the sum of the furnace duct load AND the heat pump duct load.
+    # Check that furnace capacity is greater than the building heating design load.
+    # The building heating design load includes HP duct loads, while the furnace capacity includes
+    # furnace duct loads. Since the furnace has a higher supply air temperature, it will experience
+    # higher duct loads than the HP.
     htg_design_load_with_ducts = hpxml_bldg.hvac_plant.hdl_total
-    htg_design_load_without_ducts = htg_design_load_with_ducts - hpxml_bldg.hvac_plant.hdl_ducts
     htg_capacity = hpxml_bldg.heating_systems[0].heating_capacity
-    assert_operator(htg_capacity, :>, htg_design_load_without_ducts * 1.001) # 1.001 to handle rounding
-    assert_operator(htg_capacity, :<, htg_design_load_with_ducts * 0.999) # 0.999 to handle rounding
+    assert_operator(htg_capacity, :>, htg_design_load_with_ducts * 1.01)
 
     # Run w/ ductless heat pump and ductless backup
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ductless-backup-stove.xml')
@@ -1276,6 +1275,51 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0.017, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
     assert_in_delta(0.015, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
     assert_in_delta(0.014, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+  end
+
+  def test_multiple_zones
+    # Run base-zones-spaces-multiple.xml
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-zones-spaces-multiple.xml'))
+    _model_mult, _base_hpxml, hpxml_bldg_mult = _test_measure(args_hash)
+
+    # Check above-grade zone loads are much greater than below-grade zone loads
+    assert_operator(hpxml_bldg_mult.conditioned_zones[0].hdl_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].hdl_total)
+    assert_operator(hpxml_bldg_mult.conditioned_zones[0].cdl_sens_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].cdl_sens_total)
+
+    # Check space and zone values are equal
+    (HPXML::HDL_ATTRS.keys + HPXML::CDL_SENS_ATTRS.keys).each do |key|
+      assert_equal(hpxml_bldg_mult.conditioned_zones[0].send(key), hpxml_bldg_mult.conditioned_spaces[0].send(key))
+      assert_equal(hpxml_bldg_mult.conditioned_zones[1].send(key), hpxml_bldg_mult.conditioned_spaces[1].send(key))
+    end
+
+    # Run base-zones-spaces.xml
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-zones-spaces.xml'))
+    _model, _base_hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Check results between base-zones-spaces.xml and base-zones-spaces-multiple.xml
+    (HPXML::HDL_ATTRS.keys + HPXML::CDL_SENS_ATTRS.keys + HPXML::CDL_LAT_ATTRS.keys).each do |key|
+      if key == :cdl_sens_aed_curve
+        # Check for identical arrays
+        assert_equal(hpxml_bldg.hvac_plant.send(key).split(',').map(&:to_f), hpxml_bldg_mult.hvac_plant.send(key).split(',').map(&:to_f))
+        assert_equal(hpxml_bldg.conditioned_zones[0].send(key).split(',').map(&:to_f), hpxml_bldg_mult.conditioned_zones[0].send(key).split(',').map(&:to_f).zip(hpxml_bldg_mult.conditioned_zones[1].send(key).split(',').map(&:to_f)).map { |a, b| a + b })
+        assert_equal(hpxml_bldg.conditioned_spaces[0].send(key).split(',').map(&:to_f), hpxml_bldg_mult.conditioned_spaces[0].send(key).split(',').map(&:to_f).zip(hpxml_bldg_mult.conditioned_spaces[1].send(key).split(',').map(&:to_f)).map { |a, b| a + b })
+      else
+        if key.to_s.include?('ducts') || key.to_s.include?('total')
+          # Check values are similar (ducts, and thus totals, will not be exactly identical)
+          tol_btuh = 500
+        else
+          # Check values are identical (aside from rounding)
+          tol_btuh = 1
+        end
+        assert_in_delta(hpxml_bldg.hvac_plant.send(key), hpxml_bldg_mult.hvac_plant.send(key), tol_btuh)
+        assert_in_delta(hpxml_bldg.conditioned_zones[0].send(key), hpxml_bldg_mult.conditioned_zones[0].send(key) + hpxml_bldg_mult.conditioned_zones[1].send(key), tol_btuh)
+        if not HPXML::CDL_LAT_ATTRS.keys.include?(key) # Latent loads are not calculated for spaces
+          assert_in_delta(hpxml_bldg.conditioned_spaces[0].send(key), hpxml_bldg_mult.conditioned_spaces[0].send(key) + hpxml_bldg_mult.conditioned_spaces[1].send(key), tol_btuh)
+        end
+      end
+    end
   end
 
   def test_gshp_ground_loop

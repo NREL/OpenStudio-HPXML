@@ -246,7 +246,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Reached a minimum of 1 borehole; setting bore depth to the minimum'
     end
     if hpxml_path.include? 'base-zones'
-      next if message.include? 'Multiple conditioned zones specified but the model will only include a single thermal zone.'
+      next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
 
     # FUTURE: Revert this eventually
@@ -482,12 +482,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
     # Net area
-    hpxml_value = roof.area
-    hpxml_bldg.skylights.each do |subsurface|
-      next if subsurface.roof_idref.upcase != roof_id
-
-      hpxml_value -= subsurface.area
-    end
+    hpxml_value = roof.net_area
     query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
     assert_operator(sql_value, :>, 0.01)
@@ -681,7 +676,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
     # Area
-    hpxml_value = floor.area
+    hpxml_value = floor.net_area
     query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{floor_id}' AND ColumnName='Net Area' AND Units='m2'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
     assert_operator(sql_value, :>, 0.01)
@@ -758,12 +753,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(90.0, sql_value, 0.01)
     elsif subsurface.is_a? HPXML::Skylight
-      hpxml_value = nil
-      hpxml_bldg.roofs.each do |roof|
-        next if roof.id != subsurface.roof_idref
-
-        hpxml_value = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
-      end
+      hpxml_value = UnitConversions.convert(Math.atan(subsurface.roof.pitch / 12.0), 'rad', 'deg')
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -1053,7 +1043,11 @@ def _check_unit_multiplier_results(hpxml_bldg, annual_results_1x, annual_results
   # so remove these from the comparison
   annual_results_1x = annual_results_1x.dup
   annual_results_10x = annual_results_10x.dup
-  ['System Use:', 'Temperature:', 'Utility Bills:', 'HVAC Space Design Load:'].each do |key|
+  ['System Use:',
+   'Temperature:',
+   'Utility Bills:',
+   'HVAC Zone Design Load:',
+   'HVAC Space Design Load:'].each do |key|
     annual_results_1x.delete_if { |k, _v| k.start_with? key }
     annual_results_10x.delete_if { |k, _v| k.start_with? key }
     monthly_results_1x.delete_if { |k, _v| k.start_with? key }

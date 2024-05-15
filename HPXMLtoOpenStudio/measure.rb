@@ -186,8 +186,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(args[:output_dir], in_schedules_csv))
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
-                            design_load_details_output_file_path: design_load_details_output_file_path,
-                            output_format: args[:output_format])
+                                                                             design_load_details_output_file_path: design_load_details_output_file_path,
+                                                                             output_format: args[:output_format])
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
       validate_emissions_files(hpxml.header)
@@ -474,7 +474,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_foundation_walls_slabs(runner, model, weather, spaces)
     add_windows(model, spaces)
     add_doors(model, spaces)
-    add_skylights(model, spaces)
+    add_skylights(runner, model, spaces)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
     Geometry.set_zone_volumes(spaces, @hpxml_bldg, @apply_ashrae140_assumptions)
@@ -867,7 +867,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   def add_floors(runner, model, spaces)
     @hpxml_bldg.floors.each do |floor|
-      area = floor.area
+      next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
+      area = floor.net_area
       width = Math::sqrt(area)
       length = area / width
       if floor.interior_adjacent_to.include?('attic') || floor.exterior_adjacent_to.include?('attic')
@@ -1402,11 +1404,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  def add_skylights(model, spaces)
+  def add_skylights(runner, model, spaces)
     surfaces = []
     shading_schedules = {}
 
     @hpxml_bldg.skylights.each do |skylight|
+      if not skylight.is_conditioned
+        runner.registerWarning("Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space.")
+      end
+
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
@@ -1424,7 +1430,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType('RoofCeiling')
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)) # Ensures it is included in Manual J sizing
+      surface.setSpace(create_or_get_space(model, spaces, skylight.roof.interior_adjacent_to))
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
