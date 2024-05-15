@@ -17,7 +17,7 @@ def get_params(lines, idx)
       params << [l[2], l[3], l[4..-1].join(' ')]
     elsif line.include?('# @return')
       l = line.strip.split(' ')
-      ret = [l[2], l[3], l[4..-1].join(' ')]
+      ret = [l[2], l[3..-1].join(' ')]
     elsif line.strip == '#' # blank line
       # no-op
     elsif line.strip.start_with?('#')
@@ -33,7 +33,7 @@ def set_params(lines, idx, params, descs, ret, tab, is_method)
     if ret.nil?
       lines.insert(idx, "#{tab}# @return [TODO] TODO")
     else
-      lines.insert(idx, "#{tab}# @return #{ret[0]} #{ret[1]} #{ret[2]}")
+      lines.insert(idx, "#{tab}# @return #{ret[0]} #{ret[1]}")
     end
     params.each do |param|
       lines.insert(idx, "#{tab}# @param #{param[0]} #{param[1]} #{param[2]}")

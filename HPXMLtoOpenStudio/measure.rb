@@ -153,6 +153,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(args[:output_dir], in_schedules_csv))
+puts type(weather)
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file)
         hpxml_sch_map[hpxml_bldg] = schedules_file
       end
