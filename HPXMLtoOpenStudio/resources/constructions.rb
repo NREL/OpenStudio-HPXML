@@ -24,7 +24,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_wood_stud_wall(model,
                                 surfaces,
                                 constr_name,
@@ -131,7 +131,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_double_stud_wall(model,
                                   surfaces,
                                   constr_name,
@@ -251,7 +251,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_cmu_wall(model,
                           surfaces,
                           constr_name,
@@ -364,7 +364,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_icf_wall(model,
                           surfaces,
                           constr_name,
@@ -458,7 +458,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_sip_wall(model,
                           surfaces,
                           constr_name,
@@ -562,7 +562,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_steel_stud_wall(model,
                                  surfaces,
                                  constr_name,
@@ -668,7 +668,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_generic_layered_wall(model,
                                       surfaces,
                                       constr_name,
@@ -775,7 +775,7 @@ class Constructions
   # @param outside_film [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_rim_joist(model, surfaces, constr_name,
                            cavity_r, install_grade, framing_factor,
                            mat_int_finish, osb_thick_in,
@@ -855,7 +855,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_open_cavity_roof(model, surfaces, constr_name,
                                   cavity_r, install_grade, cavity_ins_thick_in,
                                   framing_factor, framing_thick_in,
@@ -949,7 +949,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_closed_cavity_roof(model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, mat_int_finish,
@@ -1037,7 +1037,7 @@ class Constructions
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
   # @param radiant_barrier_grade [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_wood_frame_floor_ceiling(model, surfaces, constr_name, is_ceiling,
                                           cavity_r, install_grade,
                                           framing_factor, joist_height_in,
@@ -1152,7 +1152,7 @@ class Constructions
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
   # @param radiant_barrier_grade [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_steel_frame_floor_ceiling(model, surfaces, constr_name, is_ceiling,
                                            cavity_r, install_grade,
                                            framing_factor, correction_factor, joist_height_in,
@@ -1264,7 +1264,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_sip_floor_ceiling(model, surfaces, constr_name, is_ceiling,
                                    sip_r, sip_thick_in, framing_factor,
                                    mat_int_finish, osb_thick_in, rigid_r,
@@ -1356,7 +1356,7 @@ class Constructions
   # @param radiant_barrier_grade [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_generic_layered_floor_ceiling(model, surfaces, constr_name, is_ceiling,
                                                thick_ins, conds, denss, specheats,
                                                mat_int_finish, osb_thick_in, rigid_r,
@@ -1454,7 +1454,7 @@ class Constructions
   # @param mat_wall [TODO] TODO
   # @param height_above_grade [TODO] TODO
   # @param soil_k_in [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_foundation_wall(model, surfaces, constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, mat_int_finish,
@@ -1498,7 +1498,7 @@ class Constructions
   # @param mat_carpet [TODO] TODO
   # @param soil_k_in [TODO] TODO
   # @param foundation [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_foundation_slab(model, surface, constr_name,
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
@@ -1568,7 +1568,7 @@ class Constructions
   # @param ufactor [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_door(model, subsurfaces, constr_name, ufactor, inside_film, outside_film)
     return if subsurfaces.empty?
 
@@ -1595,7 +1595,7 @@ class Constructions
   # @param constr_name [TODO] TODO
   # @param ufactor [TODO] TODO
   # @param shgc [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_window(model, subsurface, constr_name, ufactor, shgc)
     apply_window_skylight(model, 'Window', subsurface, constr_name, ufactor, shgc)
   end
@@ -1607,7 +1607,7 @@ class Constructions
   # @param constr_name [TODO] TODO
   # @param ufactor [TODO] TODO
   # @param shgc [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_skylight(model, subsurface, constr_name, ufactor, shgc)
     apply_window_skylight(model, 'Skylight', subsurface, constr_name, ufactor, shgc)
   end
@@ -1619,7 +1619,7 @@ class Constructions
   # @param mat_int_finish [TODO] TODO
   # @param partition_wall_area [TODO] TODO
   # @param spaces [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area, spaces)
     return if partition_wall_area <= 0
 
@@ -1653,7 +1653,7 @@ class Constructions
   # @param model [OpenStudio::Model::Model] model object
   # @param furniture_mass [TODO] TODO
   # @param spaces [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_furniture(model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
       mass_lb_per_sqft = 8.0
@@ -1717,7 +1717,7 @@ class Constructions
   # @param object_name [TODO] TODO
   # @param space [TODO] TODO
   # @param area [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.create_os_int_mass_and_def(model, object_name, space, area)
     # EnergyPlus documentation: If both sides of the surface exchange energy with the zone
     # then the user should input twice the area when defining the Internal Mass object.
@@ -1736,7 +1736,7 @@ class Constructions
   #
   # @param eri_version [TODO] TODO
   # @param shgc [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_interior_shading_factors(eri_version, shgc)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2022C')
       summer = 0.92 - (0.21 * shgc)
@@ -1752,7 +1752,7 @@ class Constructions
   #
   # @param roof_type [TODO] TODO
   # @param solar_absorptance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_roof_color(roof_type, solar_absorptance)
     map = get_roof_color_and_solar_absorptance_map
     color_map = {}
@@ -1769,7 +1769,7 @@ class Constructions
   #
   # @param roof_type [TODO] TODO
   # @param color [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_roof_solar_absorptance(roof_type, color)
     map = get_roof_color_and_solar_absorptance_map
     return map[[color, roof_type]]
@@ -1778,7 +1778,7 @@ class Constructions
   # TODO
   #
   # @param solar_absorptance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_wall_color(solar_absorptance)
     map = get_wall_color_and_solar_absorptance_map
     color = map.min_by { |_k, v| (v - solar_absorptance).abs }[0]
@@ -1788,7 +1788,7 @@ class Constructions
   # TODO
   #
   # @param color [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_wall_solar_absorptance(color)
     map = get_wall_color_and_solar_absorptance_map
     return map[color]
@@ -1798,7 +1798,7 @@ class Constructions
   #
   # @param window_or_skylight [TODO] TODO
   # @param type [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_window_skylight_ufactor_shgc(window_or_skylight, type)
     if window_or_skylight.glass_layers == HPXML::WindowLayersSinglePane
       n_panes = 1
@@ -1903,7 +1903,7 @@ class Constructions
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_roof_color_and_solar_absorptance_map
     return { # asphalt or fiberglass shingles
       [HPXML::ColorDark, HPXML::RoofTypeAsphaltShingles] => 0.92,
@@ -1964,7 +1964,7 @@ class Constructions
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_wall_color_and_solar_absorptance_map
     return {
       HPXML::ColorDark => 0.95,
@@ -1980,7 +1980,7 @@ class Constructions
   # @param install_grade [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param cavity_r [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_gap_factor(install_grade, framing_factor, cavity_r)
     if cavity_r <= 0
       return 0 # Gap factor only applies when there is cavity insulation
@@ -2005,7 +2005,7 @@ class Constructions
   # @param ext_vert_depth [TODO] TODO
   # @param concrete_thick_in [TODO] TODO
   # @param soil_k_in [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
                                        ext_vert_r, ext_vert_depth, concrete_thick_in, soil_k_in)
 
@@ -2055,7 +2055,7 @@ class Constructions
   # @param wall_material_thick_in [TODO] TODO
   # @param wall_mat_int_finish [TODO] TODO
   # @param soil_k_in [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
                                         wall_height_above_grade, wall_material_thick_in, wall_mat_int_finish,
@@ -2095,7 +2095,7 @@ class Constructions
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param soil_k_in [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_kiva_settings(model, soil_k_in)
     # Set the Foundation:Kiva:Settings object
     soil_mat = BaseMaterial.Soil(soil_k_in)
@@ -2129,7 +2129,7 @@ class Constructions
   # @param schedules_file [TODO] TODO
   # @param foundation_walls_insulated [TODO] TODO
   # @param foundation_ceiling_insulated [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_kiva_initial_temp(foundation, slab, weather, conditioned_zone,
                                    sim_begin_month, sim_begin_day, sim_year, schedules_file,
                                    foundation_walls_insulated, foundation_ceiling_insulated)
@@ -2238,7 +2238,7 @@ class Constructions
   # @param model [OpenStudio::Model::Model] model object
   # @param name [TODO] TODO
   # @param rvalue [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.create_insulation_material(model, name, rvalue)
     rigid_mat = BaseMaterial.InsulationRigid
     mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
@@ -2259,7 +2259,7 @@ class Constructions
   # @param constr_name [TODO] TODO
   # @param ufactor [TODO] TODO
   # @param shgc [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_window_skylight(model, type, subsurface, constr_name, ufactor, shgc)
     # Define materials
     if type == 'Skylight'
@@ -2291,7 +2291,7 @@ class Constructions
   # @param shading_schedules [TODO] TODO
   # @param hpxml_header [TODO] TODO
   # @param hpxml_bldg [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml_header, hpxml_bldg)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
     sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
@@ -2351,7 +2351,7 @@ class Constructions
   #
   # @param film_r [TODO] TODO
   # @param constr_set [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
@@ -2386,7 +2386,7 @@ class Constructions
   # @param mat_ext_finish [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @param emittance [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_wall_construction(runner,
                                    model,
                                    surfaces,
@@ -2598,7 +2598,7 @@ class Constructions
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
   # @param radiant_barrier_grade [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply_floor_ceiling_construction(runner, model, surface, floor_id, floor_type, is_ceiling, assembly_r,
                                             mat_int_finish_or_covering, has_radiant_barrier, inside_film, outside_film,
                                             radiant_barrier_grade)
@@ -2709,7 +2709,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2738,7 +2738,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2766,7 +2766,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2803,7 +2803,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2845,7 +2845,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2879,7 +2879,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2912,7 +2912,7 @@ class Constructions
   # @param constr_sets [TODO] TODO
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
@@ -2941,7 +2941,7 @@ class Constructions
   # @param outside_film [TODO] TODO
   # @param assembly_r [TODO] TODO
   # @param match [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     # Verify that the actual OpenStudio construction R-value matches our target assembly R-value
 
@@ -2974,7 +2974,7 @@ class Constructions
   # @param storm_type [TODO] TODO
   # @param base_ufactor [TODO] TODO
   # @param base_shgc [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_ufactor_shgc_adjusted_by_storms(storm_type, base_ufactor, base_shgc)
     return base_ufactor, base_shgc if storm_type.nil?
 

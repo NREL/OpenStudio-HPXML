@@ -2,7 +2,7 @@ new_folder = 'documented'
 FileUtils.rm_rf(new_folder) if File.exist?(new_folder)
 
 files = []
-# files = ['HPXMLtoOpenStudio/resources/hvac_sizing.rb']
+# files = ['HPXMLtoOpenStudio/resources/geometry.rb']
 ['BuildResidentialHPXML', 'BuildResidentialScheduleFile', 'HPXMLtoOpenStudio', 'ReportSimulationOutput', 'ReportUtilityBills'].each do |folder|
   files += Dir[File.join(folder, 'resources/[!test_*]*.rb')]
 end
@@ -63,18 +63,17 @@ files.each do |file|
 
   new_classes = ObjectSpace.each_object(Class).to_a - previous_classes
   new_classes.each do |new_class|
-  
     # classes
     start_idx = nil
     end_idx = nil
     descs = []
     lines.each_with_index do |line, i|
-      next if not (line.strip.include?('class ') && (line.strip.end_with?("#{new_class}")))
+      next if not (line.strip.include?('class ') && line.strip.end_with?("#{new_class}"))
 
       end_idx = i
       _params, descs, _ret, start_idx = get_params(lines, end_idx)
     end
-    
+
     if not end_idx.nil? # class found in file
       (start_idx..end_idx - 1).to_a.reverse.each do |idx|
         lines.delete_at(idx)
@@ -82,7 +81,7 @@ files.each do |file|
 
       set_params(lines, start_idx, [], descs, nil, '', false)
     end
-  
+
     # methods
     methods = new_class.methods(false)
     methods.each do |method|

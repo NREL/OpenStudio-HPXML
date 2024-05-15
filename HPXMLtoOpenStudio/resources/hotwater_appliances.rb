@@ -18,7 +18,7 @@ class HotWaterAndAppliances
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.apply(model, runner, hpxml_header, hpxml_bldg, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map,
                  unavailable_periods, unit_multiplier, apply_ashrae140_assumptions)
@@ -492,7 +492,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_range_oven_default_values()
     return { is_induction: false,
              is_convection: false }
@@ -504,7 +504,7 @@ class HotWaterAndAppliances
   # @param cooking_range [TODO] TODO
   # @param oven [TODO] TODO
   # @param is_outside [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_range_oven_energy(nbeds, cooking_range, oven, is_outside = false)
     if cooking_range.is_induction
       burner_ef = 0.91
@@ -552,7 +552,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param eri_version [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_dishwasher_default_values(eri_version)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       return { rated_annual_kwh: 467.0, # kWh/yr
@@ -577,7 +577,7 @@ class HotWaterAndAppliances
   # @param nbeds [TODO] TODO
   # @param dishwasher [TODO] TODO
   # @param is_outside [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if dishwasher.rated_annual_kwh.nil?
@@ -628,7 +628,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param annual_kwh [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_dishwasher_ef_from_annual_kwh(annual_kwh)
     return 215.0 / annual_kwh
   end
@@ -636,7 +636,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param ef [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_dishwasher_annual_kwh_from_ef(ef)
     return 215.0 / ef
   end
@@ -644,21 +644,21 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_refrigerator_default_values(nbeds)
     return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
   end
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_extra_refrigerator_default_values
     return { rated_annual_kwh: 243.6 } # kWh/yr
   end
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_freezer_default_values
     return { rated_annual_kwh: 319.8 } # kWh/yr
   end
@@ -667,7 +667,7 @@ class HotWaterAndAppliances
   #
   # @param eri_version [TODO] TODO
   # @param fuel_type [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       return { combined_energy_factor: 3.01 }
@@ -689,7 +689,7 @@ class HotWaterAndAppliances
   # @param clothes_dryer [TODO] TODO
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
@@ -756,7 +756,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param ef [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_dryer_cef_from_ef(ef)
     return ef / 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
@@ -764,7 +764,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param cef [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_dryer_ef_from_cef(cef)
     return cef * 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
@@ -772,7 +772,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param eri_version [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_clothes_washer_default_values(eri_version)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       return { integrated_modified_energy_factor: 1.0, # ft3/(kWh/cyc)
@@ -799,7 +799,7 @@ class HotWaterAndAppliances
   # @param nbeds [TODO] TODO
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       gas_h20 = 0.3914 # (gal/cyc) per (therm/y)
@@ -847,7 +847,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param mef [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_washer_imef_from_mef(mef)
     return (mef - 0.503) / 0.95 # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
@@ -855,7 +855,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param imef [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_clothes_washer_mef_from_imef(imef)
     return 0.503 + 0.95 * imef # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
@@ -864,7 +864,7 @@ class HotWaterAndAppliances
   #
   # @param refrigerator_or_freezer [TODO] TODO
   # @param is_outside [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_refrigerator_or_freezer_energy(refrigerator_or_freezer, is_outside = false)
     # Get values
     annual_kwh = refrigerator_or_freezer.rated_annual_kwh
@@ -892,7 +892,7 @@ class HotWaterAndAppliances
   # @param obj_name [TODO] TODO
   # @param refrigerator_or_freezer [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
     # Create availability sensor
     if not unavailable_periods.empty?
@@ -955,7 +955,7 @@ class HotWaterAndAppliances
   # @param ncfl [TODO] TODO
   # @param water_heating_system [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl,
                                                   water_heating_system, hot_water_distribution)
 
@@ -989,7 +989,7 @@ class HotWaterAndAppliances
   # @param has_cond_bsmnt [TODO] TODO
   # @param cfa [TODO] TODO
   # @param ncfl [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
@@ -1004,7 +1004,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param std_pipe_length [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_recirc_loop_length(std_pipe_length)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
@@ -1013,21 +1013,21 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_recirc_branch_loop_length()
     return 10.0 # ft
   end
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_recirc_pump_power()
     return 50.0 # Watts
   end
 
   # TODO
   #
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_shared_recirc_pump_power()
     # From ANSI/RESNET 301-2019 Equation 4.2-15b
     pump_horsepower = 0.25
@@ -1047,7 +1047,7 @@ class HotWaterAndAppliances
   # @param frac_sens [TODO] TODO
   # @param frac_lat [TODO] TODO
   # @param schedule [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
     return if design_level_w == 0.0
 
@@ -1076,7 +1076,7 @@ class HotWaterAndAppliances
   # @param frac_lat [TODO] TODO
   # @param schedule [TODO] TODO
   # @param fuel_type [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
     return if design_level_w == 0.0 # Negative values intentionally allowed, e.g. for water sensible
 
@@ -1109,7 +1109,7 @@ class HotWaterAndAppliances
   # @param water_use_connections [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param mw_temp_schedule [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, water_use_connections, unit_multiplier, mw_temp_schedule = nil)
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
@@ -1132,7 +1132,7 @@ class HotWaterAndAppliances
   # @param nbeds [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_dwhr_factors(nbeds, hot_water_distribution, frac_low_flow_fixtures)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
@@ -1172,7 +1172,7 @@ class HotWaterAndAppliances
   # @param nbeds [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, frac_low_flow_fixtures)
     wh_temps_daily = weather.data.MainsDailyTemps.dup
     if (not hot_water_distribution.dwhr_efficiency.nil?)
@@ -1197,7 +1197,7 @@ class HotWaterAndAppliances
   # @param daily_wh_inlet_temperatures [TODO] TODO
   # @param tHot [TODO] TODO
   # @param tMix [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, tHot, tMix)
     adjFmix = []
     for day in 0..daily_wh_inlet_temperatures.size - 1
@@ -1212,7 +1212,7 @@ class HotWaterAndAppliances
   # @param hot_water_distribution [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
     dist_pump_annual_kwh = 0.0
 
@@ -1261,7 +1261,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_fixtures_effectiveness(frac_low_flow_fixtures)
     f_eff = 1.0 - 0.05 * frac_low_flow_fixtures
     return f_eff
@@ -1274,7 +1274,7 @@ class HotWaterAndAppliances
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param daily_mw_fractions [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
     if nbeds < 0.0
       return 0.0
@@ -1299,7 +1299,7 @@ class HotWaterAndAppliances
   #
   # @param nbeds [TODO] TODO
   # @param general_water_use_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier = 1.0)
     # Table 4.2.2(3). Internal Gains for Reference Homes
     sens_gains = (-1227.0 - 409.0 * nbeds) * general_water_use_usage_multiplier # Btu/day
@@ -1318,7 +1318,7 @@ class HotWaterAndAppliances
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution,
                               frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0)
     if (Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')) || (nbeds < 0.0)
@@ -1372,7 +1372,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param hot_water_distribution [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_dist_energy_waste_factor(hot_water_distribution)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
@@ -1417,7 +1417,7 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param hpxml_bldg [TODO] TODO
-  # @return [TODO] TODO 
+  # @return [TODO] TODO
   def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
                                              HPXML::LocationBasementUnconditioned,

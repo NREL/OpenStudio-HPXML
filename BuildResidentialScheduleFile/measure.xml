@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>6bba349e-1998-4f8a-80ad-a78d062a1d54</version_id>
-  <version_modified>2024-05-08T19:55:16Z</version_modified>
+  <version_id>94820d4b-c790-457f-a178-fc554427d1d9</version_id>
+  <version_modified>2024-05-15T04:44:57Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -169,7 +169,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>49CEA4F9</checksum>
+      <checksum>CD2BE631</checksum>
     </file>
     <file>
       <filename>cooking_consumption_dist.csv</filename>
