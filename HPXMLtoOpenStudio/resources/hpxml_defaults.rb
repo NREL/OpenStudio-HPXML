@@ -18,6 +18,8 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
+    add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+
     apply_header(hpxml.header, epw_file)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
@@ -65,10 +67,12 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
+    apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
-    # default detailed performance has to be after sizing to have autosized capacity information
+    # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+
+    cleanup_zones_spaces(hpxml_bldg)
   end
 
   def self.get_default_azimuths(hpxml_bldg)
@@ -88,8 +92,9 @@ class HPXMLDefaults
     # area, plus azimuths that are offset by 90/180/270 degrees. Used for
     # surfaces that may not have an azimuth defined (e.g., walls).
     azimuth_areas = {}
-    (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls +
-     hpxml_bldg.windows + hpxml_bldg.skylights + hpxml_bldg.doors).each do |surface|
+    (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surface|
+      next unless surface.respond_to?(:azimuth)
+
       az = surface.azimuth
       next if az.nil?
 
@@ -108,6 +113,26 @@ class HPXMLDefaults
   end
 
   private
+
+  def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+    # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
+    bldg_idx = hpxml.buildings.index(hpxml_bldg)
+    if hpxml_bldg.conditioned_zones.empty?
+      hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[-1].id
+      end
+      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
+                                      floor_area: cfa)
+      hpxml_bldg.surfaces.each do |surface|
+        next unless HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+        next if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
+        surface.attached_to_space_idref = hpxml_bldg.zones[-1].spaces[-1].id
+      end
+    end
+  end
 
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
@@ -230,9 +255,20 @@ class HPXMLDefaults
       runner.registerWarning("ManualJInputs/InternalLoadsSensible (#{hpxml_bldg.header.manualj_internal_loads_sensible}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_sensible}).")
     end
 
+    sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_latent.nil?
       hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
       hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    end
+    if sum_space_manualj_internal_loads_latent == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_latent = (hpxml_bldg.header.manualj_internal_loads_latent * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_latent_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_internal_loads_latent - sum_space_manualj_internal_loads_latent).abs > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsLatent (#{hpxml_bldg.header.manualj_internal_loads_latent}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_latent}).")
     end
 
     sum_space_manualj_num_occupants = hpxml_bldg.conditioned_spaces.map { |space| space.manualj_num_occupants.to_f }.sum.round
@@ -605,7 +641,7 @@ class HPXMLDefaults
       end
 
       if hpxml_bldg.elevation.nil?
-        hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
+        hpxml_bldg.elevation = UnitConversions.convert([epw_file.elevation, 0.0].max, 'm', 'ft').round(1)
         hpxml_bldg.elevation_isdefaulted = true
       end
 
@@ -715,12 +751,10 @@ class HPXMLDefaults
   end
 
   def self.apply_zone_spaces(hpxml_bldg)
-    if hpxml_bldg.calculate_space_design_loads?
-      hpxml_bldg.conditioned_spaces.each do |space|
-        if space.fenestration_load_procedure.nil?
-          space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
-          space.fenestration_load_procedure_isdefaulted = true
-        end
+    hpxml_bldg.conditioned_spaces.each do |space|
+      if space.fenestration_load_procedure.nil?
+        space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
+        space.fenestration_load_procedure_isdefaulted = true
       end
     end
   end
@@ -847,8 +881,10 @@ class HPXMLDefaults
         roof.emittance_isdefaulted = true
       end
       if roof.radiant_barrier.nil?
-        roof.radiant_barrier = false
-        roof.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(roof.interior_adjacent_to)
+          roof.radiant_barrier = false
+          roof.radiant_barrier_isdefaulted = true
+        end
       end
       if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
         roof.radiant_barrier_grade = 1
@@ -964,8 +1000,10 @@ class HPXMLDefaults
         wall.interior_finish_thickness_isdefaulted = true
       end
       if wall.radiant_barrier.nil?
-        wall.radiant_barrier = false
-        wall.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(wall.interior_adjacent_to) || [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(wall.exterior_adjacent_to)
+          wall.radiant_barrier = false
+          wall.radiant_barrier_isdefaulted = true
+        end
       end
       if wall.radiant_barrier && wall.radiant_barrier_grade.nil?
         wall.radiant_barrier_grade = 1
@@ -1071,8 +1109,10 @@ class HPXMLDefaults
         floor.interior_finish_thickness_isdefaulted = true
       end
       if floor.radiant_barrier.nil?
-        floor.radiant_barrier = false
-        floor.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(floor.interior_adjacent_to) || [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(floor.exterior_adjacent_to)
+          floor.radiant_barrier = false
+          floor.radiant_barrier_isdefaulted = true
+        end
       end
       if floor.radiant_barrier && floor.radiant_barrier_grade.nil?
         floor.radiant_barrier_grade = 1
@@ -2053,11 +2093,32 @@ class HPXMLDefaults
         ducts.duct_buried_insulation_level_isdefaulted = true
       end
 
+      # Default duct shape
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_fraction_rectangular.nil?
+
+        if ducts.duct_shape.nil? || ducts.duct_shape == HPXML::DuctShapeOther
+          if ducts.duct_type == HPXML::DuctTypeSupply
+            ducts.duct_fraction_rectangular = 0.25
+          elsif ducts.duct_type == HPXML::DuctTypeReturn
+            ducts.duct_fraction_rectangular = 1.0
+          end
+        elsif ducts.duct_shape == HPXML::DuctShapeRound || ducts.duct_shape == HPXML::DuctShapeOval
+          ducts.duct_fraction_rectangular = 0.0
+        elsif ducts.duct_shape == HPXML::DuctShapeRectangular
+          ducts.duct_fraction_rectangular = 1.0
+        end
+        ducts.duct_fraction_rectangular_isdefaulted = true
+      end
+
       # Default effective R-value
       hvac_distribution.ducts.each do |ducts|
         next unless ducts.duct_effective_r_value.nil?
 
-        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value, ducts.duct_type, ducts.duct_buried_insulation_level)
+        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value,
+                                                                          ducts.duct_type,
+                                                                          ducts.duct_buried_insulation_level,
+                                                                          ducts.duct_fraction_rectangular)
         ducts.duct_effective_r_value_isdefaulted = true
       end
     end
@@ -2069,6 +2130,11 @@ class HPXMLDefaults
       next unless hvac_system.location.nil?
 
       hvac_system.location_isdefaulted = true
+
+      if hvac_system.is_shared_system
+        hvac_system.location = HPXML::LocationOtherHeatedSpace
+        next
+      end
 
       # Set default location based on distribution system
       dist_system = hvac_system.distribution_system
@@ -3273,10 +3339,10 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa, output_format, design_load_details_output_file_path)
+  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     # Calculate building design loads and equipment capacities/airflows
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
+    HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
   def self.get_azimuth_from_orientation(orientation)
@@ -3340,6 +3406,7 @@ class HPXMLDefaults
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
     # Check for atmospheric heating system in conditioned space
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? heating_system.location
 
       if [HPXML::HVACTypeFurnace,
@@ -3356,14 +3423,13 @@ class HPXMLDefaults
 
         return true
       elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
-        next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-
         return true
       end
     end
 
     # Check for atmospheric water heater in conditioned space
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
+      next if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
 
       if not water_heating_system.energy_factor.nil?
@@ -3399,5 +3465,13 @@ class HPXMLDefaults
     return state_code unless state_code.nil?
 
     return epw_file.stateProvinceRegion.upcase
+  end
+
+  def self.cleanup_zones_spaces(hpxml_bldg)
+    # Remove any automatically created zones/spaces
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    auto_space.delete if not auto_space.nil?
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }
+    auto_zone.delete if not auto_zone.nil?
   end
 end

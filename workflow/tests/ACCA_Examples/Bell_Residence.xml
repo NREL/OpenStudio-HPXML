@@ -1063,6 +1063,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
+              <AttachedToZone idref='BellResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -1076,6 +1077,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
+              <AttachedToZone idref='BellResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>

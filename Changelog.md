@@ -1,7 +1,9 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
-- Updates to HPXML v4.0-rc3.
+- Updates to OpenStudio 3.8/EnergyPlus 24.1.
+- Updates to HPXML v4.0-rc4.
+- Adds BPI-2400 HPXML test files and results; see [Testing Framework](https://openstudio-hpxml.readthedocs.io/en/latest/testing_framework.html) for more information.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
   - **Breaking change**: Replaces `WaterHeatingSystem/NumberofUnitsServed` with `WaterHeatingSystem/extension/NumberofBedroomsServed` for apportioning shared water heater tank losses.
   - **Breaking change**: Replaces `HotWaterDistribution/extension/SharedRecirculation/NumberofUnitsServed` with `HotWaterDistribution/extension/SharedRecirculation/NumberofBedroomsServed` for apportioning shared recirculation pump energy.
@@ -31,7 +33,10 @@ __New Features__
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
-- Allows optional `HeatingAutosizingFactor`, `CoolingAutosizingFactor`, `BackupHeatingAutosizingFactor` inputs to scale HVAC equipment autosizing results.
+- Skylights with shafts or sun tunnels should include the `Skylight/AttachedToFloor` element.
+- Allows optional `Ducts/DuctShape` and `Ducts/DuctFractionRectangular` inputs, which affect duct effective R-value used for modeling.
+- Allows optional `HeatingAutosizingFactor`, `CoolingAutosizingFactor`, `BackupHeatingAutosizingFactor` inputs to scale HVAC capacities for autosized equipment.
+- Allows optional `HeatingAutosizingLimit`, `CoolingAutosizingLimit`, `BackupHeatingAutosizingLimit` inputs to set maximum HVAC capacities ceiling for autosized equipment.
 - Adds optional `Slab/extension/GapInsulationRValue` input for cases where a slab has horizontal (under slab) insulation.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
@@ -43,13 +48,15 @@ __New Features__
   - Adds heat pump backup sizing methodology input.
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
+  - Adds a blower fan efficiency input for specifying fan power W/cfm at maximum speed.
 - HVAC Manual J design load calculations:
   - **Breaking change**: Outputs for "Infiltration/Ventilation" category disaggregated into "Infiltration" and "Ventilation".
   - **Breaking change**: Outputs for "Windows" category no longer includes AED excursion; now a separate "AED Excursion" category.
-  - Allows optional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
-  - Allows optional room-by-room design load calculations using HPXML `Space` elements.
+  - Allows optional zone-level and space-level design load calculations using HPXML `Zones/Zone[ZoneType="conditioned"]/Spaces/Space` elements.
+  - Allows additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
+- Improves heating/cooling component loads; for timesteps where there is no heating/cooling load, assigns heat transfer to heating or cooling by comparing indoor temperature to the average of heating/cooling setpoints.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
@@ -75,6 +82,7 @@ __Bugfixes__
 - Prevents errors due to incorrect `Floor/FloorOrCeiling` input; issues a warning when detected.
 - Apportion shared water heater tank losses for HPWHs and combi systems.
 - Fixes buried duct effective R-values.
+- Fixes shared boiler default location (which could result in assuming there's a flue in conditioned space impacting infiltration).
 
 ## OpenStudio-HPXML v1.7.0
 

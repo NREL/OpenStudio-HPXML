@@ -69,7 +69,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>683.0</InternalLoadsSensible>
-                  <NumberofOccupants>2.0</NumberofOccupants>
+                  <NumberofOccupants>1.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -79,7 +79,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>683.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>1.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -89,7 +89,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>538.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>1.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -129,7 +129,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
-                  <NumberofOccupants>2.0</NumberofOccupants>
+                  <NumberofOccupants>1.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -409,6 +409,7 @@
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump1'/>
+              <AttachedToZone idref='CobbResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
