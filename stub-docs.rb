@@ -1,8 +1,10 @@
+debug = false
+
 new_folder = 'documented'
 FileUtils.rm_rf(new_folder) if File.exist?(new_folder)
 
 files = []
-# files = ['BuildResidentialScheduleFile/resources/schedules.rb']
+# files = ['HPXMLtoOpenStudio/resources/hpxml.rb']
 ['BuildResidentialHPXML', 'BuildResidentialScheduleFile', 'HPXMLtoOpenStudio', 'ReportSimulationOutput', 'ReportUtilityBills'].each do |folder|
   files += Dir[File.join(folder, 'resources/*.rb')]
 end
@@ -48,6 +50,24 @@ def set_params(lines, idx, params, descs, ret, tab, is_method)
   return lines
 end
 
+def common_parameters(param, type, desc)
+  params = [['model', '[OpenStudio::Model::Model]', 'model object'],
+            ['runner', '[OpenStudio::Measure::OSRunner]', 'runner object'],
+            ['hpxml', '[HPXML]', 'hpxml object'],
+            ['hpxml_bldg', '[HPXML::Building]', 'individual HPXML Building dwelling unit object'],
+            ['weather', '[WeatherProcess]', 'TODO'],
+            ['epw_file', '[OpenStudio::EpwFile]', 'TODO'],
+            ['space', '[OpenStudio::Model::Space]', 'OpenStudio Space object'],
+            ['surface', '[OpenStudio::Model::Surface]', 'OpenStudio Surface object']]
+  params.each do |p|
+    next if p[0] != param
+
+    type = p[1] if type == '[TODO]'
+    desc = p[2] if type == 'TODO'
+  end
+  return type, desc
+end
+
 files.each do |file|
   puts "File: #{file}"
 
@@ -64,12 +84,14 @@ files.each do |file|
   new_classes = ObjectSpace.each_object(Class).to_a - previous_classes
   new_classes.each do |new_class|
     # classes
+    class_found = false
     start_idx = nil
     end_idx = nil
     descs = []
     lines.each_with_index do |line, i|
-      next if not (line.strip.include?('class ') && line.strip.end_with?("#{new_class}"))
+      next if not (line.strip.start_with?('class ') && line.strip.include?("#{new_class} "))
 
+      class_found = true
       end_idx = i
       _params, descs, _ret, start_idx = get_params(lines, end_idx)
     end
@@ -85,48 +107,47 @@ files.each do |file|
     # methods
     methods = new_class.methods(false)
     methods.each do |method|
-      # next if method.to_s != 'get_default_unvented_space_ach'
+      # next if method.to_s != 'is_adiabatic'
 
-      params2 = []
+      all_params = []
       new_class.method(method).parameters.each do |req, param|
         next if req == :keyrest
 
-        params2 << param.to_s
+        all_params << param.to_s
       end
 
       start_idx = nil
       end_idx = nil
-      params1 = []
+      documented_params = []
+      new_params = []
       descs = []
       ret = nil
       lines.each_with_index do |line, i|
-        next if not (line.strip.include?('def ') && (line.strip.include?("#{method}(") || line.strip.end_with?("#{method}")))
+        next if not (line.strip.start_with?('def ') && (line.strip.include?("#{method}(") || line.strip.end_with?("#{method}")) && class_found)
 
+        class_found = false
         end_idx = i
-        params1, descs, ret, start_idx = get_params(lines, end_idx)
+        documented_params, descs, ret, start_idx = get_params(lines, end_idx)
 
-        # puts
-        # puts "Method: #{method}"
-        # puts "Parameters: #{params2}"
-        # puts "@params: #{params1}"
-        # puts "Description: #{descs}"
+        if debug
+          puts
+          puts "Method: #{method}"
+          puts "Parameters: #{all_params}"
+          puts "@params: #{params1}"
+          puts "Description: #{descs}"
+        end
 
-        (params2 - params1.collect { |x| x.first }).reverse.each do |needed_param|
+        all_params.reverse.each do |param|
           type = '[TODO]'
-          type = '[OpenStudio::Model::Model]' if needed_param == 'model' # get these by doing var.class
-          type = '[OpenStudio::Measure::OSRunner]' if needed_param == 'runner'
-          type = '[HPXML]' if needed_param == 'hpxml'
-          type = '[HPXML::Building]' if needed_param == 'hpxml_bldg'
-          type = '[WeatherProcess]' if needed_param == 'weather'
-          type = '[OpenStudio::EpwFile]' if needed_param == 'epw_file'
+          desc = 'TODO'
+          documented_params.each do |p|
+            next if p[0] != param
 
-          des = 'TODO'
-          des = 'model object' if needed_param == 'model'
-          des = 'runner object' if needed_param == 'runner'
-          des = 'HPXML object' if needed_param == 'hpxml'
-          des == 'individual HPXML Building dwelling unit object' if needed_param == 'hpxml_bldg'
-
-          params1 << [needed_param, type, des]
+            type = p[1]
+            desc = p[2]
+          end
+          type, desc = common_parameters(param, type, desc)
+          new_params << [param, type, desc]
         end
       end
 
@@ -136,7 +157,7 @@ files.each do |file|
         lines.delete_at(idx)
       end
 
-      set_params(lines, start_idx, params1, descs, ret, '  ', true)
+      set_params(lines, start_idx, new_params, descs, ret, '  ', true)
     end # end methods
   end # end new_classes
 
