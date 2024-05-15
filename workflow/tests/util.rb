@@ -753,7 +753,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(90.0, sql_value, 0.01)
     elsif subsurface.is_a? HPXML::Skylight
-      hpxml_value = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
+      hpxml_value = UnitConversions.convert(Math.atan(subsurface.roof.pitch / 12.0), 'rad', 'deg')
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
