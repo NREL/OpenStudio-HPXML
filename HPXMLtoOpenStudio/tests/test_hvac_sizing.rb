@@ -1287,7 +1287,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_operator(hpxml_bldg_mult.conditioned_zones[0].hdl_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].hdl_total)
     assert_operator(hpxml_bldg_mult.conditioned_zones[0].cdl_sens_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].cdl_sens_total)
 
-    # TODO: Check space and zone values are equal
+    # Check space and zone values are equal
     (HPXML::HDL_ATTRS.keys + HPXML::CDL_SENS_ATTRS.keys).each do |key|
       assert_equal(hpxml_bldg_mult.conditioned_zones[0].send(key), hpxml_bldg_mult.conditioned_spaces[0].send(key))
       assert_equal(hpxml_bldg_mult.conditioned_zones[1].send(key), hpxml_bldg_mult.conditioned_spaces[1].send(key))

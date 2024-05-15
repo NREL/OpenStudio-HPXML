@@ -294,7 +294,7 @@ class HVACSizing
         if location == HPXML::LocationAtticVented
           heat_temp = hpxml_bldg.header.manualj_heating_design_temp
         else
-          heat_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp, weather.data.ShallowGroundMonthlyTemps.min)
+          heat_temp = calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
         end
       else
         heat_temp = hpxml_bldg.header.manualj_heating_design_temp
@@ -304,7 +304,7 @@ class HVACSizing
            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
       # Note: We use this approach for garages in case they are partially below grade,
       # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
-      heat_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp, weather.data.ShallowGroundMonthlyTemps.min)
+      heat_temp = calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
 
     end
 
@@ -331,7 +331,7 @@ class HVACSizing
         if location == HPXML::LocationAtticVented
           cool_temp = hpxml_bldg.header.manualj_cooling_design_temp + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
         else
-          cool_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp, weather.data.ShallowGroundMonthlyTemps.max, true)
+          cool_temp = calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg, true)
         end
 
       else
@@ -418,7 +418,7 @@ class HVACSizing
            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
       # Note: We use this approach for garages in case they are partially below grade,
       # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
-      cool_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp, weather.data.ShallowGroundMonthlyTemps.max)
+      cool_temp = calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg)
 
     end
 
@@ -1285,29 +1285,20 @@ class HVACSizing
     # Apportion to zones/spaces
     bldg_exposed_wall_area = hpxml_bldg.conditioned_zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
     hpxml_bldg.conditioned_zones.each do |zone|
-      zone_exposed_wall_area = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
-
-      # Infiltration assignment by exterior wall area
-      all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_exposed_wall_area / bldg_exposed_wall_area
-      all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_exposed_wall_area / bldg_exposed_wall_area
-      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_exposed_wall_area / bldg_exposed_wall_area
-
       # Ventilation assignment by floor area
       all_zone_loads[zone].Heat_Vent = bldg_Heat_Vent * zone.floor_area / cfa
       all_zone_loads[zone].Cool_Vent_Sens = bldg_Cool_Vent_Sens * zone.floor_area / cfa
       all_zone_loads[zone].Cool_Vent_Lat = bldg_Cool_Vent_Lat * zone.floor_area / cfa
 
+      # Infiltration assignment by exterior wall area
       zone.spaces.each do |space|
-        # Infiltration assignment by exterior wall area
-        space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
-        if zone_exposed_wall_area > 0
-          space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
-        else
-          space.additional_properties.wall_area_ratio = 0.0
-        end
-        all_space_loads[space].Heat_Infil = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Heat_Infil
-        all_space_loads[space].Cool_Infil_Sens = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Cool_Infil_Sens
+        space.additional_properties.wall_area_ratio = space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
+        all_space_loads[space].Heat_Infil = space.additional_properties.wall_area_ratio * bldg_Heat_Infil
+        all_space_loads[space].Cool_Infil_Sens = space.additional_properties.wall_area_ratio * bldg_Cool_Infil_Sens
       end
+      all_zone_loads[zone].Heat_Infil = zone.spaces.map { |space| all_space_loads[space].Heat_Infil }.sum
+      all_zone_loads[zone].Cool_Infil_Sens = zone.spaces.map { |space| all_space_loads[space].Cool_Infil_Sens }.sum
+      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
     end
   end
 
@@ -2986,12 +2977,22 @@ class HVACSizing
     return space_UAs
   end
 
-  def self.calculate_space_design_temps(mj, location, weather, hpxml_bldg, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
+  def self.calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
+    return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp,
+                                        weather.data.ShallowGroundMonthlyTemps.min, false)
+  end
+
+  def self.calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg, is_unvented_attic_with_roof_insul = false)
+    return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp,
+                                        weather.data.ShallowGroundMonthlyTemps.max, is_unvented_attic_with_roof_insul)
+  end
+
+  def self.calculate_space_design_temps(mj, location, weather, hpxml_bldg, conditioned_design_temp, design_db, ground_db, is_unvented_attic_with_roof_insul)
     space_UAs = get_space_ua_values(mj, location, weather, hpxml_bldg)
 
     # Calculate space design temp from space UAs
     design_temp = nil
-    if not is_cooling_for_unvented_attic_roof_insulation
+    if not is_unvented_attic_with_roof_insul
 
       sum_uat, sum_ua = 0.0, 0.0
       space_UAs.each do |ua_type, ua|
