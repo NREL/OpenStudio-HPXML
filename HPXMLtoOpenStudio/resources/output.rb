@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class TE
   # Total Energy
   Total = 'Total'
@@ -17,6 +18,7 @@ class FT
   Coal = 'Coal'
 end
 
+# TODO
 class EUT
   # End Use Types
   Heating = 'Heating'
@@ -59,6 +61,7 @@ class EUT
   Battery = 'Battery'
 end
 
+# TODO
 class HWT
   # Hot Water Types
   ClothesWasher = 'Clothes Washer'
@@ -78,6 +81,7 @@ class LT
   HotWaterSolarThermal = 'Hot Water: Solar Thermal'
 end
 
+# TODO
 class CLT
   # Component Load Types
   Roofs = 'Roofs'
@@ -102,23 +106,27 @@ class CLT
   Lighting = 'Lighting'
 end
 
+# TODO
 class UHT
   # Unmet Hours Types
   Heating = 'Heating'
   Cooling = 'Cooling'
 end
 
+# TODO
 class RT
   # Resilience Types
   Battery = 'Battery'
 end
 
+# TODO
 class PLT
   # Peak Load Types
   Heating = 'Heating: Delivered'
   Cooling = 'Cooling: Delivered'
 end
 
+# TODO
 class PFT
   # Peak Fuel Types
   Summer = 'Summer'
@@ -126,6 +134,7 @@ class PFT
   Annual = 'Annual'
 end
 
+# TODO
 class AFT
   # Airflow Types
   Infiltration = 'Infiltration'
@@ -134,6 +143,7 @@ class AFT
   WholeHouseFan = 'Whole House Fan'
 end
 
+# TODO
 class WT
   # Weather Types
   DrybulbTemp = 'Drybulb Temperature'
@@ -144,6 +154,7 @@ class WT
   DirectSolar = 'Direct Solar Radiation'
 end
 
+# TODO
 class Outputs
   # TODO
   #

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class Airflow
   # Constants
   InfilPressureExponent = 0.65
@@ -2637,6 +2638,7 @@ class Airflow
   end
 end
 
+# TODO
 class Duct
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side

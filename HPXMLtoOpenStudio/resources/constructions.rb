@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
@@ -3000,6 +3001,7 @@ class Constructions
   end
 end
 
+# TODO
 class Construction
   # Facilitates creating and assigning an OpenStudio construction (with accompanying
   # OpenStudio Materials) from Material objects. Handles parallel path calculations.
@@ -3331,6 +3333,7 @@ class Construction
   end
 end
 
+# TODO
 class WoodStudConstructionSet
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
@@ -3343,6 +3346,7 @@ class WoodStudConstructionSet
   attr_accessor(:stud, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class SteelStudConstructionSet
   def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @cavity_thick_in = cavity_thick_in
@@ -3356,6 +3360,7 @@ class SteelStudConstructionSet
   attr_accessor(:cavity_thick_in, :corr_factor, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class DoubleStudConstructionSet
   def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
@@ -3369,6 +3374,7 @@ class DoubleStudConstructionSet
   attr_accessor(:stud, :framing_factor, :framing_spacing, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class SIPConstructionSet
   def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
@@ -3382,6 +3388,7 @@ class SIPConstructionSet
   attr_accessor(:thick_in, :framing_factor, :rigid_r, :sheath_thick_in, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class CMUConstructionSet
   def initialize(thick_in, cond_in, framing_factor, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
@@ -3395,6 +3402,7 @@ class CMUConstructionSet
   attr_accessor(:thick_in, :cond_in, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class ICFConstructionSet
   def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @ins_thick_in = ins_thick_in
@@ -3408,6 +3416,7 @@ class ICFConstructionSet
   attr_accessor(:ins_thick_in, :concrete_thick_in, :framing_factor, :rigid_r, :osb_thick_in, :mat_int_finish, :mat_ext_finish)
 end
 
+# TODO
 class GenericConstructionSet
   def initialize(rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @rigid_r = rigid_r

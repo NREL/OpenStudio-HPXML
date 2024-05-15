@@ -2,6 +2,7 @@ new_folder = 'documented'
 FileUtils.rm_rf(new_folder) if File.exist?(new_folder)
 
 files = []
+# files = ['HPXMLtoOpenStudio/resources/hvac_sizing.rb']
 ['BuildResidentialHPXML', 'BuildResidentialScheduleFile', 'HPXMLtoOpenStudio', 'ReportSimulationOutput', 'ReportUtilityBills'].each do |folder|
   files += Dir[File.join(folder, 'resources/[!test_*]*.rb')]
 end
@@ -27,16 +28,18 @@ def get_params(lines, idx)
   end
 end
 
-def set_params(lines, idx, params, descs, ret, tab = '  ')
-  if ret.nil?
-    lines.insert(idx, "#{tab}# @return [TODO] TODO")
-  else
-    lines.insert(idx, "#{tab}# @return #{ret[0]} #{ret[1]} #{ret[2]}")
+def set_params(lines, idx, params, descs, ret, tab, is_method)
+  if is_method
+    if ret.nil?
+      lines.insert(idx, "#{tab}# @return [TODO] TODO")
+    else
+      lines.insert(idx, "#{tab}# @return #{ret[0]} #{ret[1]} #{ret[2]}")
+    end
+    params.each do |param|
+      lines.insert(idx, "#{tab}# @param #{param[0]} #{param[1]} #{param[2]}")
+    end
+    lines.insert(idx, "#{tab}#")
   end
-  params.each do |param|
-    lines.insert(idx, "#{tab}# @param #{param[0]} #{param[1]} #{param[2]}")
-  end
-  lines.insert(idx, "#{tab}#")
   descs = ['# TODO'] if descs.empty?
   descs.each do |desc|
     lines.insert(idx, "#{tab}#{desc}")
@@ -60,6 +63,27 @@ files.each do |file|
 
   new_classes = ObjectSpace.each_object(Class).to_a - previous_classes
   new_classes.each do |new_class|
+  
+    # classes
+    start_idx = nil
+    end_idx = nil
+    descs = []
+    lines.each_with_index do |line, i|
+      next if not (line.strip.include?('class ') && (line.strip.end_with?("#{new_class}")))
+
+      end_idx = i
+      _params, descs, _ret, start_idx = get_params(lines, end_idx)
+    end
+    
+    if not end_idx.nil? # class found in file
+      (start_idx..end_idx - 1).to_a.reverse.each do |idx|
+        lines.delete_at(idx)
+      end
+
+      set_params(lines, start_idx, [], descs, nil, '', false)
+    end
+  
+    # methods
     methods = new_class.methods(false)
     methods.each do |method|
       # next if method.to_s != 'get_default_unvented_space_ach'
@@ -107,7 +131,7 @@ files.each do |file|
         lines.delete_at(idx)
       end
 
-      set_params(lines, start_idx, params1, descs, ret)
+      set_params(lines, start_idx, params1, descs, ret, '  ', true)
     end # end methods
   end # end new_classes
 

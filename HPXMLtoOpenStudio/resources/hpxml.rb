@@ -618,9 +618,9 @@ class HPXML < Object
     return has_fuels
   end
 
-  # Class to store additional properties on an HPXML object that are not intended
-  # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
-  # object for an appliance.
+# Class to store additional properties on an HPXML object that are not intended
+# to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
+# object for an appliance.
   class AdditionalProperties < OpenStruct
     def method_missing(meth, *args, **kwargs)
       # Complain if no value has been set rather than just returning nil

@@ -459,6 +459,7 @@ class Material
   end
 end
 
+# TODO
 class BaseMaterial
   def initialize(rho:, cp:, k_in: nil)
     @rho = rho
@@ -606,6 +607,7 @@ class BaseMaterial
   end
 end
 
+# TODO
 class GlazingMaterial
   def initialize(name:, ufactor:, shgc:)
     @name = name
@@ -616,6 +618,7 @@ class GlazingMaterial
   attr_accessor :name, :ufactor, :shgc
 end
 
+# TODO
 class Liquid
   def initialize(rho: nil, cp: nil, k: nil, h_fg: nil, t_frz: nil)
     @rho = rho          # Density (lb/ft3)
@@ -644,6 +647,7 @@ class Liquid
   end
 end
 
+# TODO
 class Gas
   def initialize(rho: nil, cp: nil, k: nil, m: nil)
     @rho = rho # Density (lb/ft3)

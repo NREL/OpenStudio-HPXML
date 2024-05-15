@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class WeatherData
   def initialize
   end
@@ -9,6 +10,7 @@ class WeatherData
   attr_accessor(*ATTRS)
 end
 
+# TODO
 class WeatherDesign
   def initialize
   end
@@ -16,6 +18,7 @@ class WeatherDesign
   attr_accessor(*ATTRS)
 end
 
+# TODO
 class WeatherProcess
   def initialize(epw_path:, runner:, hpxml: nil)
     @data = WeatherData.new

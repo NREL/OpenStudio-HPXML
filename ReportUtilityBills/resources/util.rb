@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class Fuel
   def initialize(meters: [])
     @meters = meters
@@ -8,6 +9,7 @@ class Fuel
   attr_accessor(:meters, :timeseries, :units)
 end
 
+# TODO
 class UtilityRate
   def initialize()
     @fixedmonthlycharge = nil
@@ -51,6 +53,7 @@ class UtilityBill
                 :monthly_production_credit, :annual_production_credit)
 end
 
+# TODO
 class CalculateUtilityBill
   # TODO
   #

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class HVACSizing
   # Calculates heating/cooling design loads, and selects equipment
   # values (e.g., capacities, airflows) specific to each HVAC system.
@@ -11,7 +12,7 @@ class HVACSizing
   # @param cfa [TODO] TODO
   # @param hvac_systems [TODO] TODO
   # @param update_hpxml [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems, update_hpxml: true)
     @hpxml_bldg = hpxml_bldg
     @cfa = cfa
@@ -3875,6 +3876,7 @@ class HVACSizing
   end
 end
 
+# TODO
 class MJ
   def initialize
   end
@@ -3883,6 +3885,7 @@ class MJ
                 :inside_air_dens, :cool_design_temps, :heat_design_temps, :p_atm)
 end
 
+# TODO
 class DesignLoads
   def initialize
   end
@@ -3893,6 +3896,7 @@ class DesignLoads
                 :Heat_Slabs, :Heat_Ceilings, :Heat_InfilVent)
 end
 
+# TODO
 class HVACSizingValues
   def initialize
   end
