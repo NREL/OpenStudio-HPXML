@@ -61,7 +61,7 @@ class CalculateUtilityBill
   # @param rate [TODO] TODO
   # @param bill [TODO] TODO
   # @param net_elec [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     if fuel_time_series.size > 12
       # Must be no more than 12 months worth of simulation data
@@ -121,7 +121,7 @@ class CalculateUtilityBill
   # @param fuels [TODO] TODO
   # @param rate [TODO] TODO
   # @param bill [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries
@@ -400,7 +400,7 @@ class CalculateUtilityBill
   # @param net_monthly_energy_charge [TODO] TODO
   # @param annual_min_charge [TODO] TODO
   # @param monthly_min_charge [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge)
     # Calculate monthly payments, rollover, and min charges
     monthly_min_charges = [0] * 12
@@ -439,7 +439,7 @@ class CalculateUtilityBill
   # @param net_metering_excess_sellback_type [TODO] TODO
   # @param net_metering_user_excess_sellback_rate [TODO] TODO
   # @param net_elec [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec)
     # Note: Annual excess sellback can only be calculated at the end of the year on the net electricity consumption.
     if net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
@@ -456,7 +456,7 @@ class CalculateUtilityBill
   #
   # @param header [TODO] TODO
   # @param month [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.calculate_monthly_prorate(header, month)
     begin_month = header.sim_begin_month
     begin_day = header.sim_begin_day

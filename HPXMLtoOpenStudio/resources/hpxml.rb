@@ -7829,7 +7829,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.vented_locations
     return [HPXML::LocationAtticVented,
             HPXML::LocationCrawlspaceVented]
@@ -7837,7 +7837,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.conditioned_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
@@ -7847,7 +7847,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.multifamily_common_space_locations
     return [HPXML::LocationOtherHeatedSpace,
             HPXML::LocationOtherMultifamilyBufferSpace,
@@ -7856,7 +7856,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.conditioned_locations_this_unit
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
@@ -7865,7 +7865,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.conditioned_finished_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned]
@@ -7873,7 +7873,7 @@ class HPXML < Object
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.conditioned_below_grade_locations
     return [HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
@@ -7882,7 +7882,7 @@ class HPXML < Object
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
   end
@@ -7890,7 +7890,7 @@ class HPXML < Object
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_adiabatic(surface)
     if surface.exterior_adjacent_to == surface.interior_adjacent_to
       # E.g., wall between unit crawlspace and neighboring unit crawlspace
@@ -7908,7 +7908,7 @@ class HPXML < Object
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
     # Note: The location of insulation is not considered here, so an insulated foundation wall of an
@@ -7922,7 +7922,7 @@ class HPXML < Object
   #
   # @param surface [TODO] TODO
   # @param force_decision [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_floor_a_ceiling(surface, force_decision)
     ceiling_locations = [LocationAtticUnconditioned,
                          LocationAtticVented,
@@ -7947,7 +7947,7 @@ class HPXML < Object
   #
   # @param parent [TODO] TODO
   # @param element_name [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_id(parent, element_name = 'SystemIdentifier')
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
@@ -7955,7 +7955,7 @@ class HPXML < Object
   # TODO
   #
   # @param element [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
   end
@@ -7967,7 +7967,7 @@ class HPXML < Object
   # @param begin_day [TODO] TODO
   # @param end_month [TODO] TODO
   # @param end_day [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.check_dates(str, begin_month, begin_day, end_month, end_day)
     errors = []
 

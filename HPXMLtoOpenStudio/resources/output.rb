@@ -148,7 +148,7 @@ class Outputs
   # TODO
   #
   # @param hpxml_bldg [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_total_hvac_capacities(hpxml_bldg)
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -178,7 +178,7 @@ class Outputs
   # TODO
   #
   # @param hpxml_bldg [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_total_hvac_airflows(hpxml_bldg)
     htg_cfm, clg_cfm = 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units

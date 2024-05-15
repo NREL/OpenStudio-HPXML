@@ -7,7 +7,7 @@ class Version
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.check_openstudio_version
     if not OpenStudio.openStudioVersion.start_with? OS_Version
       if OS_Version.count('.') == 2
@@ -21,7 +21,7 @@ class Version
   # TODO
   #
   # @param hpxml_version [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.check_hpxml_version(hpxml_version)
     if hpxml_version != HPXML_Version
       fail "HPXML version #{HPXML_Version} is required."

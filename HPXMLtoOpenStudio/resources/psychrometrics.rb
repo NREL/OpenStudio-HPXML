@@ -4,7 +4,7 @@ class Psychrometrics
   # TODO
   #
   # @param t [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.H_fg_fT(t)
     '''
     Description:
@@ -40,7 +40,7 @@ class Psychrometrics
   # TODO
   #
   # @param tdb [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Psat_fT(tdb)
     '''
     Description:
@@ -90,7 +90,7 @@ class Psychrometrics
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Tsat_fP(runner, p)
     '''
     Description:
@@ -145,7 +145,7 @@ class Psychrometrics
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param h [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Tsat_fh_P(runner, h, p)
     '''
     Description:
@@ -202,7 +202,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.rhoD_fT_w_P(tdb, w, p)
     '''
     Description:
@@ -234,7 +234,7 @@ class Psychrometrics
   #
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.h_fT_w_SI(tdb, w)
     '''
     Description:
@@ -263,7 +263,7 @@ class Psychrometrics
   #
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.h_fT_w(tdb, w)
     '''
     Description:
@@ -293,7 +293,7 @@ class Psychrometrics
   #
   # @param tdb [TODO] TODO
   # @param h [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fT_h_SI(tdb, h)
     '''
     Description:
@@ -321,7 +321,7 @@ class Psychrometrics
   # TODO
   #
   # @param z [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Pstd_fZ(z)
     '''
     Description:
@@ -351,7 +351,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Twb_fT_w_P(runner, tdb, w, p)
     '''
     Description:
@@ -423,7 +423,7 @@ class Psychrometrics
   #
   # @param p [TODO] TODO
   # @param pw [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fP(p, pw)
     '''
     Description:
@@ -456,7 +456,7 @@ class Psychrometrics
   # @param cfm [TODO] TODO
   # @param shr [TODO] TODO
   # @param win [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.CoilAoFactor(runner, dBin, p, qdot, cfm, shr, win)
     '''
     Description:
@@ -499,7 +499,7 @@ class Psychrometrics
   # @param cfm [TODO] TODO
   # @param shr [TODO] TODO
   # @param win [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.CoilBypassFactor(runner, dBin, p, qdot, cfm, shr, win)
     '''
     Description:
@@ -592,7 +592,7 @@ class Psychrometrics
   # @param p [TODO] TODO
   # @param cfm [TODO] TODO
   # @param win [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.CalculateMassflowRate(dBin, p, cfm, win)
     '''
     Description:
@@ -622,7 +622,7 @@ class Psychrometrics
   #
   # @param w [TODO] TODO
   # @param h [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.T_fw_h_SI(w, h)
     '''
     Description:
@@ -653,7 +653,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.R_fT_w_P_SI(tdb, w, p)
     '''
     Description:
@@ -683,7 +683,7 @@ class Psychrometrics
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param p [TODO] TODO
   # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Tdp_fP_w_SI(runner, p, w)
     '''
     Description:
@@ -718,7 +718,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param twb [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fT_Twb_P_SI(tdb, twb, p)
     '''
     Description:
@@ -749,7 +749,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param twb [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fT_Twb_P(tdb, twb, p)
     '''
     Description:
@@ -783,7 +783,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param w [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.R_fT_w_P(tdb, w, p)
     '''
     Description:
@@ -814,7 +814,7 @@ class Psychrometrics
   #
   # @param p [TODO] TODO
   # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Pw_fP_w(p, w)
     '''
     Description:
@@ -845,7 +845,7 @@ class Psychrometrics
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param p [TODO] TODO
   # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Tdp_fP_w(runner, p, w)
     '''
     Description:
@@ -916,7 +916,7 @@ class Psychrometrics
   # @param cfm [TODO] TODO
   # @param ao [TODO] TODO
   # @param win [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.CalculateSHR(runner, dBin, p, q, cfm, ao, win)
     '''
     Description:
@@ -994,7 +994,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param r [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fT_R_P(tdb, r, p)
     '''
     Description:
@@ -1028,7 +1028,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param r [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.w_fT_R_P_SI(tdb, r, p)
     '''
     Description:
@@ -1062,7 +1062,7 @@ class Psychrometrics
   # @param tdb [TODO] TODO
   # @param r [TODO] TODO
   # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.Twb_fT_R_P(runner, tdb, r, p)
     '''
     Description:

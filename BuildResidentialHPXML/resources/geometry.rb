@@ -1240,7 +1240,7 @@ class Geometry
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param model [OpenStudio::Model::Model] model object
   # @param door_area [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.create_doors(runner:,
                         model:,
                         door_area:,
@@ -1388,7 +1388,7 @@ class Geometry
   # @param skylight_area_back [TODO] TODO
   # @param skylight_area_left [TODO] TODO
   # @param skylight_area_right [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.create_windows_and_skylights(runner:,
                                         model:,
                                         window_front_wwr:,
@@ -1753,7 +1753,7 @@ class Geometry
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_adjacent_to(surface:)
     space = surface.space.get
     st = space.spaceType.get
@@ -1766,7 +1766,7 @@ class Geometry
   #
   # @param surface [TODO] TODO
   # @param orientation [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_surface_azimuth(surface:,
                                orientation:)
     facade = get_facade_for_surface(surface: surface)
@@ -1777,7 +1777,7 @@ class Geometry
   #
   # @param surface [TODO] TODO
   # @param height [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.surface_is_rim_joist(surface:,
                                 height:)
     return false unless (height - get_surface_height(surface: surface)).abs < 0.00001
@@ -1787,6 +1787,8 @@ class Geometry
   end
 
   # Takes in a list of floor surfaces for which to calculate the exposed perimeter.
+  # Returns the total exposed perimeter.
+  # NOTE: Does not work for buildings with non-orthogonal walls.
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param ground_floor_surfaces [TODO] TODO
@@ -1854,7 +1856,7 @@ class Geometry
   # @param geometry_garage_protrusion [TODO] TODO
   # @param geometry_garage_width [TODO] TODO
   # @param geometry_garage_depth [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
                                           geometry_garage_width:,
                                           geometry_garage_depth:,
@@ -1874,7 +1876,7 @@ class Geometry
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_facade_for_surface(surface:)
     tol = 0.001
     n = surface.outwardNormal
@@ -1907,7 +1909,7 @@ class Geometry
   #
   # @param facade [TODO] TODO
   # @param orientation [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_azimuth_from_facade(facade:,
                                    orientation:)
     if facade == Constants.FacadeFront
@@ -1927,7 +1929,7 @@ class Geometry
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_adiabatic_adjacent_surface(model:,
                                           surface:)
     return if surface.outsideBoundaryCondition != 'Adiabatic'
@@ -1973,7 +1975,7 @@ class Geometry
   # TODO
   #
   # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_conditioned_attic_height(spaces:)
     # gable roof type
     get_conditioned_spaces(spaces: spaces).each do |space|
@@ -2029,7 +2031,7 @@ class Geometry
   # @param space [TODO] TODO
   # @param rim_joist_height [TODO] TODO
   # @param z [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.add_rim_joist(model:,
                          polygon:,
                          space:,
@@ -2073,7 +2075,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] model object
   # @param footprint_polygon [TODO] TODO
   # @param space [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.assign_indexes(model:,
                           footprint_polygon:,
                           space:)
@@ -2117,6 +2119,7 @@ class Geometry
   end
 
   # Index any remaining surfaces created from intersecting/matching
+  # We can't deterministically assign indexes to these surfaces
   #
   # @param model [OpenStudio::Model::Model] model object
   # @return [TODO] TODO
@@ -2131,7 +2134,7 @@ class Geometry
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.create_space(model:)
     space = OpenStudio::Model::Space.new(model)
     space.additionalProperties.setFeature('Index', indexer(model: model))
@@ -2142,7 +2145,7 @@ class Geometry
   #
   # @param polygon [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.create_surface(polygon:,
                           model:)
     surface = OpenStudio::Model::Surface.new(polygon, model)
@@ -2154,7 +2157,7 @@ class Geometry
   #
   # @param polygon [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.create_sub_surface(polygon:,
                               model:)
     sub_surface = OpenStudio::Model::SubSurface.new(polygon, model)
@@ -2165,7 +2168,7 @@ class Geometry
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.indexer(model:)
     indexes = [0]
     (model.getSpaces + model.getSurfaces + model.getSubSurfaces).each do |s|
@@ -2180,7 +2183,7 @@ class Geometry
   #
   # @param surface1 [TODO] TODO
   # @param surface2 [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.has_same_vertices(surface1:,
                              surface2:)
     if get_surface_x_values(surfaceArray: [surface1]).sort == get_surface_x_values(surfaceArray: [surface2]).sort &&
@@ -2221,7 +2224,7 @@ class Geometry
   # TODO
   #
   # @param space [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_space_floor_z(space:)
     space.surfaces.each do |surface|
       next unless surface.surfaceType.downcase == 'floor'
@@ -2235,7 +2238,7 @@ class Geometry
   # @param surface [TODO] TODO
   # @param min_average_ceiling_height_for_window [TODO] TODO
   # @param min_window_width [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_wall_area_for_windows(surface:,
                                      min_average_ceiling_height_for_window:,
                                      min_window_width:)
@@ -2279,7 +2282,7 @@ class Geometry
   # @param facade [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.add_windows_to_wall(surface:,
                                window_area:,
                                window_gap_y:,
@@ -2382,7 +2385,7 @@ class Geometry
   # @param win_num [TODO] TODO
   # @param facade [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.add_window_to_wall(surface:,
                               win_width:,
                               win_height:,
@@ -2436,7 +2439,7 @@ class Geometry
   # TODO
   #
   # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_conditioned_spaces(spaces:)
     conditioned_spaces = []
     spaces.each do |space|
@@ -2450,7 +2453,7 @@ class Geometry
   # TODO
   #
   # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_garage_spaces(spaces:)
     garage_spaces = []
     spaces.each do |space|
@@ -2464,7 +2467,7 @@ class Geometry
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_rectangular_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
       return false
@@ -2490,7 +2493,7 @@ class Geometry
   # TODO
   #
   # @param surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_gable_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
       return false
@@ -2513,7 +2516,7 @@ class Geometry
   # TODO
   #
   # @param space [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.space_has_roof(space)
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != 'roofceiling'
@@ -2535,7 +2538,7 @@ class Geometry
   # @param roof_pitch [TODO] TODO
   # @param roof_type [TODO] TODO
   # @param rim_joist_height [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_attic_space(model:,
                            x:,
                            y:,
@@ -2634,7 +2637,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] model object
   # @param foundation_type [TODO] TODO
   # @param foundation_height [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_ambient_foundation_shift(model:,
                                           foundation_type:,
                                           foundation_height:)
@@ -2653,7 +2656,7 @@ class Geometry
   # Returns true if space is either fully or partially below grade.
   #
   # @param space [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.space_is_below_grade(space:)
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != 'wall'
@@ -2669,7 +2672,7 @@ class Geometry
   # @param p [TODO] TODO
   # @param v1 [TODO] TODO
   # @param v2 [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.is_point_between(p:,
                             v1:,
                             v2:)
@@ -2699,7 +2702,7 @@ class Geometry
   # @param wall_surfaces [TODO] TODO
   # @param floor_surface [TODO] TODO
   # @param same_space [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_walls_connected_to_floor(wall_surfaces:,
                                         floor_surface:,
                                         same_space: true)
@@ -2740,7 +2743,7 @@ class Geometry
   #
   # @param surfaces [TODO] TODO
   # @param use_top_edge [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_edges_for_surfaces(surfaces:,
                                   use_top_edge:)
     edges = []

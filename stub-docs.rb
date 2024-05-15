@@ -1,8 +1,6 @@
 new_folder = 'documented'
 FileUtils.rm_rf(new_folder) if File.exist?(new_folder)
 
-# files = ['HPXMLtoOpenStudio/resources/airflow.rb']
-# files = ['BuildResidentialHPXML/resources/geometry.rb']
 files = []
 ['BuildResidentialHPXML', 'BuildResidentialScheduleFile', 'HPXMLtoOpenStudio', 'ReportSimulationOutput', 'ReportUtilityBills'].each do |folder|
   files += Dir[File.join(folder, 'resources/[!test_*]*.rb')]
@@ -10,7 +8,7 @@ end
 
 def get_params(lines, idx)
   params = []
-  desc = nil
+  descs = []
   ret = nil
   lines[0..idx - 1].reverse.each_with_index do |line, i|
     if line.include?('# @param')
@@ -22,14 +20,14 @@ def get_params(lines, idx)
     elsif line.strip == '#' # blank line
       # no-op
     elsif line.strip.start_with?('#')
-      desc = line.strip
+      descs << line.strip
     else
-      return params, desc, ret, idx - i
+      return params, descs, ret, idx - i
     end
   end
 end
 
-def set_params(lines, idx, params, desc, ret, tab = '  ')
+def set_params(lines, idx, params, descs, ret, tab = '  ')
   if ret.nil?
     lines.insert(idx, "#{tab}# @return [TODO] TODO")
   else
@@ -39,8 +37,10 @@ def set_params(lines, idx, params, desc, ret, tab = '  ')
     lines.insert(idx, "#{tab}# @param #{param[0]} #{param[1]} #{param[2]}")
   end
   lines.insert(idx, "#{tab}#")
-  desc = '# TODO' if desc.nil?
-  lines.insert(idx, "#{tab}#{desc}")
+  descs = ['# TODO'] if descs.empty?
+  descs.each do |desc|
+    lines.insert(idx, "#{tab}#{desc}")
+  end
 
   return lines
 end
@@ -74,19 +74,19 @@ files.each do |file|
       start_idx = nil
       end_idx = nil
       params1 = []
-      desc = nil
+      descs = []
       ret = nil
       lines.each_with_index do |line, i|
         next if not (line.strip.include?('def ') && (line.strip.include?("#{method}(") || line.strip.end_with?("#{method}")))
 
         end_idx = i
-        params1, desc, ret, start_idx = get_params(lines, end_idx)
+        params1, descs, ret, start_idx = get_params(lines, end_idx)
 
         # puts
         # puts "Method: #{method}"
         # puts "Parameters: #{params2}"
         # puts "@params: #{params1}"
-        # puts "Description: #{desc}"
+        # puts "Description: #{descs}"
 
         (params2 - params1.collect { |x| x.first }).reverse.each do |needed_param|
           type = '[TODO]'
@@ -107,7 +107,7 @@ files.each do |file|
         lines.delete_at(idx)
       end
 
-      set_params(lines, start_idx, params1, desc, ret)
+      set_params(lines, start_idx, params1, descs, ret)
     end # end methods
   end # end new_classes
 

@@ -11,7 +11,7 @@ class MiscLoads
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_plug(model, runner, plug_load, obj_name, conditioned_space, apply_ashrae140_assumptions, schedules_file, unavailable_periods)
     kwh = 0
     if not plug_load.nil?
@@ -79,7 +79,7 @@ class MiscLoads
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_fuel(model, runner, fuel_load, obj_name, conditioned_space, schedules_file, unavailable_periods)
     therm = 0
     if not fuel_load.nil?
@@ -138,7 +138,7 @@ class MiscLoads
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)
     return if pool_or_spa.heater_type == HPXML::TypeNone
 
@@ -227,7 +227,7 @@ class MiscLoads
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)
     pump_kwh = 0
     if not pool_or_spa.pump_kwh_per_year.nil?
@@ -283,7 +283,7 @@ class MiscLoads
   # TODO
   #
   # @param cfa [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa
     frac_lost = 0.10
@@ -296,7 +296,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_televisions_default_values(cfa, nbeds)
     annual_kwh = 413.0 + 0.0 * cfa + 69.0 * nbeds
     frac_lost = 0.0
@@ -309,7 +309,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_pool_pump_default_values(cfa, nbeds)
     return 158.6 / 0.070 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end
@@ -319,7 +319,7 @@ class MiscLoads
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
   # @param type [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_pool_heater_default_values(cfa, nbeds, type)
     load_units = nil
     load_value = nil
@@ -340,7 +340,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_permanent_spa_pump_default_values(cfa, nbeds)
     return 59.5 / 0.059 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end
@@ -350,7 +350,7 @@ class MiscLoads
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
   # @param type [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_permanent_spa_heater_default_values(cfa, nbeds, type)
     load_units = nil
     load_value = nil
@@ -369,7 +369,7 @@ class MiscLoads
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_electric_vehicle_charging_default_values
     ev_charger_efficiency = 0.9
     ev_battery_efficiency = 0.9
@@ -382,7 +382,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_well_pump_default_values(cfa, nbeds)
     return 50.8 / 0.127 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end
@@ -391,7 +391,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_gas_grill_default_values(cfa, nbeds)
     return 0.87 / 0.029 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end
@@ -400,7 +400,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_gas_lighting_default_values(cfa, nbeds)
     return 0.22 / 0.012 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end
@@ -409,7 +409,7 @@ class MiscLoads
   #
   # @param cfa [TODO] TODO
   # @param nbeds [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_gas_fireplace_default_values(cfa, nbeds)
     return 1.95 / 0.032 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end

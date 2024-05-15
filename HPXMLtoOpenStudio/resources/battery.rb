@@ -10,7 +10,7 @@ class Battery
   # @param battery [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param unit_multiplier [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)
     charging_schedule = nil
     discharging_schedule = nil
@@ -197,7 +197,7 @@ class Battery
   # TODO
   #
   # @param has_garage [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_battery_default_values(has_garage = false)
     if has_garage
       location = HPXML::LocationGarage
@@ -216,7 +216,7 @@ class Battery
   #
   # @param nominal_capacity_kwh [TODO] TODO
   # @param nominal_voltage [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_Ah_from_kWh(nominal_capacity_kwh, nominal_voltage)
     return nominal_capacity_kwh * 1000.0 / nominal_voltage
   end
@@ -225,7 +225,7 @@ class Battery
   #
   # @param nominal_capacity_ah [TODO] TODO
   # @param nominal_voltage [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_kWh_from_Ah(nominal_capacity_ah, nominal_voltage)
     return nominal_capacity_ah * nominal_voltage / 1000.0
   end
@@ -233,7 +233,7 @@ class Battery
   # TODO
   #
   # @param battery [TODO] TODO
-  # @return [TODO] TODO
+  # @return [TODO] TODO 
   def self.get_usable_capacity_kWh(battery)
     usable_capacity_kwh = battery.usable_capacity_kwh
     if usable_capacity_kwh.nil?
