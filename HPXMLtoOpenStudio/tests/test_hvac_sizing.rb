@@ -1277,6 +1277,51 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0.014, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
   end
 
+  def test_multiple_zones
+    # Run base-zones-spaces-multiple.xml
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-zones-spaces-multiple.xml'))
+    _model_mult, _base_hpxml, hpxml_bldg_mult = _test_measure(args_hash)
+
+    # Check above-grade zone loads are much greater than below-grade zone loads
+    assert_operator(hpxml_bldg_mult.conditioned_zones[0].hdl_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].hdl_total)
+    assert_operator(hpxml_bldg_mult.conditioned_zones[0].cdl_sens_total, :>, 1.5 * hpxml_bldg_mult.conditioned_zones[1].cdl_sens_total)
+
+    # TODO: Check space and zone values are equal
+    (HPXML::HDL_ATTRS.keys + HPXML::CDL_SENS_ATTRS.keys).each do |key|
+      assert_equal(hpxml_bldg_mult.conditioned_zones[0].send(key), hpxml_bldg_mult.conditioned_spaces[0].send(key))
+      assert_equal(hpxml_bldg_mult.conditioned_zones[1].send(key), hpxml_bldg_mult.conditioned_spaces[1].send(key))
+    end
+
+    # Run base-zones-spaces.xml
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-zones-spaces.xml'))
+    _model, _base_hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Check results between base-zones-spaces.xml and base-zones-spaces-multiple.xml
+    (HPXML::HDL_ATTRS.keys + HPXML::CDL_SENS_ATTRS.keys + HPXML::CDL_LAT_ATTRS.keys).each do |key|
+      if key == :cdl_sens_aed_curve
+        # Check for identical arrays
+        assert_equal(hpxml_bldg.hvac_plant.send(key).split(',').map(&:to_f), hpxml_bldg_mult.hvac_plant.send(key).split(',').map(&:to_f))
+        assert_equal(hpxml_bldg.conditioned_zones[0].send(key).split(',').map(&:to_f), hpxml_bldg_mult.conditioned_zones[0].send(key).split(',').map(&:to_f).zip(hpxml_bldg_mult.conditioned_zones[1].send(key).split(',').map(&:to_f)).map { |a, b| a + b })
+        assert_equal(hpxml_bldg.conditioned_spaces[0].send(key).split(',').map(&:to_f), hpxml_bldg_mult.conditioned_spaces[0].send(key).split(',').map(&:to_f).zip(hpxml_bldg_mult.conditioned_spaces[1].send(key).split(',').map(&:to_f)).map { |a, b| a + b })
+      else
+        if key.to_s.include?('ducts') || key.to_s.include?('total')
+          # Check values are similar (ducts, and thus totals, will not be exactly identical)
+          tol_btuh = 500
+        else
+          # Check values are identical (aside from rounding)
+          tol_btuh = 1
+        end
+        assert_in_delta(hpxml_bldg.hvac_plant.send(key), hpxml_bldg_mult.hvac_plant.send(key), tol_btuh)
+        assert_in_delta(hpxml_bldg.conditioned_zones[0].send(key), hpxml_bldg_mult.conditioned_zones[0].send(key) + hpxml_bldg_mult.conditioned_zones[1].send(key), tol_btuh)
+        if not HPXML::CDL_LAT_ATTRS.keys.include?(key) # Latent loads are not calculated for spaces
+          assert_in_delta(hpxml_bldg.conditioned_spaces[0].send(key), hpxml_bldg_mult.conditioned_spaces[0].send(key) + hpxml_bldg_mult.conditioned_spaces[1].send(key), tol_btuh)
+        end
+      end
+    end
+  end
+
   def test_gshp_ground_loop
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)

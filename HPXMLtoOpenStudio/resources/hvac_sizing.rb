@@ -439,6 +439,7 @@ class HVACSizing
       zone.spaces.each do |space|
         all_space_loads[space] = DesignLoadValues.new
         space.additional_properties.total_exposed_wall_area = 0.0
+        # Initialize Hourly Aggregate Fenestration Loads (AFL)
         space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
         space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
         space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
@@ -574,9 +575,6 @@ class HVACSizing
       end
     end
 
-    # Initialize Hourly Aggregate Fenestration Load (AFL)
-    afl_hr = [0.0] * 12
-
     # Windows
     hpxml_bldg.windows.each do |window|
       wall = window.wall
@@ -679,7 +677,6 @@ class HVACSizing
             all_space_loads[space].Cool_Windows += clg_loads
           end
         else
-          afl_hr[hr] += clg_loads
           if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
             space.additional_properties.afl_hr[hr] += clg_loads
           elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
@@ -767,7 +764,6 @@ class HVACSizing
             all_space_loads[space].Cool_Skylights += clg_loads
           end
         else
-          afl_hr[hr] += clg_loads
           if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
             space.additional_properties.afl_hr[hr] += clg_loads
           elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
@@ -792,10 +788,11 @@ class HVACSizing
           all_space_loads[space].Cool_Windows = space.additional_properties.afl_hr_windows.max
           all_space_loads[space].Cool_Skylights = space.additional_properties.afl_hr_skylights.max
         end
+        all_space_loads[space].HourlyFenestrationLoads.each_with_index do |load, i|
+          all_zone_loads[zone].HourlyFenestrationLoads[i] += load
+        end
       end
-
-      all_zone_loads[zone].HourlyFenestrationLoads = afl_hr
-      all_zone_loads[zone].Cool_AEDExcursion = calculate_aed_excursion(afl_hr)
+      all_zone_loads[zone].Cool_AEDExcursion = calculate_aed_excursion(all_zone_loads[zone].HourlyFenestrationLoads)
     end
   end
 
@@ -1354,10 +1351,10 @@ class HVACSizing
     '''
 
     # Heating
-    loads.Heat_Tot = [loads.Heat_Windows + loads.Heat_Skylights +
-      loads.Heat_Doors + loads.Heat_Walls +
-      loads.Heat_Floors + loads.Heat_Slabs +
-      loads.Heat_Ceilings + loads.Heat_Roofs, 0.0].max +
+    loads.Heat_Tot = loads.Heat_Windows + loads.Heat_Skylights +
+                     loads.Heat_Doors + loads.Heat_Walls +
+                     loads.Heat_Floors + loads.Heat_Slabs +
+                     loads.Heat_Ceilings + loads.Heat_Roofs +
                      loads.Heat_Infil + loads.Heat_Vent
 
     # Cooling
@@ -1369,12 +1366,6 @@ class HVACSizing
                       loads.Cool_AEDExcursion + loads.Cool_Vent_Sens
     loads.Cool_Lat = loads.Cool_Infil_Lat + loads.Cool_Vent_Lat +
                      loads.Cool_IntGains_Lat
-    if loads.Cool_Lat < 0 # No latent loads; also zero out individual components
-      loads.Cool_Lat = 0.0
-      loads.Cool_Infil_Lat = 0.0
-      loads.Cool_Vent_Lat = 0.0
-      loads.Cool_IntGains_Lat = 0.0
-    end
     loads.Cool_Tot = loads.Cool_Sens + loads.Cool_Lat
   end
 
@@ -1578,7 +1569,7 @@ class HVACSizing
     '''
     Heating Duct Loads
     '''
-    return if hvac_heating.nil? || (hvac_loads.Heat_Tot == 0) || hvac_heating.distribution_system.nil? || hvac_heating.distribution_system.ducts.empty?
+    return if hvac_heating.nil? || (hvac_loads.Heat_Tot <= 0) || hvac_heating.distribution_system.nil? || hvac_heating.distribution_system.ducts.empty?
 
     supply_air_temp = hvac_heating.additional_properties.supply_air_temp
 
@@ -1638,7 +1629,7 @@ class HVACSizing
     Cooling Duct Loads
     '''
 
-    return if hvac_cooling.nil? || (hvac_loads.Cool_Sens == 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
+    return if hvac_cooling.nil? || (hvac_loads.Cool_Sens <= 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
 
     leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
 

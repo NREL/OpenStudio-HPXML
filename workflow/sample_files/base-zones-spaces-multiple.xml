@@ -67,12 +67,22 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <SystemIdentifier id='ConditionedZone'/>
+          <SystemIdentifier id='AGConditionedZone'/>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
-              <SystemIdentifier id='ConditionedSpace'/>
-              <FloorArea>2700.0</FloorArea>
+              <SystemIdentifier id='AGConditionedSpace'/>
+              <FloorArea>1350.0</FloorArea>
+            </Space>
+          </Spaces>
+        </Zone>
+        <Zone>
+          <SystemIdentifier id='BGConditionedZone'/>
+          <ZoneType>conditioned</ZoneType>
+          <Spaces>
+            <Space>
+              <SystemIdentifier id='BGConditionedSpace'/>
+              <FloorArea>1350.0</FloorArea>
             </Space>
           </Spaces>
         </Zone>
@@ -145,7 +155,7 @@
         <RimJoists>
           <RimJoist>
             <SystemIdentifier id='RimJoist1'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='BGConditionedSpace'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>115.6</Area>
@@ -178,7 +188,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall2'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='AGConditionedSpace'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -198,7 +208,7 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall3'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='AGConditionedSpace'/>
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
@@ -236,7 +246,7 @@
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall1'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='BGConditionedSpace'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
@@ -279,7 +289,7 @@
           </Floor>
           <Floor>
             <SystemIdentifier id='Floor2'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='AGConditionedSpace'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <FloorOrCeiling>ceiling</FloorOrCeiling>
@@ -325,7 +335,7 @@
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab2'/>
-            <AttachedToSpace idref='ConditionedSpace'/>
+            <AttachedToSpace idref='BGConditionedSpace'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
@@ -434,35 +444,68 @@
             </PrimarySystems>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
-              <AttachedToZone idref='ConditionedZone'/>
+              <AttachedToZone idref='AGConditionedZone'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>36000.0</HeatingCapacity>
+              <HeatingCapacity>18000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <AttachedToZone idref='BGConditionedZone'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>18000.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
-              <AttachedToZone idref='ConditionedZone'/>
+              <AttachedToZone idref='AGConditionedZone'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CoolingCapacity>12000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
               <extension>
-                <CrankcaseHeaterPowerWatts>50.0</CrankcaseHeaterPowerWatts>
+                <CrankcaseHeaterPowerWatts>25.0</CrankcaseHeaterPowerWatts>
+              </extension>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem2'/>
+              <AttachedToZone idref='BGConditionedZone'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>12000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+              <extension>
+                <CrankcaseHeaterPowerWatts>25.0</CrankcaseHeaterPowerWatts>
               </extension>
             </CoolingSystem>
           </HVACPlant>
@@ -480,7 +523,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>75.0</Value>
+                    <Value>37.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -488,7 +531,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>25.0</Value>
+                    <Value>12.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -497,14 +540,52 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>garage</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>75.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>garage</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>25.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <AirDistributionType>regular velocity</AirDistributionType>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>37.5</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>12.5</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <SystemIdentifier id='Ducts3'/>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>garage</DuctLocation>
+                  <DuctSurfaceArea>75.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <SystemIdentifier id='Ducts4'/>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>garage</DuctLocation>
+                  <DuctSurfaceArea>25.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>

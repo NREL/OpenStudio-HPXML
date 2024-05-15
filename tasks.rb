@@ -374,29 +374,66 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # HPXML Zones/Spaces #
     # ------------------ #
 
-    if ['base-zones-spaces.xml'].include? hpxml_file
+    if ['base-zones-spaces.xml',
+        'base-zones-spaces-multiple.xml'].include? hpxml_file
+      # Add zones/spaces
       hpxml_bldg.zones.add(id: 'ConditionedZone',
                            zone_type: HPXML::ZoneTypeConditioned)
-      hpxml_bldg.hvac_systems.each do |sys|
-        sys.attached_to_zone_idref = hpxml_bldg.zones[0].id
+      hpxml_bldg.zones[-1].spaces.add(id: 'ConditionedSpace',
+                                      floor_area: hpxml_bldg.building_construction.conditioned_floor_area)
+      if hpxml_file == 'base-zones-spaces-multiple.xml'
+        hpxml_bldg.zones[-1].id = 'AGConditionedZone'
+        hpxml_bldg.zones[-1].spaces[0].id = 'AGConditionedSpace'
+        hpxml_bldg.zones[-1].spaces[0].floor_area /= 2.0
+        hpxml_bldg.zones.add(id: 'BGConditionedZone',
+                             zone_type: HPXML::ZoneTypeConditioned)
+        hpxml_bldg.zones[-1].spaces.add(id: 'BGConditionedSpace',
+                                        floor_area: hpxml_bldg.building_construction.conditioned_floor_area / 2.0)
       end
       hpxml_bldg.zones.add(id: 'GarageZone',
                            zone_type: HPXML::ZoneTypeUnconditioned)
-      if ['base-zones-spaces.xml'].include? hpxml_file
-        hpxml_bldg.zones[0].spaces.add(id: 'ConditionedSpace',
-                                       floor_area: hpxml_bldg.building_construction.conditioned_floor_area)
-        hpxml_bldg.surfaces.each do |s|
-          next unless s.interior_adjacent_to == HPXML::LocationConditionedSpace || s.interior_adjacent_to == HPXML::LocationBasementConditioned
+      hpxml_bldg.zones[-1].spaces.add(id: 'GarageSpace',
+                                      floor_area: hpxml_bldg.slabs.find { |s| s.interior_adjacent_to == HPXML::LocationGarage }.area)
 
+      # Attach HVAC
+      hpxml_bldg.heating_systems[0].attached_to_zone_idref = hpxml_bldg.zones[0].id
+      hpxml_bldg.cooling_systems[0].attached_to_zone_idref = hpxml_bldg.zones[0].id
+      if hpxml_file == 'base-zones-spaces-multiple.xml'
+        hpxml_bldg.heating_systems << hpxml_bldg.heating_systems[0].dup
+        hpxml_bldg.heating_systems[-1].id = 'HeatingSystem2'
+        hpxml_bldg.heating_systems[-1].attached_to_zone_idref = hpxml_bldg.zones[1].id
+        hpxml_bldg.heating_systems[-1].primary_system = false
+        hpxml_bldg.cooling_systems << hpxml_bldg.cooling_systems[0].dup
+        hpxml_bldg.cooling_systems[-1].id = 'CoolingSystem2'
+        hpxml_bldg.cooling_systems[-1].attached_to_zone_idref = hpxml_bldg.zones[1].id
+        hpxml_bldg.cooling_systems[-1].primary_system = false
+        hpxml_bldg.hvac_distributions.add(id: "HVACDistribution#{hpxml_bldg.hvac_distributions.size + 1}",
+                                          distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                          air_type: HPXML::AirTypeRegularVelocity)
+        hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[0].dup
+        hpxml_bldg.hvac_distributions[-1].duct_leakage_measurements << hpxml_bldg.hvac_distributions[0].duct_leakage_measurements[1].dup
+        hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[0].dup
+        hpxml_bldg.hvac_distributions[-1].ducts << hpxml_bldg.hvac_distributions[0].ducts[1].dup
+        hpxml_bldg.hvac_distributions[-1].ducts[0].id = 'Ducts3'
+        hpxml_bldg.hvac_distributions[-1].ducts[1].id = 'Ducts4'
+        hpxml_bldg.heating_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+        hpxml_bldg.cooling_systems[-1].distribution_system_idref = hpxml_bldg.hvac_distributions[-1].id
+      end
+
+      # Attach surfaces
+      hpxml_bldg.surfaces.each do |s|
+        next unless s.interior_adjacent_to == HPXML::LocationConditionedSpace || s.interior_adjacent_to == HPXML::LocationBasementConditioned
+
+        if hpxml_file == 'base-zones-spaces-multiple.xml' && s.interior_adjacent_to == HPXML::LocationBasementConditioned
+          s.attached_to_space_idref = hpxml_bldg.zones[1].spaces[0].id
+        else
           s.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
         end
-        hpxml_bldg.zones[1].spaces.add(id: 'GarageSpace',
-                                       floor_area: hpxml_bldg.slabs.find { |s| s.interior_adjacent_to == HPXML::LocationGarage }.area)
-        hpxml_bldg.surfaces.each do |s|
-          next unless s.interior_adjacent_to == HPXML::LocationGarage
+      end
+      hpxml_bldg.surfaces.each do |s|
+        next unless s.interior_adjacent_to == HPXML::LocationGarage
 
-          s.attached_to_space_idref = hpxml_bldg.zones[1].spaces[0].id
-        end
+        s.attached_to_space_idref = hpxml_bldg.zones[-1].spaces[0].id
       end
     end
 
@@ -1264,7 +1301,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     end
     if ['base-enclosure-2stories-garage.xml',
         'base-enclosure-garage.xml',
-        'base-zones-spaces.xml'].include? hpxml_file
+        'base-zones-spaces.xml',
+        'base-zones-spaces-multiple.xml'].include? hpxml_file
       grg_wall = hpxml_bldg.walls.select { |w|
                    w.interior_adjacent_to == HPXML::LocationGarage &&
                      w.exterior_adjacent_to == HPXML::LocationOutside
