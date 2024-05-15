@@ -1293,12 +1293,13 @@ class HVACSizing
       # Infiltration assignment by exterior wall area
       zone.spaces.each do |space|
         space.additional_properties.wall_area_ratio = space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
-        all_space_loads[space].Heat_Infil = space.additional_properties.wall_area_ratio * bldg_Heat_Infil
-        all_space_loads[space].Cool_Infil_Sens = space.additional_properties.wall_area_ratio * bldg_Cool_Infil_Sens
+        all_space_loads[space].Heat_Infil = bldg_Heat_Infil * space.additional_properties.wall_area_ratio
+        all_space_loads[space].Cool_Infil_Sens = bldg_Cool_Infil_Sens * space.additional_properties.wall_area_ratio
       end
-      all_zone_loads[zone].Heat_Infil = zone.spaces.map { |space| all_space_loads[space].Heat_Infil }.sum
-      all_zone_loads[zone].Cool_Infil_Sens = zone.spaces.map { |space| all_space_loads[space].Cool_Infil_Sens }.sum
-      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
+      zone_wall_area_ratio = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
+      all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_wall_area_ratio
+      all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_wall_area_ratio
+      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_wall_area_ratio
     end
   end
 
