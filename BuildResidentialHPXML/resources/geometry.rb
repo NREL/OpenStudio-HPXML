@@ -1984,7 +1984,7 @@ class Geometry
         next if surface.outsideBoundaryCondition != 'Outdoors'
         next if surface.surfaceType != 'Wall'
 
-        return get_height_of_spaces([space])
+        return get_height_of_spaces(spaces: [space])
       end
     end
 
@@ -1994,7 +1994,7 @@ class Geometry
         next if surface.outsideBoundaryCondition != 'Outdoors'
         next if surface.surfaceType != 'RoofCeiling'
 
-        return get_height_of_spaces([space])
+        return get_height_of_spaces(spaces: [space])
       end
     end
 

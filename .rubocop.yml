@@ -55,12 +55,16 @@ Style/CollectionCompact:
   Enabled: true
 Style/Documentation:
   Exclude:
-    - '**/test_*.rb'
-    - 'documented/**/resources/*.rb'
+    - '**/measure.rb'
+    - '**/tests/*.rb'
+    - 'workflow/**/*.rb'
+    - 'tasks.rb'
 Style/DocumentationMethod:
   Exclude:
-    - '**/test_*.rb'
-    - 'documented/**/resources/*.rb'
+    - '**/measure.rb'
+    - '**/tests/*.rb'
+    - 'workflow/**/*.rb'
+    - 'tasks.rb'
 Style/DocumentDynamicEvalDefinition:
   Enabled: true
 Style/EndlessMethod:
