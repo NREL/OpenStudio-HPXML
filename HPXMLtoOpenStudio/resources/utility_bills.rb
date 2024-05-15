@@ -69,8 +69,12 @@ class UtilityBills
       next if row[1].upcase != state_code.upcase # State
       next if row[2].upcase != msn_code_map[fuel_type] # EIA SEDS MSN code
       
-      seds_rate = row[-1]
-      seds_rate = row[-2] if seds_rate.nil? # If the rate for the latest year is unavailable, use the rate from the previous year.
+      if fuel_type == HPXML::FuelTypeCoal
+        seds_rate = row[40] # Use 2007 prices for coal. For 2008 forward, EIA assumes there is zero residential sector coal consumption in the United States, and SEDS does not estimate a price.
+      else
+        seds_rate = row[-1]
+        seds_rate = row[-2] if seds_rate.nil? # If the rate for the latest year is unavailable, use the rate from the previous year.
+      end
 
       return Float(seds_rate) * unit_conv[fuel_type]
     end
