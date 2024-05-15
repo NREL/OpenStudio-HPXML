@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 class Lighting
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] model object
+  # @param spaces [TODO] TODO
+  # @param lighting_groups [TODO] TODO
+  # @param lighting [TODO] TODO
+  # @param eri_version [TODO] TODO
+  # @param schedules_file [TODO] TODO
+  # @param cfa [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @param unit_multiplier [TODO] TODO
+  # @return [TODO] TODO
   def self.apply(runner, model, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa,
                  unavailable_periods, unit_multiplier)
     ltg_locns = [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage]
@@ -198,6 +211,9 @@ class Lighting
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_default_fractions()
     ltg_fracs = {}
     [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
@@ -214,6 +230,14 @@ class Lighting
 
   # FIXME: The following class methods are meant to be private.
 
+  # TODO
+  #
+  # @param eri_version [TODO] TODO
+  # @param cfa [TODO] TODO
+  # @param f_int_cfl [TODO] TODO
+  # @param f_int_lfl [TODO] TODO
+  # @param f_int_led [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_interior_energy(eri_version, cfa, f_int_cfl, f_int_lfl, f_int_led)
     return if f_int_cfl.nil? || f_int_lfl.nil? || f_int_led.nil?
 
@@ -250,6 +274,14 @@ class Lighting
     return int_kwh
   end
 
+  # TODO
+  #
+  # @param eri_version [TODO] TODO
+  # @param cfa [TODO] TODO
+  # @param f_ext_cfl [TODO] TODO
+  # @param f_ext_lfl [TODO] TODO
+  # @param f_ext_led [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_exterior_energy(eri_version, cfa, f_ext_cfl, f_ext_lfl, f_ext_led)
     return if f_ext_cfl.nil? || f_ext_lfl.nil? || f_ext_led.nil?
 
@@ -286,6 +318,14 @@ class Lighting
     return ext_kwh
   end
 
+  # TODO
+  #
+  # @param eri_version [TODO] TODO
+  # @param gfa [TODO] TODO
+  # @param f_grg_cfl [TODO] TODO
+  # @param f_grg_lfl [TODO] TODO
+  # @param f_grg_led [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_garage_energy(eri_version, gfa, f_grg_cfl, f_grg_lfl, f_grg_led)
     return if f_grg_cfl.nil? || f_grg_lfl.nil? || f_grg_led.nil?
 

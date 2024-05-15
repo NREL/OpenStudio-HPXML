@@ -144,6 +144,12 @@ class UnitConversions
     ['lbm/lbm', 'grains'] => 7000.0,
   }
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param from [TODO] TODO
+  # @param to [TODO] TODO
+  # @return [TODO] TODO
   def self.convert(x, from, to)
     from_d = from.downcase
     to_d = to.downcase

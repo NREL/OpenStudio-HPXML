@@ -1,10 +1,21 @@
 # frozen_string_literal: true
 
 class XMLValidator
+  # TODO
+  #
+  # @param schema_path [TODO] TODO
+  # @return [TODO] TODO
   def self.get_schema_validator(schema_path)
     return OpenStudio::XMLValidator.new(schema_path)
   end
 
+  # TODO
+  #
+  # @param hpxml_path [TODO] TODO
+  # @param validator [TODO] TODO
+  # @param errors [TODO] TODO
+  # @param warnings [TODO] TODO
+  # @return [TODO] TODO
   def self.validate_against_schema(hpxml_path, validator, errors = [], warnings = [])
     # Validate against XSD
     validator.validate(hpxml_path)
@@ -20,10 +31,22 @@ class XMLValidator
     return errors, warnings
   end
 
+  # TODO
+  #
+  # @param schematron_path [TODO] TODO
+  # @return [TODO] TODO
   def self.get_schematron_validator(schematron_path)
     return OpenStudio::XMLValidator.new(schematron_path)
   end
 
+  # TODO
+  #
+  # @param hpxml_path [TODO] TODO
+  # @param validator [TODO] TODO
+  # @param hpxml_doc [TODO] TODO
+  # @param errors [TODO] TODO
+  # @param warnings [TODO] TODO
+  # @return [TODO] TODO
   def self.validate_against_schematron(hpxml_path, validator, hpxml_doc, errors = [], warnings = [])
     # Validate against Schematron doc
     validator.validate(hpxml_path)
@@ -75,6 +98,10 @@ class XMLValidator
     return errors, warnings
   end
 
+  # TODO
+  #
+  # @param element [TODO] TODO
+  # @return [TODO] TODO
   def self.get_element_id(element)
     if element.name.to_s == 'Building'
       return XMLHelper.get_attribute_value(XMLHelper.get_element(element, 'BuildingID'), 'id')

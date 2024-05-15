@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 class UtilityBills
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param state_code [TODO] TODO
+  # @param fuel_type [TODO] TODO
+  # @param fixed_charge [TODO] TODO
+  # @param marginal_rate [TODO] TODO
+  # @return [TODO] TODO
   def self.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
     if state_code == 'US'
       if fuel_type == HPXML::FuelTypeElectricity
@@ -81,6 +89,11 @@ class UtilityBills
     return marginal_rate, average_rate
   end
 
+  # TODO
+  #
+  # @param state_code [TODO] TODO
+  # @param fuel_type [TODO] TODO
+  # @return [TODO] TODO
   def self.get_household_consumption(state_code, fuel_type)
     rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/HouseholdConsumption.csv'))
     rows.each do |row|
@@ -94,14 +107,29 @@ class UtilityBills
     end
   end
 
+  # TODO
+  #
+  # @param average_rate [TODO] TODO
+  # @param fixed_charge [TODO] TODO
+  # @param household_consumption [TODO] TODO
+  # @return [TODO] TODO
   def self.average_rate_to_marginal_rate(average_rate, fixed_charge, household_consumption)
     return average_rate - 12.0 * fixed_charge / household_consumption
   end
 
+  # TODO
+  #
+  # @param marginal_rate [TODO] TODO
+  # @param fixed_charge [TODO] TODO
+  # @param household_consumption [TODO] TODO
+  # @return [TODO] TODO
   def self.marginal_rate_to_average_rate(marginal_rate, fixed_charge, household_consumption)
     return marginal_rate + 12.0 * fixed_charge / household_consumption
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_state_code_to_padd
     # https://www.eia.gov/tools/glossary/index.php?id=petroleum%20administration%20for%20defense%20district
     padd_to_state_codes = { 'PADD 1A' => ['CT', 'MA', 'ME', 'NH', 'RI', 'VT'],
@@ -122,6 +150,10 @@ class UtilityBills
     return state_code_to_padd
   end
 
+  # TODO
+  #
+  # @param filename [TODO] TODO
+  # @return [TODO] TODO
   def self.get_gallon_marginal_rates(filename)
     marginal_rates = {}
 
