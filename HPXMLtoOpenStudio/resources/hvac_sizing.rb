@@ -873,18 +873,12 @@ class HVACSizing
         azimuths = [wall.azimuth]
       end
 
-      if wall.is_a? HPXML::RimJoist
-        wall_area = wall.area
-      else
-        wall_area = wall.net_area
-      end
-
       htg_htm = 0.0
       clg_htm = 0.0
       azimuths.each do |_azimuth|
         if wall.is_exposed
           # Store exposed wall gross area for infiltration calculation
-          space.additional_properties.total_exposed_wall_area += wall_area / azimuths.size
+          space.additional_properties.total_exposed_wall_area += wall.area / azimuths.size
         end
         if wall.is_exterior
 
@@ -926,13 +920,13 @@ class HVACSizing
           htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
         end
       end
-      clg_loads = clg_htm * wall_area
-      htg_loads = htg_htm * wall_area
+      clg_loads = clg_htm * wall.net_area
+      htg_loads = htg_htm * wall.net_area
       all_zone_loads[zone].Cool_Walls += clg_loads
       all_zone_loads[zone].Heat_Walls += htg_loads
       all_space_loads[space].Cool_Walls += clg_loads
       all_space_loads[space].Heat_Walls += htg_loads
-      wall.additional_properties.formj1_values = FormJ1Values.new(area: wall_area,
+      wall.additional_properties.formj1_values = FormJ1Values.new(area: wall.net_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
                                                                   heat_load: htg_loads,
