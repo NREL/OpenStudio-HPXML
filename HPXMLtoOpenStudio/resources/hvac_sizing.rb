@@ -440,7 +440,6 @@ class HVACSizing
         all_space_loads[space] = DesignLoadValues.new
         space.additional_properties.total_exposed_wall_area = 0.0
         # Initialize Hourly Aggregate Fenestration Loads (AFL)
-        space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
         space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
         space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
       end
@@ -677,12 +676,8 @@ class HVACSizing
             all_space_loads[space].Cool_Windows += clg_loads
           end
         else
-          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space.additional_properties.afl_hr[hr] += clg_loads
-          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            space.additional_properties.afl_hr_windows[hr] += clg_loads
-          end
+          all_space_loads[space].HourlyFenestrationLoads[hr] += clg_loads
+          space.additional_properties.afl_hr_windows[hr] += clg_loads if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
         end
       end
     end # window
@@ -764,12 +759,8 @@ class HVACSizing
             all_space_loads[space].Cool_Skylights += clg_loads
           end
         else
-          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space.additional_properties.afl_hr[hr] += clg_loads
-          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            space.additional_properties.afl_hr_skylights[hr] += clg_loads
-          end
+          all_space_loads[space].HourlyFenestrationLoads[hr] += clg_loads
+          space.additional_properties.afl_hr_skylights[hr] += clg_loads if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
         end
       end
     end # skylight
@@ -780,9 +771,8 @@ class HVACSizing
     hpxml_bldg.conditioned_zones.each do |zone|
       # Loop spaces to calculate adjustment for each space
       zone.spaces.each do |space|
-        all_space_loads[space].HourlyFenestrationLoads = space.additional_properties.afl_hr
         if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-          all_space_loads[space].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
+          all_space_loads[space].Cool_AEDExcursion = calculate_aed_excursion(all_space_loads[space].HourlyFenestrationLoads)
         else
           all_space_loads[space].Cool_AEDExcursion = 0.0
           all_space_loads[space].Cool_Windows = space.additional_properties.afl_hr_windows.max
