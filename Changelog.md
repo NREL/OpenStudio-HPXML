@@ -60,6 +60,7 @@ __New Features__
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
+- Adds geothermal loop outputs (number/length of boreholes) to annual results output file.
 - Updates to run_simulation.rb script:
   - Allows requesting timeseries outputs with different frequencies (e.g., `--hourly enduses --monthly temperatures`).
   - **Breaking change**: Deprecates `--add-timeseries-output-variable`; EnergyPlus output variables can now be requested like other timeseries categories (using e.g. `--hourly 'Zone People Occupant Count'`).

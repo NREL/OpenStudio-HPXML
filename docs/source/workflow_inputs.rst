@@ -2851,7 +2851,7 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``LoopConfiguration``                     string                         vertical            Yes                       Geothermal loop configuration
   ``LoopFlow``                              double            gal/min      > 0                 No        See [#]_        Water flow rate through the geothermal loop
   ``BoreholesOrTrenches/Count``             integer                        >= 1, <= 10         No [#]_   See [#]_        Number of boreholes
-  ``BoreholesOrTrenches/Length``            double            ft           >= 79, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
+  ``BoreholesOrTrenches/Length``            double            ft           >= 80, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0                 No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0                 No        5.0             Borehole diameter
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0     No        standard        Grout type or conductivity [#]_
@@ -2877,8 +2877,8 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
   .. [#] BoreholesOrTrenches/Count calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by BoreholesOrTrenches/Length if BoreholesOrTrenches/Length is provided, otherwise autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
-  .. [#] 79 ft is the minimum depth in the g-function library.
-         500 ft is the maximum realistic depth to be used in residential applications.
+  .. [#] The minimum depth in the g-function library is 80 ft.
+         The maximum realistic depth to be used in residential applications is 500 ft.
   .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
