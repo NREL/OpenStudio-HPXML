@@ -1430,7 +1430,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType('RoofCeiling')
-      surface.setSpace(create_or_get_space(model, spaces, skylight.roof.interior_adjacent_to))
+      if not skylight.floor.nil?
+        # Skylight with shaft or sun tunnel (interaction with attic is currently ignored)
+        interior_adjacent_to = skylight.floor.interior_adjacent_to
+      else
+        interior_adjacent_to = skylight.roof.interior_adjacent_to
+      end
+      surface.setSpace(create_or_get_space(model, spaces, interior_adjacent_to))
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
