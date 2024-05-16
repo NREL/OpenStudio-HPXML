@@ -910,6 +910,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
+              <AttachedToZone idref='WalkerResidenceConditioned'/>
               <HeatingSystemType>
                 <ElectricResistance>
                   <ElectricDistribution>radiant floor</ElectricDistribution>
@@ -924,6 +925,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
+              <AttachedToZone idref='WalkerResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>

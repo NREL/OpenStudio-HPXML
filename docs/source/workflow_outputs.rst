@@ -503,6 +503,51 @@ Additional detail related to design loads can be found in the :ref:`design_load_
    HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)               Latent cooling design load for internal gains
    =====================================================================  ====================
 
+.. _hvac_zone_design_loads:
+
+HVAC Zone Design Loads
+~~~~~~~~~~~~~~~~~~~~~~
+
+For each conditioned zone (see :ref:`zones_spaces`), zone-level design loads are available as listed below.
+Zone design loads can also be found in the ``in.xml`` file.
+Additional detail related to zone design loads can be found in the :ref:`design_load_details`:.
+
+   =====================================================================  ====================
+   Type                                                                   Notes
+   =====================================================================  ====================
+   HVAC Zone Design Load: Heating: Total (Btu/h)                          Total heating design load
+   HVAC Zone Design Load: Heating: Ducts (Btu/h)                          Heating design load for ducts
+   HVAC Zone Design Load: Heating: Windows (Btu/h)                        Heating design load for windows
+   HVAC Zone Design Load: Heating: Skylights (Btu/h)                      Heating design load for skylights
+   HVAC Zone Design Load: Heating: Doors (Btu/h)                          Heating design load for doors
+   HVAC Zone Design Load: Heating: Walls (Btu/h)                          Heating design load for walls
+   HVAC Zone Design Load: Heating: Roofs (Btu/h)                          Heating design load for roofs
+   HVAC Zone Design Load: Heating: Floors (Btu/h)                         Heating design load for floors
+   HVAC Zone Design Load: Heating: Slabs (Btu/h)                          Heating design load for slabs
+   HVAC Zone Design Load: Heating: Ceilings (Btu/h)                       Heating design load for ceilings
+   HVAC Zone Design Load: Heating: Infiltration (Btu/h)                   Heating design load for infiltration
+   HVAC Zone Design Load: Heating: Ventilation (Btu/h)                    Heating design load for ventilation
+   HVAC Zone Design Load: Cooling Sensible: Total (Btu/h)                 Total sensible cooling design load
+   HVAC Zone Design Load: Cooling Sensible: Ducts (Btu/h)                 Sensible cooling design load for ducts
+   HVAC Zone Design Load: Cooling Sensible: Windows (Btu/h)               Sensible cooling design load for windows
+   HVAC Zone Design Load: Cooling Sensible: Skylights (Btu/h)             Sensible cooling design load for skylights
+   HVAC Zone Design Load: Cooling Sensible: Doors (Btu/h)                 Sensible cooling design load for doors
+   HVAC Zone Design Load: Cooling Sensible: Walls (Btu/h)                 Sensible cooling design load for walls
+   HVAC Zone Design Load: Cooling Sensible: Roofs (Btu/h)                 Sensible cooling design load for roofs
+   HVAC Zone Design Load: Cooling Sensible: Floors (Btu/h)                Sensible cooling design load for floors
+   HVAC Zone Design Load: Cooling Sensible: Slabs (Btu/h)                 Sensible cooling design load for slabs
+   HVAC Zone Design Load: Cooling Sensible: Ceilings (Btu/h)              Sensible cooling design load for ceilings
+   HVAC Zone Design Load: Cooling Sensible: Infiltration (Btu/h)          Sensible cooling design load for infiltration
+   HVAC Zone Design Load: Cooling Sensible: Ventilation (Btu/h)           Sensible cooling design load for ventilation
+   HVAC Zone Design Load: Cooling Sensible: Internal Gains (Btu/h)        Sensible cooling design load for internal gains
+   HVAC Zone Design Load: Cooling Sensible: AED Excursion (Btu/h)         Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
+   HVAC Zone Design Load: Cooling Latent: Total (Btu/h)                   Total latent cooling design load
+   HVAC Zone Design Load: Cooling Latent: Ducts (Btu/h)                   Latent cooling design load for ducts
+   HVAC Zone Design Load: Cooling Latent: Infiltration (Btu/h)            Latent cooling design load for infiltration
+   HVAC Zone Design Load: Cooling Latent: Ventilation (Btu/h)             Latent cooling design load for ventilation
+   HVAC Zone Design Load: Cooling Latent: Internal Gains (Btu/h)          Latent cooling design load for internal gains
+   =====================================================================  ====================
+
 .. _hvac_space_design_loads:
 
 HVAC Space Design Loads
@@ -540,6 +585,20 @@ Additional detail related to space design loads can be found in the :ref:`design
    HVAC Space Design Load: <SpaceID>: Cooling Sensible: Internal Gains (Btu/h)            Sensible cooling design load for internal gains
    HVAC Space Design Load: <SpaceID>: Cooling Sensible: AED Excursion (Btu/h)             Sensible cooling design load for Adequate Exposure Diversity (AED) excursion
    =====================================================================================  ====================
+
+HVAC Geothermal Loop
+~~~~~~~~~~~~~~~~~~~~
+
+Geothermal loop outputs are listed below.
+Outputs for individual geothermal loops can be found in the ``in.xml`` file.
+
+   =====================================================================  ====================
+   Type                                                                   Notes
+   =====================================================================  ====================
+   HVAC Geothermal Loop: Borehole/Trench Count                            Total number of vertical boreholes
+   HVAC Geothermal Loop: Borehole/Trench Length (ft)                      Length (i.e., average depth) of each borehole
+   =====================================================================  ====================
+
 
 .. _timeseries_outputs:
 
@@ -661,8 +720,6 @@ For each HPXML Building, the following output types are reported.
    .. [#] Heating CFM is the airflow rate (ft^3/min) during the heating season.
    .. [#] Cooling CFM is the airflow rate (ft^3/min) during the cooling season.
 
-.. _report_entire_house:
-
 Report: <BuildingID>: Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -687,10 +744,35 @@ For each HPXML Building, the following output types are reported.
 
    .. [#] Length will be provided for a slab floor under conditioned space.
 
+Report: <BuildingID>: <ZoneID>: Loads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For each HPXML conditioned Zone (see :ref:`zones_spaces`), the following output types are reported.
+Only those surfaces attached to a space in the given zone will be included.
+
+   =======================  ===========  ===========  ===============  ==============  =======================  =====================
+   Type                     Area (ft^2)  Length (ft)  Wall Area Ratio  Heating (Btuh)  Cooling Sensible (Btuh)  Cooling Latent (Btuh)
+   =======================  ===========  ===========  ===============  ==============  =======================  =====================
+   Windows: <WindowID>      X                                          X               X
+   Skylights: <SkylightID>  X                                          X               X
+   Doors: <DoorID>          X                                          X               X
+   Walls: <WallID>          X                                          X               X
+   Ceilings: <CeilingID>    X                                          X               X
+   Floors: <FloorID>        X            See [#]_                      X               X
+   Infiltration                                       X                X               X                        X  
+   Internal Gains                                                                      X                        X  
+   Ducts                                                               X               X                        X  
+   Ventilation                                                         X               X                        X  
+   AED Excursion                                                                       X                          
+   Total                                                               X               X                        X
+   =======================  ===========  ===========  ===============  ==============  =======================  =====================
+
+   .. [#] Length will be provided for a slab floor under conditioned space.
+
 Report: <BuildingID>: <SpaceID>: Loads
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For each HPXML Space (see :ref:`zones_spaces`), the following output types are reported.
+For each HPXML Space in a conditioned zone (see :ref:`zones_spaces`), the following output types are reported.
 Only those surfaces attached to the given space will be included.
 
    =======================  ===========  ===========  ===============  ==============  =======================
@@ -702,7 +784,7 @@ Only those surfaces attached to the given space will be included.
    Walls: <WallID>          X                                          X               X
    Ceilings: <CeilingID>    X                                          X               X
    Floors: <FloorID>        X            See [#]_                      X               X
-   Infiltration                                       X [#]_           X               X
+   Infiltration                                       X                X               X
    Internal Gains                                                                      X
    Ducts                                                               X               X
    AED Excursion                                                                       X
@@ -710,7 +792,6 @@ Only those surfaces attached to the given space will be included.
    =======================  ===========  ===========  ===============  ==============  =======================
 
    .. [#] Length will be provided for a slab floor under conditioned space.
-   .. [#] Infiltration is apportioned to the space using a wall area ratio (the space's exposed wall area divided by the entire house's exposed wall area).
 
 Report: <BuildingID>: AED Curve
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

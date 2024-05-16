@@ -63,7 +63,7 @@
       </ClimateandRiskZones>
       <Zones>
         <Zone>
-          <SystemIdentifier id='LongResidence'/>
+          <SystemIdentifier id='LongResidenceConditioned'/>
           <ZoneType>conditioned</ZoneType>
           <Spaces>
             <Space>
@@ -132,7 +132,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>0.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -182,7 +182,7 @@
               <extension>
                 <ManualJInputs>
                   <InternalLoadsSensible>900.0</InternalLoadsSensible>
-                  <NumberofOccupants>0.0</NumberofOccupants>
+                  <NumberofOccupants>2.0</NumberofOccupants>
                 </ManualJInputs>
               </extension>
             </Space>
@@ -1237,6 +1237,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
+              <AttachedToZone idref='LongResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatingSystemType>
                 <Furnace/>
@@ -1250,6 +1251,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem1'/>
+              <AttachedToZone idref='LongResidenceConditioned'/>
               <DistributionSystem idref='HVACDistribution1'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
