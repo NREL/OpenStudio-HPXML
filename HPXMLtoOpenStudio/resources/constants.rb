@@ -650,6 +650,13 @@ class Constants
   # TODO
   #
   # @return [TODO] TODO
+  def self.ObjectNameWaterHeaterAdjustment
+    return 'water heater energy adjustment'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.ObjectNameWaterLoopHeatPump
     return 'water loop heat pump'
   end
