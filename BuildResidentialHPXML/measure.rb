@@ -5030,7 +5030,7 @@ class HPXMLFile
         end
 
         # Get max z coordinate of this window
-        sub_surface_z = Geometry.get_surface_z_values([sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
+        sub_surface_z = Geometry.get_surface_z_values(surfaceArray: [sub_surface]).max + UnitConversions.convert(sub_surface.space.get.zOrigin, 'm', 'ft')
 
         overhangs_depth = args[:geometry_eaves_depth]
         overhangs_distance_to_top_of_window = eaves_z - sub_surface_z # difference between max z coordinates of eaves and this window
