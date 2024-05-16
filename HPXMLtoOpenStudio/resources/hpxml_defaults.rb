@@ -146,6 +146,11 @@ class HPXMLDefaults
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
+    if hpxml_header.defrost_model_type.nil?
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
+    end
+
     hpxml_header.unavailable_periods.each do |unavailable_period|
       if unavailable_period.begin_hour.nil?
         unavailable_period.begin_hour = 0
@@ -583,7 +588,7 @@ class HPXMLDefaults
       end
 
       if hpxml_bldg.elevation.nil?
-        hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
+        hpxml_bldg.elevation = UnitConversions.convert([epw_file.elevation, 0.0].max, 'm', 'ft').round(1)
         hpxml_bldg.elevation_isdefaulted = true
       end
 
@@ -1434,6 +1439,13 @@ class HPXMLDefaults
       else
         heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
       end
+      heat_pump.backup_heating_lockout_temp_isdefaulted = true
+    end
+
+    # Default advanced defrost
+    hpxml_bldg.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? heat_pump.heat_pump_type
+
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
 

@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__
+- Updates to OpenStudio 3.8/EnergyPlus 24.1.
 - Updates to HPXML v4.0-rc4.
 - Adds BPI-2400 HPXML test files and results; see [Testing Framework](https://openstudio-hpxml.readthedocs.io/en/latest/testing_framework.html) for more information.
 - Updates per ANSI/RESNET/ICC 301-2022 w/ Addendum C:
@@ -51,6 +52,7 @@ __New Features__
 - Manual J design load calculations:
   - Allow additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Miscellaneous improvements.
+- Improves heating/cooling component loads; for timesteps where there is no heating/cooling load, assigns heat transfer to heating or cooling by comparing indoor temperature to the average of heating/cooling setpoints.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
 - Allow alternative label energy use (W) input for ceiling fans.
@@ -63,8 +65,10 @@ __New Features__
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
   - TV plug load schedules now use TV schedule fractions from the American Time Use Survey and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
   - Ceiling fan schedules now use ceiling fan schedule fractions and monthly multipliers from ANSI/RESNET/ICC 301-2022 Addendum C.
-- **Research Feature**: Allows modeling on/off thermostat deadband with start-up degradation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
-- **Research Feature**: Allows modeling time-based realistic staging for two speed DX systems (central ac and ASHP). Assumes 5 minutes before transitioning to a higher speed.
+- Advanced research features:
+  - Allow an optional boolean input `HeatPump/extension/AdvancedDefrostApproach` for heat pump advanced defrost model. The improved model uses EMS program and OtherEquipment objects to better account for loads and energy uses during heat pump defrost.
+  - Allow modeling on/off thermostat deadband with start-up degradation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
+  - Allow modeling time-based realistic staging for two speed DX systems (central ac and ASHP). Assumes 5 minutes before transitioning to a higher speed.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.

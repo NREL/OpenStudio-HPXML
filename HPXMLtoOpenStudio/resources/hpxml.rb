@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'ostruct'
+require 'tempfile'
 
 '''
 Example Usage:
@@ -59,6 +60,8 @@ class HPXML < Object
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AddressTypeMailing = 'mailing'
   AddressTypeStreet = 'street'
+  AdvancedResearchDefrostModelTypeStandard = 'standard'
+  AdvancedResearchDefrostModelTypeAdvanced = 'advanced'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
@@ -621,7 +624,7 @@ class HPXML < Object
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
   class AdditionalProperties < OpenStruct
-    def method_missing(meth, *args)
+    def method_missing(meth, *args, **kwargs)
       # Complain if no value has been set rather than just returning nil
       raise NoMethodError, "undefined method '#{meth}' for #{self}" unless meth.to_s.end_with?('=')
 
@@ -729,17 +732,18 @@ class HPXML < Object
   end
 
   class Header < BaseElement
-    def initialize(hpxml_object, *args)
+    def initialize(hpxml_object, *args, **kwargs)
       @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
       @utility_bill_scenarios = UtilityBillScenarios.new(hpxml_object)
       @unavailable_periods = UnavailablePeriods.new(hpxml_object)
-      super(hpxml_object, *args)
+      super(hpxml_object, *args, **kwargs)
     end
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction, :software_program_used,
              :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
-             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim]
+             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim,
+             :defrost_model_type, :geb_onoff_thermostat_deadband, :geb_backup_heating_capacity_increment]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -799,7 +803,7 @@ class HPXML < Object
         calculation = XMLHelper.add_element(extension, element_name)
         XMLHelper.add_element(calculation, 'Version', calculation_version, :string)
       end
-      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?)
+      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?) || (not @defrost_model_type.nil?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
         XMLHelper.add_element(simulation_control, 'Timestep', @timestep, :integer, @timestep_isdefaulted) unless @timestep.nil?
@@ -808,7 +812,13 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndMonth', @sim_end_month, :integer, @sim_end_month_isdefaulted) unless @sim_end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', @sim_end_day, :integer, @sim_end_day_isdefaulted) unless @sim_end_day.nil?
         XMLHelper.add_element(simulation_control, 'CalendarYear', @sim_calendar_year, :integer, @sim_calendar_year_isdefaulted) unless @sim_calendar_year.nil?
-        XMLHelper.add_element(simulation_control, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
+        if (not @defrost_model_type.nil?) || (not @temperature_capacitance_multiplier.nil?) || (not @geb_onoff_thermostat_deadband.nil?) || (not @geb_backup_heating_capacity_increment.nil?)
+          advanced_research_features = XMLHelper.create_elements_as_needed(simulation_control, ['AdvancedResearchFeatures'])
+          XMLHelper.add_element(advanced_research_features, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
+          XMLHelper.add_element(advanced_research_features, 'DefrostModelType', @defrost_model_type, :string, @defrost_model_type_isdefaulted) unless @defrost_model_type.nil?
+          XMLHelper.add_element(advanced_research_features, 'OnOffThermostatDeadbandTemperature', @geb_onoff_thermostat_deadband, :float, @geb_onoff_thermostat_deadband_isdefaulted) unless @geb_onoff_thermostat_deadband.nil?
+          XMLHelper.add_element(advanced_research_features, 'BackupHeatingCapacityIncrement', @geb_backup_heating_capacity_increment, :float, @geb_backup_heating_capacity_increment_isdefaulted) unless @geb_backup_heating_capacity_increment.nil?
+        end
       end
       @emissions_scenarios.to_doc(software_info)
       @utility_bill_scenarios.to_doc(software_info)
@@ -835,7 +845,10 @@ class HPXML < Object
       @sim_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth', :integer)
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
-      @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
+      @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier', :float)
+      @defrost_model_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType', :string)
+      @geb_onoff_thermostat_deadband = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature', :float)
+      @geb_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/BackupHeatingCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
@@ -1152,9 +1165,9 @@ class HPXML < Object
     attr_accessor(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
-    def initialize(*args)
+    def initialize(*args, **kwargs)
       from_doc(nil)
-      super(*args)
+      super(*args, **kwargs)
     end
 
     def to_doc(doc)
@@ -2011,8 +2024,7 @@ class HPXML < Object
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
              :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
              :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants,
-             :manualj_daily_temp_range, :manualj_humidity_difference, :geb_onoff_thermostat_deadband,
-             :geb_backup_heating_capacity_increment]
+             :manualj_daily_temp_range, :manualj_humidity_difference]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -2043,11 +2055,6 @@ class HPXML < Object
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
-      end
-      if (not @geb_onoff_thermostat_deadband.nil?) || (not @geb_backup_heating_capacity_increment.nil?)
-        hvac_geb_control = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACGEBControl'])
-        XMLHelper.add_element(hvac_geb_control, 'OnOffThermostatDeadbandTemperature', @geb_onoff_thermostat_deadband, :float, @geb_onoff_thermostat_deadband_isdefaulted) unless @geb_onoff_thermostat_deadband.nil?
-        XMLHelper.add_element(hvac_geb_control, 'BackupHeatingCapacityIncrement', @geb_backup_heating_capacity_increment, :float, @geb_backup_heating_capacity_increment_isdefaulted) unless @geb_backup_heating_capacity_increment.nil?
       end
       XMLHelper.add_extension(building_summary, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
       if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
@@ -2095,8 +2102,6 @@ class HPXML < Object
       @manualj_internal_loads_sensible = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
       @manualj_internal_loads_latent = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
       @manualj_num_occupants = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
-      @geb_onoff_thermostat_deadband = XMLHelper.get_value(building_summary, 'extension/HVACGEBControl/OnOffThermostatDeadbandTemperature', :float)
-      @geb_backup_heating_capacity_increment = XMLHelper.get_value(building_summary, 'extension/HVACGEBControl/BackupHeatingCapacityIncrement', :float)
       @extension_properties = {}
       XMLHelper.get_elements(building_summary, 'extension/AdditionalProperties').each do |property|
         property.children.each do |child|
@@ -2110,9 +2115,9 @@ class HPXML < Object
   end
 
   class ClimateandRiskZones < BaseElement
-    def initialize(hpxml_bldg, *args)
+    def initialize(hpxml_bldg, *args, **kwargs)
       @climate_zone_ieccs = ClimateZoneIECCs.new(hpxml_bldg)
-      super(hpxml_bldg, *args)
+      super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:weather_station_id, :weather_station_name, :weather_station_wmo, :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
@@ -4278,9 +4283,9 @@ class HPXML < Object
   end
 
   class HeatingSystem < BaseElement
-    def initialize(hpxml_object, *args)
+    def initialize(hpxml_object, *args, **kwargs)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
-      super(hpxml_object, *args)
+      super(hpxml_object, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
@@ -4489,9 +4494,9 @@ class HPXML < Object
   end
 
   class CoolingSystem < BaseElement
-    def initialize(hpxml_object, *args)
+    def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
-      super(hpxml_object, *args)
+      super(hpxml_object, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type, :cooling_system_fuel,
              :cooling_capacity, :compressor_type, :fraction_cool_load_served, :cooling_efficiency_seer,
@@ -4803,10 +4808,10 @@ class HPXML < Object
   end
 
   class HeatPump < BaseElement
-    def initialize(hpxml_object, *args)
+    def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
-      super(hpxml_object, *args)
+      super(hpxml_object, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type, :compressor_lockout_temp,
@@ -5283,10 +5288,10 @@ class HPXML < Object
   end
 
   class HVACDistribution < BaseElement
-    def initialize(hpxml_bldg, *args)
+    def initialize(hpxml_bldg, *args, **kwargs)
       @duct_leakage_measurements = DuctLeakageMeasurements.new(hpxml_bldg)
       @ducts = Ducts.new(hpxml_bldg)
-      super(hpxml_bldg, *args)
+      super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
              :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
