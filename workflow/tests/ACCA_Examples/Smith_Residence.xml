@@ -22,7 +22,7 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <SiteType>suburban</SiteType>
+          <SiteType>rural</SiteType>
           <ShieldingofHome>exposed</ShieldingofHome>
           <Soil>
             <Conductivity>0.8</Conductivity>

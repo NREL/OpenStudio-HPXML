@@ -451,7 +451,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
-  ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
+  ``ShieldingofHome``               string                 See [#]_     No        See [#]_  Presence of nearby buildings, trees, obstructions for infiltration model
   ``Soil/SoilType``                 string                 See [#]_     No        unknown   Soil type
   ``Soil/MoistureType``             string                 See [#]_     No        mixed     Soil moisture type
   ``Soil/Conductivity``             double    Btu/hr-ft-F  > 0          No        See [#]_  Soil thermal conductivity
@@ -461,6 +461,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+  .. [#] If ShieldingofHome not provided, defaults to "normal" for single-family detached or manufactured home and "well-shielded" for single-family attached or apartment unit.
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] MoistureType choices are "dry", "wet", or "mixed".
   .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType:

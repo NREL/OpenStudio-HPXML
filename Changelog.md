@@ -56,6 +56,7 @@ __New Features__
   - Allows additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
   - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
+- Updates default `ShieldingofHome` to be "well-shielded" for single-family attached and multifamily dwelling units.
 - Improves heating/cooling component loads; for timesteps where there is no heating/cooling load, assigns heat transfer to heating or cooling by comparing indoor temperature to the average of heating/cooling setpoints.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.
 - Adds more error-checking for inappropriate inputs (e.g., HVAC SHR=0 or clothes washer IMEF=0).
