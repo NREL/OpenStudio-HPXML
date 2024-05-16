@@ -189,8 +189,8 @@ end
 #
 # @param measures_dir [TODO] TODO
 # @param measures [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
-# @param model [OpenStudio::Model::Model] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
+# @param model [OpenStudio::Model::Model] model object
 # @param show_measure_calls [TODO] TODO
 # @param measure_type [TODO] TODO
 # @param osw_out [TODO] TODO
@@ -245,8 +245,8 @@ end
 #
 # @param measures_dir [TODO] TODO
 # @param measures [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
-# @param model [OpenStudio::Model::Model] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
+# @param model [OpenStudio::Model::Model] model object
 # @param workspace [TODO] TODO
 # @return [TODO] TODO
 def apply_energyplus_output_requests(measures_dir, measures, runner, model, workspace)
@@ -275,7 +275,7 @@ end
 #
 # @param measure_args [TODO] TODO
 # @param measure_dir [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def print_measure_call(measure_args, measure_dir, runner)
   if measure_args.nil? || measure_dir.nil?
@@ -316,7 +316,7 @@ end
 # @param provided_args [TODO] TODO
 # @param lookup_file [TODO] TODO
 # @param measure_name [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def validate_measure_args(measure_args, provided_args, lookup_file, measure_name, runner = nil)
   measure_arg_names = measure_args.map { |arg| arg.name }
@@ -374,12 +374,12 @@ end
 
 # TODO
 #
-# @param model [OpenStudio::Model::Model] TODO
+# @param model [OpenStudio::Model::Model] model object
 # @param measure [TODO] TODO
 # @param provided_args [TODO] TODO
 # @param lookup_file [TODO] TODO
 # @param measure_name [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def get_argument_map(model, measure, provided_args, lookup_file, measure_name, runner = nil)
   measure_args = measure.arguments(model)
@@ -416,10 +416,10 @@ end
 
 # TODO
 #
-# @param model [OpenStudio::Model::Model] TODO
+# @param model [OpenStudio::Model::Model] model object
 # @param measure [TODO] TODO
 # @param argument_map [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def run_measure(model, measure, argument_map, runner)
   begin
@@ -496,7 +496,7 @@ end
 # TODO
 #
 # @param msg [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def register_error(msg, runner = nil)
   if not runner.nil?
@@ -510,7 +510,7 @@ end
 # TODO
 #
 # @param full_path [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def check_file_exists(full_path, runner = nil)
   if not File.exist?(full_path)
@@ -521,7 +521,7 @@ end
 # TODO
 #
 # @param full_path [TODO] TODO
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @return [TODO] TODO
 def check_dir_exists(full_path, runner = nil)
   if not Dir.exist?(full_path)
@@ -550,7 +550,7 @@ end
 
 # TODO
 #
-# @param runner [OpenStudio::Measure::OSRunner] TODO
+# @param runner [OpenStudio::Measure::OSRunner] runner object
 # @param rundir [TODO] TODO
 # @param debug [TODO] TODO
 # @return [TODO] TODO

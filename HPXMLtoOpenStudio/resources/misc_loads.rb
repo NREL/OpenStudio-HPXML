@@ -10,7 +10,7 @@ class MiscLoads
   # @param obj_name [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_plug(model, runner, plug_load, obj_name, conditioned_space, apply_ashrae140_assumptions, schedules_file, unavailable_periods)
@@ -78,7 +78,7 @@ class MiscLoads
   # @param fuel_load [TODO] TODO
   # @param obj_name [TODO] TODO
   # @param conditioned_space [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_fuel(model, runner, fuel_load, obj_name, conditioned_space, schedules_file, unavailable_periods)
@@ -137,7 +137,7 @@ class MiscLoads
   # @param model [OpenStudio::Model::Model] model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)
@@ -226,7 +226,7 @@ class MiscLoads
   # @param model [OpenStudio::Model::Model] model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)

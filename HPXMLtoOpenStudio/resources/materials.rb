@@ -2,23 +2,16 @@
 
 # TODO
 class Material
-  # name - Material name
-  # thick_in - Thickness [in]
-  # mat_base - Material object that defines k, rho, and cp. Can be overridden with values for those arguments.
-  # k_in - Conductivity [Btu-in/h-ft^2-F]
-  # rho - Density [lb/ft^3]
-  # cp - Specific heat [Btu/lb*F]
-  # tAbs - thermal absorptance (emittance); 0.9 is EnergyPlus default
-  # sAbs - solar absorptance; 0.7 is EnergyPlus default
+  # TODO
   #
-  # @param name [TODO] TODO
-  # @param thick_in [TODO] TODO
-  # @param mat_base [TODO] TODO
-  # @param k_in [TODO] TODO
-  # @param rho [TODO] TODO
-  # @param cp [TODO] TODO
-  # @param tAbs [TODO] TODO
-  # @param sAbs [TODO] TODO
+  # @param name [TODO] Material name
+  # @param thick_in [TODO] Thickness [in]
+  # @param mat_base [TODO] Material object that defines k, rho, and cp. Can be overridden with values for those arguments.
+  # @param k_in [TODO] Conductivity [Btu-in/h-ft^2-F]
+  # @param rho [TODO] Density [lb/ft^3]
+  # @param cp [TODO] Specific heat [Btu/lb*F]
+  # @param tAbs [TODO] thermal absorptance (emittance); 0.9 is EnergyPlus default
+  # @param sAbs [TODO] solar absorptance; 0.7 is EnergyPlus default
   # @return [TODO] TODO
   def initialize(name: nil, thick_in: nil, mat_base: nil, k_in: nil, rho: nil, cp: nil, tAbs: 0.9, sAbs: 0.7)
     @name = name
@@ -483,14 +476,9 @@ end
 class BaseMaterial
   # TODO
   #
-  # @param name [TODO] TODO
-  # @param thick_in [TODO] TODO
-  # @param mat_base [TODO] TODO
-  # @param k_in [TODO] TODO
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
-  # @param tAbs [TODO] TODO
-  # @param sAbs [TODO] TODO
+  # @param k_in [TODO] TODO
   # @return [TODO] TODO
   def initialize(rho:, cp:, k_in: nil)
     @rho = rho
@@ -643,13 +631,8 @@ class GlazingMaterial
   # TODO
   #
   # @param name [TODO] TODO
-  # @param thick_in [TODO] TODO
-  # @param mat_base [TODO] TODO
-  # @param k_in [TODO] TODO
-  # @param rho [TODO] TODO
-  # @param cp [TODO] TODO
-  # @param tAbs [TODO] TODO
-  # @param sAbs [TODO] TODO
+  # @param ufactor [TODO] TODO
+  # @param shgc [TODO] TODO
   # @return [TODO] TODO
   def initialize(name:, ufactor:, shgc:)
     @name = name
@@ -664,14 +647,11 @@ end
 class Liquid
   # TODO
   #
-  # @param name [TODO] TODO
-  # @param thick_in [TODO] TODO
-  # @param mat_base [TODO] TODO
-  # @param k_in [TODO] TODO
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
-  # @param tAbs [TODO] TODO
-  # @param sAbs [TODO] TODO
+  # @param k [TODO] TODO
+  # @param h_fg [TODO] TODO
+  # @param t_frz [TODO] TODO
   # @return [TODO] TODO
   def initialize(rho: nil, cp: nil, k: nil, h_fg: nil, t_frz: nil)
     @rho = rho          # Density (lb/ft3)
@@ -704,14 +684,10 @@ end
 class Gas
   # TODO
   #
-  # @param name [TODO] TODO
-  # @param thick_in [TODO] TODO
-  # @param mat_base [TODO] TODO
-  # @param k_in [TODO] TODO
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
-  # @param tAbs [TODO] TODO
-  # @param sAbs [TODO] TODO
+  # @param k [TODO] TODO
+  # @param m [TODO] TODO
   # @return [TODO] TODO
   def initialize(rho: nil, cp: nil, k: nil, m: nil)
     @rho = rho # Density (lb/ft3)

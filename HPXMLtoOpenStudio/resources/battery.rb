@@ -9,7 +9,7 @@ class Battery
   # @param nbeds [TODO] TODO
   # @param pv_systems [TODO] TODO
   # @param battery [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unit_multiplier [TODO] TODO
   # @return [TODO] TODO
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)

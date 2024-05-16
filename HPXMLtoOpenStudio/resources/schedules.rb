@@ -4,7 +4,7 @@
 class ScheduleConstant
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -26,7 +26,7 @@ class ScheduleConstant
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param year [TODO] TODO
@@ -69,10 +69,12 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
+  # @param weekday_month_by_hour_values [TODO] TODO
+  # @param weekday_month_by_hour_values [TODO] TODO
+  # @param weekend_month_by_hour_values [TODO] TODO
+  # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
@@ -114,9 +116,9 @@ class HourlyByMonthSchedule
 
   # TODO
   #
-  # @param values [TODO] TODO
-  # @param num_values [TODO] TODO
-  # @param sch_name [TODO] TODO
+  # @param vals [TODO] TODO
+  # @param num_outter_values [TODO] TODO
+  # @param num_inner_values [TODO] TODO
   # @return [TODO] TODO
   def validate_values(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
@@ -156,7 +158,7 @@ class HourlyByMonthSchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -266,10 +268,11 @@ class HourlyByDaySchedule
   # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
+  # @param weekday_day_by_hour_values [TODO] TODO
+  # @param weekend_day_by_hour_values [TODO] TODO
+  # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
@@ -312,9 +315,9 @@ class HourlyByDaySchedule
 
   # TODO
   #
-  # @param values [TODO] TODO
-  # @param num_values [TODO] TODO
-  # @param sch_name [TODO] TODO
+  # @param vals [TODO] TODO
+  # @param num_outter_values [TODO] TODO
+  # @param num_inner_values [TODO] TODO
   # @return [TODO] TODO
   def validate_values(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
@@ -354,7 +357,7 @@ class HourlyByDaySchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param num_days [TODO] TODO
@@ -463,10 +466,17 @@ class MonthWeekdayWeekendSchedule
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
+  # @param weekday_hourly_values [TODO] TODO
+  # @param weekend_hourly_values [TODO] TODO
+  # @param monthly_values [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
+  # @param normalize_values [TODO] TODO
+  # @param begin_month [TODO] TODO
+  # @param begin_day [TODO] TODO
+  # @param end_month [TODO] TODO
+  # @param end_day [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
@@ -588,7 +598,7 @@ class MonthWeekdayWeekendSchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param begin_month [TODO] TODO
@@ -1901,11 +1911,10 @@ class SchedulesFile
   class Column
     # TODO
     #
-    # @param model [OpenStudio::Model::Model] TODO
-    # @param sch_name [TODO] TODO
-    # @param val [TODO] TODO
-    # @param schedule_type_limits_name [TODO] TODO
-    # @param unavailable_periods [TODO] TODO
+    # @param name [TODO] TODO
+    # @param used_by_unavailable_periods [TODO] TODO
+    # @param can_be_stochastic [TODO] TODO
+    # @param type [TODO] TODO
     # @return [TODO] TODO
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
@@ -1969,11 +1978,11 @@ class SchedulesFile
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
-  # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param schedules_paths [TODO] TODO
+  # @param year [TODO] TODO
   # @param unavailable_periods [TODO] TODO
+  # @param output_path [TODO] TODO
   # @return [TODO] TODO
   def initialize(runner: nil,
                  schedules_paths:,
@@ -2123,7 +2132,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param col_name [TODO] TODO
   # @param rows_to_skip [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -2365,7 +2374,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def set_unavailable_periods(runner, unavailable_periods)

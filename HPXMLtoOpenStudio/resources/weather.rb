@@ -28,6 +28,9 @@ end
 class WeatherProcess
   # TODO
   #
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def initialize(epw_path:, runner:, hpxml: nil)
     @data = WeatherData.new
@@ -46,6 +49,12 @@ class WeatherProcess
 
   private
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param hpxml [HPXML] HPXML object
+  # @return [TODO] TODO
   def process_epw(runner, epw_file, hpxml)
     if epw_file.recordsPerHour != 1
       fail "Unexpected records per hour: #{epw_file.recordsPerHour}."
@@ -126,6 +135,10 @@ class WeatherProcess
     end
   end
 
+  # TODO
+  #
+  # @param dailydbs [TODO] TODO
+  # @return [TODO] TODO
   def calc_heat_cool_degree_days(dailydbs)
     # Calculates and stores heating/cooling degree days
     data.HDD65F = calc_degree_days(dailydbs, 65, true)
@@ -134,6 +147,12 @@ class WeatherProcess
     data.CDD50F = calc_degree_days(dailydbs, 50, false)
   end
 
+  # TODO
+  #
+  # @param dailydbs [TODO] TODO
+  # @param base_temp_f [TODO] TODO
+  # @param is_heating [TODO] TODO
+  # @return [TODO] TODO
   def calc_degree_days(daily_dbs, base_temp_f, is_heating)
     # Calculates and returns degree days from a base temperature for either heating or cooling
     base_temp_c = UnitConversions.convert(base_temp_f, 'F', 'C')
@@ -160,6 +179,11 @@ class WeatherProcess
     return 1.8 * deg_days
   end
 
+  # TODO
+  #
+  # @param daily_high_dbs [TODO] TODO
+  # @param daily_low_dbs [TODO] TODO
+  # @return [TODO] TODO
   def calc_avg_monthly_highs_lows(daily_high_dbs, daily_low_dbs)
     # Calculates and stores avg daily highs and lows for each month
     data.MonthlyAvgDailyHighDrybulbs = []
@@ -186,6 +210,11 @@ class WeatherProcess
     end
   end
 
+  # TODO
+  #
+  # @param rowdata [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @return [TODO] TODO
   def calc_ashrae_622_wsf(rowdata, epw_file)
     require 'csv'
     ashrae_csv = File.join(File.dirname(__FILE__), 'data', 'ashrae_622_wsf.csv')
@@ -235,6 +264,11 @@ class WeatherProcess
     return wsf.round(2)
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @return [TODO] TODO
   def get_design_info_from_epw(runner, epw_file)
     # Retrieve design conditions from weather header
     epw_design_conditions = epw_file.designConditions
@@ -254,6 +288,13 @@ class WeatherProcess
     return epwHasDesignData
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param rowdata [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param data [TODO] TODO
+  # @return [TODO] TODO
   def calc_design_info(runner, rowdata, epw_file, data)
     # Calculate design conditions from weather data
     if not runner.nil?
@@ -286,6 +327,10 @@ class WeatherProcess
     design.HeatingDrybulb = UnitConversions.convert(heat99per_db, 'C', 'F')
   end
 
+  # TODO
+  #
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @return [TODO] TODO
   def calc_shallow_ground_temperatures(epw_file)
     # Return shallow monthly/annual ground temperatures.
     # This correlation is the same that is used in DOE-2's src\WTH.f file, subroutine GTEMP
@@ -318,6 +363,11 @@ class WeatherProcess
     end
   end
 
+  # TODO
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @return [TODO] TODO
   def calc_deep_ground_temperatures(hpxml, epw_file)
     # Return deep annual ground temperature.
     # Annual average ground temperature using Xing's model.
@@ -359,6 +409,11 @@ class WeatherProcess
     data.DeepGroundPhaseShiftTempAmp2 = temperatures_amplitudes[4] # days
   end
 
+  # TODO
+  #
+  # @param n_days [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @return [TODO] TODO
   def calc_mains_temperatures(n_days, epw_file)
     # Algorithm based on Burch & Christensen "Towards Development of an Algorithm for Mains Water Temperature"
     deg_rad = Math::PI / 180

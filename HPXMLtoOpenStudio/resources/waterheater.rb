@@ -12,7 +12,7 @@ class Waterheater
   # @param ec_adj [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param nbeds [TODO] TODO
@@ -56,7 +56,7 @@ class Waterheater
   # @param ec_adj [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param nbeds [TODO] TODO
@@ -103,7 +103,7 @@ class Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param conditioned_zone [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param nbeds [TODO] TODO
@@ -200,7 +200,7 @@ class Waterheater
   # @param ec_adj [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param nbeds [TODO] TODO
@@ -1107,7 +1107,7 @@ class Waterheater
   # @param op_mode [TODO] TODO
   # @param setpoint_schedule [TODO] TODO
   # @param control_setpoint_schedule [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [TODO] TODO
   def self.add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, hpwh_top_element_sp, hpwh_bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
     # Lower element is enabled if the ambient air temperature prevents the HP from running
@@ -1612,7 +1612,7 @@ class Waterheater
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param climate_zone_iecc [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_location(hpxml_bldg, climate_zone_iecc)
@@ -1852,7 +1852,7 @@ class Waterheater
   # @param eta_c [TODO] TODO
   # @param is_dsh_storage [TODO] TODO
   # @param is_combi [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
   # @param ec_adj [TODO] TODO
@@ -1995,7 +1995,7 @@ class Waterheater
   # TODO
   #
   # @param new_heater [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
@@ -2021,7 +2021,7 @@ class Waterheater
   # TODO
   #
   # @param new_heater [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object

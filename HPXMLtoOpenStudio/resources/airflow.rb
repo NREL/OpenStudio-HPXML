@@ -10,9 +10,9 @@ class Airflow
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param weather [WeatherProcess] TODO
-  # @param spaces [TODO] TODO
-  # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param cfa [TODO] TODO
   # @param ncfl_ag [TODO] TODO
   # @param duct_systems [TODO] TODO
@@ -20,7 +20,7 @@ class Airflow
   # @param eri_version [TODO] TODO
   # @param frac_windows_operable [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @param hvac_availability_sensor [TODO] TODO
   # @return [TODO] TODO
@@ -229,7 +229,7 @@ class Airflow
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param cfa [TODO] TODO
   # @param weather [WeatherProcess] TODO
   # @return [TODO] TODO
@@ -279,7 +279,7 @@ class Airflow
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param vent_fan [TODO] TODO
   # @param weather [WeatherProcess] TODO
   # @param cfa [TODO] TODO
@@ -360,7 +360,7 @@ class Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param ach [TODO] TODO
   # @param ela [TODO] TODO
   # @param c_w_SG [TODO] TODO
@@ -710,7 +710,7 @@ class Airflow
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param name [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param frac_lat [TODO] TODO
   # @param frac_lost [TODO] TODO
   # @param hpxml_fuel_type [TODO] TODO
@@ -1574,7 +1574,7 @@ class Airflow
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param vented_dryer [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param index [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
@@ -1897,7 +1897,7 @@ class Airflow
   # @param vent_mech_bal_tot [TODO] TODO
   # @param vent_mech_erv_hrv_tot [TODO] TODO
   # @param infil_flow_actuator [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_adjustment_to_conditioned(model, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals, vent_mech_sup_tot,
@@ -2149,7 +2149,7 @@ class Airflow
   # @param vented_dryers [TODO] TODO
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param clg_ssn_sensor [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param elevation [TODO] TODO
@@ -2256,7 +2256,7 @@ class Airflow
   # @param vented_attic [TODO] TODO
   # @param vented_crawl [TODO] TODO
   # @param clg_ssn_sensor [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param elevation [TODO] TODO
@@ -2402,7 +2402,7 @@ class Airflow
   # @param site [TODO] TODO
   # @param hor_lk_frac [TODO] TODO
   # @param neutral_level [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param space_height [TODO] TODO
   # @return [TODO] TODO
   def self.calc_wind_stack_coeffs(site, hor_lk_frac, neutral_level, space, space_height = nil)
@@ -2636,6 +2636,15 @@ end
 class Duct
   # TODO
   #
+  # @param side [TODO] TODO
+  # @param loc_space [TODO] TODO
+  # @param loc_schedule [TODO] TODO
+  # @param leakage_frac [TODO] TODO
+  # @param leakage_cfm25 [TODO] TODO
+  # @param leakage_cfm50 [TODO] TODO
+  # @param area [TODO] TODO
+  # @param effective_rvalue [TODO] TODO
+  # @param buried_level [TODO] TODO
   # @return [TODO] TODO
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side

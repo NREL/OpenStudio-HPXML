@@ -5,7 +5,7 @@ class SimControls
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_header [TODO] TODO
+  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
   # @return [TODO] TODO
   def self.apply(model, hpxml_header)
     sim = model.getSimulationControl

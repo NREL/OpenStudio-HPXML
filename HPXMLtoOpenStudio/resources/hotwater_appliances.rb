@@ -6,14 +6,14 @@ class HotWaterAndAppliances
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param weather [WeatherProcess] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hot_water_distribution [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param plantloop_map [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO
@@ -1042,7 +1042,7 @@ class HotWaterAndAppliances
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param obj_name [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
   # @param frac_lat [TODO] TODO
@@ -1070,7 +1070,7 @@ class HotWaterAndAppliances
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param obj_name [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
   # @param frac_lat [TODO] TODO
@@ -1416,7 +1416,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @return [TODO] TODO
   def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,

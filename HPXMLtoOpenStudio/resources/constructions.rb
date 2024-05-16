@@ -7,7 +7,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -112,7 +112,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -232,7 +232,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param thick_in [TODO] TODO
   # @param conductivity [TODO] TODO
@@ -348,7 +348,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param icf_r [TODO] TODO
   # @param ins_thick_in [TODO] TODO
@@ -442,7 +442,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param sip_r [TODO] TODO
   # @param sip_thick_in [TODO] TODO
@@ -544,7 +544,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -652,7 +652,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param thick_ins [TODO] TODO
   # @param conds [TODO] TODO
@@ -762,7 +762,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -839,7 +839,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -932,7 +932,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param cavity_r [TODO] TODO
   # @param install_grade [TODO] TODO
@@ -1023,7 +1023,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param is_ceiling [TODO] TODO
   # @param cavity_r [TODO] TODO
@@ -1137,7 +1137,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param is_ceiling [TODO] TODO
   # @param cavity_r [TODO] TODO
@@ -1248,7 +1248,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param is_ceiling [TODO] TODO
   # @param sip_r [TODO] TODO
@@ -1339,7 +1339,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param is_ceiling [TODO] TODO
   # @param thick_ins [TODO] TODO
@@ -1442,7 +1442,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param constr_name [TODO] TODO
   # @param ext_rigid_ins_offset [TODO] TODO
   # @param int_rigid_ins_offset [TODO] TODO
@@ -1485,7 +1485,7 @@ class Constructions
   # TODO
   #
   # @param model [OpenStudio::Model::Model] model object
-  # @param surface [OpenStudio::Model::Surface] TODO
+  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param constr_name [TODO] TODO
   # @param under_r [TODO] TODO
   # @param under_width [TODO] TODO
@@ -1618,7 +1618,7 @@ class Constructions
   # @param constr_name [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param partition_wall_area [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @return [TODO] TODO
   def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area, spaces)
     return if partition_wall_area <= 0
@@ -1652,7 +1652,7 @@ class Constructions
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param furniture_mass [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @return [TODO] TODO
   def self.apply_furniture(model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
@@ -1715,7 +1715,7 @@ class Constructions
   #
   # @param model [OpenStudio::Model::Model] model object
   # @param object_name [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param area [TODO] TODO
   # @return [TODO] TODO
   def self.create_os_int_mass_and_def(model, object_name, space, area)
@@ -2126,7 +2126,7 @@ class Constructions
   # @param sim_begin_month [TODO] TODO
   # @param sim_begin_day [TODO] TODO
   # @param sim_year [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param foundation_walls_insulated [TODO] TODO
   # @param foundation_ceiling_insulated [TODO] TODO
   # @return [TODO] TODO
@@ -2289,8 +2289,8 @@ class Constructions
   # @param window_or_skylight [TODO] TODO
   # @param sub_surface [TODO] TODO
   # @param shading_schedules [TODO] TODO
-  # @param hpxml_header [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @return [TODO] TODO
   def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml_header, hpxml_bldg)
     sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
@@ -2374,7 +2374,7 @@ class Constructions
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param model [OpenStudio::Model::Model] model object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param wall_id [TODO] TODO
   # @param wall_type [TODO] TODO
   # @param assembly_r [TODO] TODO
@@ -2588,7 +2588,7 @@ class Constructions
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param model [OpenStudio::Model::Model] model object
-  # @param surface [OpenStudio::Model::Surface] TODO
+  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param floor_id [TODO] TODO
   # @param floor_type [TODO] TODO
   # @param is_ceiling [TODO] TODO
@@ -2936,7 +2936,7 @@ class Constructions
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param surfaces [TODO] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param inside_film [TODO] TODO
   # @param outside_film [TODO] TODO
   # @param assembly_r [TODO] TODO
@@ -3001,13 +3001,13 @@ class Constructions
   end
 end
 
-# TODO
+# Facilitates creating and assigning an OpenStudio construction (with accompanying
+# OpenStudio Materials) from Material objects. Handles parallel path calculations.
 class Construction
-  # Facilitates creating and assigning an OpenStudio construction (with accompanying
-  # OpenStudio Materials) from Material objects. Handles parallel path calculations.
-
   # TODO
   #
+  # @param name [TODO] TODO
+  # @param path_widths [TODO] TODO
   # @return [TODO] TODO
   def initialize(name, path_widths)
     @name = name
@@ -3079,8 +3079,8 @@ class Construction
   # Creates constructions as needed and assigns to surfaces.
   # Leave name as nil if the materials (e.g., exterior finish) apply to multiple constructions.
   #
-  # @param surfaces [TODO] TODO
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @param model [OpenStudio::Model::Model] model object
   # @return [TODO] TODO
   def create_and_assign_constructions(surfaces, model)
     validate
@@ -3137,6 +3137,11 @@ class Construction
 
   private
 
+  # TODO
+  #
+  # @param curr_layer_num [TODO] TODO
+  # @param name [TODO] TODO
+  # @return [TODO] TODO
   def get_parallel_material(curr_layer_num, name)
     # Returns a Material object with effective properties for the specified
     # parallel path layer of the construction.
@@ -3198,6 +3203,10 @@ class Construction
     return mat
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] model object
+  # @return [TODO] TODO
   def construct_materials(model)
     # Create materials
     materials = []
@@ -3215,6 +3224,9 @@ class Construction
     return materials
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def validate
     # Check that sum of path fracs equal 1
     if (@sum_path_fracs <= 0.999) || (@sum_path_fracs >= 1.001)
@@ -3305,6 +3317,10 @@ class Construction
   end
 
   # Creates (or returns an existing) OpenStudio Material from our own Material object
+  #
+  # @param model [OpenStudio::Model::Model] model object
+  # @param material [TODO] TODO
+  # @return [TODO] TODO
   def create_os_material(model, material)
     name = material.name
     tolerance = 0.0001
@@ -3362,6 +3378,12 @@ end
 class WoodStudConstructionSet
   # TODO
   #
+  # @param stud [TODO] TODO
+  # @param framing_factor [TODO] TODO
+  # @param rigid_r [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
@@ -3378,6 +3400,12 @@ end
 class SteelStudConstructionSet
   # TODO
   #
+  # @param cavity_thick_in [TODO] TODO
+  # @param corr_factor [TODO] TODO
+  # @param rigid_r [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @cavity_thick_in = cavity_thick_in
@@ -3395,6 +3423,12 @@ end
 class DoubleStudConstructionSet
   # TODO
   #
+  # @param stud [TODO] TODO
+  # @param framing_factor [TODO] TODO
+  # @param framing_spacing [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
@@ -3412,6 +3446,13 @@ end
 class SIPConstructionSet
   # TODO
   #
+  # @param thick_in [TODO] TODO
+  # @param framing_factor [TODO] TODO
+  # @param rigid_r [TODO] TODO
+  # @param sheath_thick_in [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
@@ -3429,6 +3470,12 @@ end
 class CMUConstructionSet
   # TODO
   #
+  # @param thick_in [TODO] TODO
+  # @param cond_in [TODO] TODO
+  # @param framing_factor [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(thick_in, cond_in, framing_factor, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
@@ -3446,6 +3493,12 @@ end
 class ICFConstructionSet
   # TODO
   #
+  # @param ins_thick_in [TODO] TODO
+  # @param concrete_thick_in [TODO] TODO
+  # @param framing_factor [TODO] TODO
+  # @param rigid_r [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @ins_thick_in = ins_thick_in
@@ -3463,6 +3516,10 @@ end
 class GenericConstructionSet
   # TODO
   #
+  # @param rigid_r [TODO] TODO
+  # @param osb_thick_in [TODO] TODO
+  # @param mat_int_finish [TODO] TODO
+  # @param mat_ext_finish [TODO] TODO
   # @return [TODO] TODO
   def initialize(rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @rigid_r = rigid_r

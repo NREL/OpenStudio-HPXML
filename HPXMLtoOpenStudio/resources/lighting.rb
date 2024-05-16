@@ -6,11 +6,11 @@ class Lighting
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param model [OpenStudio::Model::Model] model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param lighting_groups [TODO] TODO
   # @param lighting [TODO] TODO
   # @param eri_version [TODO] TODO
-  # @param schedules_file [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param cfa [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param unit_multiplier [TODO] TODO

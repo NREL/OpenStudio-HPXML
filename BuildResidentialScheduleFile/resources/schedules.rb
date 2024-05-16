@@ -7,7 +7,7 @@ require 'matrix'
 class ScheduleGenerator
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param state [TODO] TODO
   # @param minutes_per_step [TODO] TODO
   # @param steps_in_day [TODO] TODO

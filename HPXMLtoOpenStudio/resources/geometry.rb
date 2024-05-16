@@ -304,8 +304,8 @@ class Geometry
 
   # TODO
   #
-  # @param spaces [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
   def self.set_zone_volumes(spaces:,
@@ -342,7 +342,7 @@ class Geometry
 
   # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param walls_top [Double] the total height of the dwelling unit
   # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
@@ -487,12 +487,12 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
-  # @param runner [OpenStudio::Measure::OSRunner] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param num_occ [TODO] TODO
-  # @param space [OpenStudio::Model::Space] TODO
-  # @param schedules_file [TODO] TODO
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
@@ -589,9 +589,9 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] TODO
+  # @param model [OpenStudio::Model::Model] model object
   # @param length [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param walls_top [TODO] TODO
   # @return [TODO] TODO
   def self.add_neighbor_shading(model:,
@@ -624,7 +624,7 @@ class Geometry
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @param location [TODO] TODO
   # @return [TODO] TODO
   def self.calculate_zone_volume(hpxml_bldg:,
@@ -716,7 +716,7 @@ class Geometry
 
   # TODO
   #
-  # @param spaces [TODO] TODO
+  # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
   # @return [TODO] TODO
   def self.get_height_of_spaces(spaces:)
     # Calculates space heights as the max z coordinate minus the min z coordinate
@@ -732,7 +732,7 @@ class Geometry
 
   # TODO
   #
-  # @param surface [OpenStudio::Model::Surface] TODO
+  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @return [TODO] TODO
   def self.get_surface_length(surface:)
     xvalues = get_surface_x_values(surfaceArray: [surface])
