@@ -33,6 +33,7 @@ __New Features__
   - Allows optional ground diffusivity input.
   - Updates to using G-Functions from the [G-Function Library for Modeling Vertical Bore Ground Heat Exchanger](https://gdr.openei.org/submissions/1325).
   - Updated heating/cooling performance curves to reflect newer equipment.
+- Skylights with shafts or sun tunnels should include the `Skylight/AttachedToFloor` element.
 - Allows optional `Ducts/DuctShape` and `Ducts/DuctFractionRectangular` inputs, which affect duct effective R-value used for modeling.
 - Allows optional `HeatingAutosizingFactor`, `CoolingAutosizingFactor`, `BackupHeatingAutosizingFactor` inputs to scale HVAC capacities for autosized equipment.
 - Allows optional `HeatingAutosizingLimit`, `CoolingAutosizingLimit`, `BackupHeatingAutosizingLimit` inputs to set maximum HVAC capacities ceiling for autosized equipment.
@@ -48,8 +49,12 @@ __New Features__
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
   - Adds a blower fan efficiency input for specifying fan power W/cfm at maximum speed.
-- Manual J design load calculations:
-  - Allow additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
+- HVAC Manual J design load calculations:
+  - **Breaking change**: Outputs for "Infiltration/Ventilation" category disaggregated into "Infiltration" and "Ventilation".
+  - **Breaking change**: Outputs for "Windows" category no longer includes AED excursion; now a separate "AED Excursion" category.
+  - Allows optional zone-level and space-level design load calculations using HPXML `Zones/Zone[ZoneType="conditioned"]/Spaces/Space` elements.
+  - Allows additional outdoor design condition inputs: `DailyTemperatureRange` and `HumidityDifference`.
+  - Adds a new detailed output file with block/space load details by surface, AED curves, etc.
   - Miscellaneous improvements.
 - Improves heating/cooling component loads; for timesteps where there is no heating/cooling load, assigns heat transfer to heating or cooling by comparing indoor temperature to the average of heating/cooling setpoints.
 - Adds net energy and net electricity timeseries output columns even when there is no PV or generator.

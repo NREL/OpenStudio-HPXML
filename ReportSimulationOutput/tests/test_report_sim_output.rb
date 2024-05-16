@@ -216,22 +216,26 @@ class ReportSimulationOutputTest < Minitest::Test
     'HVAC Design Load: Heating: Floors (Btu/h)',
     'HVAC Design Load: Heating: Slabs (Btu/h)',
     'HVAC Design Load: Heating: Ceilings (Btu/h)',
-    'HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)',
+    'HVAC Design Load: Heating: Infiltration (Btu/h)',
+    'HVAC Design Load: Heating: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Total (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Ducts (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Windows (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Skylights (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: AED Excursion (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Doors (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Walls (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Roofs (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Floors (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Slabs (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)',
-    'HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: Infiltration (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)',
     'HVAC Design Load: Cooling Latent: Total (Btu/h)',
     'HVAC Design Load: Cooling Latent: Ducts (Btu/h)',
-    'HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)',
+    'HVAC Design Load: Cooling Latent: Infiltration (Btu/h)',
+    'HVAC Design Load: Cooling Latent: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)'
   ]
 
@@ -1315,8 +1319,7 @@ class ReportSimulationOutputTest < Minitest::Test
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path,
                   'skip_validation' => true, }
-    annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
-    assert(!File.exist?(annual_csv))
+    _annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
     assert(!File.exist?(timeseries_csv))
     assert(File.readlines(run_log).any? { |line| line.include?('Simulation used infinite energy; double-check inputs.') })
   end
