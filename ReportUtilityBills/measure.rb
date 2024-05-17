@@ -233,7 +233,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
-    args[:report_monthly_bills] = true # FIXME
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
