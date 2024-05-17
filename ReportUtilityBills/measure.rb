@@ -47,14 +47,26 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_bills', false)
     arg.setDisplayName('Generate Annual Utility Bills')
-    arg.setDescription('Generates annual utility bills.')
+    arg.setDescription('Generates output file containing annual utility bills.')
+    arg.setDefaultValue(true)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('report_annual_bills', false)
+    arg.setDisplayName('Report Annual Utility Bills')
+    arg.setDescription('Reports annual utility bills.')
     arg.setDefaultValue(true)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_monthly_bills', false)
     arg.setDisplayName('Generate Monthly Utility Bills')
-    arg.setDescription('Generates monthly utility bills.')
+    arg.setDescription('Generates output file containing monthly utility bills.')
     arg.setDefaultValue(true)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('report_monthly_bills', false)
+    arg.setDisplayName('Report Monthly Utility Bills')
+    arg.setDescription('Reports monthly utility bills.')
+    arg.setDefaultValue(false)
     args << arg
 
     timestamp_chs = OpenStudio::StringVector.new
@@ -221,6 +233,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
+    args[:report_monthly_bills] = true # FIXME
 
     hpxml_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_path').get
     hpxml_defaults_path = @model.getBuilding.additionalProperties.getFeatureAsString('hpxml_defaults_path').get
@@ -373,6 +386,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_path, 'a')
     runner.registerInfo("Wrote annual bills output to #{annual_output_path}.")
 
+    return unless args[:report_annual_bills]
+
     results_out.each do |name, value|
       next if name.nil? || value.nil?
 
@@ -435,6 +450,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
     end
     runner.registerInfo("Wrote monthly bills output to #{monthly_output_path}.")
+    
+    return unless args[:report_monthly_bills]
+
+    monthly_data.each do |col|
+      next unless col[0].include?('Total')
+
+      timestamps.zip(col[2..-1]).each do |ts, value|
+        t = ts
+        t, _ = t.split('T') if t.is_a?(String) && t.include?('T')
+
+        name = OpenStudio::toUnderscoreCase("#{col[0]} #{col[1]} #{t}").chomp('_')
+
+        runner.registerValue(name, value)
+        runner.registerInfo("Registering #{value} for #{name}.")
+      end
+    end
   end
 
   def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, monthly_fee, num_units = 1)

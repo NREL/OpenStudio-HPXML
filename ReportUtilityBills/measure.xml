@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>c4eba691-fde6-45c1-a688-9cf7d4663184</version_id>
-  <version_modified>2024-05-09T16:31:55Z</version_modified>
+  <version_id>3bc6e66f-995b-445e-a2fd-d9c2ae7ed436</version_id>
+  <version_modified>2024-05-17T22:48:58Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -37,7 +37,26 @@
     <argument>
       <name>include_annual_bills</name>
       <display_name>Generate Annual Utility Bills</display_name>
-      <description>Generates annual utility bills.</description>
+      <description>Generates output file containing annual utility bills.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>true</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>report_annual_bills</name>
+      <display_name>Report Annual Utility Bills</display_name>
+      <description>Reports annual utility bills.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -56,11 +75,30 @@
     <argument>
       <name>include_monthly_bills</name>
       <display_name>Generate Monthly Utility Bills</display_name>
-      <description>Generates monthly utility bills.</description>
+      <description>Generates output file containing monthly utility bills.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>report_monthly_bills</name>
+      <display_name>Report Monthly Utility Bills</display_name>
+      <description>Reports monthly utility bills.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -125,7 +163,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>E137125B</checksum>
+      <checksum>B856D488</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -142,7 +180,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>22A6665F</checksum>
+      <checksum>00FECFA5</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -322,7 +360,7 @@
       <filename>test_report_utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E597FDF5</checksum>
+      <checksum>60AA9F0D</checksum>
     </file>
   </files>
 </measure>
