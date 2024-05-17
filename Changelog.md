@@ -20,6 +20,7 @@ __New Features__
   - Small change to default flow rate for imbalanced mechanical ventilation systems.
   - Updated window default interior shade coefficients to be calculated based on SHGC.
   - `AverageCeilingHeight` now used in natural ACH/CFM infiltration calculations.
+- **Breaking change**: Replaces `SimulationControl/TemperatureCapacitanceMultiplier` with `SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier`.
 - **Breaking change**: Replaces `BuildingSummary/Site/extension/GroundConductivity` with `BuildingSummary/Site/Soil/Conductivity`.
 - **Breaking change**: Modeling whole SFA/MF buildings is now specified using a `SoftwareInfo/extension/WholeSFAorMFBuildingSimulation=true` element instead of `building-id=ALL` argument.
 - **Breaking change**: Skylights attached to roofs of attics (e.g., with shafts or sun tunnels) must include the `Skylight/AttachedToFloor` element.
@@ -73,9 +74,9 @@ __New Features__
   - TV plug load schedules now use TV schedule fractions from the American Time Use Survey and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
   - Ceiling fan schedules now use ceiling fan schedule fractions and monthly multipliers from ANSI/RESNET/ICC 301-2022 Addendum C.
 - Advanced research features:
-  - Allow an optional boolean input `HeatPump/extension/AdvancedDefrostApproach` for heat pump advanced defrost model. The improved model uses EMS program and OtherEquipment objects to better account for loads and energy uses during heat pump defrost.
   - Allow modeling on/off thermostat deadband with start-up degradation for single speed central ac and single speed ashp systems. Currently only supports homes with at most one cooling system serving 100% cooling loads, and one heating system serving 100% heating loads (including heat pumps). An on/off thermostat deadband temperature is a temperature difference between cut-in and cut-out temperature for HVAC operations, applied to both heating and cooling.
   - Allow modeling time-based realistic staging for two speed DX systems (central ac and ASHP). Assumes 5 minutes before transitioning to a higher speed.
+  - Allows an optional boolean input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.

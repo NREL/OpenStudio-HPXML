@@ -270,7 +270,7 @@ class HPXMLDefaults
 
     sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_latent.nil?
-      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent = sum_space_manualj_internal_loads_latent # Btuh
       hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
     end
     if sum_space_manualj_internal_loads_latent == 0
