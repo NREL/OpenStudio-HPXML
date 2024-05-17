@@ -11,7 +11,7 @@ class HVAC
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
                                          control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg,
-                                         conditioned_space, hpxml_header)
+                                         hpxml_header)
     is_heatpump = false
 
     if not cooling_system.nil?
@@ -134,14 +134,12 @@ class HVAC
           q_dot_defrost, p_dot_defrost = calculate_heat_pump_defrost_load_power_watts(heating_system, hpxml_bldg.building_construction.number_of_units,
                                                                                       fan_cfms.max, htg_cfm * htg_ap.heat_fan_speed_ratios[-1],
                                                                                       fan_watts_per_cfm)
-          # Heating Coil
-          htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost)
-        elsif hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
-          # Heating Coil
-          htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, nil)
-        else
+        elsif hpxml_header.defrost_model_type != HPXML::AdvancedResearchDefrostModelTypeStandard
           fail 'unknown defrost model type.'
         end
+
+        # Heating Coil
+        htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost)
 
         # Supplemental Heating Coil
         htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system)
@@ -216,7 +214,7 @@ class HVAC
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
     if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
-      apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, cooling_system, q_dot_defrost)
+      apply_advanced_defrost(model, htg_coil, air_loop_unitary, control_zone.spaces[0], htg_supp_coil, cooling_system, q_dot_defrost)
     end
 
     return air_loop
