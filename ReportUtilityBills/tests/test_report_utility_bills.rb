@@ -270,7 +270,7 @@ class ReportUtilityBillsTest < Minitest::Test
   end
 
   def test_auto_marginal_rate
-    fuel_types = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets]
+    fuel_types = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypeCoal, HPXML::FuelTypePropane, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets]
 
     # Check that we can successfully look up "auto" rates for every state
     # and every fuel type.
