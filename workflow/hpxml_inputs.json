@@ -1957,12 +1957,12 @@
     "hvac_control_heating_weekday_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64",
     "hvac_control_heating_weekend_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64"
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-multistage-backup.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures-geb-multistage-backup.xml": {
     "simulation_control_timestep": 1,
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
     "heat_pump_heating_capacity": 12000,
     "heat_pump_backup_heating_capacity": 34121.4,
-    "geb_backup_heating_capacity_increment": 17060.71
+    "simulation_control_geb_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1982,7 +1982,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
     "heat_pump_heating_capacity": 12000,
     "heat_pump_backup_heating_capacity": 34121.4,
-    "geb_backup_heating_capacity_increment": 17060.71
+    "simulation_control_geb_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -1996,7 +1996,7 @@
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "heat_pump_heating_capacity": 12000,
     "heat_pump_backup_heating_capacity": 34121.4,
-    "geb_backup_heating_capacity_increment": 17060.71
+    "simulation_control_geb_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -2778,27 +2778,26 @@
     "cooling_system_cooling_efficiency": 0,
     "cooling_system_fraction_cool_load_served": 0
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000,
-    "geb_onoff_thermostat_deadband": 2
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_geb_onoff_thermostat_deadband": 2,
+    "simulation_control_geb_backup_heating_capacity_increment": 17060.71
   },
   "sample_files/base-hvac-room-air-conditioner-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
-    "geb_onoff_thermostat_deadband": 2
+    "simulation_control_geb_onoff_thermostat_deadband": 2
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff-detailed-setpoints.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
-    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv",
-    "geb_onoff_thermostat_deadband": 2
+  "sample_files/base-hvac-room-ac-only-geb-onoff-detailed-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_temperature_capacitance_multiplier": 7,
+    "simulation_control_geb_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-ptac.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -2840,14 +2839,14 @@
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000,
-    "geb_onoff_thermostat_deadband": 2
+    "simulation_control_geb_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-central-ac-only-2-speed-geb-onoff.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
     "simulation_control_timestep": 1,
     "simulation_control_temperature_capacitance_multiplier": 7,
     "heat_pump_heating_capacity": 10000,
-    "geb_onoff_thermostat_deadband": 2
+    "simulation_control_geb_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-room-ac-only.xml": {
     "parent_hpxml": "sample_files/base.xml",

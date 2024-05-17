@@ -2877,12 +2877,22 @@ class HVAC
     return [2, 5]
   end
 
-  def self.clone_supp_coil_availability_schedule(htg_supp_coil)
+  def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
+    actuator = model.getEnergyManagementSystemActuators.find{|act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_')}
+
+    return actuator unless actuator.nil?
+
+    # No actuator for current backup coil availability schedule
     # Create a new schedule for supp availability
     # Make sure only being called once in case of multiple cloning
     supp_avail_sch = htg_supp_coil.availabilitySchedule.clone.to_ScheduleConstant.get
     supp_avail_sch.setName("#{htg_supp_coil.name} avail sch")
     htg_supp_coil.setAvailabilitySchedule(supp_avail_sch)
+
+    supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
+    supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') + ' act')
+
+    return supp_coil_avail_act
   end
 
   def self.apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil)
@@ -2915,9 +2925,7 @@ class HVAC
     htg_energy_trend.setNumberOfTimestepsToBeLogged(5)
 
     # Actuators
-    clone_supp_coil_availability_schedule(htg_supp_coil)
-    supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
-    supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub('-', '_') + ' act')
+    supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
     # Program
@@ -3080,10 +3088,8 @@ class HVAC
       backup_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, backup_coil_energy)
       backup_energy_trend.setName("#{backup_coil_energy.name} Trend")
       backup_energy_trend.setNumberOfTimestepsToBeLogged(1)
-
-      clone_supp_coil_availability_schedule(htg_supp_coil)
-      supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
-      supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub('-', '_') + ' act')
+      
+      supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     end
     # Sensors
     living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
@@ -3247,9 +3253,7 @@ class HVAC
     coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
     coil_speed_act.setName("#{air_loop_unitary.name} coil speed level")
     if not htg_supp_coil.nil?
-      clone_supp_coil_availability_schedule(htg_supp_coil)
-      supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
-      supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub('-', '_') + ' act')
+      supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     end
 
     # EMS program
@@ -3448,11 +3452,8 @@ class HVAC
     backup_coil_htg_rate.setKeyName(htg_supp_coil.name.get)
 
     # Need to use availability actuator because there's a bug in E+ that didn't handle the speed level = 0 correctly.See: https://github.com/NREL/EnergyPlus/pull/9392#discussion_r1578624175
-    if model.getEnergyManagementSystemActuators.find{|act| act.name.include? htg_supp_coil.availabilitySchedule.name.get.gsub('-', '_')}.nil?
-      clone_supp_coil_availability_schedule(htg_supp_coil)
-    end
-    supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
-    supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub('-', '_') + ' act')
+    
+    supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
 
     # Trend variable
     zone_temp_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, living_temp_ss)

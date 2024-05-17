@@ -10,7 +10,10 @@
     <extension>
       <SimulationControl>
         <Timestep>1</Timestep>
-        <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
+        <AdvancedResearchFeatures>
+          <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
+          <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
+        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -52,11 +55,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <HVACGEBControl>
-            <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
-          </HVACGEBControl>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -473,7 +471,6 @@
           <SystemIdentifier id='Refrigerator1'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>

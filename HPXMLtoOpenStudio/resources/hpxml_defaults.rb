@@ -109,7 +109,11 @@ class HPXMLDefaults
 
   def self.apply_header(hpxml_header, epw_file)
     if hpxml_header.timestep.nil?
-      hpxml_header.timestep = 60
+      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?)
+        hpxml_header.timestep = 1
+      else
+        hpxml_header.timestep = 60
+      end
       hpxml_header.timestep_isdefaulted = true
     end
 
@@ -142,7 +146,11 @@ class HPXMLDefaults
     end
 
     if hpxml_header.temperature_capacitance_multiplier.nil?
-      hpxml_header.temperature_capacitance_multiplier = 1.0
+      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?)
+        hpxml_header.temperature_capacitance_multiplier = 7.0
+      else
+        hpxml_header.temperature_capacitance_multiplier = 1.0
+      end
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
@@ -250,14 +258,6 @@ class HPXMLDefaults
     if hpxml_bldg.header.allow_increased_fixed_capacities.nil?
       hpxml_bldg.header.allow_increased_fixed_capacities = false
       hpxml_bldg.header.allow_increased_fixed_capacities_isdefaulted = true
-    end
-
-    # override temperature capacitance multiplier default
-    if (not hpxml_bldg.header.geb_onoff_thermostat_deadband.nil?) && hpxml_header.temperature_capacitance_multiplier_isdefaulted
-      hpxml_header.temperature_capacitance_multiplier = 7
-    end
-    if (not hpxml_bldg.header.geb_onoff_thermostat_deadband.nil?) && hpxml_header.timestep_isdefaulted
-      hpxml_header.timestep = 1
     end
 
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?

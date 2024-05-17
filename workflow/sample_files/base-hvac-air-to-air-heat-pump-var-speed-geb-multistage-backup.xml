@@ -10,6 +10,9 @@
     <extension>
       <SimulationControl>
         <Timestep>1</Timestep>
+        <AdvancedResearchFeatures>
+          <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
+        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -51,11 +54,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <HVACGEBControl>
-            <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
-          </HVACGEBControl>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -472,7 +470,6 @@
           <SystemIdentifier id='Refrigerator1'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>

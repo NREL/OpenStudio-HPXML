@@ -2104,12 +2104,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         htg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
         htg_spt_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        htg_spt_sensors[unit].setName("#{htg_sch} sch value")
+        htg_spt_sensors[unit].setName("#{htg_sch.name} sch value")
         htg_spt_sensors[unit].setKeyName(htg_sch.name.to_s)
 
         clg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
         clg_spt_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        clg_spt_sensors[unit].setName("#{clg_sch} sch value")
+        clg_spt_sensors[unit].setName("#{clg_sch.name} sch value")
         clg_spt_sensors[unit].setKeyName(clg_sch.name.to_s)
       end
 
