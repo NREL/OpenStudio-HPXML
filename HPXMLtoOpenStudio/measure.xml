@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>351a4d8a-b272-46ac-a425-9783bdc01318</version_id>
-  <version_modified>2024-05-15T16:32:10Z</version_modified>
+  <version_id>ab8c75ac-de82-4ec3-b2fe-047c34fbcfcf</version_id>
+  <version_modified>2024-05-17T23:02:57Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,13 +183,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D013D7A2</checksum>
+      <checksum>59D5267D</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>93C49D9A</checksum>
+      <checksum>CC83F731</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -201,7 +201,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CEFA8921</checksum>
+      <checksum>461EDD72</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -345,13 +345,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4CC21E47</checksum>
+      <checksum>6812FFA1</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>603839D1</checksum>
+      <checksum>963F5566</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -369,7 +369,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0E53F8FE</checksum>
+      <checksum>A438D5D8</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>399D47D1</checksum>
+      <checksum>F2834247</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -429,7 +429,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2988F957</checksum>
+      <checksum>4E4BE5F9</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -591,7 +591,7 @@
       <filename>utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07DB4C49</checksum>
+      <checksum>410C185C</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
@@ -603,7 +603,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FFCEC636</checksum>
+      <checksum>E1F1BEAF</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -639,7 +639,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>49BBCD85</checksum>
+      <checksum>8EEC2D8E</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7EDC2792</checksum>
+      <checksum>BA43A919</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
@@ -711,13 +711,13 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7E81BB89</checksum>
+      <checksum>81FC99DF</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>AEF9864A</checksum>
+      <checksum>485EE23B</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>

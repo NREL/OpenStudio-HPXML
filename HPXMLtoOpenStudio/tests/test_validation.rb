@@ -120,7 +120,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
-                            'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 79 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
+                            'hvac-gshp-invalid-bore-depth-low' => ['Expected BoreholesOrTrenches/Length to be greater than or equal to 80 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-invalid-bore-depth-high' => ['Expected BoreholesOrTrenches/Length to be less than or equal to 500 [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: "GeothermalLoop1"]'],
                             'hvac-gshp-autosized-count-not-rectangle' => ["Expected BoreholesOrTrenches/Count when extension/BorefieldConfiguration is not 'Rectangle' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
                             'hvac-location-heating-system' => ['A location is specified as "basement - unconditioned" but no surfaces were found adjacent to this space type.'],
@@ -1045,12 +1045,13 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
                             'schedule-file-max-power-ratio-with-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.'],
+                            'skylight-not-connected-to-cond-space' => ["Skylight 'Skylight1' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space."],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'storm-windows-unexpected-window-ufactor' => ['Unexpected base window U-Factor (0.33) for a storm window.'],
-                            'surface-attached-to-uncond-space' => ["Surface 'Wall2' is attached to the space of an unconditioned zone."],
-                            'surface-attached-to-uncond-space2' => ["Surface 'Slab2' is attached to the space of an unconditioned zone."],
+                            'surface-attached-to-uncond-space' => ["Surface 'Wall2Space2' is attached to the space of an unconditioned zone."],
+                            'surface-attached-to-uncond-space2' => ["Surface 'Slab2Space4' is attached to the space of an unconditioned zone."],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
                             'unattached-door' => ["Attached wall 'foobar' not found for door 'Door1'."],
                             'unattached-gshp' => ["Attached geothermal loop 'foobar' not found for heat pump 'HeatPump1'."],
@@ -1403,6 +1404,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['schedule-file-max-power-ratio-with-unit-multiplier'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml')
         hpxml_bldg.building_construction.number_of_units = 2
+      elsif ['skylight-not-connected-to-cond-space'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
+        hpxml_bldg.skylights[0].attached_to_floor_idref = nil
       elsif ['solar-thermal-system-with-combi-tankless'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-combi-tankless.xml')
         hpxml_bldg.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml_bldg.solar_thermal_systems.size + 1}",
@@ -1444,10 +1448,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.windows[0].storm_type = 'clear'
       elsif ['surface-attached-to-uncond-space'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.walls[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
+        hpxml_bldg.walls[-1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
       elsif ['surface-attached-to-uncond-space2'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.slabs[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
+        hpxml_bldg.slabs[-1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
       elsif ['unattached-cfis'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
@@ -1457,7 +1461,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.ventilation_fans[0].distribution_system_idref = 'foobar'
       elsif ['unattached-door'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.doors[0].wall_idref = 'foobar'
+        hpxml_bldg.doors[0].attached_to_wall_idref = 'foobar'
       elsif ['unattached-gshp'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml')
         hpxml_bldg.heat_pumps[0].geothermal_loop_idref = 'foobar'
@@ -1470,8 +1474,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.pv_systems[0].inverter_idref = 'foobar'
       elsif ['unattached-skylight'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
-        hpxml_bldg.skylights[0].roof_idref = 'foobar'
-        hpxml_bldg.skylights[0].floor_idref = 'foobar'
+        hpxml_bldg.skylights[0].attached_to_roof_idref = 'foobar'
+        hpxml_bldg.skylights[0].attached_to_floor_idref = 'foobar'
       elsif ['unattached-solar-thermal-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-solar-indirect-flat-plate.xml')
         hpxml_bldg.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
@@ -1491,7 +1495,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.dishwashers[0].water_heating_system_idref = 'foobar'
       elsif ['unattached-window'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.windows[0].wall_idref = 'foobar'
+        hpxml_bldg.windows[0].attached_to_wall_idref = 'foobar'
       elsif ['unattached-zone'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.heating_systems[0].attached_to_zone_idref = 'foobar'
@@ -1720,20 +1724,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['manualj-sum-space-internal-loads-sensible'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_sensible = 1000.0
-        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_sensible = 1200.0
+        hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
+          space.manualj_internal_loads_sensible = (i == 0 ? 1200.0 : 0)
+        end
       elsif ['manualj-sum-space-internal-loads-latent'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_latent = 200.0
-        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_latent = 100.0
-      elsif ['multiple-conditioned-zone'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
-                             zone_type: HPXML::ZoneTypeConditioned)
-        hpxml_bldg.zones[-1].spaces << hpxml_bldg.zones[0].spaces[0].dup
-        hpxml_bldg.zones[-1].spaces[-1].id += 'Dup'
-        hpxml_bldg.conditioned_spaces.each do |space|
-          space.floor_area /= 2.0
+        hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
+          space.manualj_internal_loads_latent = (i == 0 ? 100.0 : 0)
         end
+      elsif ['multiple-conditioned-zone'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-multiple.xml')
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case

@@ -1409,6 +1409,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     shading_schedules = {}
 
     @hpxml_bldg.skylights.each do |skylight|
+      if not skylight.is_conditioned
+        fail "Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space."
+      end
+
       tilt = skylight.roof.pitch / 12.0
       width = Math::sqrt(skylight.area)
       length = skylight.area / width
@@ -1426,7 +1430,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType('RoofCeiling')
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)) # Ensure it is included in the conditioned space heat transfer
+      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 

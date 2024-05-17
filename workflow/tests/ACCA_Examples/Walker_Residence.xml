@@ -23,6 +23,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <ShieldingofHome>normal</ShieldingofHome>
           <Soil>
             <Conductivity>0.2</Conductivity>
           </Soil>

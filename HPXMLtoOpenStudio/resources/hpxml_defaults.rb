@@ -121,15 +121,15 @@ class HPXMLDefaults
       hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
                            zone_type: HPXML::ZoneTypeConditioned)
       hpxml_bldg.hvac_systems.each do |hvac_system|
-        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[0].id
+        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[-1].id
       end
-      hpxml_bldg.zones[0].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
-                                     floor_area: cfa)
+      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
+                                      floor_area: cfa)
       hpxml_bldg.surfaces.each do |surface|
         next unless HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
         next if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
 
-        surface.attached_to_space_idref = hpxml_bldg.zones[0].spaces[0].id
+        surface.attached_to_space_idref = hpxml_bldg.zones[-1].spaces[-1].id
       end
     end
   end
@@ -257,7 +257,7 @@ class HPXMLDefaults
 
     sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_latent.nil?
-      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent = sum_space_manualj_internal_loads_latent # Btuh
       hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
     end
     if sum_space_manualj_internal_loads_latent == 0
@@ -664,7 +664,13 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.site.shielding_of_home.nil?
-      hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        # Shielding Class 5 is ACCA MJ8 default for Table 5B/5E for townhouses and condos
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
+      else
+        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET 301 default
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
     end
 
@@ -672,8 +678,6 @@ class HPXMLDefaults
       hpxml_bldg.site.ground_conductivity = 1.0 # Btu/hr-ft-F
       hpxml_bldg.site.ground_conductivity_isdefaulted = true
     end
-
-    hpxml_bldg.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml_bldg.site.shielding_of_home)
   end
 
   def self.apply_neighbor_buildings(hpxml_bldg)
@@ -1858,7 +1862,7 @@ class HPXMLDefaults
 
         if heat_pump.geothermal_loop.shank_spacing.nil?
           hp_ap = heat_pump.additional_properties
-          heat_pump.geothermal_loop.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
+          heat_pump.geothermal_loop.shank_spacing = (hp_ap.u_tube_spacing + hp_ap.pipe_od).round(2) # Distance from center of pipe to center of pipe
           heat_pump.geothermal_loop.shank_spacing_isdefaulted = true
         end
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type

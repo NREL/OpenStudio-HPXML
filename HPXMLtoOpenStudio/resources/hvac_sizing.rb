@@ -295,7 +295,7 @@ class HVACSizing
         if location == HPXML::LocationAtticVented
           heat_temp = hpxml_bldg.header.manualj_heating_design_temp
         else
-          heat_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp, weather.data.ShallowGroundMonthlyTemps.min)
+          heat_temp = calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
         end
       else
         heat_temp = hpxml_bldg.header.manualj_heating_design_temp
@@ -305,7 +305,7 @@ class HVACSizing
            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
       # Note: We use this approach for garages in case they are partially below grade,
       # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
-      heat_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp, weather.data.ShallowGroundMonthlyTemps.min)
+      heat_temp = calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
 
     end
 
@@ -332,7 +332,7 @@ class HVACSizing
         if location == HPXML::LocationAtticVented
           cool_temp = hpxml_bldg.header.manualj_cooling_design_temp + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
         else
-          cool_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp, weather.data.ShallowGroundMonthlyTemps.max, true)
+          cool_temp = calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg, true)
         end
 
       else
@@ -419,7 +419,7 @@ class HVACSizing
            HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? location
       # Note: We use this approach for garages in case they are partially below grade,
       # in which case the ASHRAE 152/MJ8 typical assumption will be quite wrong.
-      cool_temp = calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp, weather.data.ShallowGroundMonthlyTemps.max)
+      cool_temp = calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg)
 
     end
 
@@ -441,7 +441,6 @@ class HVACSizing
         all_space_loads[space] = DesignLoadValues.new
         space.additional_properties.total_exposed_wall_area = 0.0
         # Initialize Hourly Aggregate Fenestration Loads (AFL)
-        space.additional_properties.afl_hr = [0.0] * 12 # Data saved for aed curve
         space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
         space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
       end
@@ -678,12 +677,8 @@ class HVACSizing
             all_space_loads[space].Cool_Windows += clg_loads
           end
         else
-          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space.additional_properties.afl_hr[hr] += clg_loads
-          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            space.additional_properties.afl_hr_windows[hr] += clg_loads
-          end
+          all_space_loads[space].HourlyFenestrationLoads[hr] += clg_loads
+          space.additional_properties.afl_hr_windows[hr] += clg_loads if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
         end
       end
     end # window
@@ -765,12 +760,8 @@ class HVACSizing
             all_space_loads[space].Cool_Skylights += clg_loads
           end
         else
-          if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-            space.additional_properties.afl_hr[hr] += clg_loads
-          elsif space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
-            space.additional_properties.afl_hr[hr] += clg_loads # aed curve, skylight and windows combined, store for reporting aed curve
-            space.additional_properties.afl_hr_skylights[hr] += clg_loads
-          end
+          all_space_loads[space].HourlyFenestrationLoads[hr] += clg_loads
+          space.additional_properties.afl_hr_skylights[hr] += clg_loads if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedurePeak
         end
       end
     end # skylight
@@ -781,9 +772,8 @@ class HVACSizing
     hpxml_bldg.conditioned_zones.each do |zone|
       # Loop spaces to calculate adjustment for each space
       zone.spaces.each do |space|
-        all_space_loads[space].HourlyFenestrationLoads = space.additional_properties.afl_hr
         if space.fenestration_load_procedure == HPXML::SpaceFenestrationLoadProcedureStandard
-          all_space_loads[space].Cool_AEDExcursion = calculate_aed_excursion(space.additional_properties.afl_hr)
+          all_space_loads[space].Cool_AEDExcursion = calculate_aed_excursion(all_space_loads[space].HourlyFenestrationLoads)
         else
           all_space_loads[space].Cool_AEDExcursion = 0.0
           all_space_loads[space].Cool_Windows = space.additional_properties.afl_hr_windows.max
@@ -874,18 +864,12 @@ class HVACSizing
         azimuths = [wall.azimuth]
       end
 
-      if wall.is_a? HPXML::RimJoist
-        wall_area = wall.area
-      else
-        wall_area = wall.net_area
-      end
-
       htg_htm = 0.0
       clg_htm = 0.0
       azimuths.each do |_azimuth|
         if wall.is_exposed
           # Store exposed wall gross area for infiltration calculation
-          space.additional_properties.total_exposed_wall_area += wall_area / azimuths.size
+          space.additional_properties.total_exposed_wall_area += wall.area / azimuths.size
         end
         if wall.is_exterior
 
@@ -927,13 +911,13 @@ class HVACSizing
           htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
         end
       end
-      clg_loads = clg_htm * wall_area
-      htg_loads = htg_htm * wall_area
+      clg_loads = clg_htm * wall.net_area
+      htg_loads = htg_htm * wall.net_area
       all_zone_loads[zone].Cool_Walls += clg_loads
       all_zone_loads[zone].Heat_Walls += htg_loads
       all_space_loads[space].Cool_Walls += clg_loads
       all_space_loads[space].Heat_Walls += htg_loads
-      wall.additional_properties.formj1_values = FormJ1Values.new(area: wall_area,
+      wall.additional_properties.formj1_values = FormJ1Values.new(area: wall.net_area,
                                                                   heat_htm: htg_htm,
                                                                   cool_htm: clg_htm,
                                                                   heat_load: htg_loads,
@@ -1254,10 +1238,24 @@ class HVACSizing
       q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
     end
 
+    # Determine if we are in a higher or lower shielding class
+    # Combines the effects of terrain and wind shielding
+    shielding_class = 4
+    if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
+      shielding_class += 1
+    elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
+      shielding_class -= 1
+    end
+    if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
+      shielding_class += 1
+    elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
+      shielding_class -= 1
+    end
+    shielding_class = [[shielding_class, 5].min, 1].max
+
     # Set stack/wind coefficients from Tables 5D/5E
     c_s = 0.015 * ncfl_ag
-    c_w_base = [0.0133 * hpxml_bldg.site.additional_properties.aim2_shelter_coeff - 0.0027, 0.0].max # Linear relationship between shelter coefficient and c_w coefficients by shielding class
-    c_w = c_w_base * ncfl_ag**0.4
+    c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
 
     ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
     windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
@@ -1320,29 +1318,21 @@ class HVACSizing
     # Apportion to zones/spaces
     bldg_exposed_wall_area = hpxml_bldg.conditioned_zones.map { |zone| zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area } }.flatten.sum
     hpxml_bldg.conditioned_zones.each do |zone|
-      zone_exposed_wall_area = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum
-
-      # Infiltration assignment by exterior wall area
-      all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_exposed_wall_area / bldg_exposed_wall_area
-      all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_exposed_wall_area / bldg_exposed_wall_area
-      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_exposed_wall_area / bldg_exposed_wall_area
-
       # Ventilation assignment by floor area
       all_zone_loads[zone].Heat_Vent = bldg_Heat_Vent * zone.floor_area / cfa
       all_zone_loads[zone].Cool_Vent_Sens = bldg_Cool_Vent_Sens * zone.floor_area / cfa
       all_zone_loads[zone].Cool_Vent_Lat = bldg_Cool_Vent_Lat * zone.floor_area / cfa
 
+      # Infiltration assignment by exterior wall area
       zone.spaces.each do |space|
-        # Infiltration assignment by exterior wall area
-        space_exposed_wall_area = space.additional_properties.total_exposed_wall_area
-        if zone_exposed_wall_area > 0
-          space.additional_properties.wall_area_ratio = space_exposed_wall_area / zone_exposed_wall_area
-        else
-          space.additional_properties.wall_area_ratio = 0.0
-        end
-        all_space_loads[space].Heat_Infil = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Heat_Infil
-        all_space_loads[space].Cool_Infil_Sens = space.additional_properties.wall_area_ratio * all_zone_loads[zone].Cool_Infil_Sens
+        space.additional_properties.wall_area_ratio = space.additional_properties.total_exposed_wall_area / bldg_exposed_wall_area
+        all_space_loads[space].Heat_Infil = bldg_Heat_Infil * space.additional_properties.wall_area_ratio
+        all_space_loads[space].Cool_Infil_Sens = bldg_Cool_Infil_Sens * space.additional_properties.wall_area_ratio
       end
+      zone_wall_area_ratio = zone.spaces.map { |space| space.additional_properties.total_exposed_wall_area }.sum / bldg_exposed_wall_area
+      all_zone_loads[zone].Heat_Infil = bldg_Heat_Infil * zone_wall_area_ratio
+      all_zone_loads[zone].Cool_Infil_Sens = bldg_Cool_Infil_Sens * zone_wall_area_ratio
+      all_zone_loads[zone].Cool_Infil_Lat = bldg_Cool_Infil_Lat * zone_wall_area_ratio
     end
   end
 
@@ -1634,9 +1624,9 @@ class HVACSizing
     zone_loads.Heat_Ducts += ducts_heat_load
     zone_loads.Heat_Tot += ducts_heat_load
 
+    zone_htg_load = zone.spaces.map { |space| all_space_loads[space].Heat_Tot }.sum
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
-      zone_htg_load = zone.spaces.map { |space| all_space_loads[space].Heat_Tot }.sum
       space_htg_duct_load = ducts_heat_load * space_loads.Heat_Tot / zone_htg_load
       space_loads.Heat_Ducts += space_htg_duct_load
       space_loads.Heat_Tot += space_htg_duct_load
@@ -1706,9 +1696,9 @@ class HVACSizing
     zone_loads.Cool_Lat += ducts_cool_load_lat
     zone_loads.Cool_Tot += ducts_cool_load_sens + ducts_cool_load_lat
 
+    zone_clg_load_sens = zone.spaces.map { |space| all_space_loads[space].Cool_Sens }.sum
     zone.spaces.each do |space|
       space_loads = all_space_loads[space]
-      zone_clg_load_sens = zone.spaces.map { |space| all_space_loads[space].Cool_Sens }.sum
       space_clg_duct_load = ducts_cool_load_sens * space_loads.Cool_Sens / zone_clg_load_sens
       space_loads.Cool_Ducts_Sens += space_clg_duct_load
       space_loads.Cool_Sens += space_clg_duct_load
@@ -2438,7 +2428,7 @@ class HVACSizing
     num_bore_holes = geothermal_loop.num_bore_holes
     bore_depth = geothermal_loop.bore_length
 
-    min_bore_depth = UnitConversions.convert(24.0, 'm', 'ft').round # based on g-function library
+    min_bore_depth = 80 # ft; based on g-function library
     # In NY the following is the depth that requires a mining permit, which has been a barrier for Dandelion Energy with installing GSHPs.
     # Sounds like people are pushing ever deeper but for now we can apply this limit and add a note about where it came from.
     max_bore_depth = 500 # ft
@@ -3059,12 +3049,22 @@ class HVACSizing
     return space_UAs
   end
 
-  def self.calculate_space_design_temps(mj, location, weather, hpxml_bldg, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
+  def self.calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
+    return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp,
+                                        weather.data.ShallowGroundMonthlyTemps.min, false)
+  end
+
+  def self.calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg, is_unvented_attic_with_roof_insul = false)
+    return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp,
+                                        weather.data.ShallowGroundMonthlyTemps.max, is_unvented_attic_with_roof_insul)
+  end
+
+  def self.calculate_space_design_temps(mj, location, weather, hpxml_bldg, conditioned_design_temp, design_db, ground_db, is_unvented_attic_with_roof_insul)
     space_UAs = get_space_ua_values(mj, location, weather, hpxml_bldg)
 
     # Calculate space design temp from space UAs
     design_temp = nil
-    if not is_cooling_for_unvented_attic_roof_insulation
+    if not is_unvented_attic_with_roof_insul
 
       sum_uat, sum_ua = 0.0, 0.0
       space_UAs.each do |ua_type, ua|

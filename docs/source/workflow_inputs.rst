@@ -451,7 +451,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
-  ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
+  ``ShieldingofHome``               string                 See [#]_     No        See [#]_  Presence of nearby buildings, trees, obstructions for infiltration model
   ``Soil/SoilType``                 string                 See [#]_     No        unknown   Soil type
   ``Soil/MoistureType``             string                 See [#]_     No        mixed     Soil moisture type
   ``Soil/Conductivity``             double    Btu/hr-ft-F  > 0          No        See [#]_  Soil thermal conductivity
@@ -461,6 +461,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+  .. [#] If ShieldingofHome not provided, defaults to "normal" for single-family detached or manufactured home and "well-shielded" for single-family attached or apartment unit.
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] MoistureType choices are "dry", "wet", or "mixed".
   .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType:
@@ -1549,7 +1550,7 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``AttachedToRoof``                            idref                                See [#]_                  Yes                  ID of attached roof
-  ``AttachedToFloor``                           idref                                See [#]_                  No                   ID of attached attic floor for a skylight with a shaft or sun tunnel
+  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor for a skylight with a shaft or sun tunnel
   ============================================  =================  ================  ========================  ========  =========  =============================================================
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -1566,6 +1567,7 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
          
   .. [#] AttachedToRoof must reference a ``Roof``.
   .. [#] AttachedToFloor must reference a ``Floor``.
+  .. [#] AttachedToFloor required if the skylight is attached to a roof of an attic (e.g., with shaft or sun tunnel).
 
 UFactor/SHGC Lookup
 ~~~~~~~~~~~~~~~~~~~
@@ -2851,7 +2853,7 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``LoopConfiguration``                     string                         vertical            Yes                       Geothermal loop configuration
   ``LoopFlow``                              double            gal/min      > 0                 No        See [#]_        Water flow rate through the geothermal loop
   ``BoreholesOrTrenches/Count``             integer                        >= 1, <= 10         No [#]_   See [#]_        Number of boreholes
-  ``BoreholesOrTrenches/Length``            double            ft           >= 79, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
+  ``BoreholesOrTrenches/Length``            double            ft           >= 80, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0                 No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0                 No        5.0             Borehole diameter
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0     No        standard        Grout type or conductivity [#]_
@@ -2877,8 +2879,8 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
   .. [#] BoreholesOrTrenches/Count calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by BoreholesOrTrenches/Length if BoreholesOrTrenches/Length is provided, otherwise autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
-  .. [#] 79 ft is the minimum depth in the g-function library.
-         500 ft is the maximum realistic depth to be used in residential applications.
+  .. [#] The minimum depth in the g-function library is 80 ft.
+         The maximum realistic depth to be used in residential applications is 500 ft.
   .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:

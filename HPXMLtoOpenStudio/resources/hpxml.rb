@@ -45,9 +45,6 @@ XMLHelper.write_file(hpxml.to_doc, "out.xml")
 
 '''
 
-# FUTURE: Remove all idref attributes, make object attributes instead
-#         E.g., in class Window, :wall_idref => :wall
-
 class HPXML < Object
   HPXML_ATTRS = [:header, :buildings]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
@@ -1849,14 +1846,14 @@ class HPXML < Object
 
             # Update subsurface idrefs as appropriate
             (@windows + @doors).each do |subsurf|
-              next unless subsurf.wall_idref == surf2.id
+              next unless subsurf.attached_to_wall_idref == surf2.id
 
-              subsurf.wall_idref = surf.id
+              subsurf.attached_to_wall_idref = surf.id
             end
             @skylights.each do |subsurf|
-              next unless subsurf.roof_idref == surf2.id
+              next unless subsurf.attached_to_roof_idref == surf2.id
 
-              subsurf.roof_idref = surf.id
+              subsurf.attached_to_roof_idref = surf.id
             end
 
             # Remove old surface
@@ -3030,7 +3027,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def skylights
-      return @parent_object.skylights.select { |skylight| skylight.roof_idref == @id }
+      return @parent_object.skylights.select { |skylight| skylight.attached_to_roof_idref == @id }
     end
 
     def space
@@ -3410,11 +3407,11 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def windows
-      return @parent_object.windows.select { |window| window.wall_idref == @id }
+      return @parent_object.windows.select { |window| window.attached_to_wall_idref == @id }
     end
 
     def doors
-      return @parent_object.doors.select { |door| door.wall_idref == @id }
+      return @parent_object.doors.select { |door| door.attached_to_wall_idref == @id }
     end
 
     def space
@@ -3655,7 +3652,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def windows
-      return @parent_object.windows.select { |window| window.wall_idref == @id }
+      return @parent_object.windows.select { |window| window.attached_to_wall_idref == @id }
     end
 
     def space
@@ -3671,7 +3668,7 @@ class HPXML < Object
     end
 
     def doors
-      return @parent_object.doors.select { |door| door.wall_idref == @id }
+      return @parent_object.doors.select { |door| door.attached_to_wall_idref == @id }
     end
 
     def net_area
@@ -3680,7 +3677,7 @@ class HPXML < Object
 
       val = @area
       (@parent_object.windows + @parent_object.doors).each do |subsurface|
-        next unless subsurface.wall_idref == @id
+        next unless subsurface.attached_to_wall_idref == @id
 
         val -= subsurface.area
       end
@@ -3895,7 +3892,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def skylights
-      return @parent_object.skylights.select { |skylight| skylight.floor_idref == @id }
+      return @parent_object.skylights.select { |skylight| skylight.attached_to_floor_idref == @id }
     end
 
     def space
@@ -4274,18 +4271,18 @@ class HPXML < Object
              :interior_shading_id, :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
              :exterior_shading_id, :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :fraction_operable, :performance_class, :wall_idref]
+             :fraction_operable, :performance_class, :attached_to_wall_idref]
     attr_accessor(*ATTRS)
 
     def wall
-      return if @wall_idref.nil?
+      return if @attached_to_wall_idref.nil?
 
       (@parent_object.walls + @parent_object.foundation_walls).each do |wall|
-        next unless wall.id == @wall_idref
+        next unless wall.id == @attached_to_wall_idref
 
         return wall
       end
-      fail "Attached wall '#{@wall_idref}' not found for window '#{@id}'."
+      fail "Attached wall '#{@attached_to_wall_idref}' not found for window '#{@id}'."
     end
 
     def is_exterior
@@ -4378,9 +4375,9 @@ class HPXML < Object
       end
       XMLHelper.add_element(window, 'FractionOperable', @fraction_operable, :float, @fraction_operable_isdefaulted) unless @fraction_operable.nil?
       XMLHelper.add_element(window, 'PerformanceClass', @performance_class, :string, @performance_class_isdefaulted) unless @performance_class.nil?
-      if not @wall_idref.nil?
+      if not @attached_to_wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
-        XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
+        XMLHelper.add_attribute(attached_to_wall, 'idref', @attached_to_wall_idref)
       end
     end
 
@@ -4415,7 +4412,7 @@ class HPXML < Object
       @overhangs_distance_to_bottom_of_window = XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow', :float)
       @fraction_operable = XMLHelper.get_value(window, 'FractionOperable', :float)
       @performance_class = XMLHelper.get_value(window, 'PerformanceClass', :string)
-      @wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
+      @attached_to_wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
       @storm_type = XMLHelper.get_value(window, 'StormWindow/GlassType', :string)
     end
   end
@@ -4438,29 +4435,29 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :roof_idref, :floor_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref, :attached_to_floor_idref]
     attr_accessor(*ATTRS)
 
     def roof
-      return if @roof_idref.nil?
+      return if @attached_to_roof_idref.nil?
 
       @parent_object.roofs.each do |roof|
-        next unless roof.id == @roof_idref
+        next unless roof.id == @attached_to_roof_idref
 
         return roof
       end
-      fail "Attached roof '#{@roof_idref}' not found for skylight '#{@id}'."
+      fail "Attached roof '#{@attached_to_roof_idref}' not found for skylight '#{@id}'."
     end
 
     def floor
-      return if @floor_idref.nil?
+      return if @attached_to_floor_idref.nil?
 
       @parent_object.floors.each do |floor|
-        next unless floor.id == @floor_idref
+        next unless floor.id == @attached_to_floor_idref
 
         return floor
       end
-      fail "Attached floor '#{@floor_idref}' not found for skylight '#{@id}'."
+      fail "Attached floor '#{@attached_to_floor_idref}' not found for skylight '#{@id}'."
     end
 
     def is_exterior
@@ -4480,7 +4477,11 @@ class HPXML < Object
     end
 
     def is_conditioned
-      return HPXML::is_conditioned(self)
+      if not floor.nil?
+        return HPXML::is_conditioned(floor)
+      else
+        return HPXML::is_conditioned(roof)
+      end
     end
 
     def delete
@@ -4538,13 +4539,13 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', "#{id}StormWindow")
         XMLHelper.add_element(storm_window, 'GlassType', @storm_type, :string) unless @storm_type.nil?
       end
-      if not @roof_idref.nil?
+      if not @attached_to_roof_idref.nil?
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
-        XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
+        XMLHelper.add_attribute(attached_to_roof, 'idref', @attached_to_roof_idref)
       end
-      if not @floor_idref.nil?
+      if not @attached_to_floor_idref.nil?
         attached_to_floor = XMLHelper.add_element(skylight, 'AttachedToFloor')
-        XMLHelper.add_attribute(attached_to_floor, 'idref', @floor_idref)
+        XMLHelper.add_attribute(attached_to_floor, 'idref', @attached_to_floor_idref)
       end
     end
 
@@ -4572,8 +4573,8 @@ class HPXML < Object
       @interior_shading_type = XMLHelper.get_value(skylight, 'InteriorShading/Type', :string)
       @interior_shading_factor_summer = XMLHelper.get_value(skylight, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(skylight, 'InteriorShading/WinterShadingCoefficient', :float)
-      @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
-      @floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
+      @attached_to_roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
+      @attached_to_floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
       @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
     end
   end
@@ -4593,18 +4594,18 @@ class HPXML < Object
   end
 
   class Door < BaseElement
-    ATTRS = [:id, :wall_idref, :area, :azimuth, :orientation, :r_value]
+    ATTRS = [:id, :attached_to_wall_idref, :area, :azimuth, :orientation, :r_value]
     attr_accessor(*ATTRS)
 
     def wall
-      return if @wall_idref.nil?
+      return if @attached_to_wall_idref.nil?
 
       (@parent_object.walls + @parent_object.foundation_walls).each do |wall|
-        next unless wall.id == @wall_idref
+        next unless wall.id == @attached_to_wall_idref
 
         return wall
       end
-      fail "Attached wall '#{@wall_idref}' not found for door '#{@id}'."
+      fail "Attached wall '#{@attached_to_wall_idref}' not found for door '#{@id}'."
     end
 
     def is_exterior
@@ -4644,9 +4645,9 @@ class HPXML < Object
       door = XMLHelper.add_element(doors, 'Door')
       sys_id = XMLHelper.add_element(door, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      if not @wall_idref.nil?
+      if not @attached_to_wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(door, 'AttachedToWall')
-        XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
+        XMLHelper.add_attribute(attached_to_wall, 'idref', @attached_to_wall_idref)
       end
       XMLHelper.add_element(door, 'Area', @area, :float) unless @area.nil?
       XMLHelper.add_element(door, 'Azimuth', @azimuth, :integer, @azimuth_isdefaulted) unless @azimuth.nil?
@@ -4658,7 +4659,7 @@ class HPXML < Object
       return if door.nil?
 
       @id = HPXML::get_id(door)
-      @wall_idref = HPXML::get_idref(XMLHelper.get_element(door, 'AttachedToWall'))
+      @attached_to_wall_idref = HPXML::get_idref(XMLHelper.get_element(door, 'AttachedToWall'))
       @area = XMLHelper.get_value(door, 'Area', :float)
       @azimuth = XMLHelper.get_value(door, 'Azimuth', :integer)
       @orientation = XMLHelper.get_value(door, 'Orientation', :string)
