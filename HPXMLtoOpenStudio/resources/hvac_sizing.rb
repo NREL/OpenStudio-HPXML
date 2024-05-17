@@ -1272,8 +1272,8 @@ class HVACSizing
     # Calculate net infiltration cfm (NCFM; infiltration combined with unbalanced ventilation)
     if q_unb_cfm == 0
       # Neutral pressure, so NCFM = ICFM
-      infil_ncfm_heat = infil_cfm_heat
-      infil_ncfm_cool = infil_cfm_cool
+      infil_ncfm_heat = icfm_heat
+      infil_ncfm_cool = icfm_cool
     elsif q_unb_cfm > 0
       # Negative pressure, so NCFM = (ICFM^1.5 + CFMimb^1.5)^0.67
       infil_ncfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67
