@@ -182,7 +182,7 @@ Affects the transient calculation of indoor air temperatures. If not provided, t
 
 **Simulation Control: Defrost Model Type**
 
-Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for improved model that better accounts for loads and energy uses during defrost, using advanced may impact simulation runtime. If not provided, defaults to standard.
+Research feature to select the type of defrost model. Use standard for default E+ defrost setting. Use advanced for an improved model that better accounts for load and energy use during defrost; using advanced may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_defrost_model_type``
 - **Type:** ``Choice``

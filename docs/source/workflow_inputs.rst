@@ -91,16 +91,16 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            >= 1, <= 31       No        31                           Run period end date
   ``CalendarYear``                      integer            > 1600 [#]_       No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``AdvancedResearchFeatures``          element            > 0               No                                     Features used for advanced modeling or research purposes
+  ``AdvancedResearchFeatures``          element                              No        <none>                       Features used for advanced research modeling
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
 
-Some features are advanced or only for research uses, additional information is entered in ``/HPXML/SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures``.
+To enable advanced research features, additional information is entered in ``/HPXML/SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures``.
 
-These features may use EMS program, require shorter timestep, or allow more sophisticated simulation control, which may or may not impact simulation runtime.
+These features may require shorter timesteps, allow more sophisticated simulation control, and/or impact simulation runtime.
 
   ====================================  ========  =======  ================  ========  ========  ========================================================
   Element                               Type      Units    Constraints       Required  Default   Notes
@@ -113,7 +113,8 @@ These features may use EMS program, require shorter timestep, or allow more soph
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
   .. [#] DefrostModelType choices are "standard" and "advanced".
-  .. [#] Using "advanced" defrost model type creates an improved model that uses EMS program to better accounts for loads and energy uses during defrost.
+  .. [#] Use "standard" for default E+ defrost setting.
+         Use "advanced" for an improved model that better accounts for load and energy use during defrost; using "advanced" may impact simulation runtime.
 
 HPXML Emissions Scenarios
 *************************
@@ -2362,8 +2363,6 @@ The following heat pump types can be modeled:
 - :ref:`hvac_hp_room_ac_reverse_cycle`
 - :ref:`hvac_hp_ground_to_air`
 - :ref:`hvac_hp_water_loop`
-
-Additional defrost model type input is available at HPXML level, see :ref:`hpxml_simulation_control`.
 
 .. _hvac_hp_air_to_air:
 
