@@ -1270,7 +1270,11 @@ class HVACSizing
     q_unb_cfm, q_bal_cfm, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff = get_ventilation_data(hpxml_bldg)
 
     # Calculate net infiltration cfm (NCFM; infiltration combined with unbalanced ventilation)
-    if q_unb_cfm > 0
+    if q_unb_cfm == 0
+      # Neutral pressure, so NCFM = ICFM
+      infil_ncfm_heat = infil_cfm_heat
+      infil_ncfm_cool = infil_cfm_cool
+    elsif q_unb_cfm > 0
       # Negative pressure, so NCFM = (ICFM^1.5 + CFMimb^1.5)^0.67
       infil_ncfm_heat = (icfm_heat**1.5 + q_unb_cfm**1.5)**0.67
       infil_ncfm_cool = (icfm_cool**1.5 + q_unb_cfm**1.5)**0.67
@@ -1287,7 +1291,7 @@ class HVACSizing
         infil_ncfm_cool = 0.0
       else
         # Mitigating positive pressure, so NCFM = (ICFM^1.5 - ABS(CFMimb)^1.5)^0.67
-        infil_ncfm_cool = (icfm_cool**1.5 - (-q_unb_cfm)**1.5)**0.67
+        infil_ncfm_cool = (icfm_cool**1.5 - q_unb_cfm.abs**1.5)**0.67
       end
     end
 
