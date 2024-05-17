@@ -20,6 +20,9 @@ class UtilityBills
       marginal_rate = get_eia_seds_rate(state_code, fuel_type)
     end
 
+    marginal_rate = marginal_rate.round(4) unless marginal_rate.nil?
+    average_rate = average_rate.round(4) unless average_rate.nil?
+
     return marginal_rate, average_rate
   end
 
