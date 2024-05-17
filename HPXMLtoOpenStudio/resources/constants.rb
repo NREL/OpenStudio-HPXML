@@ -39,6 +39,10 @@ class Constants
     return 'AirFilm'
   end
 
+  def self.AutomaticallyAdded
+    return 'AutomaticallyAdded'
+  end
+
   def self.ERIVersions
     return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
             '2019AB', '2019ABC', '2019ABCD', '2022', '2022C']
@@ -374,6 +378,10 @@ class Constants
 
   def self.ObjectNameWaterHeaterSetpoint
     return 'water heater setpoint'
+  end
+
+  def self.ObjectNameWaterHeaterAdjustment
+    return 'water heater energy adjustment'
   end
 
   def self.ObjectNameWaterLoopHeatPump
