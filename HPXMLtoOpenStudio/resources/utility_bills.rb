@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class UtilityBills
-  def self.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
-    msn_codes = Constants.StateCodesMap.map {|x| x[0]}.uniq
+  def self.get_rates_from_eia_data(_runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
+    msn_codes = Constants.StateCodesMap.map { |x| x[0] }.uniq
     msn_codes << 'US'
     return unless msn_codes.include? state_code # Check if the state_code is valid
 
@@ -68,7 +68,7 @@ class UtilityBills
     rows.each do |row|
       next if row[1].upcase != state_code.upcase # State
       next if row[2].upcase != msn_code_map[fuel_type] # EIA SEDS MSN code
-      
+
       if fuel_type == HPXML::FuelTypeCoal
         seds_rate = row[40] # Use 2007 prices for coal. For 2008 forward, EIA assumes there is zero residential sector coal consumption in the United States, and SEDS does not estimate a price.
       else

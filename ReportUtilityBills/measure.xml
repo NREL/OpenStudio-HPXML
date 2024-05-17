@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>36a6904e-6d51-4561-b71e-a47afcff401c</version_id>
-  <version_modified>2024-05-07T13:37:11Z</version_modified>
+  <version_id>d170c758-98cf-4aad-b4de-1a29e8d87fda</version_id>
+  <version_modified>2024-05-17T19:18:21Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -142,7 +142,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>78992F6A</checksum>
+      <checksum>F4FBAF99</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -241,40 +241,22 @@
       <checksum>56DDA6EC</checksum>
     </file>
     <file>
-      <filename>simple_rates/Average_retail_price_of_electricity.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>02EEEF39</checksum>
-    </file>
-    <file>
       <filename>simple_rates/HouseholdConsumption.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>0BEECB93</checksum>
     </file>
     <file>
-      <filename>simple_rates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C5FFF659</checksum>
-    </file>
-    <file>
-      <filename>simple_rates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8C00508D</checksum>
-    </file>
-    <file>
-      <filename>simple_rates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>614B155F</checksum>
-    </file>
-    <file>
       <filename>simple_rates/README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7832E08F</checksum>
+      <checksum>5345F62B</checksum>
+    </file>
+    <file>
+      <filename>simple_rates/pr_all_update.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9107C0E8</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
@@ -322,7 +304,7 @@
       <filename>test_report_utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E597FDF5</checksum>
+      <checksum>38E1AD3D</checksum>
     </file>
   </files>
 </measure>
