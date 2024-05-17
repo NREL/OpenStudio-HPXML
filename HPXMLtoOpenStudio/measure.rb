@@ -185,9 +185,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
-
                                            output_path: File.join(args[:output_dir], in_schedules_csv),
-                                           offset_db: hpxml.header.geb_onoff_thermostat_deadband))
+                                           offset_db: hpxml.header.geb_onoff_thermostat_deadband)
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
                                                                              design_load_details_output_file_path: design_load_details_output_file_path,
                                                                              output_format: args[:output_format])
