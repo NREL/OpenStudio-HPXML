@@ -119,7 +119,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
-                            'hvac-geb-timestep-ten-mins' => ['Expected SoftwareInfo/extension/SimulationControl/Timestep to be 1.0'],
+                            'hvac-geb-timestep-ten-mins' => ['Expected ../Timestep to be 1.0'],
                             'hvac-geb-onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
@@ -416,24 +416,24 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[-1].primary_heating_system = false
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-geb-timestep-ten-mins'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
-        hpxml_bldg.header.geb_backup_heating_capacity_increment = 5000
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml.header.geb_backup_heating_capacity_increment = 5000
         hpxml.header.timestep = 10
       elsif ['hvac-geb-onoff-thermostat-heat-load-fraction'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
       elsif ['hvac-geb-onoff-thermostat-cool-load-fraction'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
       elsif ['hvac-geb-onoff-thermostat-negative-value'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
-        hpxml_bldg.header.geb_onoff_thermostat_deadband = -1.0
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml.header.geb_onoff_thermostat_deadband = -1.0
       elsif ['hvac-geb-onoff-thermostat-wrong-cooling-system-type'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
         hpxml_bldg.heat_pumps[0].compressor_type = nil
       elsif ['hvac-geb-onoff-thermostat-two-heat-pumps'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
         hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
         hpxml_bldg.heat_pumps << hpxml_bldg.heat_pumps[0].dup
@@ -932,7 +932,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
         hpxml_bldg.air_infiltration_measurements[0].infiltration_type = HPXML::InfiltrationTypeUnitExterior
       elsif ['hvac-geb-onoff-thermostat-temperature-capacitance-multiplier-one'].include? warning_case
-        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
         hpxml.header.temperature_capacitance_multiplier = 1
       elsif ['plug-load-type-sauna'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
@@ -1014,6 +1014,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
+                            'hvac-geb-onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems.'],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported."],
                             'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' and cooling system 'CoolingSystem1' are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
@@ -1206,6 +1207,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heating_systems << hpxml_bldg.heating_systems[0].dup
         hpxml_bldg.heating_systems[1].id = "HeatingSystem#{hpxml_bldg.heating_systems.size}"
         hpxml_bldg.heating_systems[0].primary_system = false
+      elsif ['hvac-geb-onoff-thermostat-num-speeds-greater-than-two'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['hvac-gshp-invalid-bore-depth-autosized'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.site.ground_conductivity = 0.1
@@ -1537,7 +1541,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'duct-lto-percent' => ['Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.'],
                               'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
-                              'hvac-geb-onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems. Simulation continues without on-off thermostat deadband control.'],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
@@ -1693,14 +1696,11 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-setpoint-adjustments-daily-schedules'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-setpoints-daily-schedules.xml')
         hpxml_bldg.hvac_controls[0].weekday_heating_setpoints = '64, 64, 64, 64, 64, 64, 64, 76, 70, 66, 66, 66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 64, 64'
-      elsif ['hvac-geb-onoff-thermostat-num-speeds-greater-than-two'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
-        hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['multistage-backup-more-than-4-stages'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-multistage-backup.xml')
-        hpxml_bldg.header.geb_backup_heating_capacity_increment = 5000
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
+        hpxml.header.geb_backup_heating_capacity_increment = 5000
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning

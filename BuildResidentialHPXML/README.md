@@ -193,6 +193,32 @@ Research feature to select the type of defrost model. Use standard for default E
 
 <br/>
 
+**Simulation Control: HVAC GEB On-Off Thermostat Deadband**
+
+On-off thermostat deadband for hvac systems. Only applies to single speed or two speed air source HVAC systems.
+
+- **Name:** ``simulation_control_geb_onoff_thermostat_deadband``
+- **Type:** ``Double``
+
+- **Units:** ``deg-F``
+
+- **Required:** ``false``
+
+<br/>
+
+**Simulation Control: HVAC GEB Backup Heating Capacity Increment**
+
+Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is 'integrated' and Backup Fuel Type is 'electricity'.
+
+- **Name:** ``simulation_control_geb_backup_heating_capacity_increment``
+- **Type:** ``Double``
+
+- **Units:** ``deg-F``
+
+- **Required:** ``false``
+
+<br/>
+
 **Site: Type**
 
 The type of site. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.7.0/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
@@ -2402,19 +2428,6 @@ The temperature above which the heat pump backup system is disabled. If both thi
 - **Type:** ``Double``
 
 - **Units:** ``deg-F``
-
-- **Required:** ``false``
-
-<br/>
-
-**Heat Pump: Backup Heating Capacity Increment**
-
-Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is 'integrated' and Backup Fuel Type is 'electricity'.
-
-- **Name:** ``heat_pump_backup_heating_capacity_increment``
-- **Type:** ``Double``
-
-- **Units:** ``Btu/hr``
 
 - **Required:** ``false``
 

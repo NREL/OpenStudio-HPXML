@@ -516,7 +516,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   end
 
   def test_air_to_air_heat_pump_multistage_backup_system
-    ['base-hvac-air-to-air-heat-pump-1-speed-geb-multistage-backup.xml',
+    ['base-hvac-air-to-air-heat-pump-1-speed-geb.xml',
      'base-hvac-air-to-air-heat-pump-2-speed-geb-multistage-backup.xml',
      'base-hvac-air-to-air-heat-pump-var-speed-geb-multistage-backup.xml'].each do |hpxml_path|
       args_hash = {}
@@ -780,8 +780,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_1_speed_geb_onoff_thermostat
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-geb.xml'))
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
@@ -792,10 +792,10 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
 
     # Check supp heating coil
-    assert_equal(1, model.getCoilHeatingElectrics.size)
+    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
 
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml_bldg.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
@@ -807,36 +807,28 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Onoff thermostat with detailed setpoints
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-geb-onoff-detailed-setpoints.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-geb-onoff-detailed-setpoints.xml'))
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
 
-    # Check heating coil
-    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
-    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-
-    # Check supp heating coil
-    assert_equal(1, model.getCoilHeatingElectrics.size)
-
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml_bldg.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_onoff_thermostat_EMS(model, htg_coil, 0.694, 0.474, -0.168, 2.185, -1.943, 0.757)
-    _check_onoff_thermostat_EMS(model, clg_coil, 0.719, 0.418, -0.137, 1.143, -0.139, -0.00405)
+    _check_onoff_thermostat_EMS(model, clg_coil, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
   end
 
   def test_air_to_air_heat_pump_2_speed_geb_onoff_thermostat
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml'))
-    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
@@ -850,7 +842,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingElectrics.size)
 
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml_bldg.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
@@ -1764,7 +1756,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     return program_values
   end
 
-<<<<<<< HEAD
   def _check_onoff_thermostat_EMS(model, clg_or_htg_coil, c1_cap, c2_cap, c3_cap, c1_eir, c2_eir, c3_eir)
     # Check max power ratio EMS
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{clg_or_htg_coil.name} cycling degradation program", true)
@@ -1777,7 +1768,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Other equations to complicated to check (contains functions, variables, or "()")
 
     return program_values
-=======
+  end
+
   def _check_advanced_defrost(model, htg_coil, supp_design_level, supp_delivered_htg, backup_fuel, defrost_time_fraction, defrost_power)
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
 
@@ -1803,7 +1795,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} defrost program")
     assert_in_epsilon(program_values['supp_design_level'].sum, supp_design_level, 0.01)
     assert_in_epsilon(program_values['supp_delivered_htg'].sum, supp_delivered_htg, 0.01)
->>>>>>> 9c7249b0671da06bcc0e2fb59cf4a30c8dea933a
   end
 
   def _create_hpxml(hpxml_name)

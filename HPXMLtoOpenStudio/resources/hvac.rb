@@ -17,9 +17,12 @@ class HVAC
     if (not cooling_system.nil?)
       is_onoff_thermostat_ddb = hpxml_header.geb_onoff_thermostat_deadband.to_f > 0.0
       # Error-checking
-      # Only availabe with single speed or two speed systems, not throwing error/warning since the input is at hpxml level
       if is_onoff_thermostat_ddb
-        is_onoff_thermostat_ddb = false unless [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type
+        if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type
+          is_onoff_thermostat_ddb = false
+          # Throw error and stop simulation, because the setpoint schedule is already shifted, user will get wrong results otherwise.
+          runner.registerError('On-off thermostat deadband currently is only supported for single speed or two speed air source systems.')
+        end
       end
     else
       is_onoff_thermostat_ddb = false
@@ -2721,7 +2724,6 @@ class HVAC
   end
 
   def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, defrost_model_type, p_dot_defrost, is_ddb_control = false)
-
     htg_ap = heating_system.additional_properties
 
     if heating_system.heating_detailed_performance_data.empty?
@@ -2878,7 +2880,7 @@ class HVAC
   end
 
   def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
-    actuator = model.getEnergyManagementSystemActuators.find{|act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_')}
+    actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') }
 
     return actuator unless actuator.nil?
 
@@ -3088,7 +3090,7 @@ class HVAC
       backup_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, backup_coil_energy)
       backup_energy_trend.setName("#{backup_coil_energy.name} Trend")
       backup_energy_trend.setNumberOfTimestepsToBeLogged(1)
-      
+
       supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     end
     # Sensors
@@ -3452,7 +3454,7 @@ class HVAC
     backup_coil_htg_rate.setKeyName(htg_supp_coil.name.get)
 
     # Need to use availability actuator because there's a bug in E+ that didn't handle the speed level = 0 correctly.See: https://github.com/NREL/EnergyPlus/pull/9392#discussion_r1578624175
-    
+
     supp_coil_avail_act = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
 
     # Trend variable

@@ -126,7 +126,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_geb_onoff_thermostat_deadband', false)
     arg.setDisplayName('Simulation Control: HVAC GEB On-Off Thermostat Deadband')
-    arg.setDescription("On-off thermostat deadband for hvac systems. Only applies to single speed or two speed air source HVAC systems.")
+    arg.setDescription('On-off thermostat deadband for hvac systems. Only applies to single speed or two speed air source HVAC systems.')
     arg.setUnits('deg-F')
     args << arg
 
@@ -4048,21 +4048,21 @@ class HPXMLFile
       end
       hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
     end
-    
+
     if not args[:simulation_control_geb_onoff_thermostat_deadband].nil?
-      if (not hpxml.header.geb_onoff_thermostat_deadband.nil?) && (hpxml.header.geb_onoff_thermostat_deadband!= args[:simulation_control_geb_onoff_thermostat_deadband])
+      if (not hpxml.header.geb_onoff_thermostat_deadband.nil?) && (hpxml.header.geb_onoff_thermostat_deadband != args[:simulation_control_geb_onoff_thermostat_deadband])
         errors << "'Simulation Control: HVAC GEB On-Off Thermostat Deadband' cannot vary across dwelling units."
       end
       hpxml.header.geb_onoff_thermostat_deadband = args[:simulation_control_geb_onoff_thermostat_deadband]
     end
 
     if not args[:simulation_control_geb_backup_heating_capacity_increment].nil?
-      if (not hpxml.header.geb_backup_heating_capacity_increment.nil?) && (hpxml.header.geb_backup_heating_capacity_increment!= args[:simulation_control_geb_backup_heating_capacity_increment])
+      if (not hpxml.header.geb_backup_heating_capacity_increment.nil?) && (hpxml.header.geb_backup_heating_capacity_increment != args[:simulation_control_geb_backup_heating_capacity_increment])
         errors << "'Simulation Control: HVAC GEB Backup Heating Capacity Increment' cannot vary across dwelling units."
       end
       hpxml.header.geb_backup_heating_capacity_increment = args[:simulation_control_geb_backup_heating_capacity_increment]
     end
-    
+
     if not args[:emissions_scenario_names].nil?
       emissions_scenario_names = args[:emissions_scenario_names].split(',').map(&:strip)
       emissions_types = args[:emissions_types].split(',').map(&:strip)
