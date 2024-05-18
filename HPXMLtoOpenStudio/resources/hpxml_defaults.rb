@@ -20,7 +20,7 @@ class HPXMLDefaults
 
     add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
-    apply_header(hpxml.header, epw_file)
+    apply_header(hpxml.header, epw_file, hpxml_bldg)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
@@ -134,7 +134,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_header(hpxml_header, epw_file)
+  def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -171,6 +171,11 @@ class HPXMLDefaults
     if hpxml_header.temperature_capacitance_multiplier.nil?
       hpxml_header.temperature_capacitance_multiplier = 1.0
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml_header.defrost_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type })
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
     end
 
     hpxml_header.unavailable_periods.each do |unavailable_period|
