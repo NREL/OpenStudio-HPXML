@@ -35,33 +35,11 @@ Generates output file containing annual utility bills.
 
 <br/>
 
-**Report Annual Utility Bills**
-
-Reports annual utility bills.
-
-- **Name:** ``report_annual_bills``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
 **Generate Monthly Utility Bills**
 
 Generates output file containing monthly utility bills.
 
 - **Name:** ``include_monthly_bills``
-- **Type:** ``Boolean``
-
-- **Required:** ``false``
-
-<br/>
-
-**Report Monthly Utility Bills**
-
-Reports monthly utility bills.
-
-- **Name:** ``report_monthly_bills``
 - **Type:** ``Boolean``
 
 - **Required:** ``false``
@@ -98,6 +76,28 @@ If not provided, defaults to 'results_bills_monthly.csv' (or 'results_bills_mont
 
 - **Name:** ``monthly_output_file_name``
 - **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Register Annual Utility Bills**
+
+Registers annual utility bills with the OpenStudio runner for downstream processing.
+
+- **Name:** ``register_annual_bills``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
+**Register Monthly Utility Bills**
+
+Registers monthly utility bills with the OpenStudio runner for downstream processing.
+
+- **Name:** ``register_monthly_bills``
+- **Type:** ``Boolean``
 
 - **Required:** ``false``
 

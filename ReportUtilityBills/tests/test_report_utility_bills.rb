@@ -1163,7 +1163,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def _bill_calcs(fuels, header, hpxml_buildings, utility_bill_scenario)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    args = { output_format: 'csv', include_annual_bills: true, report_annual_bills: true, include_monthly_bills: true, report_monthly_bills: true }
+    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true, register_annual_bills: true, register_monthly_bills: true }
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
     monthly_fee = @measure.get_monthly_fee(utility_bill_scenario, hpxml_buildings)
