@@ -469,10 +469,12 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
     assert_in_delta(865, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
-    # assert_in_delta(825, hpxml_bldg.hvac_plant.cdl_sens_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_in_delta(825, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(5541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
     assert_in_delta(655, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
-    # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infilvent, block_tol_btuh) Skip due to dehumidifying ventilation
+    # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh) Skip due to dehumidifying ventilation
+    assert_in_delta(1938, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # Fixme: Skylight not included so disable for now
