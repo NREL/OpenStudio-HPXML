@@ -71,6 +71,7 @@ __New Features__
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
   - TV plug load schedules now use TV schedule fractions from the American Time Use Survey and monthly multipliers from the 2010 Building America Analysis Spreadsheets.
   - Ceiling fan schedules now use ceiling fan schedule fractions and monthly multipliers from ANSI/RESNET/ICC 301-2022 Addendum C.
+- ReportUtilityBills measure: adds new optional arguments for registering (with the OpenStudio runner) annual or monthly utility bills.
 
 __Bugfixes__
 - Fixes error if using AllowIncreasedFixedCapacities=true w/ HP detailed performance data.
