@@ -496,6 +496,13 @@ class Constants
   # TODO
   #
   # @return [TODO] TODO
+  def self.ObjectNameBackupSuppHeat
+    return 'back up supp heat'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.ObjectNameMiscGrill
     return 'misc grill'
   end

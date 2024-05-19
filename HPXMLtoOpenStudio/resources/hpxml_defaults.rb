@@ -32,7 +32,7 @@ class HPXMLDefaults
 
     add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
-    apply_header(hpxml.header, epw_file)
+    apply_header(hpxml.header, epw_file, hpxml_bldg)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
@@ -164,8 +164,9 @@ class HPXMLDefaults
   #
   # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
   # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
   # @return [TODO] TODO
-  def self.apply_header(hpxml_header, epw_file)
+  def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -202,6 +203,11 @@ class HPXMLDefaults
     if hpxml_header.temperature_capacitance_multiplier.nil?
       hpxml_header.temperature_capacitance_multiplier = 1.0
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml_header.defrost_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type })
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
     end
 
     hpxml_header.unavailable_periods.each do |unavailable_period|
@@ -295,7 +301,7 @@ class HPXMLDefaults
 
     sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_latent.nil?
-      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent = sum_space_manualj_internal_loads_latent # Btuh
       hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
     end
     if sum_space_manualj_internal_loads_latent == 0
