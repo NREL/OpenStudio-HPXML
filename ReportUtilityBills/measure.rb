@@ -453,7 +453,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
       runner.registerInfo("Wrote monthly bills output to #{monthly_output_path}.")
     end
-    
+
     return unless args[:register_monthly_bills]
 
     monthly_data.each do |col|
