@@ -5,6 +5,8 @@ require 'matrix'
 
 class ScheduleGenerator
   def initialize(runner:,
+                 hpxml_bldg:,
+                 weather:,
                  state:,
                  column_names: nil,
                  random_seed: nil,
@@ -19,6 +21,8 @@ class ScheduleGenerator
                  append_output:,
                  **)
     @runner = runner
+    @hpxml_bldg = hpxml_bldg
+    @weather = weather
     @state = state
     @column_names = column_names
     @random_seed = random_seed
@@ -583,7 +587,33 @@ class ScheduleGenerator
     fixtures_peak_flow = @schedules[SchedulesFile::Columns[:HotWaterFixtures].name].max
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = @schedules[SchedulesFile::Columns[:HotWaterFixtures].name].map { |flow| flow / fixtures_peak_flow }
 
+    @schedules[SchedulesFile::Columns[:HeatingSetpoint].name], @schedules[SchedulesFile::Columns[:CoolingSetpoint].name] = get_heating_cooling_setpoint_schedule
     return true
+  end
+
+  def get_heating_cooling_setpoint_schedule()
+    clg_weekday_setpoints, clg_weekend_setpoints, htg_weekday_setpoints, htg_weekend_setpoints = get_heating_cooling_weekday_weekend_setpoints
+
+    heating_setpoints = []
+    cooling_setpoints = []
+
+    @total_days_in_year.times do |day|
+      today = @sim_start_day + day
+      day_of_week = today.wday
+      if [0, 6].include?(day_of_week)
+        heating_setpoint_sch = htg_weekend_setpoints
+        cooling_setpoint_sch = clg_weekend_setpoints
+      else
+        heating_setpoint_sch = htg_weekday_setpoints
+        cooling_setpoint_sch = clg_weekday_setpoints
+      end
+      @steps_in_day.times do |step|
+        hour = (step * @minutes_per_step) / 60
+        heating_setpoints << heating_setpoint_sch[day][hour]
+        cooling_setpoints << cooling_setpoint_sch[day][hour]
+      end
+    end
+    return heating_setpoints, cooling_setpoints
   end
 
   def aggregate_array(array, group_size)
@@ -932,5 +962,30 @@ class ScheduleGenerator
     end
 
     return lighting_sch
+  end
+
+  def get_heating_cooling_weekday_weekend_setpoints
+    hvac_control = @hpxml_bldg.hvac_controls[0]
+    has_ceiling_fan = (@hpxml_bldg.ceiling_fans.size > 0)
+    cooling_days, heating_days = get_heating_cooling_days(hvac_control)
+    hvac_control = @hpxml_bldg.hvac_controls[0]
+    htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_heating_setpoints(hvac_control, @sim_year, return_in_celsius: false)
+    clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_cooling_setpoints(hvac_control, has_ceiling_fan, @sim_year, @weather, return_in_celsius: false)
+    htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = HVAC.create_setpoint_schedules(@runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, @sim_year)
+    return clg_weekday_setpoints, clg_weekend_setpoints, htg_weekday_setpoints, htg_weekend_setpoints
+  end
+
+  def get_heating_cooling_days(hvac_control)
+    htg_start_month = hvac_control.seasons_heating_begin_month || 1
+    htg_start_day = hvac_control.seasons_heating_begin_day || 1
+    htg_end_month = hvac_control.seasons_heating_end_month || 12
+    htg_end_day = hvac_control.seasons_heating_end_day || 31
+    clg_start_month = hvac_control.seasons_cooling_begin_month || 1
+    clg_start_day = hvac_control.seasons_cooling_begin_day || 1
+    clg_end_month = hvac_control.seasons_cooling_end_month || 12
+    clg_end_day = hvac_control.seasons_cooling_end_day || 31
+    heating_days = Schedule.get_daily_season(@sim_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    cooling_days = Schedule.get_daily_season(@sim_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    return cooling_days, heating_days
   end
 end

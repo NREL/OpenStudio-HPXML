@@ -988,7 +988,7 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
   end
 
-  def self.get_heating_setpoints(hvac_control, year)
+  def self.get_heating_setpoints(hvac_control, year, return_in_celsius = true)
     num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
@@ -1014,14 +1014,15 @@ class HVAC
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
       htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
-
-    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    if return_in_celsius
+      htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+      htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    end
 
     return htg_weekday_setpoints, htg_weekend_setpoints
   end
 
-  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, return_in_celsius = true)
     num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
@@ -1061,8 +1062,10 @@ class HVAC
       end
     end
 
-    clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    if return_in_celsius
+      clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+      clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    end
 
     return clg_weekday_setpoints, clg_weekend_setpoints
   end

@@ -241,6 +241,34 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert(!schedule_file_names.include?('Power Outage'))
   end
 
+  def test_setpoint_schedules
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-setpoints.xml'))
+    model, hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    schedule_file_names = []
+    model.getScheduleFiles.each do |schedule_file|
+      schedule_file_names << "#{schedule_file.name}"
+    end
+    assert_equal(2, schedule_file_names.size)
+
+    schedules_paths = hpxml_bldg.header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(args_hash['hpxml_path']),
+                          'Schedules')
+    }
+
+    sf = SchedulesFile.new(schedules_paths: schedules_paths,
+                           year: @year,
+                           unavailable_periods: hpxml.header.unavailable_periods,
+                           output_path: @tmp_schedule_file_path)
+    assert sf.tmp_schedules['heating_setpoint'].size == 8760
+    assert sf.tmp_schedules['cooling_setpoint'].size == 8760
+    expected_range = 10.0..32.2 # 50°F to 90°F in Celsius
+    sf.tmp_schedules['heating_setpoint'].each { |s| assert expected_range.include?(s), "Heating setpoint #{s} out of range!" }
+    sf.tmp_schedules['cooling_setpoint'].each { |s| assert expected_range.include?(s), "Cooling setpoint #{s} out of range!" }
+  end
+
   def test_stochastic_vacancy_schedules
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-schedules-detailed-occupancy-stochastic-vacancy.xml'))
