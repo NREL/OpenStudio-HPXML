@@ -58,13 +58,13 @@ class UtilityBills
       HPXML::FuelTypeWoodPellets => 'WDRCD'
     }
     unit_conv = {
-      HPXML::FuelTypeElectricity => 0.003412, # convert $/MMBtu to $/kWh
-      HPXML::FuelTypeNaturalGas => 0.1, # convert $/MMBtu to $/therms
-      HPXML::FuelTypeOil => 0.139, # convert $/MMBtu to $/gallons of oil
-      HPXML::FuelTypePropane => 0.0916, # convert $/MMBtu to $/gallons of propane
-      HPXML::FuelTypeCoal => 1, # $/MMBtu
-      HPXML::FuelTypeWoodCord => 1, # $/MMBtu
-      HPXML::FuelTypeWoodPellets => 1 # $/MMBtu
+      HPXML::FuelTypeElectricity => 'kwh', # convert $/MBtu to $/kWh
+      HPXML::FuelTypeNaturalGas => 'therm', # convert $/MBtu to $/therm
+      HPXML::FuelTypeOil => 'gal_fuel_oil', # convert $/MBtu to $/gallons of oil
+      HPXML::FuelTypePropane => 'gal_propane', # convert $/MBtu to $/gallons of propane
+      HPXML::FuelTypeCoal => 'mbtu', # $/MBtu
+      HPXML::FuelTypeWoodCord => 'mbtu', # $/MBtu
+      HPXML::FuelTypeWoodPellets => 'mbtu' # $/MBtu
     }
 
     rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'))
@@ -79,7 +79,9 @@ class UtilityBills
         seds_rate = row[-2] if seds_rate.nil? # If the rate for the latest year is unavailable, use the rate from the previous year.
       end
 
-      return Float(seds_rate) * unit_conv[fuel_type]
+      seds_rate = UnitConversions.convert(Float(seds_rate), unit_conv[fuel_type], 'mbtu')
+
+      return seds_rate
     end
   end
 end
