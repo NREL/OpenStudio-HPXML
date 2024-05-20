@@ -67,18 +67,17 @@ class UtilityBills
       HPXML::FuelTypeWoodPellets => 'mbtu' # $/MBtu
     }
 
-    rows = CSV.read(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'))
-    rows.each do |row|
-      next if row[1].upcase != state_code.upcase # State
-      next if row[2].upcase != msn_code_map[fuel_type] # EIA SEDS MSN code
+    CSV.foreach(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'), :headers => true) do |row|
+      next if row['State'].upcase != state_code.upcase # State
+      next if row['MSN'].upcase != msn_code_map[fuel_type] # EIA SEDS MSN code
 
       if fuel_type == HPXML::FuelTypeCoal
-        seds_rate = row[40] # Use 2007 prices for coal. For 2008 forward, EIA assumes there is zero residential sector coal consumption in the United States, and SEDS does not estimate a price.
+        seds_rate = row['2007'] # Use 2007 prices for coal. For 2008 forward, EIA assumes there is zero residential sector coal consumption in the United States, and SEDS does not estimate a price.
       else
         seds_rate = row[-1]
         seds_rate = row[-2] if seds_rate.nil? # If the rate for the latest year is unavailable, use the rate from the previous year.
       end
-
+      puts state_code, msn_code_map[fuel_type], seds_rate
       seds_rate = UnitConversions.convert(Float(seds_rate), unit_conv[fuel_type], 'mbtu')
 
       return seds_rate
