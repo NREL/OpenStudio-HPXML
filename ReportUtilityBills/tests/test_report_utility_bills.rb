@@ -1163,7 +1163,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def _bill_calcs(fuels, header, hpxml_buildings, utility_bill_scenario)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true }
+    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true, register_annual_bills: true, register_monthly_bills: true }
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
     monthly_fee = @measure.get_monthly_fee(utility_bill_scenario, hpxml_buildings)
@@ -1178,8 +1178,6 @@ class ReportUtilityBillsTest < Minitest::Test
     assert(File.exist?(@bills_csv))
     actual_bills = _get_actual_bills(@bills_csv)
 
-    _check_for_runner_registered_values(runner, nil, actual_bills)
-
     # Monthly
     timestamps = (1..12).to_a
     monthly_data = []
@@ -1190,6 +1188,8 @@ class ReportUtilityBillsTest < Minitest::Test
     # Check written values exist
     assert(File.exist?(@bills_monthly_csv))
     actual_monthly_bills = _get_actual_monthly_bills(@bills_monthly_csv)
+
+    _check_for_runner_registered_values(runner, nil, actual_bills, actual_monthly_bills)
 
     return actual_bills, actual_monthly_bills
   end
@@ -1293,7 +1293,7 @@ class ReportUtilityBillsTest < Minitest::Test
     return actual_monthly_bills
   end
 
-  def _check_for_runner_registered_values(runner, results_json, actual_bills)
+  def _check_for_runner_registered_values(runner, results_json, actual_bills, actual_monthly_bills = [])
     if !runner.nil?
       runner_bills = {}
       runner.result.stepValues.each do |step_value|
@@ -1310,6 +1310,15 @@ class ReportUtilityBillsTest < Minitest::Test
 
       assert_includes(runner_bills.keys, name)
       assert_equal(value, runner_bills[name])
+    end
+
+    return if actual_monthly_bills.empty?
+
+    actual_monthly_bills.each do |name, values|
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      assert_includes(runner_bills.keys, name)
+      assert_in_delta(values.sum, runner_bills[name], 0.1) # within 10 cents
     end
   end
 end
