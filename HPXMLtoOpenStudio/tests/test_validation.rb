@@ -1050,8 +1050,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'storm-windows-unexpected-window-ufactor' => ['Unexpected base window U-Factor (0.33) for a storm window.'],
-                            'surface-attached-to-uncond-space' => ["Surface 'Wall2' is attached to the space of an unconditioned zone."],
-                            'surface-attached-to-uncond-space2' => ["Surface 'Slab2' is attached to the space of an unconditioned zone."],
+                            'surface-attached-to-uncond-space' => ["Surface 'Wall2Space2' is attached to the space of an unconditioned zone."],
+                            'surface-attached-to-uncond-space2' => ["Surface 'Slab2Space4' is attached to the space of an unconditioned zone."],
                             'unattached-cfis' => ["Attached HVAC distribution system 'foobar' not found for ventilation fan 'VentilationFan1'."],
                             'unattached-door' => ["Attached wall 'foobar' not found for door 'Door1'."],
                             'unattached-gshp' => ["Attached geothermal loop 'foobar' not found for heat pump 'HeatPump1'."],
@@ -1448,10 +1448,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.windows[0].storm_type = 'clear'
       elsif ['surface-attached-to-uncond-space'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.walls[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
+        hpxml_bldg.walls[-1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
       elsif ['surface-attached-to-uncond-space2'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.slabs[1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
+        hpxml_bldg.slabs[-1].attached_to_space_idref = hpxml_bldg.zones.find { |zone| zone.zone_type != HPXML::ZoneTypeConditioned }.spaces[0].id
       elsif ['unattached-cfis'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
@@ -1724,20 +1724,17 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['manualj-sum-space-internal-loads-sensible'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_sensible = 1000.0
-        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_sensible = 1200.0
+        hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
+          space.manualj_internal_loads_sensible = (i == 0 ? 1200.0 : 0)
+        end
       elsif ['manualj-sum-space-internal-loads-latent'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.header.manualj_internal_loads_latent = 200.0
-        hpxml_bldg.conditioned_spaces[0].manualj_internal_loads_latent = 100.0
-      elsif ['multiple-conditioned-zone'].include? warning_case
-        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.zones.add(id: 'ConditionedZoneDup',
-                             zone_type: HPXML::ZoneTypeConditioned)
-        hpxml_bldg.zones[-1].spaces << hpxml_bldg.zones[0].spaces[0].dup
-        hpxml_bldg.zones[-1].spaces[-1].id += 'Dup'
-        hpxml_bldg.conditioned_spaces.each do |space|
-          space.floor_area /= 2.0
+        hpxml_bldg.conditioned_spaces.each_with_index do |space, i|
+          space.manualj_internal_loads_latent = (i == 0 ? 100.0 : 0)
         end
+      elsif ['multiple-conditioned-zone'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces-multiple.xml')
       elsif ['power-outage'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
