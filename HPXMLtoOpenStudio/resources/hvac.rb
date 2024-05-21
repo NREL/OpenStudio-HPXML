@@ -2993,7 +2993,8 @@ class HVAC
       p_atm = UnitConversions.convert(1, 'atm', 'psi')
 
       ao = Psychrometrics.CoilAoFactor(runner, dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
-
+      
+      clg_ap.a_o = ao
       clg_ap.cool_rated_shrs_gross = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
         # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors

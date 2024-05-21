@@ -1717,18 +1717,16 @@ class HVACSizing
       # such as different indoor/outdoor coil combinations and different blower settings.
       # Ductless systems don't offer this flexibility.
 
-      #per E+ docs, cap, SHR and COP inputs should be “gross” values
+      #per E+ docs, capacity and SHR inputs should be “gross” values
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
-      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
         #ADP/BF specified for Coil:Cooling:DX:SingleSpeed, but should be implemented for all coils
         #rated total capacity and rated SHR are used to calculate coil bypass factor constant A_o at rated conditions
         #once A_o is determined, the BF at design conditions can be calculated and used to determine the design SHR
-        #last step is to calculate sensible capacity at design conditions using design_shr
-        hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]   
+        #last step is to calculate sensible capacity at design conditions using design_shr   
 
-      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
         odb_adj = adjust_outdoor_condition_var_speed(hvac_cooling.cooling_detailed_performance_data, entering_temp, hvac_cooling, :clg)
         total_cap_curve_value = odb_adj * idb_adj
@@ -1739,19 +1737,18 @@ class HVACSizing
 
       cool_cap_rated = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
 
-      hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
+      hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed] #same as net shr per comments in hvac.rb, see set_cool_rated_shrs_gross for details
       sens_cap_rated = cool_cap_rated * hvac_cooling_shr
 
       # Calculate the air flow rate required for design conditions
-      hvac_sizing_values.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizing_values.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
       #units of Cool_Airflow are cfm
       #calculate rated coil bypass factor HERE, then use rated BF --> design BF --> design SHR --> design sensible capacity
 
-      cool_airflow_rated = UnitConversions.convert(cool_cap_rated, "Btu/hr", "tons")*hvac_cooling.additional_properties.cool_rated_cfm_per_ton[-1] #rated cfm, check whether cfm/ton is net or gross?
-
-      assert(h)
-
-      a_o = Psychometrics.CoilAoFactor(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated,"Btu/hr","kBtu/hr"), cool_airflow_rated, hvac_cooling_shr, hr_indoor_cooling)
+      cool_airflow_rated = UnitConversions.convert(cool_cap_rated, 'Btu/hr', 'ton')*hvac_cooling.additional_properties.cool_rated_cfm_per_ton[-1] #rated cfm, check whether cfm/ton is net or gross?
+      #following Calculate max rated cfm section in hvac.rb, which sets rated airflow to the product of detailed performance capacity and the last element of cool_rated_cfm_per_ton array
+      #for base.xml, cool_airflow_rated = 705.6 cfm and hvac_sizings.Cool_Airflow = 715.96 cfm
+      #assuming hvac_sizings.Cool_Airflow is the design airflow rate, inferred from comments in calc_airflow_rate_manual_s code
       #note: using MJ cooling setpoint as EDB ignores return duct losses
 
       m_dot_design = UnitConversions.convert(Psychometrics.CalculateMassflowRate(mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), hvac_sizing_values.Cool_Airflow, hr_indoor_cooling), 'lbm/min', 'kg/s') #cooling design air flow rate
