@@ -43,6 +43,8 @@
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:BeginDayOfMonth) = 0'>DaylightSaving/BeginDayOfMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTBeginDayOfMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:EndMonth) = 0'>DaylightSaving/EndMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTEndMonth</sch:assert>
       <sch:assert role='ERROR' test='count(h:DaylightSaving/h:EndDayOfMonth) = 0'>DaylightSaving/EndDayOfMonth has been replaced by /HPXML/Building/Site/TimeZone/extension/DSTEndDayOfMonth</sch:assert>
+      <!-- Moved/deprecated TemperatureCapacitanceMultiplier input; see https://github.com/NREL/OpenStudio-HPXML/pull/1674 -->
+      <sch:assert role='ERROR' test='count(h:TemperatureCapacitanceMultiplier) = 0'>TemperatureCapacitanceMultiplier has been replaced by AdvancedResearchFeatures/TemperatureCapacitanceMultiplier</sch:assert>
     </sch:rule>
   </sch:pattern>
 
