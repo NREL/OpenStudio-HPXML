@@ -72,7 +72,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test - with geb onoff thermostat
     # Test inputs not overridden by defaults
-    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
     hpxml.header.timestep = 1
     hpxml.header.sim_begin_month = 2
     hpxml.header.sim_begin_day = 2
@@ -86,7 +86,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_header_values(default_hpxml, 1, 2, 2, 11, 11, 2009, 1.5, 3, 4, HPXML::ScheduleUnavailable)
 
     # geb default temperature capacitance multiplier and timestep
-    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb-onoff.xml')
+    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
     hpxml.header.timestep = nil
     hpxml.header.sim_begin_month = nil
     hpxml.header.sim_begin_day = nil

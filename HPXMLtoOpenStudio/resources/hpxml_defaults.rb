@@ -136,7 +136,7 @@ class HPXMLDefaults
 
   def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
     if hpxml_header.timestep.nil?
-      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?)
+      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?) || (not hpxml_header.geb_backup_heating_capacity_increment.nil?)
         hpxml_header.timestep = 1
       else
         hpxml_header.timestep = 60
