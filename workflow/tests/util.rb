@@ -1054,23 +1054,27 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   end
 
   # Compare annual and monthly results
-  assert_equal(annual_results_1x.keys.sort, annual_results_10x.keys.sort)
-  # FIXME: Temporarily disabled
-  # assert_equal(monthly_results_1x.keys.sort, monthly_results_10x.keys.sort)
-
   { annual_results_1x => annual_results_10x,
     monthly_results_1x => monthly_results_10x }.each do |results_1x, results_10x|
-    results_1x.each do |key, vals_1x|
+    keys = (results_1x.keys + results_10x.keys).uniq
+
+    keys.each do |key, vals_1x|
       abs_delta_tol, abs_frac_tol = get_tolerances(key)
 
+      vals_1x = results_1x[key]
       vals_10x = results_10x[key]
-      if vals_1x.is_a? Array
+      if vals_1x.is_a?(Array) || vals_10x.is_a?(Array)
         is_timeseries = true
+        vals_1x = [0.0] * vals_10x.size if vals_1x.nil?
+        vals_10x = [0.0] * vals_1x.size if vals_10x.nil?
       else
         is_timeseries = false
+        vals_1x = 0.0 if vals_1x.nil?
+        vals_10x = 0.0 if vals_10x.nil?
         vals_1x = [vals_1x]
         vals_10x = [vals_10x]
       end
+      assert_equal(vals_1x.size, vals_10x.size)
 
       vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
