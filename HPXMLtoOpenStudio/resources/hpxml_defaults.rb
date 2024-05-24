@@ -173,11 +173,7 @@ class HPXMLDefaults
     end
 
     if hpxml_header.temperature_capacitance_multiplier.nil?
-      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?)
-        hpxml_header.temperature_capacitance_multiplier = 7.0
-      else
-        hpxml_header.temperature_capacitance_multiplier = 1.0
-      end
+      hpxml_header.temperature_capacitance_multiplier = 7.0
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
     end
 
