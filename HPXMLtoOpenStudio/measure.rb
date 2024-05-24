@@ -2240,9 +2240,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       next if dehumidifier_name.nil?
 
       # Need to adjusted E+ EnergyTransfer meters for dehumidifier internal gains
-      # Since the dehumidifier runs last in the EquipmentList (so that it runs after any air conditioner dehumidification),
-      # the load it introduces isn't felt until the next timestep. So we need to use an EMS global variable to offset
-      # the dehumidifier load by one timestep.
+      # We also offset the dehumidifier load by one timestep so that it aligns with the EnergyTransfer meters.
 
       # Global Variable
       dehumidifier_global_vars[unit] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_#{dehumidifier_name}")
