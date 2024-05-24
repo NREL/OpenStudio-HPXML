@@ -2239,7 +2239,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       next if dehumidifier_name.nil?
 
-      # Need to adjusted E+ EnergyTransfer meters for dehumidifier internal gains
+      # Need to adjust E+ EnergyTransfer meters for dehumidifier internal gains.
       # We also offset the dehumidifier load by one timestep so that it aligns with the EnergyTransfer meters.
 
       # Global Variable
