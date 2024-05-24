@@ -2,7 +2,7 @@
 
 class UtilityBills
   def self.get_rates_from_eia_data(_runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
-    msn_codes = Constants.StateCodesMap.map { |x| x[0] }.uniq
+    msn_codes = Constants.StateCodesMap.keys
     msn_codes << 'US'
     return unless msn_codes.include? state_code # Check if the state_code is valid
 
