@@ -23,6 +23,11 @@ class HVAC
           # Throw error and stop simulation, because the setpoint schedule is already shifted, user will get wrong results otherwise.
           runner.registerError('On-off thermostat deadband currently is only supported for single speed or two speed air source systems.')
         end
+        if hpxml_bldg.building_construction.number_of_units > 1
+          is_onoff_thermostat_ddb = false
+          # Throw error and stop simulation
+          runner.registerError('On-off thermostat deadband currently is not supported with unit multiplier greater than 1.')
+        end
       end
     else
       is_onoff_thermostat_ddb = false
