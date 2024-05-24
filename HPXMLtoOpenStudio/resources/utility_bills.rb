@@ -78,7 +78,7 @@ class UtilityBills
         seds_rate = 0.0
         runner.registerWarning("No EIA SEDS rate for #{fuel_type} was found for the state of #{state_code}.") if not runner.nil?
       end
-      
+
       seds_rate = UnitConversions.convert(seds_rate, unit_conv[fuel_type], 'mbtu')
 
       return seds_rate
