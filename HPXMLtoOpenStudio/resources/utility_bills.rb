@@ -67,7 +67,7 @@ class UtilityBills
       HPXML::FuelTypeWoodPellets => 'mbtu' # $/MBtu
     }
 
-    CSV.foreach(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'), headers: true, skip_blanks: true) do |row|
+    CSV.foreach(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'), headers: true) do |row|
       next if row['State'].upcase != state_code.upcase # State
       next if row['MSN'].upcase != msn_code_map[fuel_type] # EIA SEDS MSN code
 
