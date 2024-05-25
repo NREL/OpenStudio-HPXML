@@ -311,6 +311,16 @@ class ReportUtilityBillsTest < Minitest::Test
     assert_nil(actual_bills)
   end
 
+  def test_warning_no_rates_for_coal_in_HI
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-coal.xml'))
+    hpxml.buildings[0].state_code = 'HI'
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    expected_warnings = ['No EIA SEDS rate for coal was found for the state of HI.']
+    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
+  end
+
   def test_warning_invalid_fixed_charge_units
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base.xml'))
