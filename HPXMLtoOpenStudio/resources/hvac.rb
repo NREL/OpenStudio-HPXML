@@ -19,14 +19,12 @@ class HVAC
       # Error-checking
       if is_onoff_thermostat_ddb
         if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type
-          is_onoff_thermostat_ddb = false
           # Throw error and stop simulation, because the setpoint schedule is already shifted, user will get wrong results otherwise.
           runner.registerError('On-off thermostat deadband currently is only supported for single speed or two speed air source systems.')
         end
         if hpxml_bldg.building_construction.number_of_units > 1
-          is_onoff_thermostat_ddb = false
           # Throw error and stop simulation
-          runner.registerError('On-off thermostat deadband currently is not supported with unit multiplier greater than 1.')
+          runner.registerError('NumberofUnits greater than 1 is not supported for on-off thermostat deadband.')
         end
       end
     else
@@ -162,7 +160,7 @@ class HVAC
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost, is_onoff_thermostat_ddb)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, hpxml_header.geb_backup_heating_capacity_increment, runner)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, hpxml_header.geb_backup_heating_capacity_increment, runner, hpxml_bldg)
       else
         # Heating Coil
         fan_cfms << htg_cfm
@@ -1908,7 +1906,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil, runner = nil)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil, runner = nil, hpxml_bldg = nil)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1920,6 +1918,10 @@ class HVAC
 
     backup_heating_capacity_increment = nil unless fuel == HPXML::FuelTypeElectricity
     if not backup_heating_capacity_increment.nil?
+      if hpxml_bldg.building_construction.number_of_units > 1
+        # Throw error and stop simulation
+        runner.registerError('NumberofUnits greater than 1 is not supported for multi-staging backup coil.')
+      end
       max_num_stages = 4
 
       num_stages = [(capacity / backup_heating_capacity_increment).ceil(), max_num_stages].min

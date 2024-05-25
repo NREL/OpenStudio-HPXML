@@ -1037,7 +1037,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-dse-multiple-attached-cooling' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-dse-multiple-attached-heating' => ["Multiple heating systems found attached to distribution system 'HVACDistribution1'."],
                             'hvac-geb-onoff-thermostat-num-speeds-greater-than-two' => ['On-off thermostat deadband currently is only supported for single speed or two speed air source systems.'],
-                            'hvac-geb-onoff-thermostat-num-unit-greater-than-one' => ['On-off thermostat deadband currently is not supported with unit multiplier greater than 1.'],
+                            'hvac-geb-onoff-thermostat-num-unit-greater-than-one' => ['NumberofUnits greater than 1 is not supported for on-off thermostat deadband.'],
+                            'hvac-geb-multistaging-backup-unit-greater-than-one' => ['NumberofUnits greater than 1 is not supported for multi-staging backup coil.'],
                             'hvac-gshp-invalid-num-bore-holes' => ["Number of bore holes (5) with borefield configuration 'Lopsided U' not supported."],
                             'hvac-inconsistent-fan-powers' => ["Fan powers for heating system 'HeatingSystem1' and cooling system 'CoolingSystem1' are attached to a single distribution system and therefore must be the same."],
                             'hvac-invalid-distribution-system-type' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
@@ -1256,6 +1257,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
       elsif ['hvac-geb-onoff-thermostat-num-unit-greater-than-one'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml_bldg.building_construction.number_of_units = 2
+      elsif ['hvac-geb-multistaging-backup-unit-greater-than-one'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-multistage-backup.xml')
         hpxml_bldg.building_construction.number_of_units = 2
       elsif ['hvac-gshp-invalid-bore-depth-autosized'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')

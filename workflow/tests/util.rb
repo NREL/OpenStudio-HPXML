@@ -55,6 +55,8 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         return
       elsif hpxml.header.geb_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
+      elsif hpxml.header.geb_backup_heating_capacity_increment
+        # multi-staging backup coil not supported with unit multiplier yet
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
