@@ -62,9 +62,9 @@ class UtilityBills
       HPXML::FuelTypeNaturalGas => 'therm', # convert $/MBtu to $/therm
       HPXML::FuelTypeOil => 'gal_fuel_oil', # convert $/MBtu to $/gallons of oil
       HPXML::FuelTypePropane => 'gal_propane', # convert $/MBtu to $/gallons of propane
-      HPXML::FuelTypeCoal => 'mbtu', # $/MBtu
-      HPXML::FuelTypeWoodCord => 'mbtu', # $/MBtu
-      HPXML::FuelTypeWoodPellets => 'mbtu' # $/MBtu
+      HPXML::FuelTypeCoal => 'kbtu', # convert $/MBtu to $/kBtu
+      HPXML::FuelTypeWoodCord => 'kbtu', # convert $/MBtu to $/kBtu
+      HPXML::FuelTypeWoodPellets => 'kbtu' # convert $/MBtu to $/kBtu
     }
 
     CSV.foreach(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'), headers: true) do |row|
@@ -78,7 +78,7 @@ class UtilityBills
         seds_rate = 0.0
         runner.registerWarning("No EIA SEDS rate for #{fuel_type} was found for the state of #{state_code}.") if not runner.nil?
       end
-      
+
       seds_rate = UnitConversions.convert(seds_rate, unit_conv[fuel_type], 'mbtu')
 
       return seds_rate
