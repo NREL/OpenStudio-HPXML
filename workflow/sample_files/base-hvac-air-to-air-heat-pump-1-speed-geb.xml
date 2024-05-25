@@ -11,7 +11,6 @@
       <SimulationControl>
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
-          <TemperatureCapacitanceMultiplier>7.0</TemperatureCapacitanceMultiplier>
           <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
           <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
         </AdvancedResearchFeatures>
