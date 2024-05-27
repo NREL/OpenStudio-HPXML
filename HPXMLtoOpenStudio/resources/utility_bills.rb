@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 class UtilityBills
+  def self.get_fuel_units(fuel_type)
+    return { HPXML::FuelTypeElectricity => 'kwh',
+             HPXML::FuelTypeNaturalGas => 'therm',
+             HPXML::FuelTypeOil => 'gal_fuel_oil',
+             HPXML::FuelTypePropane => 'gal_propane',
+             HPXML::FuelTypeCoal => 'kbtu',
+             HPXML::FuelTypeWoodCord => 'kbtu',
+             HPXML::FuelTypeWoodPellets => 'kbtu' }[fuel_type]
+  end
+
   def self.get_rates_from_eia_data(runner, state_code, fuel_type, fixed_charge, marginal_rate = nil)
     msn_codes = Constants.StateCodesMap.keys
     msn_codes << 'US'
@@ -57,15 +67,6 @@ class UtilityBills
       HPXML::FuelTypeWoodCord => 'WDRCD',
       HPXML::FuelTypeWoodPellets => 'WDRCD'
     }
-    unit_conv = {
-      HPXML::FuelTypeElectricity => 'kwh', # convert $/MBtu to $/kWh
-      HPXML::FuelTypeNaturalGas => 'therm', # convert $/MBtu to $/therm
-      HPXML::FuelTypeOil => 'gal_fuel_oil', # convert $/MBtu to $/gallons of oil
-      HPXML::FuelTypePropane => 'gal_propane', # convert $/MBtu to $/gallons of propane
-      HPXML::FuelTypeCoal => 'kbtu', # convert $/MBtu to $/kBtu
-      HPXML::FuelTypeWoodCord => 'kbtu', # convert $/MBtu to $/kBtu
-      HPXML::FuelTypeWoodPellets => 'kbtu' # convert $/MBtu to $/kBtu
-    }
 
     CSV.foreach(File.join(File.dirname(__FILE__), '../../ReportUtilityBills/resources/simple_rates/pr_all_update.csv'), headers: true) do |row|
       next if row['State'].upcase != state_code.upcase # State
@@ -79,8 +80,8 @@ class UtilityBills
         runner.registerWarning("No EIA SEDS rate for #{fuel_type} was found for the state of #{state_code}.") if not runner.nil?
       end
 
-      seds_rate = UnitConversions.convert(seds_rate, unit_conv[fuel_type], 'mbtu')
-
+      # Convert $/MBtu to $/XXX
+      seds_rate = UnitConversions.convert(seds_rate, get_fuel_units(fuel_type), 'mbtu')
       return seds_rate
     end
   end
