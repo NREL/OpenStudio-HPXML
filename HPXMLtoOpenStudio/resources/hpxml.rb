@@ -2291,6 +2291,15 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      if zone_type == ZoneTypeConditioned
+        # Check all surfaces attached to the zone are adjacent to conditioned space
+        surfaces.each do |surface|
+          next if HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+          next if HPXML::conditioned_locations_this_unit.include? surface.exterior_adjacent_to
+
+          errors << "Surface '#{surface.id}' is not adjacent to conditioned space but was assigned to conditioned Zone '#{@id}'."
+        end
+      end
       return errors
     end
 
