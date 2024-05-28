@@ -51,6 +51,7 @@ __New Features__
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
   - Adds a blower fan efficiency input for specifying fan power W/cfm at maximum speed.
+  - Allows specifying number of bedrooms served by the recirculation system which is used for apportioning recirculation pump power.
 - HVAC Manual J design load calculations:
   - **Breaking change**: Outputs for "Infiltration/Ventilation" category disaggregated into "Infiltration" and "Ventilation".
   - **Breaking change**: Outputs for "Windows" category no longer includes AED excursion; now a separate "AED Excursion" category.
@@ -204,8 +205,6 @@ __New Features__
 - Stochastic schedules for garage lighting and TV plug loads now use interior lighting and miscellaneous plug load schedules, respectively.
 - Performance improvement for HPXML files w/ large numbers of `Building` elements.
 - Weather cache files (\*foo-cache.csv) are no longer used/needed.
-- BuildResidentialHPXML measure:
-  - Adds optional argument for the number of dwelling units served by the recirculation system.
 
 __Bugfixes__
 - Fixes `BackupHeatingSwitchoverTemperature` for a heat pump w/ *separate* backup system; now correctly ceases backup operation above this temperature.
