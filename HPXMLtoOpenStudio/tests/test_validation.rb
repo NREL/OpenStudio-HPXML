@@ -1006,6 +1006,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double check inputs."],
+                            'inconsistent-cond-zone-assignment' => ["Surface 'Floor1' is not adjacent to conditioned space but was assigned to conditioned Zone 'ConditionedZone'."],
                             'invalid-battery-capacity-units' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
@@ -1250,6 +1251,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-shared-chiller-negative-seer-eq'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.cooling_systems[0].shared_loop_watts *= 100.0
+      elsif ['inconsistent-cond-zone-assignment'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        grg_ceiling = hpxml_bldg.floors.find { |f| f.interior_adjacent_to == HPXML::LocationGarage && f.exterior_adjacent_to == HPXML::LocationAtticUnvented }
+        grg_ceiling.attached_to_space_idref = hpxml_bldg.conditioned_spaces[0].id
       elsif ['invalid-battery-capacity-units'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
         hpxml_bldg.batteries[0].usable_capacity_kwh = nil
