@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>16128a24-67a9-49d5-9c5f-5cfad902397d</version_id>
-  <version_modified>2023-08-11T20:25:10Z</version_modified>
+  <version_id>95005986-ad88-4382-bd1f-caea0dcf4919</version_id>
+  <version_modified>2024-05-28T15:21:43Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -28,23 +28,45 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>debug</name>
-      <display_name>Debug Mode?</display_name>
-      <description>If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.</description>
-      <type>Boolean</type>
+      <name>output_format</name>
+      <display_name>Output Format</display_name>
+      <description>The file format of the HVAC design load details output.</description>
+      <type>Choice</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
+      <default_value>csv</default_value>
       <choices>
         <choice>
-          <value>true</value>
-          <display_name>true</display_name>
+          <value>csv</value>
+          <display_name>csv</display_name>
         </choice>
         <choice>
-          <value>false</value>
-          <display_name>false</display_name>
+          <value>json</value>
+          <display_name>json</display_name>
+        </choice>
+        <choice>
+          <value>msgpack</value>
+          <display_name>msgpack</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>annual_output_file_name</name>
+      <display_name>Annual Output File Name</display_name>
+      <description>The name of the file w/ HVAC design loads and capacities. If not provided, defaults to 'results_annual.csv' (or 'results_annual.json' or 'results_annual.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>results_annual</default_value>
+    </argument>
+    <argument>
+      <name>design_load_details_output_file_name</name>
+      <display_name>Design Load Details Output File Name</display_name>
+      <description>The name of the file w/ additional HVAC design load details. If not provided, defaults to 'results_design_load_details.csv' (or 'results_design_load_details.json' or 'results_design_load_details.msgpack').</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>results_design_load_details</default_value>
     </argument>
     <argument>
       <name>add_component_loads</name>
@@ -66,6 +88,14 @@
       </choices>
     </argument>
     <argument>
+      <name>building_id</name>
+      <display_name>BuildingID</display_name>
+      <description>The ID of the HPXML Building. Only required if the HPXML has multiple Building elements and WholeSFAorMFBuildingSimulation is not true.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>skip_validation</name>
       <display_name>Skip Validation?</display_name>
       <description>If true, bypasses HPXML input validation for faster performance. WARNING: This should only be used if the supplied HPXML file has already been validated against the Schema &amp; Schematron documents.</description>
@@ -85,12 +115,23 @@
       </choices>
     </argument>
     <argument>
-      <name>building_id</name>
-      <display_name>BuildingID</display_name>
-      <description>The ID of the HPXML Building. Only required if there are multiple Building elements in the HPXML file.</description>
-      <type>String</type>
+      <name>debug</name>
+      <display_name>Debug Mode?</display_name>
+      <description>If true: 1) Writes in.osm file, 2) Generates additional log output, and 3) Creates all EnergyPlus output files.</description>
+      <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
     </argument>
   </arguments>
   <outputs />
@@ -122,6 +163,18 @@
   </attributes>
   <files>
     <file>
+      <filename>README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>readme</usage_type>
+      <checksum>394CB1D5</checksum>
+    </file>
+    <file>
+      <filename>README.md.erb</filename>
+      <filetype>erb</filetype>
+      <usage_type>readmeerb</usage_type>
+      <checksum>513F28E9</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.3.0</identifier>
@@ -130,31 +183,37 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9F4FD400</checksum>
+      <checksum>BC3E7A02</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BCD3D2D4</checksum>
+      <checksum>CC83F731</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14852A93</checksum>
+      <checksum>E8ED081B</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D202A548</checksum>
+      <checksum>7B2EC023</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F6E89CBA</checksum>
+      <checksum>1F9097D1</checksum>
+    </file>
+    <file>
+      <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>50B7055C</checksum>
     </file>
     <file>
       <filename>data/ashrae_622_wsf.csv</filename>
@@ -205,52 +264,100 @@
       <checksum>63C6A1E2</checksum>
     </file>
     <file>
+      <filename>data/g_functions/C_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E97DCCDD</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/L_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B2B3787</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/LopU_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B13FA813</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/Open_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF25A024</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/README.md</filename>
+      <filetype>md</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>48D1301C</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/U_configurations_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B5BEF270</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/rectangle_5m_v1.0.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>25FFB6A8</checksum>
+    </file>
+    <file>
+      <filename>data/g_functions/util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2BEF07FA</checksum>
+    </file>
+    <file>
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EEB2FB66</checksum>
+      <checksum>73BFECE2</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>788F897B</checksum>
+      <checksum>8DB21849</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FC0A4F2E</checksum>
+      <checksum>C0DD8C33</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DAEE7CE9</checksum>
+      <checksum>D9A7A70C</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D1EC2F7F</checksum>
+      <checksum>063242D8</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A2730455</checksum>
+      <checksum>5A48025C</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AC964052</checksum>
+      <checksum>B88B62BF</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>16BD9A12</checksum>
+      <checksum>DE05BDEC</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -262,7 +369,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1DE8759B</checksum>
+      <checksum>960E3924</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -274,67 +381,67 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>344197E3</checksum>
+      <checksum>EE17B11F</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>44977F7D</checksum>
+      <checksum>E9C68804</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>08122D51</checksum>
+      <checksum>720F24C6</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8786A75C</checksum>
+      <checksum>AC8FD8C6</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>24DCB986</checksum>
+      <checksum>74EB5B1D</checksum>
     </file>
     <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>26D01154</checksum>
+      <checksum>24807304</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CDB0A906</checksum>
+      <checksum>923B05E5</checksum>
     </file>
     <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>581B499D</checksum>
+      <checksum>8BDAA188</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1744C3AF</checksum>
+      <checksum>4E4BE5F9</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F5311570</checksum>
+      <checksum>B81E536D</checksum>
     </file>
     <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2D1832F9</checksum>
+      <checksum>B4742C47</checksum>
     </file>
     <file>
       <filename>schedule_files/battery.csv</filename>
@@ -343,28 +450,64 @@
       <checksum>C1350909</checksum>
     </file>
     <file>
+      <filename>schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B93B3701</checksum>
+    </file>
+    <file>
       <filename>schedule_files/occupancy-non-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1362DD15</checksum>
+      <checksum>A54803E1</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-10-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D4373DC9</checksum>
+      <checksum>F88479B3</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic-30-mins.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D4373DC9</checksum>
+      <checksum>F88479B3</checksum>
     </file>
     <file>
       <filename>schedule_files/occupancy-stochastic.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DEED74EA</checksum>
+      <checksum>B0187567</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic_2.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>86E85543</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic_3.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>902A544E</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic_4.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3A0C7E92</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic_5.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F0FB0913</checksum>
+    </file>
+    <file>
+      <filename>schedule_files/occupancy-stochastic_6.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B071AE65</checksum>
     </file>
     <file>
       <filename>schedule_files/setpoints-10-mins.csv</filename>
@@ -424,49 +567,49 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>85C70F45</checksum>
+      <checksum>42F9AD9E</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3AFD26FF</checksum>
+      <checksum>DA4D108D</checksum>
     </file>
     <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6D8BA8E5</checksum>
+      <checksum>E5C9103C</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3DBC2BD</checksum>
+      <checksum>79EA8844</checksum>
     </file>
     <file>
       <filename>utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07DB4C49</checksum>
+      <checksum>89BBF142</checksum>
     </file>
     <file>
       <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BC8EE0D7</checksum>
+      <checksum>02782C5B</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0FD0919B</checksum>
+      <checksum>817CCE94</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>04DDB59E</checksum>
+      <checksum>29B9C210</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -478,115 +621,115 @@
       <filename>xmlvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CFCD83CD</checksum>
+      <checksum>87937B84</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>16592A6F</checksum>
+      <checksum>DDCAE919</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9FA3A682</checksum>
+      <checksum>06598B29</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>87CEB349</checksum>
+      <checksum>FD16E4B2</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>29313C59</checksum>
+      <checksum>68F1127B</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>808AB349</checksum>
+      <checksum>C4F6CF9B</checksum>
     </file>
     <file>
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>AC9F9282</checksum>
+      <checksum>E3A99BA1</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>21D51F9C</checksum>
+      <checksum>8CDA3FA3</checksum>
     </file>
     <file>
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>68733BE8</checksum>
+      <checksum>BA43A919</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3645750A</checksum>
+      <checksum>A15B8208</checksum>
     </file>
     <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>69CFC690</checksum>
+      <checksum>663B10FB</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>308C1B0D</checksum>
+      <checksum>0135301B</checksum>
     </file>
     <file>
       <filename>test_pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5E376500</checksum>
+      <checksum>DB1DEFCF</checksum>
     </file>
     <file>
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>65D51D3A</checksum>
+      <checksum>C6CCF641</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F6DC39F4</checksum>
+      <checksum>211EB384</checksum>
     </file>
     <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7B23CDE1</checksum>
+      <checksum>81FC99DF</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E1AB8CF7</checksum>
+      <checksum>485EE23B</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1464E73A</checksum>
+      <checksum>156AAC98</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D22025B3</checksum>
+      <checksum>71ED3EE3</checksum>
     </file>
   </files>
 </measure>
