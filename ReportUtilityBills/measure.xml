@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>fd339f1d-b0d0-4cba-8252-d33b24a1edab</version_id>
-  <version_modified>2024-05-28T20:03:21Z</version_modified>
+  <version_id>c7374ea6-65ff-448a-bf3b-ffa550add7fb</version_id>
+  <version_modified>2024-05-28T21:19:29Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -180,7 +180,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>66B56EB8</checksum>
+      <checksum>CEB09B99</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
