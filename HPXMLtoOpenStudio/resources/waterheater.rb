@@ -1765,21 +1765,16 @@ class Waterheater
   def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flows)
     water_heating_systems.each do |water_heating_system|
       # Get the water storage tanks for the outlet temp sensor
-      num_tanks = 0
       tank = nil
       hw_plant_loop = plantloop_map[water_heating_system.id]
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterMixed.is_initialized
-
         tank = c.to_WaterHeaterMixed.get
-        num_tanks += 1
       end
 
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterStratified.is_initialized
-
         tank = c.to_WaterHeaterStratified.get
-        num_tanks += 1
       end
 
       # EMS sensors
