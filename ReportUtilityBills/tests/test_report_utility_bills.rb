@@ -79,7 +79,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
     # Check for presence of fuels once
     has_fuel = @hpxml_bldg.has_fuels(Constants.FossilFuels, @hpxml.to_doc)
-    HPXMLDefaults.apply_header(@hpxml_header, nil)
+    HPXMLDefaults.apply_header(@hpxml_header, nil, @hpxml_bldg)
     HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, has_fuel)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
@@ -282,7 +282,7 @@ class ReportUtilityBillsTest < Minitest::Test
   end
 
   def test_auto_marginal_rate
-    fuel_types = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypePropane]
+    fuel_types = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas, HPXML::FuelTypeOil, HPXML::FuelTypeCoal, HPXML::FuelTypePropane, HPXML::FuelTypeWoodCord, HPXML::FuelTypeWoodPellets]
 
     # Check that we can successfully look up "auto" rates for every state
     # and every fuel type.
@@ -305,28 +305,6 @@ class ReportUtilityBillsTest < Minitest::Test
     end
   end
 
-  def test_warning_region
-    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-oil.xml'))
-    hpxml.buildings[0].state_code = 'FL'
-    hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath = 'USA_FL_Miami.Intl.AP.722020_TMY3.epw'
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    expected_warnings = ['Could not find state average fuel oil rate based on Florida; using region (PADD 1C) average.']
-    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
-    assert_nil(actual_bills)
-  end
-
-  def test_warning_national
-    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-propane.xml'))
-    hpxml.buildings[0].state_code = 'OR'
-    hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath = 'USA_OR_Portland.Intl.AP.726980_TMY3.epw'
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    expected_warnings = ['Could not find state average propane rate based on Oregon; using national average.']
-    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
-    assert_nil(actual_bills)
-  end
-
   def test_warning_dse
     @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-hvac-dse.xml'))
@@ -341,6 +319,16 @@ class ReportUtilityBillsTest < Minitest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-location-capetown-zaf.xml'))
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     expected_warnings = ['Could not find a marginal Electricity rate.', 'Could not find a marginal Natural Gas rate.']
+    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
+  end
+
+  def test_warning_no_rates_for_coal_in_HI
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-appliances-coal.xml'))
+    hpxml.buildings[0].state_code = 'HI'
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    expected_warnings = ['No EIA SEDS rate for coal was found for the state of HI.']
     actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
     assert_nil(actual_bills)
   end
@@ -390,7 +378,17 @@ class ReportUtilityBillsTest < Minitest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-misc-unit-multiplier.xml'))
     hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json')
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    expected_warnings = ['Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers or multiple Building elements.']
+    expected_warnings = ['Cannot currently calculate utility bills based on detailed electric rates for an HPXML with unit multipliers.']
+    actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
+    assert_nil(actual_bills)
+  end
+
+  def test_warning_detailed_rates_whole_sfa_mf_building
+    @args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = HPXML.new(hpxml_path: File.join(@sample_files_path, 'base-bldgtype-mf-whole-building.xml'))
+    hpxml.header.utility_bill_scenarios.add(name: 'Test 1', elec_tariff_filepath: '../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json')
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    expected_warnings = ['Cannot currently calculate utility bills based on detailed electric rates for a whole SFA/MF building simulation.']
     actual_bills, _actual_monthly_bills = _test_measure(expected_warnings: expected_warnings)
     assert_nil(actual_bills)
   end
@@ -1087,6 +1085,8 @@ class ReportUtilityBillsTest < Minitest::Test
     end
   end
 
+  private
+
   def _get_expected_bills(expected_bills)
     expected_bills['Test: Electricity: Total (USD)'] = expected_bills['Test: Electricity: Fixed (USD)'] + expected_bills['Test: Electricity: Energy (USD)'] + expected_bills['Test: Electricity: PV Credit (USD)']
     expected_bills['Test: Natural Gas: Total (USD)'] = expected_bills['Test: Natural Gas: Fixed (USD)'] + expected_bills['Test: Natural Gas: Energy (USD)']
@@ -1163,7 +1163,7 @@ class ReportUtilityBillsTest < Minitest::Test
 
   def _bill_calcs(fuels, header, hpxml_buildings, utility_bill_scenario)
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true }
+    args = { output_format: 'csv', include_annual_bills: true, include_monthly_bills: true, register_annual_bills: true, register_monthly_bills: true }
 
     utility_rates, utility_bills = @measure.setup_utility_outputs()
     monthly_fee = @measure.get_monthly_fee(utility_bill_scenario, hpxml_buildings)
@@ -1178,8 +1178,6 @@ class ReportUtilityBillsTest < Minitest::Test
     assert(File.exist?(@bills_csv))
     actual_bills = _get_actual_bills(@bills_csv)
 
-    _check_for_runner_registered_values(runner, nil, actual_bills)
-
     # Monthly
     timestamps = (1..12).to_a
     monthly_data = []
@@ -1190,6 +1188,8 @@ class ReportUtilityBillsTest < Minitest::Test
     # Check written values exist
     assert(File.exist?(@bills_monthly_csv))
     actual_monthly_bills = _get_actual_monthly_bills(@bills_monthly_csv)
+
+    _check_for_runner_registered_values(runner, nil, actual_bills, actual_monthly_bills)
 
     return actual_bills, actual_monthly_bills
   end
@@ -1223,7 +1223,8 @@ class ReportUtilityBillsTest < Minitest::Test
 
     # Run OSW
     command = "#{OpenStudio.getOpenStudioCLI} run -w #{osw_path}"
-    cli_output = `#{command}`
+    success = system(command)
+    assert(success)
 
     # Cleanup
     File.delete(osw_path)
@@ -1232,15 +1233,12 @@ class ReportUtilityBillsTest < Minitest::Test
     bills_monthly_csv = File.join(File.dirname(template_osw), 'run', 'results_bills_monthly.csv')
 
     # Check warnings/errors
-    if not expected_errors.empty?
-      expected_errors.each do |expected_error|
-        assert(cli_output.include?("ERROR] #{expected_error}"))
-      end
+    log_lines = File.readlines(File.join(File.dirname(template_osw), 'run', 'run.log')).map(&:strip)
+    expected_errors.each do |expected_error|
+      assert(log_lines.any? { |line| line.include?(' ERROR]') && line.include?(expected_error) })
     end
-    if not expected_warnings.empty?
-      expected_warnings.each do |expected_warning|
-        assert(cli_output.include?("WARN] #{expected_warning}"))
-      end
+    expected_warnings.each do |expected_warning|
+      assert(log_lines.any? { |line| line.include?(' WARN]') && line.include?(expected_warning) })
     end
 
     if !hpxml.nil?
@@ -1295,7 +1293,7 @@ class ReportUtilityBillsTest < Minitest::Test
     return actual_monthly_bills
   end
 
-  def _check_for_runner_registered_values(runner, results_json, actual_bills)
+  def _check_for_runner_registered_values(runner, results_json, actual_bills, actual_monthly_bills = [])
     if !runner.nil?
       runner_bills = {}
       runner.result.stepValues.each do |step_value|
@@ -1312,6 +1310,15 @@ class ReportUtilityBillsTest < Minitest::Test
 
       assert_includes(runner_bills.keys, name)
       assert_equal(value, runner_bills[name])
+    end
+
+    return if actual_monthly_bills.empty?
+
+    actual_monthly_bills.each do |name, values|
+      name = OpenStudio::toUnderscoreCase(name).chomp('_')
+
+      assert_includes(runner_bills.keys, name)
+      assert_in_delta(values.sum, runner_bills[name], 0.1) # within 10 cents
     end
   end
 end
