@@ -570,7 +570,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hot_water_distribution_recirc_piping_length'] = 50
       args['hot_water_distribution_recirc_branch_piping_length'] = 50
       args['hot_water_distribution_recirc_pump_power'] = 50
-      args['hot_water_distribution_recirc_num_units_served'] = 1
       args['hot_water_distribution_pipe_r'] = 0.0
       args['dwhr_facilities_connected'] = 'none'
       args['dwhr_equal_flow'] = true
