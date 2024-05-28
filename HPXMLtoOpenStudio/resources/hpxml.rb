@@ -1863,6 +1863,11 @@ class HPXML < Object
 
               subsurf.attached_to_roof_idref = surf.id
             end
+            @skylights.each do |subsurf|
+              next unless subsurf.attached_to_floor_idref == surf2.id
+
+              subsurf.attached_to_floor_idref = surf.id
+            end
 
             # Remove old surface
             surfaces[j].delete
