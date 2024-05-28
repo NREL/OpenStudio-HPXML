@@ -213,7 +213,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                                            "Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
                             'manufactured-home-reference-floor' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
                                                                     'There must be at least one ceiling adjacent to "crawlspace - vented".'],
-                            'missing-attached-to-space' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
+                            'missing-attached-to-space-wall' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
+                            'missing-attached-to-space-slab' => ['Expected 1 element(s) for xpath: AttachedToSpace'],
                             'missing-attached-to-zone' => ['Expected 1 element(s) for xpath: AttachedToZone'],
                             'missing-capacity-detailed-performance' => ['Expected 1 element(s) for xpath: ../../../HeatingCapacity',
                                                                         'Expected 1 element(s) for xpath: ../../../CoolingCapacity'],
@@ -630,9 +631,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
             break
           end
         end
-      elsif ['missing-attached-to-space'].include? error_case
+      elsif ['missing-attached-to-space-wall'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
-        hpxml_bldg.surfaces.find { |s| s.interior_adjacent_to == HPXML::LocationConditionedSpace }.attached_to_space_idref = nil
+        hpxml_bldg.walls.find { |s| s.interior_adjacent_to == HPXML::LocationConditionedSpace }.attached_to_space_idref = nil
+      elsif ['missing-attached-to-space-slab'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        hpxml_bldg.slabs.find { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.attached_to_space_idref = nil
       elsif ['missing-attached-to-zone'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         hpxml_bldg.hvac_systems[0].attached_to_zone_idref = nil
@@ -1006,6 +1010,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double check inputs."],
+                            'inconsistent-cond-zone-assignment' => ["Surface 'Floor1' is not adjacent to conditioned space but was assigned to conditioned Zone 'ConditionedZone'."],
                             'invalid-battery-capacity-units' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
@@ -1250,6 +1255,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-shared-chiller-negative-seer-eq'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.cooling_systems[0].shared_loop_watts *= 100.0
+      elsif ['inconsistent-cond-zone-assignment'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
+        grg_ceiling = hpxml_bldg.floors.find { |f| f.interior_adjacent_to == HPXML::LocationGarage && f.exterior_adjacent_to == HPXML::LocationAtticUnvented }
+        grg_ceiling.attached_to_space_idref = hpxml_bldg.conditioned_spaces[0].id
       elsif ['invalid-battery-capacity-units'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
         hpxml_bldg.batteries[0].usable_capacity_kwh = nil
