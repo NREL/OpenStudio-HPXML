@@ -53,9 +53,9 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
-      elsif hpxml.header.geb_onoff_thermostat_deadband
+      elsif hpxml.header.hvac_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
-      elsif hpxml.header.geb_backup_heating_capacity_increment
+      elsif hpxml.header.heat_pump_backup_heating_capacity_increment
         # multi-staging backup coil not supported with unit multiplier yet
       else
         hpxml_bldg.building_construction.number_of_units *= 5
@@ -388,7 +388,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
     end
     # Coil speed level EMS
-    if hpxml_header.geb_onoff_thermostat_deadband
+    if hpxml_header.hvac_onoff_thermostat_deadband
       next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # FIXME: speed level actuator throws this error when speed is set to 1 but no load
     end
     # TODO: Check why this house produces this warning
