@@ -236,7 +236,7 @@ class HVAC
 
     # supp coil control in staing EMS
     apply_two_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, is_heatpump, is_onoff_thermostat_ddb, cooling_system)
-    
+
     apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
 
     apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
@@ -2893,7 +2893,6 @@ class HVAC
   end
 
   def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
-
     actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') }
     global_var_supp_avail = model.getEnergyManagementSystemGlobalVariables.find { |var| var.name.get.include? htg_supp_coil.name.get.gsub(' ', '_') }
 
@@ -2926,6 +2925,7 @@ class HVAC
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
     return unless is_onoff_thermostat_ddb
     return if htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
+
     # Sensors
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
     tin_sensor.setName('zone air temp')
@@ -2963,7 +2963,7 @@ class HVAC
     supp_coil_avail_program.setName("#{htg_supp_coil.name.get} control program")
     supp_coil_avail_program.addLine("If #{global_var_supp_avail.name} == 0") # Other EMS set it to be 0.0, keep the logic
     supp_coil_avail_program.addLine("  Set #{supp_coil_avail_act.name} = 0")
-    supp_coil_avail_program.addLine("Else") # global variable = 1
+    supp_coil_avail_program.addLine('Else') # global variable = 1
     supp_coil_avail_program.addLine("  Set living_t = #{tin_sensor.name}")
     supp_coil_avail_program.addLine("  Set htg_sp_l = #{htg_sp_ss.name}")
     supp_coil_avail_program.addLine("  Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
@@ -3116,6 +3116,7 @@ class HVAC
     # Note: Currently only available in 1 min time step
     return unless is_onoff_thermostat_ddb
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
+
     number_of_timestep_logged = 5 # wait 5 mins to check demand
 
     # Sensors
@@ -3205,7 +3206,7 @@ class HVAC
       if (not htg_supp_coil.nil?) && (not (htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage))
         realistic_cycling_program.addLine("If #{global_var_supp_avail.name} == 0") # Other EMS set it to be 0.0, keep the logic
         realistic_cycling_program.addLine("  Set #{supp_coil_avail_act.name} = 0")
-        realistic_cycling_program.addLine("Else") # global variable = 1
+        realistic_cycling_program.addLine('Else') # global variable = 1
         realistic_cycling_program.addLine("  Set #{supp_coil_avail_act.name} = 1")
         realistic_cycling_program.addLine("  If (htg_sp_l - living_t > 0.0) && (#{s_trend_high.join(' && ')})")
         realistic_cycling_program.addLine("    Set #{supp_coil_avail_act.name} = 1")
@@ -3485,7 +3486,7 @@ class HVAC
 
     # Note: Currently only available in 1 min time step
     number_of_timestep_logged = 5 # wait 5 mins to check demand
-    max_htg_coil_stage = (htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed) ? 1: htg_coil.stages.size
+    max_htg_coil_stage = (htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed) ? 1 : htg_coil.stages.size
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
 
     # Sensors
@@ -3493,7 +3494,6 @@ class HVAC
     living_temp_ss.setName('living temp')
     living_temp_ss.setKeyName(control_zone.name.get)
 
-    htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
     htg_sp_ss.setName('htg_setpoint')
     htg_sp_ss.setKeyName(control_zone.name.get)
@@ -3548,7 +3548,7 @@ class HVAC
     # Logic to determine whether to enable backup coil
     supp_staging_program.addLine("If #{global_var_supp_avail.name} == 0") # Other EMS set it to be 0.0, keep the logic
     supp_staging_program.addLine("  Set #{supp_coil_avail_act.name} = 0")
-    supp_staging_program.addLine("Else") # global variable = 1
+    supp_staging_program.addLine('Else') # global variable = 1
     supp_staging_program.addLine("  Set #{supp_coil_avail_act.name} = 1")
     supp_staging_program.addLine("  If (supp_htg_rate_1_ago > 0) && (#{htg_sp_ss.name} + #{living_temp_ss.name} > 0.01)")
     supp_staging_program.addLine("    Set #{supp_coil_avail_act.name} = 1") # Keep backup coil on until reaching setpoint

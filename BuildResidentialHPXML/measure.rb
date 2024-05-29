@@ -4050,17 +4050,17 @@ class HPXMLFile
     end
 
     if not args[:simulation_control_onoff_thermostat_deadband].nil?
-      if (not hpxml.header.geb_onoff_thermostat_deadband.nil?) && (hpxml.header.geb_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
+      if (not hpxml.header.hvac_onoff_thermostat_deadband.nil?) && (hpxml.header.hvac_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
         errors << "'Simulation Control: HVAC GEB On-Off Thermostat Deadband' cannot vary across dwelling units."
       end
-      hpxml.header.geb_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
+      hpxml.header.hvac_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
     end
 
     if not args[:simulation_control_heat_pump_backup_heating_capacity_increment].nil?
-      if (not hpxml.header.geb_backup_heating_capacity_increment.nil?) && (hpxml.header.geb_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
+      if (not hpxml.header.heat_pump_backup_heating_capacity_increment.nil?) && (hpxml.header.heat_pump_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
         errors << "'Simulation Control: HVAC GEB Backup Heating Capacity Increment' cannot vary across dwelling units."
       end
-      hpxml.header.geb_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
+      hpxml.header.heat_pump_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
     end
 
     if not args[:emissions_scenario_names].nil?
