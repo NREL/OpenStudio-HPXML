@@ -124,16 +124,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_geb_onoff_thermostat_deadband', false)
-    arg.setDisplayName('Simulation Control: HVAC GEB On-Off Thermostat Deadband')
-    arg.setDescription('On-off thermostat deadband for hvac systems. Only applies to single speed or two speed air source HVAC systems.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
+    arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
+    arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed central AC/ASHP systems, and realistic time-based staging for two speed central AC/ASHP systems. Currently only supported with 1 min timestep.')
     arg.setUnits('deg-F')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_geb_backup_heating_capacity_increment', false)
-    arg.setDisplayName('Simulation Control: HVAC GEB Backup Heating Capacity Increment')
-    arg.setDescription("Capacity increment of the multi-staging heat pump backup system. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'.")
-    arg.setUnits('deg-F')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_heat_pump_backup_heating_capacity_increment', false)
+    arg.setDisplayName('Simulation Control: Heat Pump Backup Heating Capacity Increment')
+    arg.setDescription("Research feature to model capacity increment of the multi-staging heat pump backup system with time-based staging. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.")
+    arg.setUnits('Btu/hr')
     args << arg
 
     site_type_choices = OpenStudio::StringVector.new
@@ -4049,18 +4049,18 @@ class HPXMLFile
       hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
     end
 
-    if not args[:simulation_control_geb_onoff_thermostat_deadband].nil?
-      if (not hpxml.header.geb_onoff_thermostat_deadband.nil?) && (hpxml.header.geb_onoff_thermostat_deadband != args[:simulation_control_geb_onoff_thermostat_deadband])
+    if not args[:simulation_control_onoff_thermostat_deadband].nil?
+      if (not hpxml.header.geb_onoff_thermostat_deadband.nil?) && (hpxml.header.geb_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
         errors << "'Simulation Control: HVAC GEB On-Off Thermostat Deadband' cannot vary across dwelling units."
       end
-      hpxml.header.geb_onoff_thermostat_deadband = args[:simulation_control_geb_onoff_thermostat_deadband]
+      hpxml.header.geb_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
     end
 
-    if not args[:simulation_control_geb_backup_heating_capacity_increment].nil?
-      if (not hpxml.header.geb_backup_heating_capacity_increment.nil?) && (hpxml.header.geb_backup_heating_capacity_increment != args[:simulation_control_geb_backup_heating_capacity_increment])
+    if not args[:simulation_control_heat_pump_backup_heating_capacity_increment].nil?
+      if (not hpxml.header.geb_backup_heating_capacity_increment.nil?) && (hpxml.header.geb_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
         errors << "'Simulation Control: HVAC GEB Backup Heating Capacity Increment' cannot vary across dwelling units."
       end
-      hpxml.header.geb_backup_heating_capacity_increment = args[:simulation_control_geb_backup_heating_capacity_increment]
+      hpxml.header.geb_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
     end
 
     if not args[:emissions_scenario_names].nil?

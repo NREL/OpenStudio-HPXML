@@ -120,6 +120,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-geb-timestep-ten-mins' => ['Expected ../Timestep to be 1.0'],
+                            'hvac-geb-timestep-missing' => ['Expected ../Timestep to be 1.0'],
                             'hvac-geb-onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
@@ -422,8 +423,10 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-geb-timestep-ten-mins'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
-        hpxml.header.geb_backup_heating_capacity_increment = 5000
         hpxml.header.timestep = 10
+      elsif ['hvac-geb-timestep-missing'].include? error_case
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml.header.timestep = nil
       elsif ['hvac-geb-onoff-thermostat-heat-load-fraction'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
@@ -432,7 +435,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
       elsif ['hvac-geb-onoff-thermostat-negative-value'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
-        hpxml.header.geb_onoff_thermostat_deadband = -1.0
+        hpxml.header.hvac_onoff_thermostat_deadband = -1.0
       elsif ['hvac-geb-onoff-thermostat-wrong-cooling-system-type'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
@@ -1801,7 +1804,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml, _hpxml_bldg = _create_hpxml('base-schedules-simple-power-outage.xml')
       elsif ['multistage-backup-more-than-4-stages'].include? warning_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
-        hpxml.header.geb_backup_heating_capacity_increment = 5000
+        hpxml.header.heat_pump_backup_heating_capacity_increment = 5000
       elsif ['schedule-file-and-weekday-weekend-multipliers'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-misc-loads-large-uncommon.xml')
         hpxml.header.utility_bill_scenarios.clear # we don't want the propane warning

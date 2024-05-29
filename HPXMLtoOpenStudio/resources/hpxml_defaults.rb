@@ -47,7 +47,7 @@ class HPXMLDefaults
     apply_partition_wall_mass(hpxml_bldg)
     apply_furniture_mass(hpxml_bldg)
     apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
-    apply_hvac_control(hpxml_bldg, schedules_file, eri_version, hpxml.header)
+    apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
@@ -136,11 +136,7 @@ class HPXMLDefaults
 
   def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
     if hpxml_header.timestep.nil?
-      if (not hpxml_header.geb_onoff_thermostat_deadband.nil?) || (not hpxml_header.geb_backup_heating_capacity_increment.nil?)
-        hpxml_header.timestep = 1
-      else
-        hpxml_header.timestep = 60
-      end
+      hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
     end
 
@@ -1946,7 +1942,7 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version, _header)
+  def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     hpxml_bldg.hvac_controls.each do |hvac_control|
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HeatingSetpoint].name))
       if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil? && !schedules_file_includes_heating_setpoint_temp

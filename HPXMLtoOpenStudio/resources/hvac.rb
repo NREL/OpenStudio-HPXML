@@ -15,7 +15,7 @@ class HVAC
     is_heatpump = false
 
     if (not cooling_system.nil?)
-      is_onoff_thermostat_ddb = hpxml_header.geb_onoff_thermostat_deadband.to_f > 0.0
+      is_onoff_thermostat_ddb = hpxml_header.hvac_onoff_thermostat_deadband.to_f > 0.0
       # Error-checking
       if is_onoff_thermostat_ddb
         if not [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? cooling_system.compressor_type
@@ -25,6 +25,10 @@ class HVAC
         if hpxml_bldg.building_construction.number_of_units > 1
           # Throw error and stop simulation
           runner.registerError('NumberofUnits greater than 1 is not supported for on-off thermostat deadband.')
+        end
+        if hpxml_header.timestep > 1
+          # Throw error and stop simulation
+          runner.registerError('On-off thermostat deadband currently is only supported for 1 minute timestep.')
         end
       end
     else
@@ -160,7 +164,7 @@ class HVAC
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, hpxml_header.defrost_model_type, p_dot_defrost, is_onoff_thermostat_ddb)
 
         # Supplemental Heating Coil
-        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, hpxml_header.geb_backup_heating_capacity_increment, runner, hpxml_bldg)
+        htg_supp_coil = create_supp_heating_coil(model, obj_name, heating_system, hpxml_header, runner, hpxml_bldg)
       else
         # Heating Coil
         fan_cfms << htg_cfm
@@ -939,7 +943,7 @@ class HVAC
     heating_sch = nil
     cooling_sch = nil
     year = hpxml_header.sim_calendar_year
-    onoff_thermostat_ddb = hpxml_header.geb_onoff_thermostat_deadband.to_f
+    onoff_thermostat_ddb = hpxml_header.hvac_onoff_thermostat_deadband.to_f
     if not schedules_file.nil?
       heating_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:HeatingSetpoint].name)
     end
@@ -1906,7 +1910,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  def self.create_supp_heating_coil(model, obj_name, heat_pump, backup_heating_capacity_increment = nil, runner = nil, hpxml_bldg = nil)
+  def self.create_supp_heating_coil(model, obj_name, heat_pump, hpxml_header = nil, runner = nil, hpxml_bldg = nil)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
     efficiency = heat_pump.backup_heating_efficiency_percent
@@ -1916,11 +1920,16 @@ class HVAC
       return
     end
 
+    backup_heating_capacity_increment = hpxml_header.heat_pump_backup_heating_capacity_increment unless hpxml_header.nil?
     backup_heating_capacity_increment = nil unless fuel == HPXML::FuelTypeElectricity
     if not backup_heating_capacity_increment.nil?
       if hpxml_bldg.building_construction.number_of_units > 1
         # Throw error and stop simulation
         runner.registerError('NumberofUnits greater than 1 is not supported for multi-staging backup coil.')
+      end
+      if hpxml_header.timestep > 1
+        # Throw error and stop simulation
+        runner.registerError('Multi-staging backup coil currently is only supported for 1 minute timestep.')
       end
       max_num_stages = 4
 
@@ -4593,7 +4602,7 @@ class HVAC
       hp_sys.heating_capacity_17F *= unit_multiplier unless hp_sys.heating_capacity_17F.nil?
       hp_sys.backup_heating_capacity *= unit_multiplier unless hp_sys.backup_heating_capacity.nil?
       hp_sys.crankcase_heater_watts *= unit_multiplier unless hp_sys.crankcase_heater_watts.nil?
-      hpxml_header.geb_backup_heating_capacity_increment *= unit_multiplier unless hpxml_header.geb_backup_heating_capacity_increment.nil?
+      hpxml_header.heat_pump_backup_heating_capacity_increment *= unit_multiplier unless hpxml_header.heat_pump_backup_heating_capacity_increment.nil?
       hp_sys.heating_detailed_performance_data.each do |dp|
         dp.capacity *= unit_multiplier unless dp.capacity.nil?
       end

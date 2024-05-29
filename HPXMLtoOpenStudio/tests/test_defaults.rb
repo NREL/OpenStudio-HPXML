@@ -69,34 +69,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, _default_hpxml_bldg = _test_measure()
     _test_default_header_values(default_hpxml, 60, 1, 1, 12, 31, 2007, 7.0, nil, nil, nil)
-
-    # Test - with geb onoff thermostat
-    # Test inputs not overridden by defaults
-    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
-    hpxml.header.timestep = 1
-    hpxml.header.sim_begin_month = 2
-    hpxml.header.sim_begin_day = 2
-    hpxml.header.sim_end_month = 11
-    hpxml.header.sim_end_day = 11
-    hpxml.header.sim_calendar_year = 2009
-    hpxml.header.temperature_capacitance_multiplier = 1.5
-    hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: 1, begin_day: 1, begin_hour: 3, end_month: 12, end_day: 31, end_hour: 4, natvent_availability: HPXML::ScheduleUnavailable)
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    default_hpxml, _default_hpxml_bldg = _test_measure()
-    _test_default_header_values(default_hpxml, 1, 2, 2, 11, 11, 2009, 1.5, 3, 4, HPXML::ScheduleUnavailable)
-
-    # geb default temperature capacitance multiplier and timestep
-    hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
-    hpxml.header.timestep = nil
-    hpxml.header.sim_begin_month = nil
-    hpxml.header.sim_begin_day = nil
-    hpxml.header.sim_end_month = nil
-    hpxml.header.sim_end_day = nil
-    hpxml.header.sim_calendar_year = nil
-    hpxml.header.temperature_capacitance_multiplier = nil
-    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    default_hpxml, _default_hpxml_bldg = _test_measure()
-    _test_default_header_values(default_hpxml, 1, 1, 1, 12, 31, 2007, 7.0, nil, nil, nil)
   end
 
   def test_emissions_factors

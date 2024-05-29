@@ -180,13 +180,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         check_schedule_references(hpxml_bldg.header, args[:hpxml_path])
         in_schedules_csv = 'in.schedules.csv'
         in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
-        # Fixme: do we need to check system number of speed? Default hasn't been applied yet, so compressor can be unknown.
         schedules_file = SchedulesFile.new(runner: runner,
                                            schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(args[:output_dir], in_schedules_csv),
-                                           offset_db: hpxml.header.geb_onoff_thermostat_deadband)
+                                           offset_db: hpxml.header.hvac_onoff_thermostat_deadband)
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
                                                                              design_load_details_output_file_path: design_load_details_output_file_path,
                                                                              output_format: args[:output_format])
@@ -2124,7 +2123,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     zone_air_temp_sensors, htg_spt_sensors, clg_spt_sensors = {}, {}, {}
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     season_day_nums = {}
-    onoff_deadbands = hpxml.header.geb_onoff_thermostat_deadband.to_f
+    onoff_deadbands = hpxml.header.hvac_onoff_thermostat_deadband.to_f
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       conditioned_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }
       conditioned_zone_name = conditioned_zone.name.to_s
