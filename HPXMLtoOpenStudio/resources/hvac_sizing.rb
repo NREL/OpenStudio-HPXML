@@ -1723,6 +1723,7 @@ class HVACSizing
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
         #ADP/BF specified for Coil:Cooling:DX:SingleSpeed, but should be implemented for all coils
         #rated total capacity and rated SHR are used to calculate coil bypass factor constant A_o at rated conditions
+        #this is already done in hvac.rb and stored in the hvac_cooling_ap object
         #once A_o is determined, the BF at design conditions can be calculated and used to determine the design SHR
         #last step is to calculate sensible capacity at design conditions using design_shr   
 
@@ -1751,18 +1752,10 @@ class HVACSizing
       #assuming hvac_sizings.Cool_Airflow is the design airflow rate, inferred from comments in calc_airflow_rate_manual_s code
       #note: using MJ cooling setpoint as EDB ignores return duct losses
 
-      m_dot_design = UnitConversions.convert(Psychometrics.CalculateMassflowRate(mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), hvac_sizing_values.Cool_Airflow, hr_indoor_cooling), 'lbm/min', 'kg/s') #cooling design air flow rate
-      bf_design = exp(-1*a_o/m_dot_design)
-
-      #enthalpies using BF method
-      h_t_in_w_adp = Psychometrics.h_fT_w_SI(t_db_dp, w_dp) #enthalpy of air at apparatus dewpoint condition
-      h_in = Psychometrics.h_fT_w_SI(t_db_in, w_in) #enthalpy of air entering cooling coil
-      q_dot_total = cool_cap_design #needs to be [J/s], currently xxx units?
-      h_ADP = h_in - (q_dot_total/m_dot_design)/(1-bf_design) 
-
-      enthalpy_ratios = (h_t_in_w_adp - h_adp)/(h_in-h_adp)
-      hvac_cooling_shr_design = [enthalpy_ratios,1].min
-
+      hvac_cooling_ap.design_shr = Psychrometrics.calculateSHR(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm','psi'), cool_cap_design, hvac_sizings.Cool_Airflow, hvac_cooling_ap.a_o, hr_indoor_cooling)
+      #Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor
+      #coil Ao needs to be in SI units, currently 0.38 for base.xml --> check if unit conversion is necessary?
+      puts(hvac_cooling_ap.design_shr)
       sens_cap_design = cool_cap_design*hvac_cooling_shr_design
 
       lat_cap_design = [hvac_sizing_values.Cool_Load_Tot - sens_cap_design, 1.0].max
