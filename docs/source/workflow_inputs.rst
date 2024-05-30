@@ -102,14 +102,14 @@ To enable advanced research features, additional information is entered in ``/HP
 
 These features may require shorter timesteps, allow more sophisticated simulation control, and/or impact simulation runtime.
 
-  ====================================  ========  =======  ================  ========  ========  ========================================================
-  Element                               Type      Units    Constraints       Required  Default   Notes
-  ====================================  ========  =======  ================  ========  ========  ========================================================
-  ``TemperatureCapacitanceMultiplier``  double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
-  ``DefrostModelType``                  string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
-  ``OnOffThermostatDeadbandTemperature``double             See [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operations [#]_
-  ``BackupHeatingCapacityIncrement``    double             See [#]_          No                  Capcity increment of multi-staging heat pump backup systems [#]_
-  ====================================  ========  =======  ================  ========  ========  ========================================================
+  ======================================  ========  =======  ================  ========  ========  ========================================================
+  Element                                 Type      Units    Constraints       Required  Default   Notes
+  ======================================  ========  =======  ================  ========  ========  ========================================================
+  ``TemperatureCapacitanceMultiplier``    double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
+  ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
+  ``OnOffThermostatDeadbandTemperature``  double             See [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operations [#]_
+  ``BackupHeatingCapacityIncrement``      double             See [#]_          No                  Capcity increment of multi-staging heat pump backup systems [#]_
+  ======================================  ========  =======  ================  ========  ========  ========================================================
 
   .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
