@@ -121,10 +121,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
                             'hvac-geb-timestep-ten-mins' => ['Expected ../Timestep to be 1.0'],
                             'hvac-geb-timestep-missing' => ['Expected ../Timestep to be 1.0'],
-                            'hvac-geb-onoff-thermostat-heat-load-fraction' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
-                            'hvac-geb-onoff-thermostat-cool-load-fraction' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
+                            'hvac-geb-onoff-thermostat-heat-load-fraction-partial' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
+                            'hvac-geb-onoff-thermostat-cool-load-fraction-partial' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
-                            'hvac-geb-onoff-thermostat-wrong-cooling-system-type' => ['Unexpected cooling system types, only support dx systems'],
                             'hvac-geb-onoff-thermostat-two-heat-pumps' => ['Expected at maximum one cooling system for each Building',
                                                                            'Expected at maximum one heating system for each Building'],
                             'hvac-gshp-invalid-bore-config' => ["Expected BorefieldConfiguration to be 'Rectangle' or 'Open Rectangle' or 'C' or 'L' or 'U' or 'Lopsided U' [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop, id: \"GeothermalLoop1\"]"],
@@ -427,19 +426,15 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-geb-timestep-missing'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml.header.timestep = nil
-      elsif ['hvac-geb-onoff-thermostat-heat-load-fraction'].include? error_case
+      elsif ['hvac-geb-onoff-thermostat-heat-load-fraction-partial'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_heat_load_served = 0.5
-      elsif ['hvac-geb-onoff-thermostat-cool-load-fraction'].include? error_case
+      elsif ['hvac-geb-onoff-thermostat-cool-load-fraction-partial'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5
       elsif ['hvac-geb-onoff-thermostat-negative-value'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml.header.hvac_onoff_thermostat_deadband = -1.0
-      elsif ['hvac-geb-onoff-thermostat-wrong-cooling-system-type'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
-        hpxml_bldg.heat_pumps[0].heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
-        hpxml_bldg.heat_pumps[0].compressor_type = nil
       elsif ['hvac-geb-onoff-thermostat-two-heat-pumps'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
         hpxml_bldg.heat_pumps[0].fraction_cool_load_served = 0.5

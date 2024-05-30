@@ -65,13 +65,12 @@
   
   <sch:pattern>
     <sch:title>[OnOffThermostatDeadbandTemperature]</sch:title>
-    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures[h:OnOffThermostatDeadbandTemperature]'>
-      <sch:assert role='ERROR' test='count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:FractionCoolLoadServed > 0]) + count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionCoolLoadServed > 0]) &lt;= count(../../../../h:Building)'>Expected at maximum one cooling system for each Building</sch:assert>
-      <sch:assert role='ERROR' test='count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:FractionHeatLoadServed > 0]) + count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionHeatLoadServed > 0]) &lt;= count(../../../../h:Building)'>Expected at maximum one heating system for each Building</sch:assert>
-      <sch:assert role='ERROR' test='../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem/h:CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="packaged terminal air conditioner"] or ../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump/h:HeatPumpType[text() = "air-to-air"] or count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Unexpected cooling system types, only support dx systems</sch:assert>
-      <sch:assert role='ERROR' test='sum(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
-      <sch:assert role='ERROR' test='sum(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(../../../../h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
-      <sch:report role='WARN' test='number(h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
+    <sch:rule context='/h:HPXML[h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:OnOffThermostatDeadbandTemperature]/h:Building/h:BuildingDetails'>
+      <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:FractionCoolLoadServed > 0]) + count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionCoolLoadServed > 0]) &lt;= 1'>Expected at maximum one cooling system for each Building</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:FractionHeatLoadServed > 0]) + count(h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:FractionHeatLoadServed > 0]) &lt;= 1'>Expected at maximum one heating system for each Building</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
+      <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
+      <sch:report role='WARN' test='number(../../h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
     </sch:rule>
   </sch:pattern>
 

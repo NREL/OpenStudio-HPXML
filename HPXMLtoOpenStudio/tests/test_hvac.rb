@@ -795,7 +795,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
 
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.hvac_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
@@ -815,7 +815,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
 
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.hvac_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
@@ -842,7 +842,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingElectrics.size)
 
     # E+ thermostat
-    onoff_thermostat_deadband = hpxml.header.geb_onoff_thermostat_deadband
+    onoff_thermostat_deadband = hpxml.header.hvac_onoff_thermostat_deadband
     assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
     thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
     assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
