@@ -1747,24 +1747,26 @@ class HVACSizing
       #calculate rated coil bypass factor HERE, then use rated BF --> design BF --> design SHR --> design sensible capacity
 
       cool_airflow_rated = UnitConversions.convert(cool_cap_rated, 'Btu/hr', 'ton')*hvac_cooling.additional_properties.cool_rated_cfm_per_ton[-1] #rated cfm, check whether cfm/ton is net or gross?
-      #following Calculate max rated cfm section in hvac.rb, which sets rated airflow to the product of detailed performance capacity and the last element of cool_rated_cfm_per_ton array
+      #following Calculate max rated cfm section in hvac.rb, which sets rated airflow to the product of detailed performance capacity and the last (highest speed?) element of cool_rated_cfm_per_ton array
       #for base.xml, cool_airflow_rated = 705.6 cfm and hvac_sizings.Cool_Airflow = 715.96 cfm
-      #assuming hvac_sizings.Cool_Airflow is the design airflow rate, inferred from comments in calc_airflow_rate_manual_s code
-      #note: using MJ cooling setpoint as EDB ignores return duct losses
+      #assuming hvac_sizings.Cool_Airflow is the design airflow rate, inferred from comments in calc_airflow_rate_manual_s
+      #note: using MJ cooling setpoint as EDB in Psychrometrics.calculateSHR() ignores return duct losses
 
-      hvac_cooling_ap.design_shr = Psychrometrics.calculateSHR(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm','psi'), cool_cap_design, hvac_sizings.Cool_Airflow, hvac_cooling_ap.a_o, hr_indoor_cooling)
+      hr_indoor_cooling_local = calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, mj.cool_setpoint, mj.p_atm)
+      #hr_indoor_cooling is calculated above in the script, but is calculated after the method call of apply_hvac_equipment_adjustments. Therefore, it needs to calculated from MJ objects locally in apply_hvac_equipment_adjustments for use in CalculateSHR(). 
+
+      hvac_cooling_ap.rated_shr = Psychrometrics.CalculateSHR(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, hvac_cooling_ap.a_o, hr_indoor_cooling_local)
       #Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor
       #coil Ao needs to be in SI units, currently 0.38 for base.xml --> check if unit conversion is necessary?
-      puts(hvac_cooling_ap.design_shr)
+      puts(hvac_cooling_shr)
+      puts(hvac_cooling_ap.rated_shr)
+
       sens_cap_design = cool_cap_design*hvac_cooling_shr_design
 
       lat_cap_design = [hvac_sizing_values.Cool_Load_Tot - sens_cap_design, 1.0].max
 
-      shr_biquadratic = get_shr_biquadratic
-      a_sens = shr_biquadratic[0]
-      b_sens = shr_biquadratic[1]
-      c_sens = shr_biquadratic[3]
-      d_sens = shr_biquadratic[5]
+      
+
 
       # Adjust Sizing
       if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
