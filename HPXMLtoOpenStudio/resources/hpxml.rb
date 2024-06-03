@@ -3271,8 +3271,7 @@ class HPXML < Object
     def is_exposed
       if HPXML::is_conditioned(self) &&
          (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
+          @exterior_adjacent_to == LocationOtherNonFreezingSpace)
         return true
       end
 
@@ -3472,8 +3471,7 @@ class HPXML < Object
     def is_exposed
       if HPXML::is_conditioned(self) &&
          (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
+          @exterior_adjacent_to == LocationOtherNonFreezingSpace)
         return true
       end
 
@@ -3737,10 +3735,8 @@ class HPXML < Object
     end
 
     def is_exposed
-      # Ground shouldn't be included considering this is for infiltration?
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
+      # Ground shouldn't be included considering this is for infiltration
+      if HPXML::is_conditioned(self) && @exterior_adjacent_to == LocationOtherNonFreezingSpace
         return true
       end
 
