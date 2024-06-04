@@ -3269,7 +3269,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      return is_exposed(self)
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3463,7 +3463,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      return is_exposed(self)
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3723,7 +3723,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      return is_exposed(self)
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
