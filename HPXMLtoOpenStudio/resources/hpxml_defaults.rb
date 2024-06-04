@@ -1931,7 +1931,7 @@ class HPXMLDefaults
         end
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_fan_power_rated(cooling_system, use_eer)
-        HVAC.set_cool_curves_central_air_source(runner, cooling_system, use_eer)
+        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -1959,7 +1959,7 @@ class HPXMLDefaults
         end
         HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_central_air_source(runner, heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type

@@ -1,65 +1,33 @@
 # frozen_string_literal: true
 
-# TODO
-class Psychrometrics
-  # TODO
+# Collection of helper methods for performing psychrometric calculations.
+module Psychrometrics
+  # Calculate the latent heat of vaporization at a given drybulb temperature.
+  # Valid for temperatures between 0 and 200 degC (32 - 392 degF)
   #
-  # @param t [TODO] TODO
-  # @return [TODO] TODO
+  # Source: Based on correlation from steam tables - "Introduction to
+  # Thermodynamics, Classical and Statistical" by Sonntag and Wylen
+  #
+  # H_fg = 2518600 - 2757.1*T (J/kg with T in degC)
+  #      = 2581600 - 2757.1*(T - 32)*5/9 (J/kg with T in degF)
+  #      = 2581600 - 1531.72*T + 49015.1 (J/kg with T in degF)
+  #      = 1083 - 0.6585*T + 21.07 (Btu/lbm with T in degF)
+  #
+  # @param t [float] temperature (degF)
+  # @return [float] latent heat of vaporization (Btu/lbm)
   def self.H_fg_fT(t)
-    '''
-    Description:
-    ------------
-        Calculate the latent heat of vaporization at a given drybulb
-        temperature.
-
-        Valid for temperatures between 0 and 200 degC (32 - 392 degF)
-
-    Source:
-    -------
-        Based on correlation from steam tables - "Introduction to
-        Thermodynamics, Classical and Statistical" by Sonntag and Wylen
-
-        H_fg = 2518600 - 2757.1*T (J/kg with T in degC)
-             = 2581600 - 2757.1*(T - 32)*5/9 (J/kg with T in degF)
-             = 2581600 - 1531.72*T + 49015.1 (J/kg with T in degF)
-             = 1083 - 0.6585*T + 21.07 (Btu/lbm with T in degF)
-
-    Inputs:
-    -------
-        T       float      temperature         (degF)
-
-    Outputs:
-    --------
-        H_fg    float      latent heat of vaporization (Btu/lbm)
-    '''
     h_fg = 1083 - 0.6585 * t + 21.07
 
     return h_fg
   end
 
-  # TODO
+  # Calculate the saturation pressure of water vapor at a given temperature
   #
-  # @param tdb [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @return [float] saturated vapor pressure (psia)
   def self.Psat_fT(tdb)
-    '''
-    Description:
-    ------------
-        Calculate the saturation pressure of water vapor at a given temperature
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature      (degF)
-
-    Outputs:
-    --------
-        Psat    float      saturated vapor pressure (psia)
-    '''
     c1 = -1.0214165e4
     c2 = -4.8932428
     c3 = -5.3765794e-3
@@ -87,29 +55,14 @@ class Psychrometrics
     return psat
   end
 
-  # TODO
+  # Calculate the saturation temperature of water vapor at a given pressure
+  #
+  # Source: 2009 ASHRAE Handbook
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @param p [float] pressure (psia)
+  # @return [float] saturated vapor temperature (degF)
   def self.Tsat_fP(runner, p)
-    '''
-    Description:
-    ------------
-        Calculate the saturation temperature of water vapor at a given pressure
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        P       float      pressure                    (psia)
-
-    Outputs:
-    --------
-        Tsat    float      saturated vapor temperature (degF)
-    '''
     # Initialize
     tsat = 212.0 # (degF)
     tsat1 = tsat # (degF)
@@ -141,32 +94,15 @@ class Psychrometrics
     return tsat
   end
 
-  # TODO
+  # Calculate the drybulb temperature at saturation a given enthalpy and pressure.
+  #
+  # Source: Based on TAIRSAT f77 code in ResAC (Brandemuehl)
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param h [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @param h [float] enthalpy (Btu/lbm)
+  # @param p [float] pressure (psia)
+  # @return [float] drybulb temperature (degF)
   def self.Tsat_fh_P(runner, h, p)
-    '''
-    Description:
-    ------------
-        Calculate the drybulb temperature at saturation a given enthalpy and
-        pressure.
-
-    Source:
-    -------
-        Based on TAIRSAT f77 code in ResAC (Brandemuehl)
-
-    Inputs:
-    -------
-        h       float      enathalpy           (Btu/lbm)
-        P       float      pressure            (psia)
-
-    Outputs:
-    --------
-        Tdb     float      drybulb temperature (degF)
-    '''
     # Initialize
     tdb = 50
     tdb1 = tdb # (degF)
@@ -198,184 +134,79 @@ class Psychrometrics
     return tdb
   end
 
-  # TODO
+  # Calculate the density of dry air at a given drybulb temperature, humidity ratio, and pressure.
   #
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @param p [float] pressure (psia)
+  # @return [float] density of dry air (lbm/ft3)
   def self.rhoD_fT_w_P(tdb, w, p)
-    '''
-    Description:
-    ------------
-        Calculate the density of dry air at a given drybulb temperature,
-        humidity ratio and pressure.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degF)
-        w       float      humidity ratio        (lbm/lbm)
-        P       float      pressure              (psia)
-
-    Outputs:
-    --------
-        rhoD    float      density of dry air    (lbm/ft3)
-    '''
     pair = Gas.PsychMassRat * p / (Gas.PsychMassRat + w) # (psia)
     rhoD = UnitConversions.convert(pair, 'psi', 'Btu/ft^3') / Gas.Air.r / UnitConversions.convert(tdb, 'F', 'R') # (lbm/ft3)
 
     return rhoD
   end
 
-  # TODO
+  # Calculate the enthalpy at a given drybulb temperature and humidity ratio (SI units).
   #
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degC)
+  # @param w [float] humidity ratio (kg/kg)
+  # @return [float] enthalpy (J/kg)
   def self.h_fT_w_SI(tdb, w)
-    '''
-    Description:
-    ------------
-        Calculate the enthalpy at a given drybulb temperature
-        and humidity ratio.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degC)
-        w       float      humidity ratio        (kg/kg)
-
-    Outputs:
-    --------
-        h       float      enthalpy              (J/kg)
-    '''
     h = 1000.0 * (1.006 * tdb + w * (2501.0 + 1.86 * tdb))
     return h
   end
 
-  # TODO
+  # Calculate the enthalpy at a given drybulb temperature and humidity ratio.
   #
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @return [float] enthalpy (Btu/lb)
   def self.h_fT_w(tdb, w)
-    '''
-    Description:
-    ------------
-        Calculate the enthalpy at a given drybulb temperature
-        and humidity ratio.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degF)
-        w       float      humidity ratio        (lbm/lbm)
-
-    Outputs:
-    --------
-        h       float      enthalpy              (Btu/lb)
-    '''
     h = h_fT_w_SI(UnitConversions.convert(tdb, 'F', 'C'), w)
     h *= UnitConversions.convert(1.0, 'J', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
     return h
   end
 
-  # TODO
+  # Calculate the humidity ratio at a given drybulb temperature and enthalpy (SI units).
   #
-  # @param tdb [TODO] TODO
-  # @param h [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degC)
+  # @param h [float] enthalpy (J/kg)
+  # @return [float] humidity ratio (kg/kg)
   def self.w_fT_h_SI(tdb, h)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given drybulb temperature
-        and enthalpy.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature  (degC)
-        h       float      enthalpy              (J/kg)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (kg/kg)
-    '''
     w = (h / 1000.0 - 1.006 * tdb) / (2501.0 + 1.86 * tdb)
     return w
   end
 
-  # TODO
+  # Calculate standard pressure of air at a given altitude
   #
-  # @param z [TODO] TODO
-  # @return [TODO] TODO
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param z [float] altitude (ft)
+  # @return [float] barometric pressure (psia)
   def self.Pstd_fZ(z)
-    '''
-    Description:
-    ------------
-        Calculate standard pressure of air at a given altitude
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Z        float        altitude     (feet)
-
-    Outputs:
-    --------
-        Pstd    float        barometric pressure (psia)
-    '''
-
     pstd = UnitConversions.convert(((1 - 6.8754e-6 * z)**5.2559), 'atm', 'psi')
     return pstd
   end
 
-  # TODO
+  # Calculate the wetbulb temperature at a given drybulb temperature, humidity ratio, and pressure.
+  #
+  # Source: Based on WETBULB f77 code in ResAC (Brandemuehl)
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
+  # @param tdb [float] drybulb temperature (degF)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @param p [float] pressure (psia)
+  # @return [float] wetbulb temperature (degF)
   def self.Twb_fT_w_P(runner, tdb, w, p)
-    '''
-    Description:
-    ------------
-        Calculate the wetbulb temperature at a given drybulb temperature,
-        humidity ratio, and pressure.
-
-    Source:
-    -------
-        Based on WETBULB f77 code in ResAC (Brandemuehl)
-
-        Converted into IP units
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature (degF)
-        w       float      humidity ratio      (lbm/lbm)
-        P       float      pressure            (psia)
-
-    Outputs:
-    --------
-        Twb     float      wetbulb temperature (degF)
-    '''
     # Initialize
     tboil = self.Tsat_fP(runner, p) # (degF)
     twb = [[tdb, tboil - 0.1].min, 0.0].max # (degF)
@@ -420,70 +251,187 @@ class Psychrometrics
     return twb
   end
 
-  # TODO
+  # Calculate the humidity ratio at a given pressure and partial pressure.
   #
-  # @param p [TODO] TODO
-  # @param pw [TODO] TODO
-  # @return [TODO] TODO
+  # Source: Based on HUMRATIO f77 code in ResAC (Brandemuehl)
+  #
+  # @param p [float] pressure (psia)
+  # @param pw [float] partial pressure (psia)
+  # @return [float] humidity ratio (lbm/lbm)
   def self.w_fP(p, pw)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given pressure and partial pressure.
-
-    Source:
-    -------
-        Based on HUMRATIO f77 code in ResAC (Brandemuehl)
-
-    Inputs:
-    -------
-        P       float      pressure              (psia)
-        Pw      float      partial pressure      (psia)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (lbm/lbm)
-    '''
     w = Gas.PsychMassRat * pw / (p - pw)
     return w
   end
 
-  # TODO
+  # Calculate the drybulb temperature at a given humidity ratio and enthalpy (SI units).
+  #
+  # @param w [float] humidity ratio (kg/kg)
+  # @param h [float] enthalpy (J/kg)
+  # @return [float] drybulb temperature (degC)
+  def self.T_fw_h_SI(w, h)
+    t = (h / 1000 - w * 2501) / (1.006 + w * 1.86)
+    return t
+  end
+
+  # Calculate the relative humidity at a given drybulb temperature, humidity ratio, and pressure (SI units).
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degC)
+  # @param w [float] humidity ratio (g/g)
+  # @param p [float] pressure (kPa)
+  # @return [float] relative humidity (1/1)
+  def self.R_fT_w_P_SI(tdb, w, p)
+    return self.R_fT_w_P(UnitConversions.convert(tdb, 'C', 'F'), w, UnitConversions.convert(p, 'kPa', 'psi'))
+  end
+
+  # Calculate the dewpoint temperature at a given pressure and humidity ratio (SI units).
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param p [float] pressure (kPa)
+  # @param w [float] humidity ratio (g/g)
+  # @return [float] dewpoint temperature (degC)
+  def self.Tdp_fP_w_SI(p, w)
+    return UnitConversions.convert(self.Tdp_fP_w(UnitConversions.convert(p, 'kPa', 'psi'), w), 'F', 'C')
+  end
+
+  # Calculate the humidity ratio at a given drybulb temperature, wetbulb temperature, and pressure (SI units).
+  #
+  # Source: ASHRAE Handbook 2009
+  #
+  # @param tdb [float] drybulb temperature (degC)
+  # @param twb [float] wetbulb temperature (degC)
+  # @param p [float] pressure (kPa)
+  # @return [float] humidity ratio (g/g)
+  def self.w_fT_Twb_P_SI(tdb, twb, p)
+    return w_fT_Twb_P(UnitConversions.convert(tdb, 'C', 'F'), UnitConversions.convert(twb, 'C', 'F'), UnitConversions.convert(p, 'kPa', 'psi'))
+  end
+
+  # Calculate the humidity ratio at a given drybulb temperature, wetbulb temperature, and pressure.
+  #
+  # Source: ASHRAE Handbook 2009
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @param twb [float] wetbulb temperature (degF)
+  # @param p [float] pressure (psia)
+  # @return [float] humidity ratio (lbm/lbm)
+  def self.w_fT_Twb_P(tdb, twb, p)
+    w_star = w_fP(p, self.Psat_fT(twb))
+
+    w = ((Liquid.H2O_l.h_fg - (Liquid.H2O_l.cp - Gas.H2O_v.cp) * twb) * w_star - Gas.Air.cp * (tdb - twb)) / (Liquid.H2O_l.h_fg + Gas.H2O_v.cp * tdb - Liquid.H2O_l.cp * twb) # (lbm/lbm)
+
+    return w
+  end
+
+  # Calculate the relative humidity at a given drybulb temperature, humidity ratio, and pressure.
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @param p [float] pressure (psia)
+  # @return [float] relative humidity (1/1)
+  def self.R_fT_w_P(tdb, w, p)
+    pw = self.Pw_fP_w(p, w)
+    r = pw / self.Psat_fT(tdb)
+    return r
+  end
+
+  # Calculate the partial vapor pressure at a given pressure and humidity ratio.
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param p [float] pressure (psia)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @return [float] partial pressure (psia)
+  def self.Pw_fP_w(p, w)
+    pw = p * w / (Gas.PsychMassRat + w)
+    return pw
+  end
+
+  # Calculate the dewpoint temperature at a given pressure and humidity ratio.
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param p [float] pressure (psia)
+  # @param w [float] humidity ratio (lbm/lbm)
+  # @return [float] dewpoint temperature (degF)
+  def self.Tdp_fP_w(p, w)
+    c14 = 100.45
+    c15 = 33.193
+    c16 = 2.319
+    c17 = 0.17074
+    c18 = 1.2063
+
+    pw = self.Pw_fP_w(p, w) # (psia)
+    alpha = Math.log(pw)
+    tdp1 = c14 + c15 * alpha + c16 * alpha**2 + c17 * alpha**3 + c18 * pw**0.1984
+    tdp2 = 90.12 + 26.142 * alpha + 0.8927 * alpha**2
+    if tdp1 >= Liquid.H2O_l.t_frz
+      return tdp1
+    else
+      return tdp2
+    end
+  end
+
+  # Calculate the humidity ratio at a given drybulb temperature, relative humidity, and pressure.
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degF)
+  # @param r [float] relative humidity (1/1)
+  # @param p [float] pressure (psia)
+  # @return [float] humidity ratio (lbm/lbm)
+  def self.w_fT_R_P(tdb, r, p)
+    pws = self.Psat_fT(tdb)
+    pw = r * pws
+    w = 0.62198 * pw / (p - pw)
+
+    return w
+  end
+
+  # Calculate the humidity ratio at a given drybulb temperature, relative humidity, and pressure (SI units).
+  #
+  # Source: 2009 ASHRAE Handbook
+  #
+  # @param tdb [float] drybulb temperature (degC)
+  # @param r [float] relative humidity (1/1)
+  # @param p [float] pressure (kPa)
+  # @return [float] humidity ratio (g/g)
+  def self.w_fT_R_P_SI(tdb, r, p)
+    pws = UnitConversions.convert(self.Psat_fT(UnitConversions.convert(tdb, 'C', 'F')), 'psi', 'kPa')
+    pw = r * pws
+    w = 0.62198 * pw / (p - pw)
+    return w
+  end
+
+  # Calculate the wetbulb temperature at a given drybulb temperature, relative humidity, and pressure.
   #
   # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param dBin [TODO] TODO
-  # @param p [TODO] TODO
-  # @param qdot [TODO] TODO
-  # @param cfm [TODO] TODO
-  # @param shr [TODO] TODO
-  # @param win [TODO] TODO
-  # @return [TODO] TODO
-  def self.CoilAoFactor(runner, dBin, p, qdot, cfm, shr, win)
-    '''
-    Description:
-    ------------
-        Find the coil Ao factor at the given incoming air state (entering drybubl and wetbulb) and CFM,
-        total capacity and SHR
+  # @param tdb [float] drybulb temperature (degF)
+  # @param r [float] relative humidity (1/1)
+  # @param p [float] pressure (psia)
+  # @return [float] wetbulb temperature (degF)
+  def self.Twb_fT_R_P(runner, tdb, r, p)
+    w = w_fT_R_P(tdb, r, p)
+    twb = self.Twb_fT_w_P(runner, tdb, w, p)
+    return twb
+  end
 
-
-    Source:
-    -------
-        EnergyPlus source code
-
-    Inputs:
-    -------
-        Tdb    float    Entering Dry Bulb (degF)
-        P      float    Barometric pressure (psi)
-        Qdot   float    Total capacity of unit (kBtu/h)
-        cfm    float    Volumetric flow rate of unit (CFM)
-        shr    float    Sensible heat ratio
-        win    float    Entering humidity ratio
-    Outputs:
-    --------
-        Ao    float    Coil Ao Factor
-    '''
-
-    bf = self.CoilBypassFactor(runner, dBin, p, qdot, cfm, shr, win)
+  # Find the coil Ao factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
+  #
+  # Source: EnergyPlus source code
+  #
+  # @param dBin [float] Entering Dry Bulb (degF)
+  # @param p [float] Barometric pressure (psi)
+  # @param qdot [float] Total capacity of unit (kBtu/h)
+  # @param cfm [float] Volumetric flow rate of unit (CFM)
+  # @param shr [float] Sensible heat ratio
+  # @param win [float] Entering humidity ratio
+  # @return [float] Coil Ao Factor
+  def self.CoilAoFactor(dBin, p, qdot, cfm, shr, win)
+    bf = self.CoilBypassFactor(dBin, p, qdot, cfm, shr, win)
     mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
 
     ntu = -1.0 * Math.log(bf)
@@ -491,41 +439,18 @@ class Psychrometrics
     return ao
   end
 
-  # TODO
+  # Find the coil bypass factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param dBin [TODO] TODO
-  # @param p [TODO] TODO
-  # @param qdot [TODO] TODO
-  # @param cfm [TODO] TODO
-  # @param shr [TODO] TODO
-  # @param win [TODO] TODO
-  # @return [TODO] TODO
-  def self.CoilBypassFactor(runner, dBin, p, qdot, cfm, shr, win)
-    '''
-    Description:
-    ------------
-        Find the coil bypass factor at the given incoming air state (entering drybubl and wetbulb) and CFM,
-        total capacity and SHR
-
-
-    Source:
-    -------
-        EnergyPlus source code
-
-    Inputs:
-    -------
-        Tdb    float    Entering Dry Bulb (degF)
-        P      float    Barometric pressure (psi)
-        Qdot   float    Total capacity of unit (kBtu/h)
-        cfm    float    Volumetric flow rate of unit (CFM)
-        shr    float    Sensible heat ratio
-        win    float    Entering humidity ratio
-    Outputs:
-    --------
-        CBF    float    Coil Bypass Factor
-    '''
-
+  # Source: EnergyPlus source code
+  #
+  # @param dBin [float] Entering Dry Bulb (degF)
+  # @param p [float] Barometric pressure (psi)
+  # @param qdot [float] Total capacity of unit (kBtu/h)
+  # @param cfm [float] Volumetric flow rate of unit (CFM)
+  # @param shr [float] Sensible heat ratio
+  # @param win [float] Entering humidity ratio
+  # @return [float] Coil Bypass Factor
+  def self.CoilBypassFactor(dBin, p, qdot, cfm, shr, win)
     mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
 
     tin = UnitConversions.convert(dBin, 'F', 'C')
@@ -543,7 +468,7 @@ class Psychrometrics
     dT = tin - tout
     m_c = dW / dT
 
-    t_ADP = self.Tdp_fP_w_SI(runner, p, wout) # Initial guess for iteration
+    t_ADP = self.Tdp_fP_w_SI(p, wout) # Initial guess for iteration
 
     if shr == 1
       w_ADP = w_fT_Twb_P_SI(t_ADP, t_ADP, p)
@@ -587,360 +512,18 @@ class Psychrometrics
     return [bF, 0.01].max
   end
 
-  # TODO
+  # Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor.
   #
-  # @param dBin [TODO] TODO
-  # @param p [TODO] TODO
-  # @param cfm [TODO] TODO
-  # @param win [TODO] TODO
-  # @return [TODO] TODO
-  def self.CalculateMassflowRate(dBin, p, cfm, win)
-    '''
-    Description:
-    ------------
-        Calculate the mass flow rate at the given incoming air state (entering drybubl and wetbulb) and CFM
-
-    Source:
-    -------
-
-
-    Inputs:
-    -------
-        Tdb    float    Entering Dry Bulb (degF)
-        P      float    Barometric pressure (psi)
-        cfm    float    Volumetric flow rate of unit (CFM)
-        win    float    Entering humidity ratio
-    Outputs:
-    --------
-        mfr    float    mass flow rate (lbm/min)
-    '''
-    rho_in = rhoD_fT_w_P(dBin, win, p)
-    mfr = cfm * rho_in
-    return mfr
-  end
-
-  # TODO
+  # Source: EnergyPlus source code
   #
-  # @param w [TODO] TODO
-  # @param h [TODO] TODO
-  # @return [TODO] TODO
-  def self.T_fw_h_SI(w, h)
-    '''
-    Description:
-    ------------
-        Calculate the drybulb temperature at a given humidity ratio
-        and enthalpy.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        w       float      humidity ratio        (kg/kg)
-        h       float      enthalpy              (J/kg)
-
-    Outputs:
-    --------
-        T       float      drybulb temperature  (degC)
-    '''
-
-    t = (h / 1000 - w * 2501) / (1.006 + w * 1.86)
-    return t
-  end
-
-  # TODO
-  #
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.R_fT_w_P_SI(tdb, w, p)
-    '''
-    Description:
-    ------------
-        Calculate the relative humidity at a given drybulb temperature,
-        humidity ratio and pressure.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degC)
-        w       float      humidity ratio        (g/g)
-        P       float      pressure              (kPa)
-
-    Outputs:
-    --------
-        R       float      relative humidity     (1/1)
-    '''
-    return self.R_fT_w_P(UnitConversions.convert(tdb, 'C', 'F'), w, UnitConversions.convert(p, 'kPa', 'psi'))
-  end
-
-  # TODO
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param p [TODO] TODO
-  # @param w [TODO] TODO
-  # @return [TODO] TODO
-  def self.Tdp_fP_w_SI(runner, p, w)
-    '''
-    Description:
-    ------------
-        Calculate the dewpoint temperature at a given pressure
-        and humidity ratio.
-
-        There are two available methods:
-
-        CalcMethod == 1: Uses the correlation method from ASHRAE Handbook
-        CalcMethod <> 1: Uses the saturation temperature at the partial
-                         pressure
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        P       float      pressure              (kPa)
-        w       float      humidity ratio        (g/g)
-
-    Outputs:
-    --------
-        Tdp     float      dewpoint temperature  (degC)
-    '''
-    return UnitConversions.convert(self.Tdp_fP_w(runner, UnitConversions.convert(p, 'kPa', 'psi'), w), 'F', 'C')
-  end
-
-  # TODO
-  #
-  # @param tdb [TODO] TODO
-  # @param twb [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.w_fT_Twb_P_SI(tdb, twb, p)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given drybulb temperature,
-        wetbulb temperature and pressure.
-
-    Source:
-    -------
-        ASHRAE Handbook 2009
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degC)
-        Twb     float      wetbulb temperature   (degC)
-        P       float      pressure              (kPa)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (g/g)
-    '''
-
-    return w_fT_Twb_P(UnitConversions.convert(tdb, 'C', 'F'), UnitConversions.convert(twb, 'C', 'F'), UnitConversions.convert(p, 'kPa', 'psi'))
-  end
-
-  # TODO
-  #
-  # @param tdb [TODO] TODO
-  # @param twb [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.w_fT_Twb_P(tdb, twb, p)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given drybulb temperature,
-        wetbulb temperature and pressure.
-
-    Source:
-    -------
-        ASHRAE Handbook 2009
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degF)
-        Twb     float      wetbulb temperature   (degF)
-        P       float      pressure              (psia)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (lbm/lbm)
-    '''
-    w_star = w_fP(p, self.Psat_fT(twb))
-
-    w = ((Liquid.H2O_l.h_fg - (Liquid.H2O_l.cp - Gas.H2O_v.cp) * twb) * w_star - Gas.Air.cp * (tdb - twb)) / (Liquid.H2O_l.h_fg + Gas.H2O_v.cp * tdb - Liquid.H2O_l.cp * twb) # (lbm/lbm)
-
-    return w
-  end
-
-  # TODO
-  #
-  # @param tdb [TODO] TODO
-  # @param w [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.R_fT_w_P(tdb, w, p)
-    '''
-    Description:
-    ------------
-        Calculate the relative humidity at a given drybulb temperature,
-        humidity ratio and pressure.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degF)
-        w       float      humidity ratio        (lbm/lbm)
-        P       float      pressure              (psia)
-
-    Outputs:
-    --------
-        R       float      relative humidity     (1/1)
-    '''
-    pw = self.Pw_fP_w(p, w)
-    r = pw / self.Psat_fT(tdb)
-    return r
-  end
-
-  # TODO
-  #
-  # @param p [TODO] TODO
-  # @param w [TODO] TODO
-  # @return [TODO] TODO
-  def self.Pw_fP_w(p, w)
-    '''
-    Description:
-    ------------
-        Calculate the partial vapor pressure at a given pressure and
-        humidity ratio.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        P       float      pressure              (psia)
-        w       float      humidity ratio        (lbm/lbm)
-
-    Outputs:
-    --------
-        Pw      float      partial pressure      (psia)
-    '''
-
-    pw = p * w / (Gas.PsychMassRat + w)
-    return pw
-  end
-
-  # TODO
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param p [TODO] TODO
-  # @param w [TODO] TODO
-  # @return [TODO] TODO
-  def self.Tdp_fP_w(runner, p, w)
-    '''
-    Description:
-    ------------
-        Calculate the dewpoint temperature at a given pressure
-        and humidity ratio.
-
-        There are two available methods:
-
-        CalcMethod == 1: Uses the correlation method from ASHRAE Handbook
-        CalcMethod <> 1: Uses the saturation temperature at the partial
-                         pressure
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        P       float      pressure              (psia)
-        w       float      humidity ratio        (lbm/lbm)
-
-    Outputs:
-    --------
-        Tdp     float      dewpoint temperature  (degF)
-    '''
-
-    calcMethod = 1
-
-    if calcMethod == 1
-
-      c14 = 100.45
-      c15 = 33.193
-      c16 = 2.319
-      c17 = 0.17074
-      c18 = 1.2063
-
-      pw = self.Pw_fP_w(p, w) # (psia)
-      alpha = Math.log(pw)
-      tdp1 = c14 + c15 * alpha + c16 * alpha**2 + c17 * alpha**3 + c18 * pw**0.1984
-      tdp2 = 90.12 + 26.142 * alpha + 0.8927 * alpha**2
-      if tdp1 >= Liquid.H2O_l.t_frz
-        tdp = tdp1
-      else
-        tdp = tdp2
-      end
-
-    else
-
-      # based on DEWPOINT f77 code in ResAC (Brandemuehl)
-      if w < Constants.small
-        tdp = -999.0
-      else
-        pw = self.Pw_fP_w(p, w)
-        tdp = self.Tsat_fP(runner, pw)
-      end
-
-    end
-    return tdp
-  end
-
-  # TODO
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param dBin [TODO] TODO
-  # @param p [TODO] TODO
-  # @param q [TODO] TODO
-  # @param cfm [TODO] TODO
-  # @param ao [TODO] TODO
-  # @param win [TODO] TODO
-  # @return [TODO] TODO
-  def self.CalculateSHR(runner, dBin, p, q, cfm, ao, win)
-    '''
-    Description:
-    ------------
-        Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil
-        Ao factor
-
-    Source:
-    -------
-        EnergyPlus source code
-
-    Inputs:
-    -------
-        Tdb    float    Entering Dry Bulb (degF)
-        P      float    Barometric pressure (psi)
-        Q      float    Total capacity of unit (kBtu/h)
-        cfm    float    Volumetric flow rate of unit (CFM)
-        Ao     float    Coil Ao factor (=UA/Cp - IN SI UNITS)
-    Outputs:
-    --------
-        SHR    float    Sensible Heat Ratio
-    '''
-
+  # @param dBin [float] Entering Dry Bulb (degF)
+  # @param p [float] Barometric pressure (psi)
+  # @param q [float] Total capacity of unit (kBtu/h)
+  # @param cfm [float] Volumetric flow rate of unit (CFM)
+  # @param ao [float] Coil Ao factor (=UA/Cp - IN SI UNITS)
+  # @param win [float] Entering humidity ratio
+  # @return [float] Sensible Heat Ratio
+  def self.CalculateSHR(dBin, p, q, cfm, ao, win)
     mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
     bf = Math.exp(-1.0 * ao / mfr)
 
@@ -954,7 +537,7 @@ class Psychrometrics
     # W_ADP = self.w_fT_h_SI(T_ADP, H_ADP)
 
     # Initialize
-    t_ADP = self.Tdp_fP_w_SI(runner, p, win)
+    t_ADP = self.Tdp_fP_w_SI(p, win)
     t_ADP_1 = t_ADP # (degC)
     t_ADP_2 = t_ADP # (degC)
     w_ADP = w_fT_R_P_SI(t_ADP, 1.0, p)
@@ -990,104 +573,16 @@ class Psychrometrics
     return shr
   end
 
-  # TODO
+  # Calculate the mass flow rate at the given incoming air state (entering drybulb and wetbulb) and CFM.
   #
-  # @param tdb [TODO] TODO
-  # @param r [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.w_fT_R_P(tdb, r, p)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given drybulb temperature,
-        relative humidity and pressure.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degF)
-        R       float      relative humidity     (1/1)
-        P       float      pressure              (psia)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (lbm/lbm)
-    '''
-    pws = self.Psat_fT(tdb)
-    pw = r * pws
-    w = 0.62198 * pw / (p - pw)
-
-    return w
-  end
-
-  # TODO
-  #
-  # @param tdb [TODO] TODO
-  # @param r [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.w_fT_R_P_SI(tdb, r, p)
-    '''
-    Description:
-    ------------
-        Calculate the humidity ratio at a given drybulb temperature,
-        relative humidity and pressure.
-
-    Source:
-    -------
-        2009 ASHRAE Handbook
-
-    Inputs:
-    -------
-        Tdb     float      drybulb temperature   (degC)
-        R       float      relative humidity     (1/1)
-        P       float      pressure              (kPa)
-
-    Outputs:
-    --------
-        w       float      humidity ratio        (g/g)
-    '''
-    pws = UnitConversions.convert(self.Psat_fT(UnitConversions.convert(tdb, 'C', 'F')), 'psi', 'kPa')
-    pw = r * pws
-    w = 0.62198 * pw / (p - pw)
-    return w
-  end
-
-  # TODO
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param tdb [TODO] TODO
-  # @param r [TODO] TODO
-  # @param p [TODO] TODO
-  # @return [TODO] TODO
-  def self.Twb_fT_R_P(runner, tdb, r, p)
-    '''
-    Description:
-    ------------
-        Calculate the wetbulb temperature at a given drybulb temperature,
-        relative humidity, and pressure.
-
-    Source:
-    -------
-        None (calls other pyschrometric functions)
-
-    Inputs:
-    -------
-        Tdb    float    drybulb temperature    (degF)
-        R      float    relative humidity      (1/1)
-        P      float    pressure               (psia)
-
-    Output:
-    ------
-        Twb    float    wetbulb temperautre    (degF)
-    '''
-
-    w = w_fT_R_P(tdb, r, p)
-    twb = self.Twb_fT_w_P(runner, tdb, w, p)
-    return twb
+  # @param dBin [float] Entering Dry Bulb (degF)
+  # @param p [float] Barometric pressure (psi)
+  # @param cfm [float] Volumetric flow rate of unit (CFM)
+  # @param win [float] Entering humidity ratio
+  # @return [float] mass flow rate (lbm/min)
+  def self.CalculateMassflowRate(dBin, p, cfm, win)
+    rho_in = rhoD_fT_w_P(dBin, win, p)
+    mfr = cfm * rho_in
+    return mfr
   end
 end

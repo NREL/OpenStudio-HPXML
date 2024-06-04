@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>972e28a4-01c0-47cd-bdb0-b30a1546f4e4</version_id>
-  <version_modified>2024-06-04T15:41:46Z</version_modified>
+  <version_id>b2a2f13e-c21d-4003-a16b-9e02201aaac9</version_id>
+  <version_modified>2024-06-04T23:28:04Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -351,7 +351,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>32F947AA</checksum>
+      <checksum>A05E25D7</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -381,7 +381,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ECF7FD90</checksum>
+      <checksum>B690283F</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -435,7 +435,7 @@
       <filename>psychrometrics.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AE8970B4</checksum>
+      <checksum>77EDD13C</checksum>
     </file>
     <file>
       <filename>pv.rb</filename>
@@ -603,7 +603,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C3603A23</checksum>
+      <checksum>9D194389</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>

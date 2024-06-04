@@ -1367,11 +1367,10 @@ class HVAC
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param cooling_system [TODO] TODO
   # @param use_eer [TODO] TODO
   # @return [TODO] TODO
-  def self.set_cool_curves_central_air_source(runner, cooling_system, use_eer = false)
+  def self.set_cool_curves_central_air_source(cooling_system, use_eer = false)
     clg_ap = cooling_system.additional_properties
     clg_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
@@ -1407,7 +1406,7 @@ class HVAC
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
     end
 
-    set_cool_rated_shrs_gross(runner, cooling_system)
+    set_cool_rated_shrs_gross(cooling_system)
   end
 
   # TODO
@@ -3486,10 +3485,9 @@ class HVAC
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
   # @param cooling_system [TODO] TODO
   # @return [TODO] TODO
-  def self.set_cool_rated_shrs_gross(runner, cooling_system)
+  def self.set_cool_rated_shrs_gross(cooling_system)
     clg_ap = cooling_system.additional_properties
 
     if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
@@ -3508,12 +3506,12 @@ class HVAC
 
       p_atm = UnitConversions.convert(1, 'atm', 'psi')
 
-      ao = Psychrometrics.CoilAoFactor(runner, dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
+      ao = Psychrometrics.CoilAoFactor(dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
 
       clg_ap.cool_rated_shrs_gross = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
         # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
-        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(runner, dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao, win), 0.98].min
+        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao, win), 0.98].min
       end
     end
   end
