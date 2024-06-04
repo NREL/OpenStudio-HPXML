@@ -3269,13 +3269,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace)
-        return true
-      end
-
-      return false
+      return is_exposed(self)
     end
 
     def is_interior
@@ -3469,13 +3463,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace)
-        return true
-      end
-
-      return false
+      return is_exposed(self)
     end
 
     def is_interior
@@ -3735,12 +3723,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      # Ground shouldn't be included considering this is for infiltration
-      if HPXML::is_conditioned(self) && @exterior_adjacent_to == LocationOtherNonFreezingSpace
-        return true
-      end
-
-      return false
+      return is_exposed(self)
     end
 
     def is_interior
@@ -8358,6 +8341,16 @@ class HPXML < Object
 
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
+  end
+
+  def self.is_exposed(surface)
+    if HPXML::is_conditioned(surface) &&
+       (surface.exterior_adjacent_to == LocationOutside ||
+        surface.exterior_adjacent_to == LocationOtherNonFreezingSpace)
+      return true
+    end
+
+    return false
   end
 
   def self.is_adiabatic(surface)
