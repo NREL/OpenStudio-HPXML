@@ -3510,7 +3510,7 @@ class HVAC
 
       clg_ap.cool_rated_shrs_gross = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
-        # Calculate the SHR for each speed. Use minimum value of 0.98 to prevent E+ bypass factor calculation errors
+        # Calculate the SHR for each speed. Use maximum value of 0.98 to prevent E+ bypass factor calculation errors
         clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao, win), 0.98].min
       end
     end
