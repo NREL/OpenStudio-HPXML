@@ -5,10 +5,12 @@ class Fuel
   # TODO
   #
   # @param meters [TODO] TODO
+  # @param units [TODO] TODO
   # @return [TODO] TODO
-  def initialize(meters: [])
+  def initialize(meters: [], units:)
     @meters = meters
     @timeseries = []
+    @units = units
   end
   attr_accessor(:meters, :timeseries, :units)
 end
