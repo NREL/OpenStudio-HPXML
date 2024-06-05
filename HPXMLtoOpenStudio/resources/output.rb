@@ -108,6 +108,12 @@ class UHT
   Cooling = 'Cooling'
 end
 
+class ULT
+  # Unmet Loads Types
+  HotWaterShowerE = 'Hot Water Shower Energy'
+  HotWaterShowerUnmetTime = 'Hot Water Shower Unmet Time'
+end
+
 class RT
   # Resilience Types
   Battery = 'Battery'

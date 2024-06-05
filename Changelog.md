@@ -137,6 +137,7 @@ __New Features__
 - Allows above-grade basements/crawlspaces defined solely with Wall (not FoundationWall) elements.
 - Updates to 2022 EIA energy costs.
 - Added README.md documentation for all OpenStudio measures.
+- Added metrics for unmet hot water loads
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
