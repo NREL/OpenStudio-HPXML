@@ -4,7 +4,7 @@
 class ScheduleConstant
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -26,7 +26,7 @@ class ScheduleConstant
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param year [TODO] TODO
@@ -69,7 +69,7 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param weekday_month_by_hour_values [TODO] TODO
   # @param weekday_month_by_hour_values [TODO] TODO
@@ -158,7 +158,7 @@ class HourlyByMonthSchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -268,7 +268,7 @@ class HourlyByDaySchedule
   # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param weekday_day_by_hour_values [TODO] TODO
   # @param weekend_day_by_hour_values [TODO] TODO
@@ -357,7 +357,7 @@ class HourlyByDaySchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param num_days [TODO] TODO
@@ -466,7 +466,7 @@ class MonthWeekdayWeekendSchedule
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param weekday_hourly_values [TODO] TODO
   # @param weekend_hourly_values [TODO] TODO
@@ -598,7 +598,7 @@ class MonthWeekdayWeekendSchedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param year [TODO] TODO
   # @param begin_month [TODO] TODO
@@ -844,7 +844,7 @@ class Schedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param schedule [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
   # @return [TODO] TODO
@@ -894,7 +894,7 @@ class Schedule
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedule_name [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
@@ -1402,7 +1402,7 @@ class Schedule
 
   # TODO
   #
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.CeilingFanMonthlyMultipliers(weather:)
     return HVAC.get_default_ceiling_fan_months(weather).join(', ')
@@ -1712,7 +1712,7 @@ class Schedule
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param values [TODO] TODO
   # @return [TODO] TODO
   def self.create_ruleset_from_daily_season(model, values)
@@ -1819,7 +1819,7 @@ class Schedule
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedule_name [TODO] TODO
   # @param col_name [TODO] TODO
   # @return [TODO] TODO
@@ -1978,7 +1978,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedules_paths [TODO] TODO
   # @param year [TODO] TODO
   # @param unavailable_periods [TODO] TODO
@@ -2132,7 +2132,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param col_name [TODO] TODO
   # @param rows_to_skip [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
@@ -2374,7 +2374,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def set_unavailable_periods(runner, unavailable_periods)

@@ -4,13 +4,13 @@
 class Battery
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
-  # @param nbeds [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param pv_systems [TODO] TODO
   # @param battery [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)
     charging_schedule = nil

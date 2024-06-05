@@ -7,17 +7,17 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
-  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
-  # @param cfa [TODO] TODO
-  # @param ncfl_ag [TODO] TODO
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
   # @param duct_systems [TODO] TODO
   # @param airloop_map [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param frac_windows_operable [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -186,7 +186,7 @@ class Airflow
   # TODO
   #
   # @param vent_fan [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_mech_vent_fan_power(vent_fan, eri_version)
     # Returns fan power in W/cfm, based on ANSI 301
@@ -229,9 +229,9 @@ class Airflow
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
-  # @param cfa [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
@@ -279,12 +279,12 @@ class Airflow
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param vent_fan [TODO] TODO
-  # @param weather [WeatherProcess] TODO
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, cfa, nbeds, eri_version)
     # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
@@ -307,7 +307,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param site [TODO] TODO
   # @return [TODO] TODO
   def self.set_wind_speed_correction(model, site)
@@ -359,7 +359,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param ach [TODO] TODO
   # @param ela [TODO] TODO
@@ -428,7 +428,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param site [TODO] TODO
   # @param vent_fans_whf [TODO] TODO
   # @param open_window_area [TODO] TODO
@@ -613,7 +613,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param ems_var_name [TODO] TODO
   # @param ems_program [TODO] TODO
   # @return [TODO] TODO
@@ -629,8 +629,8 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param num_days_per_week [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
@@ -661,9 +661,9 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param loop_name [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.create_return_air_duct_zone(model, loop_name, unit_multiplier)
     # Create the return air plenum zone, space
@@ -708,7 +708,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [TODO] TODO
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param frac_lat [TODO] TODO
@@ -741,7 +741,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vent_fans_mech [TODO] TODO
   # @param airloop_map [TODO] TODO
   # @param unavailable_periods [TODO] TODO
@@ -791,7 +791,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param osm_object [TODO] TODO
   # @return [TODO] TODO
   def self.initialize_fan_objects(model, osm_object)
@@ -842,11 +842,11 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param ducts [TODO] TODO
   # @param object [TODO] TODO
   # @param vent_fans_mech [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
   def self.apply_ducts(model, ducts, object, vent_fans_mech, unit_multiplier, duct_lk_imbals)
@@ -1415,7 +1415,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param site [TODO] TODO
   # @param ach50 [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
@@ -1436,7 +1436,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_to_unconditioned_basement(model, duct_lk_imbals)
@@ -1449,8 +1449,8 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
   # @param vented_crawl [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
@@ -1466,7 +1466,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_to_unvented_crawlspace(model, duct_lk_imbals)
@@ -1479,8 +1479,8 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
   # @param site [TODO] TODO
   # @param vented_attic [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
@@ -1519,7 +1519,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_to_unvented_attic(model, duct_lk_imbals)
@@ -1532,7 +1532,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vent_object [TODO] TODO
   # @param obj_type_name [TODO] TODO
   # @param index [TODO] TODO
@@ -1572,7 +1572,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vented_dryer [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param index [TODO] TODO
@@ -1793,8 +1793,8 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param sup_fans [TODO] TODO
   # @param exh_fans [TODO] TODO
   # @param bal_fans [TODO] TODO
@@ -1857,7 +1857,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param program [TODO] TODO
   # @return [TODO] TODO
   def self.setup_mech_vent_vars_actuators(model:, program:)
@@ -1886,7 +1886,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param infil_program [TODO] TODO
   # @param vent_fans_kitchen [TODO] TODO
   # @param vent_fans_bath [TODO] TODO
@@ -2056,7 +2056,7 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param infil_program [TODO] TODO
   # @param vent_mech_preheat [TODO] TODO
   # @param vent_mech_precool [TODO] TODO
@@ -2136,14 +2136,14 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param site [TODO] TODO
   # @param vent_fans_mech [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @param vent_fans_kitchen [TODO] TODO
   # @param vent_fans_bath [TODO] TODO
   # @param vented_dryers [TODO] TODO
@@ -2152,7 +2152,7 @@ class Airflow
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @param elevation [TODO] TODO
+  # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
@@ -2240,8 +2240,8 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
   # @param site [TODO] TODO
   # @param vent_fans_mech [TODO] TODO
   # @param vent_fans_kitchen [TODO] TODO
@@ -2259,7 +2259,7 @@ class Airflow
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @param elevation [TODO] TODO
+  # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals,
                                                    has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, vented_attic,
@@ -2285,11 +2285,11 @@ class Airflow
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
   # @param infil_program [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param elevation [TODO] TODO
+  # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
     site_ap = site.additional_properties
@@ -2433,7 +2433,7 @@ class Airflow
   #
   # @param sla [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     # Returns the infiltration annual average ACH given a SLA.
@@ -2449,7 +2449,7 @@ class Airflow
   # @param ach [TODO] TODO
   # @param infil_height [TODO] TODO
   # @param avg_ceiling_height [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)
     # Returns the infiltration SLA given an annual average ACH.
@@ -2483,8 +2483,8 @@ class Airflow
   # TODO
   #
   # @param nl [TODO] TODO
-  # @param weather [WeatherProcess] TODO
-  # @param cfa [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @return [TODO] TODO
   def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
     # Returns the effective annual average infiltration rate in cfm
@@ -2571,8 +2571,8 @@ class Airflow
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
-  # @param cfa [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @return [TODO] TODO
   def self.get_mech_vent_qtot_cfm(nbeds, cfa)
     # Returns Qtot cfm per ASHRAE 62.2-2019
@@ -2587,7 +2587,7 @@ class Airflow
   # @param frac_imbal [TODO] TODO
   # @param a_ext [TODO] TODO
   # @param bldg_type [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param hours_in_operation [TODO] TODO
   # @return [TODO] TODO
   def self.get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, a_ext, bldg_type, eri_version, hours_in_operation)

@@ -10,8 +10,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param cooling_system [TODO] TODO
   # @param heating_system [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -21,7 +21,7 @@ class HVAC
   # @param control_zone [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
@@ -238,12 +238,12 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param cooling_system [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
   # @param control_zone [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs, control_zone,
                                     hvac_unavailable_periods, unit_multiplier)
@@ -297,9 +297,9 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -307,7 +307,7 @@ class HVAC
   # @param ground_conductivity [TODO] TODO
   # @param ground_diffusivity [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
@@ -508,7 +508,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -562,8 +562,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param control_zone [TODO] TODO
@@ -757,7 +757,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param control_zone [TODO] TODO
@@ -782,7 +782,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param control_zone [TODO] TODO
@@ -827,7 +827,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sequential_cool_load_fracs [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param control_zone [TODO] TODO
@@ -866,12 +866,12 @@ class HVAC
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param dehumidifiers [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods, unit_multiplier)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
@@ -953,9 +953,9 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -1013,9 +1013,9 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
   # @param hvac_control [TODO] TODO
   # @param conditioned_zone [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
@@ -1072,7 +1072,7 @@ class HVAC
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param heating_days [TODO] TODO
   # @param cooling_days [TODO] TODO
   # @param htg_weekday_setpoints [TODO] TODO
@@ -1169,7 +1169,7 @@ class HVAC
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
     num_days = Constants.NumDaysInYear(year)
@@ -1220,7 +1220,7 @@ class HVAC
   # TODO
   #
   # @param control_type [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_heating_setpoint(control_type, eri_version)
     # Per ANSI/RESNET/ICC 301
@@ -1243,7 +1243,7 @@ class HVAC
   # TODO
   #
   # @param control_type [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_cooling_setpoint(control_type, eri_version)
     # Per ANSI/RESNET/ICC 301
@@ -1767,7 +1767,7 @@ class HVAC
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_quantity(nbeds)
     # Per ANSI/RESNET/ICC 301
@@ -1776,7 +1776,7 @@ class HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
@@ -1791,7 +1791,7 @@ class HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @param latitude [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_heating_and_cooling_seasons(weather, latitude)
@@ -1862,7 +1862,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fan [TODO] TODO
   # @param hp_min_temp [TODO] TODO
   # @return [TODO] TODO
@@ -1901,7 +1901,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pump_w [TODO] TODO
   # @param pump [TODO] TODO
   # @param heating_object [TODO] TODO
@@ -1957,7 +1957,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fan_or_pump [TODO] TODO
   # @param htg_object [TODO] TODO
   # @param clg_object [TODO] TODO
@@ -2092,9 +2092,9 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param air_loop_unitary [TODO] TODO
   # @param control_zone [TODO] TODO
   # @param heating_system [TODO] TODO
@@ -2362,7 +2362,7 @@ class HVAC
   #
   # @param fraction_served [TODO] TODO
   # @param zone_hvac [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param conditioned_space [TODO] TODO
   # @return [TODO] TODO
   def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, conditioned_space)
@@ -2408,8 +2408,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param heat_pump [TODO] TODO
   # @return [TODO] TODO
   def self.create_supp_heating_coil(model, obj_name, heat_pump)
@@ -2442,8 +2442,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param fan_watts_per_cfm [TODO] TODO
   # @param fan_cfms [TODO] TODO
   # @return [TODO] TODO
@@ -2499,8 +2499,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param fan [TODO] TODO
   # @param htg_coil [TODO] TODO
   # @param clg_coil [TODO] TODO
@@ -2548,8 +2548,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param system [TODO] TODO
   # @param control_zone [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
@@ -2763,7 +2763,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [TODO] TODO
   # @param independent_vars [TODO] TODO
   # @param output_values [TODO] TODO
@@ -2797,7 +2797,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.create_curve_biquadratic_constant(model)
     curve = OpenStudio::Model::CurveBiquadratic.new(model)
@@ -2817,7 +2817,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.create_curve_quadratic_constant(model)
     curve = OpenStudio::Model::CurveQuadratic.new(model)
@@ -2834,7 +2834,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param coeff [TODO] TODO
   # @param name [TODO] TODO
   # @param min_x [TODO] TODO
@@ -2860,7 +2860,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param coeff [TODO] TODO
   # @param name [TODO] TODO
   # @param min_x [TODO] TODO
@@ -2890,7 +2890,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param coeff [TODO] TODO
   # @param name [TODO] TODO
   # @param min_x [TODO] TODO
@@ -2922,7 +2922,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param coeff [TODO] TODO
   # @param name [TODO] TODO
   # @return [TODO] TODO
@@ -2939,7 +2939,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param coeff [TODO] TODO
   # @param name [TODO] TODO
   # @return [TODO] TODO
@@ -3261,8 +3261,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param cooling_system [TODO] TODO
   # @param max_rated_fan_cfm [TODO] TODO
   # @param weather_max_drybulb [TODO] TODO
@@ -3375,8 +3375,8 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param heating_system [TODO] TODO
   # @param max_rated_fan_cfm [TODO] TODO
   # @param weather_min_drybulb [TODO] TODO
@@ -3643,7 +3643,7 @@ class HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties
@@ -3707,7 +3707,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fractions [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
@@ -3735,7 +3735,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param control_zone [TODO] TODO
   # @param hvac_object [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
@@ -3789,7 +3789,7 @@ class HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @return [TODO] TODO
   def self.set_heat_pump_temperatures(heat_pump, runner = nil)
     hp_ap = heat_pump.additional_properties
@@ -3825,7 +3825,7 @@ class HVAC
 
   # TODO
   #
-  # @param ncfl_ag [TODO] TODO
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
   # @return [TODO] TODO
   def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
     # Equation based on ASHRAE 152
@@ -3837,7 +3837,7 @@ class HVAC
   # TODO
   #
   # @param duct_type [TODO] TODO
-  # @param ncfl_ag [TODO] TODO
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
   # @param cfa_served [TODO] TODO
   # @param n_returns [TODO] TODO
   # @return [TODO] TODO
@@ -3862,7 +3862,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.get_default_duct_locations(hpxml_bldg)
     primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
@@ -3925,9 +3925,9 @@ class HVAC
   # @param tout_sensor [TODO] TODO
   # @param airflow_rated_defect_ratio [TODO] TODO
   # @param clg_or_htg_coil [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param f_chg [TODO] TODO
-  # @param obj_name [TODO] TODO
+  # @param obj_name [String] Name for the OpenStudio object
   # @param mode [TODO] TODO
   # @param defect_ratio [TODO] TODO
   # @param hvac_ap [TODO] TODO
@@ -4106,7 +4106,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [TODO] TODO
   # @param cooling_system [TODO] TODO
   # @param unitary_system [TODO] TODO
@@ -4182,7 +4182,7 @@ class HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param design_airflow [TODO] TODO
   # @param max_heating_airflow [TODO] TODO
   # @param fan_watts_per_cfm [TODO] TODO
@@ -4221,7 +4221,7 @@ class HVAC
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [TODO] TODO
   # @param air_loop_unitary [TODO] TODO
   # @param conditioned_space [TODO] TODO
@@ -4333,7 +4333,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_shared_systems(hpxml_bldg)
     applied_clg = apply_shared_cooling_systems(hpxml_bldg)
@@ -4366,7 +4366,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_shared_cooling_systems(hpxml_bldg)
     applied = false
@@ -4491,7 +4491,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_shared_heating_systems(hpxml_bldg)
     applied = false
@@ -4537,7 +4537,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param heating_system [TODO] TODO
   # @param cooling_system [TODO] TODO
   # @return [TODO] TODO
@@ -4555,7 +4555,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.get_hpxml_hvac_systems(hpxml_bldg)
     # Returns a list of heating/cooling systems, incorporating whether
@@ -4602,7 +4602,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
     min_capacity = 1.0 # Btuh
@@ -4650,7 +4650,7 @@ class HVAC
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_unit_multiplier(hpxml_bldg)
     # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the

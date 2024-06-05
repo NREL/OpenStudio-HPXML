@@ -29,7 +29,7 @@ class WeatherProcess
   # TODO
   #
   # @param epw_file [OpenStudio::EpwFile] TODO
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def initialize(epw_path:, runner:, hpxml: nil)
@@ -51,7 +51,7 @@ class WeatherProcess
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
@@ -266,7 +266,7 @@ class WeatherProcess
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def get_design_info_from_epw(runner, epw_file)
@@ -290,7 +290,7 @@ class WeatherProcess
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param rowdata [TODO] TODO
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @param data [TODO] TODO

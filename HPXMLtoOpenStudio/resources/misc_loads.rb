@@ -4,10 +4,10 @@
 class MiscLoads
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param plug_load [TODO] TODO
-  # @param obj_name [TODO] TODO
+  # @param obj_name [String] Name for the OpenStudio object
   # @param conditioned_space [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -73,10 +73,10 @@ class MiscLoads
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param fuel_load [TODO] TODO
-  # @param obj_name [TODO] TODO
+  # @param obj_name [String] Name for the OpenStudio object
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [TODO] TODO
@@ -133,8 +133,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -222,8 +222,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -283,7 +283,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @return [TODO] TODO
   def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa
@@ -295,8 +295,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_televisions_default_values(cfa, nbeds)
     annual_kwh = 413.0 + 0.0 * cfa + 69.0 * nbeds
@@ -308,8 +308,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_pool_pump_default_values(cfa, nbeds)
     return 158.6 / 0.070 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
@@ -317,8 +317,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
   def self.get_pool_heater_default_values(cfa, nbeds, type)
@@ -339,8 +339,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_permanent_spa_pump_default_values(cfa, nbeds)
     return 59.5 / 0.059 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
@@ -348,8 +348,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
   def self.get_permanent_spa_heater_default_values(cfa, nbeds, type)
@@ -381,8 +381,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_well_pump_default_values(cfa, nbeds)
     return 50.8 / 0.127 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
@@ -390,8 +390,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_grill_default_values(cfa, nbeds)
     return 0.87 / 0.029 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
@@ -399,8 +399,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_lighting_default_values(cfa, nbeds)
     return 0.22 / 0.012 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
@@ -408,8 +408,8 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_fireplace_default_values(cfa, nbeds)
     return 1.95 / 0.032 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr

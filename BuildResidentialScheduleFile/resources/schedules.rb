@@ -7,7 +7,7 @@ require 'matrix'
 class ScheduleGenerator
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param state [TODO] TODO
   # @param minutes_per_step [TODO] TODO
   # @param steps_in_day [TODO] TODO
@@ -67,7 +67,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def create(args:,
              weather:)
@@ -96,7 +96,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] TODO
+  # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def create_stochastic_schedules(args:,
                                   weather:)

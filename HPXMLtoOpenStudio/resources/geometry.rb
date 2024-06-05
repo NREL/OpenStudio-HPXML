@@ -4,8 +4,8 @@
 class Geometry
   # Tear down the existing model if it exists.
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @return [TODO] TODO
   def self.tear_down_model(model:,
                            runner:)
@@ -89,7 +89,7 @@ class Geometry
   # Create space and zone based on contents of spaces and value of location.
   # Set a "dwelling unit multiplier" equal to the number of similar units represented.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param location [String] HPXML location
   # @param zone_multiplier [Integer] the number of similar zones represented
@@ -305,7 +305,7 @@ class Geometry
   # TODO
   #
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
   def self.set_zone_volumes(spaces:,
@@ -342,8 +342,8 @@ class Geometry
 
   # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [Double] the total height of the dwelling unit
   # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
   def self.explode_surfaces(model:,
@@ -487,9 +487,9 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param num_occ [TODO] TODO
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -589,9 +589,9 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param length [TODO] TODO
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [TODO] TODO
   # @return [TODO] TODO
   def self.add_neighbor_shading(model:,
@@ -624,7 +624,7 @@ class Geometry
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param location [TODO] TODO
   # @return [TODO] TODO
   def self.calculate_zone_volume(hpxml_bldg:,

@@ -4,19 +4,19 @@
 class Geometry
   # Create a 3D representation of a single-family detached home using the following arguments.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
-  # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
-  # @param geometry_average_ceiling_height [Double] average ceiling height in ft
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
-  # @param geometry_garage_width [Double] width of the garage in ft
-  # @param geometry_garage_depth [Double] depth of the garage in ft
+  # @param geometry_garage_width [Double] width of the garage (ft)
+  # @param geometry_garage_depth [Double] depth of the garage (ft)
   # @param geometry_garage_protrusion [Double] fraction of garage that protrudes from conditioned space
   # @param geometry_garage_position [String] Right or Left
   # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation in ft
-  # @param geometry_rim_joist_height [Double] height of the rim joists in ft
+  # @param geometry_foundation_height [Double] height of the foundation (ft)
+  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
@@ -649,14 +649,14 @@ class Geometry
 
   # Create a 3D representation of a single-family attached home using the following arguments.
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
-  # @param geometry_average_ceiling_height [Double] average ceiling height in ft
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
   # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation in ft
-  # @param geometry_rim_joist_height [Double] height of the rim joists in ft
+  # @param geometry_foundation_height [Double] height of the foundation (ft)
+  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
@@ -949,14 +949,14 @@ class Geometry
 
   # Create a 3D representation of an apartment (dwelling unit in a multifamily building) home using the following arguments.
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param geometry_unit_cfa [Double] conditioned floor area in ft^2
-  # @param geometry_average_ceiling_height [Double] average ceiling height in ft
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
   # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
   # @param geometry_foundation_type [String] foundation type of the building
-  # @param geometry_foundation_height [Double] height of the foundation in ft
-  # @param geometry_rim_joist_height [Double] height of the rim joists in ft
+  # @param geometry_foundation_height [Double] height of the foundation (ft)
+  # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
   # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
@@ -1237,8 +1237,8 @@ class Geometry
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param door_area [TODO] TODO
   # @return [TODO] TODO
   def self.create_doors(runner:,
@@ -1373,8 +1373,8 @@ class Geometry
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param model [OpenStudio::Model::Model] model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param window_front_wwr [TODO] TODO
   # @param window_back_wwr [TODO] TODO
   # @param window_left_wwr [TODO] TODO
@@ -1790,7 +1790,7 @@ class Geometry
   # Returns the total exposed perimeter.
   # NOTE: Does not work for buildings with non-orthogonal walls.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param ground_floor_surfaces [TODO] TODO
   # @param has_foundation_walls [TODO] TODO
   # @return [TODO] TODO
@@ -1927,7 +1927,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @return [TODO] TODO
   def self.get_adiabatic_adjacent_surface(model:,
@@ -1954,9 +1954,9 @@ class Geometry
 
   # Get the absolute tilt based on tilt, roof pitch, and latitude.
   #
-  # @param tilt_str [Double, String] tilt in degrees or RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
+  # @param tilt_str [Double, String] tilt (degrees) or RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
   # @param roof_pitch [Double] roof pitch in vertical rise inches for every 12 inches of horizontal run
-  # @param latitude [Double] latitude in degrees
+  # @param latitude [Double] latitude (degrees)
   # @return [Double] absolute tilt
   def self.get_absolute_tilt(tilt_str:,
                              roof_pitch:,
@@ -2005,8 +2005,8 @@ class Geometry
 
   # Get the absolute azimuth based on relative azimuth and building orientation.
   #
-  # @param relative_azimuth [Double] relative azimuth in degrees
-  # @param building_orientation [Double] building orientation in degrees
+  # @param relative_azimuth [Double] relative azimuth (degrees)
+  # @param building_orientation [Double] building orientation (degrees)
   # @return [Double] absolute azimuth
   def self.get_abs_azimuth(relative_azimuth:,
                            building_orientation:)
@@ -2026,7 +2026,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param polygon [TODO] TODO
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param rim_joist_height [TODO] TODO
@@ -2072,7 +2072,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param footprint_polygon [TODO] TODO
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @return [TODO] TODO
@@ -2121,7 +2121,7 @@ class Geometry
   # Index any remaining surfaces created from intersecting/matching
   # We can't deterministically assign indexes to these surfaces
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.assign_remaining_surface_indexes(model:)
     model.getSurfaces.each do |surface|
@@ -2133,7 +2133,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.create_space(model:)
     space = OpenStudio::Model::Space.new(model)
@@ -2144,7 +2144,7 @@ class Geometry
   # TODO
   #
   # @param polygon [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.create_surface(polygon:,
                           model:)
@@ -2156,7 +2156,7 @@ class Geometry
   # TODO
   #
   # @param polygon [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.create_sub_surface(polygon:,
                               model:)
@@ -2167,7 +2167,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.indexer(model:)
     indexes = [0]
@@ -2279,8 +2279,8 @@ class Geometry
   # @param window_aspect_ratio [TODO] TODO
   # @param max_single_window_area [TODO] TODO
   # @param facade [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @return [TODO] TODO
   def self.add_windows_to_wall(surface:,
                                window_area:,
@@ -2383,7 +2383,7 @@ class Geometry
   # @param win_center_y [TODO] TODO
   # @param win_num [TODO] TODO
   # @param facade [TODO] TODO
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [TODO] TODO
   def self.add_window_to_wall(surface:,
                               win_width:,
@@ -2529,7 +2529,7 @@ class Geometry
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param x [TODO] TODO
   # @param y [TODO] TODO
   # @param average_ceiling_height [TODO] TODO
@@ -2633,7 +2633,7 @@ class Geometry
 
   # Shift all spaces up by foundation height for ambient foundation.
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param foundation_type [TODO] TODO
   # @param foundation_height [TODO] TODO
   # @return [TODO] TODO

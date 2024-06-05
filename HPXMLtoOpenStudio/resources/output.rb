@@ -160,7 +160,7 @@ end
 class Outputs
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.get_total_hvac_capacities(hpxml_bldg)
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
@@ -190,7 +190,7 @@ class Outputs
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.get_total_hvac_airflows(hpxml_bldg)
     htg_cfm, clg_cfm = 0.0, 0.0
@@ -213,7 +213,7 @@ class Outputs
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param results_out [TODO] TODO
   # @return [TODO] TODO
   def self.append_sizing_results(hpxml_bldgs, results_out)

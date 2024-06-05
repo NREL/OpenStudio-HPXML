@@ -4,10 +4,10 @@
 class PV
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param nbeds [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param pv_system [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply(model, nbeds, pv_system, unit_multiplier)
     obj_name = pv_system.id

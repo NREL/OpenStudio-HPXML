@@ -4,11 +4,11 @@
 class Location
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
   # @param epw_file [OpenStudio::EpwFile] TODO
-  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply(model, weather, epw_file, hpxml_header, hpxml_bldg)
     apply_year(model, hpxml_header, epw_file)
@@ -21,8 +21,8 @@ class Location
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_site(model, hpxml_bldg)
     site = model.getSite
@@ -35,8 +35,8 @@ class Location
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @return [TODO] TODO
   def self.apply_year(model, hpxml_header, epw_file)
@@ -53,8 +53,8 @@ class Location
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_dst(model, hpxml_bldg)
     return unless hpxml_bldg.dst_enabled
@@ -70,9 +70,9 @@ class Location
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param weather [WeatherProcess] TODO
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_ground_temps(model, weather, hpxml_bldg)
     # Shallow ground temperatures only currently used for ducts located under slab
@@ -117,7 +117,7 @@ class Location
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_path [TODO] TODO
   # @return [TODO] TODO
   def self.get_epw_path(hpxml_bldg, hpxml_path)

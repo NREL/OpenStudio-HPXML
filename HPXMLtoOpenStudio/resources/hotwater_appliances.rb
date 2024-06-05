@@ -4,19 +4,19 @@
 class HotWaterAndAppliances
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param runner [OpenStudio::Measure::OSRunner] runner object
-  # @param hpxml_header [HPXML::Header] shared HPXML Header object across HPXML Building objects
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
-  # @param weather [WeatherProcess] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hot_water_distribution [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param plantloop_map [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
   def self.apply(model, runner, hpxml_header, hpxml_bldg, weather, spaces, hot_water_distribution,
@@ -500,7 +500,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param cooking_range [TODO] TODO
   # @param oven [TODO] TODO
   # @param is_outside [TODO] TODO
@@ -551,7 +551,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_dishwasher_default_values(eri_version)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
@@ -573,8 +573,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param dishwasher [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
@@ -643,7 +643,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_refrigerator_default_values(nbeds)
     return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
@@ -665,7 +665,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param fuel_type [TODO] TODO
   # @return [TODO] TODO
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
@@ -684,8 +684,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param clothes_dryer [TODO] TODO
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
@@ -771,7 +771,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_clothes_washer_default_values(eri_version)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
@@ -795,8 +795,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
@@ -887,9 +887,9 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param col_name [TODO] TODO
-  # @param obj_name [TODO] TODO
+  # @param obj_name [String] Name for the OpenStudio object
   # @param refrigerator_or_freezer [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
@@ -951,7 +951,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @param ncfl [TODO] TODO
   # @param water_heating_system [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
@@ -987,7 +987,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @param ncfl [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
@@ -1040,8 +1040,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
@@ -1068,8 +1068,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param design_level_w [TODO] TODO
   # @param frac_sens [TODO] TODO
@@ -1102,12 +1102,12 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] model object
-  # @param obj_name [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
   # @param peak_flow [TODO] TODO
   # @param schedule [TODO] TODO
   # @param water_use_connections [TODO] TODO
-  # @param unit_multiplier [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param mw_temp_schedule [TODO] TODO
   # @return [TODO] TODO
   def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, water_use_connections, unit_multiplier, mw_temp_schedule = nil)
@@ -1129,7 +1129,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @return [TODO] TODO
@@ -1168,8 +1168,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param weather [WeatherProcess] TODO
-  # @param nbeds [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @return [TODO] TODO
@@ -1211,7 +1211,7 @@ class HotWaterAndAppliances
   #
   # @param hot_water_distribution [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
     dist_pump_annual_kwh = 0.0
@@ -1269,8 +1269,8 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param daily_mw_fractions [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
@@ -1297,7 +1297,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [TODO] TODO
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param general_water_use_usage_multiplier [TODO] TODO
   # @return [TODO] TODO
   def self.get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier = 1.0)
@@ -1309,11 +1309,11 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [TODO] TODO
-  # @param nbeds [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @param ncfl [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
@@ -1416,7 +1416,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param hpxml_bldg [HPXML::Building] individual HPXML Building dwelling unit object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
