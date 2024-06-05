@@ -1343,6 +1343,8 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(315.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Length (ft)'])
   end
 
+  private
+
   def _test_measure(args_hash, expect_success: true)
     # Run measure via OSW
     require 'json'

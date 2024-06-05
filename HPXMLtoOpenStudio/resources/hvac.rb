@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class HVAC
   AirSourceHeatRatedODB = 47.0 # degF, Rated outdoor drybulb for air-source systems, heating
   AirSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for air-source systems, heating
@@ -7,6 +8,21 @@ class HVAC
   AirSourceCoolRatedIWB = 67.0 # degF, Rated indoor wetbulb for air-source systems, cooling
   CrankcaseHeaterTemp = 50.0 # degF
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param cooling_system [TODO] TODO
+  # @param heating_system [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param weather_max_drybulb [TODO] TODO
+  # @param weather_min_drybulb [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
@@ -220,6 +236,15 @@ class HVAC
     return air_loop
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param cooling_system [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @return [TODO] TODO
   def self.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs, control_zone,
                                     hvac_unavailable_periods, unit_multiplier)
 
@@ -270,6 +295,20 @@ class HVAC
     return air_loop
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
+  # @param heat_pump [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param ground_conductivity [TODO] TODO
+  # @param ground_diffusivity [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @return [TODO] TODO
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
                                          control_zone, ground_conductivity, ground_diffusivity,
@@ -467,6 +506,15 @@ class HVAC
     return air_loop
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param heat_pump [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                              sequential_heat_load_fracs, sequential_cool_load_fracs,
                                              control_zone, hvac_unavailable_periods)
@@ -512,6 +560,15 @@ class HVAC
     return air_loop
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param heating_system [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
     obj_name = Constants.ObjectNameBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
@@ -698,6 +755,14 @@ class HVAC
     return zone_hvac
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param heating_system [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_electric_baseboard(model, heating_system,
                                     sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
 
@@ -715,6 +780,14 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param heating_system [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_unit_heater(model, heating_system,
                              sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
 
@@ -752,6 +825,14 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_ideal_air_loads(model, sequential_cool_load_fracs,
                                  sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
 
@@ -783,6 +864,15 @@ class HVAC
     set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param dehumidifiers [TODO] TODO
+  # @param conditioned_space [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @return [TODO] TODO
   def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods, unit_multiplier)
     dehumidifier_id = dehumidifiers[0].id # Syncs with the ReportSimulationOutput measure, which only looks at first dehumidifier ID
 
@@ -861,6 +951,16 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
+  # @param ceiling_fan [TODO] TODO
+  # @param conditioned_space [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
     obj_name = Constants.ObjectNameCeilingFan
@@ -911,6 +1011,19 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_control [TODO] TODO
+  # @param conditioned_zone [TODO] TODO
+  # @param has_ceiling_fan [TODO] TODO
+  # @param heating_days [TODO] TODO
+  # @param cooling_days [TODO] TODO
+  # @param year [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [TODO] TODO
   def self.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
     heating_sch = nil
     cooling_sch = nil
@@ -957,6 +1070,17 @@ class HVAC
     conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param heating_days [TODO] TODO
+  # @param cooling_days [TODO] TODO
+  # @param htg_weekday_setpoints [TODO] TODO
+  # @param htg_weekend_setpoints [TODO] TODO
+  # @param clg_weekday_setpoints [TODO] TODO
+  # @param clg_weekend_setpoints [TODO] TODO
+  # @param year [TODO] TODO
+  # @return [TODO] TODO
   def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
     # Create setpoint schedules
     # This method ensures that we don't construct a setpoint schedule where the cooling setpoint
@@ -1002,6 +1126,11 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
   end
 
+  # TODO
+  #
+  # @param hvac_control [TODO] TODO
+  # @param year [TODO] TODO
+  # @return [TODO] TODO
   def self.get_heating_setpoints(hvac_control, year)
     num_days = Constants.NumDaysInYear(year)
 
@@ -1035,6 +1164,13 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints
   end
 
+  # TODO
+  #
+  # @param hvac_control [TODO] TODO
+  # @param has_ceiling_fan [TODO] TODO
+  # @param year [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
     num_days = Constants.NumDaysInYear(year)
 
@@ -1081,6 +1217,11 @@ class HVAC
     return clg_weekday_setpoints, clg_weekend_setpoints
   end
 
+  # TODO
+  #
+  # @param control_type [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [TODO] TODO
   def self.get_default_heating_setpoint(control_type, eri_version)
     # Per ANSI/RESNET/ICC 301
     htg_weekday_setpoints = '68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68'
@@ -1099,6 +1240,11 @@ class HVAC
     return htg_weekday_setpoints, htg_weekend_setpoints
   end
 
+  # TODO
+  #
+  # @param control_type [TODO] TODO
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [TODO] TODO
   def self.get_default_cooling_setpoint(control_type, eri_version)
     # Per ANSI/RESNET/ICC 301
     clg_weekday_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
@@ -1117,6 +1263,11 @@ class HVAC
     return clg_weekday_setpoints, clg_weekend_setpoints
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @param hspf [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_heating_capacity_retention(compressor_type, hspf = nil)
     retention_temp = 5.0
     if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? compressor_type
@@ -1128,6 +1279,10 @@ class HVAC
     return retention_temp, retention_fraction
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @return [TODO] TODO
   def self.get_cool_cap_eir_ft_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       cap_ft_spec = [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
@@ -1141,6 +1296,10 @@ class HVAC
     return cap_ft_spec, eir_ft_spec
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @return [TODO] TODO
   def self.get_cool_cap_eir_fflow_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
@@ -1161,6 +1320,12 @@ class HVAC
     return cap_fflow_spec, eir_fflow_spec
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @param heating_capacity_retention_temp [TODO] TODO
+  # @param heating_capacity_retention_fraction [TODO] TODO
+  # @return [TODO] TODO
   def self.get_heat_cap_eir_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     cap_ft_spec = calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1176,6 +1341,10 @@ class HVAC
     return cap_ft_spec, eir_ft_spec
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @return [TODO] TODO
   def self.get_heat_cap_eir_fflow_spec(compressor_type)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       # Single stage systems have PSC or constant torque ECM blowers, so the airflow rate is affected by the static pressure losses.
@@ -1196,7 +1365,12 @@ class HVAC
     return cap_fflow_spec, eir_fflow_spec
   end
 
-  def self.set_cool_curves_central_air_source(runner, cooling_system, use_eer = false)
+  # TODO
+  #
+  # @param cooling_system [TODO] TODO
+  # @param use_eer [TODO] TODO
+  # @return [TODO] TODO
+  def self.set_cool_curves_central_air_source(cooling_system, use_eer = false)
     clg_ap = cooling_system.additional_properties
     clg_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
@@ -1232,9 +1406,13 @@ class HVAC
       clg_ap.cool_cap_fflow_spec, clg_ap.cool_eir_fflow_spec = get_cool_cap_eir_fflow_spec(cooling_system.compressor_type)
     end
 
-    set_cool_rated_shrs_gross(runner, cooling_system)
+    set_cool_rated_shrs_gross(cooling_system)
   end
 
+  # TODO
+  #
+  # @param hvac_system [TODO] TODO
+  # @return [TODO] TODO
   def self.get_cool_capacity_ratios(hvac_system)
     # For each speed, ratio of capacity to nominal capacity
     if hvac_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1253,6 +1431,11 @@ class HVAC
     fail 'Unable to get cooling capacity ratios.'
   end
 
+  # TODO
+  #
+  # @param heating_system [TODO] TODO
+  # @param use_cop [TODO] TODO
+  # @return [TODO] TODO
   def self.set_heat_curves_central_air_source(heating_system, use_cop = false)
     htg_ap = heating_system.additional_properties
     htg_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
@@ -1287,6 +1470,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.set_heat_detailed_performance_data(heat_pump)
     hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
@@ -1338,6 +1525,10 @@ class HVAC
                                   isdefaulted: true)
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.set_cool_detailed_performance_data(heat_pump)
     hp_ap = heat_pump.additional_properties
     is_ducted = !heat_pump.distribution_system_idref.nil?
@@ -1383,6 +1574,10 @@ class HVAC
                                   isdefaulted: true)
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.get_heat_capacity_ratios(heat_pump)
     # For each speed, ratio of capacity to nominal capacity
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1411,6 +1606,10 @@ class HVAC
     fail 'Unable to get heating capacity ratios.'
   end
 
+  # TODO
+  #
+  # @param hvac_system [TODO] TODO
+  # @return [TODO] TODO
   def self.drop_intermediate_speeds(hvac_system)
     # For variable-speed systems, we only want to model min/max speeds in E+.
     # Here we drop any intermediate speeds that we may have added for other purposes (e.g. hvac sizing).
@@ -1438,6 +1637,11 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @param use_eer [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_cool_cfm_per_ton(compressor_type, use_eer = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1455,6 +1659,11 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @param use_cop_or_htg_sys [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_heat_cfm_per_ton(compressor_type, use_cop_or_htg_sys = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1472,6 +1681,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.set_curves_gshp(heat_pump)
     hp_ap = heat_pump.additional_properties
 
@@ -1509,6 +1722,11 @@ class HVAC
     hp_ap.heat_rated_cops = [1.0 / heat_eir]
   end
 
+  # TODO
+  #
+  # @param hvac_type [TODO] TODO
+  # @param seer [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_compressor_type(hvac_type, seer)
     if [HPXML::HVACTypeCentralAirConditioner,
         HPXML::HVACTypeHeatPumpAirToAir].include? hvac_type
@@ -1531,21 +1749,35 @@ class HVAC
     return
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_default_ceiling_fan_power()
     # Per ANSI/RESNET/ICC 301
     return 42.6 # W
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_default_ceiling_fan_medium_cfm()
     # From ANSI 301-2019
     return 3000.0 # cfm
   end
 
+  # TODO
+  #
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [TODO] TODO
   def self.get_default_ceiling_fan_quantity(nbeds)
     # Per ANSI/RESNET/ICC 301
     return nbeds + 1
   end
 
+  # TODO
+  #
+  # @param weather [WeatherProcess] Weather object
+  # @return [TODO] TODO
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
     months = [0] * 12
@@ -1557,6 +1789,11 @@ class HVAC
     return months
   end
 
+  # TODO
+  #
+  # @param weather [WeatherProcess] Weather object
+  # @param latitude [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_heating_and_cooling_seasons(weather, latitude)
     # Calculates heating/cooling seasons from BAHSP definition
 
@@ -1621,8 +1858,14 @@ class HVAC
     return heating_season, cooling_season
   end
 
-  private
+  # FIXME: The following class methods are meant to be private.
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param fan [TODO] TODO
+  # @param hp_min_temp [TODO] TODO
+  # @return [TODO] TODO
   def self.set_fan_power_ems_program(model, fan, hp_min_temp)
     # EMS is used to disable the fan power below the hp_min_temp; the backup heating
     # system will be operating instead.
@@ -1656,6 +1899,13 @@ class HVAC
     fan_program_calling_manager.addProgram(fan_program)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param pump_w [TODO] TODO
+  # @param pump [TODO] TODO
+  # @param heating_object [TODO] TODO
+  # @return [TODO] TODO
   def self.set_pump_power_ems_program(model, pump_w, pump, heating_object)
     # EMS is used to set the pump power.
     # Without EMS, the pump power will vary according to the plant loop part load ratio
@@ -1705,6 +1955,15 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param fan_or_pump [TODO] TODO
+  # @param htg_object [TODO] TODO
+  # @param clg_object [TODO] TODO
+  # @param backup_htg_object [TODO] TODO
+  # @param hpxml_object [TODO] TODO
+  # @return [TODO] TODO
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
 
@@ -1831,6 +2090,20 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param air_loop_unitary [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param heating_system [TODO] TODO
+  # @param cooling_system [TODO] TODO
+  # @param htg_supp_coil [TODO] TODO
+  # @param clg_coil [TODO] TODO
+  # @param htg_coil [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [TODO] TODO
   def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
     return if schedules_file.nil?
     return if clg_coil.nil? && htg_coil.nil?
@@ -2085,6 +2358,13 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
+  # TODO
+  #
+  # @param fraction_served [TODO] TODO
+  # @param zone_hvac [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param conditioned_space [TODO] TODO
+  # @return [TODO] TODO
   def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, conditioned_space)
     # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
 
@@ -2126,6 +2406,12 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.create_supp_heating_coil(model, obj_name, heat_pump)
     fuel = heat_pump.backup_heating_fuel
     capacity = heat_pump.backup_heating_capacity
@@ -2154,6 +2440,13 @@ class HVAC
     return htg_supp_coil
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param fan_watts_per_cfm [TODO] TODO
+  # @param fan_cfms [TODO] TODO
+  # @return [TODO] TODO
   def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
     fan = OpenStudio::Model::FanSystemModel.new(model)
@@ -2177,11 +2470,21 @@ class HVAC
     return fan
   end
 
+  # TODO
+  #
+  # @param max_fan_power [TODO] TODO
+  # @param fan_ratio [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_fan_power_from_curve(max_fan_power, fan_ratio)
     # Cubic relationship fan power curve
     return max_fan_power * (fan_ratio**3)
   end
 
+  # TODO
+  #
+  # @param fan [TODO] TODO
+  # @param fan_watts_per_cfm [TODO] TODO
+  # @return [TODO] TODO
   def self.set_fan_power(fan, fan_watts_per_cfm)
     if fan_watts_per_cfm > 0
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
@@ -2194,6 +2497,18 @@ class HVAC
     fan.setDesignPressureRise(pressure_rise)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param fan [TODO] TODO
+  # @param htg_coil [TODO] TODO
+  # @param clg_coil [TODO] TODO
+  # @param htg_supp_coil [TODO] TODO
+  # @param htg_cfm [TODO] TODO
+  # @param clg_cfm [TODO] TODO
+  # @param supp_max_temp [TODO] TODO
+  # @return [TODO] TODO
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp = nil)
     cycle_fan_sch = OpenStudio::Model::ScheduleConstant.new(model)
     cycle_fan_sch.setName(obj_name + ' auto fan schedule')
@@ -2231,6 +2546,18 @@ class HVAC
     return air_loop_unitary
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param system [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param airflow_cfm [TODO] TODO
+  # @param heating_system [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, airflow_cfm, heating_system, hvac_unavailable_periods)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
@@ -2257,6 +2584,14 @@ class HVAC
     return air_loop
   end
 
+  # TODO
+  #
+  # @param dh_type [TODO] TODO
+  # @param w_coeff [TODO] TODO
+  # @param ef_coeff [TODO] TODO
+  # @param ief [TODO] TODO
+  # @param water_removal_rate [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_dehumidifier_ief_to_ef_inputs(dh_type, w_coeff, ef_coeff, ief, water_removal_rate)
     # Shift inputs under IEF test conditions to E+ supported EF test conditions
     # test conditions
@@ -2283,6 +2618,10 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
+  # TODO
+  #
+  # @param heating_system [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_boiler_eae(heating_system)
     if heating_system.heating_system_type != HPXML::HVACTypeBoiler
       return
@@ -2345,6 +2684,12 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param compressor_type [TODO] TODO
+  # @param heating_capacity_retention_temp [TODO] TODO
+  # @param heating_capacity_retention_fraction [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_heat_cap_ft_spec(compressor_type, heating_capacity_retention_temp, heating_capacity_retention_fraction)
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       iat_slope = -0.002303414
@@ -2369,6 +2714,10 @@ class HVAC
     return [[oat_intercept + iat_intercept, iat_slope, 0, oat_slope, 0, 0]] * num_speeds
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @return [TODO] TODO
   def self.get_heating_capacity_retention(heat_pump)
     if not heat_pump.heating_capacity_17F.nil?
       heating_capacity_retention_temp = 17.0
@@ -2382,6 +2731,12 @@ class HVAC
     return heating_capacity_retention_temp, heating_capacity_retention_fraction
   end
 
+  # TODO
+  #
+  # @param capacity_ratios [TODO] TODO
+  # @param rated_cfm_per_tons [TODO] TODO
+  # @param rated_airflow_rate [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_fan_speed_ratios(capacity_ratios, rated_cfm_per_tons, rated_airflow_rate)
     fan_speed_ratios = []
     capacity_ratios.each_with_index do |capacity_ratio, i|
@@ -2390,6 +2745,10 @@ class HVAC
     return fan_speed_ratios
   end
 
+  # TODO
+  #
+  # @param coeff [TODO] TODO
+  # @return [TODO] TODO
   def self.convert_curve_biquadratic(coeff)
     # Convert IP curves to SI curves
     si_coeff = []
@@ -2402,6 +2761,15 @@ class HVAC
     return si_coeff
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [TODO] TODO
+  # @param independent_vars [TODO] TODO
+  # @param output_values [TODO] TODO
+  # @param output_min [TODO] TODO
+  # @param output_max [TODO] TODO
+  # @return [TODO] TODO
   def self.create_table_lookup(model, name, independent_vars, output_values, output_min = nil, output_max = nil)
     if (not output_min.nil?) && (output_values.min < output_min)
       fail "Minimum table lookup output value (#{output_values.min}) is less than #{output_min} for #{name}."
@@ -2427,6 +2795,10 @@ class HVAC
     return table
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [TODO] TODO
   def self.create_curve_biquadratic_constant(model)
     curve = OpenStudio::Model::CurveBiquadratic.new(model)
     curve.setName('ConstantBiquadratic')
@@ -2443,6 +2815,10 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [TODO] TODO
   def self.create_curve_quadratic_constant(model)
     curve = OpenStudio::Model::CurveQuadratic.new(model)
     curve.setName('ConstantQuadratic')
@@ -2456,6 +2832,16 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param coeff [TODO] TODO
+  # @param name [TODO] TODO
+  # @param min_x [TODO] TODO
+  # @param max_x [TODO] TODO
+  # @param min_y [TODO] TODO
+  # @param max_y [TODO] TODO
+  # @return [TODO] TODO
   def self.create_curve_biquadratic(model, coeff, name, min_x, max_x, min_y, max_y)
     curve = OpenStudio::Model::CurveBiquadratic.new(model)
     curve.setName(name)
@@ -2472,6 +2858,16 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param coeff [TODO] TODO
+  # @param name [TODO] TODO
+  # @param min_x [TODO] TODO
+  # @param max_x [TODO] TODO
+  # @param min_y [TODO] TODO
+  # @param max_y [TODO] TODO
+  # @return [TODO] TODO
   def self.create_curve_bicubic(model, coeff, name, min_x, max_x, min_y, max_y)
     curve = OpenStudio::Model::CurveBicubic.new(model)
     curve.setName(name)
@@ -2492,6 +2888,17 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param coeff [TODO] TODO
+  # @param name [TODO] TODO
+  # @param min_x [TODO] TODO
+  # @param max_x [TODO] TODO
+  # @param min_y [TODO] TODO
+  # @param max_y [TODO] TODO
+  # @param is_dimensionless [TODO] TODO
+  # @return [TODO] TODO
   def self.create_curve_quadratic(model, coeff, name, min_x, max_x, min_y, max_y, is_dimensionless = false)
     curve = OpenStudio::Model::CurveQuadratic.new(model)
     curve.setName(name)
@@ -2513,6 +2920,12 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param coeff [TODO] TODO
+  # @param name [TODO] TODO
+  # @return [TODO] TODO
   def self.create_curve_quad_linear(model, coeff, name)
     curve = OpenStudio::Model::CurveQuadLinear.new(model)
     curve.setName(name)
@@ -2524,6 +2937,12 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param coeff [TODO] TODO
+  # @param name [TODO] TODO
+  # @return [TODO] TODO
   def self.create_curve_quint_linear(model, coeff, name)
     curve = OpenStudio::Model::CurveQuintLinear.new(model)
     curve.setName(name)
@@ -2536,6 +2955,13 @@ class HVAC
     return curve
   end
 
+  # TODO
+  #
+  # @param net_cap [TODO] TODO
+  # @param fan_power [TODO] TODO
+  # @param mode [TODO] TODO
+  # @param net_cop [TODO] TODO
+  # @return [TODO] TODO
   def self.convert_net_to_gross_capacity_cop(net_cap, fan_power, mode, net_cop = nil)
     net_cap_watts = UnitConversions.convert(net_cap, 'Btu/hr', 'w')
     if mode == :clg
@@ -2552,6 +2978,15 @@ class HVAC
     return gross_cap_btu_hr, gross_cop
   end
 
+  # TODO
+  #
+  # @param detailed_performance_data [TODO] TODO
+  # @param hvac_ap [TODO] TODO
+  # @param mode [TODO] TODO
+  # @param max_rated_fan_cfm [TODO] TODO
+  # @param weather_temp [TODO] TODO
+  # @param compressor_lockout_temp [TODO] TODO
+  # @return [TODO] TODO
   def self.process_neep_detailed_performance(detailed_performance_data, hvac_ap, mode, max_rated_fan_cfm, weather_temp, compressor_lockout_temp = nil)
     data_array = Array.new(2) { Array.new }
     detailed_performance_data.sort_by { |dp| dp.outdoor_temperature }.each do |data_point|
@@ -2594,6 +3029,13 @@ class HVAC
     correct_ft_cap_eir(data_array, mode)
   end
 
+  # TODO
+  #
+  # @param data_array [TODO] TODO
+  # @param mode [TODO] TODO
+  # @param compressor_lockout_temp [TODO] TODO
+  # @param weather_temp [TODO] TODO
+  # @return [TODO] TODO
   def self.interpolate_to_odb_table_points(data_array, mode, compressor_lockout_temp, weather_temp)
     # Set of data used for table lookup
     data_array.each do |data|
@@ -2635,6 +3077,14 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param data [TODO] TODO
+  # @param _mode [TODO] TODO
+  # @param user_odbs [TODO] TODO
+  # @param property [TODO] TODO
+  # @param find_high [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_odb_at_zero_cop_or_capacity(data, _mode, user_odbs, property, find_high)
     if find_high
       odb_dp1 = data.find { |dp| dp.outdoor_temperature == user_odbs[-1] }
@@ -2665,6 +3115,13 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param detailed_performance_data [TODO] TODO
+  # @param capacity_description [TODO] TODO
+  # @param target_odb [TODO] TODO
+  # @param property [TODO] TODO
+  # @return [TODO] TODO
   def self.interpolate_to_odb_table_point(detailed_performance_data, capacity_description, target_odb, property)
     data = detailed_performance_data.select { |dp| dp.capacity_description == capacity_description }
 
@@ -2695,6 +3152,12 @@ class HVAC
     return val
   end
 
+  # TODO
+  #
+  # @param data_array [TODO] TODO
+  # @param mode [TODO] TODO
+  # @param tol [TODO] TODO
+  # @return [TODO] TODO
   def self.add_data_point_adaptive_step_size(data_array, mode, tol = 0.1)
     data_array.each do |data|
       data_sorted = data.sort_by { |dp| dp.outdoor_temperature }
@@ -2730,6 +3193,11 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param data_array [TODO] TODO
+  # @param mode [TODO] TODO
+  # @return [TODO] TODO
   def self.correct_ft_cap_eir(data_array, mode)
     # Add sensitivity to indoor conditions
     # single speed cutler curve coefficients
@@ -2791,6 +3259,14 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param cooling_system [TODO] TODO
+  # @param max_rated_fan_cfm [TODO] TODO
+  # @param weather_max_drybulb [TODO] TODO
+  # @return [TODO] TODO
   def self.create_dx_cooling_coil(model, obj_name, cooling_system, max_rated_fan_cfm, weather_max_drybulb)
     clg_ap = cooling_system.additional_properties
 
@@ -2897,6 +3373,16 @@ class HVAC
     return clg_coil
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param heating_system [TODO] TODO
+  # @param max_rated_fan_cfm [TODO] TODO
+  # @param weather_min_drybulb [TODO] TODO
+  # @param defrost_model_type [TODO] TODO
+  # @param p_dot_defrost [TODO] TODO
+  # @return [TODO] TODO
   def self.create_dx_heating_coil(model, obj_name, heating_system, max_rated_fan_cfm, weather_min_drybulb, defrost_model_type, p_dot_defrost)
     htg_ap = heating_system.additional_properties
 
@@ -2997,7 +3483,11 @@ class HVAC
     return htg_coil
   end
 
-  def self.set_cool_rated_shrs_gross(runner, cooling_system)
+  # TODO
+  #
+  # @param cooling_system [TODO] TODO
+  # @return [TODO] TODO
+  def self.set_cool_rated_shrs_gross(cooling_system)
     clg_ap = cooling_system.additional_properties
 
     if ((cooling_system.is_a? HPXML::CoolingSystem) && ([HPXML::HVACTypeRoomAirConditioner, HPXML::HVACTypePTAC].include? cooling_system.cooling_system_type)) ||
@@ -3016,20 +3506,28 @@ class HVAC
 
       p_atm = UnitConversions.convert(1, 'atm', 'psi')
 
-      ao = Psychrometrics.CoilAoFactor(runner, dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
+      ao = Psychrometrics.CoilAoFactor(dB_rated, p_atm, UnitConversions.convert(1, 'ton', 'kBtu/hr'), cool_nominal_cfm_per_ton, cooling_system.cooling_shr, win)
 
       clg_ap.cool_rated_shrs_gross = []
       clg_ap.cool_capacity_ratios.each_with_index do |capacity_ratio, i|
         # Calculate the SHR for each speed. Use maximum value of 0.98 to prevent E+ bypass factor calculation errors
-        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(runner, dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao, win), 0.98].min
+        clg_ap.cool_rated_shrs_gross << [Psychrometrics.CalculateSHR(dB_rated, p_atm, UnitConversions.convert(capacity_ratio, 'ton', 'kBtu/hr'), clg_ap.cool_rated_cfm_per_ton[i] * capacity_ratio, ao, win), 0.98].min
       end
     end
   end
 
+  # TODO
+  #
+  # @param c_d [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_plr_coefficients(c_d)
     return [(1.0 - c_d), c_d, 0.0] # Linear part load model
   end
 
+  # TODO
+  #
+  # @param cooling_system [TODO] TODO
+  # @return [TODO] TODO
   def self.set_cool_c_d(cooling_system)
     clg_ap = cooling_system.additional_properties
 
@@ -3054,6 +3552,10 @@ class HVAC
     clg_ap.cool_plf_fplr_spec = [calc_plr_coefficients(clg_ap.cool_c_d)] * num_speeds
   end
 
+  # TODO
+  #
+  # @param heating_system [TODO] TODO
+  # @return [TODO] TODO
   def self.set_heat_c_d(heating_system)
     htg_ap = heating_system.additional_properties
 
@@ -3077,11 +3579,20 @@ class HVAC
     htg_ap.heat_plf_fplr_spec = [calc_plr_coefficients(htg_ap.heat_c_d)] * num_speeds
   end
 
+  # TODO
+  #
+  # @param cooling_system [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_ceer_from_eer(cooling_system)
     # Reference: http://documents.dps.ny.gov/public/Common/ViewDoc.aspx?DocRefId=%7BB6A57FC0-6376-4401-92BD-D66EC1930DCF%7D
     return cooling_system.cooling_efficiency_eer / 1.01
   end
 
+  # TODO
+  #
+  # @param hvac_system [TODO] TODO
+  # @param use_eer_cop [TODO] TODO
+  # @return [TODO] TODO
   def self.set_fan_power_rated(hvac_system, use_eer_cop)
     hvac_ap = hvac_system.additional_properties
 
@@ -3103,12 +3614,22 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param pump_eff [TODO] TODO
+  # @param pump_w [TODO] TODO
+  # @param pump_head_pa [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
     # Calculate needed pump rated flow rate to achieve a given pump power with an assumed
     # efficiency and pump head.
     return pump_eff * pump_w / pump_head_pa # m3/s
   end
 
+  # TODO
+  #
+  # @param air_loop [TODO] TODO
+  # @return [TODO] TODO
   def self.get_unitary_system_from_air_loop_hvac(air_loop)
     # Returns the unitary system or nil
     air_loop.supplyComponents.each do |comp|
@@ -3119,6 +3640,11 @@ class HVAC
     return
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @return [TODO] TODO
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties
     geothermal_loop = heat_pump.geothermal_loop
@@ -3161,6 +3687,12 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param load_fraction [TODO] TODO
+  # @param remaining_fraction [TODO] TODO
+  # @param availability_days [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_sequential_load_fractions(load_fraction, remaining_fraction, availability_days)
     # Returns the EnergyPlus sequential load fractions for every day of the year
     if remaining_fraction > 0
@@ -3173,6 +3705,12 @@ class HVAC
     return sequential_load_fracs
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param fractions [TODO] TODO
+  # @param unavailable_periods [TODO] TODO
+  # @return [TODO] TODO
   def self.get_sequential_load_schedule(model, fractions, unavailable_periods)
     if fractions.nil?
       fractions = [0]
@@ -3195,6 +3733,16 @@ class HVAC
     return s
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param control_zone [TODO] TODO
+  # @param hvac_object [TODO] TODO
+  # @param sequential_heat_load_fracs [TODO] TODO
+  # @param sequential_cool_load_fracs [TODO] TODO
+  # @param hvac_unavailable_periods [TODO] TODO
+  # @param heating_system [TODO] TODO
+  # @return [TODO] TODO
   def self.set_sequential_load_fractions(model, control_zone, hvac_object, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods, heating_system = nil)
     heating_sch = get_sequential_load_schedule(model, sequential_heat_load_fracs, hvac_unavailable_periods)
     cooling_sch = get_sequential_load_schedule(model, sequential_cool_load_fracs, hvac_unavailable_periods)
@@ -3238,6 +3786,11 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @return [TODO] TODO
   def self.set_heat_pump_temperatures(heat_pump, runner = nil)
     hp_ap = heat_pump.additional_properties
 
@@ -3270,6 +3823,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @return [TODO] TODO
   def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
     # Equation based on ASHRAE 152
     # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
@@ -3277,6 +3834,13 @@ class HVAC
     return f_out
   end
 
+  # TODO
+  #
+  # @param duct_type [TODO] TODO
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @param cfa_served [TODO] TODO
+  # @param n_returns [TODO] TODO
+  # @return [TODO] TODO
   def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
     # Equations based on ASHRAE 152
     # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
@@ -3296,6 +3860,10 @@ class HVAC
     return primary_duct_area, secondary_duct_area
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_default_duct_locations(hpxml_bldg)
     primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
                                        HPXML::LocationBasementUnconditioned,
@@ -3318,6 +3886,10 @@ class HVAC
     return primary_duct_location, secondary_duct_location
   end
 
+  # TODO
+  #
+  # @param f_chg [TODO] TODO
+  # @return [TODO] TODO
   def self.get_charge_fault_cooling_coeff(f_chg)
     if f_chg <= 0
       qgr_values = [-9.46E-01, 4.93E-02, -1.18E-03, -1.15E+00]
@@ -3330,6 +3902,10 @@ class HVAC
     return qgr_values, p_values, ff_chg_values
   end
 
+  # TODO
+  #
+  # @param f_chg [TODO] TODO
+  # @return [TODO] TODO
   def self.get_charge_fault_heating_coeff(f_chg)
     if f_chg <= 0
       qgr_values = [-0.0338595, 0.0, 0.0202827, -2.6226343] # Add a zero term to combine cooling and heating calculation
@@ -3342,6 +3918,20 @@ class HVAC
     return qgr_values, p_values, ff_chg_values
   end
 
+  # TODO
+  #
+  # @param fault_program [TODO] TODO
+  # @param tin_sensor [TODO] TODO
+  # @param tout_sensor [TODO] TODO
+  # @param airflow_rated_defect_ratio [TODO] TODO
+  # @param clg_or_htg_coil [TODO] TODO
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param f_chg [TODO] TODO
+  # @param obj_name [String] Name for the OpenStudio object
+  # @param mode [TODO] TODO
+  # @param defect_ratio [TODO] TODO
+  # @param hvac_ap [TODO] TODO
+  # @return [TODO] TODO
   def self.add_install_quality_calculations(fault_program, tin_sensor, tout_sensor, airflow_rated_defect_ratio, clg_or_htg_coil, model, f_chg, obj_name, mode, defect_ratio, hvac_ap)
     if mode == :clg
       if clg_or_htg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
@@ -3514,6 +4104,16 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param heating_system [TODO] TODO
+  # @param cooling_system [TODO] TODO
+  # @param unitary_system [TODO] TODO
+  # @param htg_coil [TODO] TODO
+  # @param clg_coil [TODO] TODO
+  # @param control_zone [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_installation_quality(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
     if not cooling_system.nil?
       charge_defect_ratio = cooling_system.charge_defect_ratio
@@ -3579,6 +4179,14 @@ class HVAC
     program_calling_manager.addProgram(fault_program)
   end
 
+  # TODO
+  #
+  # @param heat_pump [TODO] TODO
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param design_airflow [TODO] TODO
+  # @param max_heating_airflow [TODO] TODO
+  # @param fan_watts_per_cfm [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
     # Calculate q_dot and p_dot
     # q_dot is used for EMS program to account for introduced cooling load and supp coil power consumption by actuating other equipment objects
@@ -3611,6 +4219,16 @@ class HVAC
     return q_dot_defrost, p_dot_defrost
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param htg_coil [TODO] TODO
+  # @param air_loop_unitary [TODO] TODO
+  # @param conditioned_space [TODO] TODO
+  # @param htg_supp_coil [TODO] TODO
+  # @param heat_pump [TODO] TODO
+  # @param q_dot_defrost [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, heat_pump, q_dot_defrost)
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
@@ -3706,10 +4324,17 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_default_gshp_pump_power()
     return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_shared_systems(hpxml_bldg)
     applied_clg = apply_shared_cooling_systems(hpxml_bldg)
     applied_htg = apply_shared_heating_systems(hpxml_bldg)
@@ -3739,6 +4364,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_shared_cooling_systems(hpxml_bldg)
     applied = false
     hpxml_bldg.cooling_systems.each do |cooling_system|
@@ -3860,6 +4489,10 @@ class HVAC
     return applied
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_shared_heating_systems(hpxml_bldg)
     applied = false
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -3893,10 +4526,21 @@ class HVAC
     return applied
   end
 
+  # TODO
+  #
+  # @param capacity [TODO] TODO
+  # @param rated_cfm_per_ton [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_rated_airflow(capacity, rated_cfm_per_ton)
     return UnitConversions.convert(capacity, 'Btu/hr', 'ton') * UnitConversions.convert(rated_cfm_per_ton, 'cfm', 'm^3/s')
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param heating_system [TODO] TODO
+  # @param cooling_system [TODO] TODO
+  # @return [TODO] TODO
   def self.is_attached_heating_and_cooling_systems(hpxml_bldg, heating_system, cooling_system)
     # Now only allows furnace+AC
     if not ((hpxml_bldg.heating_systems.include? heating_system) && (hpxml_bldg.cooling_systems.include? cooling_system))
@@ -3909,6 +4553,10 @@ class HVAC
     return true
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_hpxml_hvac_systems(hpxml_bldg)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
@@ -3952,6 +4600,10 @@ class HVAC
     return hvac_systems
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.ensure_nonzero_sizing_values(hpxml_bldg)
     min_capacity = 1.0 # Btuh
     min_airflow = 3.0 # cfm; E+ min airflow is 0.001 m3/s
@@ -3996,6 +4648,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_unit_multiplier(hpxml_bldg)
     # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
     # multiplied thermal zone load to the HVAC system, so the HVAC system
@@ -4039,6 +4695,10 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param capacity [TODO] TODO
+  # @return [TODO] TODO
   def self.get_dehumidifier_default_values(capacity)
     rh_setpoint = 0.6
     if capacity <= 25.0
@@ -4056,6 +4716,11 @@ class HVAC
     return { rh_setpoint: rh_setpoint, ief: ief }
   end
 
+  # TODO
+  #
+  # @param seer2 [TODO] TODO
+  # @param is_ducted [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_seer_from_seer2(seer2, is_ducted)
     # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
     # Note: There are less common system types (packaged, small duct high velocity,
@@ -4067,6 +4732,11 @@ class HVAC
     end
   end
 
+  # TODO
+  #
+  # @param hspf2 [TODO] TODO
+  # @param is_ducted [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_hspf_from_hspf2(hspf2, is_ducted)
     # ANSI/RESNET/ICC 301 Table 4.4.4.1(1) SEER2/HSPF2 Conversion Factors
     # Note: There are less common system types (packaged, small duct high velocity,
