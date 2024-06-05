@@ -30,7 +30,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return "Calculate electric/gas utility bills based on monthly fixed charges and marginal rates. Calculate other utility bills based on marginal rates for oil, propane, wood cord, wood pellets, and coal. User can specify PV compensation types of 'Net-Metering' or 'Feed-In Tariff', along with corresponding rates and connection fees."
   end
 
-  # define the arguments that the user will input
+  # Define the arguments that the user will input.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [OpenStudio::Measure::OSArgumentVector] an OpenStudio::Measure::OSArgumentVector object
   def arguments(model = nil) # rubocop:disable Lint/UnusedMethodArgument
     args = OpenStudio::Measure::OSArgumentVector.new
 
@@ -91,6 +94,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def check_for_return_type_warnings()
     warnings = []
 
@@ -126,6 +132,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings.uniq
   end
 
+  # TODO
+  #
+  # @param utility_bill_scenario [TODO] TODO
+  # @return [TODO] TODO
   def check_for_next_type_warnings(utility_bill_scenario)
     warnings = []
 
@@ -139,7 +149,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings.uniq
   end
 
-  # return a vector of IdfObject's to request EnergyPlus objects needed by the run method
+  # Return a vector of IdfObject's to request EnergyPlus objects needed by the run method.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @return [TODO] TODO
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
 
@@ -207,6 +221,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return result.uniq
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param warnings [TODO] TODO
+  # @return [TODO] TODO
   def register_warnings(runner, warnings)
     return false if warnings.empty?
 
@@ -216,7 +235,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  # define what happens when the measure is run
+  # Define what happens when the measure is run.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @return [Boolean] TODO
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
@@ -325,6 +348,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
+  # TODO
+  #
+  # @param bill_scenario [TODO] TODO
+  # @param hpxml_buildings [TODO] TODO
+  # @return [TODO] TODO
   def get_monthly_fee(bill_scenario, hpxml_buildings)
     monthly_fee = 0.0
     if not bill_scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil?
@@ -342,6 +370,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return monthly_fee
   end
 
+  # TODO
+  #
+  # @param args [Json::Value] a Json::Value hash
+  # @return [TODO] TODO
   def get_timestamps(args)
     ep_timestamps = @msgpackData['MeterData']['Monthly']['Rows'].map { |r| r.keys[0] }
 
@@ -366,6 +398,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return timestamps
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param args [Json::Value] a Json::Value hash
+  # @param utility_bills [TODO] TODO
+  # @param annual_output_path [TODO] TODO
+  # @param bill_scenario_name [TODO] TODO
+  # @return [TODO] TODO
   def report_runperiod_output_results(runner, args, utility_bills, annual_output_path, bill_scenario_name)
     return unless (args[:include_annual_bills] || args[:register_annual_bills])
 
@@ -399,6 +439,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
+  # TODO
+  #
+  # @param args [Json::Value] a Json::Value hash
+  # @param utility_bills [TODO] TODO
+  # @param bill_scenario_name [TODO] TODO
+  # @param monthly_data [TODO] TODO
+  # @param header [TODO] TODO
+  # @return [TODO] TODO
   def get_monthly_output_results(args, utility_bills, bill_scenario_name, monthly_data, header)
     run_period = (header.sim_begin_month - 1)..(header.sim_end_month - 1)
     monthly_data << ["#{bill_scenario_name}: Total", 'USD'] + ([0.0] * run_period.size)
@@ -415,6 +463,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param args [Json::Value] a Json::Value hash
+  # @param timestamps [TODO] TODO
+  # @param monthly_data [TODO] TODO
+  # @param monthly_output_path [TODO] TODO
+  # @return [TODO] TODO
   def report_monthly_output_results(runner, args, timestamps, monthly_data, monthly_output_path)
     return unless (args[:include_monthly_bills] || args[:register_monthly_bills])
 
@@ -471,6 +527,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_path [TODO] TODO
+  # @param fuels [TODO] TODO
+  # @param utility_rates [TODO] TODO
+  # @param bill_scenario [TODO] TODO
+  # @param monthly_fee [TODO] TODO
+  # @param num_units [TODO] TODO
+  # @return [TODO] TODO
   def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, monthly_fee, num_units = 1)
     warnings = []
     utility_rates.each do |fuel_type, rate|
@@ -582,6 +647,14 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings
   end
 
+  # TODO
+  #
+  # @param fuels [TODO] TODO
+  # @param utility_rates [TODO] TODO
+  # @param utility_bills [TODO] TODO
+  # @param utility_bill_scenario [TODO] TODO
+  # @param header [TODO] TODO
+  # @return [TODO] TODO
   def get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
     net_elec = 0
 
@@ -624,6 +697,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def setup_fuel_outputs()
     fuels = {}
     fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
@@ -637,6 +713,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return fuels
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def setup_utility_outputs()
     utility_rates = {}
     utility_rates[FT::Elec] = UtilityRate.new
@@ -659,6 +738,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return utility_rates, utility_bills
   end
 
+  # TODO
+  #
+  # @param fuels [TODO] TODO
+  # @param utility_bill_scenario [TODO] TODO
+  # @return [TODO] TODO
   def get_outputs(fuels, utility_bill_scenario)
     fuels.each do |(fuel_type, _is_production), fuel|
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
@@ -669,6 +753,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
+  # TODO
+  #
+  # @param meter_names [TODO] TODO
+  # @param unit_conv [TODO] TODO
+  # @param unit_adder [TODO] TODO
+  # @param timeseries_freq [TODO] TODO
+  # @return [TODO] TODO
   def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_freq)
     msgpack_timeseries_name = { 'hourly' => 'Hourly',
                                 'monthly' => 'Monthly' }[timeseries_freq]
