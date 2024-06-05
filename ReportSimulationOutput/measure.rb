@@ -314,7 +314,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param arguments [TODO] TODO
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [TODO] TODO
   def get_arguments(runner, arguments, user_arguments)
     args = runner.getArgumentValues(arguments, user_arguments)
@@ -332,7 +332,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # Return a vector of IdfObject's to request EnergyPlus objects needed by the run method.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [TODO] TODO
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
@@ -544,7 +544,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # Define what happens when the measure is run.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] TODO
   def run(runner, user_arguments)
     super(runner, user_arguments)
@@ -632,7 +632,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param msgpackData [TODO] TODO
   # @param hpxml_header [TODO] TODO
   # @param hpxml_bldgs [TODO] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def get_timestamps(msgpackData, hpxml_header, hpxml_bldgs, args)
     return if msgpackData.nil?
@@ -741,7 +741,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def get_outputs(runner, args)
     outputs = {}
@@ -1482,7 +1482,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param outputs [TODO] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param annual_output_path [TODO] TODO
   # @return [TODO] TODO
   def report_runperiod_output_results(runner, outputs, args, annual_output_path)
@@ -1662,7 +1662,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param outputs [TODO] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param timestamps_dst [TODO] TODO
   # @param timestamps_utc [TODO] TODO
   # @return [TODO] TODO
@@ -2810,7 +2810,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param emissions [TODO] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def setup_timeseries_includes(emissions, args)
     # To calculate timeseries emissions or timeseries fuel consumption, we also need to select timeseries

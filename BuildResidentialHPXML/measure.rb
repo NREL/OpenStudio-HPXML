@@ -3439,7 +3439,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] TODO
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
@@ -3509,7 +3509,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
   # Issue warnings or errors for certain combinations of argument values.
   #
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [Array<String>, Array<String>] arrays of warnings and errors
   def validate_arguments(args)
     warnings = argument_warnings(args)
@@ -3521,7 +3521,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # Collection of warning checks on combinations of user argument values.
   # Warnings are registered to the runner, but do not exit the measure.
   #
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [Array<String>] array of warnings
   def argument_warnings(args)
     warnings = []
@@ -3560,7 +3560,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # Collection of error checks on combinations of user argument values.
   # Errors are registered to the runner, and exit the measure.
   #
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [Array<String>] array of errors
   def argument_errors(args)
     errors = []
@@ -3981,7 +3981,7 @@ class HPXMLFile
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [Boolean] TODO
   def self.set_header(runner, hpxml, args)
     errors = []
@@ -4386,7 +4386,7 @@ class HPXMLFile
   # Return the building so we can then set more properties on it.
   #
   # @param hpxml [HPXML] HPXML object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def self.add_building(hpxml, args)
     if not args[:simulation_control_daylight_saving_period].nil?
@@ -4423,7 +4423,7 @@ class HPXMLFile
   # - orientation
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_site(hpxml_bldg, args)
     hpxml_bldg.site.shielding_of_home = args[:site_shielding_of_home]
     hpxml_bldg.site.ground_conductivity = args[:site_ground_conductivity]
@@ -4477,7 +4477,7 @@ class HPXMLFile
   # - height
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_neighbor_buildings(hpxml_bldg, args)
     nbr_map = { Constants.FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
                 Constants.FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
@@ -4505,7 +4505,7 @@ class HPXMLFile
   # - general water use usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_building_occupancy(hpxml_bldg, args)
     hpxml_bldg.building_occupancy.number_of_residents = args[:geometry_unit_num_occupants]
     hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = args[:general_water_use_usage_multiplier]
@@ -4522,7 +4522,7 @@ class HPXMLFile
   # - dwelling unit multipliers
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_building_construction(hpxml_bldg, args)
     if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       args[:geometry_unit_num_floors_above_grade] = 1
@@ -4554,7 +4554,7 @@ class HPXMLFile
   # - user-specified additional properties
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_building_header(hpxml_bldg, args)
     if not args[:schedules_filepaths].nil?
       hpxml_bldg.header.schedules_filepaths = args[:schedules_filepaths].split(',').map(&:strip)
@@ -4586,7 +4586,7 @@ class HPXMLFile
   # - weather station name / EPW filepath
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_climate_and_risk_zones(hpxml_bldg, args)
     hpxml_bldg.climate_and_risk_zones.weather_station_id = 'WeatherStation'
 
@@ -4607,7 +4607,7 @@ class HPXMLFile
   # - presence of flue or chimney in conditioned space
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_air_infiltration_measurements(hpxml_bldg, args)
     if args[:air_leakage_units] == HPXML::UnitsELA
       effective_leakage_area = args[:air_leakage_value]
@@ -4646,7 +4646,7 @@ class HPXMLFile
   # - presence and grade of radiant barrier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_roofs(hpxml_bldg, args, sorted_surfaces)
     args[:geometry_roof_pitch] *= 12.0
@@ -4694,7 +4694,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_rim_joists(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
@@ -4756,7 +4756,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
@@ -4849,7 +4849,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_foundation_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
@@ -4935,7 +4935,7 @@ class HPXMLFile
   # - presence and grade of attic floor radiant barrier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
@@ -5017,7 +5017,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_slabs(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
@@ -5087,7 +5087,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [TODO] TODO
   def self.set_windows(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
@@ -5163,7 +5163,7 @@ class HPXMLFile
   # - attached roofs
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_subsurfaces [TODO] TODO
   def self.set_skylights(hpxml_bldg, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
@@ -5203,7 +5203,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param sorted_subsurfaces [TODO] TODO
   def self.set_doors(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
@@ -5234,7 +5234,7 @@ class HPXMLFile
   # - attached roofs, walls, and floors
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_attics(hpxml_bldg, args)
     surf_ids = { 'roofs' => { 'surfaces' => hpxml_bldg.roofs, 'ids' => [] },
                  'walls' => { 'surfaces' => hpxml_bldg.walls, 'ids' => [] },
@@ -5271,7 +5271,7 @@ class HPXMLFile
   # - attached slabs, floors, foundation walls, walls, and rim joists
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_foundations(hpxml_bldg, args)
     surf_ids = { 'slabs' => { 'surfaces' => hpxml_bldg.slabs, 'ids' => [] },
                  'floors' => { 'surfaces' => hpxml_bldg.floors, 'ids' => [] },
@@ -5329,7 +5329,7 @@ class HPXMLFile
   # - number of dwelling units served
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_heating_systems(hpxml_bldg, args)
     heating_system_type = args[:heating_system_type]
 
@@ -5402,7 +5402,7 @@ class HPXMLFile
   # - detailed performance data
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_cooling_systems(hpxml_bldg, args)
     cooling_system_type = args[:cooling_system_type]
 
@@ -5520,7 +5520,7 @@ class HPXMLFile
   # - detailed performance data
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_heat_pumps(hpxml_bldg, args)
     heat_pump_type = args[:heat_pump_type]
 
@@ -5708,7 +5708,7 @@ class HPXMLFile
   # - pipe type and diameter
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_geothermal_loop(hpxml_bldg, args)
     return if hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size == 0
     return if args[:geothermal_loop_configuration].nil? || args[:geothermal_loop_configuration] == 'none'
@@ -5746,7 +5746,7 @@ class HPXMLFile
   # - heat load served
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_secondary_heating_systems(hpxml_bldg, args)
     heating_system_type = args[:heating_system_2_type]
     heating_system_is_heatpump_backup = (args[:heat_pump_type] != 'none' && args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate)
@@ -5788,7 +5788,7 @@ class HPXMLFile
   # - presence of ducts
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_hvac_distribution(hpxml_bldg, args)
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -5870,7 +5870,7 @@ class HPXMLFile
   # - fan W/cfm
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_hvac_blower(hpxml_bldg, args)
     # Blower fan W/cfm
     hpxml_bldg.hvac_systems.each do |hvac_system|
@@ -5899,7 +5899,7 @@ class HPXMLFile
   # - leakage type, units, and value
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_duct_leakages(args, hvac_distribution)
     hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                     duct_leakage_units: args[:ducts_leakage_units],
@@ -5951,7 +5951,7 @@ class HPXMLFile
   # - surface area
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param hvac_distribution [TODO] TODO
   def self.set_ducts(hpxml_bldg, args, hvac_distribution)
     ducts_supply_location = get_location(args[:ducts_supply_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
@@ -6068,7 +6068,7 @@ class HPXMLFile
   #
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @param weather [WeatherProcess] Weather object
   def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
@@ -6170,7 +6170,7 @@ class HPXMLFile
   #   - fan power
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_ventilation_fans(hpxml_bldg, args)
     if args[:mech_vent_fan_type] != 'none'
 
@@ -6311,7 +6311,7 @@ class HPXMLFile
   # - number of bedrooms served
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_water_heating_systems(hpxml_bldg, args)
     water_heater_type = args[:water_heater_type]
     return if water_heater_type == 'none'
@@ -6428,7 +6428,7 @@ class HPXMLFile
   # - drain water heat recovery facilities connected, flow configuration, efficiency
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_hot_water_distribution(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
 
@@ -6465,7 +6465,7 @@ class HPXMLFile
   # - faucet/sink low flow
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_water_fixtures(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
 
@@ -6487,7 +6487,7 @@ class HPXMLFile
   # - solar fraction
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param epw_file [OpenStudio::EpwFile] TODO
   def self.set_solar_thermal(hpxml_bldg, args, epw_file)
     return if args[:solar_thermal_system_type] == 'none'
@@ -6536,7 +6536,7 @@ class HPXMLFile
   # - presence of a second system
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param epw_file [OpenStudio::EpwFile] TODO
   def self.set_pv_systems(hpxml_bldg, args, epw_file)
     return unless args[:pv_system_present]
@@ -6590,7 +6590,7 @@ class HPXMLFile
   # - number of bedrooms served
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_battery(hpxml_bldg, args)
     return unless args[:battery_present]
 
@@ -6620,7 +6620,7 @@ class HPXMLFile
   # - holiday lighting daily energy and period
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_lighting(hpxml_bldg, args)
     if args[:lighting_present]
       has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
@@ -6704,7 +6704,7 @@ class HPXMLFile
   # - dehumidification load served
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_dehumidifier(hpxml_bldg, args)
     return if args[:dehumidifier_type] == 'none'
 
@@ -6734,7 +6734,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_clothes_washer(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:clothes_washer_present]
@@ -6766,7 +6766,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_clothes_dryer(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:clothes_washer_present]
@@ -6806,7 +6806,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_dishwasher(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:dishwasher_present]
@@ -6835,7 +6835,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_refrigerator(hpxml_bldg, args)
     return unless args[:refrigerator_present]
 
@@ -6851,7 +6851,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_extra_refrigerator(hpxml_bldg, args)
     return unless args[:extra_refrigerator_present]
 
@@ -6869,7 +6869,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_freezer(hpxml_bldg, args)
     return unless args[:freezer_present]
 
@@ -6885,7 +6885,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_cooking_range_oven(hpxml_bldg, args)
     return unless args[:cooking_range_oven_present]
 
@@ -6905,7 +6905,7 @@ class HPXMLFile
   # - quantity
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_ceiling_fans(hpxml_bldg, args)
     return unless args[:ceiling_fan_present]
 
@@ -6920,7 +6920,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_plug_loads_television(hpxml_bldg, args)
     return unless args[:misc_plug_loads_television_present]
 
@@ -6936,7 +6936,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_plug_loads_other(hpxml_bldg, args)
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeOther,
@@ -6951,7 +6951,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_plug_loads_well_pump(hpxml_bldg, args)
     return unless args[:misc_plug_loads_well_pump_present]
 
@@ -6966,7 +6966,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_plug_loads_vehicle(hpxml_bldg, args)
     return unless args[:misc_plug_loads_vehicle_present]
 
@@ -6982,7 +6982,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_fuel_loads_grill(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_grill_present]
 
@@ -6999,7 +6999,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_fuel_loads_lighting(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_lighting_present]
 
@@ -7017,7 +7017,7 @@ class HPXMLFile
   # - usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_misc_fuel_loads_fireplace(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_fireplace_present]
 
@@ -7038,7 +7038,7 @@ class HPXMLFile
   # - heater usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_pool(hpxml_bldg, args)
     return unless args[:pool_present]
 
@@ -7075,7 +7075,7 @@ class HPXMLFile
   # - heater usage multiplier
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.set_permanent_spa(hpxml_bldg, args)
     return unless args[:permanent_spa_present]
 
@@ -7107,7 +7107,7 @@ class HPXMLFile
   # Combine surfaces to simplify the HPXML file.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   def self.collapse_surfaces(hpxml_bldg, args)
     if args[:combine_like_surfaces]
       # Collapse some surfaces whose azimuth is a minor effect to simplify HPXMLs.

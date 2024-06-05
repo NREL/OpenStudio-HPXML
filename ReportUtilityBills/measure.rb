@@ -152,7 +152,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # Return a vector of IdfObject's to request EnergyPlus objects needed by the run method.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [TODO] TODO
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
@@ -238,7 +238,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # Define what happens when the measure is run.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] TODO
   def run(runner, user_arguments)
     super(runner, user_arguments)
@@ -372,7 +372,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def get_timestamps(args)
     ep_timestamps = @msgpackData['MeterData']['Monthly']['Rows'].map { |r| r.keys[0] }
@@ -401,7 +401,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param utility_bills [TODO] TODO
   # @param annual_output_path [TODO] TODO
   # @param bill_scenario_name [TODO] TODO
@@ -441,7 +441,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param utility_bills [TODO] TODO
   # @param bill_scenario_name [TODO] TODO
   # @param monthly_data [TODO] TODO
@@ -466,7 +466,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @param timestamps [TODO] TODO
   # @param monthly_data [TODO] TODO
   # @param monthly_output_path [TODO] TODO

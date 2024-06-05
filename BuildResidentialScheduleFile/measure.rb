@@ -89,7 +89,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param user_arguments [OpenStudio::Measure.convertOSArgumentVectorToMap] OpenStudio::Measure.convertOSArgumentVectorToMap object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] TODO
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
@@ -182,7 +182,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # @param hpxml_path [TODO] TODO
   # @param hpxml_output_path [TODO] TODO
   # @param schedules_filepaths [TODO] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
     # write out the modified hpxml
@@ -199,7 +199,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param epw_file [OpenStudio::EpwFile] TODO
   # @param weather [WeatherProcess] Weather object
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def create_schedules(runner, hpxml, hpxml_bldg, epw_file, weather, args)
     info_msgs = []
@@ -240,7 +240,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   #
   # @param hpxml [HPXML] HPXML object
   # @param epw_file [OpenStudio::EpwFile] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def get_simulation_parameters(hpxml, epw_file, args)
     args[:minutes_per_step] = 60
@@ -261,7 +261,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param epw_file [OpenStudio::EpwFile] TODO
-  # @param args [Json::Value] a Json::Value hash
+  # @param args [Hash] Map of :argument_name => value
   # @return [TODO] TODO
   def get_generator_inputs(hpxml_bldg, epw_file, args)
     state_code = HPXMLDefaults.get_default_state_code(hpxml_bldg.state_code, epw_file)
