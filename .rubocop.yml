@@ -55,14 +55,12 @@ Style/CollectionCompact:
   Enabled: true
 Style/Documentation:
   Exclude:
-    - '**/measure.rb'
     - '**/tests/*.rb'
     - 'HPXMLtoOpenStudio/resources/hpxml.rb'
     - 'workflow/**/*.rb'
     - 'tasks.rb'
 Style/DocumentationMethod:
   Exclude:
-    - '**/measure.rb'
     - '**/tests/*.rb'
     - 'HPXMLtoOpenStudio/resources/hpxml.rb'
     - 'workflow/**/*.rb'
