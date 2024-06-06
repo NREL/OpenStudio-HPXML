@@ -86,6 +86,49 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
+  def test_central_air_conditioner_var_speed_max_power_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-central-ac-only-var-speed-max-power-ratio-schedule.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+
+    # Check heating coil
+    assert_equal(0, model.getCoilHeatingDXMultiSpeeds.size)
+
+    # Check supp heating coil
+    assert_equal(0, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+  end
+
+  def test_central_air_conditioner_furnace_var_speed_max_power_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-furnace-gas-central-ac-var-speed-max-power-ratio-schedule.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+
+    # Check heating coil
+    assert_equal(0, model.getCoilHeatingDXMultiSpeeds.size)
+    assert_equal(1, model.getCoilHeatingGass.size)
+
+    # Check supp heating coil
+    assert_equal(0, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, nil, nil, nil, nil, 2779.53, 5.89, 7168.65, 5.25)
+  end
+
   def test_room_air_conditioner
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only.xml'))
@@ -648,6 +691,129 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert(program_values.empty?) # Check no EMS program
   end
 
+  def test_air_to_air_heat_pump_var_speed_max_power_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
+
+    # two systems
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(2, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil_1 = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil_1.stages.size)
+    clg_coil_2 = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil_2.stages.size)
+
+    # Check heating coil
+    assert_equal(2, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil_1 = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil_1.stages.size)
+    htg_coil_2 = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil_2.stages.size)
+
+    # Check supp heating coil
+    assert_equal(2, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(2, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 0)
+    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 1)
+  end
+
+  def test_heat_pump_advanced_defrost
+    # Var Speed heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-advanced-defrost.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
+
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    # q_dot smaller than backup capacity
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1215.05)
+
+    # Single Speed heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-advanced-defrost.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
+
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+    # q_dot smaller than backup capacity
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1572.8)
+
+    # Ductless heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless-advanced-defrost.xml'))
+    model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    backup_fuel = EPlus.fuel_type(HPXML::FuelTypeElectricity)
+
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    # q_dot smaller than backup capacity
+    _check_advanced_defrost(model, htg_coil, 0.0, 0.0, backup_fuel, 0.06667, 4028.7)
+
+    # Dual fuel heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-advanced-defrost.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    heat_pump = hpxml_bldg.heat_pumps[0]
+    backup_fuel = EPlus.fuel_type(heat_pump.backup_heating_fuel)
+    supp_htg_power = 4747.75 / 0.95
+
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    # q_dot smaller than backup capacity
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 4747.75, backup_fuel, 0.06667, 1231.91)
+
+    # Separate backup heat pump test
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml'))
+    model, _hpxml, hpxml_bldg = _test_measure(args_hash)
+
+    # Get HPXML values
+    backup_heating_system = hpxml_bldg.heating_systems[0]
+    backup_fuel = EPlus.fuel_type(backup_heating_system.heating_system_fuel)
+    supp_htg_power = 2373.9 / 0.8
+
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    # q_dot smaller than backup capacity
+    _check_advanced_defrost(model, htg_coil, supp_htg_power, 2373.9, backup_fuel, 0.06667, 576.3)
+  end
+
   def test_mini_split_heat_pump
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ductless.xml'))
@@ -720,6 +886,29 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     unitary_system = model.getAirLoopHVACUnitarySystems[0]
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} IQ")
     assert(program_values.empty?) # Check no EMS program
+  end
+
+  def test_mini_split_heat_pump_max_power_ratio
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml'))
+    model, _hpxml = _test_measure(args_hash)
+
+    # Check cooling coil
+    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
+    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
+    assert_equal(2, clg_coil.stages.size)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
+    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
+    assert_equal(2, htg_coil.stages.size)
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+
+    # Check EMS
+    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
+    _check_max_power_ratio_EMS_multispeed(model, 3304.36, 4.55, 10634.05, 3.88, 4169.30, 4.64, 10752.98, 4.07)
   end
 
   def test_mini_split_air_conditioner
@@ -1044,7 +1233,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+    [0.87, 0.87].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
     [0.806, 0.806].each_with_index do |rated_airflow_ratio, i|
@@ -1060,7 +1249,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
     [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
@@ -1073,7 +1262,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
     [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
@@ -1127,7 +1316,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [1.088, 1.088].each_with_index do |rated_airflow_ratio, i|
+    [0.87, 0.87].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1140,7 +1329,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+    [0.747, 0.748].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1210,7 +1399,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     cooling_system = hpxml_bldg.cooling_systems[0]
     program_values = _check_install_quality_multispeed_ratio(cooling_system, model)
-    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+    [0.749, 0.749].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
   end
@@ -1223,7 +1412,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Get HPXML values
     heat_pump = hpxml_bldg.heat_pumps[0]
     program_values = _check_install_quality_multispeed_ratio(heat_pump, model, heat_pump)
-    [0.936, 0.936].each_with_index do |rated_airflow_ratio, i|
+    [0.748, 0.748].each_with_index do |rated_airflow_ratio, i|
       assert_in_epsilon(rated_airflow_ratio, program_values['FF_AF_clg'][i], 0.01)
     end
     [0.71, 0.71].each_with_index do |rated_airflow_ratio, i|
@@ -1416,6 +1605,67 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     end
 
     return program_values
+  end
+
+  def _check_max_power_ratio_EMS_multispeed(model, htg_speed1_capacity, htg_speed1_cop, htg_speed2_capacity, htg_speed2_cop, clg_speed1_capacity, clg_speed1_cop, clg_speed2_capacity, clg_speed2_cop, num_sys = 1, sys_i = 0)
+    # model objects:
+    # Unitary system
+    assert_equal(num_sys, model.getAirLoopHVACUnitarySystems.size)
+    unitary_system = model.getAirLoopHVACUnitarySystems[sys_i]
+
+    # Check max power ratio EMS
+    index = 0
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} max power ratio program", true)
+    if not htg_speed1_capacity.nil?
+      # two coils, two sets of values
+      assert_equal(2, program_values['rated_eir_0'].size)
+      assert_equal(2, program_values['rated_eir_1'].size)
+      assert_equal(2, program_values['rt_capacity_0'].size)
+      assert_equal(2, program_values['rt_capacity_1'].size)
+      assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / htg_speed1_cop, 0.01) unless htg_speed1_cop.nil?
+      assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / htg_speed2_cop, 0.01) unless htg_speed2_cop.nil?
+      assert_in_epsilon(program_values['rt_capacity_0'][index], htg_speed1_capacity, 0.01) unless htg_speed1_capacity.nil?
+      assert_in_epsilon(program_values['rt_capacity_1'][index], htg_speed2_capacity, 0.01) unless htg_speed2_capacity.nil?
+      index += 1
+    else
+      assert_equal(1, program_values['rated_eir_0'].size)
+      assert_equal(1, program_values['rated_eir_1'].size)
+      assert_equal(1, program_values['rt_capacity_0'].size)
+      assert_equal(1, program_values['rt_capacity_1'].size)
+    end
+    assert_in_epsilon(program_values['rated_eir_0'][index], 1.0 / clg_speed1_cop, 0.01) unless clg_speed1_cop.nil?
+    assert_in_epsilon(program_values['rated_eir_1'][index], 1.0 / clg_speed2_cop, 0.01) unless clg_speed2_cop.nil?
+    assert_in_epsilon(program_values['rt_capacity_0'][index], clg_speed1_capacity, 0.01) unless clg_speed1_capacity.nil?
+    assert_in_epsilon(program_values['rt_capacity_1'][index], clg_speed2_capacity, 0.01) unless clg_speed2_capacity.nil?
+
+    return program_values
+  end
+
+  def _check_advanced_defrost(model, htg_coil, supp_design_level, supp_delivered_htg, backup_fuel, defrost_time_fraction, defrost_power)
+    unitary_system = model.getAirLoopHVACUnitarySystems[0]
+
+    # Check Other equipment inputs
+    defrost_heat_load_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost heat load' }
+    assert_equal(1, defrost_heat_load_oe.size)
+    assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionRadiant)
+    assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLatent)
+    assert_equal(0, defrost_heat_load_oe[0].otherEquipmentDefinition.fractionLost)
+    defrost_supp_heat_energy_oe = model.getOtherEquipments.select { |oe| oe.name.get.include? 'defrost supp heat energy' }
+    assert_equal(1, defrost_supp_heat_energy_oe.size)
+    assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionRadiant)
+    assert_equal(0, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLatent)
+    assert_equal(1, defrost_supp_heat_energy_oe[0].otherEquipmentDefinition.fractionLost)
+    assert(backup_fuel == defrost_supp_heat_energy_oe[0].fuelType.to_s)
+
+    # Check heating coil defrost inputs
+    assert(htg_coil.defrostStrategy == 'Resistive')
+    assert_in_epsilon(htg_coil.defrostTimePeriodFraction, defrost_time_fraction, 0.01)
+    assert_in_epsilon(htg_coil.resistiveDefrostHeaterCapacity.get, defrost_power, 0.01)
+
+    # Check EMS
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{unitary_system.name} defrost program")
+    assert_in_epsilon(program_values['supp_design_level'].sum, supp_design_level, 0.01)
+    assert_in_epsilon(program_values['supp_delivered_htg'].sum, supp_delivered_htg, 0.01)
   end
 
   def _create_hpxml(hpxml_name)

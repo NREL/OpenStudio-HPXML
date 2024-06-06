@@ -75,6 +75,8 @@ HPXML Software Info
 
 High-level simulation inputs are entered in ``/HPXML/SoftwareInfo``.
 
+.. _hpxml_simulation_control:
+
 HPXML Simulation Control
 ************************
 
@@ -89,15 +91,31 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            >= 1, <= 31       No        31                           Run period end date
   ``CalendarYear``                      integer            > 1600 [#]_       No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``TemperatureCapacitanceMultiplier``  double             > 0               No        1.0                          Multiplier on air heat capacitance [#]_
+  ``AdvancedResearchFeatures``          element                              No        <none>                       Features used for advanced research modeling
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
+
+To enable advanced research features, additional information is entered in ``/HPXML/SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures``.
+
+These features may require shorter timesteps, allow more sophisticated simulation control, and/or impact simulation runtime.
+
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+  Element                               Type      Units    Constraints       Required  Default   Notes
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+  ``TemperatureCapacitanceMultiplier``  double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
+  ``DefrostModelType``                  string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+
+  .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
+  .. [#] DefrostModelType choices are "standard" and "advanced".
+  .. [#] Use "standard" for default E+ defrost setting.
+         Use "advanced" for an improved model that better accounts for load and energy use during defrost; using "advanced" may impact simulation runtime.
 
 HPXML Emissions Scenarios
 *************************
@@ -215,7 +233,7 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   ================================  ========  =======  ===========  ========  ========  ====================
 
   .. [#] If running :ref:`bldg_type_bldgs`, the fixed charge will apply to every dwelling unit in the building.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 **Detailed**
 
@@ -251,15 +269,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
-         
-         \- **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
-         
-         \- **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
-         
-         \- **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
-         
-         or defaults to $0.015/kBtu for other fuels.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv`` (except for coal, which is based on 2007 EIA SEDS data as EIA assumes there is zero residential sector coal consumption in the United States for 2008 forward and  does not estimate a price).
 
 PV Compensation
 ~~~~~~~~~~~~~~~
@@ -394,7 +404,7 @@ For these simulations:
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- Batteries are not currently supported. Dehumidifiers and ground-source heat pumps are only supported if ``NumberofUnits`` is 1.
+- Batteries are not currently supported.
 - Utility bill calculations using detailed rates are not supported.
 
 .. _buildingsite:
@@ -404,19 +414,26 @@ HPXML Building Site
 
 Building site information can be entered in ``/HPXML/Building/Site``.
 
-  =======================================  ========  =====  ===========  ========  ========  ===============
-  Element                                  Type      Units  Constraints  Required  Default   Description
-  =======================================  ========  =====  ===========  ========  ========  ===============
-  ``SiteID``                               id                            Yes                 Unique identifier
-  ``Address/StateCode``                    string                        No        See [#]_  State/territory where the home is located
-  ``Address/ZipCode``                      string           See [#]_     No                  ZIP Code where the home is located
-  ``TimeZone/UTCOffset``                   double           See [#]_     No        See [#]_  Difference in decimal hours between the home's time zone and UTC
-  ``TimeZone/DSTObserved``                 boolean                       No        true      Daylight saving time observed?
-  =======================================  ========  =====  ===========  ========  ========  ===============
+  =======================================  ========  =====  ===============  ========  ========  ===============
+  Element                                  Type      Units  Constraints      Required  Default   Description
+  =======================================  ========  =====  ===============  ========  ========  ===============
+  ``SiteID``                               id                                Yes                 Unique identifier
+  ``Address/CityMunicipality``             string                            No        See [#]_  Address city/municipality (not used in the energy model)
+  ``Address/StateCode``                    string                            No        See [#]_  Address state/territory
+  ``Address/ZipCode``                      string           See [#]_         No                  Address ZIP Code (not used in the energy model)
+  ``GeoLocation/Latitude``                 double    deg    >= -90, <= 90    No        See [#]_  Site latitude (negative for southern hemisphere)
+  ``GeoLocation/Longitude``                double    deg    >= -180, <= 180  No        See [#]_  Site longitude (negative for western hemisphere)
+  ``Elevation``                            double    ft     >= 0             No        See [#]_  Site elevation
+  ``TimeZone/UTCOffset``                   double           >= -12, <= 14    No        See [#]_  Difference in decimal hours between the home's time zone and UTC
+  ``TimeZone/DSTObserved``                 boolean                           No        true      Daylight saving time observed?
+  =======================================  ========  =====  ===============  ========  ========  ===============
 
+  .. [#] If CityMunicipality not provided, defaults according to the EPW weather file header.
   .. [#] If StateCode not provided, defaults according to the EPW weather file header.
   .. [#] ZipCode can be defined as the standard 5 number postal code, or it can have the additional 4 number code separated by a hyphen.
-  .. [#] UTCOffset ranges from -12 to 14.
+  .. [#] If Latitude not provided, defaults according to the EPW weather file header.
+  .. [#] If Longitude not provided, defaults according to the EPW weather file header.
+  .. [#] If Elevation not provided, defaults according to the EPW weather file header.
   .. [#] If UTCOffset not provided, defaults according to the EPW weather file header.
 
 If daylight saving time is observed, additional information can be specified in ``/HPXML/Building/Site/TimeZone/extension``.
@@ -444,7 +461,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Element                           Type      Units        Constraints  Required  Default   Notes
   ================================  ========  ===========  ===========  ========  ========  ============================================================
   ``SiteType``                      string                 See [#]_     No        suburban  Terrain type for infiltration model
-  ``ShieldingofHome``               string                 See [#]_     No        normal    Presence of nearby buildings, trees, obstructions for infiltration model
+  ``ShieldingofHome``               string                 See [#]_     No        See [#]_  Presence of nearby buildings, trees, obstructions for infiltration model
   ``Soil/SoilType``                 string                 See [#]_     No        unknown   Soil type
   ``Soil/MoistureType``             string                 See [#]_     No        mixed     Soil moisture type
   ``Soil/Conductivity``             double    Btu/hr-ft-F  > 0          No        See [#]_  Soil thermal conductivity
@@ -454,6 +471,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
 
   .. [#] SiteType choices are "rural", "suburban", or "urban".
   .. [#] ShieldingofHome choices are "normal", "exposed", or "well-shielded".
+  .. [#] If ShieldingofHome not provided, defaults to "normal" for single-family detached or manufactured home and "well-shielded" for single-family attached or apartment unit.
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] MoistureType choices are "dry", "wet", or "mixed".
   .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType:
@@ -505,6 +523,11 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   Default Conductivity and Diffusivity values based on SoilType/MoistureType provided by Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement. Application to very Low Enthalpy Geothermal Energy Systems <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
   Conductivity is used for foundation heat transfer and ground source heat pumps.
   Diffusivity is used for ground source heat pumps.
+
+.. _neighbor_buildings:
+
+HPXML Neighbor Buildings
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each neighboring building defined, additional information is entered in a ``extension/Neighbors/NeighborBuilding``.
 
@@ -558,26 +581,34 @@ HPXML Building Construction
 
 Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction``.
 
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  Element                                                    Type      Units      Constraints                        Required  Default   Notes
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
-  ``ResidentialFacilityType``                                string               See [#]_                           Yes                 Type of dwelling unit
-  ``NumberofUnits``                                          integer              >= 1                               No        1         Unit multiplier [#]_
-  ``NumberofConditionedFloors``                              double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
-  ``NumberofConditionedFloorsAboveGrade``                    double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
-  ``NumberofBedrooms``                                       integer              >= 0                               Yes                 Number of bedrooms
-  ``NumberofBathrooms``                                      integer              > 0                                No        See [#]_  Number of bathrooms
-  ``ConditionedFloorArea``                                   double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
-  ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``  double    ft3 or ft  > 0                                No        See [#]_  Volume/ceiling height within conditioned space boundary (including a conditioned basement/crawlspace)
-  =========================================================  ========  =========  =================================  ========  ========  =======================================================================
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  Element                                  Type      Units      Constraints                        Required  Default   Notes
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
+  ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
+  ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
+  ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
+  ``AverageCeilingHeight``                 double    ft         > 0                                No        8.2       Floor to ceiling height within conditioned space
+  ``NumberofBedrooms``                     integer              >= 0                               Yes                 Number of bedrooms
+  ``NumberofBathrooms``                    integer              > 0                                No        See [#]_  Number of bathrooms
+  ``ConditionedFloorArea``                 double    ft2        > 0                                Yes                 Floor area within conditioned space boundary (excluding conditioned crawlspace floor area)
+  ``ConditionedBuildingVolume``            double    ft3        > 0                                No        See [#]_  Volume within conditioned space boundary (including a conditioned basement/crawlspace)
+  =======================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
+         Note that when NumberofUnits is greater than 1, a few capabilities are not currently supported:
+         
+         \- Dehumidifiers
+         
+         \- Ground-source heat pumps
+         
+         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
+         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If neither ConditionedBuildingVolume nor AverageCeilingHeight provided, AverageCeilingHeight defaults to 8 ft.
-         If one is provided, the other is calculated using the following relationship: ConditionedBuildingVolume = ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
+  .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
 HPXML Schedules
 ***************
@@ -643,10 +674,17 @@ The column names available in the schedule CSV files are:
   ``general_water_use``             frac     General water use internal gains.                                                  No
   ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                              No
   ``cooling_setpoint``              F        Thermostat cooling setpoint schedule.                                              No
+  ``hvac_maximum_power_ratio``      frac     Variable speed system maximum power ratio schedule. [#]_                           No
   ``water_heater_setpoint``         F        Water heater setpoint schedule.                                                    No
   ``water_heater_operating_mode``   0/1      Heat pump water heater operating mode schedule. 0=hybrid/auto, 1=heat pump only.   No
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
   ================================  =======  =================================================================================  ===============================
+
+  .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
+         While any fraction value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
+         A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
+         During the shedding events, the main heat pump is limited to running below the specified fraction of rated power, and the backup system is locked out.
+         When the comfort constraints are violated, both heat pump and backup systems are allowed to run at full load to recover the indoor temperature until reaching setpoint.
 
 Columns with units of `frac` must be normalized to MAX=1; that is, these schedules only define *when* energy is used, not *how much* energy is used.
 In other words, the amount of energy or hot water used in each simulation timestep is essentially the schedule value divided by the sum of all schedule values in the column, multiplied by the annual energy or hot water use.
@@ -657,7 +695,14 @@ Frequency of schedule values do not need to match the simulation timestep.
 For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
 
 A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Can Be Stochastically Generated" above for applicable columns); see the :ref:`usage_instructions` for the commands.
-Inputs for the stochastic schedule generator are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents`` and ``/HPXML/Building/Site/Address/StateCode``.
+Inputs for the stochastic schedule generator are entered in:
+
+- ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents``
+- ``/HPXML/Building/Site/Address/StateCode`` (optional)
+- ``/HPXML/Building/Site/GeoLocation/Latitude`` (optional)
+- ``/HPXML/Building/Site/GeoLocation/Longitude`` (optional)
+- ``/HPXML/Building/Site/TimeZone/UTCOffset`` (optional)
+
 See :ref:`buildingoccupancy` and :ref:`buildingsite` for more information.
 
 .. warning::
@@ -679,55 +724,73 @@ HPXML HVAC Sizing Control
 *************************
 
 HVAC equipment sizing controls are entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl``.
+Additional autosizing factor inputs are available at the system level, see :ref:`hvac_heating`, :ref:`hvac_cooling` and :ref:`hvac_heatpump`.
 
   ===================================  ========  =====  ===========  ========  =========  ============================================
   Element                              Type      Units  Constraints  Required  Default    Description
   ===================================  ========  =====  ===========  ========  =========  ============================================
-  ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps [#]_
-  ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup [#]_
+  ``HeatPumpSizingMethodology``        string           See [#]_     No        HERS       Logic for autosized heat pumps
+  ``HeatPumpBackupSizingMethodology``  string           See [#]_     No        emergency  Logic for autosized heat pump backup
   ``AllowIncreasedFixedCapacities``    boolean                       No        false      Logic for fixed capacity HVAC equipment [#]_
   ===================================  ========  =====  ===========  ========  =========  ============================================
 
-  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad'.
-  .. [#] If HeatPumpSizingMethodology is 'ACCA', autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
-         If HeatPumpSizingMethodology is 'HERS', autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
-         If HeatPumpSizingMethodology is 'MaxLoad', autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature.
-  .. [#] HeatPumpBackupSizingMethodology choices are 'emergency' or 'supplemental'.
-  .. [#] Heat pump backup capacity is often sized for emergency heat so that it can meet the entire design load if the heat pump fails.
+  .. [#] HeatPumpSizingMethodology choices are 'ACCA', 'HERS', or 'MaxLoad', and are described as follows:
+  
+         \- **ACCA**: autosized heat pumps have their nominal capacity sized per ACCA Manual J/S based on cooling design loads, with some oversizing allowances for larger heating design loads.
+         
+         \- **HERS**: autosized heat pumps have their nominal capacity sized equal to the larger of heating/cooling design loads.
+         
+         \- **MaxLoad**: autosized heat pumps have their nominal capacity sized based on the larger of heating/cooling design loads, while taking into account the heat pump's reduced capacity at the design temperature, such that no backup heating should be necessary.
+
+  .. [#] HeatPumpBackupSizingMethodology choices are 'emergency' or 'supplemental', and are described as follows:
+
+         \- **emergency**: heat pump backup capacity will be autosized to meet the ACCA Manual J heating design load.
+         
+         \- **supplemental**: heat pump backup capacity will be autosized to meet the remainder of the ACCA Manual J heating design load not met by the heat pump at the heating design temperature.
+
+         Heat pump backup capacity is often sized for emergency heat so that it can meet the entire design load if the heat pump fails.
          Some contractors/homeowners may choose not to do so, perhaps due to insufficient panel/wiring capacity.
-
-         If HeatPumpBackupSizingMethodology is 'emergency', heat pump backup capacity will be autosized to meet the ACCA Manual J heating design load.
-         If HeatPumpBackupSizingMethodology is 'supplemental', heat pump backup capacity will be autosized to meet the remainder of the ACCA Manual J heating design load not met by the heat pump at the heating design temperature.
-
-         If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
+         Note: If the minimum temperature for the heat pump's compressor (i.e., ``CompressorLockoutTemperature`` or ``BackupHeatingSwitchoverTemperature``) is above the heating design temperature, the two sizing methodologies will give identical results.
   .. [#] If AllowIncreasedFixedCapacities is true, the larger of user-specified fixed capacity and design load will be used (to reduce potential for unmet loads); otherwise user-specified fixed capacity is used.
 
-If any HVAC equipment is being autosized (i.e., capacities are not provided), additional inputs for ACCA Manual J can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
+Manual J Inputs
+~~~~~~~~~~~~~~~
+
+Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment, can be entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension/HVACSizingControl/ManualJInputs``.
 
   =================================  ========  ======  ===========  ========  ============  ============================================
   Element                            Type      Units   Constraints  Required  Default       Description
   =================================  ========  ======  ===========  ========  ============  ============================================
-  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating design temperature
-  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling design temperature
+  ``HeatingDesignTemperature``       double    F                    No        See [#]_      Heating outdoor design temperature
+  ``CoolingDesignTemperature``       double    F                    No        See [#]_      Cooling outdoor design temperature
+  ``DailyTemperatureRange``          string            See [#]_     No        See [#]_      Class based on average difference between daily high/low outdoor temperatures during the hottest month
   ``HeatingSetpoint``                double    F                    No        70            Conditioned space heating setpoint [#]_
   ``CoolingSetpoint``                double    F                    No        75            Conditioned space cooling setpoint [#]_
   ``HumiditySetpoint``               double    frac    > 0, < 1     No        See [#]_      Conditioned space relative humidity
-  ``InternalLoadsSensible``          double    Btu/hr               No        See [#]_      Sensible internal loads for cooling design load
-  ``InternalLoadsLatent``            double    Btu/hr               No        0             Latent internal loads for cooling design load
-  ``NumberofOccupants``              integer                        No        #Beds+1 [#]_  Number of occupants for cooling design load
+  ``HumidityDifference``             double    grains               No        See [#]_      Difference between absolute humidity of the outdoor/indoor air during the summer
+  ``InternalLoadsSensible``          double    Btu/hr  >= 0         No        See [#]_      Sensible internal loads for cooling design load
+  ``InternalLoadsLatent``            double    Btu/hr  >= 0         No        0             Latent internal loads for cooling design load
+  ``NumberofOccupants``              integer           >= 0         No        See [#]_      Number of occupants for cooling design load
   =================================  ========  ======  ===========  ========  ============  ============================================
 
   .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] If CoolingDesignTemperature not provided, the 1% cooling design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
          If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
+  .. [#] DailyTemperatureRange choices are "low", "medium", or "high".
+  .. [#] If DailyTemperatureRange not provided, the cooling drybulb temperature range is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
+         If not available in the EPW header, it is calculated from the 8760 hourly temperatures in the EPW.
   .. [#] Any heating setpoint other than 70F is not in compliance with Manual J.
   .. [#] Any cooling setpoint other than 75F is not in compliance with Manual J.
   .. [#] If HumiditySetpoint not provided, defaults to 0.45 in a dry climate, otherwise 0.5.
-  .. [#] If InternalLoadsSensible not provided, defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
+  .. [#] If HumidityDifference not provided, it is calculated from the other inputs/defaults and the cooling humidity ratio.
+         The cooling humidity ratio is calculated from the DESIGN CONDITIONS header section inside the EPW weather file or, if not available, the 8760 hourly temperatures in the EPW.
+  .. [#] If InternalLoadsSensible not provided, defaults to the sum of conditioned spaces' InternalLoadsSensible values if provided (see :ref:`zones_spaces`).
+         Otherwise defaults to 2400 Btu/hr if there is one refrigerator and no freezer, or 3600 Btu/hr if two refrigerators or a freezer.
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
-  .. [#] If NumberofOccupants not provided, defaults to the number of bedrooms plus one per Manual J.
+  .. [#] If NumberofOccupants not provided, defaults to the sum of conditioned spaces' NumberofOccupants values if provided (see :ref:`zones_spaces`).
+         Otherwise defaults to the number of bedrooms plus one per Manual J.
          Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
 
 .. _shadingcontrol:
@@ -747,6 +810,54 @@ The remainder of the year is winter.
   ``SummerEndMonth``                    integer            >= 1, <= 12    Yes                Summer shading end date
   ``SummerEndDayOfMonth``               integer            >= 1, <= 31    Yes                Summer shading end date
   ====================================  ========  =======  =============  ========  =======  =====================================
+
+.. _zones_spaces:
+
+HPXML Zones/Spaces
+------------------
+
+Conditioned zones can be provided to produce :ref:`hvac_zone_design_loads` and :ref:`hvac_space_design_loads`.
+
+.. note::
+
+  The specification of conditioned zones does not currently affect the energy simulation as all conditioned space in a dwelling unit is currently modeled as a single EnergyPlus conditioned thermal zone.
+  If multiple conditioned zones are specified, the HVAC systems attached to a given zone are assumed to fully condition it for the HVAC design load calculations.
+
+One or more zones can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone``.
+
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+  Element                    Type     Units    Constraints  Required  Default  Notes
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+  ``SystemIdentifier``       id                             Yes                Unique identifier
+  ``ZoneType``               string            See [#]_     Yes                Type of zone
+  ``Spaces/Space``           element                        Yes                One or more spaces within the zone
+  =========================  =======  =======  ===========  ========  =======  ==============================================
+
+  .. [#] ZoneType choices are "unconditioned" or "conditioned".
+
+Each space within a conditioned zone can be entered as a ``/HPXML/Building/BuildingDetails/Zones/Zone[ZoneType="conditioned"]/Spaces/Space``.
+
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
+  Element                                                Type     Units    Constraints  Required  Default   Notes
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
+  ``SystemIdentifier``                                   id                             Yes                 Unique identifier
+  ``FloorArea``                                          double   ft2      > 0          Yes                 Space floor area
+  ``extension/ManualJInputs/InternalLoadsSensible``      double   Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space sensible internal loads for cooling design load
+  ``extension/ManualJInputs/InternalLoadsLatent``        double   Btu/hr   >= 0         No [#]_   See [#]_  Conditioned space latent internal loads for cooling design load
+  ``extension/ManualJInputs/NumberofOccupants``          integer           >= 0         No [#]_   See [#]_  Conditioned space number of occupants for cooling design load
+  ``extension/ManualJInputs/FenestrationLoadProcedure``  string            See [#]_     No        standard  Conditioned space fenestration load procedure [#]_
+  =====================================================  =======  =======  ===========  ========  ========  ==============================================
+
+  .. [#] InternalLoadsSensible must be provided for all spaces or no spaces.
+  .. [#] If InternalLoadsSensible not provided for a conditioned space, the home's total internal sensible loads are apportioned to each space by floor area.
+  .. [#] InternalLoadsLatent must be provided for all spaces or no spaces.
+  .. [#] If InternalLoadsLatent not provided for a conditioned space, the home's total internal latent loads are apportioned to each space by floor area.
+  .. [#] NumberofOccupants must be provided for all spaces or no spaces.
+  .. [#] If NumberofOccupants not provided for a conditioned space, the home's total number of occupants are apportioned to each space by floor area.
+  .. [#] FenestrationLoadProcedure choices are "standard" or "peak".
+  .. [#] The "standard" choice should be used for cooling individual rooms and spaces with a single-zone, central air system, where the local fenestration load equals the daily average fenestration load for the room/space plus the AED (Adequate Exposure Diversity) excursion value for the room/space.
+         The "peak" choice should be used for room and space cooling by any time of multi-zone system or local unitary equipment (in which the HVAC system has the ability to adjust cooling capacity on a room or zone basis), where the local fenestration load equals the peak value on the AED curve.
+         Consult ACCA Manual J for more information.
 
 HPXML Climate Zones
 -------------------
@@ -779,6 +890,8 @@ Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRi
   =========================  ======  =======  ===========  ========  =======  ==============================================
 
   .. [#] A full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
+
+.. _enclosure:
 
 HPXML Enclosure
 ---------------
@@ -815,15 +928,20 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
   ``SystemIdentifier``                   id                          Yes                                   Unique identifier
   ``TypeOfInfiltrationLeakage``          string         See [#]_     See [#]_                              Type of infiltration leakage
-  ``InfiltrationVolume``                 double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement
+  ``InfiltrationVolume``                 double  ft3    > 0          No         ConditionedBuildingVolume  Volume associated with infiltration measurement [#]_
   ``InfiltrationHeight``                 double  ft     > 0          No         See [#]_                   Height associated with infiltration measurement [#]_
   ``extension/Aext``                     double  frac   > 0          No         See [#]_                   Exterior area ratio for SFA/MF dwelling units
   =====================================  ======  =====  ===========  =========  =========================  ===============================================
 
-  .. [#] TypeOfInfiltrationLeakage choices are "unit total" or "unit exterior only".
+  .. [#] TypeOfInfiltrationLeakage choices are "unit total" or "unit exterior only", and are described as follows:
+  
+         \- **unit total**: the provided infiltration value represents the total infiltration to the dwelling unit, as measured by a compartmentalization test, in which case it will be adjusted by ``extension/Aext``.
+         
+         \- **unit exterior only**: the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
+
   .. [#] TypeOfInfiltrationLeakage required if single-family attached or apartment unit.
-         Use "unit total" if the provided infiltration value represents the total infiltration to the dwelling unit, as measured by a compartmentalization test, in which case it will be adjusted by ``extension/Aext``.
-         Use "unit exterior only" if the provided infiltration value represents the infiltration to the dwelling unit from outside only, as measured by a guarded test.
+  .. [#] InfiltrationVolume can be thought of as the volume of space most impacted by a blower door test.
+         Note that InfiltrationVolume can be larger than ConditionedBuildingVolume as it can include, e.g., attics or basements with access doors/hatches that are open during the blower door test.
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
   .. [#] If Aext not provided and TypeOfInfiltrationLeakage is "unit total", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF spaces) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
@@ -916,20 +1034,51 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
+If the dwelling unit has an unvented attic, whether it is within the infiltration volume can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple unvented attics, they must all have the same value.
+
 If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
   =================  ======  =====  ===========  ========  ==========  ==========================
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
   ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
+  ``Value``          double         > 0 [#]_     No        1/300 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure choices are "SLA" (specific leakage area) or "ACHnatural" (natural air changes per hour).
+  .. [#] If there are multiple vented attics, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 HPXML Foundations
 *****************
+
+If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple unconditioned basements, they must all have the same value.
+
+If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
+
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  Element                       Type     Units  Constraints  Required  Default  Notes
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple unvented crawlspaces, they must all have the same value.
 
 If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
@@ -937,17 +1086,23 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
   ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/150 [#]_  Value for ventilation rate
+  ``Value``          double         > 0 [#]_     No        1/150 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
+  .. [#] If there are multiple vented crawlspaces, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-If the dwelling has a manufactured home belly-and-wing foundation, whether a
-skirt is present can be optionally entered in
-``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing/SkirtPresent``.
-The default, if that value is missing, is to assume there is a skirt present and
-the floors above that foundation do not have exposure to the wind. 
+If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
+
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  Element            Type     Units  Constraints  Required  Default     Notes
+  =================  =======  =====  ===========  ========  ==========  ==========================
+  ``SkirtPresent``   boolean         See [#]_     No        true        Presence of skirt [#]_
+  =================  =======  =====  ===========  ========  ==========  ==========================
+
+  .. [#] If there are multiple manufactured home belly-and-wing foundations, they must all have the same value.
+  .. [#] When a skirt is present, it is assumed that the foundation does not have exposure to wind.
 
 HPXML Roofs
 ***********
@@ -960,6 +1115,7 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   Element                                 Type               Units             Constraints               Required   Default                         Notes
   ======================================  =================  ================  ========================  =========  ==============================  ==================================
   ``SystemIdentifier``                    id                                                             Yes                                        Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  See [#]_                                   ID of attached space
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                                        Interior adjacent space type
   ``Area``                                double             ft2               > 0                       Yes                                        Gross area (including skylights)
   ``Azimuth`` or ``Orientation``          integer or string  deg or direction  >= 0, <= 359 or See [#]_  No         See [#]_                        Direction (clockwise from North)
@@ -968,13 +1124,15 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
   ``Emittance``                           double                               >= 0, <= 1                No         0.90                            Emittance
   ``InteriorFinish/Type``                 string                               See [#]_                  No         See [#]_                        Interior finish material
   ``InteriorFinish/Thickness``            double             in                >= 0                      No         0.5                             Interior finish thickness
-  ``Pitch``                               integer            ?:12              >= 0                      Yes                                        Pitch
+  ``Pitch``                               double             ?/12              >= 0                      Yes                                        Pitch [#]_
   ``RadiantBarrier``                      boolean                                                        No         false                           Presence of radiant barrier [#]_
   ``RadiantBarrierGrade``                 integer                              >= 1, <= 3                No         1                               Radiant barrier installation grade
   ``Insulation/SystemIdentifier``         id                                                             Yes                                        Unique identifier
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                                        Assembly R-value [#]_
   ======================================  =================  ================  ========================  =========  ==============================  ==================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
   .. [#] InteriorAdjacentTo choices are "attic - vented", "attic - unvented", "conditioned space", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
@@ -1004,8 +1162,11 @@ For a multifamily building where the dwelling unit has another dwelling unit abo
          
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space, otherwise "none".
+  .. [#] Pitch is entered as vertical rise in inches for every 12 inches of horizontal run.
+         For example, 6.0 means a 6/12 roof, which has a 26.57-degree roof slope.
   .. [#] RadiantBarrier intended for attic roofs. Model assumes an emittance of 0.05.
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+         It should also include the effects of insulation gaps (installation grading) and/or compressed insulation in cavities per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 HPXML Rim Joists
 ****************
@@ -1016,6 +1177,7 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   Element                                 Type               Units             Constraints               Required  Default      Notes
   ======================================  =================  ================  ========================  ========  ===========  ==============================
   ``SystemIdentifier``                    id                                                             Yes                    Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  See [#]_               ID of attached space
   ``ExteriorAdjacentTo``                  string                               See [#]_                  Yes                    Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                    Interior adjacent space type
   ``Area``                                double             ft2               > 0                       Yes                    Gross area
@@ -1027,6 +1189,8 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                    Assembly R-value [#]_
   ======================================  =================  ================  ========================  ========  ===========  ==============================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1048,7 +1212,8 @@ Each rim joist surface (i.e., the perimeter of floor joists typically found betw
          
          \- **reflective**: 0.30
          
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+         It should also include the effects of insulation gaps (installation grading) and/or compressed insulation in cavities per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 HPXML Walls
 ***********
@@ -1059,6 +1224,7 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   Element                                 Type               Units             Constraints               Required       Default      Notes
   ======================================  =================  ================  ========================  =============  ===========  ====================================
   ``SystemIdentifier``                    id                                                             Yes                         Unique identifier
+  ``AttachedToSpace``                     idref                                See [#]_                  See [#]_                    ID of attached space
   ``ExteriorAdjacentTo``                  string                               See [#]_                  Yes                         Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                               See [#]_                  Yes                         Interior adjacent space type
   ``WallType``                            element                              See [#]_                  Yes                         Wall type (for thermal mass)
@@ -1075,6 +1241,8 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   ``Insulation/AssemblyEffectiveRValue``  double             F-ft2-hr/Btu      > 0                       Yes                         Assembly R-value [#]_
   ======================================  =================  ================  ========================  =============  ===========  ====================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1100,7 +1268,8 @@ Each wall surface is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Wa
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space or basement - conditioned, otherwise "none".
   .. [#] RadiantBarrier intended for attic gable walls. Model assumes an emittance of 0.05.
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+         It should also include the effects of insulation gaps (installation grading) and/or compressed insulation in cavities per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 HPXML Foundation Walls
 **********************
@@ -1112,6 +1281,7 @@ Any wall surface in contact with the ground is considered a foundation wall.
   Element                                                         Type               Units             Constraints               Required   Default         Notes
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
   ``SystemIdentifier``                                            id                                                             Yes                        Unique identifier
+  ``AttachedToSpace``                                             idref                                See [#]_                  See [#]_                   ID of attached space
   ``ExteriorAdjacentTo``                                          string                               See [#]_                  Yes                        Exterior adjacent space type [#]_
   ``InteriorAdjacentTo``                                          string                               See [#]_                  Yes                        Interior adjacent space type
   ``Type``                                                        string                               See [#]_                  No         solid concrete  Type of material
@@ -1128,6 +1298,8 @@ Any wall surface in contact with the ground is considered a foundation wall.
   ``Insulation/AssemblyEffectiveRValue``                          double             F-ft2-hr/Btu      > 0                       See [#]_                   Assembly R-value [#]_
   ==============================================================  =================  ================  ========================  =========  ==============  ====================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "ground", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
@@ -1146,8 +1318,8 @@ Any wall surface in contact with the ground is considered a foundation wall.
   .. [#] Layer[InstallationType="continuous - interior"] only required if AssemblyEffectiveRValue is not provided.
   .. [#] Layer[InstallationType="continuous - exterior"] only required if AssemblyEffectiveRValue is not provided.
   .. [#] AssemblyEffectiveRValue only required if Layer elements are not provided.
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior air film, and insulation installation grade.
-         R-value should **not** include exterior air film (for any above-grade exposure) or any soil thermal resistance.
+  .. [#] AssemblyEffectiveRValue includes all material layers and the interior air film; it should **not** include the exterior air film (for any above-grade exposure) or any soil thermal resistance.
+         It should also include the effects of insulation gaps (installation grading) and/or compressed insulation in cavities per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
 
 If insulation layers are provided, additional information is entered in each ``FoundationWall/Insulation/Layer``.
 
@@ -1170,10 +1342,12 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   Element                                 Type      Units         Constraints  Required  Default   Notes
   ======================================  ========  ============  ===========  ========  ========  ============================
   ``SystemIdentifier``                    id                                   Yes                 Unique identifier
+  ``AttachedToSpace``                     idref                   See [#]_     See [#]_            ID of attached space
   ``ExteriorAdjacentTo``                  string                  See [#]_     Yes                 Exterior adjacent space type
   ``InteriorAdjacentTo``                  string                  See [#]_     Yes                 Interior adjacent space type
+  ``FloorOrCeiling``                      string                  See [#]_     See [#]_            Floor or ceiling from the perspective of the conditioned space
   ``FloorType``                           element                 See [#]_     Yes                 Floor type (for thermal mass)
-  ``Area``                                double    ft2           > 0          Yes                 Gross area
+  ``Area``                                double    ft2           > 0          Yes                 Gross area (including skylights for ceilings)
   ``InteriorFinish/Type``                 string                  See [#]_     No        See [#]_  Interior finish material
   ``InteriorFinish/Thickness``            double    in            >= 0         No        0.5       Interior finish thickness
   ``RadiantBarrier``                      boolean                              No        false     Presence of radiant barrier [#]_
@@ -1182,26 +1356,21 @@ Each floor/ceiling surface that is not in contact with the ground (Slab) nor adj
   ``Insulation/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ======================================  ========  ============  ===========  ========  ========  ============================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space (and not adiabatic).
   .. [#] ExteriorAdjacentTo choices are "outside", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", or "manufactured home underbelly".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "attic - vented", "attic - unvented", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
+  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
+  .. [#] FloorOrCeiling only required for floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
   .. [#] FloorType child element choices are ``WoodFrame``, ``StructuralInsulatedPanel``, ``SteelFrame``, or ``SolidConcrete``.
   .. [#] InteriorFinish/Type choices are "gypsum board", "gypsum composite board", "plaster", "wood", "other", or "none".
   .. [#] InteriorFinish/Type defaults to "gypsum board" if InteriorAdjacentTo is conditioned space and the surface is a ceiling, otherwise "none".
   .. [#] RadiantBarrier intended for attic floors. Model assumes an emittance of 0.5 (reduced effectiveness due to accumulation of dust) per `an ORNL article on radiant barriers <https://web.ornl.gov/sci/buildings/tools/radiant/rb2/>`_.
-  .. [#] AssemblyEffectiveRValue includes all material layers, interior/exterior air films, and insulation installation grade.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+         It should also include the effects of insulation gaps (installation grading), compressed insulation in cavities, and/or reduced attic floor insulation thickness at the eaves per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
          For a manufactured home belly where the area of the belly wrap is different and usually greater than the floor area, the AssemblyEffectiveRValue should be adjusted to account for the surface area of the belly wrap and insulation.
-
-For floors adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space", additional information is entered in ``Floor``.
-
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  Element                                 Type      Units  Constraints     Required  Default  Notes
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-  ``FloorOrCeiling``                      string           See [#]_        Yes                Specifies whether a floor or ceiling from the perspective of the conditioned space
-  ======================================  ========  =====  ==============  ========  =======  ==========================================
-
-  .. [#] FloorOrCeiling choices are "floor" or "ceiling".
 
 HPXML Slabs
 ***********
@@ -1212,22 +1381,26 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   Element                                                  Type      Units         Constraints  Required   Default   Notes
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
   ``SystemIdentifier``                                     id                                   Yes                  Unique identifier
+  ``AttachedToSpace``                                      idref                   See [#]_     See [#]_             ID of attached space
   ``InteriorAdjacentTo``                                   string                  See [#]_     Yes                  Interior adjacent space type
   ``Area``                                                 double    ft2           > 0          Yes                  Gross area
   ``Thickness``                                            double    in            >= 0         No         See [#]_  Thickness [#]_
   ``ExposedPerimeter``                                     double    ft            >= 0         Yes                  Perimeter exposed to ambient conditions [#]_
   ``DepthBelowGrade``                                      double    ft            >= 0         No         See [#]_  Depth from the top of the slab surface to grade
   ``PerimeterInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
-  ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation
+  ``PerimeterInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation (see figure below)
   ``PerimeterInsulation/Layer/InsulationDepth``            double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
   ``UnderSlabInsulation/SystemIdentifier``                 id                                   Yes                  Unique identifier
-  ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation
+  ``UnderSlabInsulation/Layer/NominalRValue``              double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation (see figure below)
   ``UnderSlabInsulation/Layer/InsulationWidth``            double    ft            >= 0         See [#]_             Width from slab edge inward of horizontal insulation
   ``UnderSlabInsulation/Layer/InsulationSpansEntireSlab``  boolean                              See [#]_             Whether horizontal insulation spans entire slab
+  ``extension/GapInsulationRValue``                        double    F-ft2-hr/Btu  >= 0         No         See [#]_  R-value of gap insulation (see figure below)
   ``extension/CarpetFraction``                             double    frac          >= 0, <= 1   No         See [#]_  Fraction of slab covered by carpet
   ``extension/CarpetRValue``                               double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
   =======================================================  ========  ============  ===========  =========  ========  ====================================================
 
+  .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
   .. [#] InteriorAdjacentTo choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "crawlspace - vented", "crawlspace - unvented", "crawlspace - conditioned", or "garage".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] If Thickness not provided, defaults to 0 when adjacent to crawlspace and 4 inches for all other cases.
@@ -1238,9 +1411,15 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
          For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
   .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
+  .. [#] If GapInsulationRValue not provided, defaults to 5.0 if there is under slab (horizontal) insulation, otherwise 0.0.
   .. [#] If CarpetFraction not provided, defaults to 0.8 when adjacent to conditioned space, otherwise 0.0.
   .. [#] If CarpetRValue not provided, defaults to 2.0 when adjacent to conditioned space, otherwise 0.0.
-  
+
+Slab insulation locations can be visualized in the figure below:
+
+.. image:: images/slab.png
+   :align: center
+
 .. _windowinputs:
 
 HPXML Windows
@@ -1252,25 +1431,30 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
   Element                                       Type               Units             Constraints               Required  Default    Notes
   ============================================  =================  ================  ========================  ========  =========  =============================================================
   ``SystemIdentifier``                          id                                                             Yes                  Unique identifier
-  ``Area``                                      double             ft2               > 0                       Yes                  Total area
+  ``Area``                                      double             ft2               > 0                       Yes                  Total area [#]_
   ``Azimuth`` or ``Orientation``                integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
   ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description
   ``SHGC`` and/or ``GlassLayers``               double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
   ``ExteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
   ``ExteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        0.70 [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        0.85 [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        [#]_       Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        [#]_       Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``Overhangs``                                 element                                                        No        <none>     Presence of overhangs (including roof eaves)
   ``FractionOperable``                          double             frac              >= 0, <= 1                No        0.67       Operable fraction [#]_
   ``AttachedToWall``                            idref                                See [#]_                  Yes                  ID of attached wall
   ============================================  =================  ================  ========================  ========  =========  =============================================================
 
+  .. [#] For bay or garden windows, this should represent the *total* area, not just the primary flat exposure.
+         The ratio of total area to primary flat exposure is typically around 1.15 for bay windows and 2.0 for garden windows.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] InteriorShading/SummerShadingCoefficient default value indicates 30% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
-  .. [#] InteriorShading/WinterShadingCoefficient default value indicates 15% reduction in solar heat gain, based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
+  
+         Interior shading coefficient = 0.92 - (0.21 * SHGC)
+         
+  .. [#] InteriorShading/WinterShadingCoefficient default value is the same as InteriorShading/SummerShadingCoefficient default value.
   .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          
          \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
@@ -1285,6 +1469,9 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
          The total open window area for natural ventilation is calculated using A) the operable fraction, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
 
+Natural Ventilation
+~~~~~~~~~~~~~~~~~~~
+
 If operable windows are defined, the availability of natural ventilation is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary/extension``.
 
   =============================================  ========  =========  ===========  ========  ========  ========================================================
@@ -1294,6 +1481,9 @@ If operable windows are defined, the availability of natural ventilation is ente
   =============================================  ========  =========  ===========  ========  ========  ========================================================
 
   .. [#] Default of 3 days per week (Monday/Wednesday/Friday) is based on `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+UFactor/SHGC Lookup
+~~~~~~~~~~~~~~~~~~~
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Window``.
 
@@ -1342,6 +1532,11 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 
   OpenStudio-HPXML will return an error if the combination of window properties is not in the above table.
 
+.. _overhangs:
+
+HPXML Overhangs
+~~~~~~~~~~~~~~~
+
 If overhangs are specified, additional information is entered in ``Overhangs``.
 
   ============================  ========  ======  ===========  ========  =======  ========================================================
@@ -1374,12 +1569,14 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``AttachedToRoof``                            idref                                See [#]_                  Yes                  ID of attached roof
+  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor for a skylight with a shaft or sun tunnel
   ============================================  =================  ================  ========================  ========  =========  =============================================================
 
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] GlassType choices are "clear" or "low-e". The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
+  .. [#] GlassType choices are "clear" or "low-e".
+         The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_. 
          
          \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
          
@@ -1388,6 +1585,11 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
          Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
          
   .. [#] AttachedToRoof must reference a ``Roof``.
+  .. [#] AttachedToFloor must reference a ``Floor``.
+  .. [#] AttachedToFloor required if the skylight is attached to a roof of an attic (e.g., with shaft or sun tunnel).
+
+UFactor/SHGC Lookup
+~~~~~~~~~~~~~~~~~~~
 
 If UFactor and SHGC are not provided and GlassLayers is not "glass block", additional information is entered in ``Skylight``.
 
@@ -1521,14 +1723,19 @@ Each electric resistance heating system is entered as a ``/HPXML/Building/Buildi
   Element                                                        Type     Units   Constraints         Required  Default         Notes
   =============================================================  =======  ======  ==================  ========  ==============  ==========
   ``SystemIdentifier``                                           id                                   Yes                       Unique identifier
+  ``AttachedToZone``                                             idref            See [#]_            See [#]_                  ID of attached zone
   ``HeatingSystemType/ElectricResistance``                       element                              Yes                       Type of heating system
   ``HeatingSystemType/ElectricResistance/ElectricDistribution``  string           See [#]_            No        baseboard       Type of electric resistance distribution
   ``HeatingSystemFuel``                                          string           electricity         Yes                       Fuel type
   ``HeatingCapacity``                                            double   Btu/hr  >= 0                No        autosized [#]_  Heating output capacity
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``             double   frac    > 0, <= 1           Yes                       Efficiency
   ``FractionHeatLoadServed``                                     double   frac    >= 0, <= 1 [#]_     See [#]_                  Fraction of heating load served
+  ``extension/HeatingAutosizingFactor``                          double   frac    > 0                 No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                           double   Btu/hr  > 0                 No                        Heating autosizing capacity limit
   =============================================================  =======  ======  ==================  ========  ==============  ==========
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] ElectricDistribution choices are "baseboard", "radiant floor", or "radiant ceiling".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1546,6 +1753,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   Element                                                 Type     Units      Constraints      Required  Default         Notes
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
   ``SystemIdentifier``                                    id                                   Yes                       Unique identifier
+  ``AttachedToZone``                                      idref               See [#]_         See [#]_                  ID of attached zone
   ``UnitLocation``                                        string              See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                                  idref    See [#]_                    Yes                       ID of attached distribution system
   ``HeatingSystemType/Furnace``                           element                              Yes                       Type of heating system
@@ -1557,8 +1765,12 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``FractionHeatLoadServed``                              double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWattsPerCFM``                       double   W/cfm      >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed [#]_
   ``extension/AirflowDefectRatio``                        double   frac       >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
+  ``extension/HeatingAutosizingFactor``                   double   frac       > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                    double   Btu/hr     > 0              No                        Heating autosizing capacity limit
   ======================================================  =======  =========  ===============  ========  ==============  ================================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -1588,6 +1800,7 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   Element                                                     Type     Units   Constraints      Required  Default         Notes
   ==========================================================  =======  ======  ===============  ========  ==============  ================
   ``SystemIdentifier``                                        id                                Yes                       Unique identifier
+  ``AttachedToZone``                                          idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/WallFurnace``                           element                           Yes                       Type of heating system
   ``HeatingSystemType/WallFurnace/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
@@ -1596,8 +1809,12 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``             double   frac    > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                  double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                 double   W       >= 0             No        0               Fan power
+  ``extension/HeatingAutosizingFactor``                       double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                        double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ==========================================================  =======  ======  ===============  ========  ==============  ================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1615,6 +1832,7 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   Element                                                      Type     Units   Constraints      Required  Default         Notes
   ===========================================================  =======  ======  ===============  ========  ==============  ================
   ``SystemIdentifier``                                         id                                Yes                       Unique identifier
+  ``AttachedToZone``                                           idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/FloorFurnace``                           element                           Yes                       Type of heating system
   ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
@@ -1623,8 +1841,12 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``              double   frac    > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                                   double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                                  double   W       >= 0             No        0               Fan power
+  ``extension/HeatingAutosizingFactor``                        double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                         double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ===========================================================  =======  ======  ===============  ========  ==============  ================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1642,6 +1864,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   Element                                                Type     Units      Constraints      Required  Default         Notes
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
   ``SystemIdentifier``                                   id                                   Yes                       Unique identifier
+  ``AttachedToZone``                                     idref               See [#]_         See [#]_                  ID of attached zone
   ``UnitLocation``                                       string              See [#]_         No        See [#]_        Location of boiler
   ``DistributionSystem``                                 idref    See [#]_   Yes                                        ID of attached distribution system
   ``HeatingSystemType/Boiler``                           element                              Yes                       Type of heating system
@@ -1652,8 +1875,12 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   ``AnnualHeatingEfficiency[Units="AFUE"]/Value``        double   frac       > 0, <= 1        Yes                       Rated efficiency
   ``FractionHeatLoadServed``                             double   frac       >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``ElectricAuxiliaryEnergy``                            double   kWh/yr     >= 0             No        See [#]_        Electric auxiliary energy
+  ``extension/HeatingAutosizingFactor``                  double   frac       > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                   double   Btu/hr     > 0              No                        Heating autosizing capacity limit
   =====================================================  =======  =========  ===============  ========  ==============  =========================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -1681,31 +1908,30 @@ Boiler (Shared)
 
 Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
-  ============================================================  =======  ===========  ===============  ========  ==============  =========================================
-  Element                                                       Type     Units        Constraints      Required  Default         Notes
-  ============================================================  =======  ===========  ===============  ========  ==============  =========================================
-  ``SystemIdentifier``                                          id                                     Yes                       Unique identifier
-  ``UnitLocation``                                              string                See [#]_         No        See [#]_        Location of boiler
-  ``DistributionSystem``                                        idref    See [#]_     Yes                                        ID of attached distribution system
-  ``IsSharedSystem``                                            boolean               true             Yes                       Whether it serves multiple dwelling units
-  ``NumberofUnitsServed``                                       integer               > 1              Yes                       Number of dwelling units served
-  ``HeatingSystemType/Boiler``                                  element                                Yes                       Type of heating system
-  ``HeatingSystemType/Boiler/PilotLight``                       boolean                                No        false           Presence of standing pilot light (older systems)
-  ``HeatingSystemType/Boiler/extension/PilotLightBtuh``         double   Btu/hr       >= 0             No        500             Pilot light burn rate
-  ``HeatingSystemFuel``                                         string                See [#]_         Yes                       Fuel type
-  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                       Rated efficiency
-  ``FractionHeatLoadServed``                                    double   frac         >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
-  ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double   kWh/yr or W  >= 0             No        See [#]_        Electric auxiliary energy or shared loop power
-  ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double   kWh/yr or W  >= 0             No [#]_                   Electric auxiliary energy or fan coil power
-  ============================================================  =======  ===========  ===============  ========  ==============  =========================================
+  ============================================================  =======  ===========  ===============  ========  ==================  =========================================
+  Element                                                       Type     Units        Constraints      Required  Default             Notes
+  ============================================================  =======  ===========  ===============  ========  ==================  =========================================
+  ``SystemIdentifier``                                          id                                     Yes                           Unique identifier
+  ``AttachedToZone``                                            idref                 See [#]_         See [#]_                      ID of attached zone
+  ``UnitLocation``                                              string                See [#]_         No        other heated space  Location of boiler
+  ``DistributionSystem``                                        idref    See [#]_     Yes                                            ID of attached distribution system
+  ``IsSharedSystem``                                            boolean               true             Yes                           Whether it serves multiple dwelling units
+  ``NumberofUnitsServed``                                       integer               > 1              Yes                           Number of dwelling units served
+  ``HeatingSystemType/Boiler``                                  element                                Yes                           Type of heating system
+  ``HeatingSystemType/Boiler/PilotLight``                       boolean                                No        false               Presence of standing pilot light (older systems)
+  ``HeatingSystemType/Boiler/extension/PilotLightBtuh``         double   Btu/hr       >= 0             No        500                 Pilot light burn rate
+  ``HeatingSystemFuel``                                         string                See [#]_         Yes                           Fuel type
+  ``AnnualHeatingEfficiency[Units="AFUE"]/Value``               double   frac         > 0, <= 1        Yes                           Rated efficiency
+  ``FractionHeatLoadServed``                                    double   frac         >= 0, <= 1 [#]_  See [#]_                      Fraction of heating load served
+  ``ElectricAuxiliaryEnergy`` or ``extension/SharedLoopWatts``  double   kWh/yr or W  >= 0             No        See [#]_            Electric auxiliary energy or shared loop power
+  ``ElectricAuxiliaryEnergy`` or ``extension/FanCoilWatts``     double   kWh/yr or W  >= 0             No [#]_                       Electric auxiliary energy or fan coil power
+  ``extension/HeatingAutosizingFactor``                         double   frac         > 0              No        1.0                 Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                          double   Btu/hr       > 0              No                            Heating autosizing capacity limit
+  ============================================================  =======  ===========  ===============  ========  ==================  =========================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
-  .. [#] If UnitLocation not provided, defaults based on the distribution system:
-         
-         \- **Hydronic**: same default logic as :ref:`waterheatingsystems`
-         
-         \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
-         
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
          Note: The choice of hydronic distribution type does not currently affect simulation results; it is currently only used to know if there's an attached water loop heat pump or not.
@@ -1734,6 +1960,7 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   Element                                               Type     Units   Constraints      Required  Default         Notes
   ====================================================  =======  ======  ===============  ========  ==============  ===================
   ``SystemIdentifier``                                  id                                Yes                       Unique identifier
+  ``AttachedToZone``                                    idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/Stove``                           element                           Yes                       Type of heating system
   ``HeatingSystemType/Stove/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/Stove/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
@@ -1742,8 +1969,12 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``    double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                            double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                           double   W       >= 0             No        40              Fan power
+  ``extension/HeatingAutosizingFactor``                 double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                  double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ====================================================  =======  ======  ===============  ========  ==============  ===================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1761,14 +1992,19 @@ Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   Element                                             Type     Units   Constraints      Required  Default         Notes
   ==================================================  =======  ======  ===============  ========  ==============  ===================
   ``SystemIdentifier``                                id                                Yes                       Unique identifier
+  ``AttachedToZone``                                  idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/SpaceHeater``                   element                           Yes                       Type of heating system
   ``HeatingSystemFuel``                               string           See [#]_         Yes                       Fuel type
   ``HeatingCapacity``                                 double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                         double   W       >= 0             No        0               Fan power
+  ``extension/HeatingAutosizingFactor``               double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ==================================================  =======  ======  ===============  ========  ==============  ===================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1787,6 +2023,7 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   Element                                                   Type     Units   Constraints      Required  Default         Notes
   ========================================================  =======  ======  ===============  ========  ==============  ===================
   ``SystemIdentifier``                                      id                                Yes                       Unique identifier
+  ``AttachedToZone``                                        idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/Fireplace``                           element                           Yes                       Type of heating system
   ``HeatingSystemType/Fireplace/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/Fireplace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
@@ -1795,8 +2032,12 @@ Instead of modeling fireplaces as serving a fraction of the heating load, firepl
   ``AnnualHeatingEfficiency[Units="Percent"]/Value``        double   frac    > 0, <= 1        Yes                       Efficiency
   ``FractionHeatLoadServed``                                double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
   ``extension/FanPowerWatts``                               double   W       >= 0             No        0               Fan power
+  ``extension/HeatingAutosizingFactor``                     double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                      double   Btu/hr  > 0              No                        Heating autosizing capacity limit
   ========================================================  =======  ======  ===============  ========  ==============  ===================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1829,6 +2070,7 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   Element                                                           Type     Units        Constraints              Required  Default         Notes
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
   ``SystemIdentifier``                                              id                                             Yes                       Unique identifier
+  ``AttachedToZone``                                                idref                 See [#]_                 See [#]_                  ID of attached zone
   ``UnitLocation``                                                  string                See [#]_                 No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref                 See [#]_                 Yes                       ID of attached distribution system
   ``CoolingSystemType``                                             string                central air conditioner  Yes                       Type of cooling system
@@ -1843,8 +2085,12 @@ Each central air conditioner is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/AirflowDefectRatio``                                  double   frac         >= -0.9, <= 9            No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac         >= -0.9, <= 9            No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W            >= 0                     No        50.0            Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                             double   frac         > 0                      No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                              double   Btu/hr       > 0                      No                        Cooling autosizing capacity limit
   ================================================================  =======  ===========  =======================  ========  ==============  ===========================================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -1879,6 +2125,7 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   Element                                                         Type    Units   Constraints           Required  Default         Notes
   ==============================================================  ======  ======  ====================  ========  ==============  ============================================
   ``SystemIdentifier``                                            id                                    Yes                       Unique identifier
+  ``AttachedToZone``                                              idref           See [#]_              See [#]_                  ID of attached zone
   ``CoolingSystemType``                                           string          room air conditioner  Yes                       Type of cooling system
   ``CoolingSystemFuel``                                           string          electricity           Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                  No        autosized [#]_  Cooling output capacity
@@ -1887,8 +2134,12 @@ Each room air conditioner is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``SensibleHeatFraction``                                        double  frac    > 0.5, <= 1           No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_              No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                  No        0.0             Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                           double  frac    > 0                   No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                            double  Btu/hr  > 0                   No                        Cooling autosizing capacity limit
   ==============================================================  ======  ======  ====================  ========  ==============  ============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -1918,6 +2169,7 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   Element                                                         Type    Units   Constraints                        Required  Default         Notes
   ==============================================================  ======  ======  =================================  ========  ==============  ==========================================
   ``SystemIdentifier``                                            id                                                 Yes                       Unique identifier
+  ``AttachedToZone``                                              idref           See [#]_                           See [#]_                  ID of attached zone
   ``CoolingSystemType``                                           string          packaged terminal air conditioner  Yes                       Type of cooling system
   ``CoolingSystemFuel``                                           string          electricity                        Yes                       Fuel type
   ``CoolingCapacity``                                             double  Btu/hr  >= 0                               No        autosized [#]_  Cooling output capacity
@@ -1926,8 +2178,12 @@ Each packaged terminal air conditioner (PTAC) is entered as a ``/HPXML/Building/
   ``SensibleHeatFraction``                                        double  frac    > 0.5, <= 1                        No        0.65            Sensible heat fraction
   ``IntegratedHeatingSystemFuel``                                 string          See [#]_                           No        <none>          Fuel type of integrated heater
   ``extension/CrankcaseHeaterPowerWatts``                         double  W       >= 0                               No        0.0             Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                           double  frac    > 0                                No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                            double  Btu/hr  > 0                                No                        Cooling autosizing capacity limit
   ==============================================================  ======  ======  =================================  ========  ==============  ==========================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] IntegratedHeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -1953,17 +2209,22 @@ Evaporative Cooler
 
 Each evaporative cooler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
-  ==========================  ========  ======  ==================  ========  ==============  ==================================
-  Element                     Type      Units   Constraints         Required  Default         Notes
-  ==========================  ========  ======  ==================  ========  ==============  ==================================
-  ``SystemIdentifier``        id                                    Yes                       Unique identifier
-  ``DistributionSystem``      idref             See [#]_            No                        ID of attached distribution system
-  ``CoolingSystemType``       string            evaporative cooler  Yes                       Type of cooling system
-  ``CoolingSystemFuel``       string            electricity         Yes                       Fuel type
-  ``CoolingCapacity``         double    Btu/hr  >= 0                No        autosized [#]_  Cooling output capacity
-  ``FractionCoolLoadServed``  double    frac    >= 0, <= 1 [#]_     Yes                       Fraction of cooling load served
-  ==========================  ========  ======  ==================  ========  ==============  ==================================
+  ======================================  ========  ======  ==================  ========  ==============  ==================================
+  Element                                 Type      Units   Constraints         Required  Default         Notes
+  ======================================  ========  ======  ==================  ========  ==============  ==================================
+  ``SystemIdentifier``                    id                                    Yes                       Unique identifier
+  ``AttachedToZone``                      idref             See [#]_            See [#]_                  ID of attached zone
+  ``DistributionSystem``                  idref             See [#]_            No                        ID of attached distribution system
+  ``CoolingSystemType``                   string            evaporative cooler  Yes                       Type of cooling system
+  ``CoolingSystemFuel``                   string            electricity         Yes                       Fuel type
+  ``CoolingCapacity``                     double    Btu/hr  >= 0                No        autosized [#]_  Cooling output capacity
+  ``FractionCoolLoadServed``              double    frac    >= 0, <= 1 [#]_     Yes                       Fraction of cooling load served
+  ``extension/CoolingAutosizingFactor``   double    frac    > 0                 No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``    double    Btu/hr  > 0                 No                        Cooling autosizing capacity limit
+  ======================================  ========  ======  ==================  ========  ==============  ==================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1979,6 +2240,7 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   Element                                                           Type      Units   Constraints      Required  Default         Notes
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
   ``SystemIdentifier``                                              id                                 Yes                       Unique identifier
+  ``AttachedToZone``                                                idref             See [#]_         See [#]_                  ID of attached zone
   ``UnitLocation``                                                  string            See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref             See [#]_         No                        ID of attached distribution system
   ``CoolingSystemType``                                             string            mini-split       Yes                       Type of cooling system
@@ -1993,8 +2255,12 @@ Each mini-split air conditioner is entered as a ``/HPXML/Building/BuildingDetail
   ``extension/AirflowDefectRatio``                                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W       >= 0             No        50.0            Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                             double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                              double    Btu/hr  > 0              No                        Cooling autosizing capacity limit
   ================================================================  ========  ======  ===============  ========  ==============  ===========================================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2027,6 +2293,7 @@ Each shared chiller (serving multiple dwelling units) is entered as a ``/HPXML/B
   Element                                            Type      Units   Constraints      Required  Default    Notes
   =================================================  ========  ======  ===============  ========  =========  =========================================
   ``SystemIdentifier``                               id                                 Yes                  Unique identifier
+  ``AttachedToZone``                                 idref             See [#]_         See [#]_             ID of attached zone
   ``DistributionSystem``                             idref             See [#]_         Yes                  ID of attached distribution system
   ``IsSharedSystem``                                 boolean           true             Yes                  Whether it serves multiple dwelling units
   ``NumberofUnitsServed``                            integer           > 1              Yes                  Number of dwelling units served
@@ -2037,8 +2304,12 @@ Each shared chiller (serving multiple dwelling units) is entered as a ``/HPXML/B
   ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``  double    kW/ton  > 0              Yes                  Rated efficiency
   ``extension/SharedLoopWatts``                      double    W       >= 0             Yes                  Pumping and fan power serving the system
   ``extension/FanCoilWatts``                         double    W       >= 0             See [#]_             Fan coil power
+  ``extension/CoolingAutosizingFactor``              double    frac    > 0              No        1.0        Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``               double    Btu/hr  > 0              No                   Cooling autosizing capacity limit
   =================================================  ========  ======  ===============  ========  =========  =========================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the chiller has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2055,19 +2326,24 @@ Cooling Tower (Shared)
 
 Each shared cooling tower (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem``.
 
-  =============================  ========  ======  ===============  ========  =========  =========================================
-  Element                        Type      Units   Constraints      Required  Default    Notes
-  =============================  ========  ======  ===============  ========  =========  =========================================
-  ``SystemIdentifier``           id                                 Yes                  Unique identifier
-  ``DistributionSystem``         idref             See [#]_         Yes                  ID of attached distribution system
-  ``IsSharedSystem``             boolean           true             Yes                  Whether it serves multiple dwelling units
-  ``NumberofUnitsServed``        integer           > 1              Yes                  Number of dwelling units served
-  ``CoolingSystemType``          string            cooling tower    Yes                  Type of cooling system
-  ``CoolingSystemFuel``          string            electricity      Yes                  Fuel type
-  ``FractionCoolLoadServed``     double    frac    >= 0, <= 1 [#]_  Yes                  Fraction of cooling load served
-  ``extension/SharedLoopWatts``  double    W       >= 0             Yes                  Pumping and fan power serving the system
-  =============================  ========  ======  ===============  ========  =========  =========================================
+  =====================================  ========  ======  ===============  ========  =========  =========================================
+  Element                                Type      Units   Constraints      Required  Default    Notes
+  =====================================  ========  ======  ===============  ========  =========  =========================================
+  ``SystemIdentifier``                   id                                 Yes                  Unique identifier
+  ``AttachedToZone``                     idref             See [#]_         See [#]_             ID of attached zone
+  ``DistributionSystem``                 idref             See [#]_         Yes                  ID of attached distribution system
+  ``IsSharedSystem``                     boolean           true             Yes                  Whether it serves multiple dwelling units
+  ``NumberofUnitsServed``                integer           > 1              Yes                  Number of dwelling units served
+  ``CoolingSystemType``                  string            cooling tower    Yes                  Type of cooling system
+  ``CoolingSystemFuel``                  string            electricity      Yes                  Fuel type
+  ``FractionCoolLoadServed``             double    frac    >= 0, <= 1 [#]_  Yes                  Fraction of cooling load served
+  ``extension/SharedLoopWatts``          double    W       >= 0             Yes                  Pumping and fan power serving the system
+  ``extension/CoolingAutosizingFactor``  double    frac    > 0              No        1.0        Cooling autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``   double    Btu/hr  > 0              No                   Cooling autosizing capacity limit
+  =====================================  ========  ======  ===============  ========  =========  =========================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "water loop").
          A :ref:`hvac_hp_water_loop` must also be specified.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2101,6 +2377,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   Element                                                           Type     Units     Constraints               Required  Default         Notes
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
   ``SystemIdentifier``                                              id                                           Yes                       Unique identifier
+  ``AttachedToZone``                                                idref              See [#]_                  See [#]_                  ID of attached zone
   ``UnitLocation``                                                  string             See [#]_                  No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref              See [#]_                  Yes                       ID of attached distribution system
   ``HeatPumpType``                                                  string             air-to-air                Yes                       Type of heat pump
@@ -2123,8 +2400,14 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``extension/AirflowDefectRatio``                                  double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double   frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double   W         >= 0                      No        50.0            Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                             double   frac      > 0                       No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``                             double   frac      > 0                       No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Heating autosizing capacity limit
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2177,6 +2460,7 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   Element                                                           Type      Units     Constraints               Required  Default         Notes
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
   ``SystemIdentifier``                                              id                                            Yes                       Unique identifier
+  ``AttachedToZone``                                                idref               See [#]_                  See [#]_                  ID of attached zone
   ``UnitLocation``                                                  string              See [#]_                  No        See [#]_        Location of air handler
   ``DistributionSystem``                                            idref               See [#]_                  No                        ID of attached distribution system, if present
   ``HeatPumpType``                                                  string              mini-split                Yes                       Type of heat pump
@@ -2199,8 +2483,14 @@ Each ``HeatPump`` is expected to represent a single outdoor unit, whether connec
   ``extension/AirflowDefectRatio``                                  double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                                   double    frac      >= -0.9, <= 9             No        0.0             Deviation between design/installed refrigerant charges [#]_
   ``extension/CrankcaseHeaterPowerWatts``                           double    W         >= 0                      No        50.0            Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                             double    frac      > 0                       No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``                             double    frac      > 0                       No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                              double    Btu/hr    > 0                       No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``                              double    Btu/hr    > 0                       No                        Heating autosizing capacity limit
   ================================================================  ========  ========  ========================  ========  ==============  ==============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2246,6 +2536,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   Element                                                          Type      Units     Constraints                  Required  Default         Notes
   ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
   ``SystemIdentifier``                                             id                                               Yes                       Unique identifier
+  ``AttachedToZone``                                               idref               See [#]_                     See [#]_                  ID of attached zone
   ``HeatPumpType``                                                 string              packaged terminal heat pump  Yes                       Type of heat pump
   ``HeatPumpFuel``                                                 string              electricity                  Yes                       Fuel type
   ``HeatingCapacity``                                              double    Btu/hr    >= 0                         No        autosized [#]_  Heating output capacity (excluding any backup heating)
@@ -2260,8 +2551,14 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                          Yes                       Rated heating efficiency
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17            No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                         No        0.0             Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                            double    frac      > 0                          No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``                            double    frac      > 0                          No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                             double    Btu/hr    > 0                          No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``                             double    Btu/hr    > 0                          No                        Heating autosizing capacity limit
   ===============================================================  ========  ========  ===========================  ========  ==============  ==============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
@@ -2286,6 +2583,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   Element                                                          Type      Units     Constraints                              Required  Default         Notes
   ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
   ``SystemIdentifier``                                             id                                                           Yes                       Unique identifier
+  ``AttachedToZone``                                               idref               See [#]_                                 See [#]_                  ID of attached zone
   ``HeatPumpType``                                                 string              room air conditioner with reverse cycle  Yes                       Type of heat pump
   ``HeatPumpFuel``                                                 string              electricity                              Yes                       Fuel type
   ``HeatingCapacity``                                              double    Btu/hr    >= 0                                     No        autosized [#]_  Heating output capacity (excluding any backup heating)
@@ -2300,8 +2598,14 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   ``AnnualHeatingEfficiency[Units="COP"]/Value``                   double    W/W       > 0                                      Yes                       Rated heating efficiency
   ``extension/HeatingCapacityRetention[Fraction | Temperature]``   double    frac | F  >= 0, < 1 | <= 17                        No        0.425 | 5       Heating output capacity retention at cold temperature [#]_
   ``extension/CrankcaseHeaterPowerWatts``                          double    W         >= 0                                     No        0.0             Crankcase heater power
+  ``extension/CoolingAutosizingFactor``                            double    frac      > 0                                      No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``                            double    frac      > 0                                      No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``                             double    Btu/hr    > 0                                      No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``                             double    Btu/hr    > 0                                      No                        Heating autosizing capacity limit
   ===============================================================  ========  ========  =======================================  ========  ==============  ==============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] Cooling capacity autosized per ACCA Manual J/S based on cooling design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
   .. [#] If neither CompressorLockoutTemperature nor BackupHeatingSwitchoverTemperature provided, CompressorLockoutTemperature defaults to 25F if fossil fuel backup otherwise 0F.
@@ -2326,10 +2630,11 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   Element                                          Type      Units   Constraints      Required  Default         Notes
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
   ``SystemIdentifier``                             id                                 Yes                       Unique identifier
-  ``UnitLocation``                                 string            ground-to-air    No        See [#]_        Location of air handler
+  ``AttachedToZone``                               idref             See [#]_         See [#]_                  ID of attached zone
+  ``UnitLocation``                                 string            See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                           idref             See [#]_         Yes                       ID of attached distribution system
   ``IsSharedSystem``                               boolean                            No        false           Whether it has a shared hydronic circulation loop [#]_
-  ``HeatPumpType``                                 string            See [#]_         Yes                       Type of heat pump
+  ``HeatPumpType``                                 string            ground-to-air    Yes                       Type of heat pump
   ``HeatPumpFuel``                                 string            electricity      Yes                       Fuel type
   ``HeatingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Heating output capacity (excluding any backup heating)
   ``CoolingCapacity``                              double    Btu/hr  >= 0             No        autosized [#]_  Cooling output capacity
@@ -2346,8 +2651,14 @@ Each ground-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/S
   ``extension/FanPowerWattsPerCFM``                double    W/cfm   >= 0             No        See [#]_        Blower fan efficiency at maximum fan speed
   ``extension/AirflowDefectRatio``                 double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed airflows [#]_
   ``extension/ChargeDefectRatio``                  double    frac    >= -0.9, <= 9    No        0.0             Deviation between design/installed refrigerant charges [#]_
+  ``extension/CoolingAutosizingFactor``            double    frac    > 0              No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``            double    frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``             double    Btu/hr  > 0              No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``             double    Btu/hr  > 0              No                        Heating autosizing capacity limit
   ===============================================  ========  ======  ===============  ========  ==============  ==============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2392,6 +2703,7 @@ Each water-loop-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetai
   Element                                          Type      Units   Constraints        Required  Default         Notes
   ===============================================  ========  ======  =================  ========  ==============  ==============================================
   ``SystemIdentifier``                             id                                   Yes                       Unique identifier
+  ``AttachedToZone``                               idref             See [#]_           See [#]_                  ID of attached zone
   ``UnitLocation``                                 string            See [#]_           No        See [#]_        Location of air handler
   ``DistributionSystem``                           idref             See [#]_           Yes                       ID of attached distribution system
   ``HeatPumpType``                                 string            water-loop-to-air  Yes                       Type of heat pump
@@ -2401,8 +2713,14 @@ Each water-loop-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetai
   ``BackupType``                                   string            See [#]_           No        <none>          Type of backup heating
   ``AnnualCoolingEfficiency[Units="EER"]/Value``   double    Btu/Wh  > 0                See [#]_                  Rated cooling efficiency
   ``AnnualHeatingEfficiency[Units="COP"]/Value``   double    W/W     > 0                See [#]_                  Rated heating efficiency
+  ``extension/CoolingAutosizingFactor``            double    frac    > 0                No        1.0             Cooling autosizing capacity multiplier
+  ``extension/HeatingAutosizingFactor``            double    frac    > 0                No        1.0             Heating autosizing capacity multiplier
+  ``extension/CoolingAutosizingLimit``             double    Btu/hr  > 0                No                        Cooling autosizing capacity limit
+  ``extension/HeatingAutosizingLimit``             double    Btu/hr  > 0                No                        Heating autosizing capacity limit
   ===============================================  ========  ======  =================  ========  ==============  ==============================================
 
+  .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
+  .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
   .. [#] UnitLocation choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", "other non-freezing space", "roof deck", "manufactured home belly", or "unconditioned space".
   .. [#] If UnitLocation not provided, defaults based on the distribution system:
          
@@ -2459,6 +2777,8 @@ If a backup type of "integrated" is provided, additional information is entered 
   ``BackupSystemFuel``                                                           string            See [#]_     Yes                       Integrated backup heating fuel type
   ``BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value``       double    frac    > 0, <= 1    Yes                       Integrated backup heating efficiency
   ``BackupHeatingCapacity``                                                      double    Btu/hr  >= 0         No        autosized [#]_  Integrated backup heating output capacity
+  ``extension/BackupHeatingAutosizingFactor``                                    double    frac    > 0          No        1.0             Backup Heating autosizing capacity multiplier
+  ``extension/BackupHeatingAutosizingLimit``                                     double    Btu/hr  > 0          No                        Backup Heating autosizing capacity limit
   =============================================================================  ========  ======  ===========  ========  ==============  ==========================================
 
   .. [#] BackupSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
@@ -2552,7 +2872,7 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``LoopConfiguration``                     string                         vertical            Yes                       Geothermal loop configuration
   ``LoopFlow``                              double            gal/min      > 0                 No        See [#]_        Water flow rate through the geothermal loop
   ``BoreholesOrTrenches/Count``             integer                        >= 1, <= 10         No [#]_   See [#]_        Number of boreholes
-  ``BoreholesOrTrenches/Length``            double            ft           >= 79, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
+  ``BoreholesOrTrenches/Length``            double            ft           >= 80, <= 500 [#]_  No        See [#]_        Length (i.e., average depth) of each borehole
   ``BoreholesOrTrenches/Spacing``           double            ft           > 0                 No        16.4            Distance between boreholes
   ``BoreholesOrTrenches/Diameter``          double            in           > 0                 No        5.0             Borehole diameter
   ``Grout/Type`` or ``Grout/Conductivity``  string or double  Btu/hr-ft-F  See [#]_ or > 0     No        standard        Grout type or conductivity [#]_
@@ -2578,12 +2898,12 @@ Each geothermal loop is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          \- **Lopsided U**: 6, 7, 8, 9, or 10
 
   .. [#] BoreholesOrTrenches/Count calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by BoreholesOrTrenches/Length if BoreholesOrTrenches/Length is provided, otherwise autosized by assuming 1 for every ton of ground source heat pump cooling capacity (max of 10).
-  .. [#] 79 ft is the minimum depth in the g-function library.
-         500 ft is the maximum realistic depth to be used in residential applications.
+  .. [#] The minimum depth in the g-function library is 80 ft.
+         The maximum realistic depth to be used in residential applications is 500 ft.
   .. [#] BoreholesOrTrenches/Length calculated as the required total length of the ground heat exchanger (calculated during sizing) divided by the total number of boreholes.
   .. [#] Grout/Type choices are "standard" or "thermally enhanced".
   .. [#] If Grout/Conductivity not provided, defaults based on Grout/Type:
-         
+
          \- **standard**: 0.75 Btu/hr-ft-F
          
          \- **thermally enhanced**: 1.2 Btu/hr-ft-F
@@ -2630,6 +2950,9 @@ If any HVAC systems are specified, a single thermostat is entered as a ``/HPXML/
   .. [#] If CoolingSeason not provided, defaults to year-round.
   .. [#] CeilingFanSetpointTempCoolingSeasonOffset should only be used if there are sufficient ceiling fans present to warrant a reduced cooling setpoint.
 
+HPXML HVAC Seasons
+~~~~~~~~~~~~~~~~~~
+
 If a heating and/or cooling season is defined, additional information is entered in ``HVACControl/HeatingSeason`` and/or ``HVACControl/CoolingSeason``.
 
   ===================  ========  =====  ===========  ========  =======  ===========
@@ -2641,17 +2964,16 @@ If a heating and/or cooling season is defined, additional information is entered
   ``EndDayOfMonth``    integer          >= 1, <= 31  Yes                End day
   ===================  ========  =====  ===========  ========  =======  ===========
 
-Thermostat setpoints are additionally entered using either simple inputs or hourly inputs.
+.. warning::
 
-- :ref:`hvac_control_simple`
-- :ref:`hvac_control_hourly`
+  It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.
 
-Alternatively, setpoints can be defined using :ref:`schedules_detailed`.
+HPXML HVAC Setpoints
+~~~~~~~~~~~~~~~~~~~~
 
-.. _hvac_control_simple:
+Thermostat setpoints are additionally entered using either simple inputs, hourly inputs, or :ref:`schedules_detailed`.
 
-Simple Inputs
-~~~~~~~~~~~~~
+**Simple Inputs**
 
 To define simple thermostat setpoints, additional information is entered in ``HVACControl``.
 
@@ -2689,10 +3011,7 @@ If there is a cooling temperature setup, additional information is entered in ``
 
   .. [#] TotalSetupHoursperWeekCooling is converted to hrs/day and modeled as a temperature setup every day starting at SetupStartHourCooling.
 
-.. _hvac_control_hourly:
-
-Hourly Inputs
-~~~~~~~~~~~~~~~
+**Hourly Inputs**
 
 To define hourly thermostat setpoints, additional information is entered in ``HVACControl``.
 
@@ -2767,45 +3086,23 @@ Additional information is entered in each ``DuctLeakageMeasurement``.
 
 Additional information is entered in each ``Ducts``.
 
-  =======================================================  =======  ============  ================  ========  ==========  ======================================
-  Element                                                  Type     Units         Constraints       Required  Default     Notes
-  =======================================================  =======  ============  ================  ========  ==========  ======================================
-  ``SystemIdentifier``                                     id                                       Yes                   Unique identifier
-  ``DuctInsulationRValue`` and/or ``DuctEffectiveRValue``  double   F-ft2-hr/Btu  >= 0              Yes                   Duct R-value [#]_
-  ``DuctBuriedInsulationLevel``                            string                 See [#]_          No        not buried  Duct buried insulation level [#]_
-  ``DuctLocation``                                         string                 See [#]_          No        See [#]_    Duct location
-  ``FractionDuctArea`` and/or ``DuctSurfaceArea``          double   frac or ft2   0-1 [#]_ or >= 0  See [#]_  See [#]_    Duct fraction/surface area in location
-  ``extension/DuctSurfaceAreaMultiplier``                  double                 >= 0              No        1.0         Duct surface area multiplier
-  =======================================================  =======  ============  ================  ========  ==========  ======================================
+  =======================================================  ================  ============  ======================  ========  ==========  ======================================
+  Element                                                  Type              Units         Constraints             Required  Default     Notes
+  =======================================================  ================  ============  ======================  ========  ==========  ======================================
+  ``SystemIdentifier``                                     id                                                      Yes                   Unique identifier
+  ``DuctInsulationRValue`` and/or ``DuctEffectiveRValue``  double            F-ft2-hr/Btu  >= 0                    Yes                   Duct R-value [#]_
+  ``DuctBuriedInsulationLevel``                            string                          See [#]_                No        not buried  Duct buried insulation level [#]_
+  ``DuctLocation``                                         string                          See [#]_                No        See [#]_    Duct location
+  ``FractionDuctArea`` and/or ``DuctSurfaceArea``          double            frac or ft2   0-1 [#]_ or >= 0        See [#]_  See [#]_    Duct fraction/surface area in location
+  ``DuctShape`` and/or ``DuctFractionRectangular``         string or double  n/a or frac   See [#]_ or >= 0, <= 1  No        See [#]_    Duct shape (e.g., round vs rectangular)
+  ``extension/DuctSurfaceAreaMultiplier``                  double                          >= 0                    No        1.0         Duct surface area multiplier
+  =======================================================  ================  ============  ======================  ========  ==========  ======================================
 
-  .. [#] It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue. DuctInsulationRValue should not include the exterior air film (i.e., use 0 for an uninsulated duct).
-         For ducts buried in insulation (using DuctBuriedInsulationLevel), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value.
-         On the other hand, DuctEffectiveRValue should include the exterior air film as well as other effects such as adjustments for insulation wrapped around round ducts, or effective heat transfer for ducts buried in attic insulation.
-         DuctEffectiveRValue is used for the actual model heat transfer, and when not provided is calculated as follows:
-         
-         \- **Uninsulated**: 1.7                                     
-         
-         \- **Supply, Insulated**: 2.2438 + 0.5619 * DuctInsulationRValue  
-         
-         \- **Supply, Partially Buried**: 5.83 + 2.0 * DuctInsulationRValue
-         
-         \- **Supply, Fully Buried**: 9.4 + 1.9 * DuctInsulationRValue
-         
-         \- **Supply, Deeply Buried**: 16.67 + 1.45 * DuctInsulationRValue
-         
-         \- **Return, Insulated**: 2.0388 + 0.7053 * DuctInsulationRValue
-         
-         \- **Return, Partially Buried**: 7.6 + 2.5 * DuctInsulationRValue
-         
-         \- **Return, Fully Buried**: 11.83 + 2.45 * DuctInsulationRValue
-         
-         \- **Return, Deeply Buried**: 20.9 + 1.9 * DuctInsulationRValue       
-         
-         The uninsulated effective R-value is from ASHRAE Handbook of Fundamentals.
-         The insulated effective R-values are from `True R-Values of Round Residential Ductwork <https://www.aceee.org/files/proceedings/2006/data/papers/SS06_Panel1_Paper18.pdf>`_.
-         The buried effective R-values are from Table 13 of `Reducing Thermal Losses and Gains With Buried and Encapsulated Ducts <https://www.nrel.gov/docs/fy13osti/55876.pdf>`_.
-         The equations assume that the average supply duct has an 8-inch diameter and the average return duct has a 14-in diameter.
-         
+  .. [#] It is recommended to provide DuctInsulationRValue and not DuctEffectiveRValue.
+         DuctInsulationRValue represents the nominal insulation R-value and should not include interior/exterior air films (i.e., use 0 for an uninsulated duct).
+         For ducts buried in insulation (i.e., DuctBuriedInsulationLevel is any value but "not buried"), DuctInsulationRValue should only represent any surrounding insulation duct wrap and not the entire attic insulation R-value.
+         DuctEffectiveRValue is used in the actual duct heat transfer calculation, and should include all effects (i.e., interior/exterior air films, adjustments for presence of round ducts, and adjustments when buried in loose-fill attic insulation).
+         When DuctEffectiveRValue is not provided, it is calculated from DuctInsulationRValue, DuctFractionRectangular, and DuctBuriedInsulationLevel based on ANSI/RESNET/ICC 301-2025 (not yet published) assuming round supply ducts are 6-in on average and round return ducts are 14-in on average.
   .. [#] DuctBuriedInsulationLevel choices are "not buried", "partially buried", "fully buried", or "deeply buried".
   .. [#] Whether the ducts are buried in, e.g., attic loose-fill insulation.
          Partially buried ducts have insulation that does not cover the top of the ducts.
@@ -2832,6 +3129,10 @@ Additional information is entered in each ``Ducts``.
          where F_out is 1.0 when NumberofConditionedFloorsAboveGrade <= 1 and 0.75 when NumberofConditionedFloorsAboveGrade > 1, and b_r is 0.05 * NumberofReturnRegisters with a maximum value of 0.25.
          
          If FractionDuctArea is provided, each duct surface area will be FractionDuctArea times total duct area, which is calculated using the sum of primary and secondary duct areas from the equations above.
+
+  .. [#] DuctShape choices are "rectangular", "round", "oval", or "other".
+  .. [#] If DuctFractionRectangular not provided, defaults to 1.0 if DuctShape is "rectangular" and 0.0 if DuctShape is "round" or "oval".
+         If DuctShape is "other" or not provided, DuctFractionRectangular defaults to 0.25 for supply ducts and 1.0 for return ducts.
 
 .. _hvac_distribution_hydronic:
 
@@ -2906,19 +3207,21 @@ Each exhaust only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -2944,19 +3247,21 @@ Each supply only fan is entered as a ``/HPXML/Building/BuildingDetails/Systems/M
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] HoursInOperation is optional unless the VentilationFan refers to the supplemental fan of a :ref:`vent_fan_cfis` system, in which case it is not allowed because the runtime is automatically calculated for each hour (based on the air handler runtime) to maintain the hourly target ventilation rate.
   .. [#] If FanPower not provided, defaults to 0.35 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -2982,19 +3287,21 @@ Each balanced (supply and exhaust) fan is entered as a ``/HPXML/Building/Buildin
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] If FanPower not provided, defaults to 0.7 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -3020,19 +3327,21 @@ Each heat recovery ventilator (HRV) is entered as a ``/HPXML/Building/BuildingDe
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
   .. [#] If FanPower not provided, defaults to 1.0 W/cfm based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
@@ -3060,19 +3369,21 @@ Each energy recovery ventilator (ERV) is entered as a ``/HPXML/Building/Building
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
   .. [#] Additional inputs for shared systems are described in :ref:`vent_fan_shared`.
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf * Aext)
+         Qfan  = required mechanical ventilation rate (cfm) = Qtot - Qinf_eff
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] Providing AdjustedTotalRecoveryEfficiency (ATRE) is preferable to TotalRecoveryEfficiency (TRE).
   .. [#] Providing AdjustedSensibleRecoveryEfficiency (ASRE) is preferable to SensibleRecoveryEfficiency (SRE).
@@ -3104,19 +3415,21 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
-  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_:
+  .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
          
-         Qfan = Qtot - (Qinf/Qtot) * (Qinf * Aext)
+         Qfan = required mechanical ventilation rate (cfm) = ((Qtot^2 – 4*Qinf_eff^2 + 2*Qinf_eff*Qtot + Qinf_eff^2)^0.5 + Qtot - Qinf_eff) / 2
          
          where
          
-         Qfan = required mechanical ventilation rate (cfm)
-         
          Qtot = total required ventilation rate (cfm) = 0.03 * ConditionedFloorArea + 7.5*(NumberofBedrooms + 1)
+         
+         Qinf_eff = Qinf * Aext
          
          Qinf = infiltration rate (cfm)
          
          Aext = 1 if single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", otherwise ratio of SFA/MF exterior envelope surface area to total envelope surface area as described in :ref:`air_infiltration`
+         
+         OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] The HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
@@ -3256,7 +3569,6 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``WaterHeaterType``                            string                            storage water heater  Yes                 Type of water heater
   ``Location``                                   string                            See [#]_              No        See [#]_  Water heater location
   ``IsSharedSystem``                             boolean                                                 No        false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                           > 0                   See [#]_            Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double             gal            > 0                   No        See [#]_  Nominal tank volume
   ``FractionDHWLoadServed``                      double             frac           >= 0, <= 1 [#]_       Yes                 Fraction of hot water load served [#]_
   ``HeatingCapacity``                            double             Btu/hr         > 0                   No        See [#]_  Heating capacity
@@ -3267,6 +3579,7 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
   ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
   ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
+  ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms    See [#]_            Number of bedrooms served directly or indirectly
   =============================================  =================  =============  ====================  ========  ========  =============================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -3278,7 +3591,6 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
@@ -3300,6 +3612,9 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
   .. [#] TankModelType choices are "mixed" or "stratified".
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
 
 .. _water_heater_tankless:
 
@@ -3316,12 +3631,12 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``WaterHeaterType``                          string                 instantaneous water heater  Yes                     Type of water heater
   ``Location``                                 string                 See [#]_                    No            See [#]_  Water heater location
   ``IsSharedSystem``                           boolean                                            No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                      integer                > 0                         See [#]_                Number of dwelling units served directly or indirectly
   ``PerformanceAdjustment``                    double   frac          >= 0, <= 1                  No            See [#]_  Multiplier on efficiency, typically to account for cycling
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
   ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
   ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms          See [#]_                Number of bedrooms served directly or indirectly
   ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
 
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
@@ -3333,13 +3648,14 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] If PerformanceAdjustment not provided, defaults to 0.94 (UEF) or 0.92 (EF) based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
 
 .. _water_heater_heat_pump:
 
@@ -3356,7 +3672,6 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``WaterHeaterType``                            string                           heat pump water heater  Yes                    Type of water heater
   ``Location``                                   string                           See [#]_                No        See [#]_     Water heater location
   ``IsSharedSystem``                             boolean                                                  No        false        Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                          > 0                     See [#]_               Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double            gal            > 0                     Yes                    Nominal tank volume
   ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                    Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                    EnergyGuide label rated efficiency
@@ -3365,6 +3680,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0            R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double            F              > 0                     No        125          Water heater setpoint [#]_
   ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_               Number of bedrooms served directly or indirectly
   =============================================  ================  =============  ======================  ========  ===========  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -3375,7 +3691,6 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -3387,6 +3702,9 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          If FirstHourRating provided and UsageBin not provided, UsageBin is determined based on the FirstHourRating value.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
 
 .. _water_heater_combi_storage:
 
@@ -3402,13 +3720,13 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``WaterHeaterType``                            string                 space-heating boiler with storage tank  Yes                     Type of water heater
   ``Location``                                   string                 See [#]_                                No            See [#]_  Water heater location
   ``IsSharedSystem``                             boolean                                                        No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``                        integer                > 0                                     See [#]_                Number of dwelling units served directly or indirectly
   ``TankVolume``                                 double   gal           > 0                                     Yes                     Nominal volume of the storage tank
   ``FractionDHWLoadServed``                      double   frac          >= 0, <= 1 [#]_                         Yes                     Fraction of hot water load served [#]_
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
   ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
   ``HotWaterTemperature``                        double   F             > 0                                     No            125       Water heater setpoint [#]_
   ``RelatedHVACSystem``                          idref                  See [#]_                                Yes                     ID of boiler
+  ``extension/NumberofBedroomsServed``           integer                > NumberofBedrooms                      See [#]_                Number of bedrooms served directly or indirectly
   =============================================  =======  ============  ======================================  ============  ========  ==================================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
@@ -3419,13 +3737,15 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If StandbyLoss not provided, defaults based on a regression analysis of `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_.
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
 
 .. _water_heater_combi_tankless_coil:
 
@@ -3434,18 +3754,18 @@ Combi Boiler w/ Tankless Coil
 
 Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  Element                    Type     Units  Constraints                              Required      Default   Notes
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
-  ``SystemIdentifier``       id                                                       Yes                     Unique identifier
-  ``WaterHeaterType``        string          space-heating boiler with tankless coil  Yes                     Type of water heater
-  ``Location``               string          See [#]_                                 No            See [#]_  Water heater location
-  ``IsSharedSystem``         boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``NumberofUnitsServed``    integer         > 0                                      See [#]_                Number of dwelling units served directly or indirectly
-  ``FractionDHWLoadServed``  double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
-  ``HotWaterTemperature``    double   F      > 0                                      No            125       Water heater setpoint [#]_
-  ``RelatedHVACSystem``      idref           See [#]_                                 Yes                     ID of boiler
-  =========================  =======  =====  =======================================  ============  ========  ==================================================
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  Element                               Type     Units  Constraints                              Required      Default   Notes
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
+  ``SystemIdentifier``                  id                                                       Yes                     Unique identifier
+  ``WaterHeaterType``                   string          space-heating boiler with tankless coil  Yes                     Type of water heater
+  ``Location``                          string          See [#]_                                 No            See [#]_  Water heater location
+  ``IsSharedSystem``                    boolean                                                  No            false     Whether it serves multiple dwelling units or shared laundry room
+  ``FractionDHWLoadServed``             double   frac   >= 0, <= 1 [#]_                          Yes                     Fraction of hot water load served [#]_
+  ``HotWaterTemperature``               double   F      > 0                                      No            125       Water heater setpoint [#]_
+  ``RelatedHVACSystem``                 idref           See [#]_                                 Yes                     ID of boiler
+  ``extension/NumberofBedroomsServed``  integer         > NumberofBedrooms                       See [#]_                Number of bedrooms served directly or indirectly
+  ====================================  =======  =====  =======================================  ============  ========  ==================================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
@@ -3455,12 +3775,13 @@ Each combination boiler w/ tankless coil is entered as a ``/HPXML/Building/Build
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
-  .. [#] NumberofUnitsServed only required if IsSharedSystem is true, in which case it must be > 1.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] RelatedHVACSystem must reference a ``HeatingSystem`` (Boiler).
+  .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
 
 .. _water_heater_desuperheater:
 
@@ -3484,7 +3805,7 @@ If the water heater uses a desuperheater, additional information is entered in `
 HPXML Hot Water Distribution
 ****************************
 
-If any water heating systems are provided, a single hot water distribution system can be described:
+If any water heating systems are provided, a single hot water distribution system must be described:
 
 - :ref:`hot_water_dist_standard`
 - :ref:`hot_water_dist_recirc`
@@ -3597,21 +3918,21 @@ Recirculation (Shared)
 
 A shared recirculation hot water distribution system (serving multiple dwelling units) is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution``.
 
-  =========================================================  =======  ============  ===========  ========  ========  =====================
-  Element                                                    Type     Units         Constraints  Required  Default   Notes
-  =========================================================  =======  ============  ===========  ========  ========  =====================
-  ``SystemIdentifier``                                       id                                  Yes                 Unique identifier
-  ``SystemType/Standard``                                    element                             Yes                 Type of distribution system
-  ``SystemType/Standard/PipingLength``                       double   ft            > 0          No        See [#]_  Length of piping [#]_
-  ``PipeInsulation/PipeRValue``                              double   F-ft2-hr/Btu  >= 0         No        0.0       Pipe insulation R-value
-  ``DrainWaterHeatRecovery``                                 element                             No        <none>    Presence of drain water heat recovery device [#]_
-  ``extension/SharedRecirculation/NumberofUnitsServed``      integer                > 1          Yes                 Number of dwelling units served
-  ``extension/SharedRecirculation/PumpPower``                double   W             >= 0         No        220 [#]_  Shared recirculation pump power
-  ``extension/SharedRecirculation/ControlType``              string                 See [#]_     Yes                 Shared recirculation control type
-  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                               No        See [#]_  24 comma-separated recirculation pump weekday fractions
-  ``extension/RecirculationPumpWeekendScheduleFractions``    array                               No                  24 comma-separated recirculation pump weekend fractions
-  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                               No        See [#]_  12 comma-separated recirculation pump monthly multipliers
-  =========================================================  =======  ============  ===========  ========  ========  =====================
+  =========================================================  =======  ============  ===================  ========  ========  =====================
+  Element                                                    Type     Units         Constraints          Required  Default   Notes
+  =========================================================  =======  ============  ===================  ========  ========  =====================
+  ``SystemIdentifier``                                       id                                          Yes                 Unique identifier
+  ``SystemType/Standard``                                    element                                     Yes                 Type of distribution system
+  ``SystemType/Standard/PipingLength``                       double   ft            > 0                  No        See [#]_  Length of piping [#]_
+  ``PipeInsulation/PipeRValue``                              double   F-ft2-hr/Btu  >= 0                 No        0.0       Pipe insulation R-value
+  ``DrainWaterHeatRecovery``                                 element                                     No        <none>    Presence of drain water heat recovery device [#]_
+  ``extension/SharedRecirculation/NumberofBedroomsServed``   integer                > NumberofBedrooms   Yes [#]_            Number of bedrooms served
+  ``extension/SharedRecirculation/PumpPower``                double   W             >= 0                 No        220 [#]_  Shared recirculation pump power
+  ``extension/SharedRecirculation/ControlType``              string                 See [#]_             Yes                 Shared recirculation control type
+  ``extension/RecirculationPumpWeekdayScheduleFractions``    array                                       No        See [#]_  24 comma-separated recirculation pump weekday fractions
+  ``extension/RecirculationPumpWeekendScheduleFractions``    array                                       No                  24 comma-separated recirculation pump weekend fractions
+  ``extension/RecirculationPumpMonthlyScheduleMultipliers``  array                                       No        See [#]_  12 comma-separated recirculation pump monthly multipliers
+  =========================================================  =======  ============  ===================  ========  ========  =====================
 
   .. [#] If PipingLength not provided, calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_:
          
@@ -3627,6 +3948,8 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
          
   .. [#] PipingLength is the length of hot water piping from the shared recirculation loop to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any).
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
+  .. [#] Recirculation pump energy will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the recirculation system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
+         Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] ControlType choices are "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
          
@@ -3841,7 +4164,10 @@ Many of the inputs are adopted from the `PVWatts model <https://pvwatts.nrel.gov
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the PV system per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
-In addition, an inverter must be entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
+HPXML Inverters
+~~~~~~~~~~~~~~~
+
+In addition, the PVSystem must be connected to an inverter that is entered as a ``/HPXML/Building/BuildingDetails/Systems/Photovoltaics/Inverter``.
 
   =======================================================  =================  ================  ===================  ========  ========  ============================================
   Element                                                  Type               Units             Constraints          Required  Default   Notes
@@ -4218,41 +4544,13 @@ Lighting and ceiling fans are entered in ``/HPXML/Building/BuildingDetails/Light
 HPXML Lighting
 **************
 
-Lighting can be specified in one of two ways: using 1) lighting type fractions or 2) annual energy consumption values.
 Lighting is described using multiple ``LightingGroup`` elements for each location (interior, exterior, or garage).
 If no LightingGroup elements are provided for a given location (e.g., exterior), the simulation will not include that lighting use.
 
-If specifying **lighting type fractions**, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements (one for each possible ``LightingType``) are entered for each lighting location:
+Lighting can be specified in one of two ways:
 
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-  Element                        Type     Units   Constraints      Required  Default  Notes
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-  ``SystemIdentifier``           id                                Yes                Unique identifier
-  ``LightingType``               element          See [#]_         Yes                Lighting type
-  ``Location``                   string           See [#]_         Yes                Lighting location [#]_
-  ``FractionofUnitsInLocation``  double   frac    >= 0, <= 1 [#]_  Yes                Fraction of light fixtures in the location with the specified lighting type
-  =============================  =======  ======  ===============  ========  =======  ===========================================================================
-
-  .. [#] LightingType child element choices are ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
-  .. [#] Location choices are "interior", "garage", or "exterior".
-  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
-  .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
-         If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
-
-  Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
-
-If specifying **annual energy consumption** instead, a single ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` element is entered for each lighting location:
-
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-  Element                           Type     Units   Constraints  Required  Default   Notes
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-  ``SystemIdentifier``              id                            Yes                 Unique identifier
-  ``Location``                      string           See [#]_     Yes                 Lighting location [#]_
-  ``Load[Units="kWh/year"]/Value``  double   kWh/yr  >= 0         Yes                 Lighting energy use
-  ================================  =======  ======  ===========  ========  ========  ===========================================================================
-
-  .. [#] Location choices are "interior", "garage", or "exterior".
-  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+- :ref:`lighting_fractions`
+- :ref:`lighting_annual_energy`
 
 With either lighting specification, additional information can be entered in ``/HPXML/Building/BuildingDetails/Lighting``.
 
@@ -4279,6 +4577,51 @@ With either lighting specification, additional information can be entered in ``/
   .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
   .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.065, 0.056, 0.047".
   .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
+
+.. _lighting_fractions:
+
+Lighting Type Fractions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+If specifying lighting type fractions, three ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` elements (one for each possible ``LightingType``) are entered for each lighting location:
+
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+  Element                        Type     Units   Constraints      Required  Default  Notes
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+  ``SystemIdentifier``           id                                Yes                Unique identifier
+  ``LightingType``               element          See [#]_         Yes                Lighting type
+  ``Location``                   string           See [#]_         Yes                Lighting location [#]_
+  ``FractionofUnitsInLocation``  double   frac    >= 0, <= 1 [#]_  Yes                Fraction of light fixtures in the location with the specified lighting type
+  =============================  =======  ======  ===============  ========  =======  ===========================================================================
+
+  .. [#] LightingType child element choices are ``LightEmittingDiode``, ``CompactFluorescent``, or ``FluorescentTube``.
+  .. [#] Location choices are "interior", "garage", or "exterior".
+  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+  .. [#] The sum of FractionofUnitsInLocation for a given Location (e.g., interior) must be less than or equal to 1.
+         If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
+
+  Interior, exterior, and garage lighting energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+
+.. _lighting_annual_energy:
+
+Annual Energy Consumption
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If specifying annual energy consumption, a single ``/HPXML/Building/BuildingDetails/Lighting/LightingGroup`` element is entered for each lighting location:
+
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  Element                           Type     Units   Constraints  Required  Default   Notes
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+  ``SystemIdentifier``              id                            Yes                 Unique identifier
+  ``Location``                      string           See [#]_     Yes                 Lighting location [#]_
+  ``Load[Units="kWh/year"]/Value``  double   kWh/yr  >= 0         Yes                 Lighting energy use
+  ================================  =======  ======  ===========  ========  ========  ===========================================================================
+
+  .. [#] Location choices are "interior", "garage", or "exterior".
+  .. [#] Garage lighting is ignored if the building has no garage specified elsewhere.
+
+Exterior Holiday Lighting
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If exterior holiday lighting is specified, additional information is entered in ``/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting``.
 
@@ -4397,7 +4740,7 @@ If not entered, the simulation will not include a pool heater.
          
          \- **electric resistance [kWh/year]**: 8.3 / 0.004 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920) (based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_)
          
-         \- **heat pump [kWh/year]**: (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
+         \- **heat pump [kWh/year]**: (electric resistance [kWh/year]) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
@@ -4520,7 +4863,7 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
          
-         If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
+         If NumberofResidents provided, any value based on NumberofBedrooms will be adjusted using the :ref:`buildingoccupancy`.
          
   .. [#] If FracSensible not provided, defaults as:
          
@@ -4616,16 +4959,16 @@ The various locations used in an HPXML file are defined as follows:
   Value                           Description                                              Temperature                                                Building Type
   ==============================  =======================================================  =========================================================  =================
   outside                         Ambient environment                                      Weather data                                               Any
-  ground                                                                                   EnergyPlus calculation                                     Any
-  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  attic - vented                                                                           EnergyPlus calculation                                     Any
-  attic - unvented                                                                         EnergyPlus calculation                                     Any
-  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  basement - unconditioned                                                                 EnergyPlus calculation                                     Any
-  crawlspace - vented                                                                      EnergyPlus calculation                                     Any
-  crawlspace - unvented                                                                    EnergyPlus calculation                                     Any
-  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus calculation                                     Any
-  garage                          Single-family garage (not shared parking)                EnergyPlus calculation                                     Any
+  ground                                                                                   EnergyPlus foundation model calculation                    Any
+  conditioned space               Above-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  attic - vented                                                                           EnergyPlus thermal zone calculation                        Any
+  attic - unvented                                                                         EnergyPlus thermal zone calculation                        Any
+  basement - conditioned          Below-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  basement - unconditioned                                                                 EnergyPlus thermal zone calculation                        Any
+  crawlspace - vented                                                                      EnergyPlus thermal zone calculation                        Any
+  crawlspace - unvented                                                                    EnergyPlus thermal zone calculation                        Any
+  crawlspace - conditioned        Below-grade conditioned space maintained at setpoint     EnergyPlus thermal zone calculation                        Any
+  garage                          Unconditioned garage (not shared parking garage) [#]_    EnergyPlus thermal zone calculation                        Any
   manufactured home underbelly    Underneath the belly, ambient environment                Weather data                                               Manufactured only
   manufactured home belly         Within the belly                                         Same as conditioned space                                  Manufactured only              
   other housing unit              E.g., conditioned adjacent unit or conditioned corridor  Same as conditioned space                                  SFA/MF only
@@ -4634,9 +4977,17 @@ The various locations used in an HPXML file are defined as follows:
   other non-freezing space        E.g., shared parking garage ceiling                      Floats with outside; minimum of 40F                        SFA/MF only
   other exterior                  Water heater outside                                     Weather data                                               Any
   exterior wall                   Ducts in exterior wall                                   Avg of conditioned space/outside                           Any
-  under slab                      Ducts under slab (ground)                                EnergyPlus calculation                                     Any
+  under slab                      Ducts under slab (ground)                                EnergyPlus foundation model calculation                    Any
   roof deck                       Ducts on roof deck (outside)                             Weather data                                               Any
   ==============================  =======================================================  =========================================================  =================
+
+  .. [#] OpenStudio-HPXML does not model "conditioned" or "heated" garages.
+         Many conditioned garages are not conditioned 24/7, rather they are only conditioned for short periods when occupants are in them and turn on the space conditioning equipment, so it is best to assume an unconditioned garage.
+         However, if a garage was converted into livable space, then "conditioned space" should be used instead.
+
+.. note::
+
+  All conditioned space in a dwelling unit (i.e., "conditioned space", "basement - conditioned", and "crawlspace - conditioned") is modeled as a single thermal zone, in which a single air temperature/humidity is calculated for each timestep.
 
 Validating & Debugging Errors
 -----------------------------

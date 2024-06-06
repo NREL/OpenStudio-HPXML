@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
+# As there is a performance penalty to using OpenStudio's built-in unit convert()
+# method, we use our own approach here.
 class UnitConversions
-  # As there is a performance penalty to using OpenStudio's built-in unit convert()
-  # method, we use our own approach here.
-
   # Hash value is [scalar, delta]
   @Scalars = {
     # Energy
@@ -34,6 +33,12 @@ class UnitConversions
     ['wh', 'kbtu'] => 0.003412141633127942,
     ['kbtu', 'btu'] => 1000.0,
     ['kbtu', 'mbtu'] => 0.001,
+    ['gal_fuel_oil', 'kbtu'] => 139,
+    ['gal_fuel_oil', 'mbtu'] => 139 / 1000.0,
+    ['gal_fuel_oil', 'j'] => 139 * 1000.0 * 1055.05585262,
+    ['gal_propane', 'kbtu'] => 91.6,
+    ['gal_propane', 'mbtu'] => 91.6 / 1000.0,
+    ['gal_propane', 'j'] => 91.6 * 1000.0 * 1055.05585262,
 
     # Power
     ['btu/hr', 'w'] => 0.2930710701722222,
@@ -145,6 +150,12 @@ class UnitConversions
     ['lbm/lbm', 'grains'] => 7000.0,
   }
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param from [TODO] TODO
+  # @param to [TODO] TODO
+  # @return [TODO] TODO
   def self.convert(x, from, to)
     from_d = from.downcase
     to_d = to.downcase
