@@ -932,7 +932,6 @@ class HPXMLDefaults
 
         unvented_crawl.within_infiltration_volume = false
         unvented_crawl.within_infiltration_volume_isdefaulted = true
-        break # EPvalidator.xml only allows a single value
       end
       if unvented_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
         fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume.'
