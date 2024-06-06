@@ -879,7 +879,7 @@ class HPXMLDefaults
       unvented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeUnvented }
       if unvented_attics.empty?
         hpxml_bldg.attics.add(id: 'UnventedAttic',
-                              foundation_type: HPXML::AtticTypeUnvented)
+                              attic_type: HPXML::AtticTypeUnvented)
         unvented_attics << hpxml_bldg.attics[-1]
       end
       unvented_attics.each do |unvented_attic|
