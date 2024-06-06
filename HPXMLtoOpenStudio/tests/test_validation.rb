@@ -1010,7 +1010,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double check inputs."],
+                            'inconsistent-belly-wing-skirt-present' => ['All belly-and-wing foundations must have the same SkirtPresent.'],
                             'inconsistent-cond-zone-assignment' => ["Surface 'Floor1' is not adjacent to conditioned space but was assigned to conditioned Zone 'ConditionedZone'."],
+                            'inconsistent-uncond-basement-within-infiltration-volume' => ['All unconditioned basements must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-unvented-attic-within-infiltration-volume' => ['All unvented attics must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-unvented-crawl-within-infiltration-volume' => ['All unvented crawlspaces must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-vented-attic-ventilation-rate' => ['All vented attics must have the same VentilationRate.'],
+                            'inconsistent-vented-attic-ventilation-rate2' => ['All vented attics must have the same VentilationRate.'],
+                            'inconsistent-vented-crawl-ventilation-rate' => ['All vented crawlspaces must have the same VentilationRate.'],
                             'invalid-battery-capacity-units' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
@@ -1255,10 +1262,53 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-shared-chiller-negative-seer-eq'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.cooling_systems[0].shared_loop_watts *= 100.0
+      elsif ['inconsistent-belly-wing-skirt-present'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-belly-wing-skirt.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].belly_wing_skirt_present = false
       elsif ['inconsistent-cond-zone-assignment'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         grg_ceiling = hpxml_bldg.floors.find { |f| f.interior_adjacent_to == HPXML::LocationGarage && f.exterior_adjacent_to == HPXML::LocationAtticUnvented }
         grg_ceiling.attached_to_space_idref = hpxml_bldg.conditioned_spaces[0].id
+      elsif ['inconsistent-uncond-basement-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = true
+      elsif ['inconsistent-unvented-attic-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeUnvented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].within_infiltration_volume = true
+      elsif ['inconsistent-unvented-crawl-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-unvented-crawlspace.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceUnvented }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = true
+      elsif ['inconsistent-vented-attic-ventilation-rate'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].vented_attic_sla *= 2
+      elsif ['inconsistent-vented-attic-ventilation-rate2'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].vented_attic_sla = nil
+        hpxml_bldg.attics[-1].vented_attic_ach = 5.0
+      elsif ['inconsistent-vented-crawl-ventilation-rate'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-vented-crawlspace.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].vented_crawlspace_sla *= 2
       elsif ['invalid-battery-capacity-units'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
         hpxml_bldg.batteries[0].usable_capacity_kwh = nil

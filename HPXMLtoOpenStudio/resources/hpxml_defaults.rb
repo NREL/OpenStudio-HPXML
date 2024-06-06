@@ -875,29 +875,43 @@ class HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_attics(hpxml_bldg)
-    hpxml_bldg.attics.each do |attic|
-      next unless attic.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationAtticUnvented)
+      unvented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeUnvented }
+      if unvented_attics.empty?
+        hpxml_bldg.attics.add(id: 'UnventedAttic',
+                              foundation_type: HPXML::AtticTypeUnvented)
+        unvented_attics << hpxml_bldg.attics[-1]
+      end
+      unvented_attics.each do |unvented_attic|
+        next unless unvented_attic.within_infiltration_volume.nil?
 
-      if [HPXML::AtticTypeUnvented].include? attic.attic_type
-        attic.within_infiltration_volume = false
-        attic.within_infiltration_volume_isdefaulted = true
+        unvented_attic.within_infiltration_volume = false
+        unvented_attic.within_infiltration_volume_isdefaulted = true
+      end
+      if unvented_attics.map { |a| a.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented attics must have the same WithinInfiltrationVolume.'
       end
     end
 
-    return unless hpxml_bldg.has_location(HPXML::LocationAtticVented)
+    if hpxml_bldg.has_location(HPXML::LocationAtticVented)
+      vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
+      if vented_attics.empty?
+        hpxml_bldg.attics.add(id: 'VentedAttic',
+                              attic_type: HPXML::AtticTypeVented)
+        vented_attics << hpxml_bldg.attics[-1]
+      end
+      vented_attics.each do |vented_attic|
+        next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
 
-    vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
-    if vented_attics.empty?
-      hpxml_bldg.attics.add(id: 'VentedAttic',
-                            attic_type: HPXML::AtticTypeVented)
-      vented_attics << hpxml_bldg.attics[-1]
-    end
-    vented_attics.each do |vented_attic|
-      next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
-
-      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
-      vented_attic.vented_attic_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic.vented_attic_sla_isdefaulted = true
+      end
+      if vented_attics.map { |a| a.vented_attic_sla }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
+      if vented_attics.map { |a| a.vented_attic_ach }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
     end
   end
 
@@ -906,14 +920,41 @@ class HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_foundations(hpxml_bldg)
-    hpxml_bldg.foundations.each do |foundation|
-      next unless foundation.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationCrawlspaceUnvented)
+      unvented_crawls = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceUnvented }
+      if unvented_crawls.empty?
+        hpxml_bldg.foundations.add(id: 'UnventedCrawlspace',
+                                   foundation_type: HPXML::FoundationTypeCrawlspaceUnvented)
+        unvented_crawls << hpxml_bldg.foundations[-1]
+      end
+      unvented_crawls.each do |unvented_crawl|
+        next unless unvented_crawl.within_infiltration_volume.nil?
 
-      next unless [HPXML::FoundationTypeBasementUnconditioned,
-                   HPXML::FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+        unvented_crawl.within_infiltration_volume = false
+        unvented_crawl.within_infiltration_volume_isdefaulted = true
+        break # EPvalidator.xml only allows a single value
+      end
+      if unvented_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume.'
+      end
+    end
 
-      foundation.within_infiltration_volume = false
-      foundation.within_infiltration_volume_isdefaulted = true
+    if hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+      uncond_bsmts = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
+      if uncond_bsmts.empty?
+        hpxml_bldg.foundations.add(id: 'UnconditionedBasement',
+                                   foundation_type: HPXML::FoundationTypeBasementUnconditioned)
+        uncond_bsmts << hpxml_bldg.foundations[-1]
+      end
+      uncond_bsmts.each do |uncond_bsmt|
+        next unless uncond_bsmt.within_infiltration_volume.nil?
+
+        uncond_bsmt.within_infiltration_volume = false
+        uncond_bsmt.within_infiltration_volume_isdefaulted = true
+      end
+      if uncond_bsmts.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unconditioned basements must have the same WithinInfiltrationVolume.'
+      end
     end
 
     if hpxml_bldg.has_location(HPXML::LocationCrawlspaceVented)
@@ -928,7 +969,9 @@ class HPXMLDefaults
 
         vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
         vented_crawl.vented_crawlspace_sla_isdefaulted = true
-        break # EPvalidator.xml only allows a single ventilation rate
+      end
+      if vented_crawls.map { |f| f.vented_crawlspace_sla }.uniq.size != 1
+        fail 'All vented crawlspaces must have the same VentilationRate.'
       end
     end
 
@@ -942,9 +985,11 @@ class HPXMLDefaults
       belly_and_wing_foundations.each do |foundation|
         next unless foundation.belly_wing_skirt_present.nil?
 
-        foundation.belly_wing_skirt_present_isdefaulted = true
         foundation.belly_wing_skirt_present = true
-        break
+        foundation.belly_wing_skirt_present_isdefaulted = true
+      end
+      if belly_and_wing_foundations.map { |f| f.belly_wing_skirt_present }.uniq.size != 1
+        fail 'All belly-and-wing foundations must have the same SkirtPresent.'
       end
     end
   end
