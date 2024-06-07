@@ -6661,52 +6661,29 @@ class HPXMLFile
   end
 
   def self.set_electric_vehicle(hpxml_bldg, args)
-    if args[:ev_present].is_initialized && args[:ev_present].get != true
+    if args[:ev_present] != true
       return
     end
 
-    location = get_location('outside', hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
-
-    if args[:ev_battery_discharge_power].is_initialized
-      rated_power_output = args[:ev_battery_discharge_power].get
-    end
-
-    if args[:ev_battery_capacity].is_initialized
-      nominal_capacity_kwh = args[:ev_battery_capacity].get
-    end
-
-    if args[:ev_battery_usable_capacity].is_initialized
-      usable_capacity_kwh = args[:ev_battery_usable_capacity].get
-    end
-
-    if args[:ev_charger_present].is_initialized
-      ev_charger_present = args[:ev_charger_present].get
-    else
-      ev_charger_present = false
-    end
-
-    if args[:ev_charger_power].is_initialized
-      ev_charger_power = args[:ev_charger_power].get
-    end
-
-    if args[:ev_charger_location].is_initialized
-      location = get_location(args[:ev_charger_location].get, hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
-    end
-
     charger_id = nil
-    if ev_charger_present
+    if args[:ev_charger_present]
+      if args[:ev_charger_location].nil?
+        args[:ev_charger_location] = 'outside'
+      end
+      location = get_location(args[:ev_charger_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
+
       charger_id = "EVCharger#{hpxml_bldg.ev_chargers.size + 1}"
       hpxml_bldg.ev_chargers.add(id: charger_id,
                                  location: location,
-                                 charging_power: ev_charger_power)
+                                 charging_power: args[:ev_charger_power])
     end
 
     ev_ct = hpxml_bldg.vehicles.count { |vehicle| vehicle.id.include?('ElectricVehicle') }
     hpxml_bldg.vehicles.add(id: "ElectricVehicle#{ev_ct + 1}",
                             type: HPXML::BatteryTypeLithiumIon,
-                            rated_power_output: rated_power_output,
-                            nominal_capacity_kwh: nominal_capacity_kwh,
-                            usable_capacity_kwh: usable_capacity_kwh,
+                            rated_power_output: args[:ev_battery_discharge_power],
+                            nominal_capacity_kwh: args[:ev_battery_capacity],
+                            usable_capacity_kwh: args[:ev_battery_usable_capacity],
                             ev_charger_idref: charger_id)
   end
 
