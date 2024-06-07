@@ -3780,7 +3780,7 @@ The type of the hot water distribution system.
 
 **Hot Water Distribution: Standard Piping Length**
 
-If the distribution system is Standard, the length of the piping. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#standard'>Standard</a>) is used.
+If the distribution system is Standard or Recirculation (Shared), the length of the piping. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#standard'>Standard</a> or <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#recirculation-shared'>Recirculation (Shared)</a>) is used.
 
 - **Name:** ``hot_water_distribution_standard_piping_length``
 - **Type:** ``Double``
@@ -3832,7 +3832,7 @@ If the distribution system is Recirculation, the length of the recirculation bra
 
 **Hot Water Distribution: Recirculation Pump Power**
 
-If the distribution system is Recirculation, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#recirculation-in-unit'>Recirculation (In-Unit)</a>) is used.
+If the distribution system is Recirculation, the recirculation pump power. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#recirculation-in-unit'>Recirculation (In-Unit)</a> or <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#recirculation-shared'>Recirculation (Shared)</a>) is used.
 
 - **Name:** ``hot_water_distribution_recirc_pump_power``
 - **Type:** ``Double``
