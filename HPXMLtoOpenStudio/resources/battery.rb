@@ -2,8 +2,6 @@
 
 # TODO
 class Battery
-  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
-
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
@@ -14,7 +12,7 @@ class Battery
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
-  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)
+  def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
     charging_schedule = nil
     discharging_schedule = nil
     if is_ev
@@ -133,17 +131,29 @@ class Battery
     elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
 
-    elcds = model.getElectricLoadCenterDistributions
-    elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
-    if elcds.empty?
+    if is_ev
+      # EVs always get their own ELCD, not PV
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
-      elcd.setName('Battery elec load center dist')
+      elcd.setName("#{obj_name} elec load center dist")
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+      elcs.setInitialFractionalStateofCharge(maximum_storage_state_of_charge_fraction)
     else
-      elcd = elcds[0] # i.e., pv
-
-      elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
-      elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+      elcds = model.getElectricLoadCenterDistributions
+      elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
+      # Use PV ELCD if present
+      elcds.each do |elcd_|
+        if elcd_.name.to_s.include? "PVSystem"
+          elcd = elcd_
+          elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
+          elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+          break
+        end
+      end
+      if elcds.empty?
+        elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+        elcd.setName("#{obj_name} elec load center dist")
+        elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+      end
     end
 
     elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
