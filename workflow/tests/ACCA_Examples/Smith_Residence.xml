@@ -1214,6 +1214,46 @@
             <AttachedToWall idref='WallRecRoomNorth'/>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id='SkylightKitchenStairwell'/>
+            <Area>8.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.52</UFactor>
+            <SHGC>0.35</SHGC>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToFloor idref='CeilingKitchenStairwell'/>
+            <extension>
+              <Curb>
+                <Area>4.0</Area>
+                <RValue>2.86</RValue>
+              </Curb>
+              <Shaft>
+                <Area>60.0</Area>
+                <RValue>12.5</RValue>
+              </Shaft>
+            </extension>
+          </Skylight>
+          <Skylight>
+            <SystemIdentifier id='SkylightLivingDining'/>
+            <Area>32.0</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.52</UFactor>
+            <SHGC>0.35</SHGC>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToFloor idref='CeilingLivingDining'/>
+            <extension>
+              <Curb>
+                <Area>8.0</Area>
+                <RValue>2.86</RValue>
+              </Curb>
+              <Shaft>
+                <Area>120.0</Area>
+                <RValue>12.5</RValue>
+              </Shaft>
+            </extension>
+          </Skylight>
+        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>

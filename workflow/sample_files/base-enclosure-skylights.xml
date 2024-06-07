@@ -317,6 +317,16 @@
             </InteriorShading>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToFloor idref='Floor1'/>
+            <extension>
+              <Curb>
+                <Area>5.25</Area>
+                <RValue>1.96</RValue>
+              </Curb>
+              <Shaft>
+                <Area>60.0</Area>
+                <RValue>6.25</RValue>
+              </Shaft>
+            </extension>
           </Skylight>
           <Skylight>
             <SystemIdentifier id='Skylight2'/>

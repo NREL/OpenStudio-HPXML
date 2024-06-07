@@ -888,6 +888,46 @@
             <AttachedToWall idref='WallLivingDiningWest'/>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id='SkylightKitchenUtility'/>
+            <Area>8.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.49</UFactor>
+            <SHGC>0.29</SHGC>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToFloor idref='CeilingKitchenUtility'/>
+            <extension>
+              <Curb>
+                <Area>3.2</Area>
+                <RValue>2.86</RValue>
+              </Curb>
+              <Shaft>
+                <Area>60.0</Area>
+                <RValue>20.0</RValue>
+              </Shaft>
+            </extension>
+          </Skylight>
+          <Skylight>
+            <SystemIdentifier id='SkylightLivingDining'/>
+            <Area>32.0</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.49</UFactor>
+            <SHGC>0.29</SHGC>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToFloor idref='CeilingLivingDining'/>
+            <extension>
+              <Curb>
+                <Area>9.6</Area>
+                <RValue>2.86</RValue>
+              </Curb>
+              <Shaft>
+                <Area>120.0</Area>
+                <RValue>20.0</RValue>
+              </Shaft>
+            </extension>
+          </Skylight>
+        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>
