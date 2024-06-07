@@ -1,3 +1,10 @@
+## OpenStudio-HPXML v1.9.0
+
+__New Features__
+
+__Bugfixes__
+- Allows additional flexibility for multiple `Attic`/`Foundation` elements.
+
 ## OpenStudio-HPXML v1.8.1
 
 __Bugfixes__
