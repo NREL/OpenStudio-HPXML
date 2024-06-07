@@ -3056,7 +3056,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants.ObjectNameMechanicalVentilationPrecooling => EUT::MechVentPrecool,
           Constants.ObjectNameBackupSuppHeat => EUT::HeatingHeatPumpBackup,
           Constants.ObjectNameWaterHeaterAdjustment => EUT::HotWater,
-          Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
+          Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery,
+          Constants.ObjectNameEVBatteryDischargeOffset => EUT::EVBattery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
           fail 'Unepected error: multiple matches.' unless end_use.nil?
           ### FIXME: ensure loss program applies to the correct battery
