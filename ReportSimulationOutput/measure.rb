@@ -2524,6 +2524,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                                                        is_negative: true)
     @end_uses[[FT::Elec, EUT::Battery]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::Battery]),
                                                      is_storage: true)
+    @end_uses[[FT::Elec, EUT::EVBattery]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Elec, EUT::EVBattery]),
+                                                     is_storage: true)
     @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::Heating]))
     @end_uses[[FT::Gas, EUT::HeatingHeatPumpBackup]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HeatingHeatPumpBackup]))
     @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(outputs: get_object_outputs(EUT, [FT::Gas, EUT::HotWater]))
@@ -2993,7 +2995,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
                  [to_ft[fuel], EUT::Generator] => ["Generator #{fuel} HHV Basis Energy"] }
 
       elsif object.to_ElectricLoadCenterStorageLiIonNMCBattery.is_initialized
-        return { [FT::Elec, EUT::Battery] => ['Electric Storage Production Decrement Energy', 'Electric Storage Discharge Energy'] }
+        if object.name.to_s.include? "ElectricVehicle"
+          return { [FT::Elec, EUT::EVBattery] => ["Electric Storage Production Decrement Energy", "Electric Storage Discharge Energy"] }
+        else
+          return { [FT::Elec, EUT::Battery] => ["Electric Storage Production Decrement Energy", "Electric Storage Discharge Energy"] }
+        end
 
       elsif object.to_ElectricEquipment.is_initialized
         object = object.to_ElectricEquipment.get
@@ -3053,7 +3059,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
           Constants.ObjectNameBatteryLossesAdjustment => EUT::Battery }.each do |obj_name, eut|
           next unless subcategory.start_with? obj_name
           fail 'Unepected error: multiple matches.' unless end_use.nil?
-
+          ### FIXME: ensure loss program applies to the correct battery
           end_use = eut
         end
 
