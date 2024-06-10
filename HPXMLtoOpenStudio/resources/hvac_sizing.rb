@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# TODO
-class HVACSizing
+# Collection of helper methods for performing HVAC design load and autosizing calculations.
+module HVACSizing
   # Calculates heating/cooling design loads, and selects equipment
   # values (e.g., capacities, airflows) specific to each HVAC system.
   # Calculations generally follow ACCA Manual J/S.
@@ -121,7 +121,7 @@ class HVACSizing
     return @all_hvac_sizings
   end
 
-  # FIXME: The following class methods are meant to be private.
+  # FIXME: The following module methods are meant to be private.
 
   # TODO
   #
@@ -854,7 +854,7 @@ class HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Doors
+  # TODO
   #
   # @param afl_hr [TODO] TODO
   # @return [TODO] TODO
@@ -1454,7 +1454,7 @@ class HVACSizing
     end
   end
 
-  # Aggregate Loads to Totals
+  # Aggregates component design loads to totals
   #
   # @param loads [TODO] TODO
   # @return [TODO] TODO
@@ -1478,7 +1478,8 @@ class HVACSizing
     loads.Cool_Tot = loads.Cool_Sens + loads.Cool_Lat
   end
 
-  # HVAC Temperatures
+  # Determine HVAC Leaving Air Temperature (LAT) and/or Supply Air Temperature (SAT).
+  # Values are assigned to the hvac_cooling/hvac_heating objects.
   #
   # @param mj [TODO] TODO
   # @param zone_loads [TODO] TODO
@@ -1530,8 +1531,6 @@ class HVACSizing
   # @param frac_zone_cool_load_served [TODO] TODO
   # @return [TODO] TODO
   def self.apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
-    # Calculate design loads that this HVAC system serves
-
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
       # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
@@ -1858,7 +1857,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param hvac_loads [TODO] TODO
-  # @param zone_loads [WeatherProcess] TODO
+  # @param zone_loads [TODO] TODO
   # @param hvac_heating [TODO] TODO
   # @param hvac_cooling [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -2959,7 +2958,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param sens_load_or_capacity [TODO] TODO
-  # @param deltaT [TODO] TODO
+  # @param delta_t [TODO] TODO
   # @param dx_capacity [TODO] TODO
   # @param hp_cooling_cfm [TODO] TODO
   # @return [TODO] TODO

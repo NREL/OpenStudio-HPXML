@@ -469,12 +469,11 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh) Skip due to dehumidifying ventilation
     assert_in_delta(1938, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
-    # FIXME: Investigate discrepancy here
     # eyeball observation from figure 13-5
-    # block_aed = [3800, 4600, 5400, 6200, 6900, 7200, 7250, 7250, 7000, 6500, 5800, 4100]
-    # hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
-    #   assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
-    # end
+    block_aed = [3800, 4600, 5400, 6200, 6900, 7200, 7250, 7250, 7000, 6500, 5800, 4100]
+    hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
+      # assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac) Skip due to larger difference, possibly because 1.25 dome factor is incorrectly excluded from Form J1 skylight areas?
+    end
     space_load_results = {
       ['living', 'dining'] => [1880, 5478],
       ['kitchen'] => [1084, 4845],

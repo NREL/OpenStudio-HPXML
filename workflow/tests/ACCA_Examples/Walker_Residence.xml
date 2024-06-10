@@ -879,7 +879,7 @@
             <SHGC>0.16</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningWestExteriorShading'/>
-              <SummerShadingCoefficient>0.25</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningWestInteriorShading'/>
@@ -903,7 +903,7 @@
                 <RValue>2.86</RValue>
               </Curb>
               <Shaft>
-                <Area>60.0</Area>
+                <Area>48.0</Area>
                 <RValue>20.0</RValue>
               </Shaft>
             </extension>
@@ -918,11 +918,11 @@
             <AttachedToFloor idref='CeilingLivingDining'/>
             <extension>
               <Curb>
-                <Area>9.6</Area>
+                <Area>6.4</Area>
                 <RValue>2.86</RValue>
               </Curb>
               <Shaft>
-                <Area>120.0</Area>
+                <Area>96.0</Area>
                 <RValue>20.0</RValue>
               </Shaft>
             </extension>
