@@ -1655,8 +1655,10 @@ If the skylight has a curb, additional information is entered in ``Skylight/exte
   Element     Type      Units         Constraints  Required  Default   Notes
   ==========  ========  ============  ===========  ========  ========  ========================================================
   ``Area``    double    ft^2          > 0          Yes                 Curb area
-  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Curb R-value
+  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Curb R-value [#]_
   ==========  ========  ============  ===========  ========  ========  ========================================================
+
+  .. [#] RValue includes interior/exterior air films.
 
 .. _skylight_shaft:
 
@@ -1669,8 +1671,10 @@ If the skylight has a shaft, additional information is entered in ``Skylight/ext
   Element     Type      Units         Constraints  Required  Default   Notes
   ==========  ========  ============  ===========  ========  ========  ========================================================
   ``Area``    double    ft^2          > 0          Yes                 Shaft area
-  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Shaft R-value
+  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Shaft R-value [#]_
   ==========  ========  ============  ===========  ========  ========  ========================================================
+
+  .. [#] RValue includes all material layers and interior/exterior air films.
 
 HPXML Doors
 ***********
@@ -1684,12 +1688,13 @@ Each opaque door is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Doo
   ``AttachedToWall``                            idref                            See [#]_                  Yes                  ID of attached wall
   ``Area``                                      double             ft2           > 0                       Yes                  Total area
   ``Azimuth`` or ``Orientation``                integer or string  deg           >= 0, <= 359 or See [#]_  No        See [#]_   Direction (clockwise from North)
-  ``RValue``                                    double             F-ft2-hr/Btu  > 0                       Yes                  R-value (including any storm door)
+  ``RValue``                                    double             F-ft2-hr/Btu  > 0                       Yes                  R-value [#]_
   ============================================  =================  ============  ========================  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation nor AttachedToWall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
+  .. [#] RValue includes interior/exterior air films and presence of any storm door.
 
 HPXML Partition Wall Mass
 *************************
