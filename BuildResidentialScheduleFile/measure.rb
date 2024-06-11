@@ -32,7 +32,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return 'Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Stochastic schedules are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.'
   end
 
-  # define the arguments that the user will input
+  # Define the arguments that the user will input.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [OpenStudio::Measure::OSArgumentVector] an OpenStudio::Measure::OSArgumentVector object
   def arguments(model) # rubocop:disable Lint/UnusedMethodArgument
     args = OpenStudio::Measure::OSArgumentVector.new
 
@@ -82,7 +85,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return args
   end
 
-  # define what happens when the measure is run
+  # Define what happens when the measure is run.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
+  # @return [Boolean] TODO
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
@@ -167,6 +175,15 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param doc [TODO] TODO
+  # @param hpxml_path [TODO] TODO
+  # @param hpxml_output_path [TODO] TODO
+  # @param schedules_filepaths [TODO] TODO
+  # @param args [Hash] Map of :argument_name => value
+  # @return [TODO] TODO
   def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
     # write out the modified hpxml
     if (hpxml_path != hpxml_output_path) || !schedules_filepaths.include?(args[:output_csv_path])
@@ -175,6 +192,15 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     end
   end
 
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param args [Hash] Map of :argument_name => value
+  # @return [TODO] TODO
   def create_schedules(runner, hpxml, hpxml_bldg, epw_file, weather, args)
     info_msgs = []
 
@@ -210,6 +236,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     return true
   end
 
+  # TODO
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param args [Hash] Map of :argument_name => value
+  # @return [TODO] TODO
   def get_simulation_parameters(hpxml, epw_file, args)
     args[:minutes_per_step] = 60
     if !hpxml.header.timestep.nil?
@@ -225,6 +257,12 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param args [Hash] Map of :argument_name => value
+  # @return [TODO] TODO
   def get_generator_inputs(hpxml_bldg, epw_file, args)
     state_code = HPXMLDefaults.get_default_state_code(hpxml_bldg.state_code, epw_file)
     if Constants.StateCodesMap.keys.include?(state_code)
@@ -236,7 +274,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     args[:column_names] = args[:schedules_column_names].split(',').map(&:strip) if !args[:schedules_column_names].nil?
 
     if hpxml_bldg.building_occupancy.number_of_residents.nil?
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(hpxml_bldg.building_construction.number_of_bedrooms)
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(nbeds: hpxml_bldg.building_construction.number_of_bedrooms)
     else
       args[:geometry_num_occupants] = hpxml_bldg.building_occupancy.number_of_residents
     end

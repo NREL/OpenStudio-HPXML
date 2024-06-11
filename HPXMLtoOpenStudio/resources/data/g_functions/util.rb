@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# TODO
+#
+# @param filepath [TODO] TODO
+# @return [TODO] TODO
 def process_g_functions(filepath)
   # Downselect jsons found at https://gdr.openei.org/files/1325/g-function_library_1.0.zip
   require 'json'
@@ -73,6 +77,14 @@ def process_g_functions(filepath)
   return num_configs_actual
 end
 
+# TODO
+#
+# @param json [TODO] TODO
+# @param json2 [TODO] TODO
+# @param expected_num_boreholes [TODO] TODO
+# @param m_n [TODO] TODO
+# @param key2 [TODO] TODO
+# @return [TODO] TODO
 def add_m_n(json, json2, expected_num_boreholes, m_n, key2 = nil)
   if key2.nil?
     actual_num_boreholes = json[m_n]['bore_locations'].size

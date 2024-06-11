@@ -1010,7 +1010,14 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-shared-boiler-multiple' => ['More than one shared heating system found.'],
                             'hvac-shared-chiller-multiple' => ['More than one shared cooling system found.'],
                             'hvac-shared-chiller-negative-seer-eq' => ["Negative SEER equivalent calculated for cooling system 'CoolingSystem1', double check inputs."],
+                            'inconsistent-belly-wing-skirt-present' => ['All belly-and-wing foundations must have the same SkirtPresent.'],
                             'inconsistent-cond-zone-assignment' => ["Surface 'Floor1' is not adjacent to conditioned space but was assigned to conditioned Zone 'ConditionedZone'."],
+                            'inconsistent-uncond-basement-within-infiltration-volume' => ['All unconditioned basements must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-unvented-attic-within-infiltration-volume' => ['All unvented attics must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-unvented-crawl-within-infiltration-volume' => ['All unvented crawlspaces must have the same WithinInfiltrationVolume.'],
+                            'inconsistent-vented-attic-ventilation-rate' => ['All vented attics must have the same VentilationRate.'],
+                            'inconsistent-vented-attic-ventilation-rate2' => ['All vented attics must have the same VentilationRate.'],
+                            'inconsistent-vented-crawl-ventilation-rate' => ['All vented crawlspaces must have the same VentilationRate.'],
                             'invalid-battery-capacity-units' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-battery-capacity-units2' => ["UsableCapacity and NominalCapacity for Battery 'Battery1' must be in the same units."],
                             'invalid-datatype-boolean' => ["Element 'RadiantBarrier': 'FOOBAR' is not a valid value of the atomic type 'xs:boolean'"],
@@ -1255,10 +1262,53 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-shared-chiller-negative-seer-eq'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-shared-chiller-only-baseboard.xml')
         hpxml_bldg.cooling_systems[0].shared_loop_watts *= 100.0
+      elsif ['inconsistent-belly-wing-skirt-present'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-belly-wing-skirt.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBellyAndWing }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].belly_wing_skirt_present = false
       elsif ['inconsistent-cond-zone-assignment'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-zones-spaces.xml')
         grg_ceiling = hpxml_bldg.floors.find { |f| f.interior_adjacent_to == HPXML::LocationGarage && f.exterior_adjacent_to == HPXML::LocationAtticUnvented }
         grg_ceiling.attached_to_space_idref = hpxml_bldg.conditioned_spaces[0].id
+      elsif ['inconsistent-uncond-basement-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-unconditioned-basement.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = true
+      elsif ['inconsistent-unvented-attic-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeUnvented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].within_infiltration_volume = true
+      elsif ['inconsistent-unvented-crawl-within-infiltration-volume'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-unvented-crawlspace.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceUnvented }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].within_infiltration_volume = true
+      elsif ['inconsistent-vented-attic-ventilation-rate'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].vented_attic_sla *= 2
+      elsif ['inconsistent-vented-attic-ventilation-rate2'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-atticroof-vented.xml')
+        attic = hpxml_bldg.attics.find { |a| a.attic_type == HPXML::AtticTypeVented }
+        hpxml_bldg.attics << attic.dup
+        hpxml_bldg.attics[-1].id = 'Duplicate'
+        hpxml_bldg.attics[-1].vented_attic_sla = nil
+        hpxml_bldg.attics[-1].vented_attic_ach = 5.0
+      elsif ['inconsistent-vented-crawl-ventilation-rate'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-vented-crawlspace.xml')
+        fnd = hpxml_bldg.foundations.find { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceVented }
+        hpxml_bldg.foundations << fnd.dup
+        hpxml_bldg.foundations[-1].id = 'Duplicate'
+        hpxml_bldg.foundations[-1].vented_crawlspace_sla *= 2
       elsif ['invalid-battery-capacity-units'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-pv-battery.xml')
         hpxml_bldg.batteries[0].usable_capacity_kwh = nil
@@ -1568,6 +1618,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'floor-or-ceiling1' => ["Floor 'Floor1' has FloorOrCeiling=floor but it should be ceiling. The input will be overridden."],
                               'floor-or-ceiling2' => ["Floor 'Floor1' has FloorOrCeiling=ceiling but it should be floor. The input will be overridden."],
                               'hvac-gshp-bore-depth-autosized-high' => ['Reached a maximum of 10 boreholes; setting bore depth to the maximum (500 ft).'],
+                              'hvac-seasons' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'],
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
@@ -1576,7 +1627,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'manualj-sum-space-internal-loads-latent' => ['ManualJInputs/InternalLoadsLatent (200.0) does not match sum of conditioned spaces (100.0).'],
                               'multiple-conditioned-zone' => ['While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'],
                               'power-outage' => ['It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.',
-                                                 'It is not possible to eliminate all water heater energy use (e.g. parasitics) in EnergyPlus during an unavailable period.'],
+                                                 'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'],
                               'schedule-file-and-weekday-weekend-multipliers' => ["Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.",
                                                                                   "Both 'occupants' schedule file and weekend fractions provided; the latter will be ignored.",
                                                                                   "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored.",
@@ -1713,6 +1764,8 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['hvac-gshp-bore-depth-autosized-high'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.site.ground_conductivity = 0.07
+      elsif ['hvac-seasons'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-hvac-seasons.xml')
       elsif ['hvac-setpoint-adjustments'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.hvac_controls[0].heating_setpoint_temp = 76.0
