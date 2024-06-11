@@ -796,6 +796,7 @@ class Psychrometrics
         Q      float    Total capacity of unit (kBtu/h)
         cfm    float    Volumetric flow rate of unit (CFM)
         Ao     float    Coil Ao factor (=UA/Cp - IN SI UNITS)
+        Win    float    Entering Humidity Ratio (dimensionless)
     Outputs:
     --------
         SHR    float    Sensible Heat Ratio
