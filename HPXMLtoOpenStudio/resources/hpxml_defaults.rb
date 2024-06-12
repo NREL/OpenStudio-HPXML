@@ -574,6 +574,8 @@ class HPXMLDefaults
         end
       end
 
+      next if hpxml_bldg.pv_systems.size == 0
+
       if scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil? && scenario.pv_monthly_grid_connection_fee_dollars.nil?
         scenario.pv_monthly_grid_connection_fee_dollars = 0.0
         scenario.pv_monthly_grid_connection_fee_dollars_isdefaulted = true
