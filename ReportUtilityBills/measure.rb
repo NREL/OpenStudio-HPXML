@@ -615,7 +615,6 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
         end
 
         # Net Metering
-        # TODO: if battery or generator and no PV, default to HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost?
         rate.net_metering_excess_sellback_type = bill_scenario.pv_net_metering_annual_excess_sellback_rate_type if bill_scenario.pv_compensation_type == HPXML::PVCompensationTypeNetMetering
         rate.net_metering_user_excess_sellback_rate = bill_scenario.pv_net_metering_annual_excess_sellback_rate if rate.net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeUserSpecified
 

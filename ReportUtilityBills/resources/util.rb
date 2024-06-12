@@ -386,7 +386,6 @@ class CalculateUtilityBill
       end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_month.sum(0.0))
 
       annual_total_charge_with_pv = annual_payments + end_of_year_bill_credit - excess_sellback
-      # TODO: if battery or generator and no PV, put this toward annual_energy_charge instead of annual_production credit?
       bill.annual_production_credit = annual_total_charge - annual_total_charge_with_pv
 
       for m in 0..11

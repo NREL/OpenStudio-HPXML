@@ -549,7 +549,7 @@ class HPXMLDefaults
         end
       end
 
-      next unless hpxml_bldg.pv_systems.size > 0
+      next if hpxml_bldg.pv_systems.size == 0 && hpxml_bldg.batteries.size == 0 && hpxml_bldg.generators.size == 0
 
       if scenario.pv_compensation_type.nil?
         scenario.pv_compensation_type = HPXML::PVCompensationTypeNetMetering
