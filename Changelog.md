@@ -4,7 +4,7 @@ __New Features__
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.
-- ReportUtilityBills measure: apply production compensation defaults to batteries and generators.
+- ReportUtilityBills measure: only calculate production credits when electricity is produced.
 
 ## OpenStudio-HPXML v1.8.1
 
