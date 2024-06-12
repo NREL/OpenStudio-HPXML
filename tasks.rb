@@ -2570,6 +2570,8 @@ if ARGV[0].to_sym == :update_measures
           'Lint/UnusedMethodArgument',
           'Lint/UselessAssignment',
           'Style/AndOr',
+          'Style/Documentation',
+          'Style/DocumentationMethod',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
           'Style/Next',

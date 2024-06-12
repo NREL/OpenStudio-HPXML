@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+# TODO
 class TE
   # Total Energy
   Total = 'Total'
   Net = 'Net'
 end
 
+# TODO
 class FT
   # Fuel Types
   Elec = 'Electricity'
@@ -17,6 +19,7 @@ class FT
   Coal = 'Coal'
 end
 
+# TODO
 class EUT
   # End Use Types
   Heating = 'Heating'
@@ -59,6 +62,7 @@ class EUT
   Battery = 'Battery'
 end
 
+# TODO
 class HWT
   # Hot Water Types
   ClothesWasher = 'Clothes Washer'
@@ -67,6 +71,7 @@ class HWT
   DistributionWaste = 'Distribution Waste'
 end
 
+# TODO
 class LT
   # Load Types
   Heating = 'Heating: Delivered'
@@ -78,6 +83,7 @@ class LT
   HotWaterSolarThermal = 'Hot Water: Solar Thermal'
 end
 
+# TODO
 class CLT
   # Component Load Types
   Roofs = 'Roofs'
@@ -102,23 +108,27 @@ class CLT
   Lighting = 'Lighting'
 end
 
+# TODO
 class UHT
   # Unmet Hours Types
   Heating = 'Heating'
   Cooling = 'Cooling'
 end
 
+# TODO
 class RT
   # Resilience Types
   Battery = 'Battery'
 end
 
+# TODO
 class PLT
   # Peak Load Types
   Heating = 'Heating: Delivered'
   Cooling = 'Cooling: Delivered'
 end
 
+# TODO
 class PFT
   # Peak Fuel Types
   Summer = 'Summer'
@@ -126,6 +136,7 @@ class PFT
   Annual = 'Annual'
 end
 
+# TODO
 class AFT
   # Airflow Types
   Infiltration = 'Infiltration'
@@ -134,6 +145,7 @@ class AFT
   WholeHouseFan = 'Whole House Fan'
 end
 
+# TODO
 class WT
   # Weather Types
   DrybulbTemp = 'Drybulb Temperature'
@@ -144,7 +156,12 @@ class WT
   DirectSolar = 'Direct Solar Radiation'
 end
 
+# TODO
 class Outputs
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_total_hvac_capacities(hpxml_bldg)
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -171,6 +188,10 @@ class Outputs
     return htg_cap, clg_cap, hp_backup_cap
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_total_hvac_airflows(hpxml_bldg)
     htg_cfm, clg_cfm = 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -190,6 +211,11 @@ class Outputs
     return htg_cfm, clg_cfm
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param results_out [TODO] TODO
+  # @return [TODO] TODO
   def self.append_sizing_results(hpxml_bldgs, results_out)
     line_break = nil
 
@@ -320,6 +346,13 @@ class Outputs
     return results_out
   end
 
+  # TODO
+  #
+  # @param results_out [TODO] TODO
+  # @param output_format [TODO] TODO
+  # @param output_file_path [TODO] TODO
+  # @param mode [TODO] TODO
+  # @return [TODO] TODO
   def self.write_results_out_to_file(results_out, output_format, output_file_path, mode = 'w')
     line_break = nil
     if ['csv'].include? output_format
@@ -342,7 +375,7 @@ class Outputs
         require 'json'
         File.open(output_file_path, mode) { |json| json.write(JSON.pretty_generate(h)) }
       elsif output_format == 'msgpack'
-        File.open(output_file_path, mode) { |json| h.to_msgpack(json) }
+        File.open(output_file_path, "#{mode}b") { |json| h.to_msgpack(json) }
       end
     end
   end

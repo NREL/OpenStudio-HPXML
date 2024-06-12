@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
+# TODO
 class Fuel
+  # TODO
+  #
+  # @param meters [TODO] TODO
+  # @param units [TODO] TODO
+  # @return [TODO] TODO
   def initialize(meters: [], units:)
     @meters = meters
     @timeseries = []
@@ -9,7 +15,11 @@ class Fuel
   attr_accessor(:meters, :timeseries, :units)
 end
 
+# TODO
 class UtilityRate
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
@@ -34,7 +44,11 @@ class UtilityRate
                 :energyratestructure, :energyweekdayschedule, :energyweekendschedule)
 end
 
+# TODO
 class UtilityBill
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize()
     @annual_energy_charge = 0.0
     @annual_fixed_charge = 0.0
@@ -52,7 +66,18 @@ class UtilityBill
                 :monthly_production_credit, :annual_production_credit)
 end
 
+# TODO
 class CalculateUtilityBill
+  # TODO
+  #
+  # @param fuel_type [TODO] TODO
+  # @param header [TODO] TODO
+  # @param fuel_time_series [TODO] TODO
+  # @param is_production [TODO] TODO
+  # @param rate [TODO] TODO
+  # @param bill [TODO] TODO
+  # @param net_elec [TODO] TODO
+  # @return [TODO] TODO
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     if fuel_time_series.size > 12
       # Must be no more than 12 months worth of simulation data
@@ -106,6 +131,13 @@ class CalculateUtilityBill
     return net_elec
   end
 
+  # TODO
+  #
+  # @param header [TODO] TODO
+  # @param fuels [TODO] TODO
+  # @param rate [TODO] TODO
+  # @param bill [TODO] TODO
+  # @return [TODO] TODO
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     production_fuel_time_series = fuels[[FT::Elec, true]].timeseries
@@ -380,6 +412,13 @@ class CalculateUtilityBill
     bill.annual_energy_charge = bill.monthly_energy_charge.sum
   end
 
+  # TODO
+  #
+  # @param monthly_fixed_charge [TODO] TODO
+  # @param net_monthly_energy_charge [TODO] TODO
+  # @param annual_min_charge [TODO] TODO
+  # @param monthly_min_charge [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge)
     # Calculate monthly payments, rollover, and min charges
     monthly_min_charges = [0] * 12
@@ -412,6 +451,13 @@ class CalculateUtilityBill
     return annual_payments, monthly_min_charges, end_of_year_bill_credit
   end
 
+  # TODO
+  #
+  # @param end_of_year_bill_credit [TODO] TODO
+  # @param net_metering_excess_sellback_type [TODO] TODO
+  # @param net_metering_user_excess_sellback_rate [TODO] TODO
+  # @param net_elec [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec)
     # Note: Annual excess sellback can only be calculated at the end of the year on the net electricity consumption.
     if net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
@@ -424,6 +470,11 @@ class CalculateUtilityBill
     return end_of_year_bill_credit, excess_sellback
   end
 
+  # TODO
+  #
+  # @param header [TODO] TODO
+  # @param month [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_monthly_prorate(header, month)
     begin_month = header.sim_begin_month
     begin_day = header.sim_begin_day
@@ -451,12 +502,20 @@ class CalculateUtilityBill
   end
 end
 
+# TODO
+#
+# @param x [TODO] TODO
+# @return [TODO] TODO
 def valid_filename(x)
   x = "#{x}".gsub(/[^0-9A-Za-z\s]/, '') # remove non-alphanumeric
   x = "#{x}".gsub(/\s+/, ' ').strip # remove multiple spaces
   return x
 end
 
+# TODO
+#
+# @param filepath [TODO] TODO
+# @return [TODO] TODO
 def process_usurdb(filepath)
   # Map csv found at https://openei.org/apps/USURDB/download/usurdb.csv.gz to
   # https://openei.org/services/doc/rest/util_rates/?version=7#response-fields
