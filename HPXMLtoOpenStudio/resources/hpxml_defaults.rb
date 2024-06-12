@@ -549,7 +549,7 @@ class HPXMLDefaults
         end
       end
 
-      next if hpxml_bldg.pv_systems.size == 0 && hpxml_bldg.batteries.size == 0 && hpxml_bldg.generators.size == 0
+      next unless hpxml_bldg.pv_systems.size > 0
 
       if scenario.pv_compensation_type.nil?
         scenario.pv_compensation_type = HPXML::PVCompensationTypeNetMetering
@@ -573,8 +573,6 @@ class HPXMLDefaults
           scenario.pv_feed_in_tariff_rate_isdefaulted = true
         end
       end
-
-      next if hpxml_bldg.pv_systems.size == 0
 
       if scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil? && scenario.pv_monthly_grid_connection_fee_dollars.nil?
         scenario.pv_monthly_grid_connection_fee_dollars = 0.0

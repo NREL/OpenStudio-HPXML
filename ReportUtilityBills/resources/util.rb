@@ -153,7 +153,8 @@ class CalculateUtilityBill
 
     net_monthly_energy_charge = [0] * 12
     production_fit_month = [0] * 12
-    has_production = (production_fuel_time_series.sum != 0)
+
+    has_production = (production_fuel_time_series.sum > 0)
 
     elec_month = [0] * 12
     net_elec_month = [0] * 12
@@ -382,6 +383,7 @@ class CalculateUtilityBill
     annual_total_charge = bill.monthly_energy_charge.sum + bill.monthly_fixed_charge.sum
 
     if has_production && !rate.feed_in_tariff_rate # Net metering calculations
+
       annual_payments, monthly_min_charges, end_of_year_bill_credit = apply_min_charges(bill.monthly_fixed_charge, net_monthly_energy_charge, rate.minannualcharge, rate.minmonthlycharge)
       end_of_year_bill_credit, excess_sellback = apply_excess_sellback(end_of_year_bill_credit, rate.net_metering_excess_sellback_type, rate.net_metering_user_excess_sellback_rate, net_elec_month.sum(0.0))
 
