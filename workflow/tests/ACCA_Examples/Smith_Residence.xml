@@ -1226,11 +1226,11 @@
             <extension>
               <Curb>
                 <Area>4.0</Area>
-                <RValue>2.86</RValue>
+                <AssemblyEffectiveRValue>2.86</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>60.0</Area>
-                <RValue>12.5</RValue>
+                <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>
@@ -1245,11 +1245,11 @@
             <extension>
               <Curb>
                 <Area>8.0</Area>
-                <RValue>2.86</RValue>
+                <AssemblyEffectiveRValue>2.86</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>120.0</Area>
-                <RValue>12.5</RValue>
+                <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>

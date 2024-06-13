@@ -803,8 +803,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
 
     # Skylight curb R-value
-    if not skylight.curb_r_value.nil?
-      hpxml_value = skylight.curb_r_value
+    if not skylight.curb_assembly_r_value.nil?
+      hpxml_value = skylight.curb_assembly_r_value
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{curb_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1)
@@ -823,10 +823,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
 
     # Skylight shaft R-value
-    next unless not skylight.shaft_r_value.nil?
+    next unless not skylight.shaft_assembly_r_value.nil?
 
     # Compare R-value w/o film
-    hpxml_value = skylight.shaft_r_value
+    hpxml_value = skylight.shaft_assembly_r_value
     hpxml_value -= Material.AirFilmVertical.rvalue
     hpxml_value -= Material.AirFilmVertical.rvalue
     query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{shaft_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"

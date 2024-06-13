@@ -1556,7 +1556,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     @hpxml_bldg.skylights.each do |skylight|
       if not skylight.is_conditioned
-        fail "Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space."
+        fail "Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft, use AttachedToFloor to connect it to conditioned space."
       end
 
       tilt = skylight.roof.pitch / 12.0
@@ -1577,8 +1577,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('Width', total_width)
 
         # Assign curb construction
-        curb_r_value = [skylight.curb_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
-        curb_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(curb_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
+        curb_assembly_r_value = [skylight.curb_assembly_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
+        curb_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(curb_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
         curb_mat.setName('SkylightCurbMaterial')
         curb_const = OpenStudio::Model::Construction.new(model)
         curb_const.setName('SkylightCurbConstruction')
@@ -1636,8 +1636,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setWindExposure('NoWind')
 
       # Apply construction
-      shaft_r_value = [skylight.shaft_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
-      shaft_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(shaft_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
+      shaft_assembly_r_value = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
+      shaft_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(shaft_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
       shaft_mat.setName('SkylightShaftMaterial')
       shaft_const = OpenStudio::Model::Construction.new(model)
       shaft_const.setName('SkylightShaftConstruction')

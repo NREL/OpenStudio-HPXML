@@ -325,7 +325,7 @@
             <extension>
               <Shaft>
                 <Area>60.0</Area>
-                <RValue>6.25</RValue>
+                <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>
@@ -350,7 +350,7 @@
             <extension>
               <Shaft>
                 <Area>60.0</Area>
-                <RValue>6.25</RValue>
+                <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>

@@ -759,13 +759,13 @@ module HVACSizing
 
       # Calculate U-effective by including curb/shaft impacts
       u_eff_skylight = skylight_ufactor
-      if (not skylight.curb_area.nil?) && (not skylight.curb_r_value.nil?)
-        u_curb = 1.0 / skylight.curb_r_value
+      if (not skylight.curb_area.nil?) && (not skylight.curb_assembly_r_value.nil?)
+        u_curb = 1.0 / skylight.curb_assembly_r_value
         ar_curb = skylight.curb_area / skylight.area
         u_eff_skylight += u_curb * ar_curb
       end
-      if (not skylight.shaft_area.nil?) && (not skylight.shaft_r_value.nil?)
-        u_shaft = 1.0 / skylight.shaft_r_value
+      if (not skylight.shaft_area.nil?) && (not skylight.shaft_assembly_r_value.nil?)
+        u_shaft = 1.0 / skylight.shaft_assembly_r_value
         ar_shaft = skylight.shaft_area / skylight.area
         u_eff_skylight += u_shaft * ar_shaft
       end

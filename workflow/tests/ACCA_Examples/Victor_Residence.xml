@@ -287,7 +287,7 @@
             <extension>
               <Curb>
                 <Area>0.7</Area>
-                <RValue>1.96</RValue>
+                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
               </Curb>
             </extension>
           </Skylight>
@@ -301,7 +301,7 @@
             <extension>
               <Curb>
                 <Area>2.63</Area>
-                <RValue>1.96</RValue>
+                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
               </Curb>
             </extension>
           </Skylight>

@@ -900,11 +900,11 @@
             <extension>
               <Curb>
                 <Area>3.2</Area>
-                <RValue>2.86</RValue>
+                <AssemblyEffectiveRValue>2.86</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>48.0</Area>
-                <RValue>20.0</RValue>
+                <AssemblyEffectiveRValue>20.0</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>
@@ -919,11 +919,11 @@
             <extension>
               <Curb>
                 <Area>6.4</Area>
-                <RValue>2.86</RValue>
+                <AssemblyEffectiveRValue>2.86</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>96.0</Area>
-                <RValue>20.0</RValue>
+                <AssemblyEffectiveRValue>20.0</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
           </Skylight>

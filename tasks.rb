@@ -854,12 +854,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     elsif hpxml_file.include? 'base-enclosure-skylights-cathedral.xml'
       hpxml_bldg.skylights.each do |skylight|
         skylight.curb_area = 5.25
-        skylight.curb_r_value = 1.96
+        skylight.curb_assembly_r_value = 1.96
       end
     elsif hpxml_file.include? 'base-enclosure-skylights'
       hpxml_bldg.skylights.each do |skylight|
         skylight.shaft_area = 60.0
-        skylight.shaft_r_value = 6.25
+        skylight.shaft_assembly_r_value = 6.25
       end
       if ['base-enclosure-skylights-physical-properties.xml'].include? hpxml_file
         hpxml_bldg.skylights[0].ufactor = nil

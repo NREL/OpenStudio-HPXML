@@ -1569,7 +1569,6 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``AttachedToRoof``                            idref                                See [#]_                  Yes                  ID of attached roof
-  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor for a skylight with a shaft or sun tunnel
   ``extension/Curb``                            element                                                        No        <none>     Presence of curb (skylight wall above the roof deck) [#]_
   ``extension/Shaft``                           element                                                        No        <none>     Presence of shaft (skylight wall below the roof deck) [#]_
   ============================================  =================  ================  ========================  ========  =========  =============================================================
@@ -1589,8 +1588,6 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
          Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
          
   .. [#] AttachedToRoof must reference a ``Roof``.
-  .. [#] AttachedToFloor must reference a ``Floor``.
-  .. [#] AttachedToFloor required if the skylight is attached to a roof of an attic (e.g., with shaft or sun tunnel).
   .. [#] If extension/Curb is provided, additional inputs are described in :ref:`skylight_curb`.
   .. [#] If extension/Shaft is provided, additional inputs are described in :ref:`skylight_shaft`.
 
@@ -1649,32 +1646,34 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 Skylight Curb
 ~~~~~~~~~~~~~
 
-If the skylight has a curb, additional information is entered in ``Skylight/extension/Curb``.
+If the skylight has a curb, additional information is entered in ``Skylight``.
 
-  ==========  ========  ============  ===========  ========  ========  ========================================================
-  Element     Type      Units         Constraints  Required  Default   Notes
-  ==========  ========  ============  ===========  ========  ========  ========================================================
-  ``Area``    double    ft^2          > 0          Yes                 Curb area
-  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Curb R-value [#]_
-  ==========  ========  ============  ===========  ========  ========  ========================================================
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  Element                                      Type      Units         Constraints  Required  Default   Notes
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  ``extension/Curb/Area``                      double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Curb/AssemblyEffectiveRValue``   double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
 
-  .. [#] RValue includes interior/exterior air films.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
 
 .. _skylight_shaft:
 
 Skylight Shaft
 ~~~~~~~~~~~~~~
 
-If the skylight has a shaft, additional information is entered in ``Skylight/extension/Shaft``.
+If the skylight has a shaft, additional information is entered in ``Skylight``.
 
-  ==========  ========  ============  ===========  ========  ========  ========================================================
-  Element     Type      Units         Constraints  Required  Default   Notes
-  ==========  ========  ============  ===========  ========  ========  ========================================================
-  ``Area``    double    ft^2          > 0          Yes                 Shaft area
-  ``RValue``  double    F-ft2-hr/Btu  > 0          Yes                 Shaft R-value [#]_
-  ==========  ========  ============  ===========  ========  ========  ========================================================
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  Element                                      Type      Units         Constraints  Required  Default   Notes
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  ``AttachedToFloor``                          idref                                Yes                 ID of attached attic floor
+  ``extension/Shaft/Area``                     double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Shaft/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
 
-  .. [#] RValue includes all material layers and interior/exterior air films.
+  .. [#] AttachedToFloor must reference a ``Floor``.
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
 
 HPXML Doors
 ***********
