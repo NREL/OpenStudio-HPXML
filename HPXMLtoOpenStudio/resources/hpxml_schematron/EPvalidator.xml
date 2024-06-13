@@ -860,6 +860,7 @@
       <sch:assert role='ERROR' test='count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InteriorShading/WinterShadingCoefficient</sch:assert>
       <sch:assert role='ERROR' test='count(h:StormWindow) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StormWindow</sch:assert> <!-- See [SkylightStorm] -->
       <sch:assert role='ERROR' test='count(h:AttachedToRoof) = 1'>Expected 1 element(s) for xpath: AttachedToRoof</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AttachedToFloor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToFloor</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:Curb) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Curb</sch:assert> <!-- See [SkylightCurb] -->
       <sch:assert role='ERROR' test='count(h:extension/h:Shaft) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Shaft</sch:assert> <!-- See [SkylightShaft] -->
     </sch:rule>
