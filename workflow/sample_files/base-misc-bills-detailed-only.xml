@@ -23,7 +23,7 @@
           <Name>TOU</Name>
           <UtilityRate>
             <FuelType>electricity</FuelType>
-            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate.json</TariffFilePath>
+            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json</TariffFilePath>
           </UtilityRate>
         </UtilityBillScenario>
         <UtilityBillScenario>

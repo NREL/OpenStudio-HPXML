@@ -704,8 +704,12 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # @return [TODO] TODO
   def setup_fuel_outputs()
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-    fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    # fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    # fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeNaturalGas))
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeOil))
     fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypePropane))
@@ -751,7 +755,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       timeseries_freq = 'monthly'
       timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
-      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timeseries_freq)
+      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, timeseries_freq)
     end
   end
 
@@ -762,7 +766,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # @param unit_adder [TODO] TODO
   # @param timeseries_freq [TODO] TODO
   # @return [TODO] TODO
-  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_freq)
+  def get_report_meter_data_timeseries(meter_names, unit_conv, timeseries_freq)
     msgpack_timeseries_name = { 'hourly' => 'Hourly',
                                 'monthly' => 'Monthly' }[timeseries_freq]
     begin
@@ -777,8 +781,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     rows.each do |row|
       row = row[row.keys[0]]
       val = 0.0
-      indexes.each do |i|
-        val += row[i] * unit_conv + unit_adder
+      indexes.each_with_index do |i, j|
+        r = row[i]
+        r *= -1 if j == meter_names.index("ElectricStorage:#{EPlus::FuelTypeElectricity}Produced") # negative for this meter means charging
+
+        val += r * unit_conv
       end
       vals << val
     end
