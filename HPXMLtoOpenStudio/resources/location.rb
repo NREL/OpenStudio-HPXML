@@ -6,7 +6,7 @@ class Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
@@ -37,7 +37,7 @@ class Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.apply_year(model, hpxml_header, epw_file)
     if Date.leap?(hpxml_header.sim_calendar_year)
@@ -154,7 +154,7 @@ class Location
   # TODO
   #
   # @param sim_calendar_year [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.get_sim_calendar_year(sim_calendar_year, epw_file)
     if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY

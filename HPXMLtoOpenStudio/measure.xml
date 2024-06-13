@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>bd574947-22c2-4bea-be69-b5d06e3e1d53</version_id>
-  <version_modified>2024-06-06T19:53:17Z</version_modified>
+  <version_id>16328b90-01a0-42fb-a69d-73729a4b1dbf</version_id>
+  <version_modified>2024-06-13T19:58:12Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>6A766701</checksum>
+      <checksum>E5C8D15B</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -351,7 +351,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1F33E8E0</checksum>
+      <checksum>A639BA8D</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -399,7 +399,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4EDEB336</checksum>
+      <checksum>87D92843</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -609,13 +609,13 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>763D96A8</checksum>
+      <checksum>51448764</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ACA9368F</checksum>
+      <checksum>2E605B99</checksum>
     </file>
     <file>
       <filename>xmlvalidator.rb</filename>

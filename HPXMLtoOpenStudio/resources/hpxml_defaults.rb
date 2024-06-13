@@ -12,7 +12,7 @@ class HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param weather [WeatherProcess] Weather object
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param convert_shared_systems [TODO] TODO
   # @param design_load_details_output_file_path [TODO] TODO
@@ -163,7 +163,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
@@ -584,7 +584,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.apply_building(hpxml_bldg, epw_file)
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
@@ -856,7 +856,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     if (not epw_file.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
@@ -3785,7 +3785,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param latitude [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.get_default_latitude(latitude, epw_file)
     return latitude unless latitude.nil?
@@ -3796,7 +3796,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param longitude [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.get_default_longitude(longitude, epw_file)
     return longitude unless longitude.nil?
@@ -3807,7 +3807,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param time_zone [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.get_default_time_zone(time_zone, epw_file)
     return time_zone unless time_zone.nil?
@@ -3818,7 +3818,7 @@ class HPXMLDefaults
   # TODO
   #
   # @param state_code [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def self.get_default_state_code(state_code, epw_file)
     return state_code unless state_code.nil?
