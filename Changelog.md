@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
+- Adds inputs for modeling skylight curbs and/or shafts.
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.
