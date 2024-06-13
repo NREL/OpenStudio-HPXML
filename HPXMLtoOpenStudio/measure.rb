@@ -99,7 +99,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] TODO
+  # @return [Boolean] true if successful
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
@@ -463,9 +463,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  # TODO
+  # Creates a full OpenStudio model that represents the given HPXML individual dwelling by
+  # adding OpenStudio objects to the empty OpenStudio model for each component of the building.
   #
-  # @param unit_model [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -476,7 +477,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param unit_num [TODO] TODO
-  # @return [TODO] TODO
+  # @return nil
   def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version, unit_num)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
@@ -1566,7 +1567,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
 
       if not skylight.curb_area.nil?
-        # Create parent surface that includes curb area
+        # Create parent surface that includes curb heat transfer
         total_area = skylight.area + skylight.curb_area
         total_width = Math::sqrt(total_area)
         total_length = total_area / total_width
@@ -1610,6 +1611,38 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Apply interior/exterior shading (as needed)
       Constructions.apply_window_skylight_shading(model, skylight, sub_surface, shading_schedules, @hpxml_header, @hpxml_bldg)
+
+      next unless (not skylight.shaft_area.nil?) && (not skylight.floor.nil?)
+
+      # Add skylight shaft heat transfer, similar to attic knee walls
+
+      shaft_height = Math::sqrt(skylight.shaft_area)
+      shaft_width = skylight.shaft_area / shaft_height
+      shaft_azimuth = @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
+      shaft_z_origin = @walls_top - shaft_height
+
+      vertices = Geometry.create_wall_vertices(length: shaft_width, height: shaft_height, z_origin: shaft_z_origin, azimuth: shaft_azimuth)
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+      surface.additionalProperties.setFeature('Length', shaft_width)
+      surface.additionalProperties.setFeature('Width', shaft_height)
+      surface.additionalProperties.setFeature('Azimuth', shaft_azimuth)
+      surface.additionalProperties.setFeature('Tilt', 90.0)
+      surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
+      surface.setName("surface #{skylight.id} shaft")
+      surface.setSurfaceType('Wall')
+      set_surface_interior(model, spaces, surface, skylight.floor)
+      set_surface_exterior(model, spaces, surface, skylight.floor)
+      surface.setSunExposure('NoSun')
+      surface.setWindExposure('NoWind')
+
+      # Apply construction
+      shaft_r_value = [skylight.shaft_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
+      shaft_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(shaft_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
+      shaft_mat.setName('SkylightShaftMaterial')
+      shaft_const = OpenStudio::Model::Construction.new(model)
+      shaft_const.setName('SkylightShaftConstruction')
+      shaft_const.insertLayer(0, shaft_mat)
+      surface.setConstruction(shaft_const)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')
