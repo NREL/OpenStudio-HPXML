@@ -205,13 +205,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     # Has production
     has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
     has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0 # has modeled battery
+    has_generator = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.generators.empty? }.size > 0
 
     # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
-        next if is_production && !has_pv
+        next if is_production && !has_pv # we don't need to request these meters if there isn't pv
         next if meter.include?('ElectricStorage') && !has_battery # we don't need to request this meter if there isn't a modeled battery
+        next if meter.include?('Cogeneration') && !has_generator # we don't need to request this meter if there isn't a generator
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
@@ -706,12 +708,8 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   # @return [TODO] TODO
   def setup_fuel_outputs()
     fuels = {}
-    # fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-    # fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-
-    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced", "Cogeneration:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
     fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeNaturalGas))
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeOil))
     fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypePropane))
