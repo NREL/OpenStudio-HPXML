@@ -2,6 +2,8 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Advanced research features:
+  - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.
