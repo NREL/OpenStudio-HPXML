@@ -1060,7 +1060,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
-                            'schedule-file-max-power-ratio-with-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.'],
                             'skylight-not-connected-to-cond-space' => ["Skylight 'Skylight1' not connected to conditioned space; if it's a skylight with a shaft, use AttachedToFloor to connect it to conditioned space."],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
@@ -1464,9 +1463,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['schedule-file-max-power-ratio-with-unit-multiplier'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml')
-        hpxml_bldg.building_construction.number_of_units = 2
       elsif ['skylight-not-connected-to-cond-space'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
         hpxml_bldg.skylights.add(id: 'Skylight1',

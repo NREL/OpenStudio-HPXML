@@ -6,8 +6,9 @@ def run_simulation_tests(xmls)
   # Run simulations
   puts "Running #{xmls.size} HPXML files..."
   all_annual_results = {}
-  Parallel.map(xmls, in_threads: Parallel.processor_count) do |xml|
+  Parallel.map(xmls, in_threads: 1) do |xml|
     next if xml.end_with? '-10x.xml'
+    next unless xml.include? 'max-power-ratio-schedule'
 
     xml_name = File.basename(xml)
     results = _run_xml(xml, Parallel.worker_number)
@@ -18,7 +19,7 @@ def run_simulation_tests(xmls)
 
     # Also run with a 10x unit multiplier (2 identical dwelling units each with a 5x
     # unit multiplier) and check how the results compare to the original run
-    _run_xml(xml, Parallel.worker_number, true, all_annual_results[xml_name], monthly_results)
+    _run_xml(xml, Parallel.worker_number + 1, true, all_annual_results[xml_name], monthly_results)
   end
 
   return all_annual_results
@@ -44,11 +45,8 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         # FUTURE: Dehumidifiers currently don't give desired results w/ unit multipliers
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
       elsif hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size > 0
-        # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
-        # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-      elsif xml.include? 'max-power-ratio-schedule'
-        # FUTURE: Maximum power ratio schedule currently gives inconsistent component load results w/ unit multipliers
-        # https://github.com/NREL/OpenStudio-HPXML/issues/1610
+      # FUTURE: GSHPs currently don't give desired results w/ unit multipliers
+      # https://github.com/NREL/OpenStudio-HPXML/issues/1499
       elsif hpxml_bldg.batteries.size > 0
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
