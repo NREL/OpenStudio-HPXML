@@ -777,13 +777,16 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return [0.0]
     end
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
+    meter_names = indexes.each.collect { |i| cols[i]['Variable'] }
+    indexes = Hash[indexes.zip(meter_names)]
+
     vals = []
     rows.each do |row|
       row = row[row.keys[0]]
       val = 0.0
-      indexes.each_with_index do |i, j|
+      indexes.each do |i, meter_name|
         r = row[i]
-        r *= -1 if j == meter_names.index("ElectricStorage:#{EPlus::FuelTypeElectricity}Produced") # negative for this meter means charging
+        r *= -1 if ["ElectricStorage:#{EPlus::FuelTypeElectricity}Produced", "Cogeneration:#{EPlus::FuelTypeElectricity}Produced"].include?(meter_name) # positive for this meter means producing
 
         val += r * unit_conv
       end
