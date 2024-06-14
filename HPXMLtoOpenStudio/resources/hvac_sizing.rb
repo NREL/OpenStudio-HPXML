@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# TODO
-class HVACSizing
+# Collection of helper methods for performing HVAC design load and autosizing calculations.
+module HVACSizing
   # Calculates heating/cooling design loads, and selects equipment
   # values (e.g., capacities, airflows) specific to each HVAC system.
   # Calculations generally follow ACCA Manual J/S.
@@ -121,7 +121,7 @@ class HVACSizing
     return @all_hvac_sizings
   end
 
-  # FIXME: The following class methods are meant to be private.
+  # FIXME: The following module methods are meant to be private.
 
   # TODO
   #
@@ -708,23 +708,22 @@ class HVACSizing
           window_height = window.overhangs_distance_to_bottom_of_window - window.overhangs_distance_to_top_of_window
           if z_sl < window.overhangs_distance_to_top_of_window
             # Overhang is too short to provide shade or no adjustment for overhang shade required
-            htm = htm_d
+            clg_htm = htm_d
           elsif z_sl < window.overhangs_distance_to_bottom_of_window
             percent_shaded = (z_sl - window.overhangs_distance_to_top_of_window) / window_height
-            htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
+            clg_htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
           else
             # Window is entirely in the shade since the shade line is below the windowsill
-            htm = htm_n
+            clg_htm = htm_n
           end
         else
-          htm = htm_d
+          clg_htm = htm_d
         end
 
         # Block/space loads
-        clg_loads = htm * window.area
+        clg_loads = clg_htm * window.area
         if hr.nil?
           # Average Load Procedure (ALP) load
-          clg_htm = htm
           all_zone_loads[zone].Cool_Windows += clg_loads
           window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
                                                                         heat_htm: htg_htm,
@@ -757,11 +756,21 @@ class HVACSizing
       inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 
       skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
-      u_curb = 0.51 # default to wood (Table 2B-3)
-      ar_curb = 0.35 # default to small (Table 2B-3)
-      u_eff_skylight = skylight_ufactor + u_curb * ar_curb
 
-      htg_htm = skylight_ufactor * mj.htd
+      # Calculate U-effective by including curb/shaft impacts
+      u_eff_skylight = skylight_ufactor
+      if (not skylight.curb_area.nil?) && (not skylight.curb_assembly_r_value.nil?)
+        u_curb = 1.0 / skylight.curb_assembly_r_value
+        ar_curb = skylight.curb_area / skylight.area
+        u_eff_skylight += u_curb * ar_curb
+      end
+      if (not skylight.shaft_area.nil?) && (not skylight.shaft_assembly_r_value.nil?)
+        u_shaft = 1.0 / skylight.shaft_assembly_r_value
+        ar_shaft = skylight.shaft_area / skylight.area
+        u_eff_skylight += u_shaft * ar_shaft
+      end
+
+      htg_htm = u_eff_skylight * mj.htd
       htg_loads = htg_htm * skylight.area
       all_zone_loads[zone].Heat_Skylights += htg_loads
       all_space_loads[space].Heat_Skylights += htg_loads
@@ -800,14 +809,13 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given skylight Direction
-        htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
-        htm *= skylight_esc
+        clg_htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        clg_htm *= skylight_esc
 
         # Block/space loads
-        clg_loads = htm * skylight.area
+        clg_loads = clg_htm * skylight.area
         if hr.nil?
           # Average Load Procedure (ALP) load
-          clg_htm = htm
           all_zone_loads[zone].Cool_Skylights += clg_loads
           skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
                                                                           heat_htm: htg_htm,
@@ -846,7 +854,7 @@ class HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Doors
+  # TODO
   #
   # @param afl_hr [TODO] TODO
   # @return [TODO] TODO
@@ -1446,7 +1454,7 @@ class HVACSizing
     end
   end
 
-  # Aggregate Loads to Totals
+  # Aggregates component design loads to totals
   #
   # @param loads [TODO] TODO
   # @return [TODO] TODO
@@ -1470,7 +1478,8 @@ class HVACSizing
     loads.Cool_Tot = loads.Cool_Sens + loads.Cool_Lat
   end
 
-  # HVAC Temperatures
+  # Determine HVAC Leaving Air Temperature (LAT) and/or Supply Air Temperature (SAT).
+  # Values are assigned to the hvac_cooling/hvac_heating objects.
   #
   # @param mj [TODO] TODO
   # @param zone_loads [TODO] TODO
@@ -1522,8 +1531,6 @@ class HVACSizing
   # @param frac_zone_cool_load_served [TODO] TODO
   # @return [TODO] TODO
   def self.apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
-    # Calculate design loads that this HVAC system serves
-
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
       # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
@@ -1850,7 +1857,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param hvac_loads [TODO] TODO
-  # @param zone_loads [WeatherProcess] TODO
+  # @param zone_loads [TODO] TODO
   # @param hvac_heating [TODO] TODO
   # @param hvac_cooling [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -2951,7 +2958,7 @@ class HVACSizing
   #
   # @param mj [TODO] TODO
   # @param sens_load_or_capacity [TODO] TODO
-  # @param deltaT [TODO] TODO
+  # @param delta_t [TODO] TODO
   # @param dx_capacity [TODO] TODO
   # @param hp_cooling_cfm [TODO] TODO
   # @return [TODO] TODO

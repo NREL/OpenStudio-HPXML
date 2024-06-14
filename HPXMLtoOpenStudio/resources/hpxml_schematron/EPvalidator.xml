@@ -861,6 +861,8 @@
       <sch:assert role='ERROR' test='count(h:StormWindow) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StormWindow</sch:assert> <!-- See [SkylightStorm] -->
       <sch:assert role='ERROR' test='count(h:AttachedToRoof) = 1'>Expected 1 element(s) for xpath: AttachedToRoof</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToFloor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToFloor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:Curb) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Curb</sch:assert> <!-- See [SkylightCurb] -->
+      <sch:assert role='ERROR' test='count(h:extension/h:Shaft) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Shaft</sch:assert> <!-- See [SkylightShaft] -->
     </sch:rule>
   </sch:pattern>
 
@@ -887,6 +889,27 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:StormWindow'>
       <sch:assert role='ERROR' test='count(h:GlassType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: GlassType</sch:assert>
       <sch:assert role='ERROR' test='h:GlassType[text()="clear" or text()="low-e"] or not(h:GlassType)'>Expected GlassType to be 'clear' or 'low-e'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SkylightCurb]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:extension/h:Curb'>
+      <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SkylightShaft]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:extension/h:Shaft'>
+      <sch:assert role='ERROR' test='count(../../h:AttachedToFloor) = 1'>Expected 1 element(s) for xpath: ../../AttachedToFloor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
