@@ -3099,6 +3099,7 @@ Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/S
   ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``  element                        See [#]_             Return duct leakage value
   ``DistributionSystemType/AirDistribution/Ducts``                                      element                        No                   Supply/return ducts; multiple are allowed [#]_
   ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
+  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh``  double   Btu/hr   >= 0         No        0          Blower fan heat for ACCA Manual J design loads
   ``ConditionedFloorAreaServed``                                                        double   ft2      > 0          See [#]_             Conditioned floor area served
   ====================================================================================  =======  =======  ===========  ========  =========  ==========================
   
@@ -3181,13 +3182,14 @@ Hydronic Distribution
 
 Each hydronic distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  Element                                                                   Type     Units    Constraints  Required  Default    Notes
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  ``SystemIdentifier``                                                      id                             Yes                  Unique identifier
-  ``DistributionSystemType/HydronicDistribution``                           element                        Yes                  Type of distribution system
-  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``  string            See [#]_     Yes                  Type of hydronic distribution system
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  Element                                                                                     Type     Units    Constraints  Required  Default    Notes
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  ``SystemIdentifier``                                                                        id                             Yes                  Unique identifier
+  ``DistributionSystemType/HydronicDistribution``                                             element                        Yes                  Type of distribution system
+  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``                    string            See [#]_     Yes                  Type of hydronic distribution system
+  ``DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh``  double   Btu/hr   >= 0         No        0          Piping load for ACCA Manual J design loads
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
 
   .. [#] HydronicDistributionType choices are "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop".
 

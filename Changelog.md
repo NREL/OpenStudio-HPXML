@@ -2,6 +2,8 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- HVAC Manual J design load and sizing calculations:
+  - Adds optional inputs and outputs for blower fan heat and piping load.
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.

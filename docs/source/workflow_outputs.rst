@@ -738,6 +738,8 @@ For each HPXML Building, the following output types are reported.
    Internal Gains                                                                      X                        X  
    Ducts                                                               X               X                        X  
    Ventilation                                                         X               X                        X  
+   Piping                                                              X
+   Blower Heat                                                                         X
    AED Excursion                                                                       X                          
    Total                                                               X               X                        X
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
@@ -763,6 +765,8 @@ Only those surfaces attached to a space in the given zone will be included.
    Internal Gains                                                                      X                        X  
    Ducts                                                               X               X                        X  
    Ventilation                                                         X               X                        X  
+   Piping                                                              X
+   Blower Heat                                                                         X
    AED Excursion                                                                       X                          
    Total                                                               X               X                        X
    =======================  ===========  ===========  ===============  ==============  =======================  =====================
