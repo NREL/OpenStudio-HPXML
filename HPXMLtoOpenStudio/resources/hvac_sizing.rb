@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
-class HVACSizing
+# Collection of helper methods for performing HVAC design load and autosizing calculations.
+module HVACSizing
+  # Calculates heating/cooling design loads, and selects equipment
+  # values (e.g., capacities, airflows) specific to each HVAC system.
+  # Calculations generally follow ACCA Manual J/S.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hvac_systems [TODO] TODO
+  # @param update_hpxml [TODO] TODO
+  # @param output_format [TODO] TODO
+  # @param output_file_path [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true,
                      output_format: 'csv', output_file_path: nil)
-    # Calculates heating/cooling design loads, and selects equipment
-    # values (e.g., capacities, airflows) specific to each HVAC system.
-    # Calculations generally follow ACCA Manual J/S.
 
     check_for_errors(hpxml_bldg, hvac_systems)
 
@@ -111,8 +121,14 @@ class HVACSizing
     return @all_hvac_sizings
   end
 
-  private
+  # FIXME: The following module methods are meant to be private.
 
+  # TODO
+  #
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param zone [TODO] TODO
+  # @return [TODO] TODO
   def self.is_system_to_skip(hvac_heating, hvac_cooling, zone)
     # Skip systems not attached to this zone
     if (not hvac_heating.nil?) && (hvac_heating.zone != zone)
@@ -140,6 +156,11 @@ class HVACSizing
     return false
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hvac_systems [TODO] TODO
+  # @return [TODO] TODO
   def self.check_for_errors(hpxml_bldg, hvac_systems)
     # Check all surfaces adjacent to conditioned space (and not adiabatic) are
     # not attached to spaces of unconditioned zones.
@@ -167,11 +188,13 @@ class HVACSizing
     end
   end
 
+  # Site Calculations and Design Temperatures
+  #
+  # @param mj [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
-    '''
-    Site Calculations and Design Temperatures
-    '''
-
     # CLTD adjustments based on daily temperature range
     mj.daily_range_temp_adjust = [4, 0, -5]
 
@@ -253,6 +276,12 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param cool_indoor_rh [TODO] TODO
+  # @param cool_indoor_setpoint [TODO] TODO
+  # @param p_atm [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_indoor_hr(cool_indoor_rh, cool_indoor_setpoint, p_atm)
     cool_setpoint_c = UnitConversions.convert(cool_indoor_setpoint, 'F', 'C')
     pwsat = 6.11 * 10**(7.5 * cool_setpoint_c / (237.3 + cool_setpoint_c)) / 10.0 # kPa, using https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf
@@ -260,6 +289,11 @@ class HVACSizing
     return hr_indoor_cooling
   end
 
+  # TODO
+  #
+  # @param hr_outdoor_cooling [TODO] TODO
+  # @param hr_indoor_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_design_grains(hr_outdoor_cooling, hr_indoor_cooling)
     cool_outdoor_grains = UnitConversions.convert(hr_outdoor_cooling, 'lbm/lbm', 'grains')
     cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
@@ -267,6 +301,10 @@ class HVACSizing
     return cool_design_grains
   end
 
+  # TODO
+  #
+  # @param daily_temperature_range [TODO] TODO
+  # @return [TODO] TODO
   def self.determine_daily_temperature_range_class(daily_temperature_range)
     if daily_temperature_range < 16.0
       return HPXML::ManualJDailyTempRangeLow
@@ -277,6 +315,13 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param location [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.process_design_temp_heating(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       heat_temp = mj.heat_setpoint
@@ -314,6 +359,13 @@ class HVACSizing
     return heat_temp
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param location [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.process_design_temp_cooling(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       cool_temp = mj.cool_setpoint
@@ -428,6 +480,10 @@ class HVACSizing
     return cool_temp
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.init_loads(hpxml_bldg)
     '''
     Initial Zone/Space design loads
@@ -449,11 +505,14 @@ class HVACSizing
     return all_zone_loads, all_space_loads
   end
 
+  # Heating and Cooling Loads: Windows & Skylights
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_windows_skylights(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Windows & Skylights
-    '''
-
     # Average cooling load factors (CLF) for windows/skylights WITHOUT internal shading (MJ8 Table 3D-3)
     clf_avg_nois = [0.24, 0.35, 0.38, 0.4, 0.48, 0.4, 0.38, 0.35, 0.24]
     clf_avg_nois_horiz = 0.68
@@ -649,23 +708,22 @@ class HVACSizing
           window_height = window.overhangs_distance_to_bottom_of_window - window.overhangs_distance_to_top_of_window
           if z_sl < window.overhangs_distance_to_top_of_window
             # Overhang is too short to provide shade or no adjustment for overhang shade required
-            htm = htm_d
+            clg_htm = htm_d
           elsif z_sl < window.overhangs_distance_to_bottom_of_window
             percent_shaded = (z_sl - window.overhangs_distance_to_top_of_window) / window_height
-            htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
+            clg_htm = percent_shaded * htm_n + (1.0 - percent_shaded) * htm_d
           else
             # Window is entirely in the shade since the shade line is below the windowsill
-            htm = htm_n
+            clg_htm = htm_n
           end
         else
-          htm = htm_d
+          clg_htm = htm_d
         end
 
         # Block/space loads
-        clg_loads = htm * window.area
+        clg_loads = clg_htm * window.area
         if hr.nil?
           # Average Load Procedure (ALP) load
-          clg_htm = htm
           all_zone_loads[zone].Cool_Windows += clg_loads
           window.additional_properties.formj1_values = FormJ1Values.new(area: window.area,
                                                                         heat_htm: htg_htm,
@@ -698,11 +756,21 @@ class HVACSizing
       inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 
       skylight_ufactor, skylight_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
-      u_curb = 0.51 # default to wood (Table 2B-3)
-      ar_curb = 0.35 # default to small (Table 2B-3)
-      u_eff_skylight = skylight_ufactor + u_curb * ar_curb
 
-      htg_htm = skylight_ufactor * mj.htd
+      # Calculate U-effective by including curb/shaft impacts
+      u_eff_skylight = skylight_ufactor
+      if (not skylight.curb_area.nil?) && (not skylight.curb_assembly_r_value.nil?)
+        u_curb = 1.0 / skylight.curb_assembly_r_value
+        ar_curb = skylight.curb_area / skylight.area
+        u_eff_skylight += u_curb * ar_curb
+      end
+      if (not skylight.shaft_area.nil?) && (not skylight.shaft_assembly_r_value.nil?)
+        u_shaft = 1.0 / skylight.shaft_assembly_r_value
+        ar_shaft = skylight.shaft_area / skylight.area
+        u_eff_skylight += u_shaft * ar_shaft
+      end
+
+      htg_htm = u_eff_skylight * mj.htd
       htg_loads = htg_htm * skylight.area
       all_zone_loads[zone].Heat_Skylights += htg_loads
       all_space_loads[space].Heat_Skylights += htg_loads
@@ -741,14 +809,13 @@ class HVACSizing
         end
 
         # Hourly Heat Transfer Multiplier for the given skylight Direction
-        htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
-        htm *= skylight_esc
+        clg_htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
+        clg_htm *= skylight_esc
 
         # Block/space loads
-        clg_loads = htm * skylight.area
+        clg_loads = clg_htm * skylight.area
         if hr.nil?
           # Average Load Procedure (ALP) load
-          clg_htm = htm
           all_zone_loads[zone].Cool_Skylights += clg_loads
           skylight.additional_properties.formj1_values = FormJ1Values.new(area: skylight.area,
                                                                           heat_htm: htg_htm,
@@ -787,6 +854,10 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param afl_hr [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_aed_excursion(afl_hr)
     # Daily Average Load (DAL)
     dal = afl_hr.sum(0.0) / afl_hr.size
@@ -801,11 +872,14 @@ class HVACSizing
     return [0.0, pfl - ell].max
   end
 
+  # Heating and Cooling Loads: Doors
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Doors
-    '''
-
     if mj.daily_range_num == 0
       cltd = mj.ctd + 15.0
     elsif mj.daily_range_num == 1
@@ -844,11 +918,14 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Walls
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Walls
-    '''
-
     # Above-Grade Walls
     (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
       next unless wall.is_thermal_boundary
@@ -958,11 +1035,14 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Roofs
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_roofs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Roofs
-    '''
-
     # Roofs
     hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
@@ -1024,11 +1104,14 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Ceilings
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Ceilings
-    '''
-
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_ceiling
       next unless floor.is_thermal_boundary
@@ -1059,11 +1142,14 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Floors
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Floors
-    '''
-
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
       next unless floor.is_thermal_boundary
@@ -1140,11 +1226,14 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Floors
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_slabs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Heating and Cooling Loads: Floors
-    '''
-
     hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
 
@@ -1213,11 +1302,15 @@ class HVACSizing
     end
   end
 
+  # Heating and Cooling Loads: Infiltration & Ventilation
+  #
+  # @param mj [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @return [TODO] TODO
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
-    '''
-    Heating and Cooling Loads: Infiltration & Ventilation
-    '''
-
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     sla = infil_values[:sla] * infil_values[:a_ext]
@@ -1340,10 +1433,13 @@ class HVACSizing
     end
   end
 
+  # Cooling Load: Internal Gains
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.process_load_internal_gains(hpxml_bldg, all_zone_loads, all_space_loads)
-    '''
-    Cooling Load: Internal Gains
-    '''
     hpxml_bldg.conditioned_zones.each do |zone|
       zone_manualj_num_occupants = zone.spaces.map { |space| space.manualj_num_occupants }.sum
       zone_manualj_internal_loads_sensible = zone.spaces.map { |space| space.manualj_internal_loads_sensible }.sum
@@ -1358,11 +1454,11 @@ class HVACSizing
     end
   end
 
+  # Aggregates component design loads to totals
+  #
+  # @param loads [TODO] TODO
+  # @return [TODO] TODO
   def self.aggregate_loads_to_totals(loads)
-    '''
-    Aggregate Loads to Totals
-    '''
-
     # Heating
     loads.Heat_Tot = loads.Heat_Windows + loads.Heat_Skylights +
                      loads.Heat_Doors + loads.Heat_Walls +
@@ -1382,10 +1478,15 @@ class HVACSizing
     loads.Cool_Tot = loads.Cool_Sens + loads.Cool_Lat
   end
 
+  # Determine HVAC Leaving Air Temperature (LAT) and/or Supply Air Temperature (SAT).
+  # Values are assigned to the hvac_cooling/hvac_heating objects.
+  #
+  # @param mj [TODO] TODO
+  # @param zone_loads [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_hvac_air_temperatures(mj, zone_loads, hvac_heating, hvac_cooling)
-    '''
-    HVAC Temperatures
-    '''
     if not hvac_cooling.nil?
       cooling_type = get_hvac_cooling_type(hvac_cooling)
 
@@ -1422,9 +1523,14 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_loads [TODO] TODO
+  # @param frac_zone_heat_load_served [TODO] TODO
+  # @param frac_zone_cool_load_served [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
-    # Calculate design loads that this HVAC system serves
-
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
       # Size to meet original fraction load served (not adjusted value from HVAC.apply_shared_heating_systems()
@@ -1467,6 +1573,10 @@ class HVACSizing
     hvac_loads.Cool_IntGains_Lat *= frac_zone_cool_load_served
   end
 
+  # TODO
+  #
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.get_hvac_size_limits(hvac_cooling)
     oversize_limit = 1.15
     oversize_delta = 15000.0
@@ -1483,6 +1593,11 @@ class HVACSizing
     return oversize_limit, oversize_delta, undersize_limit
   end
 
+  # TODO
+  #
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
     hvac_sizings.Cool_Load_Sens = hvac_loads.Cool_Sens
     hvac_sizings.Cool_Load_Lat = hvac_loads.Cool_Lat
@@ -1491,6 +1606,14 @@ class HVACSizing
     hvac_sizings.Heat_Load_Supp = hvac_loads.Heat_Tot
   end
 
+  # TODO
+  #
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param frac_zone_heat_load_served [TODO] TODO
+  # @param frac_zone_cool_load_served [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_heat_pump_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
     return unless hvac_cooling.is_a? HPXML::HeatPump
     return if frac_zone_heat_load_served == 0
@@ -1507,6 +1630,11 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param duct [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_duct_regain_factor(duct, hpxml_bldg)
     # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
     # values used for forced air systems in proposed ASHRAE Std. 152"
@@ -1519,7 +1647,7 @@ class HVACSizing
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
            HPXML::LocationManufacturedHomeBelly].include? duct.duct_location
-      space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
+      space_values = Geometry.get_temperature_scheduled_space_values(location: duct.duct_location)
       dse_Fregain = space_values[:f_regain]
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.duct_location
@@ -1578,13 +1706,20 @@ class HVACSizing
     return dse_Fregain
   end
 
+  # Heating Duct Loads
+  #
+  # @param mj [TODO] TODO
+  # @param zone [TODO] TODO
+  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_duct_loads_heating(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_heating, hpxml_bldg)
-    '''
-    Heating Duct Loads
-    '''
     return if hvac_heating.nil? || (hvac_loads.Heat_Tot <= 0) || hvac_heating.distribution_system.nil? || hvac_heating.distribution_system.ducts.empty?
 
-    supply_air_temp = hvac_heating.additional_properties.supply_air_temp
+    hvac_heating_ap = hvac_heating.additional_properties
 
     init_heat_load = hvac_loads.Heat_Tot
 
@@ -1603,7 +1738,8 @@ class HVACSizing
       heat_load_prev = heat_load_next
 
       # Calculate the new heating air flow rate
-      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, (supply_air_temp - mj.heat_setpoint), nil)
+      heating_delta_t = hvac_heating_ap.supply_air_temp - mj.heat_setpoint
+      heat_cfm = calc_airflow_rate_manual_s(mj, heat_load_next, heating_delta_t)
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_heating.distribution_system, heat_cfm)
 
@@ -1637,14 +1773,21 @@ class HVACSizing
     end
   end
 
+  # Cooling Duct Loads
+  #
+  # @param mj [TODO] TODO
+  # @param zone [TODO] TODO
+  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @return [TODO] TODO
   def self.apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
-    '''
-    Cooling Duct Loads
-    '''
-
     return if hvac_cooling.nil? || (hvac_loads.Cool_Sens <= 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
 
-    leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
+    hvac_cooling_ap = hvac_cooling.additional_properties
 
     init_cool_load_sens = hvac_loads.Cool_Sens
     init_cool_load_lat = hvac_loads.Cool_Lat
@@ -1661,7 +1804,8 @@ class HVACSizing
     delta = 1
     cool_load_tot_next = init_cool_load_sens + init_cool_load_lat
 
-    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, (mj.cool_setpoint - leaving_air_temp), nil)
+    cooling_delta_t = mj.cool_setpoint - hvac_cooling_ap.leaving_air_temp
+    cool_cfm = calc_airflow_rate_manual_s(mj, init_cool_load_sens, cooling_delta_t)
     _dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
     for _iter in 1..50
@@ -1673,11 +1817,11 @@ class HVACSizing
       cool_load_tot = cool_load_lat + cool_load_sens
 
       # Calculate the new cooling air flow rate
-      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, (mj.cool_setpoint - leaving_air_temp), nil)
+      cool_cfm = calc_airflow_rate_manual_s(mj, cool_load_sens, cooling_delta_t)
 
       dse_Qs, dse_Qr = calc_duct_leakages_cfm25(hvac_cooling.distribution_system, cool_cfm)
 
-      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(mj, dse_Qs, dse_Qr, leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, mj.cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
+      dse_DE, _dse_dTe_cooling, _cool_duct_sens = calc_delivery_effectiveness_cooling(mj, dse_Qs, dse_Qr, hvac_cooling_ap.leaving_air_temp, cool_cfm, cool_load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, mj.cool_setpoint, dse_Fregain_s, dse_Fregain_r, cool_load_tot, dse_h_r, supply_r, return_r)
 
       cool_load_tot_next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
@@ -1709,10 +1853,16 @@ class HVACSizing
     end
   end
 
+  # CFIS Ventilation Loads
+  #
+  # @param mj [TODO] TODO
+  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_cfis_loads(mj, hvac_loads, zone_loads, hvac_heating, hvac_cooling, hpxml_bldg)
-    '''
-    CFIS Ventilation Loads
-    '''
     if (not hvac_heating.nil?) && (not hvac_heating.distribution_system.nil?)
       hvac_distribution = hvac_heating.distribution_system
     elsif (not hvac_cooling.nil?) && (not hvac_cooling.distribution_system.nil?)
@@ -1747,11 +1897,18 @@ class HVACSizing
     zone_loads.Cool_Tot += cool_sens_load + cool_lat_load
   end
 
+  # Equipment Adjustments
+  #
+  # @param mj [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hvac_sizings [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param hvac_system [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
-    '''
-    Equipment Adjustments
-    '''
-
     # Cooling
 
     cooling_type = get_hvac_cooling_type(hvac_cooling)
@@ -1759,7 +1916,7 @@ class HVACSizing
     if not cooling_type.nil?
       hvac_cooling_ap = hvac_cooling.additional_properties
       is_ducted = !hvac_cooling.distribution_system.nil?
-      leaving_air_temp = hvac_cooling.additional_properties.leaving_air_temp
+      cooling_delta_t = mj.cool_setpoint - hvac_cooling_ap.leaving_air_temp
       oversize_limit, oversize_delta, undersize_limit = get_hvac_size_limits(hvac_cooling)
     end
 
@@ -1794,7 +1951,7 @@ class HVACSizing
       sens_cap_rated = cool_cap_rated * hvac_cooling_shr
 
       # Calculate the air flow rate required for design conditions
-      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, cooling_delta_t, dx_capacity: cool_cap_rated)
 
       sensible_cap_curve_value = process_curve_fit(hvac_sizings.Cool_Airflow, hvac_sizings.Cool_Load_Tot, entering_temp)
       sens_cap_design = sens_cap_rated * sensible_cap_curve_value
@@ -1823,7 +1980,7 @@ class HVACSizing
 
         cool_load_sens_cap_design = hvac_sizings.Cool_Load_Lat / ((total_cap_curve_value / hvac_cooling_shr - \
                                   (b_sens + d_sens * entering_temp) / \
-                                  (1.1 * mj.acf * (mj.cool_setpoint - leaving_air_temp))) / \
+                                  (1.1 * mj.acf * cooling_delta_t)) / \
                                   (a_sens + c_sens * entering_temp) - 1.0)
 
         # Ensure equipment is not being undersized
@@ -1883,7 +2040,7 @@ class HVACSizing
       end
 
       # Calculate the final air flow rate using final sensible capacity at design
-      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
 
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_type) && !is_ducted
@@ -1958,7 +2115,7 @@ class HVACSizing
 
         cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
                                    (1.0 + (1.0 - coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
+                                   (80.0 - mj.cool_setpoint) / cooling_delta_t))
         cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
 
         # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
@@ -1975,16 +2132,16 @@ class HVACSizing
       # Recalculate the air flow rate in case the oversizing limit has been used
       cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
                                  (1.0 + (1.0 - coil_bf * bypass_factor_curve_value) *
-                                 (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
-      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
+                                 (80.0 - mj.cool_setpoint) / cooling_delta_t))
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
 
     elsif HPXML::HVACTypeEvaporativeCooler == cooling_type
 
       hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
       hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Load_Sens
-      if mj.cool_setpoint - leaving_air_temp > 0
+      if cooling_delta_t > 0
         # See Manual S Section 4-4 Direct Evaporative Cooling: Blower Cfm
-        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), nil)
+        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, cooling_delta_t)
       else
         hvac_sizings.Cool_Airflow = hpxml_bldg.building_construction.conditioned_floor_area * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
@@ -2015,7 +2172,7 @@ class HVACSizing
     if not heating_type.nil?
       hvac_heating_ap = hvac_heating.additional_properties
       is_ducted = !hvac_heating.distribution_system.nil?
-      supply_air_temp = hvac_heating.additional_properties.supply_air_temp
+      heating_delta_t = hvac_heating_ap.supply_air_temp - mj.heat_setpoint
 
       if hvac_heating.is_a?(HPXML::HeatingSystem) && hvac_heating.is_heat_pump_backup_system
         # Adjust heating load using the HP backup calculation
@@ -2029,7 +2186,7 @@ class HVACSizing
         hvac_sizings.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizings.Heat_Load, hp_sizing_values.Heat_Capacity, hp_heating_speed, hpxml_bldg)
       end
     elsif not hvac_cooling.nil? && hvac_cooling.has_integrated_heating
-      supply_air_temp = hvac_cooling.additional_properties.supply_air_temp
+      heating_delta_t = hvac_cooling_ap.supply_air_temp - mj.heat_setpoint
     end
 
     if hvac_sizings.Heat_Load <= 0
@@ -2052,7 +2209,7 @@ class HVACSizing
 
       hvac_sizings.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizings.Heat_Load_Supp, hvac_sizings.Heat_Capacity, hvac_heating_speed, hpxml_bldg)
       if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
-        hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizings.Heat_Capacity, hvac_sizings.Cool_Airflow)
+        hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity, hp_cooling_cfm: hvac_sizings.Cool_Airflow)
       else
         hvac_sizings.Heat_Airflow = calc_airflow_rate_user(hvac_sizings.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed], hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed])
       end
@@ -2078,27 +2235,27 @@ class HVACSizing
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
         cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / (mj.cool_setpoint - leaving_air_temp)))
-        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
+                                   (80.0 - mj.cool_setpoint) / cooling_delta_t))
+        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
       else
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
         hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
       end
-      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizings.Heat_Capacity, hvac_sizings.Cool_Airflow)
+      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity, hp_cooling_cfm: hvac_sizings.Cool_Airflow)
 
     elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heating_type
 
       hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
       hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
 
-      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizings.Heat_Capacity)
+      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity)
 
     elsif (heating_type == HPXML::HVACTypeFurnace) || ((not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating)
 
       hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
       hvac_sizings.Heat_Capacity_Supp = 0.0
 
-      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizings.Heat_Capacity)
+      hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t)
 
     elsif [HPXML::HVACTypeStove,
            HPXML::HVACTypeSpaceHeater,
@@ -2114,7 +2271,7 @@ class HVACSizing
         hvac_sizings.Heat_Airflow = UnitConversions.convert(hvac_sizings.Heat_Capacity, 'Btu/hr', 'ton') * hvac_heating_ap.heat_rated_cfm_per_ton[0]
       else
         # Autosized airflow rate
-        hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, (supply_air_temp - mj.heat_setpoint), hvac_sizings.Heat_Capacity)
+        hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t)
       end
 
     elsif [HPXML::HVACTypeBoiler,
@@ -2137,6 +2294,12 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param adjusted_outdoor_temp [TODO] TODO
+  # @param adjusted_indoor_temp [TODO] TODO
+  # @param mode [TODO] TODO
+  # @return [TODO] TODO
   def self.adjust_indoor_condition_var_speed(adjusted_outdoor_temp, adjusted_indoor_temp, mode)
     if mode == :clg
       rated_indoor_temp = HVAC::AirSourceCoolRatedIWB
@@ -2149,6 +2312,13 @@ class HVACSizing
     return MathTools.biquadratic(adjusted_indoor_temp, adjusted_outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, adjusted_outdoor_temp, coefficients_1speed)
   end
 
+  # TODO
+  #
+  # @param detailed_performance_data [TODO] TODO
+  # @param adjusted_outdoor_temp [TODO] TODO
+  # @param hvac_sys [TODO] TODO
+  # @param mode [TODO] TODO
+  # @return [TODO] TODO
   def self.adjust_outdoor_condition_var_speed(detailed_performance_data, adjusted_outdoor_temp, hvac_sys, mode)
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
     if detailed_performance_data.empty?
@@ -2174,6 +2344,16 @@ class HVACSizing
     return odb_adj
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param frac_zone_heat_load_served [TODO] TODO
+  # @param frac_zone_cool_load_served [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
     # Increases the autosized heating/cooling capacities to account for any reduction
     # in capacity due to HVAC installation quality. This is done to prevent causing
@@ -2329,6 +2509,12 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
@@ -2365,11 +2551,14 @@ class HVACSizing
     end
   end
 
+  # Fixed Sizing Equipment
+  #
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_hvac_fixed_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
-    '''
-    Fixed Sizing Equipment
-    '''
-
     # Override HVAC capacities if values are provided
     if not hvac_cooling.nil?
       fixed_cooling_capacity = hvac_cooling.cooling_capacity
@@ -2412,10 +2601,15 @@ class HVACSizing
     end
   end
 
+  # GSHP Ground Loop Sizing Calculations
+  #
+  # @param mj [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hvac_sizings [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling)
-    '''
-    GSHP Ground Loop Sizing Calculations
-    '''
     cooling_type = get_hvac_cooling_type(hvac_cooling)
 
     return if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
@@ -2513,6 +2707,9 @@ class HVACSizing
     hvac_sizings.GSHP_Bore_Config = bore_config
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.valid_bore_configs
     valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
                       HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
@@ -2523,6 +2720,10 @@ class HVACSizing
     return valid_configs
   end
 
+  # TODO
+  #
+  # @param g_functions_filename [TODO] TODO
+  # @return [TODO] TODO
   def self.get_g_functions_json(g_functions_filename)
     require 'json'
 
@@ -2531,6 +2732,10 @@ class HVACSizing
     return g_functions_json
   end
 
+  # TODO
+  #
+  # @param g_functions_json [TODO] TODO
+  # @return [TODO] TODO
   def self.get_valid_num_bores(g_functions_json)
     valid_num_bores = []
     g_functions_json.each do |_key_1, values_1|
@@ -2548,11 +2753,13 @@ class HVACSizing
     return valid_num_bores
   end
 
+  # Finalize Sizing Calculations
+  #
+  # @param hvac_sizings [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.apply_hvac_finalize_airflows(hvac_sizings, hvac_heating, hvac_cooling)
-    '''
-    Finalize Sizing Calculations
-    '''
-
     if (not hvac_heating.nil?) && hvac_heating.respond_to?(:airflow_defect_ratio)
       if hvac_sizings.Heat_Airflow > 0
         hvac_sizings.Heat_Airflow *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)
@@ -2566,6 +2773,13 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param heating_db [TODO] TODO
+  # @param hvac_heating_speed [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
     if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
       idb_adj = adjust_indoor_condition_var_speed(heating_db, mj.heat_setpoint, :htg)
@@ -2577,6 +2791,15 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param hvac_heating [TODO] TODO
+  # @param heating_load [TODO] TODO
+  # @param hp_nominal_heating_capacity [TODO] TODO
+  # @param hvac_heating_speed [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hvac_heating_speed, hpxml_bldg)
     if hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
       # Size backup to meet full design load in case heat pump fails
@@ -2602,11 +2825,22 @@ class HVACSizing
     end
   end
 
+  # Adjust heat pump sizing
+  #
+  # @param mj [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hvac_sizings [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_heating [TODO] TODO
+  # @param total_cap_curve_value [TODO] TODO
+  # @param hvac_system [TODO] TODO
+  # @param hvac_heating_speed [TODO] TODO
+  # @param oversize_limit [TODO] TODO
+  # @param oversize_delta [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed,
                                         oversize_limit, oversize_delta, hpxml_bldg)
-    '''
-    Adjust heat pump sizing
-    '''
 
     capacity_ratio = hvac_heating.additional_properties.heat_capacity_ratios[hvac_heating_speed]
 
@@ -2664,6 +2898,10 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def self.get_ventilation_data(hpxml_bldg)
     # If CFIS w/ supplemental fan, assume air handler is running the full hour and can provide
     # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
@@ -2716,36 +2954,62 @@ class HVACSizing
     return [q_unbal, q_bal, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff]
   end
 
-  def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, deltaT, rated_capacity, corresponding_cooling_airflow_rate = nil)
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param sens_load_or_capacity [TODO] TODO
+  # @param delta_t [TODO] TODO
+  # @param dx_capacity [TODO] TODO
+  # @param hp_cooling_cfm [TODO] TODO
+  # @return [TODO] TODO
+  def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, delta_t, dx_capacity: nil, hp_cooling_cfm: nil)
     # Airflow sizing following Manual S based on design calculation
-    airflow_rate = sens_load_or_capacity / (1.1 * mj.acf * deltaT)
+    airflow_cfm = sens_load_or_capacity / (1.1 * mj.acf * delta_t)
 
-    if not rated_capacity.nil?
+    if not dx_capacity.nil?
       # Ensure the air flow rate is between 300 and 400 cfm/ton for typical DX equipment.
       # Recommendation by Hugh Henderson.
-      rated_capacity_tons = UnitConversions.convert(rated_capacity, 'Btu/hr', 'ton')
-      if airflow_rate / rated_capacity_tons > 400
-        airflow_rate = 400.0 * rated_capacity_tons
-      elsif airflow_rate / rated_capacity_tons < 300
-        airflow_rate = 300.0 * rated_capacity_tons
+      rated_capacity_tons = UnitConversions.convert(dx_capacity, 'Btu/hr', 'ton')
+      if airflow_cfm / rated_capacity_tons > 400
+        airflow_cfm = 400.0 * rated_capacity_tons
+      elsif airflow_cfm / rated_capacity_tons < 300
+        airflow_cfm = 300.0 * rated_capacity_tons
       end
     end
 
-    if corresponding_cooling_airflow_rate.to_f > 0
+    if hp_cooling_cfm.to_f > 0
       # For a heat pump, ensure the heating airflow rate is within 30% of the cooling airflow rate.
       # Recommendation by Hugh Henderson.
-      airflow_rate = [airflow_rate, 0.7 * corresponding_cooling_airflow_rate].max
-      airflow_rate = [airflow_rate, 1.3 * corresponding_cooling_airflow_rate].min
+      airflow_cfm = [airflow_cfm, 0.7 * hp_cooling_cfm].max
+      airflow_cfm = [airflow_cfm, 1.3 * hp_cooling_cfm].min
     end
 
-    return airflow_rate
+    return airflow_cfm
   end
 
+  # TODO
+  #
+  # @param capacity [TODO] TODO
+  # @param rated_cfm_per_ton [TODO] TODO
+  # @param capacity_ratio [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_airflow_rate_user(capacity, rated_cfm_per_ton, capacity_ratio)
     # Airflow determined by user setting, not based on design
-    return rated_cfm_per_ton * capacity_ratio * UnitConversions.convert(capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
+    airflow_cfm = rated_cfm_per_ton * capacity_ratio * UnitConversions.convert(capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
+    return airflow_cfm
   end
 
+  # TODO
+  #
+  # @param cool_cap_curve_spec [TODO] TODO
+  # @param cool_sh_curve_spec [TODO] TODO
+  # @param wb_temp [TODO] TODO
+  # @param db_temp [TODO] TODO
+  # @param w_temp [TODO] TODO
+  # @param vfr_air [TODO] TODO
+  # @param loop_flow [TODO] TODO
+  # @param rated_vfr_air [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_gshp_clg_curve_value(cool_cap_curve_spec, cool_sh_curve_spec, wb_temp, db_temp, w_temp, vfr_air, loop_flow = nil, rated_vfr_air = nil)
     # Reference conditions in thesis with largest capacity:
     # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
@@ -2778,6 +3042,23 @@ class HVACSizing
     return total_cap_curve_value, sensible_cap_curve_value
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param dse_Qs [TODO] TODO
+  # @param dse_Qr [TODO] TODO
+  # @param system_cfm [TODO] TODO
+  # @param load_sens [TODO] TODO
+  # @param dse_Tamb_s [TODO] TODO
+  # @param dse_Tamb_r [TODO] TODO
+  # @param dse_As [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param t_setpoint [TODO] TODO
+  # @param dse_Fregain_s [TODO] TODO
+  # @param dse_Fregain_r [TODO] TODO
+  # @param supply_r [TODO] TODO
+  # @param return_r [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_delivery_effectiveness_heating(mj, dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
     '''
     Calculate the Delivery Effectiveness for heating (using the method of ASHRAE Standard 152).
@@ -2789,6 +3070,26 @@ class HVACSizing
     return dse_DEcorr
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param dse_Qs [TODO] TODO
+  # @param dse_Qr [TODO] TODO
+  # @param leaving_air_temp [TODO] TODO
+  # @param system_cfm [TODO] TODO
+  # @param load_sens [TODO] TODO
+  # @param dse_Tamb_s [TODO] TODO
+  # @param dse_Tamb_r [TODO] TODO
+  # @param dse_As [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param t_setpoint [TODO] TODO
+  # @param dse_Fregain_s [TODO] TODO
+  # @param dse_Fregain_r [TODO] TODO
+  # @param load_total [TODO] TODO
+  # @param dse_h_r [TODO] TODO
+  # @param supply_r [TODO] TODO
+  # @param return_r [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_delivery_effectiveness_cooling(mj, dse_Qs, dse_Qr, leaving_air_temp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r)
     '''
     Calculate the Delivery Effectiveness for cooling (using the method of ASHRAE Standard 152).
@@ -2801,6 +3102,22 @@ class HVACSizing
     return dse_DEcorr, dse_dTe, cooling_load_ducts_sens
   end
 
+  # TODO
+  #
+  # @param system_cfm [TODO] TODO
+  # @param load_sens [TODO] TODO
+  # @param dse_Tamb_s [TODO] TODO
+  # @param dse_Tamb_r [TODO] TODO
+  # @param dse_As [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param t_setpoint [TODO] TODO
+  # @param dse_Qs [TODO] TODO
+  # @param dse_Qr [TODO] TODO
+  # @param supply_r [TODO] TODO
+  # @param return_r [TODO] TODO
+  # @param air_dens [TODO] TODO
+  # @param air_cp [TODO] TODO
+  # @return [TODO] TODO
   def self._calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     # Supply and return conduction functions, Bs and Br
     dse_Bs = Math.exp((-1.0 * dse_As) / (60.0 * system_cfm * air_dens * air_cp * supply_r))
@@ -2816,6 +3133,23 @@ class HVACSizing
     return dse_Bs, dse_Br, dse_As, dse_Ar, dse_dTe, dse_dT_s, dse_dT_r
   end
 
+  # TODO
+  #
+  # @param dse_As [TODO] TODO
+  # @param system_cfm [TODO] TODO
+  # @param load_total [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param dse_h_r [TODO] TODO
+  # @param dse_Br [TODO] TODO
+  # @param dse_dT_r [TODO] TODO
+  # @param dse_Bs [TODO] TODO
+  # @param leaving_air_temp [TODO] TODO
+  # @param dse_Tamb_s [TODO] TODO
+  # @param load_sens [TODO] TODO
+  # @param air_dens [TODO] TODO
+  # @param air_cp [TODO] TODO
+  # @param h_in [TODO] TODO
+  # @return [TODO] TODO
   def self._calc_dse_DE_cooling(dse_As, system_cfm, load_total, dse_Ar, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leaving_air_temp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     # Calculate the delivery effectiveness (Equation 6-25)
     dse_DE = ((dse_As * 60.0 * system_cfm * air_dens) / (-1.0 * load_total)) * \
@@ -2830,6 +3164,16 @@ class HVACSizing
     return dse_DE, cooling_load_ducts_sens
   end
 
+  # TODO
+  #
+  # @param dse_As [TODO] TODO
+  # @param dse_Bs [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param dse_Br [TODO] TODO
+  # @param dse_dT_s [TODO] TODO
+  # @param dse_dT_r [TODO] TODO
+  # @param dse_dTe [TODO] TODO
+  # @return [TODO] TODO
   def self._calc_dse_DE_heating(dse_As, dse_Bs, dse_Ar, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness (Equation 6-23)
     dse_DE = (dse_As * dse_Bs -
@@ -2839,6 +3183,16 @@ class HVACSizing
     return dse_DE
   end
 
+  # TODO
+  #
+  # @param dse_DE [TODO] TODO
+  # @param dse_Fregain_s [TODO] TODO
+  # @param dse_Fregain_r [TODO] TODO
+  # @param dse_Br [TODO] TODO
+  # @param dse_Ar [TODO] TODO
+  # @param dse_dT_r [TODO] TODO
+  # @param dse_dTe [TODO] TODO
+  # @return [TODO] TODO
   def self._calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_Ar, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness corrector for regain (Equation 6-40)
     dse_DEcorr = (dse_DE + dse_Fregain_s * (1.0 - dse_DE) - (dse_Fregain_s - dse_Fregain_r -
@@ -2851,6 +3205,13 @@ class HVACSizing
     return dse_DEcorr
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param return_leakage_cfm [TODO] TODO
+  # @param cool_load_tot [TODO] TODO
+  # @param cool_load_lat [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_sensible_latent_split(mj, return_leakage_cfm, cool_load_tot, cool_load_lat)
     # Calculate the latent duct leakage load (Manual J accounts only for return duct leakage)
     dse_cool_load_latent = [0.0, 0.68 * mj.acf * return_leakage_cfm * mj.cool_design_grains].max
@@ -2862,6 +3223,12 @@ class HVACSizing
     return cool_load_lat, cool_load_sens
   end
 
+  # TODO
+  #
+  # @param distribution_system [TODO] TODO
+  # @param design_temps [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.calc_duct_conduction_values(distribution_system, design_temps, hpxml_bldg)
     dse_A = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     dse_Ufactor = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
@@ -2904,6 +3271,11 @@ class HVACSizing
            dse_Fregain[HPXML::DuctTypeSupply], dse_Fregain[HPXML::DuctTypeReturn]
   end
 
+  # TODO
+  #
+  # @param distribution_system [TODO] TODO
+  # @param system_cfm [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_duct_leakages_cfm25(distribution_system, system_cfm)
     '''
     Calculate supply & return duct leakage in cfm25.
@@ -2927,6 +3299,12 @@ class HVACSizing
     return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
+  # TODO
+  #
+  # @param airflow_rate [TODO] TODO
+  # @param capacity [TODO] TODO
+  # @param temp [TODO] TODO
+  # @return [TODO] TODO
   def self.process_curve_fit(airflow_rate, capacity, temp)
     # TODO: Get rid of this curve by using ADP/BF calculations
     return 0 if capacity == 0
@@ -2935,6 +3313,9 @@ class HVACSizing
     return MathTools.biquadratic(airflow_rate / capacity_tons, temp, get_shr_biquadratic)
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_shr_biquadratic
     # Based on EnergyPlus's model for calculating SHR at off-rated conditions. This curve fit
     # avoids the iterations in the actual model. It does not account for altitude or variations
@@ -2942,6 +3323,11 @@ class HVACSizing
     return [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
   end
 
+  # TODO
+  #
+  # @param hvac_ap [TODO] TODO
+  # @param is_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.get_sizing_speed(hvac_ap, is_cooling)
     if is_cooling && hvac_ap.respond_to?(:cool_capacity_ratios)
       capacity_ratios = hvac_ap.cool_capacity_ratios
@@ -2960,6 +3346,10 @@ class HVACSizing
     return 0
   end
 
+  # TODO
+  #
+  # @param azimuth [TODO] TODO
+  # @return [TODO] TODO
   def self.get_true_azimuth(azimuth)
     true_az = azimuth - 180.0
     if true_az < 0
@@ -2968,6 +3358,13 @@ class HVACSizing
     return true_az
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param location [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_space_ua_values(mj, location, weather, hpxml_bldg)
     if HPXML::conditioned_locations.include? location
       fail 'Method should not be called for a conditioned space.'
@@ -3045,7 +3442,7 @@ class HVACSizing
     else # Unvented space
       ach = Airflow.get_default_unvented_space_ach()
     end
-    volume = Geometry.calculate_zone_volume(hpxml_bldg, location)
+    volume = Geometry.calculate_zone_volume(hpxml_bldg: hpxml_bldg, location: location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     outside_air_density = UnitConversions.convert(mj.p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
     space_UAs[HPXML::LocationOutside] += infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
@@ -3053,16 +3450,41 @@ class HVACSizing
     return space_UAs
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param location [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.calculate_space_heating_design_temps(mj, location, weather, hpxml_bldg)
     return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.heat_setpoint, hpxml_bldg.header.manualj_heating_design_temp,
                                         weather.data.ShallowGroundMonthlyTemps.min, false)
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param location [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.calculate_space_cooling_design_temps(mj, location, weather, hpxml_bldg, is_unvented_attic_with_roof_insul = false)
     return calculate_space_design_temps(mj, location, weather, hpxml_bldg, mj.cool_setpoint, hpxml_bldg.header.manualj_cooling_design_temp,
                                         weather.data.ShallowGroundMonthlyTemps.max, is_unvented_attic_with_roof_insul)
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param location [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param conditioned_design_temp [TODO] TODO
+  # @param design_db [TODO] TODO
+  # @param ground_db [TODO] TODO
+  # @param is_unvented_attic_with_roof_insul [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_space_design_temps(mj, location, weather, hpxml_bldg, conditioned_design_temp, design_db, ground_db, is_unvented_attic_with_roof_insul)
     space_UAs = get_space_ua_values(mj, location, weather, hpxml_bldg)
 
@@ -3123,8 +3545,15 @@ class HVACSizing
     return design_temp
   end
 
+  # TODO
+  #
+  # @param location [TODO] TODO
+  # @param setpoint [TODO] TODO
+  # @param oa_db [TODO] TODO
+  # @param gnd_db [TODO] TODO
+  # @return [TODO] TODO
   def self.calculate_scheduled_space_design_temps(location, setpoint, oa_db, gnd_db)
-    space_values = Geometry.get_temperature_scheduled_space_values(location)
+    space_values = Geometry.get_temperature_scheduled_space_values(location: location)
     design_temp = setpoint * space_values[:indoor_weight] + oa_db * space_values[:outdoor_weight] + gnd_db * space_values[:ground_weight]
     if not space_values[:temp_min].nil?
       design_temp = [design_temp, space_values[:temp_min]].max
@@ -3132,6 +3561,10 @@ class HVACSizing
     return design_temp
   end
 
+  # TODO
+  #
+  # @param wall [TODO] TODO
+  # @return [TODO] TODO
   def self.get_ashrae_wall_group(wall)
     # Determine the ASHRAE Group Number G-B (based on the Table 4A Group Number A-K) for above-grade walls
 
@@ -3308,14 +3741,24 @@ class HVACSizing
     return ashrae_wall_group
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.gshp_coil_bf
     return 0.0806
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.gshp_coil_bf_ft_spec
     return [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
   end
 
+  # TODO
+  #
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.gshp_hx_pipe_rvalue(hvac_cooling)
     hvac_cooling_ap = hvac_cooling.additional_properties
 
@@ -3323,6 +3766,16 @@ class HVACSizing
     return Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_conductivity
   end
 
+  # TODO
+  #
+  # @param mj [TODO] TODO
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_cooling_ap [TODO] TODO
+  # @param bore_spacing [TODO] TODO
+  # @param bore_diameter [TODO] TODO
+  # @param grout_conductivity [TODO] TODO
+  # @param pipe_r_value [TODO] TODO
+  # @return [TODO] TODO
   def self.gshp_hxbore_ft_per_ton(mj, weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
     if hvac_cooling_ap.u_tube_spacing_type == 'b'
       beta_0 = 17.4427
@@ -3358,6 +3811,15 @@ class HVACSizing
     return nom_length_heat, nom_length_cool
   end
 
+  # TODO
+  #
+  # @param bore_config [TODO] TODO
+  # @param g_functions_json [TODO] TODO
+  # @param num_bore_holes [TODO] TODO
+  # @param bore_spacing [TODO] TODO
+  # @param bore_depth [TODO] TODO
+  # @param bore_diameter [TODO] TODO
+  # @return [TODO] TODO
   def self.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
     actuals = { 'b' => UnitConversions.convert(bore_spacing, 'ft', 'm'),
                 'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
@@ -3414,6 +3876,13 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param g_functions_json [TODO] TODO
+  # @param bore_config [TODO] TODO
+  # @param num_bore_holes [TODO] TODO
+  # @param b_h_rb [TODO] TODO
+  # @return [TODO] TODO
   def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
     g_functions_json.each do |_key_1, values_1|
       if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
@@ -3442,6 +3911,10 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @return [TODO] TODO
   def self.calculate_average_r_value(surfaces)
     # Crude approximation of average R-value
     surfaces_a = 0.0
@@ -3457,6 +3930,12 @@ class HVACSizing
     return surfaces_a / surfaces_ua
   end
 
+  # TODO
+  #
+  # @param foundation_wall [TODO] TODO
+  # @param include_soil [TODO] TODO
+  # @param ground_conductivity [TODO] TODO
+  # @return [TODO] TODO
   def self.get_foundation_wall_ufactor(foundation_wall, include_soil, ground_conductivity)
     # Calculate effective U-factor
 
@@ -3511,6 +3990,11 @@ class HVACSizing
     return u_wall
   end
 
+  # TODO
+  #
+  # @param slab [TODO] TODO
+  # @param ground_conductivity [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_slab_f_value(slab, ground_conductivity)
     # Calculation for the F-values in Table 4A for slab foundations.
     # Important pages are the Table values (pg. 344-345) and the software protocols
@@ -3571,6 +4055,13 @@ class HVACSizing
     return f_values.sum() / f_values.size
   end
 
+  # TODO
+  #
+  # @param slab_is_insulated [TODO] TODO
+  # @param depth_below_grade [TODO] TODO
+  # @param width_of_shortest_side [TODO] TODO
+  # @param ground_conductivity [TODO] TODO
+  # @return [TODO] TODO
   def self.calc_basement_effective_uvalue(slab_is_insulated, depth_below_grade, width_of_shortest_side, ground_conductivity)
     # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
     r_other = 1.47 # Value from ASHRAE HoF, probably used by Manual J
@@ -3584,6 +4075,10 @@ class HVACSizing
     return u_value
   end
 
+  # TODO
+  #
+  # @param hvac_heating [TODO] TODO
+  # @return [TODO] TODO
   def self.get_hvac_heating_type(hvac_heating)
     if hvac_heating.nil?
       return
@@ -3594,6 +4089,10 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param hvac_cooling [TODO] TODO
+  # @return [TODO] TODO
   def self.get_hvac_cooling_type(hvac_cooling)
     if hvac_cooling.nil?
       return
@@ -3604,6 +4103,14 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param hvac_heating [TODO] TODO
+  # @param hvac_cooling [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hvac_systems [TODO] TODO
+  # @param zone [TODO] TODO
+  # @return [TODO] TODO
   def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
     if hvac_cooling.is_a?(HPXML::CoolingSystem) && hvac_cooling.has_integrated_heating
       frac_heat_load_served = hvac_cooling.integrated_heating_system_fraction_heat_load_served
@@ -3660,6 +4167,10 @@ class HVACSizing
     return frac_heat_load_served, frac_cool_load_served
   end
 
+  # TODO
+  #
+  # @param zone [TODO] TODO
+  # @return [TODO] TODO
   def self.get_has_radiant_floor(zone)
     # FUTURE: Allow specifying presence of radiant floors on a floor-by-floor basis?
     if zone.heating_systems.count { |htg| htg.electric_resistance_distribution == HPXML::ElectricResistanceDistributionRadiantFloor } > 0
@@ -3672,6 +4183,12 @@ class HVACSizing
     return false
   end
 
+  # TODO
+  #
+  # @param htg_sys [TODO] TODO
+  # @param clg_sys [TODO] TODO
+  # @param hvac_sizings [TODO] TODO
+  # @return [TODO] TODO
   def self.assign_to_hpxml_system(htg_sys, clg_sys, hvac_sizings)
     if not htg_sys.nil?
 
@@ -3793,6 +4310,10 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param all_zone_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.aggregate_zone_loads_to_bldg(all_zone_loads)
     bldg_loads = DesignLoadValues.new
     all_zone_loads.values.each do |zone_load|
@@ -3835,6 +4356,11 @@ class HVACSizing
     return bldg_loads
   end
 
+  # TODO
+  #
+  # @param hpxml_object [TODO] TODO
+  # @param loads [TODO] TODO
+  # @return [TODO] TODO
   def self.assign_to_hpxml_obj(hpxml_object, loads)
     tol = 10 # Btuh
 
@@ -3908,6 +4434,14 @@ class HVACSizing
     end
   end
 
+  # TODO
+  #
+  # @param output_format [TODO] TODO
+  # @param output_file_path [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param all_zone_loads [TODO] TODO
+  # @param all_space_loads [TODO] TODO
+  # @return [TODO] TODO
   def self.write_detailed_output(output_format, output_file_path, hpxml_bldg, all_zone_loads, all_space_loads)
     line_break = nil
     results_out = []
@@ -3921,26 +4455,50 @@ class HVACSizing
                         HPXML::OrientationSouthwest => 'SW',
                         HPXML::OrientationWest => 'W' }
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.windows(obj)
       return obj.windows.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.skylights(obj)
       return obj.skylights.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.doors(obj)
       return obj.doors.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.walls(obj)
       return (obj.walls + obj.rim_joists + obj.foundation_walls).select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.ceilings(obj)
       return obj.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_ceiling } + obj.roofs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
 
+    # TODO
+    #
+    # @param obj [TODO] TODO
+    # @return [TODO] TODO
     def self.floors(obj)
       return obj.floors.select { |s| s.additional_properties.respond_to?(:formj1_values) && s.is_floor } + obj.slabs.select { |s| s.additional_properties.respond_to?(:formj1_values) }
     end
@@ -4116,7 +4674,11 @@ class HVACSizing
   end
 end
 
+# TODO
 class MJValues
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
   end
   attr_accessor(:daily_range_temp_adjust, :cool_setpoint, :heat_setpoint, :cool_design_grains, :ctd, :htd,
@@ -4124,6 +4686,7 @@ class MJValues
                 :inside_air_dens, :cool_design_temps, :heat_design_temps, :p_atm, :latitude, :ground_conductivity)
 end
 
+# TODO
 class DesignLoadValues
   attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat_Tot, :Heat_Ducts, :Cool_Ducts_Sens, :Cool_Ducts_Lat,
                 :Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors, :Cool_Slabs,
@@ -4132,6 +4695,9 @@ class DesignLoadValues
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
                 :Heat_Slabs, :Heat_Ceilings, :Heat_Infil, :Heat_Vent, :HourlyFenestrationLoads)
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
     @Cool_Sens = 0.0
     @Cool_Lat = 0.0
@@ -4169,18 +4735,33 @@ class DesignLoadValues
   end
 end
 
+# TODO
 class HVACSizingValues
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
                 :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def initialize
   end
 end
 
+# TODO
 class FormJ1Values
   attr_accessor(:Area, :Length, :Heat_HTM, :Cool_HTM, :Heat_Load, :Cool_Load_Sens, :Cool_Load_Lat)
 
+  # TODO
+  #
+  # @param heat_load [TODO] TODO
+  # @param cool_load_sens [TODO] TODO
+  # @param cool_load_lat [TODO] TODO
+  # @param area [TODO] TODO
+  # @param length [TODO] TODO
+  # @param heat_htm [TODO] TODO
+  # @param cool_htm [TODO] TODO
+  # @return [TODO] TODO
   def initialize(heat_load:, cool_load_sens:, cool_load_lat:, area: nil, length: nil, heat_htm: nil, cool_htm: nil)
     @Heat_Load = heat_load.round
     @Cool_Load_Sens = cool_load_sens.round

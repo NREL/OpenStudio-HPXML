@@ -2475,7 +2475,7 @@ class HPXML < Object
     end
 
     def skylights
-      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id }
+      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id || ((not s.floor.nil?) && s.floor.attached_to_space_idref == @id) }
     end
 
     def surfaces
@@ -3273,14 +3273,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3474,14 +3467,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3741,14 +3727,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      # Ground shouldn't be included considering this is for infiltration?
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -4461,7 +4440,8 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref, :attached_to_floor_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref,
+             :attached_to_floor_idref, :curb_area, :curb_assembly_r_value, :shaft_area, :shaft_assembly_r_value]
     attr_accessor(*ATTRS)
 
     def roof
@@ -4573,6 +4553,16 @@ class HPXML < Object
         attached_to_floor = XMLHelper.add_element(skylight, 'AttachedToFloor')
         XMLHelper.add_attribute(attached_to_floor, 'idref', @attached_to_floor_idref)
       end
+      if (not @curb_area.nil?) || (not @curb_assembly_r_value.nil?)
+        curb = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Curb'])
+        XMLHelper.add_element(curb, 'Area', @curb_area, :float) unless @curb_area.nil?
+        XMLHelper.add_element(curb, 'AssemblyEffectiveRValue', @curb_assembly_r_value, :float) unless @curb_assembly_r_value.nil?
+      end
+      if (not @shaft_area.nil?) || (not @shaft_assembly_r_value.nil?)
+        shaft = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Shaft'])
+        XMLHelper.add_element(shaft, 'Area', @shaft_area, :float) unless @shaft_area.nil?
+        XMLHelper.add_element(shaft, 'AssemblyEffectiveRValue', @shaft_assembly_r_value, :float) unless @shaft_assembly_r_value.nil?
+      end
     end
 
     def from_doc(skylight)
@@ -4602,6 +4592,10 @@ class HPXML < Object
       @attached_to_roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
       @attached_to_floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
       @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
+      @curb_area = XMLHelper.get_value(skylight, 'extension/Curb/Area', :float)
+      @curb_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Curb/AssemblyEffectiveRValue', :float)
+      @shaft_area = XMLHelper.get_value(skylight, 'extension/Shaft/Area', :float)
+      @shaft_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Shaft/AssemblyEffectiveRValue', :float)
     end
   end
 
@@ -8365,6 +8359,16 @@ class HPXML < Object
 
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
+  end
+
+  def self.is_exposed(surface)
+    if HPXML::is_conditioned(surface) &&
+       (surface.exterior_adjacent_to == LocationOutside ||
+        surface.exterior_adjacent_to == LocationOtherNonFreezingSpace)
+      return true
+    end
+
+    return false
   end
 
   def self.is_adiabatic(surface)

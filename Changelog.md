@@ -1,3 +1,16 @@
+## OpenStudio-HPXML v1.9.0
+
+__New Features__
+- Adds inputs for modeling skylight curbs and/or shafts.
+
+__Bugfixes__
+- Allows additional flexibility for multiple `Attic`/`Foundation` elements.
+
+## OpenStudio-HPXML v1.8.1
+
+__Bugfixes__
+- Fixes cfm/ton restriction from incorrectly applying to furnace heating airflow rate.
+
 ## OpenStudio-HPXML v1.8.0
 
 __New Features__

@@ -281,17 +281,29 @@
             <SystemIdentifier id='Skylight1'/>
             <Area>2.0</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.74</UFactor>
+            <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
+            <extension>
+              <Curb>
+                <Area>0.7</Area>
+                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
+              </Curb>
+            </extension>
           </Skylight>
           <Skylight>
             <SystemIdentifier id='Skylight2'/>
             <Area>7.5</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.74</UFactor>
+            <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
+            <extension>
+              <Curb>
+                <Area>2.63</Area>
+                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
+              </Curb>
+            </extension>
           </Skylight>
         </Skylights>
         <Doors>

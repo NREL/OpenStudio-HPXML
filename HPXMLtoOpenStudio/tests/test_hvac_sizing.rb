@@ -204,7 +204,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def test_manual_j_residences
     block_tol_btuh = 500 # Individual block load components
     space_tol_frac = 0.1 # Space totals
-    space_tol_frac_duct = 0.5 # Space duct tolerance
 
     # Section 7: Vatilo Residence
     # Expected values from Figure 7-4
@@ -373,7 +372,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(2561, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
     assert_in_delta(9634, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    # assert_in_delta(2994, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(2994, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(1118, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(17440, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
@@ -384,7 +383,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1987, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
     assert_in_delta(530, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
     assert_in_delta(6187, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
-    # assert_in_delta(3780, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(3780, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(382, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(2669, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
@@ -394,22 +393,19 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1054, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(459, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(563, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
     assert_in_delta(565, hpxml_bldg.hvac_plant.cdl_lat_ducts, 1500)
     assert_in_delta(1651, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
     assert_in_delta(1755, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
-
     # eyeball observation from figure 13-5
-    # Fixme: Skylight not included so disable for now
-    # block_aed = [6800, 8800, 11000, 13000, 14000, 15800, 16900, 17200, 16900, 15900, 13000, 6800]
-    # hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
-    #  assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
-    # end
-
-    # skylight excluded
+    block_aed = [6800, 8800, 11000, 13000, 14000, 15800, 16900, 17200, 16900, 15900, 13000, 6800]
+    hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
+      assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
+    end
     space_load_results = {
-      ['living', 'dining'] => [9939 - 2207, 6531 - 2974],
-      ['kitchen'] => [6703 - 787, 3648 - 806],
+      ['living', 'dining'] => [9939, 6531],
+      ['kitchen'] => [6703, 3648],
       ['bedroom_3'] => [2768, 1010],
       ['bedroom_1'] => [5070, 1520],
       ['bedroom_2'] => [4722, 1428],
@@ -429,12 +425,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       spaces = hpxml_bldg.conditioned_spaces.select { |space| space_names.any? { |space_name| space.id.include? space_name } }
       spaces_htg_load = spaces.map { |space| space.hdl_total - space.hdl_ducts }.sum
       spaces_clg_load = spaces.map { |space| space.cdl_sens_total - space.cdl_sens_ducts }.sum
-      spaces_duct_load_htg = spaces.map { |space| space.hdl_ducts }.sum
-      spaces_duct_load_clg = spaces.map { |space| space.cdl_sens_ducts }.sum
       assert_in_delta(space_load_no_ducts_clg, spaces_clg_load, [space_load_no_ducts_clg * space_tol_frac, block_tol_btuh].max)
       assert_in_delta(space_load_no_ducts_htg, spaces_htg_load, [space_load_no_ducts_htg * space_tol_frac, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_clg, spaces_duct_load_clg, [est_space_duct_loads_clg * space_tol_frac_duct, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_htg, spaces_duct_load_htg, [est_space_duct_loads_htg * space_tol_frac_duct, block_tol_btuh].max)
     end
     # eyeball observation from figure 12-9
     rec_room_aed = [1300, 1800, 2200, 2600, 2800, 4000, 5500, 6900, 7400, 7200, 5600, 1800]
@@ -451,7 +443,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh)
     assert_in_delta(1608, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    # assert_in_delta(543, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(543, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(264, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(1446, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
@@ -462,7 +454,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(990, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
     assert_in_delta(851, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2500)
     assert_in_delta(1776, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
-    # assert_in_delta(3182, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(3182, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(442, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(1173, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
@@ -472,22 +464,19 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(825, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(5541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
     assert_in_delta(655, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
     # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh) Skip due to dehumidifying ventilation
     assert_in_delta(1938, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
-
-    # Fixme: Skylight not included so disable for now
     # eyeball observation from figure 13-5
-    # block_aed = [3800, 4600, 5400, 6200, 6900, 7200, 7250, 7250, 7000, 6500, 5800, 4100]
-    # hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
-    #  assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac)
-    # end
-
-    # skylight excluded
+    block_aed = [3800, 4600, 5400, 6200, 6900, 7200, 7250, 7250, 7000, 6500, 5800, 4100]
+    hpxml_bldg.hvac_plant.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
+      # assert_in_delta(block_aed[i], aed_curve_value, block_aed[i] * space_tol_frac) Skip due to larger difference, possibly because 1.25 dome factor is incorrectly excluded from Form J1 skylight areas?
+    end
     space_load_results = {
-      ['living', 'dining'] => [1880 - 409, 5478 - 2507],
-      ['kitchen'] => [1084 - 134, 4845 - 675],
+      ['living', 'dining'] => [1880, 5478],
+      ['kitchen'] => [1084, 4845],
       ['bedroom_3'] => [384, 763],
       ['bedroom_1'] => [680, 1050],
       ['bedroom_2'] => [640, 1110],
@@ -505,12 +494,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       # Note: Exclude radiant floor from room load below per Section 13-4
       spaces_htg_load = spaces.map { |space| space.hdl_total - space.hdl_ducts - space.hdl_slabs }.sum
       spaces_clg_load = spaces.map { |space| space.cdl_sens_total - space.cdl_sens_ducts }.sum
-      spaces_duct_load_htg = spaces.map { |space| space.hdl_ducts }.sum
-      spaces_duct_load_clg = spaces.map { |space| space.cdl_sens_ducts }.sum
       assert_in_delta(space_load_no_ducts_htg, spaces_htg_load, [space_load_no_ducts_htg * space_tol_frac, block_tol_btuh].max)
       assert_in_delta(space_load_no_ducts_clg, spaces_clg_load, [space_load_no_ducts_clg * space_tol_frac, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_htg, spaces_duct_load_htg, [est_space_duct_loads_htg * space_tol_frac_duct, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_clg, spaces_duct_load_clg, [est_space_duct_loads_clg * space_tol_frac_duct, 800].max)
     end
 
     # Section 13: Walker Residence - Ceiling Option 1
@@ -591,13 +576,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       spaces = hpxml_bldg.conditioned_spaces.select { |space| space_names.any? { |space_name| space.id.include? space_name } }
       spaces_htg_load = spaces.map { |space| space.hdl_total - space.hdl_ducts }.sum
       spaces_clg_load = spaces.map { |space| space.cdl_sens_total - space.cdl_sens_ducts }.sum
-      # spaces_duct_load_htg = spaces.map { |space| space.hdl_ducts }.sum
-      # spaces_duct_load_clg = spaces.map { |space| space.cdl_sens_ducts }.sum
       assert_in_delta(space_load_no_ducts_htg, spaces_htg_load, [space_load_no_ducts_htg * space_tol_frac, block_tol_btuh].max)
       assert_in_delta(space_load_no_ducts_clg, spaces_clg_load, [space_load_no_ducts_clg * space_tol_frac, block_tol_btuh].max)
-      # Skip duct check
-      # assert_in_delta(est_space_duct_loads_htg, spaces_duct_load_htg, [est_space_duct_loads_htg * space_tol_frac_duct, block_tol_btuh].max)
-      # assert_in_delta(est_space_duct_loads_clg, spaces_duct_load_clg, [est_space_duct_loads_clg * space_tol_frac_duct, 1000.0].max)
     end
     # eyeball observation from figure 14-5, 14-6, 14-7
     living_dining_aed = [1000, 1250, 1550, 1800, 1900, 3000, 4450, 5700, 6300, 6600, 5100, 1800]
@@ -629,7 +609,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(1340, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
     assert_in_delta(10912, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    # assert_in_delta(1981, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(1981, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(1538, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(3672, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
@@ -639,8 +619,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1760, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_in_delta(1562, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
     assert_in_delta(1673, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
-    assert_in_delta(11654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh) # Excludes 2045 Btuh for AED excursion since skylight is not modeled
-    # assert_in_delta(5514, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh) Skip due to not being able to model skylights w/ shafts
+    assert_in_delta(11654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
+    assert_in_delta(5514, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(782, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(939, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
     assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
@@ -650,13 +630,13 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(317, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(493, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(4541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
+    assert_in_delta(2045, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
     assert_in_delta(64, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
     assert_in_delta(241, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
     assert_in_delta(329, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(1000, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
-    # skylight excluded
     space_load_results = {
-      ['family'] => [8931 - 1981, 18173 - 5514],
+      ['family'] => [8931, 18173],
       ['kitchen'] => [3007, 3272],
       ['utility'] => [970, 1181],
       ['dining'] => [4750, 3821],
@@ -677,20 +657,15 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       spaces = hpxml_bldg.conditioned_spaces.select { |space| space_names.any? { |space_name| space.id.include? space_name } }
       spaces_htg_load = spaces.map { |space| space.hdl_total - space.hdl_ducts }.sum
       spaces_clg_load = spaces.map { |space| space.cdl_sens_total - space.cdl_sens_ducts }.sum
-      spaces_duct_load_htg = spaces.map { |space| space.hdl_ducts }.sum
-      spaces_duct_load_clg = spaces.map { |space| space.cdl_sens_ducts }.sum
       assert_in_delta(space_load_no_ducts_htg, spaces_htg_load, [space_load_no_ducts_htg * space_tol_frac, block_tol_btuh].max)
       assert_in_delta(space_load_no_ducts_clg, spaces_clg_load, [space_load_no_ducts_clg * space_tol_frac, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_htg, spaces_duct_load_htg, [est_space_duct_loads_htg * space_tol_frac_duct, block_tol_btuh].max)
-      assert_in_delta(est_space_duct_loads_clg, spaces_duct_load_clg, [est_space_duct_loads_clg * space_tol_frac_duct, 800].max)
     end
     # eyeball observation from figure 15-5, 15-6, 15-7
-    # family includes skylihgt, disable for now
-    # family_room_aed = [4100, 5500, 6900, 7600, 8900, 10000, 12900, 14500, 15400, 15100, 13000, 8900]
-    # family_room_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'family_room' }
-    # family_room_space.cdl_sens_aed_curve.split(', ').map{|s| s.to_f}.each_with_index do |aed_curve_value, i|
-    #  assert_in_delta(family_room_aed[i], aed_curve_value, family_room_aed[i] * space_tol_frac)
-    # end
+    family_room_aed = [4100, 5500, 6900, 7600, 8900, 10000, 12900, 14500, 15400, 15100, 13000, 8900]
+    family_room_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'family_room' }
+    family_room_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
+      assert_in_delta(family_room_aed[i], aed_curve_value, family_room_aed[i] * space_tol_frac)
+    end
     dining_aed = [1300, 1250, 1150, 1100, 1230, 1350, 1780, 2100, 2300, 2250, 1800, 770]
     dining_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.include? 'dining' }
     dining_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|

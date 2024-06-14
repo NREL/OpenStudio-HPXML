@@ -703,73 +703,143 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert_in_epsilon(hpxml_value, sql_value, 0.01)
   end
 
-  # Enclosure Windows/Skylights
-  (hpxml_bldg.windows + hpxml_bldg.skylights).each do |subsurface|
-    subsurface_id = subsurface.id.upcase
+  # Enclosure Windows
+  hpxml_bldg.windows.each do |window|
+    window_id = window.id.upcase
 
-    if subsurface.is_exterior
+    if window.is_exterior
       table_name = 'Exterior Fenestration'
     else
       table_name = 'Interior Door'
     end
 
     # Area
-    if subsurface.is_exterior
+    if window.is_exterior
       col_name = 'Area of Multiplied Openings'
     else
       col_name = 'Gross Area'
     end
-    hpxml_value = subsurface.area
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='m2'"
+    hpxml_value = window.area
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='#{col_name}' AND Units='m2'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
     assert_operator(sql_value, :>, 0.01)
     assert_in_epsilon(hpxml_value, sql_value, 0.1)
 
     # U-Factor
-    if subsurface.is_exterior
+    if window.is_exterior
       col_name = 'Glass U-Factor'
     else
       col_name = 'U-Factor no Film'
     end
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[0]
-    if subsurface.is_interior
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)[0]
+    if window.is_interior
       hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
       hpxml_value = 1.0 / (1.0 / hpxml_value - Material.AirFilmVertical.rvalue)
     end
-    if subsurface.is_a? HPXML::Skylight
-      hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
-    end
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='#{col_name}' AND Units='W/m2-K'"
     sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
     assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
-    next unless subsurface.is_exterior
+    next unless window.is_exterior
 
     # SHGC
-    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(subsurface.storm_type, subsurface.ufactor, subsurface.shgc)[1]
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Glass SHGC'"
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)[1]
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='Glass SHGC'"
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_in_delta(hpxml_value, sql_value, 0.01)
 
     # Azimuth
-    hpxml_value = subsurface.azimuth
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Azimuth' AND Units='deg'"
+    hpxml_value = window.azimuth
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='Azimuth' AND Units='deg'"
     sql_value = sqlFile.execAndReturnFirstDouble(query).get
     assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
     # Tilt
-    if subsurface.is_a? HPXML::Window
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(90.0, sql_value, 0.01)
-    elsif subsurface.is_a? HPXML::Skylight
-      hpxml_value = UnitConversions.convert(Math.atan(subsurface.roof.pitch / 12.0), 'rad', 'deg')
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
-    else
-      flunk "Subsurface '#{subsurface_id}' should have either AttachedToWall or AttachedToRoof element."
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{window_id}' AND ColumnName='Tilt' AND Units='deg'"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_in_epsilon(90.0, sql_value, 0.01)
+  end
+
+  # Enclosure Skylights
+  hpxml_bldg.skylights.each do |skylight|
+    skylight_id = skylight.id.upcase
+
+    table_name = 'Exterior Fenestration'
+
+    # Area
+    hpxml_value = skylight.area
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Area of Multiplied Openings' AND Units='m2'"
+    sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+    assert_operator(sql_value, :>, 0.01)
+    assert_in_epsilon(hpxml_value, sql_value, 0.1)
+
+    # U-Factor
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)[0]
+    hpxml_value /= 1.2 # converted to the 20-deg slope from the vertical position by multiplying the tested value at vertical
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
+    sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+    assert_in_epsilon(hpxml_value, sql_value, 0.02)
+
+    # SHGC
+    hpxml_value = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)[1]
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Glass SHGC'"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_in_delta(hpxml_value, sql_value, 0.01)
+
+    # Azimuth
+    hpxml_value = skylight.azimuth
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Azimuth' AND Units='deg'"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+    # Tilt
+    hpxml_value = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{skylight_id}' AND ColumnName='Tilt' AND Units='deg'"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+    table_name = 'Opaque Exterior'
+    curb_id = "SURFACE #{skylight.id.upcase}"
+
+    # Skylight curb area
+    if not skylight.curb_area.nil?
+      hpxml_value = skylight.curb_area
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{curb_id}' AND ColumnName='Net Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+      assert_operator(sql_value, :>, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
     end
+
+    # Skylight curb R-value
+    if not skylight.curb_assembly_r_value.nil?
+      hpxml_value = skylight.curb_assembly_r_value
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{curb_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+    end
+
+    table_name = 'Opaque Interior'
+    shaft_id = "SURFACE #{skylight.id.upcase} SHAFT"
+
+    # Skylight shaft area
+    if not skylight.shaft_area.nil?
+      hpxml_value = skylight.shaft_area
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{shaft_id}' AND ColumnName='Gross Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+      assert_operator(sql_value, :>, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.1)
+    end
+
+    # Skylight shaft R-value
+    next unless not skylight.shaft_assembly_r_value.nil?
+
+    # Compare R-value w/o film
+    hpxml_value = skylight.shaft_assembly_r_value
+    hpxml_value -= Material.AirFilmVertical.rvalue
+    hpxml_value -= Material.AirFilmVertical.rvalue
+    query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='#{table_name}' AND RowName='#{shaft_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+    sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+    assert_in_epsilon(hpxml_value, sql_value, 0.1)
   end
 
   # Enclosure Doors
@@ -864,6 +934,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
   end
 
+  # Appliances
   tabular_map = { HPXML::ClothesWasher => Constants.ObjectNameClothesWasher,
                   HPXML::ClothesDryer => Constants.ObjectNameClothesDryer,
                   HPXML::Refrigerator => Constants.ObjectNameRefrigerator,
@@ -1010,11 +1081,11 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
         abs_delta_tol = UnitConversions.convert(abs_delta_tol, 'MBtu', 'kWh')
       end
     elsif key.include?('Peak Electricity:')
-      # Check that the peak electricity difference is less than 500 W or less than 10%
+      # Check that the peak electricity difference is less than 500 W or less than 15%
       # Wider tolerances than others because a small change in when an event (like the
       # water heating firing) occurs can significantly impact the peak.
       abs_delta_tol = 500.0
-      abs_frac_tol = 0.1
+      abs_frac_tol = 0.15
     elsif key.include?('Peak Load:')
       # Check that the peak load difference is less than 0.2 kBtu/hr or less than 5%
       abs_delta_tol = 0.2

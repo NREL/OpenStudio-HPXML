@@ -765,7 +765,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pv_system_2_array_tilt'] = 'roofpitch+15'
     elsif ['extra-dhw-solar-latitude.xml'].include? hpxml_file
       args['solar_thermal_system_type'] = HPXML::SolarThermalSystemType
-      args['solar_thermal_collector_tilt'] = 'latitude-15'
+      args['solar_thermal_collector_tilt'] = 'Latitude-15'
     elsif ['extra-second-refrigerator.xml'].include? hpxml_file
       args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     elsif ['extra-second-heating-system-portable-heater-to-heating-system.xml'].include? hpxml_file
