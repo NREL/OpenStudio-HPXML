@@ -4,7 +4,7 @@ __New Features__
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.
-- ReportUtilityBills measure: only calculate production credits when electricity is produced.
+- ReportUtilityBills measure: avoid accounting for battery and generator production as PV credit.
 
 ## OpenStudio-HPXML v1.8.1
 
