@@ -120,7 +120,7 @@
             </Space>
             <Space>
               <SystemIdentifier id='recroom'/>
-              <FloorArea>1003.0</FloorArea> <!-- The floor plan is not right for basement, one side is 41' wide, one side is 40' wide-->
+              <FloorArea>1003.0</FloorArea>
             </Space>
           </Spaces>
         </Zone>
@@ -132,7 +132,7 @@
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>2.8</AirLeakage> <!-- What's the conversion?-->
+              <AirLeakage>2.8</AirLeakage>
             </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
@@ -140,7 +140,7 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
-            <Area>2771</Area>
+            <Area>2771.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>light</RoofColor>
             <Pitch>7.0</Pitch>
@@ -153,7 +153,7 @@
           <Roof>
             <SystemIdentifier id='AssumedRoofGarage'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <Area>65</Area>
+            <Area>65.0</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>light</RoofColor>
             <Pitch>7.0</Pitch>
@@ -457,7 +457,7 @@
             <Orientation>east</Orientation>
             <Insulation>
               <SystemIdentifier id='WallRecRoomEastPartitionInsulation'/>
-              <AssemblyEffectiveRValue>8.7</AssemblyEffectiveRValue> <!-- Use basement or garage partiion? -->
+              <AssemblyEffectiveRValue>8.7</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -842,7 +842,7 @@
               <SystemIdentifier id='SlabBedroom2PerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -863,7 +863,7 @@
               <SystemIdentifier id='SlabBathroom2PerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -884,7 +884,7 @@
               <SystemIdentifier id='SlabBedroom3PerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -905,7 +905,7 @@
               <SystemIdentifier id='SlabCraftPerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -926,7 +926,7 @@
               <SystemIdentifier id='SlabWorkshopPerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -947,7 +947,7 @@
               <SystemIdentifier id='SlabUtilityRoomPerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -968,7 +968,7 @@
               <SystemIdentifier id='SlabRecRoomPerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -988,7 +988,7 @@
               <SystemIdentifier id='AssumedSlabGaragePerimeterInsulation'/>
               <Layer>
                 <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth> <!--Didn't say depth, use the same as Smith Residence, the same construction in table 4A-->
+                <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -1024,7 +1024,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowPrimaryBathroomNorth'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1045,7 +1045,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='FrenchDoorFamilyRoomNorth'/>
-            <Area>35</Area>
+            <Area>35.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.6</UFactor>
             <SHGC>0.39</SHGC>
@@ -1076,7 +1076,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowFamilyRoomEastInteriorShading'/>
-              <SummerShadingCoefficient>0.93</SummerShadingCoefficient> <!--Word file says Drape low but the pdf marked as loose weave, dark (High), here uses High with half drawn-->
+              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -1087,7 +1087,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowKitchenSouth'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1097,7 +1097,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenSouthInteriorShading'/>
-              <SummerShadingCoefficient>0.73</SummerShadingCoefficient> <!--Word file says Drape low but the pdf marked as loose weave, dark (High), here uses High with half drawn-->
+              <SummerShadingCoefficient>0.73</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>3.5</Depth>
@@ -1108,7 +1108,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom1South'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1171,7 +1171,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2North'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1192,7 +1192,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowCraftNorth'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1213,7 +1213,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowRecRoomSouth'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1234,7 +1234,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom3South'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1255,7 +1255,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom3West'/>
-            <Area>5</Area>
+            <Area>5.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1276,7 +1276,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBathroom2West'/>
-            <Area>5</Area>
+            <Area>5.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1297,7 +1297,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowBedroom2West'/>
-            <Area>10</Area>
+            <Area>10.0</Area>
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
@@ -1361,14 +1361,14 @@
           <Door>
             <SystemIdentifier id='DoorFoyer'/>
             <AttachedToWall idref='WallFoyerSouth'/>
-            <Area>21</Area>
+            <Area>21.0</Area>
             <Orientation>south</Orientation>
             <RValue>2.86</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorKitchenGarage'/>
             <AttachedToWall idref='WallKitchenPartitionEast'/>
-            <Area>21</Area>
+            <Area>21.0</Area>
             <Orientation>east</Orientation>
             <RValue>2.86</RValue>
           </Door>
@@ -1376,7 +1376,7 @@
       </Enclosure>
       <Systems>
         <HVAC>
-          <HVACPlant><!-- hvac information unknown-->
+          <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem1'/>
               <AttachedToZone idref='BobRossResidenceConditioned'/>
