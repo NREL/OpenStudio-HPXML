@@ -1321,7 +1321,7 @@
           <Skylight>
             <SystemIdentifier id='SkylightFamilyRoom'/>
             <Area>8.0</Area>
-            <Azimuth>0</Azimuth>
+            <Orientation>north</Orientation>
             <UFactor>1.13</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
