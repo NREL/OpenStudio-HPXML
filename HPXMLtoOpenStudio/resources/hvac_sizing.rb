@@ -79,9 +79,9 @@ module HVACSizing
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
       apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
       apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
-      apply_hvac_fixed_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
+      apply_hvac_final_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
+      apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
       apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling)
-      apply_hvac_finalize_airflows(hvac_sizings, hvac_heating, hvac_cooling)
       @all_hvac_sizings[hvac_system] = hvac_sizings
 
       if update_hpxml
@@ -1605,9 +1605,11 @@ module HVACSizing
   # @param hvac_loads [TODO] TODO
   # @return [TODO] TODO
   def self.apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
-    hvac_sizings.Cool_Load_Sens = hvac_loads.Cool_Sens
+    # Note: We subtract the blower heat below because we want to calculate a net capacity,
+    # not a gross capacity.
+    hvac_sizings.Cool_Load_Sens = hvac_loads.Cool_Sens - hvac_loads.Cool_BlowerHeat
     hvac_sizings.Cool_Load_Lat = hvac_loads.Cool_Lat
-    hvac_sizings.Cool_Load_Tot = hvac_loads.Cool_Tot
+    hvac_sizings.Cool_Load_Tot = hvac_loads.Cool_Tot - hvac_loads.Cool_BlowerHeat
     hvac_sizings.Heat_Load = hvac_loads.Heat_Tot
     hvac_sizings.Heat_Load_Supp = hvac_loads.Heat_Tot
   end
@@ -2606,15 +2608,15 @@ module HVACSizing
     end
   end
 
-  # Fixed Sizing Equipment
+  # Finalize Capacity Calculations
   #
   # @param hvac_sizings [TODO] TODO
   # @param hvac_heating [TODO] TODO
   # @param hvac_cooling [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
-  def self.apply_hvac_fixed_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
-    # Override HVAC capacities if values are provided
+  def self.apply_hvac_final_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
+    # Cooling
     if not hvac_cooling.nil?
       fixed_cooling_capacity = hvac_cooling.cooling_capacity
     end
@@ -2627,6 +2629,8 @@ module HVACSizing
         hvac_sizings.Cool_Capacity_Sens *= fixed_cooling_capacity / autosized_cooling_capacity
       end
     end
+
+    # Heating
     if not hvac_heating.nil?
       fixed_heating_capacity = hvac_heating.heating_capacity
     elsif (not hvac_cooling.nil?) && hvac_cooling.has_integrated_heating
@@ -2640,6 +2644,8 @@ module HVACSizing
         hvac_sizings.Heat_Airflow *= fixed_heating_capacity / autosized_heating_capacity
       end
     end
+
+    # Heat pump backup heating
     if hvac_heating.is_a? HPXML::HeatPump
       if not hvac_heating.backup_heating_capacity.nil?
         fixed_supp_heating_capacity = hvac_heating.backup_heating_capacity
@@ -2808,13 +2814,13 @@ module HVACSizing
     return valid_num_bores
   end
 
-  # Finalize Sizing Calculations
+  # Finalize Airflow Calculations
   #
   # @param hvac_sizings [TODO] TODO
   # @param hvac_heating [TODO] TODO
   # @param hvac_cooling [TODO] TODO
   # @return [TODO] TODO
-  def self.apply_hvac_finalize_airflows(hvac_sizings, hvac_heating, hvac_cooling)
+  def self.apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
     if (not hvac_heating.nil?) && hvac_heating.respond_to?(:airflow_defect_ratio)
       if hvac_sizings.Heat_Airflow > 0
         hvac_sizings.Heat_Airflow *= (1.0 + hvac_heating.airflow_defect_ratio.to_f)

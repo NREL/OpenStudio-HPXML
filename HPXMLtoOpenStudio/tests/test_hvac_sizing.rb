@@ -1177,11 +1177,20 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
     # Test blower fan heat input
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
-    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-autosize.xml')
     hpxml_bldg.hvac_distributions[0].manualj_blower_fan_heat_btuh = 1234.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
     assert_equal(1234.0, test_hpxml_bldg.hvac_plant.cdl_sens_blowerheat)
+    orig_cooling_capacity = test_hpxml_bldg.cooling_systems[0].cooling_capacity
+
+    # Test blower fan heat input 2
+    # Check the autosized equipment capacity (net) doesn't change
+    hpxml_bldg.hvac_distributions[0].manualj_blower_fan_heat_btuh = 0.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _model, _test_hpxml, test_hpxml_bldg = _test_measure(args_hash)
+    assert_equal(0.0, test_hpxml_bldg.hvac_plant.cdl_sens_blowerheat)
+    assert_equal(orig_cooling_capacity, test_hpxml_bldg.cooling_systems[0].cooling_capacity)
 
     # Test boiler hot water piping input
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
