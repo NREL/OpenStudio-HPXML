@@ -841,8 +841,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabBedroom2PerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -862,8 +862,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabBathroom2PerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -883,8 +883,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabBedroom3PerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -904,8 +904,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabCraftPerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -925,8 +925,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabWorkshopPerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -946,8 +946,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabUtilityRoomPerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -967,8 +967,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='SlabRecRoomPerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -987,8 +987,8 @@
             <PerimeterInsulation>
               <SystemIdentifier id='AssumedSlabGaragePerimeterInsulation'/>
               <Layer>
-                <NominalRValue>5.0</NominalRValue>
-                <InsulationDepth>3.0</InsulationDepth>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
             <UnderSlabInsulation>
@@ -1322,17 +1322,17 @@
             <SystemIdentifier id='SkylightFamilyRoom'/>
             <Area>8.0</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>1.13</UFactor>
+            <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToFloor idref='CeilingFamilyRoom'/>
             <extension>
               <Curb>
                 <Area>2.8</Area>
-                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
+                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue> <!--Should it be insulated or uninsulated?-->
               </Curb>
               <Shaft>
-                <Area>48.0</Area>
+                <Area>60.0</Area>
                 <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
@@ -1341,17 +1341,17 @@
             <SystemIdentifier id='SkylightKitchen'/>
             <Area>8.0</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>1.13</UFactor>
+            <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToFloor idref='CeilingKitchen'/>
             <extension>
               <Curb>
                 <Area>2.8</Area>
-                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
+                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue> <!--Should it be insulated or uninsulated?-->
               </Curb>
               <Shaft>
-                <Area>48.0</Area>
+                <Area>60.0</Area>
                 <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
               </Shaft>
             </extension>
