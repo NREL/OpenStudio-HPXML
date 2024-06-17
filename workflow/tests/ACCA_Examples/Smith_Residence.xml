@@ -1313,7 +1313,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>95.2</Value>
+                    <Value>25.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -1321,23 +1321,37 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>60.2</Value>
+                    <Value>15.1</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
-                  <DuctSurfaceArea>272.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>72.9</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
-                  <DuctSurfaceArea>86.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>21.5</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <SystemIdentifier id='Ducts3'/>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>conditioned space</DuctLocation>
+                  <DuctSurfaceArea>413.1</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <SystemIdentifier id='Ducts4'/>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>conditioned space</DuctLocation>
+                  <DuctSurfaceArea>121.6</DuctSurfaceArea>
                 </Ducts>
                 <NumberofReturnRegisters>1</NumberofReturnRegisters>
               </AirDistribution>
