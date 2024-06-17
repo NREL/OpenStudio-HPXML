@@ -5,7 +5,9 @@ __New Features__
 
 __Bugfixes__
 - Allows additional flexibility for multiple `Attic`/`Foundation` elements.
-- ReportUtilityBills measure: avoid accounting for battery and generator production as PV credit.
+- ReportUtilityBills measure:
+  - When PV is present, account for battery storage and generator production as Energy instead of PV Credit.
+  - Fixes not accounting for battery storage and generator production when PV is not present.
 
 ## OpenStudio-HPXML v1.8.1
 
