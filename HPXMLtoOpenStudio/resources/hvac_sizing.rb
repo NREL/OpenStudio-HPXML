@@ -1718,14 +1718,16 @@ class HVACSizing
       # Ductless systems don't offer this flexibility.
 
       #per E+ docs, capacity and SHR inputs for DX coil model should be “gross” values
+      #without a rated fan power variable in the OS-HPXML code (likely would be in hvac.rb or hvac_sizing.rb, if it existed),
+      #may not be able to test if cool_cap_rated is a gross or net value
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
-        #ADP/BF specified in E+ docs for Coil:Cooling:DX:SingleSpeed, but should be implemented for all DX coils
-        #rated total capacity and rated SHR are used to calculate coil bypass factor constant A_o at rated conditions
+        #ADP/BF specified in E+ eng ref for Coil:Cooling:DX:SingleSpeed, but should be implemented for all DX coils
+        #rated total capacity and rated SHR are used to calculate coil constant A_o at rated conditions
         #this is already done in hvac.rb and stored in the hvac_cooling_ap object
-        #once A_o is determined, pass in design conditions to calculate initial estimate for design SHR
-        #the design SHR is used to calculate the design sensible capacity, which is used to UPDATE the airflow calculation.
+        #once A_o is determined, pass in design conditions to calculate an initial estimate for the design SHR
+        #the design SHR is used to calculate the design sensible capacity, which is used to UPDATE the airflow calculation (cfm is an input to calculateSHR()).
         #the updated airflow value gets fed back to calculateSHR() and the process continues until the airflow converges to a stable value!
 
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
@@ -1858,6 +1860,7 @@ class HVACSizing
       hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
 
       delta = (heat_load_next - heat_load_prev) / heat_load_prev
+      #end iteration here
 
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_type) && !is_ducted
