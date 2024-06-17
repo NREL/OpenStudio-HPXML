@@ -545,7 +545,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] for proper exit status reporting
+  # @return [Boolean] for proper exit status reporting, true if successful
   def run(runner, user_arguments)
     super(runner, user_arguments)
 

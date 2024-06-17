@@ -1042,6 +1042,27 @@
             <AttachedToWall idref='WallDiningNorthwest'/>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id='SkylightFamilyRoom'/>
+            <Area>32.0</Area>
+            <Azimuth>225</Azimuth>
+            <UFactor>0.64</UFactor>
+            <SHGC>0.63</SHGC>
+            <AttachedToRoof idref='Roof1'/>
+            <AttachedToFloor idref='CeilingFamilyRoom'/>
+            <extension>
+              <Curb>
+                <Area>16.0</Area>
+                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue>
+              </Curb>
+              <Shaft>
+                <Area>120.0</Area>
+                <AssemblyEffectiveRValue>12.5</AssemblyEffectiveRValue>
+              </Shaft>
+            </extension>
+          </Skylight>
+        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>

@@ -90,7 +90,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] for proper exit status reporting
+  # @return [Boolean] for proper exit status reporting, true if successful
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 

@@ -99,7 +99,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] for proper exit status reporting
+  # @return [Boolean] for proper exit status reporting, true if successful
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
@@ -463,9 +463,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
-  # TODO
+  # Creates a full OpenStudio model that represents the given HPXML individual dwelling by
+  # adding OpenStudio objects to the empty OpenStudio model for each component of the building.
   #
-  # @param unit_model [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -476,7 +477,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param unit_num [TODO] TODO
-  # @return [TODO] TODO
+  # @return nil
   def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version, unit_num)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
@@ -660,7 +661,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_num_occupants(model, runner, spaces)
     # Occupants
@@ -674,7 +675,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param location [TODO] TODO
   # @return [TODO] TODO
   def create_or_get_space(model, spaces, location)
@@ -684,12 +685,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return spaces[location]
   end
 
-  # TODO
+  # Adds any HPXML Roofs to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_roofs(runner, model, spaces)
     @hpxml_bldg.roofs.each do |roof|
       next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -802,12 +803,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Adds any HPXML Walls to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_walls(runner, model, spaces)
     @hpxml_bldg.walls.each do |wall|
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -880,12 +881,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Adds any HPXML RimJoists to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_rim_joists(runner, model, spaces)
     @hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
@@ -958,12 +959,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Adds any HPXML Floors to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_floors(runner, model, spaces)
     @hpxml_bldg.floors.each do |floor|
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -1049,7 +1050,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_foundation_walls_slabs(runner, model, weather, spaces)
     foundation_types = @hpxml_bldg.slabs.map { |s| s.interior_adjacent_to }.uniq
@@ -1172,7 +1173,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param foundation_wall [TODO] TODO
   # @param exposed_length [TODO] TODO
   # @param fnd_wall_length [TODO] TODO
@@ -1262,7 +1263,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param slab [TODO] TODO
   # @param z_origin [TODO] TODO
   # @param exposed_length [TODO] TODO
@@ -1360,7 +1361,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_conditioned_floor_area(model, spaces)
     # Check if we need to add floors between conditioned spaces (e.g., between first
@@ -1424,7 +1425,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_thermal_mass(model, spaces)
     if @apply_ashrae140_assumptions
@@ -1441,11 +1442,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Adds any HPXML Windows to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_windows(model, spaces)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
@@ -1544,18 +1545,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  # TODO
+  # Adds any HPXML Skylights to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_skylights(model, spaces)
     surfaces = []
     shading_schedules = {}
 
     @hpxml_bldg.skylights.each do |skylight|
       if not skylight.is_conditioned
-        fail "Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft or sun tunnel, use AttachedToFloor to connect it to conditioned space."
+        fail "Skylight '#{skylight.id}' not connected to conditioned space; if it's a skylight with a shaft, use AttachedToFloor to connect it to conditioned space."
       end
 
       tilt = skylight.roof.pitch / 12.0
@@ -1565,11 +1566,32 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       ufactor, shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(skylight.storm_type, skylight.ufactor, skylight.shgc)
 
-      # Create parent surface slightly bigger than skylight
-      vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt, add_buffer: true)
-      surface = OpenStudio::Model::Surface.new(vertices, model)
-      surface.additionalProperties.setFeature('Length', length)
-      surface.additionalProperties.setFeature('Width', width)
+      if not skylight.curb_area.nil?
+        # Create parent surface that includes curb heat transfer
+        total_area = skylight.area + skylight.curb_area
+        total_width = Math::sqrt(total_area)
+        total_length = total_area / total_width
+        vertices = Geometry.create_roof_vertices(length: total_length, width: total_width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt, add_buffer: true)
+        surface = OpenStudio::Model::Surface.new(vertices, model)
+        surface.additionalProperties.setFeature('Length', total_length)
+        surface.additionalProperties.setFeature('Width', total_width)
+
+        # Assign curb construction
+        curb_assembly_r_value = [skylight.curb_assembly_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
+        curb_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(curb_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
+        curb_mat.setName('SkylightCurbMaterial')
+        curb_const = OpenStudio::Model::Construction.new(model)
+        curb_const.setName('SkylightCurbConstruction')
+        curb_const.insertLayer(0, curb_mat)
+        surface.setConstruction(curb_const)
+      else
+        # Create parent surface slightly bigger than skylight
+        vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt, add_buffer: true)
+        surface = OpenStudio::Model::Surface.new(vertices, model)
+        surface.additionalProperties.setFeature('Length', length)
+        surface.additionalProperties.setFeature('Width', width)
+        surfaces << surface # Add to surfaces list so it's assigned an adiabatic construction
+      end
       surface.additionalProperties.setFeature('Azimuth', skylight.azimuth)
       surface.additionalProperties.setFeature('Tilt', tilt)
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
@@ -1577,7 +1599,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setSurfaceType('RoofCeiling')
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
-      surfaces << surface
 
       vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
@@ -1590,16 +1611,48 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Apply interior/exterior shading (as needed)
       Constructions.apply_window_skylight_shading(model, skylight, sub_surface, shading_schedules, @hpxml_header, @hpxml_bldg)
+
+      next unless (not skylight.shaft_area.nil?) && (not skylight.floor.nil?)
+
+      # Add skylight shaft heat transfer, similar to attic knee walls
+
+      shaft_height = Math::sqrt(skylight.shaft_area)
+      shaft_width = skylight.shaft_area / shaft_height
+      shaft_azimuth = @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
+      shaft_z_origin = @walls_top - shaft_height
+
+      vertices = Geometry.create_wall_vertices(length: shaft_width, height: shaft_height, z_origin: shaft_z_origin, azimuth: shaft_azimuth)
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+      surface.additionalProperties.setFeature('Length', shaft_width)
+      surface.additionalProperties.setFeature('Width', shaft_height)
+      surface.additionalProperties.setFeature('Azimuth', shaft_azimuth)
+      surface.additionalProperties.setFeature('Tilt', 90.0)
+      surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
+      surface.setName("surface #{skylight.id} shaft")
+      surface.setSurfaceType('Wall')
+      set_surface_interior(model, spaces, surface, skylight.floor)
+      set_surface_exterior(model, spaces, surface, skylight.floor)
+      surface.setSunExposure('NoSun')
+      surface.setWindExposure('NoWind')
+
+      # Apply construction
+      shaft_assembly_r_value = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
+      shaft_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(shaft_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
+      shaft_mat.setName('SkylightShaftMaterial')
+      shaft_const = OpenStudio::Model::Construction.new(model)
+      shaft_const.setName('SkylightShaftConstruction')
+      shaft_const.insertLayer(0, shaft_mat)
+      surface.setConstruction(shaft_const)
     end
 
     apply_adiabatic_construction(model, surfaces, 'roof')
   end
 
-  # TODO
+  # Adds any HPXML Doors to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
-  # @return [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return nil
   def add_doors(model, spaces)
     surfaces = []
     @hpxml_bldg.doors.each do |door|
@@ -1678,7 +1731,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
@@ -1762,7 +1815,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
   def add_cooling_system(model, runner, weather, spaces, airloop_map)
@@ -1817,7 +1870,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
   def add_heating_system(runner, model, weather, spaces, airloop_map)
@@ -1890,7 +1943,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
   def add_heat_pump(runner, model, weather, spaces, airloop_map)
@@ -1950,7 +2003,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param epw_path [TODO] TODO
   # @return [TODO] TODO
   def add_ideal_system(model, spaces, epw_path)
@@ -2001,7 +2054,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_setpoints(runner, model, weather, spaces)
     return if @hpxml_bldg.hvac_controls.size == 0
@@ -2018,7 +2071,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_ceiling_fans(runner, model, weather, spaces)
     return if @hpxml_bldg.ceiling_fans.size == 0
@@ -2032,7 +2085,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_dehumidifiers(runner, model, spaces)
     return if @hpxml_bldg.dehumidifiers.size == 0
@@ -2068,7 +2121,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_mels(runner, model, spaces)
     # Misc
@@ -2096,7 +2149,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_mfls(runner, model, spaces)
     # Misc
@@ -2122,7 +2175,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_lighting(runner, model, spaces)
     Lighting.apply(runner, model, spaces, @hpxml_bldg.lighting_groups, @hpxml_bldg.lighting, @eri_version,
@@ -2133,7 +2186,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_pools_and_permanent_spas(runner, model, spaces)
     (@hpxml_bldg.pools + @hpxml_bldg.permanent_spas).each do |pool_or_spa|
@@ -2153,7 +2206,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherProcess] Weather object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
   def add_airflow(runner, model, weather, spaces, airloop_map)
@@ -2234,7 +2287,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hvac_distribution [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def create_ducts(model, hvac_distribution, spaces)
     air_ducts = []
@@ -2344,7 +2397,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_batteries(runner, model, spaces)
     @hpxml_bldg.batteries.each do |battery|
@@ -2719,6 +2772,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                 'Floor' => :floors,
                 'Ceiling' => :ceilings,
                 'Roof' => :roofs,
+                'Skylight' => :skylights_conduction, # Skylight curb/shaft
                 'InferredCeiling' => :internal_mass,
                 'InferredFloor' => :internal_mass }[surface_type]
         fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
@@ -3088,7 +3142,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [TODO] TODO
   # @param hpxml_surface [TODO] TODO
   # @return [TODO] TODO
@@ -3104,7 +3158,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param surface [TODO] TODO
   # @param hpxml_surface [TODO] TODO
   # @return [TODO] TODO
@@ -3134,7 +3188,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param surface [TODO] TODO
   # @param exterior_adjacent_to [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     otherside_coeffs = nil
@@ -3161,7 +3215,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param location [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def get_space_temperature_schedule(model, location, spaces)
     # Create outside boundary schedules to be actuated by EMS,
@@ -3277,7 +3331,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param location [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
@@ -3306,7 +3360,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # (e.g., appliances).
   #
   # @param location [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def get_space_from_location(location, spaces)
     return if [HPXML::LocationOutside,
@@ -3325,7 +3379,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param surface [TODO] TODO
-  # @param spaces [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_surface [TODO] TODO
   # @return [TODO] TODO
