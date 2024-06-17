@@ -605,8 +605,6 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          
          \- Ground-source heat pumps
          
-         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
-         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
