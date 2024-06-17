@@ -1329,7 +1329,7 @@
             <extension>
               <Curb>
                 <Area>2.8</Area>
-                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue> <!--Should it be insulated or uninsulated?-->
+                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>60.0</Area>
@@ -1348,7 +1348,7 @@
             <extension>
               <Curb>
                 <Area>2.8</Area>
-                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue> <!--Should it be insulated or uninsulated?-->
+                <AssemblyEffectiveRValue>6.67</AssemblyEffectiveRValue>
               </Curb>
               <Shaft>
                 <Area>60.0</Area>
