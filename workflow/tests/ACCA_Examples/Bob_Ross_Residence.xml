@@ -1321,7 +1321,7 @@
           <Skylight>
             <SystemIdentifier id='SkylightFamilyRoom'/>
             <Area>8.0</Area>
-            <Azimuth>0</Azimuth>
+            <Orientation>north</Orientation>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
@@ -1340,7 +1340,7 @@
           <Skylight>
             <SystemIdentifier id='SkylightKitchen'/>
             <Area>8.0</Area>
-            <Azimuth>180</Azimuth>
+            <Orientation>south</Orientation>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
@@ -1433,14 +1433,14 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>301.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>93.0</DuctSurfaceArea>
                 </Ducts>
