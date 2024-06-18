@@ -645,7 +645,7 @@ class HPXMLDefaults
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
       elsif hpxml_bldg.site.soil_type == HPXML::SiteSoilTypeUnknown
-        hpxml_bldg.site.ground_conductivity = 1.0
+        hpxml_bldg.site.ground_conductivity = 1.0 # ANSI/RESNET/ICC 301-2022 Addendum C
         hpxml_bldg.site.ground_diffusivity = 0.0208
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
