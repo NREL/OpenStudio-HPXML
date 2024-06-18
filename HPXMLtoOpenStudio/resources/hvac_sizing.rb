@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-# Collection of helper methods for performing HVAC design load and autosizing calculations.
+# Collection of methods for performing HVAC design load and autosizing calculations.
 module HVACSizing
   # Calculates heating/cooling design loads, and selects equipment
   # values (e.g., capacities, airflows) specific to each HVAC system.
-  # Calculations generally follow ACCA Manual J/S.
+  # Calculations follow ACCA Manual J (and S).
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [TODO] TODO
-  # @param update_hpxml [TODO] TODO
-  # @param output_format [TODO] TODO
-  # @param output_file_path [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_systems [Array] List of HPXML HVAC (heating and/or cooling) systems
+  # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports capacities/airflows
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param output_file_path [String] Detailed output file path
+  # @return [Hash] Map of HVAC systems => HVACSizingValues objects
   def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true,
                      output_format: 'csv', output_file_path: nil)
 
@@ -125,12 +125,12 @@ module HVACSizing
 
   # FIXME: The following module methods are meant to be private.
 
-  # TODO
+  # Checks whether we will be performing sizing calculations on the given HPXML HVAC system.
   #
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
-  # @param zone [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @param zone [HPXML::Zone] The current zone of interest
+  # @return [Boolean] true if this system should be excluded from sizing calculations
   def self.is_system_to_skip(hvac_heating, hvac_cooling, zone)
     # Skip systems not attached to this zone
     if (not hvac_heating.nil?) && (hvac_heating.zone != zone)
@@ -158,11 +158,11 @@ module HVACSizing
     return false
   end
 
-  # TODO
+  # Initial checks for errors (i.e., situations that should not occur). Throws an error if found.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_systems [Array] List of HPXML HVAC (heating and/or cooling) systems
+  # @return nil
   def self.check_for_errors(hpxml_bldg, hvac_systems)
     # Check all surfaces adjacent to conditioned space (and not adiabatic) are
     # not attached to spaces of unconditioned zones.
@@ -190,12 +190,12 @@ module HVACSizing
     end
   end
 
-  # Site Calculations and Design Temperatures
+  # Assigns site values and design temperatures to the mj object.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
     # CLTD adjustments based on daily temperature range
     mj.daily_range_temp_adjust = [4, 0, -5]
@@ -336,13 +336,13 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Calculates the heating design temperature for the given location (space type).
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherProcess] Weather object
-  # @param location [TODO] TODO
+  # @param location [String] The location (e.g., HPXML::LocationAtticVented) of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Heating design temperature in deg-F
   def self.process_design_temp_heating(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       heat_temp = mj.heat_setpoint
@@ -380,13 +380,13 @@ module HVACSizing
     return heat_temp
   end
 
-  # TODO
+  # Calculates the cooling design temperature for the given location (space type).
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherProcess] Weather object
-  # @param location [TODO] TODO
+  # @param location [String] The location (e.g., HPXML::LocationAtticVented) of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Cooling design temperature in deg-F
   def self.process_design_temp_cooling(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       cool_temp = mj.cool_setpoint
@@ -501,10 +501,10 @@ module HVACSizing
     return cool_temp
   end
 
-  # TODO
+  # Initializes zone/space load hashes.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Hash, Hash>] Map of HPXML::Zones => DesignLoadValues object, Map of HPXML::Spaces => DesignLoadValues object
   def self.init_loads(hpxml_bldg)
     '''
     Initial Zone/Space design loads
@@ -526,13 +526,13 @@ module HVACSizing
     return all_zone_loads, all_space_loads
   end
 
-  # Heating and Cooling Loads: Windows & Skylights
+  # Calculates heating and cooling loads for windows & skylights.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_windows_skylights(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     # Average cooling load factors (CLF) for windows/skylights WITHOUT internal shading (MJ8 Table 3D-3)
     clf_avg_nois = [0.24, 0.35, 0.38, 0.4, 0.48, 0.4, 0.38, 0.35, 0.24]
@@ -893,13 +893,13 @@ module HVACSizing
     return [0.0, pfl - ell].max
   end
 
-  # Heating and Cooling Loads: Doors
+  # Calculates heating and cooling loads for doors.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     if mj.daily_range_num == 0
       cltd = mj.ctd + 15.0
@@ -939,13 +939,13 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Walls
+  # Calculates heating and cooling loads for above-grade and below-grade HPXML walls.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_walls(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     # Above-Grade Walls
     (hpxml_bldg.walls + hpxml_bldg.rim_joists).each do |wall|
@@ -1056,15 +1056,14 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Roofs
+  # Calculates heating and cooling loads for roofs.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_roofs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
-    # Roofs
     hpxml_bldg.roofs.each do |roof|
       next unless roof.is_thermal_boundary
 
@@ -1125,13 +1124,13 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Ceilings
+  # Calculates heating and cooling loads for ceilings.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_ceilings(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_ceiling
@@ -1163,13 +1162,13 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Floors
+  # Calculates heating and cooling loads for floors.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_floors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
@@ -1247,13 +1246,13 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Floors
+  # Calculates heating loads for slabs.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_slabs(mj, hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.slabs.each do |slab|
       next unless slab.is_thermal_boundary
@@ -1323,14 +1322,14 @@ module HVACSizing
     end
   end
 
-  # Heating and Cooling Loads: Infiltration & Ventilation
+  # Calculates heating and cooling loads for infiltration and whole-building ventilation.
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @param weather [WeatherProcess] Weather object
-  # @return [TODO] TODO
+  # @return nil
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
@@ -1454,12 +1453,12 @@ module HVACSizing
     end
   end
 
-  # Cooling Load: Internal Gains
+  # Calculates cooling loads for internal gains.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.process_load_internal_gains(hpxml_bldg, all_zone_loads, all_space_loads)
     hpxml_bldg.conditioned_zones.each do |zone|
       zone_manualj_num_occupants = zone.spaces.map { |space| space.manualj_num_occupants }.sum
@@ -1475,10 +1474,10 @@ module HVACSizing
     end
   end
 
-  # Aggregates component design loads to totals
+  # Aggregates component design loads to totals; updates the object that is passed in.
   #
-  # @param loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param loads [DesignLoadValues] Object with component design loads
+  # @return nil
   def self.aggregate_loads_to_totals(loads)
     # Heating
     loads.Heat_Tot = loads.Heat_Windows + loads.Heat_Skylights +
@@ -1504,11 +1503,11 @@ module HVACSizing
   # Determine HVAC Leaving Air Temperature (LAT) and/or Supply Air Temperature (SAT).
   # Values are assigned to the hvac_cooling/hvac_heating objects.
   #
-  # @param mj [TODO] TODO
-  # @param zone_loads [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
-  # @return [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @return nil
   def self.apply_hvac_air_temperatures(mj, zone_loads, hvac_heating, hvac_cooling)
     if not hvac_cooling.nil?
       cooling_type = get_hvac_cooling_type(hvac_cooling)
@@ -1548,11 +1547,11 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_loads [TODO] TODO
-  # @param frac_zone_heat_load_served [TODO] TODO
-  # @param frac_zone_cool_load_served [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
+  # @param frac_zone_heat_load_served [Double] Fraction of zone heating load served by this HVAC system
+  # @param frac_zone_cool_load_served [Double] Fraction of zone cooling load served by this HVAC system
+  # @return nil
   def self.apply_fractions_load_served(hvac_heating, hvac_loads, frac_zone_heat_load_served, frac_zone_cool_load_served)
     # Heating Loads
     if get_hvac_heating_type(hvac_heating) == HPXML::HVACTypeHeatPumpWaterLoopToAir
@@ -1600,7 +1599,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [TODO] TODO
   def self.get_hvac_size_limits(hvac_cooling)
     oversize_limit = 1.15
@@ -1620,9 +1619,9 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
+  # @return nil
   def self.apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
     # Note: We subtract the blower heat below because we want to calculate a net capacity,
     # not a gross capacity.
@@ -1635,12 +1634,12 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param frac_zone_heat_load_served [TODO] TODO
   # @param frac_zone_cool_load_served [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_heat_pump_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
     return unless hvac_cooling.is_a? HPXML::HeatPump
     return if frac_zone_heat_load_served == 0
@@ -1657,15 +1656,16 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Calculates the duct thermal regain factor, which is defined as the fraction of distribution
+  # system losses (gains for cooling) that are returned to the conditioned space.
   #
-  # @param duct [TODO] TODO
+  # Sources: MJ8 pg 204 and Walker (1998) "Technical background for default values used for
+  # forced air systems in proposed ASHRAE Std. 152"
+  #
+  # @param duct [HPXML::Duct] The duct to calculate regain for
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] The duct regain factor (fraction)
   def self.get_duct_regain_factor(duct, hpxml_bldg)
-    # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
-    # values used for forced air systems in proposed ASHRAE Std. 152"
-
     dse_Fregain = nil
 
     if [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? duct.duct_location
@@ -1735,14 +1735,14 @@ module HVACSizing
 
   # Heating Duct Loads
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param zone [TODO] TODO
-  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
   # @param zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @param hvac_heating [TODO] TODO
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_duct_loads_heating(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_heating, hpxml_bldg)
     return if hvac_heating.nil? || (hvac_loads.Heat_Tot <= 0) || hvac_heating.distribution_system.nil? || hvac_heating.distribution_system.ducts.empty?
 
@@ -1802,15 +1802,15 @@ module HVACSizing
 
   # Cooling Duct Loads
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param zone [TODO] TODO
-  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
   # @param zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherProcess] Weather object
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
     return if hvac_cooling.nil? || (hvac_loads.Cool_Sens <= 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
 
@@ -1882,13 +1882,13 @@ module HVACSizing
 
   # CFIS Ventilation Loads
   #
-  # @param mj [TODO] TODO
-  # @param hvac_loads [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
   # @param zone_loads [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_cfis_loads(mj, hvac_loads, zone_loads, hvac_heating, hvac_cooling, hpxml_bldg)
     if (not hvac_heating.nil?) && (not hvac_heating.distribution_system.nil?)
       hvac_distribution = hvac_heating.distribution_system
@@ -1926,11 +1926,11 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
   # @param zone_loads [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @return nil
   def self.apply_hvac_blower_heat_load(hvac_loads, zone_loads, hvac_heating, hvac_cooling)
     if not hvac_heating.nil?
       hvac_distribution = hvac_heating.distribution_system
@@ -1953,10 +1953,10 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_loads [TODO] TODO
+  # @param zone_loads [DesignLoadValues] Design loads for the current HPXML::Zone
   # @param zone_loads [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @return nil
   def self.apply_hvac_piping_load(hvac_loads, zone_loads, hvac_heating)
     if not hvac_heating.nil?
       hvac_distribution = hvac_heating.distribution_system
@@ -1975,15 +1975,15 @@ module HVACSizing
 
   # Equipment Adjustments
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param hvac_sizings [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
   # @param weather [WeatherProcess] Weather object
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hvac_system [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
     # Cooling
 
@@ -2422,14 +2422,14 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param frac_zone_heat_load_served [TODO] TODO
   # @param frac_zone_cool_load_served [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
     # Increases the autosized heating/cooling capacities to account for any reduction
     # in capacity due to HVAC installation quality. This is done to prevent causing
@@ -2587,10 +2587,10 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @return nil
   def self.apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
@@ -2629,11 +2629,11 @@ module HVACSizing
 
   # Finalize Capacity Calculations
   #
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_final_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
     # Cooling
     if not hvac_cooling.nil?
@@ -2683,13 +2683,13 @@ module HVACSizing
 
   # GSHP Ground Loop Sizing Calculations
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param hvac_sizings [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
   # @param weather [WeatherProcess] Weather object
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling, hpxml_bldg)
     cooling_type = get_hvac_cooling_type(hvac_cooling)
 
@@ -2837,9 +2837,9 @@ module HVACSizing
 
   # Finalize Airflow Calculations
   #
-  # @param hvac_sizings [TODO] TODO
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [TODO] TODO
   def self.apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
     if (not hvac_heating.nil?) && hvac_heating.respond_to?(:airflow_defect_ratio)
@@ -2857,8 +2857,8 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
-  # @param hvac_heating [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param heating_db [TODO] TODO
   # @param hvac_heating_speed [TODO] TODO
   # @return [TODO] TODO
@@ -2875,8 +2875,8 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
-  # @param hvac_heating [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param heating_load [TODO] TODO
   # @param hp_nominal_heating_capacity [TODO] TODO
   # @param hvac_heating_speed [TODO] TODO
@@ -2909,11 +2909,11 @@ module HVACSizing
 
   # Adjust heat pump sizing
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param hvac_sizings [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
   # @param weather [WeatherProcess] Weather object
-  # @param hvac_heating [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param total_cap_curve_value [TODO] TODO
   # @param hvac_system [TODO] TODO
   # @param hvac_heating_speed [TODO] TODO
@@ -3038,7 +3038,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param sens_load_or_capacity [TODO] TODO
   # @param delta_t [TODO] TODO
   # @param dx_capacity [TODO] TODO
@@ -3126,7 +3126,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param dse_Qs [TODO] TODO
   # @param dse_Qr [TODO] TODO
   # @param system_cfm [TODO] TODO
@@ -3154,7 +3154,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param dse_Qs [TODO] TODO
   # @param dse_Qr [TODO] TODO
   # @param leaving_air_temp [TODO] TODO
@@ -3289,7 +3289,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param return_leakage_cfm [TODO] TODO
   # @param cool_load_tot [TODO] TODO
   # @param cool_load_lat [TODO] TODO
@@ -3442,7 +3442,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [TODO] TODO
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3534,7 +3534,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [TODO] TODO
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3546,7 +3546,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [TODO] TODO
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3558,7 +3558,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [TODO] TODO
   # @param weather [WeatherProcess] Weather object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -3839,7 +3839,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [TODO] TODO
   def self.gshp_hx_pipe_rvalue(hvac_cooling)
     hvac_cooling_ap = hvac_cooling.additional_properties
@@ -3850,7 +3850,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param mj [TODO] TODO
+  # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherProcess] Weather object
   # @param hvac_cooling_ap [TODO] TODO
   # @param bore_spacing [TODO] TODO
@@ -4158,10 +4158,10 @@ module HVACSizing
     return u_value
   end
 
-  # TODO
+  # Gets the system type of the specified HPXML heating system.
   #
-  # @param hvac_heating [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @return [string] Heating system type (e.g., HPXML::HVACTypeFurnace or HPXML::HVACTypeHeatPumpAirToAir) or nil
   def self.get_hvac_heating_type(hvac_heating)
     if hvac_heating.nil?
       return
@@ -4172,10 +4172,10 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Gets the system type of the specified HPXML cooling system.
   #
-  # @param hvac_cooling [TODO] TODO
-  # @return [TODO] TODO
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @return [string] Cooling system type (e.g., HPXML::HVACTypeCentralAirConditioner or HPXML::HVACTypeHeatPumpAirToAir) or nil
   def self.get_hvac_cooling_type(hvac_cooling)
     if hvac_cooling.nil?
       return
@@ -4188,10 +4188,10 @@ module HVACSizing
 
   # TODO
   #
-  # @param hvac_heating [TODO] TODO
-  # @param hvac_cooling [TODO] TODO
+  # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hvac_systems [TODO] TODO
+  # @param hvac_systems [Array] List of HPXML HVAC (heating and/or cooling) systems
   # @param zone [TODO] TODO
   # @return [TODO] TODO
   def self.get_fractions_load_served(hvac_heating, hvac_cooling, hpxml_bldg, hvac_systems, zone)
@@ -4270,7 +4270,7 @@ module HVACSizing
   #
   # @param htg_sys [TODO] TODO
   # @param clg_sys [TODO] TODO
-  # @param hvac_sizings [TODO] TODO
+  # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
   # @return [TODO] TODO
   def self.assign_to_hpxml_system(htg_sys, clg_sys, hvac_sizings)
     if not htg_sys.nil?
@@ -4395,7 +4395,7 @@ module HVACSizing
 
   # TODO
   #
-  # @param all_zone_loads [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @return [TODO] TODO
   def self.aggregate_zone_loads_to_bldg(all_zone_loads)
     bldg_loads = DesignLoadValues.new
@@ -4521,14 +4521,14 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Writes a output file with additional detailed information needed to fill out, e.g., an ACCA Form J1.
   #
-  # @param output_format [TODO] TODO
-  # @param output_file_path [TODO] TODO
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param output_file_path [String] Detailed output file path
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param all_zone_loads [TODO] TODO
-  # @param all_space_loads [TODO] TODO
-  # @return [TODO] TODO
+  # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
+  # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
+  # @return nil
   def self.write_detailed_output(output_format, output_file_path, hpxml_bldg, all_zone_loads, all_space_loads)
     line_break = nil
     results_out = []
