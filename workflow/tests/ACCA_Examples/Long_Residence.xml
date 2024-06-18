@@ -1285,6 +1285,11 @@
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
+                <extension>
+                  <ManualJInputs>
+                    <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
+                  </ManualJInputs>
+                </extension>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>

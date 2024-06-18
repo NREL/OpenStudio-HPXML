@@ -991,7 +991,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>32.64</Value>
+                    <Value>26.6</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -999,25 +999,30 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>20.64</Value>
+                    <Value>17.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
-                  <DuctSurfaceArea>272.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>222.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctEffectiveRValue>9.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>8.0</DuctInsulationRValue>
                   <DuctLocation>attic - vented</DuctLocation>
-                  <DuctSurfaceArea>86.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>73.0</DuctSurfaceArea>
                 </Ducts>
                 <NumberofReturnRegisters>1</NumberofReturnRegisters>
+                <extension>
+                  <ManualJInputs>
+                    <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
+                  </ManualJInputs>
+                </extension>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>

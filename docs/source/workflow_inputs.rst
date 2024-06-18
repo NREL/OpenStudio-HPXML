@@ -604,8 +604,6 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          
          \- Ground-source heat pumps
          
-         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
-         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
@@ -3098,6 +3096,7 @@ Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/S
   ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``  element                        See [#]_             Return duct leakage value
   ``DistributionSystemType/AirDistribution/Ducts``                                      element                        No                   Supply/return ducts; multiple are allowed [#]_
   ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
+  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh``  double   Btu/hr   >= 0         No        0          Blower fan heat for ACCA Manual J design loads [#]_
   ``ConditionedFloorAreaServed``                                                        double   ft2      > 0          See [#]_             Conditioned floor area served
   ====================================================================================  =======  =======  ===========  ========  =========  ==========================
   
@@ -3106,6 +3105,8 @@ Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] Return duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
   .. [#] If NumberofReturnRegisters not provided and return ducts are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
+  .. [#] BlowerFanHeatBtuh should only be provided when calculating design loads for HVAC equipment whose performance data has not been adjusted for blower heat.
+         When provided, it can be calculated according to Manual J Section 25 or the default of 1707 Btu/hr (500 W) can be used.
   .. [#] ConditionedFloorAreaServed required only when duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
 
 Additional information is entered in each ``DuctLeakageMeasurement``.
@@ -3180,15 +3181,18 @@ Hydronic Distribution
 
 Each hydronic distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  Element                                                                   Type     Units    Constraints  Required  Default    Notes
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  ``SystemIdentifier``                                                      id                             Yes                  Unique identifier
-  ``DistributionSystemType/HydronicDistribution``                           element                        Yes                  Type of distribution system
-  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``  string            See [#]_     Yes                  Type of hydronic distribution system
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  Element                                                                                     Type     Units    Constraints  Required  Default    Notes
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  ``SystemIdentifier``                                                                        id                             Yes                  Unique identifier
+  ``DistributionSystemType/HydronicDistribution``                                             element                        Yes                  Type of distribution system
+  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``                    string            See [#]_     Yes                  Type of hydronic distribution system
+  ``DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh``  double   Btu/hr   >= 0         No        0          Piping load for ACCA Manual J design loads [#]_
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
 
   .. [#] HydronicDistributionType choices are "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop".
+  .. [#] HotWaterPipingBtuh should only be provided when hydronic distribution pipes run through unconditioned spaces.
+         When provided, it can be calculated according to Manual J Section 26.
 
 .. _hvac_distribution_dse:
 
