@@ -204,7 +204,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
     # Has production
     has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
-    has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0 # has modeled battery
+    has_battery = has_pv && @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.batteries.empty? }.size > 0 # has modeled battery
     has_generator = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.generators.empty? }.size > 0
 
     # Fuel outputs
