@@ -24,9 +24,6 @@
         <Site>
           <SiteType>suburban</SiteType>
           <ShieldingofHome>normal</ShieldingofHome>
-          <Soil>
-            <Conductivity>0.8</Conductivity>
-          </Soil>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
@@ -380,18 +377,23 @@
                 <Ducts>
                   <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
-                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>2.0</DuctInsulationRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
                   <DuctSurfaceArea>516.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
-                  <DuctEffectiveRValue>3.0</DuctEffectiveRValue>
+                  <DuctInsulationRValue>2.0</DuctInsulationRValue>
                   <DuctLocation>crawlspace - unvented</DuctLocation>
                   <DuctSurfaceArea>125.0</DuctSurfaceArea>
                 </Ducts>
                 <NumberofReturnRegisters>1</NumberofReturnRegisters>
+                <extension>
+                  <ManualJInputs>
+                    <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
+                  </ManualJInputs>
+                </extension>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>

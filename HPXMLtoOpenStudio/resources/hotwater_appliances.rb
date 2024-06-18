@@ -952,7 +952,7 @@ class HotWaterAndAppliances
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
-  # @param ncfl [TODO] TODO
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param water_heating_system [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
   # @return [TODO] TODO
@@ -988,7 +988,7 @@ class HotWaterAndAppliances
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
-  # @param ncfl [TODO] TODO
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @return [TODO] TODO
   def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
     # ANSI/RESNET 301-2014 Addendum A-2015
@@ -1314,7 +1314,7 @@ class HotWaterAndAppliances
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
-  # @param ncfl [TODO] TODO
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
