@@ -25,7 +25,8 @@
           <SiteType>rural</SiteType>
           <ShieldingofHome>exposed</ShieldingofHome>
           <Soil>
-            <Conductivity>0.8</Conductivity>
+            <SoilType>unknown</SoilType>
+            <MoistureType>wet</MoistureType>
           </Soil>
         </Site>
         <BuildingConstruction>

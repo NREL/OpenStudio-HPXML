@@ -24,9 +24,6 @@
         <Site>
           <SiteType>suburban</SiteType>
           <ShieldingofHome>normal</ShieldingofHome>
-          <Soil>
-            <Conductivity>0.8</Conductivity>
-          </Soil>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
