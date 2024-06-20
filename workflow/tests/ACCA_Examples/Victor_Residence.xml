@@ -9,6 +9,13 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <GeoLocation>
+        <Latitude>40.0</Latitude>
+      </GeoLocation>
+      <Elevation>607.0</Elevation>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -16,6 +23,7 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
+          <ShieldingofHome>normal</ShieldingofHome>
           <Soil>
             <Conductivity>0.8</Conductivity>
           </Soil>
@@ -30,8 +38,16 @@
         <extension>
           <HVACSizingControl>
             <ManualJInputs>
-              <HeatingDesignTemperature>3</HeatingDesignTemperature>
-              <CoolingDesignTemperature>90</CoolingDesignTemperature>
+              <HeatingDesignTemperature>3.0</HeatingDesignTemperature>
+              <CoolingDesignTemperature>90.0</CoolingDesignTemperature>
+              <DailyTemperatureRange>medium</DailyTemperatureRange>
+              <HeatingSetpoint>70.0</HeatingSetpoint>
+              <CoolingSetpoint>75.0</CoolingSetpoint>
+              <HumiditySetpoint>0.5</HumiditySetpoint>
+              <HumidityDifference>45.0</HumidityDifference>
+              <InternalLoadsSensible>2400.0</InternalLoadsSensible>
+              <InternalLoadsLatent>0.0</InternalLoadsLatent>
+              <NumberofOccupants>4</NumberofOccupants>
             </ManualJInputs>
           </HVACSizingControl>
         </extension>
@@ -52,7 +68,7 @@
             <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
               <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>8.1</AirLeakage>
+              <AirLeakage>7.7</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>26100.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
@@ -154,9 +170,13 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window1ExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -166,6 +186,10 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window2ExteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
@@ -178,9 +202,13 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window3ExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
-              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -190,9 +218,13 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window4ExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -207,9 +239,13 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window5ExteriorShading'/>
+              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window5InteriorShading'/>
-              <SummerShadingCoefficient>0.54</SummerShadingCoefficient>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>1.0</Depth>
@@ -224,6 +260,10 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window6ExteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window6InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>

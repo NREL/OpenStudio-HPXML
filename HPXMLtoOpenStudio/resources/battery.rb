@@ -1,8 +1,18 @@
 # frozen_string_literal: true
 
+# TODO
 class Battery
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param pv_systems [TODO] TODO
+  # @param battery [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @return [TODO] TODO
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
-
     charging_schedule = nil
     discharging_schedule = nil
     if is_ev
@@ -121,17 +131,29 @@ class Battery
     elcs.setFullyChargedCellVoltage(default_nominal_cell_voltage)
     elcs.setCellVoltageatEndofExponentialZone(default_nominal_cell_voltage)
 
-    elcds = model.getElectricLoadCenterDistributions
-    elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
-    if elcds.empty?
+    if is_ev
+      # EVs always get their own ELCD, not PV
       elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
-      elcd.setName('Battery elec load center dist')
+      elcd.setName("#{obj_name} elec load center dist")
       elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+      elcs.setInitialFractionalStateofCharge(maximum_storage_state_of_charge_fraction)
     else
-      elcd = elcds[0] # i.e., pv
-
-      elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
-      elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+      elcds = model.getElectricLoadCenterDistributions
+      elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
+      # Use PV ELCD if present
+      elcds.each do |elcd_|
+        if elcd_.name.to_s.include? "PVSystem"
+          elcd = elcd_
+          elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
+          elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+          break
+        end
+      end
+      if elcds.empty?
+        elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
+        elcd.setName("#{obj_name} elec load center dist")
+        elcd.setElectricalBussType('AlternatingCurrentWithStorage')
+      end
     end
 
     elcd.setMinimumStorageStateofChargeFraction(minimum_storage_state_of_charge_fraction)
@@ -203,6 +225,10 @@ class Battery
     elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
   end
 
+  # TODO
+  #
+  # @param has_garage [TODO] TODO
+  # @return [TODO] TODO
   def self.get_battery_default_values(has_garage = false)
     if has_garage
       location = HPXML::LocationGarage
@@ -217,22 +243,33 @@ class Battery
              usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
   end
 
+  # TODO
+  #
+  # @param nominal_capacity_kwh [TODO] TODO
+  # @param nominal_voltage [TODO] TODO
+  # @return [TODO] TODO
   def self.get_Ah_from_kWh(nominal_capacity_kwh, nominal_voltage)
     return nominal_capacity_kwh * 1000.0 / nominal_voltage
   end
 
+  # TODO
+  #
+  # @param nominal_capacity_ah [TODO] TODO
+  # @param nominal_voltage [TODO] TODO
+  # @return [TODO] TODO
   def self.get_kWh_from_Ah(nominal_capacity_ah, nominal_voltage)
     return nominal_capacity_ah * nominal_voltage / 1000.0
   end
 
+  # TODO
+  #
+  # @param battery [TODO] TODO
+  # @return [TODO] TODO
   def self.get_usable_capacity_kWh(battery)
     usable_capacity_kwh = battery.usable_capacity_kwh
     if usable_capacity_kwh.nil?
       usable_capacity_kwh = get_kWh_from_Ah(battery.usable_capacity_ah, battery.nominal_voltage) # kWh
     end
     return usable_capacity_kwh
-  end
-
-  def self.get_min_max_state_of_charge()
   end
 end
