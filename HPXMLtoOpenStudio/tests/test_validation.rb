@@ -202,6 +202,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-number-of-bedrooms-served-recirc' => ['Expected NumberofBedroomsServed to be greater than ../../../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/extension/SharedRecirculation, id: "HotWaterDistribution1"]'],
                             'invalid-number-of-bedrooms-served-water-heater' => ['Expected extension/NumberofBedroomsServed to be greater than ../../../BuildingSummary/BuildingConstruction/NumberofBedrooms [context: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"], id: "WaterHeatingSystem1"]'],
                             'invalid-number-of-conditioned-floors' => ['Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
+                            'invalid-number-of-conditioned-floors-above-grade' => ['Expected NumberofConditionedFloorsAboveGrade to be greater than 0 [context: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction, id: "MyBuilding"]'],
                             'invalid-pilot-light-heating-system' => ['Expected 1 element(s) for xpath: ../../HeatingSystemFuel[text()!="electricity"]'],
                             'invalid-soil-type' => ["Expected SoilType to be 'sand' or 'silt' or 'clay' or 'loam' or 'gravel' or 'unknown' [context: /HPXML/Building/BuildingDetails/BuildingSummary/Site/Soil, id: \"MyBuilding\"]"],
                             'invalid-shared-vent-in-unit-flowrate' => ['Expected RatedFlowRate to be greater than extension/InUnitFlowRate [context: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"], id: "VentilationFan1"]'],
@@ -616,6 +617,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-number-of-conditioned-floors'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 3
+      elsif ['invalid-number-of-conditioned-floors-above-grade'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 0
       elsif ['invalid-pilot-light-heating-system'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-floor-furnace-propane-only.xml')
         hpxml_bldg.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
@@ -1097,7 +1101,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'schedule-detailed-duplicate-columns' => ["Schedule column name 'occupants' is duplicated."],
                             'schedule-detailed-wrong-filename' => ["Schedules file path 'invalid-wrong-filename.csv' does not exist."],
                             'schedule-detailed-wrong-rows' => ["Schedule has invalid number of rows (8759) for column 'occupants'. Must be one of: 8760, 17520, 26280, 35040, 43800, 52560, 87600, 105120, 131400, 175200, 262800, 525600."],
-                            'schedule-file-max-power-ratio-with-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.'],
                             'skylight-not-connected-to-cond-space' => ["Skylight 'Skylight1' not connected to conditioned space; if it's a skylight with a shaft, use AttachedToFloor to connect it to conditioned space."],
                             'solar-thermal-system-with-combi-tankless' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater' => ["Water heating system 'WaterHeatingSystem1' connected to solar thermal system 'SolarThermalSystem1' cannot be attached to a desuperheater."],
@@ -1510,9 +1513,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         csv_data = CSV.read(File.join(File.dirname(hpxml.hpxml_path), hpxml_bldg.header.schedules_filepaths[0]))
         File.write(@tmp_csv_path, csv_data[0..-2].map(&:to_csv).join)
         hpxml_bldg.header.schedules_filepaths = [@tmp_csv_path]
-      elsif ['schedule-file-max-power-ratio-with-unit-multiplier'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-hvac-mini-split-heat-pump-ducted-max-power-ratio-schedule.xml')
-        hpxml_bldg.building_construction.number_of_units = 2
       elsif ['skylight-not-connected-to-cond-space'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-garage.xml')
         hpxml_bldg.skylights.add(id: 'Skylight1',

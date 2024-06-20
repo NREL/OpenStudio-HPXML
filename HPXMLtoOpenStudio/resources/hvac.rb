@@ -256,7 +256,7 @@ class HVAC
 
     apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
 
-    apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
+    apply_max_power_EMS(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
 
     if is_heatpump && hpxml_header.defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeAdvanced
       apply_advanced_defrost(model, htg_coil, air_loop_unitary, control_zone.spaces[0], htg_supp_coil, cooling_system, q_dot_defrost)
@@ -3749,7 +3749,6 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param air_loop_unitary [TODO] TODO
   # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
   # @param heating_system [TODO] TODO
@@ -3759,15 +3758,11 @@ class HVAC
   # @param htg_coil [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [TODO] TODO
-  def self.apply_max_power_EMS(model, runner, hpxml_bldg, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
+  def self.apply_max_power_EMS(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
     return if schedules_file.nil?
     return if clg_coil.nil? && htg_coil.nil?
 
     max_pow_ratio_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:HVACMaximumPowerRatio].name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
-    # Not allowed with unit multiplier for now
-    if not max_pow_ratio_sch.nil?
-      fail 'NumberofUnits greater than 1 is not supported for maximum power ratio schedules of variable speed hvac systems.' if hpxml_bldg.building_construction.number_of_units > 1
-    end
     return if max_pow_ratio_sch.nil?
 
     # Check maximum power ratio schedules only used in var speed systems,

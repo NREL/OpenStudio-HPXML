@@ -497,7 +497,8 @@ class HPXML < Object
                 hdl_slabs: 'Slabs',
                 hdl_ceilings: 'Ceilings',
                 hdl_infil: 'Infiltration',
-                hdl_vent: 'Ventilation' }
+                hdl_vent: 'Ventilation',
+                hdl_piping: 'Piping' }
   CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
                      cdl_sens_ducts: 'Ducts',
                      cdl_sens_windows: 'Windows',
@@ -511,6 +512,7 @@ class HPXML < Object
                      cdl_sens_infil: 'Infiltration',
                      cdl_sens_vent: 'Ventilation',
                      cdl_sens_intgains: 'InternalLoads',
+                     cdl_sens_blowerheat: 'BlowerHeat',
                      cdl_sens_aedexcursion: 'AEDExcursion',
                      cdl_sens_aed_curve: 'AEDCurve' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
@@ -4780,7 +4782,8 @@ class HPXML < Object
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
-             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor, :heating_autosizing_limit]
+             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor,
+             :heating_autosizing_limit]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
 
@@ -5779,7 +5782,8 @@ class HPXML < Object
       super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
-             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type,
+             :manualj_blower_fan_heat_btuh, :manualj_hot_water_piping_btuh]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -5860,15 +5864,23 @@ class HPXML < Object
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
-        XMLHelper.add_element(distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
+        XMLHelper.add_element(hydronic_distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        if not @manualj_hot_water_piping_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(hydronic_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'HotWaterPipingBtuh', @manualj_hot_water_piping_btuh, :float, @manualj_hot_water_piping_btuh_isdefaulted)
+        end
       end
       if [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
-        XMLHelper.add_element(distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
-        @duct_leakage_measurements.to_doc(distribution)
-        @ducts.to_doc(distribution)
-        XMLHelper.add_element(distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
+        XMLHelper.add_element(air_distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
+        @duct_leakage_measurements.to_doc(air_distribution)
+        @ducts.to_doc(air_distribution)
+        XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        if not @manualj_blower_fan_heat_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(air_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'BlowerFanHeatBtuh', @manualj_blower_fan_heat_btuh, :float, @manualj_blower_fan_heat_btuh_isdefaulted)
+        end
       end
 
       if not @duct_system_sealed.nil?
@@ -5895,12 +5907,14 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @manualj_hot_water_piping_btuh = XMLHelper.get_value(hydronic_distribution, 'extension/ManualJInputs/HotWaterPipingBtuh', :float)
       end
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
         @number_of_return_registers = XMLHelper.get_value(air_distribution, 'NumberofReturnRegisters', :integer)
         @duct_leakage_measurements.from_doc(air_distribution)
         @ducts.from_doc(air_distribution)
+        @manualj_blower_fan_heat_btuh = XMLHelper.get_value(air_distribution, 'extension/ManualJInputs/BlowerFanHeatBtuh', :float)
       end
     end
   end
