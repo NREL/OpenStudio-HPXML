@@ -239,7 +239,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] for proper exit status reporting, true if successful
+  # @return [Boolean] true if successful
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
@@ -711,7 +711,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # Initialize both the UtilityRate and UtilityBill objects.
   #
-  # @return [Hash, Hash] Fuel Type => UtilityRate object, Fuel type => UtilityBill object
+  # @return [Array<Hash, Hash>] Fuel Type => UtilityRate object, Fuel type => UtilityBill object
   def setup_utility_outputs()
     utility_rates = {}
     utility_rates[FT::Elec] = UtilityRate.new

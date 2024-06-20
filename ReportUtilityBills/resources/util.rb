@@ -415,7 +415,7 @@ class CalculateUtilityBill
   # @param net_monthly_energy_charge [Array<Double>] array of monthly net energy charges, in USD
   # @param annual_min_charge [Double] the minimum annual electricity charge, in USD
   # @param monthly_min_charge [Double] the minimum monthly electricity charge, in USD
-  # @return [Double, Array<Double>, Double] annual payments, array of monthly minimum charges, end of year bill credit, in USD
+  # @return [Array<Double, Array<Double>, Double>] annual payments, array of monthly minimum charges, end of year bill credit, in USD
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge)
     monthly_min_charges = [0] * 12
     if annual_min_charge.nil?
@@ -452,8 +452,8 @@ class CalculateUtilityBill
   # @param end_of_year_bill_credit [Double] end of year bill credit, in USD
   # @param net_metering_excess_sellback_type [String] net metering annual excess sellback rate type
   # @param net_metering_user_excess_sellback_rate [Double] user-specified net metering annual excess sellback rate
-  # @param net_elec [Double] net eletricity production for the run period
-  # @return [Double, Double] end of year bill credit, excess sellback
+  # @param net_elec [Double] net electricity production for the run period
+  # @return [Array<Double, Double>] end of year bill credit, excess sellback
   def self.apply_excess_sellback(end_of_year_bill_credit, net_metering_excess_sellback_type, net_metering_user_excess_sellback_rate, net_elec)
     # Note: Annual excess sellback can only be calculated at the end of the year on the net electricity consumption.
     if net_metering_excess_sellback_type == HPXML::PVAnnualExcessSellbackRateTypeRetailElectricityCost
