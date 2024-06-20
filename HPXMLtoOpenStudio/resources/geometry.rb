@@ -715,12 +715,11 @@ class Geometry
     fail "Unhandled location: #{location}."
   end
 
-  # TODO
+  # Calculates space heights as the max z coordinate minus the min z coordinate.
   #
   # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
-  # @return [TODO] TODO
+  # @return [Double] max z coordinate minus min z coordinate for a collection of spaces (ft)
   def self.get_height_of_spaces(spaces:)
-    # Calculates space heights as the max z coordinate minus the min z coordinate
     minzs = []
     maxzs = []
     spaces.each do |space|

@@ -411,11 +411,11 @@ class CalculateUtilityBill
 
   # For net metering calculations, calculate monthly payments, rollover, and min charges.
   #
-  # @param monthly_fixed_charge [Double] the sum of monthly fixed electricity charges, in USD
-  # @param net_monthly_energy_charge [Array<Double>] array of monthly net energy charges, in USD
-  # @param annual_min_charge [Double] the minimum annual electricity charge, in USD
-  # @param monthly_min_charge [Double] the minimum monthly electricity charge, in USD
-  # @return [Array<Double, Array<Double>, Double>] annual payments, array of monthly minimum charges, end of year bill credit, in USD
+  # @param monthly_fixed_charge [Double] the sum of monthly fixed electricity charges (USD)
+  # @param net_monthly_energy_charge [Array<Double>] array of monthly net energy charges (USD)
+  # @param annual_min_charge [Double] the minimum annual electricity charge (USD)
+  # @param monthly_min_charge [Double] the minimum monthly electricity charge  (USD)
+  # @return [Array<Double, Array<Double>, Double>] annual payments, array of monthly minimum charges, end of year bill credit (USD)
   def self.apply_min_charges(monthly_fixed_charge, net_monthly_energy_charge, annual_min_charge, monthly_min_charge)
     monthly_min_charges = [0] * 12
     if annual_min_charge.nil?
@@ -449,7 +449,7 @@ class CalculateUtilityBill
 
   # For net metering calculations, apply the excess sellback.
   #
-  # @param end_of_year_bill_credit [Double] end of year bill credit, in USD
+  # @param end_of_year_bill_credit [Double] end of year bill credit (USD)
   # @param net_metering_excess_sellback_type [String] net metering annual excess sellback rate type
   # @param net_metering_user_excess_sellback_rate [Double] user-specified net metering annual excess sellback rate
   # @param net_elec [Double] net electricity production for the run period
