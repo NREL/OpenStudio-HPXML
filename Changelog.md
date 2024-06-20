@@ -9,7 +9,8 @@ __New Features__
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
-- Allows additional flexibility for multiple `Attic`/`Foundation` elements.
+- Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
+- Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
 
 ## OpenStudio-HPXML v1.8.1
 
