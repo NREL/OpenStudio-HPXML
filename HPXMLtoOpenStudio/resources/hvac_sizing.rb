@@ -4760,7 +4760,7 @@ class MJValues
   end
   attr_accessor(:daily_range_temp_adjust, :cool_setpoint, :heat_setpoint, :cool_design_grains, :ctd, :htd,
                 :daily_range_num, :acf, :cool_indoor_wetbulb, :cool_indoor_enthalpy, :cool_outdoor_wetbulb,
-                :inside_air_dens, :cool_design_temps, :heat_design_temps, :p_atm, :latitude, :ground_conductivity)
+                :inside_air_dens, :cool_design_temps, :heat_design_temps, :p_atm, :p_psi, :latitude, :ground_conductivity)
 end
 
 # TODO
