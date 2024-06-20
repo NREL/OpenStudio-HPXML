@@ -81,7 +81,7 @@ module HVACSizing
       apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
       apply_hvac_final_capacities(hvac_sizings, hvac_heating, hvac_cooling, hpxml_bldg)
       apply_hvac_final_airflows(hvac_sizings, hvac_heating, hvac_cooling)
-      apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling)
+      apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling, hpxml_bldg)
       @all_hvac_sizings[hvac_system] = hvac_sizings
 
       if update_hpxml
@@ -239,7 +239,26 @@ module HVACSizing
 
     # Other
     mj.latitude = hpxml_bldg.latitude
-    mj.ground_conductivity = hpxml_bldg.site.ground_conductivity
+    if (not hpxml_bldg.site.soil_type.nil?) && (not hpxml_bldg.site.moisture_type.nil?)
+      if ([HPXML::SiteSoilTypeClay,
+           HPXML::SiteSoilTypeUnknown].include?(hpxml_bldg.site.soil_type) &&
+          [HPXML::SiteSoilMoistureTypeWet,
+           HPXML::SiteSoilMoistureTypeMixed].include?(hpxml_bldg.site.moisture_type))
+        # Heavy moist soil, R-value/ft=1.25 (Manual J default for Table 4A)
+        mj.ground_conductivity = 1.0 / 1.25
+      elsif ([HPXML::SiteSoilTypeSand,
+              HPXML::SiteSoilTypeGravel,
+              HPXML::SiteSoilTypeSilt].include?(hpxml_bldg.site.soil_type) &&
+             [HPXML::SiteSoilMoistureTypeDry].include?(hpxml_bldg.site.moisture_type))
+        # Light dry soil, R-value/ft=5.0
+        mj.ground_conductivity = 1.0 / 5.0
+      else
+        # Heavy dry or light moist soil, R-value/ft=2.0
+        mj.ground_conductivity = 1.0 / 2.0
+      end
+    else
+      mj.ground_conductivity = hpxml_bldg.site.ground_conductivity
+    end
 
     # Design Temperatures
 
@@ -2669,8 +2688,9 @@ module HVACSizing
   # @param hvac_sizings [TODO] TODO
   # @param weather [WeatherProcess] Weather object
   # @param hvac_cooling [TODO] TODO
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
-  def self.apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling)
+  def self.apply_hvac_ground_loop(mj, runner, hvac_sizings, weather, hvac_cooling, hpxml_bldg)
     cooling_type = get_hvac_cooling_type(hvac_cooling)
 
     return if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
@@ -2699,7 +2719,8 @@ module HVACSizing
       hvac_cooling_ap = hvac_cooling.additional_properties
       grout_conductivity = geothermal_loop.grout_conductivity
       pipe_r_value = gshp_hx_pipe_rvalue(hvac_cooling)
-      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(mj, weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
+      ground_conductivity = hpxml_bldg.site.ground_conductivity
+      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(mj, weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value, ground_conductivity)
       bore_length_heat = nom_length_heat * hvac_sizings.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length_cool = nom_length_cool * hvac_sizings.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
       bore_length = [bore_length_heat, bore_length_cool].max
@@ -3836,8 +3857,9 @@ module HVACSizing
   # @param bore_diameter [TODO] TODO
   # @param grout_conductivity [TODO] TODO
   # @param pipe_r_value [TODO] TODO
+  # @param ground_conductivity [TODO] TODO
   # @return [TODO] TODO
-  def self.gshp_hxbore_ft_per_ton(mj, weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value)
+  def self.gshp_hxbore_ft_per_ton(mj, weather, hvac_cooling_ap, bore_spacing, bore_diameter, grout_conductivity, pipe_r_value, ground_conductivity)
     if hvac_cooling_ap.u_tube_spacing_type == 'b'
       beta_0 = 17.4427
       beta_1 = -0.6052
@@ -3849,7 +3871,7 @@ module HVACSizing
       beta_1 = -0.94467
     end
 
-    r_value_ground = Math.log(bore_spacing / bore_diameter * 12.0) / 2.0 / Math::PI / mj.ground_conductivity
+    r_value_ground = Math.log(bore_spacing / bore_diameter * 12.0) / 2.0 / Math::PI / ground_conductivity
     r_value_grout = 1.0 / grout_conductivity / beta_0 / ((bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
     r_value_bore = r_value_grout + pipe_r_value / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
 

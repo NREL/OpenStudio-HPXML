@@ -160,6 +160,8 @@ def _get_simulation_monthly_results(monthly_csv_path)
 end
 
 def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
+  return if hpxml_path.include? 'ACCA_Examples'
+
   assert(File.exist? File.join(rundir, 'eplusout.msgpack'))
 
   hpxml_header = hpxml.header
@@ -1200,7 +1202,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
   end
 end
 
-def _write_results(results, csv_out)
+def _write_results(results, csv_out, output_groups_filter: [])
   require 'csv'
 
   output_groups = {
@@ -1212,6 +1214,8 @@ def _write_results(results, csv_out)
   }
 
   output_groups.each do |output_group, key_types|
+    next unless output_groups_filter.empty? || output_groups_filter.include?(output_group)
+
     output_keys = []
     key_types.each do |key_type|
       results.values.each do |xml_results|

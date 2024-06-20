@@ -25,7 +25,8 @@
           <SiteType>suburban</SiteType>
           <ShieldingofHome>normal</ShieldingofHome>
           <Soil>
-            <Conductivity>0.8</Conductivity>
+            <SoilType>unknown</SoilType>
+            <MoistureType>wet</MoistureType>
           </Soil>
         </Site>
         <BuildingConstruction>
