@@ -184,7 +184,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     get_generator_inputs(hpxml_bldg, epw_file, args)
 
     args[:resources_path] = File.join(File.dirname(__FILE__), 'resources')
-    schedule_generator = ScheduleGenerator.new(runner: runner, epw_file: epw_file, **args)
+    schedule_generator = ScheduleGenerator.new(runner: runner, hpxml_bldg: hpxml_bldg,
+                                               epw_file: epw_file, **args)
 
     success = schedule_generator.create(args: args)
     return false if not success
