@@ -6,7 +6,7 @@ class Fuel
   #
   # @param meters [Array<String>] array of EnergyPlus meter names
   # @param units [String] fuel units corresponding to HPXML::FuelTypeXXX
-  # @return nil
+  # @return [void]
   def initialize(meters: [], units:)
     @meters = meters
     @timeseries = []
@@ -19,7 +19,7 @@ end
 class UtilityRate
   # Initialize a UtilityRate object.
   #
-  # @return nil
+  # @return [void]
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
@@ -48,7 +48,7 @@ end
 class UtilityBill
   # Initialize a UtilityBill object.
   #
-  # @return nil
+  # @return [void]
   def initialize()
     @annual_energy_charge = 0.0
     @annual_fixed_charge = 0.0
@@ -136,7 +136,7 @@ class CalculateUtilityBill
   # @param fuels [Hash] Fuel type, is_production => Fuel object
   # @param rate [UtilityRate] UtilityRate object
   # @param bill [UtilityBill] UtilityBill object
-  # @return nil
+  # @return [void]
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     pv_fuel_time_series = fuels[[FT::Elec, true]].timeseries

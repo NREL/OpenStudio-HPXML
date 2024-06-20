@@ -346,7 +346,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [Double] the total height of the dwelling unit
-  # @return nil
+  # @return [void]
   def self.explode_surfaces(model:,
                             hpxml_bldg:,
                             walls_top:)
