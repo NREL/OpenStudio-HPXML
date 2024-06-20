@@ -25,6 +25,7 @@ class Location
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_site(model, hpxml_bldg)
+    # Note: None of these affect the model; see https://github.com/NREL/EnergyPlus/issues/10579.
     site = model.getSite
     site.setName("#{hpxml_bldg.city}_#{hpxml_bldg.state_code}")
     site.setLatitude(hpxml_bldg.latitude)

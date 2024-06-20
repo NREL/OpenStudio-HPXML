@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>76da98ae-b6d2-482d-a349-4a54056c8b36</version_id>
-  <version_modified>2024-06-20T15:11:51Z</version_modified>
+  <version_id>bcd0ffd0-9ccb-45a3-b226-82e05676195f</version_id>
+  <version_modified>2024-06-20T16:20:34Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -399,7 +399,7 @@
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>87D92843</checksum>
+      <checksum>646D452D</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -573,13 +573,13 @@
       <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6DB56B13</checksum>
+      <checksum>6239E428</checksum>
     </file>
     <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4DB5755A</checksum>
+      <checksum>E0B9EC1D</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
