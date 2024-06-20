@@ -265,8 +265,8 @@ module HPXMLDefaults
 
     if hpxml_bldg.header.manualj_humidity_setpoint.nil?
       hpxml_bldg.header.manualj_humidity_setpoint = 0.5 # 50%
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      psia = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, psia)
       if HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling) < 0
         # Dry summer climate per Manual J 18-1 Design Grains
         hpxml_bldg.header.manualj_humidity_setpoint = 0.45 # 45%
@@ -275,8 +275,8 @@ module HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_humidity_difference.nil?
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      psia = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, psia)
       hpxml_bldg.header.manualj_humidity_difference = HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling).round(1)
       hpxml_bldg.header.manualj_humidity_difference_isdefaulted = true
     end

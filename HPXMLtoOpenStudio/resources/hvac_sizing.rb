@@ -220,7 +220,8 @@ module HVACSizing
     alt_cnt = (hpxml_bldg.elevation / 1000.0).to_i
     mj.acf = MathTools.interp2(hpxml_bldg.elevation, alt_cnt * 1000.0, (alt_cnt + 1.0) * 1000.0, acfs[alt_cnt], acfs[alt_cnt + 1])
 
-    mj.p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
+    psia = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+    mj.p_atm = UnitConversions.convert(psia, 'psi', 'atm')
 
     # Calculate interior/outdoor wetbulb temperature for cooling
     mj.cool_indoor_wetbulb = Psychrometrics.Twb_fT_R_P(nil, mj.cool_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'))
@@ -230,7 +231,7 @@ module HVACSizing
     mj.cool_design_grains = hpxml_bldg.header.manualj_humidity_difference
 
     # Calculate indoor enthalpy in Btu/lb for cooling
-    hr_indoor_cooling = calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, mj.cool_setpoint, mj.p_atm)
+    hr_indoor_cooling = Psychrometrics.w_fT_R_P(mj.cool_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, psia)
     mj.cool_indoor_enthalpy = Psychrometrics.h_fT_w(mj.cool_setpoint, hr_indoor_cooling)
 
     # Inside air density
@@ -295,19 +296,6 @@ module HVACSizing
         mj.heat_design_temps[location] = process_design_temp_heating(mj, weather, location, hpxml_bldg)
       end
     end
-  end
-
-  # TODO
-  #
-  # @param cool_indoor_rh [TODO] TODO
-  # @param cool_indoor_setpoint [TODO] TODO
-  # @param p_atm [TODO] TODO
-  # @return [TODO] TODO
-  def self.calculate_indoor_hr(cool_indoor_rh, cool_indoor_setpoint, p_atm)
-    cool_setpoint_c = UnitConversions.convert(cool_indoor_setpoint, 'F', 'C')
-    pwsat = 6.11 * 10**(7.5 * cool_setpoint_c / (237.3 + cool_setpoint_c)) / 10.0 # kPa, using https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf
-    hr_indoor_cooling = (0.62198 * cool_indoor_rh * pwsat) / (UnitConversions.convert(p_atm, 'atm', 'kPa') - cool_indoor_rh * pwsat)
-    return hr_indoor_cooling
   end
 
   # TODO
