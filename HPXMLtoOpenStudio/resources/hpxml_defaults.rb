@@ -18,8 +18,8 @@ module HPXMLDefaults
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param convert_shared_systems [TODO] TODO
-  # @param design_load_details_output_file_path [TODO] TODO
-  # @param output_format [TODO] TODO
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
+  # @param output_format [String] Detailed HVAC sizing output file format ('csv', 'json', or 'msgpack')
   # @return nil
   def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true,
                  design_load_details_output_file_path: nil, output_format: 'csv')
@@ -3683,13 +3683,13 @@ module HPXMLDefaults
     end
   end
 
-  # Assigns default capacities/airflows for autosized HVAC equipment
+  # Assigns default capacities/airflows for autosized HPXML HVAC equipment.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherProcess] Weather object
-  # @param output_format [TODO] TODO
-  # @param design_load_details_output_file_path [TODO] TODO
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
   # @return nil
   def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
