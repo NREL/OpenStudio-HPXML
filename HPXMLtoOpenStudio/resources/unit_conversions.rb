@@ -154,8 +154,8 @@ module UnitConversions
   # unit convert() method, we use our own approach here.
   #
   # @param x [Double] value to be converted from
-  # @param from [TODO] TODO
-  # @param to [TODO] TODO
+  # @param from [String] type of unit to convert from
+  # @param to [String] type of unit to convert to
   # @return [Double] value converted to
   def self.convert(x, from, to)
     from_d = from.downcase
