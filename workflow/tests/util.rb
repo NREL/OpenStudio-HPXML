@@ -388,7 +388,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     end
     # Coil speed level EMS
     if hpxml_header.hvac_onoff_thermostat_deadband
-      next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # FIXME: speed level actuator throws this error when speed is set to 1 but no load
+      next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # Speed level actuator throws this error when speed is set to 1 but no load
     end
     # TODO: Check why this house produces this warning
     if hpxml_path.include? 'house044.xml'

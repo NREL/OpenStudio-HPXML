@@ -58,11 +58,9 @@
       <sch:assert role='ERROR' test='number(h:OnOffThermostatDeadbandTemperature) &gt; 0 or not(h:OnOffThermostatDeadbandTemperature)'>Expected OnOffThermostatDeadbandTemperature to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:HeatPumpBackupCapacityIncrement) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HeatPumpBackupCapacityIncrement</sch:assert>
       <sch:assert role='ERROR' test='number(h:HeatPumpBackupCapacityIncrement) &gt; 0 or not (h:HeatPumpBackupCapacityIncrement)'>HeatPumpBackupCapacityIncrement should be greater than 0.0</sch:assert>
-      <sch:assert role='ERROR' test='number(../h:Timestep) = 1 or not(h:HeatPumpBackupCapacityIncrement)'>Expected ../Timestep to be 1.0</sch:assert>
-      <sch:assert role='ERROR' test='number(../h:Timestep) = 1 or not(h:OnOffThermostatDeadbandTemperature)'>Expected ../Timestep to be 1.0</sch:assert>
     </sch:rule>
   </sch:pattern>
-  
+
   <sch:pattern>
     <sch:title>[OnOffThermostatDeadbandTemperature]</sch:title>
     <sch:rule context='/h:HPXML[h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:OnOffThermostatDeadbandTemperature]/h:Building/h:BuildingDetails'>
@@ -71,6 +69,14 @@
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionHeatLoadServed) = 0'>Expected sum(FractionHeatLoadServed) to be equal to 1</sch:assert>
       <sch:assert role='ERROR' test='sum(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) &gt;= 0.99 or count(h:Systems/h:HVAC/h:HVACPlant/*/h:FractionCoolLoadServed) = 0'>Expected sum(FractionCoolLoadServed) to be equal to 1</sch:assert>
       <sch:report role='WARN' test='number(../../h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:TemperatureCapacitanceMultiplier) &lt;= 1'>TemperatureCapacitanceMultiplier should typically be greater than 1.</sch:report>
+      <sch:assert role='ERROR' test='number(../../h:SoftwareInfo/h:extension/h:SimulationControl/h:Timestep) = 1'>Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[HeatPumpBackupCapacityIncrement]</sch:title>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:AdvancedResearchFeatures/h:HeatPumpBackupCapacityIncrement'>
+      <sch:assert role='ERROR' test='number(../../h:Timestep) = 1'>Expected ../../Timestep to be 1.0</sch:assert>
     </sch:rule>
   </sch:pattern>
 

@@ -119,8 +119,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'hvac-distribution-return-duct-leakage-missing' => ['Expected 1 element(s) for xpath: DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="CFM50" or Units="Percent") and TotalOrToOutside="to outside"] [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution[AirDistributionType[text()="regular velocity" or text()="gravity"]], id: "HVACDistribution1"]'],
                             'hvac-frac-load-served' => ['Expected sum(FractionHeatLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]',
                                                         'Expected sum(FractionCoolLoadServed) to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]'],
-                            'hvac-geb-timestep-ten-mins' => ['Expected ../Timestep to be 1.0'],
-                            'hvac-geb-timestep-missing' => ['Expected ../Timestep to be 1.0'],
+                            'hvac-geb-timestep-ten-mins' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0',
+                                                             'Expected ../../Timestep to be 1.0'],
+                            'hvac-geb-timestep-missing' => ['Expected ../../SoftwareInfo/extension/SimulationControl/Timestep to be 1.0'],
                             'hvac-geb-onoff-thermostat-heat-load-fraction-partial' => ['Expected sum(FractionHeatLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-cool-load-fraction-partial' => ['Expected sum(FractionCoolLoadServed) to be equal to 1'],
                             'hvac-geb-onoff-thermostat-negative-value' => ['Expected OnOffThermostatDeadbandTemperature to be greater than 0'],
@@ -423,7 +424,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
         hpxml_bldg.heat_pumps[-1].primary_heating_system = false
         hpxml_bldg.heat_pumps[-1].primary_cooling_system = false
       elsif ['hvac-geb-timestep-ten-mins'].include? error_case
-        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
+        hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-1-speed-geb.xml')
         hpxml.header.timestep = 10
       elsif ['hvac-geb-timestep-missing'].include? error_case
         hpxml, _hpxml_bldg = _create_hpxml('base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml')
@@ -1680,7 +1681,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'hvac-setpoint-adjustments' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-setbacks' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
                               'hvac-setpoint-adjustments-daily-schedules' => ['HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.'],
-                              'multistage-backup-more-than-4-stages' => ['E+ Currently only supports less than 4 stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage. Simulation continued.',
+                              'multistage-backup-more-than-4-stages' => ['EnergyPlus only supports 4 stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage.',
                                                                          'Calculated multi-stage backup coil capacity increment for last stage is not equal to user input, actual capacity increment is'],
                               'manualj-sum-space-num-occupants' => ['ManualJInputs/NumberofOccupants (4) does not match sum of conditioned spaces (5).'],
                               'manualj-sum-space-internal-loads-sensible' => ['ManualJInputs/InternalLoadsSensible (1000.0) does not match sum of conditioned spaces (1200.0).'],

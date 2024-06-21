@@ -12,7 +12,7 @@
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
           <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
-          <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
+          <HeatPumpBackupCapacityIncrement>17060.71</HeatPumpBackupCapacityIncrement>
         </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>

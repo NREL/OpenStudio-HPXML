@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
-          <BackupHeatingCapacityIncrement>17060.71</BackupHeatingCapacityIncrement>
+          <HeatPumpBackupCapacityIncrement>17060.71</HeatPumpBackupCapacityIncrement>
         </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>

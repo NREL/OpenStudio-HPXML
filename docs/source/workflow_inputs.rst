@@ -610,6 +610,10 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          
          \- Ground-source heat pumps
          
+         \- On-Off ThermostatDeadband Temperature
+         
+         \- Heat Pump Backup Capacity Increment
+         
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
 
