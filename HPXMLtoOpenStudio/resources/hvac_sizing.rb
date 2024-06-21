@@ -1749,8 +1749,7 @@ class HVACSizing
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
       #initial estimate for design airflow rate [cfm]
-      hvac_sizings.Cool_Airflow_Init = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
-      hvac_sizings.Cool_Airflow_Next = hvac_sizings.Cool_Airflow_Init
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Cool_Load_Sens, (mj.cool_setpoint - leaving_air_temp), cool_cap_rated)
 
       hr_indoor_cooling_local = calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, mj.cool_setpoint, mj.p_atm)
       #hr_indoor_cooling is calculated above in hvac_sizing.rb, but is calculated AFTER the method call of apply_hvac_equipment_adjustments. 
@@ -1764,12 +1763,12 @@ class HVACSizing
         #delta.abs is the normalized difference in design airflow between consecutive iterations
         #may need to change tolerance (delta.abs) or number of iterations as necessary
 
-        hvac_sizings.Cool_Airflow_Prev = hvac_sizings.Cool_Airflow_Next
+        cool_airflow_prev = hvac_sizings.Cool_Airflow
 
         #use coil ao factor in hvac.rb to calculate design SHR --> design sensible capacity --> use design sensible capacity to RECALCULATE design airflow. 
         #note: using MJ cooling setpoint as EDB in Psychrometrics.calculateSHR() ignores return duct losses
 
-        hvac_sizings.Design_SHR = Psychrometrics.CalculateSHR(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow_Next, hvac_cooling_ap.a_o, hr_indoor_cooling_local)
+        hvac_sizings.Design_SHR = Psychrometrics.CalculateSHR(runner, mj.cool_setpoint, UnitConversions.convert(mj.p_atm, 'atm', 'psi'), UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, hvac_cooling_ap.a_o, hr_indoor_cooling_local)
         #Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor
         #CFM changes in the iteration based on current value of hvac_sizings.Design_SHR 
         
@@ -1846,9 +1845,9 @@ class HVACSizing
         end
 
         # Calculate the final air flow rate using final sensible capacity at design
-        hvac_sizings.Cool_Airflow_Next = calc_airflow_rate_manual_s(mj, cool_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
+        hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_sens_cap_design, (mj.cool_setpoint - leaving_air_temp), hvac_sizings.Cool_Capacity)
 
-        delta = (hvac_sizings.Cool_Airflow_Next - hvac_sizings.Cool_Airflow_Prev) / hvac_sizings.Cool_Airflow_Prev
+        delta = (hvac_sizings.Cool_Airflow - cool_airflow_prev) / cool_airflow_prev
         #end iteration here
       end
 
@@ -4124,8 +4123,7 @@ end
 
 class HVACSizingValues
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, 
-                :Cool_Airflow, :Cool_Airflow_Init, :Cool_Airflow_Next, :Cool_Airflow_Prev, :Design_SHR,
-                :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
+                :Cool_Airflow, :Design_SHR, :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
                 :GSHP_Loop_Flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 
   def initialize
