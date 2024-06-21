@@ -472,13 +472,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param epw_path [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param weather [WeatherProcess] Weather object
   # @param debug [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param unit_num [TODO] TODO
-  # @return nil
+  # @return [void]
   def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version, unit_num)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
@@ -691,7 +691,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_roofs(runner, model, spaces)
     @hpxml_bldg.roofs.each do |roof|
       next if roof.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -809,7 +809,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_walls(runner, model, spaces)
     @hpxml_bldg.walls.each do |wall|
       next if wall.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -887,7 +887,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_rim_joists(runner, model, spaces)
     @hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
@@ -965,7 +965,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_floors(runner, model, spaces)
     @hpxml_bldg.floors.each do |floor|
       next if floor.net_area < 1.0 # skip modeling net surface area for surfaces comprised entirely of subsurface area
@@ -1447,7 +1447,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_windows(model, spaces)
     # We already stored @fraction_of_windows_operable, so lets remove the
     # fraction_operable properties from windows and re-collapse the enclosure
@@ -1550,7 +1550,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_skylights(model, spaces)
     surfaces = []
     shading_schedules = {}
@@ -1653,7 +1653,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return nil
+  # @return [void]
   def add_doors(model, spaces)
     surfaces = []
     @hpxml_bldg.doors.each do |door|

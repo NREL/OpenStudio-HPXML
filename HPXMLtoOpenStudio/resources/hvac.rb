@@ -5161,14 +5161,12 @@ class HVAC
     return true
   end
 
-  # TODO
+  # Returns a list of HPXML HVAC (heating/cooling) systems, incorporating whether multiple systems are
+  # connected to the same distribution system (e.g., a furnace + central air conditioner w/ the same ducts).
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
   def self.get_hpxml_hvac_systems(hpxml_bldg)
-    # Returns a list of heating/cooling systems, incorporating whether
-    # multiple systems are connected to the same distribution system
-    # (e.g., a furnace + central air conditioner w/ the same ducts).
     hvac_systems = []
 
     hpxml_bldg.cooling_systems.each do |cooling_system|
