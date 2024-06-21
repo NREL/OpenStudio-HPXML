@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# TODO
-class Airflow
+# Collection of methods related to airflow modeling (e.g., infiltration, natural ventilation,
+# mechanical ventilation, ducts, etc.).
+module Airflow
   # Constants
   InfilPressureExponent = 0.65
 
@@ -134,6 +135,7 @@ class Airflow
     conditioned_const_ach *= infil_values[:a_ext] unless conditioned_const_ach.nil?
     conditioned_ach50 *= infil_values[:a_ext] unless conditioned_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
+    unit_height_above_grade = hpxml_bldg.building_construction.unit_height_above_grade
 
     # Cooling season schedule
     # Applies to natural ventilation, not HVAC equipment.
@@ -144,11 +146,23 @@ class Airflow
     clg_ssn_sensor.setName('cool_season')
     clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
 
+    # Natural ventilation and whole house fans
     apply_natural_ventilation_and_whole_house_fan(model, hpxml_bldg.site, vent_fans_whf, open_window_area, clg_ssn_sensor, hpxml_bldg.header.natvent_days_per_week,
                                                   infil_values[:volume], infil_values[:height], unavailable_periods)
-    apply_infiltration_and_ventilation_fans(model, weather, hpxml_bldg.site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals,
-                                            has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_values[:volume], infil_values[:height],
-                                            vented_attic, vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, hpxml_bldg.elevation)
+
+    # Infiltration/ventilation for unconditioned spaces
+    apply_infiltration_to_garage(model, hpxml_bldg.site, conditioned_ach50, duct_lk_imbals)
+    apply_infiltration_to_unconditioned_basement(model, duct_lk_imbals)
+    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl, duct_lk_imbals)
+    apply_infiltration_to_unvented_crawlspace(model, duct_lk_imbals)
+    apply_infiltration_to_vented_attic(model, weather, hpxml_bldg.site, vented_attic, duct_lk_imbals)
+    apply_infiltration_to_unvented_attic(model, duct_lk_imbals)
+
+    # Infiltration/ventilation for conditioned space
+    apply_infiltration_ventilation_to_conditioned(model, hpxml_bldg.site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_values[:volume],
+                                                  infil_values[:height], weather, vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space,
+                                                  clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, hpxml_bldg.elevation, duct_lk_imbals,
+                                                  unit_height_above_grade)
   end
 
   # TODO
@@ -2154,10 +2168,11 @@ class Airflow
   # @param unavailable_periods [TODO] TODO
   # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
+  # @param unit_height_above_grade [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
                                                          vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals)
+                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals, unit_height_above_grade)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -2203,7 +2218,8 @@ class Airflow
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
-    apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
+    apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
+                                      infil_height, unit_height_above_grade, elevation)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -2240,47 +2256,6 @@ class Airflow
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
-  # @param site [TODO] TODO
-  # @param vent_fans_mech [TODO] TODO
-  # @param vent_fans_kitchen [TODO] TODO
-  # @param vent_fans_bath [TODO] TODO
-  # @param vented_dryers [TODO] TODO
-  # @param duct_lk_imbals [TODO] TODO
-  # @param has_flue_chimney_in_cond_space [TODO] TODO
-  # @param conditioned_ach50 [TODO] TODO
-  # @param conditioned_const_ach [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param vented_attic [TODO] TODO
-  # @param vented_crawl [TODO] TODO
-  # @param clg_ssn_sensor [TODO] TODO
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param vent_fans_cfis_suppl [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @param elevation [Double] Elevation of the building site (ft)
-  # @return [TODO] TODO
-  def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals,
-                                                   has_flue_chimney_in_cond_space, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, vented_attic,
-                                                   vented_crawl, clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, elevation)
-
-    # Infiltration for unconditioned spaces
-    apply_infiltration_to_garage(model, site, conditioned_ach50, duct_lk_imbals)
-    apply_infiltration_to_unconditioned_basement(model, duct_lk_imbals)
-    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl, duct_lk_imbals)
-    apply_infiltration_to_unvented_crawlspace(model, duct_lk_imbals)
-    apply_infiltration_to_vented_attic(model, weather, site, vented_attic, duct_lk_imbals)
-    apply_infiltration_to_unvented_attic(model, duct_lk_imbals)
-
-    # Infiltration/ventilation for conditioned space
-    apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
-                                                  vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                  vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals)
-  end
-
-  # TODO
-  #
   # @param site [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
@@ -2289,9 +2264,11 @@ class Airflow
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
+  # @param unit_height_above_grade [TODO] TODO
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
-  def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
+  def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
+                                             infil_height, unit_height_above_grade, elevation)
     site_ap = site.additional_properties
 
     if conditioned_ach50.to_f > 0
@@ -2377,7 +2354,7 @@ class Airflow
       infil_program.addLine("Set s_m = #{site_ap.ashrae_terrain_thickness}")
       infil_program.addLine("Set s_s = #{site_ap.ashrae_site_terrain_thickness}")
       infil_program.addLine("Set z_m = #{UnitConversions.convert(site_ap.height, 'ft', 'm')}")
-      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height, 'ft', 'm')}")
+      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height + unit_height_above_grade, 'ft', 'm')}")
       infil_program.addLine('Set f_t = (((s_m/z_m)^p_m)*((z_s/s_s)^p_s))')
       infil_program.addLine("Set Tdiff = #{@tin_sensor.name}-#{@tout_sensor.name}")
       infil_program.addLine('Set dT = @Abs Tdiff')

@@ -44,7 +44,7 @@ module HPXMLDefaults
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
-    apply_building_construction(hpxml_bldg, cfa, nbeds)
+    apply_building_construction(hpxml.header, hpxml_bldg, cfa, nbeds)
     apply_zone_spaces(hpxml_bldg)
     apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     apply_attics(hpxml_bldg)
@@ -819,11 +819,12 @@ module HPXMLDefaults
 
   # Assigns default values for omitted optional inputs in the HPXML::BuildingConstruction object
   #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [void]
-  def self.apply_building_construction(hpxml_bldg, cfa, nbeds)
+  def self.apply_building_construction(hpxml_header, hpxml_bldg, cfa, nbeds)
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
       # ASHRAE 62.2 default for average floor to ceiling height
@@ -841,6 +842,17 @@ module HPXMLDefaults
     if hpxml_bldg.building_construction.number_of_units.nil?
       hpxml_bldg.building_construction.number_of_units = 1
       hpxml_bldg.building_construction.number_of_units_isdefaulted = true
+    end
+    if hpxml_bldg.building_construction.unit_height_above_grade.nil?
+      # Check if all floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
+      floors = hpxml_bldg.floors.select { |floor| floor.is_floor && floor.is_thermal_boundary }
+      exterior_floors = floors.select { |floor| floor.is_exterior }
+      if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && !hpxml_header.apply_ashrae140_assumptions
+        hpxml_bldg.building_construction.unit_height_above_grade = 2.0
+      else
+        hpxml_bldg.building_construction.unit_height_above_grade = 0.0
+      end
+      hpxml_bldg.building_construction.unit_height_above_grade_isdefaulted = true
     end
   end
 

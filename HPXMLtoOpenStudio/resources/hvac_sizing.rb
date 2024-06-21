@@ -1335,8 +1335,7 @@ module HVACSizing
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-    sla = infil_values[:sla] * infil_values[:a_ext]
-    ela = sla * cfa
+    ela = infil_values[:sla] * cfa * infil_values[:a_ext] # Account for exterior exposure
 
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
@@ -1375,6 +1374,18 @@ module HVACSizing
     ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
     windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
     windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml_bldg.building_construction.residential_facility_type
+      if hpxml_bldg.building_construction.unit_height_above_grade > 0
+        # Scale default wind speed for height (a_exponent from Figure A15-1)
+        a_exponent = { HPXML::ShieldingNormal => 0.22,
+                       HPXML::ShieldingExposed => 0.14,
+                       HPXML::ShieldingWellShielded => 0.33 }[hpxml_bldg.site.shielding_of_home]
+        estimated_story = (hpxml_bldg.building_construction.unit_height_above_grade + infil_values[:height]) / infil_values[:height]
+        windspeed_cooling_mph *= estimated_story**a_exponent
+        windspeed_heating_mph *= estimated_story**a_exponent
+      end
+    end
 
     # Calculate infiltration airflow rates
     icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5

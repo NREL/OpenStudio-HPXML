@@ -2,6 +2,7 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
