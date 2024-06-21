@@ -55,7 +55,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.header.sim_calendar_year = 2020
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, _default_hpxml_bldg = _test_measure()
-    _test_default_header_values(default_hpxml, 60, 1, 1, 12, 31, 2012, 1.0, nil, nil, nil)
+    _test_default_header_values(default_hpxml, 60, 1, 1, 12, 31, 2012, 7.0, nil, nil, nil)
 
     # Test defaults - southern hemisphere
     hpxml, _hpxml_bldg = _create_hpxml('base-location-capetown-zaf.xml')
@@ -68,7 +68,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml.header.temperature_capacitance_multiplier = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, _default_hpxml_bldg = _test_measure()
-    _test_default_header_values(default_hpxml, 60, 1, 1, 12, 31, 2007, 1.0, nil, nil, nil)
+    _test_default_header_values(default_hpxml, 60, 1, 1, 12, 31, 2007, 7.0, nil, nil, nil)
   end
 
   def test_emissions_factors
@@ -206,7 +206,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, _default_hpxml_bldg = _test_measure()
     default_hpxml.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.1252, 1.0593, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, 12, 12, nil, nil, nil, nil, nil, 0.1242, 1.0468, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
 
     # Test defaults w/ electricity JSON file
@@ -216,7 +216,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     default_hpxml, _default_hpxml_bldg = _test_measure()
     default_hpxml.header.utility_bill_scenarios.each do |scenario|
-      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 1.0593, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
+      _test_default_bills_values(scenario, nil, 12, nil, nil, nil, nil, nil, nil, 1.0468, nil, nil, nil, nil, nil, HPXML::PVCompensationTypeNetMetering, HPXML::PVAnnualExcessSellbackRateTypeUserSpecified, 0.03, nil, nil, 0)
     end
   end
 
@@ -290,7 +290,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', 'Denver Intl Ap', -7, 5413.4, 39.83, -104.65, 3, HPXML::HeatPumpSizingHERS, false,
-                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.7, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
+                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.8, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
 
     # Test defaults - DST in weather file
     hpxml, hpxml_bldg = _create_hpxml('base-location-AMY-2012.xml')
@@ -1450,13 +1450,13 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 698, nil, true, 500, 1.0)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, nil, nil, true, 500, 1.0)
 
     # Test defaults w/o pilot
     hpxml_bldg.heating_systems[0].pilot_light = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, 698, nil, false, nil, 1.0)
+    _test_default_floor_furnace_values(default_hpxml_bldg.heating_systems[0], 0, nil, nil, false, nil, 1.0)
   end
 
   def test_electric_resistance
@@ -1552,14 +1552,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_capacity = 12345
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, nil, 12345, 1.0)
+    _test_default_space_heater_values(default_hpxml_bldg.heating_systems[0], 22, nil, 12345, 1.0)
 
     # Test autosizing with factors
     hpxml_bldg.heating_systems[0].heating_capacity = nil
     hpxml_bldg.heating_systems[0].heating_autosizing_factor = 1.2
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, 1.2)
+    _test_default_space_heater_values(default_hpxml_bldg.heating_systems[0], 22, nil, nil, 1.2)
 
     # Test defaults
     hpxml_bldg.heating_systems[0].fan_watts = nil
@@ -1568,7 +1568,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.heating_systems[0].heating_autosizing_limit = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_portable_heater_values(default_hpxml_bldg.heating_systems[0], 0, nil, nil, 1.0)
+    _test_default_space_heater_values(default_hpxml_bldg.heating_systems[0], 0, nil, nil, 1.0)
   end
 
   def test_fireplaces
@@ -2194,7 +2194,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_hvac_control_season_values(default_hpxml_bldg.hvac_controls[0], 1, 1, 12, 31, 1, 1, 12, 31)
   end
 
-  def test_hvac_distribution
+  def test_hvac_distribution_air
     # Test inputs not overridden by defaults
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
     hpxml_bldg.hvac_distributions[0].conditioned_floor_area_served = 2700.0
@@ -2209,6 +2209,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.hvac_distributions[0].ducts[1].duct_effective_r_value = 3.21
     hpxml_bldg.hvac_distributions[0].ducts[0].duct_fraction_rectangular = 0.33
     hpxml_bldg.hvac_distributions[0].ducts[1].duct_fraction_rectangular = 0.77
+    hpxml_bldg.hvac_distributions[0].manualj_blower_fan_heat_btuh = 1234.0
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     expected_supply_locations = [HPXML::LocationAtticUnvented]
@@ -2226,13 +2227,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.33]
     expected_return_rect_fracs = [0.77]
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 1234.0)
 
     # Test defaults w/ conditioned basement
     hpxml_bldg.hvac_distributions[0].number_of_return_registers = nil
+    hpxml_bldg.hvac_distributions[0].manualj_blower_fan_heat_btuh = nil
     hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
       duct.duct_location = nil
       duct.duct_surface_area = nil
@@ -2262,10 +2264,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [1.0]
     expected_return_rect_fracs = [0.0]
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ multiple foundations
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-multiple.xml')
@@ -2296,10 +2298,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25]
     expected_return_rect_fracs = [1.0]
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ foundation exposed to ambient
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-ambient.xml')
@@ -2330,10 +2332,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25]
     expected_return_rect_fracs = [1.0]
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ building/unit adjacent to other housing unit
     hpxml, hpxml_bldg = _create_hpxml('base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml')
@@ -2364,10 +2366,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25]
     expected_return_rect_fracs = [1.0]
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ 2-story building
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories.xml')
@@ -2398,10 +2400,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25] * 4
     expected_return_rect_fracs = [1.0] * 4
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ 1-story building & multiple HVAC systems
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-multiple.xml')
@@ -2436,10 +2438,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25] * 2 * default_hpxml_bldg.hvac_distributions.size
     expected_return_rect_fracs = [1.0] * 2 * default_hpxml_bldg.hvac_distributions.size
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ 2-story building & multiple HVAC systems
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-multiple.xml')
@@ -2475,10 +2477,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25] * 4 * default_hpxml_bldg.hvac_distributions.size
     expected_return_rect_fracs = [1.0] * 4 * default_hpxml_bldg.hvac_distributions.size
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
 
     # Test defaults w/ 2-story building & multiple HVAC systems & duct area fractions
     hpxml, hpxml_bldg = _create_hpxml('base-hvac-multiple.xml')
@@ -2519,10 +2521,25 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     expected_supply_rect_fracs = [0.25] * 2 * default_hpxml_bldg.hvac_distributions.size
     expected_return_rect_fracs = [1.0] * 2 * default_hpxml_bldg.hvac_distributions.size
     expected_n_return_registers = default_hpxml_bldg.building_construction.number_of_conditioned_floors
-    _test_default_duct_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
-                              expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
-                              expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
-                              expected_supply_rect_fracs, expected_return_rect_fracs)
+    _test_default_air_distribution_values(default_hpxml_bldg, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas,
+                                          expected_supply_fracs, expected_return_fracs, expected_n_return_registers, expected_supply_area_mults, expected_return_area_mults,
+                                          expected_supply_buried_levels, expected_return_buried_levels, expected_supply_effective_rvalues, expected_return_effective_rvalues,
+                                          expected_supply_rect_fracs, expected_return_rect_fracs, 0.0)
+  end
+
+  def test_hvac_distribution_hydronic
+    # Test inputs not overridden by defaults
+    hpxml, hpxml_bldg = _create_hpxml('base-hvac-boiler-gas-central-ac-1-speed.xml')
+    hpxml_bldg.hvac_distributions[0].manualj_hot_water_piping_btuh = 1234.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_hydronic_distribution_values(default_hpxml_bldg, 1234.0)
+
+    # Test defaults
+    hpxml_bldg.hvac_distributions[0].manualj_hot_water_piping_btuh = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_hydronic_distribution_values(default_hpxml_bldg, 0.0)
   end
 
   def test_mech_ventilation_fans
@@ -4659,7 +4676,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def _test_default_portable_heater_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, heating_autosizing_factor)
+  def _test_default_space_heater_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity, heating_autosizing_factor)
     assert_equal(fan_watts, heating_system.fan_watts)
     if heating_airflow_cfm.nil? # nil implies an autosized value
       assert(heating_system.heating_airflow_cfm > 0)
@@ -4667,20 +4684,6 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       assert_in_delta(heating_airflow_cfm, heating_system.heating_airflow_cfm, 1.0)
     end
     assert_equal(heating_autosizing_factor, heating_system.heating_autosizing_factor)
-    if heating_capacity.nil?
-      assert(heating_system.heating_capacity > 0)
-    else
-      assert_equal(heating_capacity, heating_system.heating_capacity)
-    end
-  end
-
-  def _test_default_fixed_heater_values(heating_system, fan_watts, heating_airflow_cfm, heating_capacity)
-    assert_equal(fan_watts, heating_system.fan_watts)
-    if heating_airflow_cfm.nil? # nil implies an autosized value
-      assert(heating_system.heating_airflow_cfm > 0)
-    else
-      assert_equal(heating_airflow_cfm, heating_system.heating_airflow_cfm)
-    end
     if heating_capacity.nil?
       assert(heating_system.heating_capacity > 0)
     else
@@ -5025,16 +5028,17 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(clg_season_end_day, hvac_control.seasons_cooling_end_day)
   end
 
-  def _test_default_duct_values(hpxml_bldg, supply_locations, return_locations, supply_areas, return_areas,
-                                supply_fracs, return_fracs, n_return_registers, supply_area_mults, return_area_mults,
-                                supply_buried_levels, return_buried_levels, supply_effective_rvalues, return_effective_rvalues,
-                                supply_rect_fracs, return_rect_fracs)
+  def _test_default_air_distribution_values(hpxml_bldg, supply_locations, return_locations, supply_areas, return_areas,
+                                            supply_fracs, return_fracs, n_return_registers, supply_area_mults, return_area_mults,
+                                            supply_buried_levels, return_buried_levels, supply_effective_rvalues, return_effective_rvalues,
+                                            supply_rect_fracs, return_rect_fracs, manualj_blower_fan_heat_btuh)
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      next unless [HPXML::HVACDistributionTypeAir].include? hvac_distribution.distribution_system_type
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
       assert_equal(n_return_registers, hvac_distribution.number_of_return_registers)
+      assert_equal(manualj_blower_fan_heat_btuh, hvac_distribution.manualj_blower_fan_heat_btuh)
       hvac_distribution.ducts.each do |duct|
         if duct.duct_type == HPXML::DuctTypeSupply
           assert_equal(supply_locations[supply_duct_idx], duct.duct_location)
@@ -5056,6 +5060,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
           return_duct_idx += 1
         end
       end
+    end
+  end
+
+  def _test_default_hydronic_distribution_values(hpxml_bldg, manualj_hot_water_piping_btuh)
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+
+      assert_equal(manualj_hot_water_piping_btuh, hvac_distribution.manualj_hot_water_piping_btuh)
     end
   end
 

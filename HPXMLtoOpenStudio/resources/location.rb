@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
+# TODO
 class Location
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply(model, weather, epw_file, hpxml_header, hpxml_bldg)
     apply_year(model, hpxml_header, epw_file)
     apply_site(model, hpxml_bldg)
@@ -8,9 +17,15 @@ class Location
     apply_ground_temps(model, weather, hpxml_bldg)
   end
 
-  private
+  # FIXME: The following class methods are meant to be private.
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_site(model, hpxml_bldg)
+    # Note: None of these affect the model; see https://github.com/NREL/EnergyPlus/issues/10579.
     site = model.getSite
     site.setName("#{hpxml_bldg.city}_#{hpxml_bldg.state_code}")
     site.setLatitude(hpxml_bldg.latitude)
@@ -19,6 +34,12 @@ class Location
     site.setElevation(UnitConversions.convert(hpxml_bldg.elevation, 'ft', 'm').round)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.apply_year(model, hpxml_header, epw_file)
     if Date.leap?(hpxml_header.sim_calendar_year)
       n_hours = epw_file.data.size
@@ -31,6 +52,11 @@ class Location
     year_description.setCalendarYear(hpxml_header.sim_calendar_year)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_dst(model, hpxml_bldg)
     return unless hpxml_bldg.dst_enabled
 
@@ -43,6 +69,12 @@ class Location
     run_period_control_daylight_saving_time.setEndDate(dst_end_date)
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherProcess] Weather object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.apply_ground_temps(model, weather, hpxml_bldg)
     # Shallow ground temperatures only currently used for ducts located under slab
     sgts = model.getSiteGroundTemperatureShallow
@@ -57,6 +89,9 @@ class Location
     end
   end
 
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.get_climate_zones
     zones_csv = File.join(File.dirname(__FILE__), 'data', 'climate_zones.csv')
     if not File.exist?(zones_csv)
@@ -66,6 +101,10 @@ class Location
     return zones_csv
   end
 
+  # TODO
+  #
+  # @param wmo [TODO] TODO
+  # @return [TODO] TODO
   def self.get_climate_zone_iecc(wmo)
     zones_csv = get_climate_zones
 
@@ -77,6 +116,11 @@ class Location
     return
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_path [TODO] TODO
+  # @return [TODO] TODO
   def self.get_epw_path(hpxml_bldg, hpxml_path)
     epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
     abs_epw_path = File.absolute_path(epw_filepath)
@@ -108,6 +152,11 @@ class Location
     return abs_epw_path
   end
 
+  # TODO
+  #
+  # @param sim_calendar_year [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.get_sim_calendar_year(sim_calendar_year, epw_file)
     if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
       sim_calendar_year = epw_file.startDateActualYear.get

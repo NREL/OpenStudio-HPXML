@@ -57,6 +57,8 @@ class HPXML < Object
   # FUTURE: Move some of these to within child classes (e.g., HPXML::Attic class)
   AddressTypeMailing = 'mailing'
   AddressTypeStreet = 'street'
+  AdvancedResearchDefrostModelTypeStandard = 'standard'
+  AdvancedResearchDefrostModelTypeAdvanced = 'advanced'
   AirTypeFanCoil = 'fan coil'
   AirTypeGravity = 'gravity'
   AirTypeHighVelocity = 'high velocity'
@@ -495,7 +497,8 @@ class HPXML < Object
                 hdl_slabs: 'Slabs',
                 hdl_ceilings: 'Ceilings',
                 hdl_infil: 'Infiltration',
-                hdl_vent: 'Ventilation' }
+                hdl_vent: 'Ventilation',
+                hdl_piping: 'Piping' }
   CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
                      cdl_sens_ducts: 'Ducts',
                      cdl_sens_windows: 'Windows',
@@ -509,6 +512,7 @@ class HPXML < Object
                      cdl_sens_infil: 'Infiltration',
                      cdl_sens_vent: 'Ventilation',
                      cdl_sens_intgains: 'InternalLoads',
+                     cdl_sens_blowerheat: 'BlowerHeat',
                      cdl_sens_aedexcursion: 'AEDExcursion',
                      cdl_sens_aed_curve: 'AEDCurve' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
@@ -775,7 +779,8 @@ class HPXML < Object
              :software_program_version, :apply_ashrae140_assumptions, :temperature_capacitance_multiplier, :timestep,
              :sim_begin_month, :sim_begin_day, :sim_end_month, :sim_end_day, :sim_calendar_year,
              :eri_calculation_version, :co2index_calculation_version, :energystar_calculation_version,
-             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim]
+             :iecc_eri_calculation_version, :zerh_calculation_version, :whole_sfa_or_mf_building_sim,
+             :defrost_model_type]
     attr_accessor(*ATTRS)
     attr_reader(:emissions_scenarios)
     attr_reader(:utility_bill_scenarios)
@@ -835,7 +840,7 @@ class HPXML < Object
         calculation = XMLHelper.add_element(extension, element_name)
         XMLHelper.add_element(calculation, 'Version', calculation_version, :string)
       end
-      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?)
+      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day.nil?) || (not @temperature_capacitance_multiplier.nil?) || (not @defrost_model_type.nil?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
         XMLHelper.add_element(simulation_control, 'Timestep', @timestep, :integer, @timestep_isdefaulted) unless @timestep.nil?
@@ -844,7 +849,11 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndMonth', @sim_end_month, :integer, @sim_end_month_isdefaulted) unless @sim_end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', @sim_end_day, :integer, @sim_end_day_isdefaulted) unless @sim_end_day.nil?
         XMLHelper.add_element(simulation_control, 'CalendarYear', @sim_calendar_year, :integer, @sim_calendar_year_isdefaulted) unless @sim_calendar_year.nil?
-        XMLHelper.add_element(simulation_control, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
+        if (not @defrost_model_type.nil?) || (not @temperature_capacitance_multiplier.nil?)
+          advanced_research_features = XMLHelper.create_elements_as_needed(simulation_control, ['AdvancedResearchFeatures'])
+          XMLHelper.add_element(advanced_research_features, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
+          XMLHelper.add_element(advanced_research_features, 'DefrostModelType', @defrost_model_type, :string, @defrost_model_type_isdefaulted) unless @defrost_model_type.nil?
+        end
       end
       @emissions_scenarios.to_doc(software_info)
       @utility_bill_scenarios.to_doc(software_info)
@@ -871,7 +880,8 @@ class HPXML < Object
       @sim_end_month = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth', :integer)
       @sim_end_day = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth', :integer)
       @sim_calendar_year = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/CalendarYear', :integer)
-      @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/TemperatureCapacitanceMultiplier', :float)
+      @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier', :float)
+      @defrost_model_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType', :string)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
@@ -1855,6 +1865,11 @@ class HPXML < Object
 
               subsurf.attached_to_roof_idref = surf.id
             end
+            @skylights.each do |subsurf|
+              next unless subsurf.attached_to_floor_idref == surf2.id
+
+              subsurf.attached_to_floor_idref = surf.id
+            end
 
             # Remove old surface
             surfaces[j].delete
@@ -2283,6 +2298,15 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
+      if zone_type == ZoneTypeConditioned
+        # Check all surfaces attached to the zone are adjacent to conditioned space
+        surfaces.each do |surface|
+          next if HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+          next if HPXML::conditioned_locations_this_unit.include? surface.exterior_adjacent_to
+
+          errors << "Surface '#{surface.id}' is not adjacent to conditioned space but was assigned to conditioned Zone '#{@id}'."
+        end
+      end
       return errors
     end
 
@@ -2449,7 +2473,7 @@ class HPXML < Object
     end
 
     def skylights
-      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id }
+      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id || ((not s.floor.nil?) && s.floor.attached_to_space_idref == @id) }
     end
 
     def surfaces
@@ -3247,14 +3271,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3448,14 +3465,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOutside ||
-          @exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -3715,14 +3725,7 @@ class HPXML < Object
     end
 
     def is_exposed
-      # Ground shouldn't be included considering this is for infiltration?
-      if HPXML::is_conditioned(self) &&
-         (@exterior_adjacent_to == LocationOtherNonFreezingSpace ||
-          @exterior_adjacent_to == LocationGarage)
-        return true
-      end
-
-      return false
+      return HPXML::is_exposed(self)
     end
 
     def is_interior
@@ -4435,7 +4438,8 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref, :attached_to_floor_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref,
+             :attached_to_floor_idref, :curb_area, :curb_assembly_r_value, :shaft_area, :shaft_assembly_r_value]
     attr_accessor(*ATTRS)
 
     def roof
@@ -4547,6 +4551,16 @@ class HPXML < Object
         attached_to_floor = XMLHelper.add_element(skylight, 'AttachedToFloor')
         XMLHelper.add_attribute(attached_to_floor, 'idref', @attached_to_floor_idref)
       end
+      if (not @curb_area.nil?) || (not @curb_assembly_r_value.nil?)
+        curb = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Curb'])
+        XMLHelper.add_element(curb, 'Area', @curb_area, :float) unless @curb_area.nil?
+        XMLHelper.add_element(curb, 'AssemblyEffectiveRValue', @curb_assembly_r_value, :float) unless @curb_assembly_r_value.nil?
+      end
+      if (not @shaft_area.nil?) || (not @shaft_assembly_r_value.nil?)
+        shaft = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Shaft'])
+        XMLHelper.add_element(shaft, 'Area', @shaft_area, :float) unless @shaft_area.nil?
+        XMLHelper.add_element(shaft, 'AssemblyEffectiveRValue', @shaft_assembly_r_value, :float) unless @shaft_assembly_r_value.nil?
+      end
     end
 
     def from_doc(skylight)
@@ -4576,6 +4590,10 @@ class HPXML < Object
       @attached_to_roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
       @attached_to_floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
       @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
+      @curb_area = XMLHelper.get_value(skylight, 'extension/Curb/Area', :float)
+      @curb_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Curb/AssemblyEffectiveRValue', :float)
+      @shaft_area = XMLHelper.get_value(skylight, 'extension/Shaft/Area', :float)
+      @shaft_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Shaft/AssemblyEffectiveRValue', :float)
     end
   end
 
@@ -4760,7 +4778,8 @@ class HPXML < Object
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
-             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor, :heating_autosizing_limit]
+             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor,
+             :heating_autosizing_limit]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
 
@@ -5760,7 +5779,8 @@ class HPXML < Object
       super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
-             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type,
+             :manualj_blower_fan_heat_btuh, :manualj_hot_water_piping_btuh]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -5841,15 +5861,23 @@ class HPXML < Object
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
-        XMLHelper.add_element(distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
+        XMLHelper.add_element(hydronic_distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        if not @manualj_hot_water_piping_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(hydronic_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'HotWaterPipingBtuh', @manualj_hot_water_piping_btuh, :float, @manualj_hot_water_piping_btuh_isdefaulted)
+        end
       end
       if [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
-        XMLHelper.add_element(distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
-        @duct_leakage_measurements.to_doc(distribution)
-        @ducts.to_doc(distribution)
-        XMLHelper.add_element(distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
+        XMLHelper.add_element(air_distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
+        @duct_leakage_measurements.to_doc(air_distribution)
+        @ducts.to_doc(air_distribution)
+        XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        if not @manualj_blower_fan_heat_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(air_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'BlowerFanHeatBtuh', @manualj_blower_fan_heat_btuh, :float, @manualj_blower_fan_heat_btuh_isdefaulted)
+        end
       end
 
       if not @duct_system_sealed.nil?
@@ -5876,12 +5904,14 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @manualj_hot_water_piping_btuh = XMLHelper.get_value(hydronic_distribution, 'extension/ManualJInputs/HotWaterPipingBtuh', :float)
       end
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
         @number_of_return_registers = XMLHelper.get_value(air_distribution, 'NumberofReturnRegisters', :integer)
         @duct_leakage_measurements.from_doc(air_distribution)
         @ducts.from_doc(air_distribution)
+        @manualj_blower_fan_heat_btuh = XMLHelper.get_value(air_distribution, 'extension/ManualJInputs/BlowerFanHeatBtuh', :float)
       end
     end
   end
@@ -8340,6 +8370,16 @@ class HPXML < Object
 
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
+  end
+
+  def self.is_exposed(surface)
+    if HPXML::is_conditioned(surface) &&
+       (surface.exterior_adjacent_to == LocationOutside ||
+        surface.exterior_adjacent_to == LocationOtherNonFreezingSpace)
+      return true
+    end
+
+    return false
   end
 
   def self.is_adiabatic(surface)

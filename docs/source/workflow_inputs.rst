@@ -75,6 +75,8 @@ HPXML Software Info
 
 High-level simulation inputs are entered in ``/HPXML/SoftwareInfo``.
 
+.. _hpxml_simulation_control:
+
 HPXML Simulation Control
 ************************
 
@@ -89,15 +91,31 @@ EnergyPlus simulation controls are entered in ``/HPXML/SoftwareInfo/extension/Si
   ``EndMonth``                          integer            >= 1, <= 12       No        12 (December)                Run period end date
   ``EndDayOfMonth``                     integer            >= 1, <= 31       No        31                           Run period end date
   ``CalendarYear``                      integer            > 1600 [#]_       No        2007 (for TMY weather) [#]_  Calendar year (for start day of week)
-  ``TemperatureCapacitanceMultiplier``  double             > 0               No        1.0                          Multiplier on air heat capacitance [#]_
+  ``AdvancedResearchFeatures``          element                              No        <none>                       Features used for advanced research modeling
   ====================================  ========  =======  ================  ========  ===========================  =====================================
 
   .. [#] BeginMonth/BeginDayOfMonth date must occur before EndMonth/EndDayOfMonth date (e.g., a run period from 10/1 to 3/31 is invalid).
   .. [#] If a leap year is specified (e.g., 2008), the EPW weather file must contain 8784 hours.
   .. [#] CalendarYear only applies to TMY (Typical Meteorological Year) weather. For AMY (Actual Meteorological Year) weather, the AMY year will be used regardless of what is specified.
+
+To enable advanced research features, additional information is entered in ``/HPXML/SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures``.
+
+These features may require shorter timesteps, allow more sophisticated simulation control, and/or impact simulation runtime.
+
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+  Element                               Type      Units    Constraints       Required  Default   Notes
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+  ``TemperatureCapacitanceMultiplier``  double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
+  ``DefrostModelType``                  string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
+  ====================================  ========  =======  ================  ========  ========  ========================================================
+
+  .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
   .. [#] TemperatureCapacitanceMultiplier affects the transient calculation of indoor air temperatures.
          Values greater than 1.0 have the effect of smoothing or damping the rate of change in the indoor air temperature from timestep to timestep.
          This heat capacitance effect is modeled on top of any other individual mass inputs (e.g., furniture mass, partition wall mass, interior drywall, etc.) in the HPXML.
+  .. [#] DefrostModelType choices are "standard" and "advanced".
+  .. [#] Use "standard" for default E+ defrost setting.
+         Use "advanced" for an improved model that better accounts for load and energy use during defrost; using "advanced" may impact simulation runtime.
 
 HPXML Emissions Scenarios
 *************************
@@ -215,7 +233,7 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   ================================  ========  =======  ===========  ========  ========  ====================
 
   .. [#] If running :ref:`bldg_type_bldgs`, the fixed charge will apply to every dwelling unit in the building.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at ``ReportUtilityBills/resources/Data/UtilityRates/Average_retail_price_of_electricity.csv``.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 **Detailed**
 
@@ -251,15 +269,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA data that can be found at:
-         
-         \- **natural gas**: ``ReportUtilityBills/resources/Data/UtilityRates/NG_PRI_SUM_A_EPG0_PRS_DMCF_A.csv``
-         
-         \- **propane**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPLLPA_PRS_DPGAL_W.csv``
-         
-         \- **fuel oil**: ``ReportUtilityBills/resources/Data/UtilityRates/PET_PRI_WFR_A_EPD2F_PRS_DPGAL_W.csv``
-         
-         or defaults to $0.015/kBtu for other fuels.
+  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on 2022 EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv`` (except for coal, which is based on 2007 EIA SEDS data as EIA assumes there is zero residential sector coal consumption in the United States for 2008 forward and  does not estimate a price).
 
 PV Compensation
 ~~~~~~~~~~~~~~~
@@ -464,9 +474,9 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
   .. [#] If ShieldingofHome not provided, defaults to "normal" for single-family detached or manufactured home and "well-shielded" for single-family attached or apartment unit.
   .. [#] SoilType choices are "sand", "silt", "clay", "loam", "gravel", or "unknown".
   .. [#] MoistureType choices are "dry", "wet", or "mixed".
-  .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType:
+  .. [#] If Conductivity not provided, defaults to Diffusivity / 0.0208 if Diffusivity provided, otherwise defaults based on SoilType and MoistureType per Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ unless otherwise noted:
   
-         \- **unknown, dry/wet/mixed**: 1.0000
+         \- **unknown, dry/wet/mixed**: 1.0000 (based on ANSI/RESNET/ICC 301-2022 Addendum C)
 
          \- **sand/gravel, dry**: 0.2311
 
@@ -486,7 +496,7 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
 
          \- **gravel, mixed**: 0.6355
 
-  .. [#] If Diffusivity not provided, defaults to Conductivity * 0.0208 if Conductivity provided, otherwise defaults based on SoilType and MoistureType:
+  .. [#] If Diffusivity not provided, defaults to Conductivity * 0.0208 if Conductivity provided, otherwise defaults based on SoilType and MoistureType per Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_:
   
          \- **unknown, dry/wet/mixed**: 0.0208
 
@@ -510,9 +520,8 @@ Site information is entered in ``/HPXML/Building/BuildingDetails/BuildingSummary
 
 .. note::
 
-  Default Conductivity and Diffusivity values based on SoilType/MoistureType provided by Table 1 of `Ground Thermal Diffusivity Calculation by Direct Soil Temperature Measurement. Application to very Low Enthalpy Geothermal Energy Systems <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4813881>`_ (with the exception of "unknown").
-  Conductivity is used for foundation heat transfer and ground source heat pumps.
-  Diffusivity is used for ground source heat pumps.
+  Soil conductivity is used for foundation heat transfer and ground source heat pumps.
+  Soil diffusivity is used for ground source heat pumps.
 
 .. _neighbor_buildings:
 
@@ -594,8 +603,6 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          \- Dehumidifiers
          
          \- Ground-source heat pumps
-         
-         \- HVAC maximum power ratio schedules for variable speed hvac systems (see :ref:`schedules_detailed`)
          
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
@@ -685,6 +692,7 @@ Frequency of schedule values do not need to match the simulation timestep.
 For example, hourly schedules can be used with a 10-minute simulation timestep, or 10-minute schedules can be used with an hourly simulation timestep.
 
 A detailed stochastic occupancy schedule CSV file can also be automatically generated for you (see "Can Be Stochastically Generated" above for applicable columns); see the :ref:`usage_instructions` for the commands.
+The stochastic occupancy schedules are generated using the methodology described in `Stochastic simulation of occupant-driven energy use in a bottom-up residential building stock model <https://www.sciencedirect.com/science/article/pii/S0306261922011540>`_.
 Inputs for the stochastic schedule generator are entered in:
 
 - ``/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents``
@@ -1024,13 +1032,15 @@ The presence of a flue or chimney with combustion air from conditioned space can
 HPXML Attics
 ************
 
-If the dwelling unit has an unvented attic, whether it is within the infiltration volume is entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
+If the dwelling unit has an unvented attic, whether it is within the infiltration volume can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
   ============================  =======  =====  ===========  ========  =======  ===============================================
-  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
   ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple unvented attics, they must all have the same value.
 
 If the dwelling unit has a vented attic, attic ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate``.
 
@@ -1038,30 +1048,35 @@ If the dwelling unit has a vented attic, attic ventilation information can be op
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
   ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/300 [#]_  Value for ventilation rate
+  ``Value``          double         > 0 [#]_     No        1/300 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure choices are "SLA" (specific leakage area) or "ACHnatural" (natural air changes per hour).
+  .. [#] If there are multiple vented attics, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 HPXML Foundations
 *****************
 
-If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
+If the dwelling unit has an unconditioned basement, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='false']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
   ============================  =======  =====  ===========  ========  =======  ===============================================
-  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
   ============================  =======  =====  ===========  ========  =======  ===============================================
 
-If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume is entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
+  .. [#] If there are multiple unconditioned basements, they must all have the same value.
+
+If the dwelling unit has an unvented crawlspace, whether it is within the infiltration volume can be optionally entered in ``Enclosure/Foundations/Foundation/FoundationType/Crawlspace[Vented='false']``.
 
   ============================  =======  =====  ===========  ========  =======  ===============================================
   Element                       Type     Units  Constraints  Required  Default  Notes
   ============================  =======  =====  ===========  ========  =======  ===============================================
-  ``WithinInfiltrationVolume``  boolean                      No        false    In accordance with ANSI/RESNET/ICC Standard 380
+  ``WithinInfiltrationVolume``  boolean         See [#]_     No        false    In accordance with ANSI/RESNET/ICC Standard 380
   ============================  =======  =====  ===========  ========  =======  ===============================================
+
+  .. [#] If there are multiple unvented crawlspaces, they must all have the same value.
 
 If the dwelling unit has a vented crawlspace, crawlspace ventilation information can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate``.
 
@@ -1069,10 +1084,11 @@ If the dwelling unit has a vented crawlspace, crawlspace ventilation information
   Element            Type    Units  Constraints  Required  Default     Notes
   =================  ======  =====  ===========  ========  ==========  ==========================
   ``UnitofMeasure``  string         See [#]_     No        SLA         Units for ventilation rate
-  ``Value``          double         > 0          No        1/150 [#]_  Value for ventilation rate
+  ``Value``          double         > 0 [#]_     No        1/150 [#]_  Value for ventilation rate
   =================  ======  =====  ===========  ========  ==========  ==========================
 
   .. [#] UnitofMeasure only choice is "SLA" (specific leakage area).
+  .. [#] If there are multiple vented crawlspaces, they must all have the same value.
   .. [#] Value default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
 If the dwelling has a manufactured home belly-and-wing foundation, whether a skirt is present can be optionally entered in ``/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/BellyAndWing``.
@@ -1080,9 +1096,10 @@ If the dwelling has a manufactured home belly-and-wing foundation, whether a ski
   =================  =======  =====  ===========  ========  ==========  ==========================
   Element            Type     Units  Constraints  Required  Default     Notes
   =================  =======  =====  ===========  ========  ==========  ==========================
-  ``SkirtPresent``   boolean                      No        true        Presence of skirt [#]_
+  ``SkirtPresent``   boolean         See [#]_     No        true        Presence of skirt [#]_
   =================  =======  =====  ===========  ========  ==========  ==========================
 
+  .. [#] If there are multiple manufactured home belly-and-wing foundations, they must all have the same value.
   .. [#] When a skirt is present, it is assumed that the foundation does not have exposure to wind.
 
 HPXML Roofs
@@ -1540,7 +1557,7 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   Element                                       Type               Units             Constraints               Required  Default    Notes
   ============================================  =================  ================  ========================  ========  =========  =============================================================
   ``SystemIdentifier``                          id                                                             Yes                  Unique identifier
-  ``Area``                                      double             ft2               > 0                       Yes                  Total area
+  ``Area``                                      double             ft2               > 0                       Yes                  Total area [#]_
   ``Azimuth`` or ``Orientation``                integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
   ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description
   ``SHGC`` and/or ``GlassLayers``               double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
@@ -1550,9 +1567,13 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
   ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``AttachedToRoof``                            idref                                See [#]_                  Yes                  ID of attached roof
-  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor for a skylight with a shaft or sun tunnel
+  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor
+  ``extension/Curb``                            element                                                        No        <none>     Presence of curb (skylight wall above the roof deck) [#]_
+  ``extension/Shaft``                           element                                                        No        <none>     Presence of shaft (skylight wall below the roof deck) [#]_
   ============================================  =================  ================  ========================  ========  =========  =============================================================
 
+  .. [#] For dome skylights, this should represent the *total* area, not just the primary flat exposure.
+         The ratio of total area to primary flat exposure is typically around 1.25 for dome skylights.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
@@ -1567,7 +1588,10 @@ Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylig
          
   .. [#] AttachedToRoof must reference a ``Roof``.
   .. [#] AttachedToFloor must reference a ``Floor``.
-  .. [#] AttachedToFloor required if the skylight is attached to a roof of an attic (e.g., with shaft or sun tunnel).
+  .. [#] AttachedToFloor required if the attached roof is not adjacent to conditioned space (i.e., there is a skylight shaft).
+  .. [#] If extension/Curb is provided, additional inputs are described in :ref:`skylight_curb`.
+  .. [#] If extension/Shaft is provided, additional inputs are described in :ref:`skylight_shaft`.
+         The skylight shaft will be modeled similar to an attic knee wall.
 
 UFactor/SHGC Lookup
 ~~~~~~~~~~~~~~~~~~~
@@ -1619,6 +1643,38 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 
   OpenStudio-HPXML will return an error if the combination of skylight properties is not in the above table.
 
+.. _skylight_curb:
+
+Skylight Curb
+~~~~~~~~~~~~~
+
+If the skylight has a curb, additional information is entered in ``Skylight``.
+
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  Element                                      Type      Units         Constraints  Required  Default   Notes
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  ``extension/Curb/Area``                      double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Curb/AssemblyEffectiveRValue``   double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+
+.. _skylight_shaft:
+
+Skylight Shaft
+~~~~~~~~~~~~~~
+
+If the skylight has a shaft, additional information is entered in ``Skylight``.
+
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  Element                                      Type      Units         Constraints  Required  Default   Notes
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+  ``extension/Shaft/Area``                     double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Shaft/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
+  ===========================================  ========  ============  ===========  ========  ========  ========================================================
+
+  .. [#] AssemblyEffectiveRValue includes all material layers and interior/exterior air films.
+
 HPXML Doors
 ***********
 
@@ -1631,12 +1687,13 @@ Each opaque door is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Doo
   ``AttachedToWall``                            idref                            See [#]_                  Yes                  ID of attached wall
   ``Area``                                      double             ft2           > 0                       Yes                  Total area
   ``Azimuth`` or ``Orientation``                integer or string  deg           >= 0, <= 359 or See [#]_  No        See [#]_   Direction (clockwise from North)
-  ``RValue``                                    double             F-ft2-hr/Btu  > 0                       Yes                  R-value (including any storm door)
+  ``RValue``                                    double             F-ft2-hr/Btu  > 0                       Yes                  R-value [#]_
   ============================================  =================  ============  ========================  ========  =========  ==============================
 
   .. [#] AttachedToWall must reference a ``Wall`` or ``FoundationWall``.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] If neither Azimuth nor Orientation nor AttachedToWall azimuth provided, defaults to the azimuth with the largest surface area defined in the HPXML file.
+  .. [#] RValue includes interior/exterior air films and presence of any storm door.
 
 HPXML Partition Wall Mass
 *************************
@@ -2384,7 +2441,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   ``extension/CoolingAutosizingFactor``                             double   frac      > 0                       No        1.0             Cooling autosizing capacity multiplier
   ``extension/HeatingAutosizingFactor``                             double   frac      > 0                       No        1.0             Heating autosizing capacity multiplier
   ``extension/CoolingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Cooling autosizing capacity limit
-  ``extension/HeatingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Heating autosizing capacity limit  
+  ``extension/HeatingAutosizingLimit``                              double   Btu/hr    > 0                       No                        Heating autosizing capacity limit
   ================================================================  =======  ========  ========================  ========  ==============  =================================================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
@@ -2945,6 +3002,10 @@ If a heating and/or cooling season is defined, additional information is entered
   ``EndDayOfMonth``    integer          >= 1, <= 31  Yes                End day
   ===================  ========  =====  ===========  ========  =======  ===========
 
+.. warning::
+
+  It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.
+
 HPXML HVAC Setpoints
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -3036,6 +3097,7 @@ Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/S
   ``DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]``  element                        See [#]_             Return duct leakage value
   ``DistributionSystemType/AirDistribution/Ducts``                                      element                        No                   Supply/return ducts; multiple are allowed [#]_
   ``DistributionSystemType/AirDistribution/NumberofReturnRegisters``                    integer           >= 0         No        See [#]_   Number of return registers
+  ``DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh``  double   Btu/hr   >= 0         No        0          Blower fan heat for ACCA Manual J design loads [#]_
   ``ConditionedFloorAreaServed``                                                        double   ft2      > 0          See [#]_             Conditioned floor area served
   ====================================================================================  =======  =======  ===========  ========  =========  ==========================
   
@@ -3044,6 +3106,8 @@ Each air distribution system is entered as a ``/HPXML/Building/BuildingDetails/S
   .. [#] Return duct leakage required if AirDistributionType is "regular velocity" or "gravity" and optional if AirDistributionType is "fan coil".
   .. [#] Provide a Ducts element for each supply duct and each return duct.
   .. [#] If NumberofReturnRegisters not provided and return ducts are present, defaults to one return register per conditioned floor per `ASHRAE Standard 152 <https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet>`_, rounded up to the nearest integer if needed.
+  .. [#] BlowerFanHeatBtuh should only be provided when calculating design loads for HVAC equipment whose performance data has not been adjusted for blower heat.
+         When provided, it can be calculated according to Manual J Section 25 or the default of 1707 Btu/hr (500 W) can be used.
   .. [#] ConditionedFloorAreaServed required only when duct surface area is defaulted (i.e., ``AirDistribution/Ducts`` are present without ``DuctSurfaceArea`` child elements).
 
 Additional information is entered in each ``DuctLeakageMeasurement``.
@@ -3118,15 +3182,18 @@ Hydronic Distribution
 
 Each hydronic distribution system is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution``.
 
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  Element                                                                   Type     Units    Constraints  Required  Default    Notes
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
-  ``SystemIdentifier``                                                      id                             Yes                  Unique identifier
-  ``DistributionSystemType/HydronicDistribution``                           element                        Yes                  Type of distribution system
-  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``  string            See [#]_     Yes                  Type of hydronic distribution system
-  ========================================================================  =======  =======  ===========  ========  =========  ====================================
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  Element                                                                                     Type     Units    Constraints  Required  Default    Notes
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
+  ``SystemIdentifier``                                                                        id                             Yes                  Unique identifier
+  ``DistributionSystemType/HydronicDistribution``                                             element                        Yes                  Type of distribution system
+  ``DistributionSystemType/HydronicDistribution/HydronicDistributionType``                    string            See [#]_     Yes                  Type of hydronic distribution system
+  ``DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh``  double   Btu/hr   >= 0         No        0          Piping load for ACCA Manual J design loads [#]_
+  ==========================================================================================  =======  =======  ===========  ========  =========  ====================================
 
   .. [#] HydronicDistributionType choices are "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop".
+  .. [#] HotWaterPipingBtuh should only be provided when hydronic distribution pipes run through unconditioned spaces.
+         When provided, it can be calculated according to Manual J Section 26.
 
 .. _hvac_distribution_dse:
 
