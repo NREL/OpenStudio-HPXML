@@ -4090,7 +4090,7 @@ class HPXMLFile
 
     if not args[:simulation_control_onoff_thermostat_deadband].nil?
       if (not hpxml.header.hvac_onoff_thermostat_deadband.nil?) && (hpxml.header.hvac_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
-        errors << "'Simulation Control: HVAC GEB On-Off Thermostat Deadband' cannot vary across dwelling units."
+        errors << "'Simulation Control: HVAC On-Off Thermostat Deadband' cannot vary across dwelling units."
       end
       hpxml.header.hvac_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
     end
