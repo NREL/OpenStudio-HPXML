@@ -1162,7 +1162,7 @@ class HVAC
   #
   # @param hvac_control [TODO] TODO
   # @param year [TODO] TODO
-  # @param offset_db [Float] On-off thermostat deadband
+  # @param offset_db [Float] On-off thermostat deadband in deg-F
   # @return [TODO] TODO
   def self.get_heating_setpoints(hvac_control, year, offset_db)
     num_days = Constants.NumDaysInYear(year)
@@ -1206,7 +1206,7 @@ class HVAC
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
   # @param weather [WeatherProcess] Weather object
-  # @param offset_db [Float] On-off thermostat deadband
+  # @param offset_db [Float] On-off thermostat deadband in deg-F
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, offset_db)
     num_days = Constants.NumDaysInYear(year)
@@ -2213,7 +2213,7 @@ class HVAC
 
       num_stages = [(capacity / backup_heating_capacity_increment).ceil(), max_num_stages].min
       # OpenStudio only supports 4 stages for now
-      runner.registerWarning("E+ Currently only supports less than #{max_num_stages} stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage. Simulation continued.") if (capacity / backup_heating_capacity_increment).ceil() > 4
+      runner.registerWarning("EnergyPlus only supports #{max_num_stages} stages for multi-stage electric backup coil. Combined the remaining capacities in the last stage.") if (capacity / backup_heating_capacity_increment).ceil() > 4
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectricMultiStage.new(model)
       htg_supp_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
@@ -3387,7 +3387,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
-  # @return [OpenStudio::Model::EnergyManagementSystemActuator, OpenStudio::Model::EnergyManagementSystemGlobalVariable] OpenStudio EMS Actuator and Global Variable objects for supplemental coil availability schedule
+  # @return [Array<OpenStudio::Model::EnergyManagementSystemActuator, OpenStudio::Model::EnergyManagementSystemGlobalVariable>] OpenStudio EMS Actuator and Global Variable objects for supplemental coil availability schedule
   def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') }
     global_var_supp_avail = model.getEnergyManagementSystemGlobalVariables.find { |var| var.name.get.include? htg_supp_coil.name.get.gsub(' ', '_') }
