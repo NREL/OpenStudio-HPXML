@@ -2,7 +2,7 @@
 
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
@@ -349,7 +349,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
         hpxml_path = File.absolute_path(File.join(@output_path, hpxml_file))
         hpxml = HPXML.new(hpxml_path: hpxml_path)
         if hpxml.errors.size > 0
-          puts hpxml.errors.to_s
+          puts hpxml.errors
           puts "\nError: Did not successfully validate #{hpxml_file}."
           exit!
         end
@@ -362,7 +362,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
         errors, _warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
         next unless errors.size > 0
 
-        puts errors.to_s
+        puts errors
         puts "\nError: Did not successfully validate #{hpxml_file}."
         exit!
       rescue Exception => e
@@ -765,7 +765,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['pv_system_2_array_tilt'] = 'roofpitch+15'
     elsif ['extra-dhw-solar-latitude.xml'].include? hpxml_file
       args['solar_thermal_system_type'] = HPXML::SolarThermalSystemType
-      args['solar_thermal_collector_tilt'] = 'latitude-15'
+      args['solar_thermal_collector_tilt'] = 'Latitude-15'
     elsif ['extra-second-refrigerator.xml'].include? hpxml_file
       args['extra_refrigerator_location'] = HPXML::LocationConditionedSpace
     elsif ['extra-second-heating-system-portable-heater-to-heating-system.xml'].include? hpxml_file

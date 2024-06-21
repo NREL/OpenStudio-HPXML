@@ -1,12 +1,28 @@
 # frozen_string_literal: true
 
-class HPXMLDefaults
-  # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-  # child object where custom information can be attached to the object without
-  # being written to the HPXML file. This will allow the custom information to
-  # be used by subsequent calculations/logic.
-
-  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
+# Collection of methods related to defaulting optional inputs in the HPXML
+# that were not provided.
+#
+# Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
+# child object where custom information can be attached to the object without
+# being written to the HPXML file. This will allow the custom information to
+# be used by subsequent calculations/logic.
+module HPXMLDefaults
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param weather [WeatherProcess] Weather object
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param convert_shared_systems [TODO] TODO
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
+  # @param output_format [String] Detailed HVAC sizing output file format ('csv', 'json', or 'msgpack')
+  # @return [void]
+  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true,
+                 design_load_details_output_file_path: nil, output_format: 'csv')
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
@@ -17,16 +33,19 @@ class HPXMLDefaults
     # Check for presence of fuels once
     has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
 
-    apply_header(hpxml.header, epw_file)
+    add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+
+    apply_header(hpxml.header, epw_file, hpxml_bldg)
     apply_building(hpxml_bldg, epw_file)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
     apply_building_header(hpxml.header, hpxml_bldg, weather)
-    apply_building_header_sizing(hpxml_bldg, weather, nbeds)
+    apply_building_header_sizing(runner, hpxml_bldg, weather, nbeds)
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
     apply_building_construction(hpxml.header, hpxml_bldg, cfa, nbeds)
+    apply_zone_spaces(hpxml_bldg)
     apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
@@ -63,13 +82,23 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+    apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
-    # default detailed performance has to be after sizing to have autosized capacity information
+    # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+
+    cleanup_zones_spaces(hpxml_bldg)
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_default_azimuths(hpxml_bldg)
+    # TODO
+    #
+    # @param azimuth [TODO] TODO
+    # @return [TODO] TODO
     def self.sanitize_azimuth(azimuth)
       # Ensure 0 <= orientation < 360
       while azimuth < 0
@@ -86,8 +115,9 @@ class HPXMLDefaults
     # area, plus azimuths that are offset by 90/180/270 degrees. Used for
     # surfaces that may not have an azimuth defined (e.g., walls).
     azimuth_areas = {}
-    (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls +
-     hpxml_bldg.windows + hpxml_bldg.skylights + hpxml_bldg.doors).each do |surface|
+    (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surface|
+      next unless surface.respond_to?(:azimuth)
+
       az = surface.azimuth
       next if az.nil?
 
@@ -105,9 +135,41 @@ class HPXMLDefaults
             sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
-  private
+  # FIXME: The following class methods are meant to be private.
 
-  def self.apply_header(hpxml_header, epw_file)
+  # TODO
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @return [void]
+  def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+    # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
+    bldg_idx = hpxml.buildings.index(hpxml_bldg)
+    if hpxml_bldg.conditioned_zones.empty?
+      hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[-1].id
+      end
+      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
+                                      floor_area: cfa)
+      hpxml_bldg.surfaces.each do |surface|
+        next unless HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+        next if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
+        surface.attached_to_space_idref = hpxml_bldg.zones[-1].spaces[-1].id
+      end
+    end
+  end
+
+  # Assigns default values for omitted optional inputs in the HPXML::Header object
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
+  def self.apply_header(hpxml_header, epw_file, hpxml_bldg)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -142,8 +204,13 @@ class HPXMLDefaults
     end
 
     if hpxml_header.temperature_capacitance_multiplier.nil?
-      hpxml_header.temperature_capacitance_multiplier = 1.0
+      hpxml_header.temperature_capacitance_multiplier = 7.0
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml_header.defrost_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type })
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
     end
 
     hpxml_header.unavailable_periods.each do |unavailable_period|
@@ -162,7 +229,15 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_header_sizing(hpxml_bldg, weather, nbeds)
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
+  # specific to HVAC equipment sizing
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [void]
+  def self.apply_building_header_sizing(runner, hpxml_bldg, weather, nbeds)
     if hpxml_bldg.header.manualj_heating_design_temp.nil?
       hpxml_bldg.header.manualj_heating_design_temp = weather.design.HeatingDrybulb.round(2)
       hpxml_bldg.header.manualj_heating_design_temp_isdefaulted = true
@@ -190,8 +265,8 @@ class HPXMLDefaults
 
     if hpxml_bldg.header.manualj_humidity_setpoint.nil?
       hpxml_bldg.header.manualj_humidity_setpoint = 0.5 # 50%
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      p_psi = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, p_psi)
       if HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling) < 0
         # Dry summer climate per Manual J 18-1 Design Grains
         hpxml_bldg.header.manualj_humidity_setpoint = 0.45 # 45%
@@ -200,32 +275,77 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_humidity_difference.nil?
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      p_psi = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, p_psi)
       hpxml_bldg.header.manualj_humidity_difference = HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling).round(1)
       hpxml_bldg.header.manualj_humidity_difference_isdefaulted = true
     end
 
+    sum_space_manualj_internal_loads_sensible = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_sensible.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_sensible.nil?
-      if hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
+      if sum_space_manualj_internal_loads_sensible > 0
+        hpxml_bldg.header.manualj_internal_loads_sensible = sum_space_manualj_internal_loads_sensible
+      elsif hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
         hpxml_bldg.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
       else
         hpxml_bldg.header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
       end
       hpxml_bldg.header.manualj_internal_loads_sensible_isdefaulted = true
     end
-
-    if hpxml_bldg.header.manualj_internal_loads_latent.nil?
-      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
-      hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    if sum_space_manualj_internal_loads_sensible == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_sensible = (hpxml_bldg.header.manualj_internal_loads_sensible * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_sensible_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_internal_loads_sensible - sum_space_manualj_internal_loads_sensible).abs > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsSensible (#{hpxml_bldg.header.manualj_internal_loads_sensible}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_sensible}).")
     end
 
+    sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
+    if hpxml_bldg.header.manualj_internal_loads_latent.nil?
+      hpxml_bldg.header.manualj_internal_loads_latent = sum_space_manualj_internal_loads_latent # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    end
+    if sum_space_manualj_internal_loads_latent == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_latent = (hpxml_bldg.header.manualj_internal_loads_latent * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_latent_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_internal_loads_latent - sum_space_manualj_internal_loads_latent).abs > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsLatent (#{hpxml_bldg.header.manualj_internal_loads_latent}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_latent}).")
+    end
+
+    sum_space_manualj_num_occupants = hpxml_bldg.conditioned_spaces.map { |space| space.manualj_num_occupants.to_f }.sum.round
     if hpxml_bldg.header.manualj_num_occupants.nil?
-      hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      if sum_space_manualj_num_occupants > 0
+        hpxml_bldg.header.manualj_num_occupants = sum_space_manualj_num_occupants
+      else
+        hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
+    end
+    if sum_space_manualj_num_occupants == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_num_occupants = (hpxml_bldg.header.manualj_num_occupants * space.floor_area / total_floor_area).round(2)
+        space.manualj_num_occupants_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_num_occupants - sum_space_manualj_num_occupants).abs >= 1 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/NumberofOccupants (#{hpxml_bldg.header.manualj_num_occupants}) does not match sum of conditioned spaces (#{sum_space_manualj_num_occupants}).")
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @return [void]
   def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_bldg.header.natvent_days_per_week.nil?
       hpxml_bldg.header.natvent_days_per_week = 3
@@ -266,6 +386,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::EmissionsScenarios objects
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param has_fuel [TODO] TODO
+  # @return [void]
   def self.apply_emissions_scenarios(hpxml_header, has_fuel)
     hpxml_header.emissions_scenarios.each do |scenario|
       # Electricity
@@ -342,6 +467,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::UtilityBillScenarios objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param has_fuel [TODO] TODO
+  # @return [void]
   def self.apply_utility_bill_scenarios(runner, hpxml_header, hpxml_bldg, has_fuel)
     hpxml_header.utility_bill_scenarios.each do |scenario|
       if scenario.elec_tariff_filepath.nil?
@@ -394,7 +526,7 @@ class HPXMLDefaults
           scenario.coal_fixed_charge_isdefaulted = true
         end
         if scenario.coal_marginal_rate.nil?
-          scenario.coal_marginal_rate = 0.015
+          scenario.coal_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeCoal, nil)
           scenario.coal_marginal_rate_isdefaulted = true
         end
       end
@@ -405,7 +537,7 @@ class HPXMLDefaults
           scenario.wood_fixed_charge_isdefaulted = true
         end
         if scenario.wood_marginal_rate.nil?
-          scenario.wood_marginal_rate = 0.015
+          scenario.wood_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeWoodCord, nil)
           scenario.wood_marginal_rate_isdefaulted = true
         end
       end
@@ -416,7 +548,7 @@ class HPXMLDefaults
           scenario.wood_pellets_fixed_charge_isdefaulted = true
         end
         if scenario.wood_pellets_marginal_rate.nil?
-          scenario.wood_pellets_marginal_rate = 0.015
+          scenario.wood_pellets_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeWoodPellets, nil)
           scenario.wood_pellets_marginal_rate_isdefaulted = true
         end
       end
@@ -453,6 +585,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Building object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [void]
   def self.apply_building(hpxml_bldg, epw_file)
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
       hpxml_bldg.site.soil_type = HPXML::SiteSoilTypeUnknown
@@ -512,7 +649,7 @@ class HPXMLDefaults
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
       elsif hpxml_bldg.site.soil_type == HPXML::SiteSoilTypeUnknown
-        hpxml_bldg.site.ground_conductivity = 1.0
+        hpxml_bldg.site.ground_conductivity = 1.0 # ANSI/RESNET/ICC 301-2022 Addendum C
         hpxml_bldg.site.ground_diffusivity = 0.0208
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
@@ -575,7 +712,7 @@ class HPXMLDefaults
       end
 
       if hpxml_bldg.elevation.nil?
-        hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
+        hpxml_bldg.elevation = UnitConversions.convert([epw_file.elevation, 0.0].max, 'm', 'ft').round(1)
         hpxml_bldg.elevation_isdefaulted = true
       end
 
@@ -591,6 +728,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Site object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_site(hpxml_bldg)
     if hpxml_bldg.site.site_type.nil?
       hpxml_bldg.site.site_type = HPXML::SiteTypeSuburban
@@ -598,7 +739,13 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.site.shielding_of_home.nil?
-      hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        # Shielding Class 5 is ACCA MJ8 default for Table 5B/5E for townhouses and condos
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
+      else
+        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET 301 default
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
     end
 
@@ -606,10 +753,12 @@ class HPXMLDefaults
       hpxml_bldg.site.ground_conductivity = 1.0 # Btu/hr-ft-F
       hpxml_bldg.site.ground_conductivity_isdefaulted = true
     end
-
-    hpxml_bldg.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml_bldg.site.shielding_of_home)
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::NeighborBuildings objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_neighbor_buildings(hpxml_bldg)
     hpxml_bldg.neighbor_buildings.each do |neighbor_building|
       if neighbor_building.azimuth.nil?
@@ -623,6 +772,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingOccupancy object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_building_occupancy(hpxml_bldg, schedules_file)
     if hpxml_bldg.building_occupancy.number_of_residents.nil?
       hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms = hpxml_bldg.building_construction.number_of_bedrooms
@@ -663,6 +817,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingConstruction object
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [void]
   def self.apply_building_construction(hpxml_header, hpxml_bldg, cfa, nbeds)
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
@@ -695,6 +856,24 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Zones and HPXML::Spaces objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
+  def self.apply_zone_spaces(hpxml_bldg)
+    hpxml_bldg.conditioned_spaces.each do |space|
+      if space.fenestration_load_procedure.nil?
+        space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
+        space.fenestration_load_procedure_isdefaulted = true
+      end
+    end
+  end
+
+  # Assigns default values for omitted optional inputs in the HPXML::ClimateandRiskZones object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [void]
   def self.apply_climate_and_risk_zones(hpxml_bldg, epw_file)
     if (not epw_file.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
       zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
@@ -707,42 +886,90 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Attic objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_attics(hpxml_bldg)
-    hpxml_bldg.attics.each do |attic|
-      next unless attic.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationAtticUnvented)
+      unvented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeUnvented }
+      if unvented_attics.empty?
+        hpxml_bldg.attics.add(id: 'UnventedAttic',
+                              attic_type: HPXML::AtticTypeUnvented)
+        unvented_attics << hpxml_bldg.attics[-1]
+      end
+      unvented_attics.each do |unvented_attic|
+        next unless unvented_attic.within_infiltration_volume.nil?
 
-      if [HPXML::AtticTypeUnvented].include? attic.attic_type
-        attic.within_infiltration_volume = false
-        attic.within_infiltration_volume_isdefaulted = true
+        unvented_attic.within_infiltration_volume = false
+        unvented_attic.within_infiltration_volume_isdefaulted = true
+      end
+      if unvented_attics.map { |a| a.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented attics must have the same WithinInfiltrationVolume.'
       end
     end
 
-    return unless hpxml_bldg.has_location(HPXML::LocationAtticVented)
+    if hpxml_bldg.has_location(HPXML::LocationAtticVented)
+      vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
+      if vented_attics.empty?
+        hpxml_bldg.attics.add(id: 'VentedAttic',
+                              attic_type: HPXML::AtticTypeVented)
+        vented_attics << hpxml_bldg.attics[-1]
+      end
+      vented_attics.each do |vented_attic|
+        next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
 
-    vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
-    if vented_attics.empty?
-      hpxml_bldg.attics.add(id: 'VentedAttic',
-                            attic_type: HPXML::AtticTypeVented)
-      vented_attics << hpxml_bldg.attics[-1]
-    end
-    vented_attics.each do |vented_attic|
-      next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
-
-      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
-      vented_attic.vented_attic_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic.vented_attic_sla_isdefaulted = true
+      end
+      if vented_attics.map { |a| a.vented_attic_sla }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
+      if vented_attics.map { |a| a.vented_attic_ach }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Foundation objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_foundations(hpxml_bldg)
-    hpxml_bldg.foundations.each do |foundation|
-      next unless foundation.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationCrawlspaceUnvented)
+      unvented_crawls = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceUnvented }
+      if unvented_crawls.empty?
+        hpxml_bldg.foundations.add(id: 'UnventedCrawlspace',
+                                   foundation_type: HPXML::FoundationTypeCrawlspaceUnvented)
+        unvented_crawls << hpxml_bldg.foundations[-1]
+      end
+      unvented_crawls.each do |unvented_crawl|
+        next unless unvented_crawl.within_infiltration_volume.nil?
 
-      next unless [HPXML::FoundationTypeBasementUnconditioned,
-                   HPXML::FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+        unvented_crawl.within_infiltration_volume = false
+        unvented_crawl.within_infiltration_volume_isdefaulted = true
+      end
+      if unvented_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume.'
+      end
+    end
 
-      foundation.within_infiltration_volume = false
-      foundation.within_infiltration_volume_isdefaulted = true
+    if hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+      uncond_bsmts = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
+      if uncond_bsmts.empty?
+        hpxml_bldg.foundations.add(id: 'UnconditionedBasement',
+                                   foundation_type: HPXML::FoundationTypeBasementUnconditioned)
+        uncond_bsmts << hpxml_bldg.foundations[-1]
+      end
+      uncond_bsmts.each do |uncond_bsmt|
+        next unless uncond_bsmt.within_infiltration_volume.nil?
+
+        uncond_bsmt.within_infiltration_volume = false
+        uncond_bsmt.within_infiltration_volume_isdefaulted = true
+      end
+      if uncond_bsmts.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unconditioned basements must have the same WithinInfiltrationVolume.'
+      end
     end
 
     if hpxml_bldg.has_location(HPXML::LocationCrawlspaceVented)
@@ -757,7 +984,9 @@ class HPXMLDefaults
 
         vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
         vented_crawl.vented_crawlspace_sla_isdefaulted = true
-        break # EPvalidator.xml only allows a single ventilation rate
+      end
+      if vented_crawls.map { |f| f.vented_crawlspace_sla }.uniq.size != 1
+        fail 'All vented crawlspaces must have the same VentilationRate.'
       end
     end
 
@@ -771,13 +1000,19 @@ class HPXMLDefaults
       belly_and_wing_foundations.each do |foundation|
         next unless foundation.belly_wing_skirt_present.nil?
 
-        foundation.belly_wing_skirt_present_isdefaulted = true
         foundation.belly_wing_skirt_present = true
-        break
+        foundation.belly_wing_skirt_present_isdefaulted = true
+      end
+      if belly_and_wing_foundations.map { |f| f.belly_wing_skirt_present }.uniq.size != 1
+        fail 'All belly-and-wing foundations must have the same SkirtPresent.'
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::AirInfiltrationMeasurement object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_infiltration(hpxml_bldg)
     infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
     if infil_measurement.infiltration_volume.nil?
@@ -798,6 +1033,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Roof objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_roofs(hpxml_bldg)
     hpxml_bldg.roofs.each do |roof|
       if roof.azimuth.nil?
@@ -817,8 +1056,10 @@ class HPXMLDefaults
         roof.emittance_isdefaulted = true
       end
       if roof.radiant_barrier.nil?
-        roof.radiant_barrier = false
-        roof.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(roof.interior_adjacent_to)
+          roof.radiant_barrier = false
+          roof.radiant_barrier_isdefaulted = true
+        end
       end
       if roof.radiant_barrier && roof.radiant_barrier_grade.nil?
         roof.radiant_barrier_grade = 1
@@ -852,6 +1093,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::RimJoist objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_rim_joists(hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
@@ -887,6 +1132,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Wall objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_walls(hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
       if wall.azimuth.nil?
@@ -934,8 +1183,10 @@ class HPXMLDefaults
         wall.interior_finish_thickness_isdefaulted = true
       end
       if wall.radiant_barrier.nil?
-        wall.radiant_barrier = false
-        wall.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(wall.interior_adjacent_to) || [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(wall.exterior_adjacent_to)
+          wall.radiant_barrier = false
+          wall.radiant_barrier_isdefaulted = true
+        end
       end
       if wall.radiant_barrier && wall.radiant_barrier_grade.nil?
         wall.radiant_barrier_grade = 1
@@ -944,6 +1195,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FoundationWall objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_foundation_walls(hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       if foundation_wall.type.nil?
@@ -999,6 +1254,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Floor objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
       if floor.floor_or_ceiling.nil?
@@ -1041,8 +1301,10 @@ class HPXMLDefaults
         floor.interior_finish_thickness_isdefaulted = true
       end
       if floor.radiant_barrier.nil?
-        floor.radiant_barrier = false
-        floor.radiant_barrier_isdefaulted = true
+        if [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(floor.interior_adjacent_to) || [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include?(floor.exterior_adjacent_to)
+          floor.radiant_barrier = false
+          floor.radiant_barrier_isdefaulted = true
+        end
       end
       if floor.radiant_barrier && floor.radiant_barrier_grade.nil?
         floor.radiant_barrier_grade = 1
@@ -1051,6 +1313,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Slab objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_slabs(hpxml_bldg)
     hpxml_bldg.slabs.each do |slab|
       if slab.thickness.nil?
@@ -1084,6 +1350,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Window objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [void]
   def self.apply_windows(hpxml_bldg, eri_version)
     hpxml_bldg.windows.each do |window|
       if window.ufactor.nil? || window.shgc.nil?
@@ -1160,6 +1431,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Skylight objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_skylights(hpxml_bldg)
     hpxml_bldg.skylights.each do |skylight|
       if skylight.azimuth.nil?
@@ -1231,6 +1506,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Door objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_doors(hpxml_bldg)
     hpxml_bldg.doors.each do |door|
       if door.azimuth.nil?
@@ -1254,6 +1533,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PartitionWallMass object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_partition_wall_mass(hpxml_bldg)
     if hpxml_bldg.partition_wall_mass.area_fraction.nil?
       hpxml_bldg.partition_wall_mass.area_fraction = 1.0
@@ -1269,6 +1552,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FurnitureMass object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_furniture_mass(hpxml_bldg)
     if hpxml_bldg.furniture_mass.area_fraction.nil?
       hpxml_bldg.furniture_mass.area_fraction = 0.4
@@ -1280,6 +1567,15 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HeatingSystem,
+  # HPXML::CoolingSystem, and HPXML::HeatPump objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @param convert_shared_systems [TODO] TODO
+  # @return [void]
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml_bldg)
@@ -1696,7 +1992,7 @@ class HPXMLDefaults
         end
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_fan_power_rated(cooling_system, use_eer)
-        HVAC.set_cool_curves_central_air_source(runner, cooling_system, use_eer)
+        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -1724,7 +2020,7 @@ class HPXMLDefaults
         end
         HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_central_air_source(runner, heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
@@ -1788,7 +2084,7 @@ class HPXMLDefaults
 
         if heat_pump.geothermal_loop.shank_spacing.nil?
           hp_ap = heat_pump.additional_properties
-          heat_pump.geothermal_loop.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
+          heat_pump.geothermal_loop.shank_spacing = (hp_ap.u_tube_spacing + hp_ap.pipe_od).round(2) # Distance from center of pipe to center of pipe
           heat_pump.geothermal_loop.shank_spacing_isdefaulted = true
         end
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
@@ -1798,6 +2094,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::CoolingPerformanceDataPoint
+  # and HPXML::HeatingPerformanceDataPoint objects.
+  # Currently these objects are only used for variable-speed air source systems.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       is_hp = hvac_system.is_a? HPXML::HeatPump
@@ -1863,6 +2165,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HVACControl object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [void]
   def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     hpxml_bldg.hvac_controls.each do |hvac_control|
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HeatingSetpoint].name))
@@ -1925,6 +2233,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HVACDistribution objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @return [void]
   def self.apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -2023,22 +2337,71 @@ class HPXMLDefaults
         ducts.duct_buried_insulation_level_isdefaulted = true
       end
 
+      # Default duct shape
+      hvac_distribution.ducts.each do |ducts|
+        next unless ducts.duct_fraction_rectangular.nil?
+
+        if ducts.duct_shape.nil? || ducts.duct_shape == HPXML::DuctShapeOther
+          if ducts.duct_type == HPXML::DuctTypeSupply
+            ducts.duct_fraction_rectangular = 0.25
+          elsif ducts.duct_type == HPXML::DuctTypeReturn
+            ducts.duct_fraction_rectangular = 1.0
+          end
+        elsif ducts.duct_shape == HPXML::DuctShapeRound || ducts.duct_shape == HPXML::DuctShapeOval
+          ducts.duct_fraction_rectangular = 0.0
+        elsif ducts.duct_shape == HPXML::DuctShapeRectangular
+          ducts.duct_fraction_rectangular = 1.0
+        end
+        ducts.duct_fraction_rectangular_isdefaulted = true
+      end
+
       # Default effective R-value
       hvac_distribution.ducts.each do |ducts|
         next unless ducts.duct_effective_r_value.nil?
 
-        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value, ducts.duct_type, ducts.duct_buried_insulation_level)
+        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value,
+                                                                          ducts.duct_type,
+                                                                          ducts.duct_buried_insulation_level,
+                                                                          ducts.duct_fraction_rectangular)
         ducts.duct_effective_r_value_isdefaulted = true
+      end
+    end
+
+    # Manual J inputs
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+        # Blower fan heat
+        if hvac_distribution.manualj_blower_fan_heat_btuh.nil?
+          hvac_distribution.manualj_blower_fan_heat_btuh = 0.0
+          hvac_distribution.manualj_blower_fan_heat_btuh_isdefaulted = true
+        end
+      elsif hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+        # Hot water piping
+        if hvac_distribution.manualj_hot_water_piping_btuh.nil?
+          hvac_distribution.manualj_hot_water_piping_btuh = 0.0
+          hvac_distribution.manualj_hot_water_piping_btuh_isdefaulted = true
+        end
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HeatingSystem,
+  # HPXML::CoolingSystem, and HPXML::HeatPump objects related to HVAC location.
+  #
+  # Note: This needs to be called after we have applied defaults for ducts.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_hvac_location(hpxml_bldg)
-    # This needs to come after we have applied defaults for ducts
     hpxml_bldg.hvac_systems.each do |hvac_system|
       next unless hvac_system.location.nil?
 
       hvac_system.location_isdefaulted = true
+
+      if hvac_system.is_shared_system
+        hvac_system.location = HPXML::LocationOtherHeatedSpace
+        next
+      end
 
       # Set default location based on distribution system
       dist_system = hvac_system.distribution_system
@@ -2087,6 +2450,14 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::VentilationFan objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [void]
   def self.apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
     # Default mech vent systems
     hpxml_bldg.ventilation_fans.each do |vent_fan|
@@ -2194,6 +2565,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_water_heaters(hpxml_bldg, nbeds, eri_version, schedules_file)
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       if water_heating_system.is_shared_system.nil?
@@ -2260,14 +2638,29 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::AirInfiltration object
+  # specific to the presence of a flue/chimney.
+  #
+  # Note: This needs to be called after we have applied defaults for HVAC/DHW systems.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_flue_or_chimney(hpxml_bldg)
-    # This needs to come after we have applied defaults for HVAC/DHW systems
     if hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space.nil?
       hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
       hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space_isdefaulted = true
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HotWaterDistribution objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @param has_uncond_bsmnt [TODO] TODO
+  # @param has_cond_bsmnt [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, has_uncond_bsmnt, has_cond_bsmnt, schedules_file)
     return if hpxml_bldg.hot_water_distributions.size == 0
 
@@ -2343,6 +2736,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::WaterFixture objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_water_fixtures(hpxml_bldg, schedules_file)
     return if hpxml_bldg.hot_water_distributions.size == 0
 
@@ -2374,6 +2772,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::SolarThermalSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_solar_thermal_systems(hpxml_bldg)
     hpxml_bldg.solar_thermal_systems.each do |solar_thermal_system|
       if solar_thermal_system.collector_azimuth.nil?
@@ -2391,6 +2793,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PVSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_pv_systems(hpxml_bldg)
     hpxml_bldg.pv_systems.each do |pv_system|
       if pv_system.array_azimuth.nil?
@@ -2430,6 +2836,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Generator objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_generators(hpxml_bldg)
     hpxml_bldg.generators.each do |generator|
       if generator.is_shared_system.nil?
@@ -2439,6 +2849,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Battery objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.apply_batteries(hpxml_bldg)
     default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
     hpxml_bldg.batteries.each do |battery|
@@ -2500,6 +2914,14 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::ClothesWasher, HPXML::ClothesDryer,
+  # HPXML::Dishwasher, HPXML::Refrigerator, HPXML::Freezer, HPXML::CookingRange, and HPXML::Oven objects.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_appliances(hpxml_bldg, nbeds, eri_version, schedules_file)
     # Default clothes washer
     if hpxml_bldg.clothes_washers.size > 0
@@ -2802,6 +3224,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Lighting and HPXML::LightingGroup objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_lighting(hpxml_bldg, schedules_file)
     return if hpxml_bldg.lighting_groups.empty?
 
@@ -2893,6 +3320,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::CeilingFan objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_ceiling_fans(hpxml_bldg, nbeds, weather, schedules_file)
     return if hpxml_bldg.ceiling_fans.size == 0
 
@@ -2920,6 +3354,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Pool and HPXML::PermanentSpa objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_pools_and_permanent_spas(hpxml_bldg, cfa, schedules_file)
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
     hpxml_bldg.pools.each do |pool|
@@ -3035,6 +3475,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PlugLoad objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_plug_loads(hpxml_bldg, cfa, schedules_file)
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
     hpxml_bldg.plug_loads.each do |plug_load|
@@ -3154,6 +3600,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FuelLoad objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [void]
   def self.apply_fuel_loads(hpxml_bldg, cfa, schedules_file)
     nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
     hpxml_bldg.fuel_loads.each do |fuel_load|
@@ -3243,12 +3695,23 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
-    # Calculate building design loads and equipment capacities/airflows
+  # Assigns default capacities/airflows for autosized HPXML HVAC equipment.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherProcess] Weather object
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
+  # @return [void]
+  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems)
+    HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
+  # TODO
+  #
+  # @param orientation [TODO] TODO
+  # @return [TODO] TODO
   def self.get_azimuth_from_orientation(orientation)
     return if orientation.nil?
 
@@ -3273,6 +3736,10 @@ class HPXMLDefaults
     fail "Unexpected orientation: #{orientation}."
   end
 
+  # TODO
+  #
+  # @param azimuth [TODO] TODO
+  # @return [TODO] TODO
   def self.get_orientation_from_azimuth(azimuth)
     return if azimuth.nil?
 
@@ -3295,6 +3762,10 @@ class HPXMLDefaults
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_nbeds_adjusted_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
     unit_type = hpxml_bldg.building_construction.residential_facility_type
@@ -3307,9 +3778,14 @@ class HPXMLDefaults
     end
   end
 
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [TODO] TODO
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
     # Check for atmospheric heating system in conditioned space
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? heating_system.location
 
       if [HPXML::HVACTypeFurnace,
@@ -3326,14 +3802,13 @@ class HPXMLDefaults
 
         return true
       elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
-        next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
-
         return true
       end
     end
 
     # Check for atmospheric water heater in conditioned space
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
+      next if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
 
       if not water_heating_system.energy_factor.nil?
@@ -3347,27 +3822,59 @@ class HPXMLDefaults
     return false
   end
 
+  # TODO
+  #
+  # @param latitude [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.get_default_latitude(latitude, epw_file)
     return latitude unless latitude.nil?
 
     return epw_file.latitude
   end
 
+  # TODO
+  #
+  # @param longitude [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.get_default_longitude(longitude, epw_file)
     return longitude unless longitude.nil?
 
     return epw_file.longitude
   end
 
+  # TODO
+  #
+  # @param time_zone [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.get_default_time_zone(time_zone, epw_file)
     return time_zone unless time_zone.nil?
 
     return epw_file.timeZone
   end
 
+  # TODO
+  #
+  # @param state_code [TODO] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @return [TODO] TODO
   def self.get_default_state_code(state_code, epw_file)
     return state_code unless state_code.nil?
 
     return epw_file.stateProvinceRegion.upcase
+  end
+
+  # TODO
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
+  def self.cleanup_zones_spaces(hpxml_bldg)
+    # Remove any automatically created zones/spaces
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    auto_space.delete if not auto_space.nil?
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }
+    auto_zone.delete if not auto_zone.nil?
   end
 end

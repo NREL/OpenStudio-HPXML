@@ -216,23 +216,31 @@ class ReportSimulationOutputTest < Minitest::Test
     'HVAC Design Load: Heating: Floors (Btu/h)',
     'HVAC Design Load: Heating: Slabs (Btu/h)',
     'HVAC Design Load: Heating: Ceilings (Btu/h)',
-    'HVAC Design Load: Heating: Infiltration/Ventilation (Btu/h)',
+    'HVAC Design Load: Heating: Infiltration (Btu/h)',
+    'HVAC Design Load: Heating: Ventilation (Btu/h)',
+    'HVAC Design Load: Heating: Piping (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Total (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Ducts (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Windows (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Skylights (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: AED Excursion (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Doors (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Walls (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Roofs (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Floors (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Slabs (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Ceilings (Btu/h)',
-    'HVAC Design Load: Cooling Sensible: Infiltration/Ventilation (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: Infiltration (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: Ventilation (Btu/h)',
     'HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h)',
+    'HVAC Design Load: Cooling Sensible: Blower Heat (Btu/h)',
     'HVAC Design Load: Cooling Latent: Total (Btu/h)',
     'HVAC Design Load: Cooling Latent: Ducts (Btu/h)',
-    'HVAC Design Load: Cooling Latent: Infiltration/Ventilation (Btu/h)',
-    'HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)'
+    'HVAC Design Load: Cooling Latent: Infiltration (Btu/h)',
+    'HVAC Design Load: Cooling Latent: Ventilation (Btu/h)',
+    'HVAC Design Load: Cooling Latent: Internal Gains (Btu/h)',
+    'HVAC Geothermal Loop: Borehole/Trench Count',
+    'HVAC Geothermal Loop: Borehole/Trench Length (ft)'
   ]
 
   BaseHPXMLTimeseriesColsEnergy = [
@@ -599,7 +607,7 @@ class ReportSimulationOutputTest < Minitest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    actual_annual_rows = _get_annual_values(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
     _check_runner_registered_values_and_measure_xml_outputs(actual_annual_rows)
 
@@ -634,7 +642,7 @@ class ReportSimulationOutputTest < Minitest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows + emission_annual_cols
-    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    actual_annual_rows = _get_annual_values(annual_csv)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.keys.sort)
     _check_runner_registered_values_and_measure_xml_outputs(actual_annual_rows)
   end
@@ -660,7 +668,7 @@ class ReportSimulationOutputTest < Minitest::Test
     annual_csv, timeseries_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
-    actual_annual_rows = _get_actual_annual_rows(annual_csv)
+    actual_annual_rows = _get_annual_values(annual_csv)
     assert(actual_annual_rows.keys.empty?)
   end
 
@@ -792,6 +800,8 @@ class ReportSimulationOutputTest < Minitest::Test
     _check_for_zero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"], 0, 31 * 24 - 1) # Jan
     _check_for_zero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::PlugLoads}"], (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 + 1, -1) # Dec
     _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
+    positive_cols = actual_timeseries_cols.select { |col| col.start_with?('End Use:') }
+    _check_for_positive_timeseries_values(timeseries_csv, positive_cols)
   end
 
   def test_timeseries_hourly_system_uses
@@ -1045,6 +1055,10 @@ class ReportSimulationOutputTest < Minitest::Test
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, emissions_timeseries_cols[0..2])
     _check_for_nonzero_timeseries_values(timeseries_csv, ["End Use: #{FT::Elec}: #{EUT::Refrigerator}"])
+    negative_cols = ["End Use: #{FT::Elec}: #{EUT::PV}"]
+    positive_cols = actual_timeseries_cols.select { |col| col.start_with?('End Use:') } - negative_cols - ["End Use: #{FT::Elec}: #{EUT::Battery}"]
+    _check_for_negative_timeseries_values(timeseries_csv, negative_cols)
+    _check_for_positive_timeseries_values(timeseries_csv, positive_cols)
   end
 
   def test_timeseries_daily_ALL
@@ -1315,11 +1329,23 @@ class ReportSimulationOutputTest < Minitest::Test
 
     args_hash = { 'hpxml_path' => @tmp_hpxml_path,
                   'skip_validation' => true, }
-    annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
-    assert(!File.exist?(annual_csv))
+    _annual_csv, timeseries_csv, run_log = _test_measure(args_hash, expect_success: false)
     assert(!File.exist?(timeseries_csv))
     assert(File.readlines(run_log).any? { |line| line.include?('Simulation used infinite energy; double-check inputs.') })
   end
+
+  def test_geothermal_loop
+    args_hash = { 'hpxml_path' => File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-hvac-ground-to-air-heat-pump-detailed-geothermal-loop.xml'),
+                  'skip_validation' => true }
+    annual_csv, timeseries_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    actual_annual_rows = _get_annual_values(annual_csv)
+    assert_equal(9.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Count'])
+    assert_equal(315.0, actual_annual_rows['HVAC Geothermal Loop: Borehole/Trench Length (ft)'])
+  end
+
+  private
 
   def _test_measure(args_hash, expect_success: true)
     # Run measure via OSW
@@ -1386,7 +1412,7 @@ class ReportSimulationOutputTest < Minitest::Test
     return steps.uniq.size
   end
 
-  def _get_values(timeseries_csv, timeseries_cols)
+  def _get_timeseries_values(timeseries_csv, timeseries_cols)
     values = {}
     timeseries_cols.each do |col|
       values[col] = []
@@ -1404,7 +1430,7 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def _check_for_nonzero_avg_timeseries_value(timeseries_csv, timeseries_cols)
-    values = _get_values(timeseries_csv, timeseries_cols)
+    values = _get_timeseries_values(timeseries_csv, timeseries_cols)
 
     timeseries_cols.each do |col|
       avg_value = values[col].sum(0.0) / values[col].size
@@ -1413,7 +1439,7 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def _check_for_zero_timeseries_values(timeseries_csv, timeseries_cols, start_ix, end_ix)
-    values = _get_values(timeseries_csv, timeseries_cols)
+    values = _get_timeseries_values(timeseries_csv, timeseries_cols)
 
     timeseries_cols.each do |col|
       has_only_zero_timeseries_values = values[col][start_ix..end_ix].all? { |x| x == 0 }
@@ -1422,16 +1448,30 @@ class ReportSimulationOutputTest < Minitest::Test
   end
 
   def _check_for_nonzero_timeseries_values(timeseries_csv, timeseries_cols)
-    # check that every day has non zero values for baseload equipment (e.g., refrigerator)
-    values = _get_values(timeseries_csv, timeseries_cols)
+    values = _get_timeseries_values(timeseries_csv, timeseries_cols)
 
     timeseries_cols.each do |col|
-      has_no_zero_timeseries_value = !values[col].include?(0.0)
-      assert(has_no_zero_timeseries_value)
+      refute(values[col].include?(0.0))
     end
   end
 
-  def _get_actual_annual_rows(annual_csv)
+  def _check_for_positive_timeseries_values(timeseries_csv, timeseries_cols)
+    values = _get_timeseries_values(timeseries_csv, timeseries_cols)
+
+    timeseries_cols.each do |col|
+      assert_operator(values[col].min, :>=, 0)
+    end
+  end
+
+  def _check_for_negative_timeseries_values(timeseries_csv, timeseries_cols)
+    values = _get_timeseries_values(timeseries_csv, timeseries_cols)
+
+    timeseries_cols.each do |col|
+      assert_operator(values[col].max, :<=, 0)
+    end
+  end
+
+  def _get_annual_values(annual_csv)
     actual_annual_rows = {}
     File.readlines(annual_csv).each do |line|
       next if line.strip.empty?

@@ -437,7 +437,6 @@
           <SystemIdentifier id='Refrigerator1'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>
@@ -942,7 +941,6 @@
           <SystemIdentifier id='Refrigerator1_2'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_2'/>
@@ -1335,7 +1333,6 @@
           <SystemIdentifier id='Refrigerator1_3'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_3'/>
@@ -1728,7 +1725,6 @@
           <SystemIdentifier id='Refrigerator1_4'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_4'/>
@@ -2178,7 +2174,6 @@
           <SystemIdentifier id='Refrigerator1_5'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_5'/>
@@ -2628,7 +2623,6 @@
           <SystemIdentifier id='Refrigerator1_6'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1_6'/>
