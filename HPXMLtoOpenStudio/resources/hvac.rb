@@ -43,10 +43,6 @@ class HVAC
           # Throw error and stop simulation
           runner.registerError('NumberofUnits greater than 1 is not supported for on-off thermostat deadband.')
         end
-        if hpxml_header.timestep > 1
-          # Throw error and stop simulation
-          runner.registerError('On-off thermostat deadband currently is only supported for 1 minute timestep.')
-        end
       end
     else
       is_onoff_thermostat_ddb = false
@@ -2204,10 +2200,6 @@ class HVAC
       if hpxml_bldg.building_construction.number_of_units > 1
         # Throw error and stop simulation
         runner.registerError('NumberofUnits greater than 1 is not supported for multi-staging backup coil.')
-      end
-      if hpxml_header.timestep > 1
-        # Throw error and stop simulation
-        runner.registerError('Multi-staging backup coil currently is only supported for 1 minute timestep.')
       end
       max_num_stages = 4
 
