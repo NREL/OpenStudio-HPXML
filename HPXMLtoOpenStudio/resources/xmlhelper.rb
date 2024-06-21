@@ -253,7 +253,7 @@ class XMLHelper
 
   # TODO
   #
-  # @param doc [TODO] TODO
+  # @param doc [Oga::XML::Document] Oga XML Document object
   # @param out_path [TODO] TODO
   # @return [TODO] TODO
   def self.write_file(doc, out_path)
