@@ -3,13 +3,13 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>3e97c1ce-c81f-4ab9-a086-b4f94510389e</version_id>
-  <version_modified>2024-06-20T15:11:49Z</version_modified>
+  <version_id>f3ee0ac4-9f12-4b23-8a57-ff5e2bfa2130</version_id>
+  <version_modified>2024-06-21T00:37:39Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
-  <description>Builds a residential schedule file.</description>
-  <modeler_description>Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Stochastic schedules are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.</modeler_description>
+  <description>Builds a residential stochastic occupancy schedule file.</description>
+  <modeler_description>Generates a CSV of schedules at the specified file path, and inserts the CSV schedule file path into the output HPXML file (or overwrites it if one already exists). Stochastic schedules are generated using time-inhomogeneous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data. See &lt;a href='https://www.sciencedirect.com/science/article/pii/S0306261922011540'&gt;Stochastic simulation of occupant-driven energy use in a bottom-up residential building stock model&lt;/a&gt; for a more complete description of the methodology.</modeler_description>
   <arguments>
     <argument>
       <name>hpxml_path</name>
@@ -116,7 +116,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>5852D2EF</checksum>
+      <checksum>EB56CA85</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -133,13 +133,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A2F3618B</checksum>
+      <checksum>A981343F</checksum>
     </file>
     <file>
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A8A141BE</checksum>
+      <checksum>C8528AAA</checksum>
     </file>
     <file>
       <filename>clothes_dryer_consumption_dist.csv</filename>
