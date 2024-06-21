@@ -1050,7 +1050,7 @@
     "geometry_building_num_units": 6,
     "geometry_foundation_type": "AboveApartment",
     "geometry_attic_type": "BelowApartment",
-    "geometry_floor_height_above_grade": 10,
+    "geometry_unit_height_above_grade": 10,
     "window_front_wwr": 0.18,
     "window_back_wwr": 0.18,
     "window_left_wwr": 0.18,

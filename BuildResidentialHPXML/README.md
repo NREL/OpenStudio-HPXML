@@ -565,11 +565,11 @@ Average distance from the floor to the ceiling.
 
 <br/>
 
-**Geometry: Floor Height Above Grade**
+**Geometry: Unit Height Above Grade**
 
-Describes the above-grade height of, e.g., apartment units on upper floors or homes above pier and beam (ambient) foundation. It is defined as the height of the lowest above-grade point within the infiltration pressure boundary and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-construction'>HPXML Building Construction</a>) is used.
+Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-construction'>HPXML Building Construction</a>) is used.
 
-- **Name:** ``geometry_floor_height_above_grade``
+- **Name:** ``geometry_unit_height_above_grade``
 - **Type:** ``Double``
 
 - **Units:** ``ft``

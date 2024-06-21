@@ -4171,9 +4171,9 @@
 											<xs:documentation>[ft] height of building</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-                  <xs:element minOccurs="0" name="FloorHeightAboveGrade" type="LengthMeasurement">
+									<xs:element minOccurs="0" name="UnitHeightAboveGrade" type="LengthMeasurement">
 										<xs:annotation>
-											<xs:documentation>[ft] Height of the floor above grade. Useful to characterize the height of, e.g., apartment units above ground level or homes on pier and beam foundations.</xs:documentation>
+											<xs:documentation>[ft] Height of the unit's lowest conditioned floor above grade. Useful to characterize the height of apartment units above ground level or homes on pier and beam foundations. Can be negative for, e.g., a garden-level apartment unit.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="NumberofUnits" type="IntegerGreaterThanZero">

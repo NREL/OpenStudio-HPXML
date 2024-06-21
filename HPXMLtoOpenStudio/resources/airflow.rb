@@ -135,7 +135,7 @@ module Airflow
     conditioned_const_ach *= infil_values[:a_ext] unless conditioned_const_ach.nil?
     conditioned_ach50 *= infil_values[:a_ext] unless conditioned_ach50.nil?
     has_flue_chimney_in_cond_space = hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space
-    floor_height_above_grade = hpxml_bldg.building_construction.floor_height_above_grade
+    unit_height_above_grade = hpxml_bldg.building_construction.unit_height_above_grade
 
     # Cooling season schedule
     # Applies to natural ventilation, not HVAC equipment.
@@ -162,7 +162,7 @@ module Airflow
     apply_infiltration_ventilation_to_conditioned(model, hpxml_bldg.site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_values[:volume],
                                                   infil_values[:height], weather, vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space,
                                                   clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, hpxml_bldg.elevation, duct_lk_imbals,
-                                                  floor_height_above_grade)
+                                                  unit_height_above_grade)
   end
 
   # TODO
@@ -2168,11 +2168,11 @@ module Airflow
   # @param unavailable_periods [TODO] TODO
   # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
-  # @param floor_height_above_grade [TODO] TODO
+  # @param unit_height_above_grade [TODO] TODO
   # @return [TODO] TODO
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
                                                          vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals, floor_height_above_grade)
+                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals, unit_height_above_grade)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -2219,7 +2219,7 @@ module Airflow
 
     # Calculate infiltration without adjustment by ventilation
     apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
-                                      infil_height, floor_height_above_grade, elevation)
+                                      infil_height, unit_height_above_grade, elevation)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -2264,11 +2264,11 @@ module Airflow
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param floor_height_above_grade [TODO] TODO
+  # @param unit_height_above_grade [TODO] TODO
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
-                                             infil_height, floor_height_above_grade, elevation)
+                                             infil_height, unit_height_above_grade, elevation)
     site_ap = site.additional_properties
 
     if conditioned_ach50.to_f > 0
@@ -2354,7 +2354,7 @@ module Airflow
       infil_program.addLine("Set s_m = #{site_ap.ashrae_terrain_thickness}")
       infil_program.addLine("Set s_s = #{site_ap.ashrae_site_terrain_thickness}")
       infil_program.addLine("Set z_m = #{UnitConversions.convert(site_ap.height, 'ft', 'm')}")
-      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height + floor_height_above_grade, 'ft', 'm')}")
+      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height + unit_height_above_grade, 'ft', 'm')}")
       infil_program.addLine('Set f_t = (((s_m/z_m)^p_m)*((z_s/s_s)^p_s))')
       infil_program.addLine("Set Tdiff = #{@tin_sensor.name}-#{@tout_sensor.name}")
       infil_program.addLine('Set dT = @Abs Tdiff')

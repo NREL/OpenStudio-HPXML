@@ -2,6 +2,7 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
@@ -62,7 +63,6 @@ __New Features__
   - Miscellaneous improvements.
 - Allows optional `Ducts/DuctShape` and `Ducts/DuctFractionRectangular` inputs, which affect duct effective R-value used for modeling.
 - Adds optional `Slab/extension/GapInsulationRValue` input for cases where a slab has horizontal (under slab) insulation.
-- Adds optional `BuildingConstruction/FloorHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
 - Allows radiant barriers for additional locations (attic gable walls and floor); reduced emissivity due to dust assumed for radiant barriers on attic floor.
 - Adds window and skylight `GlassType` options of "low-e, high-solar-gain" and "low-e, low-solar-gain"; updates U-factor/SHGC lookup tables.
 - Updates default temperature capacitance multiplier from 1 to 7, an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.

@@ -443,7 +443,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.conditioned_building_volume = 20000
     hpxml_bldg.building_construction.average_ceiling_height = 7
     hpxml_bldg.building_construction.number_of_units = 3
-    hpxml_bldg.building_construction.floor_height_above_grade = 1.6
+    hpxml_bldg.building_construction.unit_height_above_grade = 1.6
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 20000, 7.0, 4, 3, 1.6)
@@ -453,7 +453,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_construction.average_ceiling_height = nil
     hpxml_bldg.building_construction.number_of_bathrooms = nil
     hpxml_bldg.building_construction.number_of_units = nil
-    hpxml_bldg.building_construction.floor_height_above_grade = nil
+    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 22140, 8.2, 2, 1, 0)
@@ -461,7 +461,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ conditioned crawlspace
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-conditioned-crawlspace.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.floor_height_above_grade = nil
+    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 16200, 8.0, 2, 1, 0)
@@ -469,7 +469,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ belly-and-wing foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-belly-wing-skirt.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.floor_height_above_grade = nil
+    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
@@ -477,7 +477,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ pier & beam foundation
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-ambient.xml')
     hpxml_bldg.building_construction.conditioned_building_volume = nil
-    hpxml_bldg.building_construction.floor_height_above_grade = nil
+    hpxml_bldg.building_construction.unit_height_above_grade = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_construction_values(default_hpxml_bldg, 10800, 8.0, 2, 1, 2)
@@ -4356,12 +4356,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_building_construction_values(hpxml_bldg, building_volume, average_ceiling_height, number_of_bathrooms,
-                                                 number_of_units, floor_height_above_grade)
+                                                 number_of_units, unit_height_above_grade)
     assert_equal(building_volume, hpxml_bldg.building_construction.conditioned_building_volume)
     assert_in_epsilon(average_ceiling_height, hpxml_bldg.building_construction.average_ceiling_height, 0.01)
     assert_equal(number_of_bathrooms, hpxml_bldg.building_construction.number_of_bathrooms)
     assert_equal(number_of_units, hpxml_bldg.building_construction.number_of_units)
-    assert_equal(floor_height_above_grade, hpxml_bldg.building_construction.floor_height_above_grade)
+    assert_equal(unit_height_above_grade, hpxml_bldg.building_construction.unit_height_above_grade)
   end
 
   def _test_default_infiltration_values(hpxml_bldg, volume, has_flue_or_chimney_in_conditioned_space)

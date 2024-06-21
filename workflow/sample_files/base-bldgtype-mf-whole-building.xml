@@ -44,7 +44,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>0.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>0.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
@@ -548,7 +548,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>0.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>0.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
@@ -1052,7 +1052,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>10.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>10.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
@@ -1444,7 +1444,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>10.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>10.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
@@ -1836,7 +1836,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>20.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>20.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
@@ -2285,7 +2285,7 @@
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
-          <FloorHeightAboveGrade>20.0</FloorHeightAboveGrade>
+          <UnitHeightAboveGrade>20.0</UnitHeightAboveGrade>
           <NumberofUnitsInBuilding>6</NumberofUnitsInBuilding>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>

@@ -586,7 +586,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   Element                                  Type      Units      Constraints                        Required  Default   Notes
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
   ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
-  ``FloorHeightAboveGrade``                double    ft         >= 0                               No        See [#]_  Above-grade height of the floor [#]_
+  ``UnitHeightAboveGrade``                 double    ft         >= 0                               No        See [#]_  Height of the unit's lowest conditioned floor above grade [#]_
   ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
   ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
@@ -598,9 +598,9 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
 
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
-  .. [#] If FloorHeightAboveGrade not provided, defaults to 2 ft if all HPXML Floors have ExteriorAdjacentTo with "outside"/"manufactured home underbelly", otherwise 0 ft.
-  .. [#] FloorHeightAboveGrade is used to describe the above-grade height of, e.g., apartment units on upper levels or homes above pier and beam (ambient) foundation.
-         It is defined as the height of the lowest above-grade point within the infiltration pressure boundary, and is used along with :ref:`air_infiltration` to calculate the wind speed for the infiltration model.
+  .. [#] If UnitHeightAboveGrade not provided, defaults to 2 ft if all HPXML Floors have ExteriorAdjacentTo with "outside"/"manufactured home underbelly", otherwise 0 ft.
+  .. [#] UnitHeightAboveGrade is useful to characterize the height of apartment units above ground level or homes on pier and beam foundations.
+         It is used along with :ref:`air_infiltration` to calculate the wind speed for the infiltration model.
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
@@ -948,7 +948,7 @@ Building air leakage is entered in ``/HPXML/Building/BuildingDetails/Enclosure/A
          Note that InfiltrationVolume can be larger than ConditionedBuildingVolume as it can include, e.g., attics or basements with access doors/hatches that are open during the blower door test.
   .. [#] If InfiltrationHeight not provided, it is inferred from other inputs (e.g., conditioned floor area, number of conditioned floors above-grade, above-grade foundation wall height, etc.).
   .. [#] InfiltrationHeight is defined as the vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2.
-         It is used along with the ``FloorHeightAboveGrade`` in :ref:`bldg_constr` to calculate the wind speed for the infiltration model.
+         It is used along with the ``UnitHeightAboveGrade`` in :ref:`bldg_constr` to calculate the wind speed for the infiltration model.
   .. [#] If Aext not provided and TypeOfInfiltrationLeakage is "unit total", defaults for single-family attached and apartment units to the ratio of exterior (adjacent to outside) envelope surface area to total (adjacent to outside, other dwelling units, or other MF spaces) envelope surface area, as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_ and `ASHRAE 62.2-2019 <https://www.techstreet.com/ashrae/standards/ashrae-62-2-2019?product_id=2087691>`_.
          Note that all attached surfaces, even adiabatic surfaces, must be defined in the HPXML file.
          If single-family detached or TypeOfInfiltrationLeakage is "unit exterior only", Aext is 1.

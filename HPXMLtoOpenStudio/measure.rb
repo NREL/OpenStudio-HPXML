@@ -3399,7 +3399,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @return [TODO] TODO
   def set_foundation_and_walls_top()
-    @foundation_top = @hpxml_bldg.building_construction.floor_height_above_grade
+    @foundation_top = @hpxml_bldg.building_construction.unit_height_above_grade
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       @foundation_top = top if top > @foundation_top

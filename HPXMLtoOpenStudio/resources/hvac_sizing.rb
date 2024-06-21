@@ -1376,12 +1376,12 @@ module HVACSizing
     windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
 
     if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml_bldg.building_construction.residential_facility_type
-      if hpxml_bldg.building_construction.floor_height_above_grade > 0
+      if hpxml_bldg.building_construction.unit_height_above_grade > 0
         # Scale default wind speed for height (a_exponent from Figure A15-1)
         a_exponent = { HPXML::ShieldingNormal => 0.22,
                        HPXML::ShieldingExposed => 0.14,
                        HPXML::ShieldingWellShielded => 0.33 }[hpxml_bldg.site.shielding_of_home]
-        estimated_story = (hpxml_bldg.building_construction.floor_height_above_grade + infil_values[:height]) / infil_values[:height]
+        estimated_story = (hpxml_bldg.building_construction.unit_height_above_grade + infil_values[:height]) / infil_values[:height]
         windspeed_cooling_mph *= estimated_story**a_exponent
         windspeed_heating_mph *= estimated_story**a_exponent
       end
