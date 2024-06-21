@@ -3356,7 +3356,7 @@ class HVAC
     end
   end
 
-  # TODO
+  # Return the time needed to reach full capacity based on c_d assumption, used for degradation EMS program.
   #
   # @param c_d [Float] Degradation coefficient
   # @return [Float] Time in minutes to reach full capacity
@@ -3368,14 +3368,14 @@ class HVAC
     return time
   end
 
-  # TODO
+  # Return min and max limit to time needed to reach full capacity
   #
   # @return [2, 5] Minimum and maximum time in minutes to reach full capacity
   def self.get_time_to_full_cap_limits()
     return [2, 5]
   end
 
-  # TODO
+  # Return the EMS actuator and EMS global variable for backup coil availability schedule, this is called every time EMS uses this actuator to avoid conflicts across different EMS programs.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
@@ -3408,7 +3408,8 @@ class HVAC
     return supp_coil_avail_act, global_var_supp_avail
   end
 
-  # TODO
+  # Apply EMS program to control back up coil behavior when single speed system is modeled with on-off thermostat feature.
+  # Back up coil is turned on after 5 mins that heat pump is not able to maintain setpoints.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
@@ -3499,7 +3500,8 @@ class HVAC
     program_calling_manager.addProgram(supp_coil_avail_program)
   end
 
-  # TODO
+  # Apply capacity degradation EMS to account for realistic start-up losses.
+  # Capacity function of airflow rate curve and EIR function of airflow rate curve are actuated to capture the impact of start-up losses.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param system_ap [HPXML::AdditionalProperties] HPXML Cooling System or HPXML Heating System Additional Properties
@@ -3613,7 +3615,7 @@ class HVAC
     program_calling_manager.addProgram(cycling_degrad_program)
   end
 
-  # TODO
+  # Apply time-based realistic staging EMS program for two speed system. Observe 5 mins before ramping up the speed level, or enable the backup coil.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
@@ -3737,19 +3739,19 @@ class HVAC
     program_calling_manager.addProgram(realistic_cycling_program)
   end
 
-  # TODO
+  # Apply maximum power ratio schedule for variable speed system. Creates EMS program to determine and control the stage that can reach the maximum power constraint.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param air_loop_unitary [TODO] TODO
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
   # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
-  # @param heating_system [TODO] TODO
-  # @param cooling_system [TODO] TODO
-  # @param htg_supp_coil [TODO] TODO
-  # @param clg_coil [TODO] TODO
-  # @param htg_coil [TODO] TODO
+  # @param heating_system [HPXML::HeatingSystem] HPXML Heating System
+  # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
+  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
+  # @param clg_coil [OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio MultiStage Cooling Coil object
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio MultiStage Heating Coil object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [TODO] TODO
+  # @return nil
   def self.apply_max_power_EMS(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
     return if schedules_file.nil?
     return if clg_coil.nil? && htg_coil.nil?
@@ -3996,7 +3998,7 @@ class HVAC
     program_calling_manager.addProgram(program)
   end
 
-  # TODO
+  # Apply time-based realistic staging EMS program for integrated multi-stage backup system. Observe 5 mins before ramping up the speed level.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
