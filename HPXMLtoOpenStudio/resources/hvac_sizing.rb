@@ -1775,7 +1775,7 @@ class HVACSizing
         
         #calculate sensible/latent split at design conditions
         cool_sens_cap_design = cool_cap_design * hvac_sizings.Design_SHR
-        cool_lat_cap_design = [hvac_sizing_values.Cool_Load_Tot - cool_sens_cap_design, 1.0].max
+        cool_lat_cap_design = [hvac_sizings.Cool_Load_Tot - cool_sens_cap_design, 1.0].max
 
         # Adjust Sizing
         if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
@@ -2473,7 +2473,7 @@ class HVACSizing
 
     lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
 
-    hvac_sizings.GSHP_Loop_flow = loop_flow
+    hvac_sizings.GSHP_Loop_Flow = loop_flow
     hvac_sizings.GSHP_Bore_Depth = bore_depth
     hvac_sizings.GSHP_Bore_Holes = num_bore_holes
     hvac_sizings.GSHP_G_Functions = [lntts, gfnc_coeff]
@@ -3687,7 +3687,7 @@ class HVACSizing
         geothermal_loop = htg_sys.geothermal_loop
         if not geothermal_loop.nil?
           if geothermal_loop.loop_flow.nil?
-            geothermal_loop.loop_flow = hvac_sizings.GSHP_Loop_flow
+            geothermal_loop.loop_flow = hvac_sizings.GSHP_Loop_Flow
             geothermal_loop.loop_flow_isdefaulted = true
           end
           if geothermal_loop.num_bore_holes.nil?
@@ -4123,9 +4123,10 @@ class DesignLoadValues
 end
 
 class HVACSizingValues
-  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
+  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Cool_Capacity, :Cool_Capacity_Sens, 
+                :Cool_Airflow, :Cool_Airflow_Init, :Cool_Airflow_Next, :Cool_Airflow_Prev, :Design_SHR,
                 :Heat_Load, :Heat_Load_Supp, :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
+                :GSHP_Loop_Flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions, :GSHP_Bore_Config)
 
   def initialize
   end
