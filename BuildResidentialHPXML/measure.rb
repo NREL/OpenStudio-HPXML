@@ -4097,7 +4097,7 @@ class HPXMLFile
 
     if not args[:simulation_control_heat_pump_backup_heating_capacity_increment].nil?
       if (not hpxml.header.heat_pump_backup_heating_capacity_increment.nil?) && (hpxml.header.heat_pump_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
-        errors << "'Simulation Control: HVAC GEB Backup Heating Capacity Increment' cannot vary across dwelling units."
+        errors << "'Simulation Control: Heat Pump Backup Heating Capacity Increment' cannot vary across dwelling units."
       end
       hpxml.header.heat_pump_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
     end
