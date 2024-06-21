@@ -854,7 +854,7 @@ class HPXML < Object
           XMLHelper.add_element(advanced_research_features, 'TemperatureCapacitanceMultiplier', @temperature_capacitance_multiplier, :float, @temperature_capacitance_multiplier_isdefaulted) unless @temperature_capacitance_multiplier.nil?
           XMLHelper.add_element(advanced_research_features, 'DefrostModelType', @defrost_model_type, :string, @defrost_model_type_isdefaulted) unless @defrost_model_type.nil?
           XMLHelper.add_element(advanced_research_features, 'OnOffThermostatDeadbandTemperature', @hvac_onoff_thermostat_deadband, :float, @hvac_onoff_thermostat_deadband_isdefaulted) unless @hvac_onoff_thermostat_deadband.nil?
-          XMLHelper.add_element(advanced_research_features, 'BackupHeatingCapacityIncrement', @heat_pump_backup_heating_capacity_increment, :float, @heat_pump_backup_heating_capacity_increment_isdefaulted) unless @heat_pump_backup_heating_capacity_increment.nil?
+          XMLHelper.add_element(advanced_research_features, 'HeatPumpBackupCapacityIncrement', @heat_pump_backup_heating_capacity_increment, :float, @heat_pump_backup_heating_capacity_increment_isdefaulted) unless @heat_pump_backup_heating_capacity_increment.nil?
         end
       end
       @emissions_scenarios.to_doc(software_info)
@@ -885,7 +885,7 @@ class HPXML < Object
       @temperature_capacitance_multiplier = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier', :float)
       @defrost_model_type = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/DefrostModelType', :string)
       @hvac_onoff_thermostat_deadband = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature', :float)
-      @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/BackupHeatingCapacityIncrement', :float)
+      @heat_pump_backup_heating_capacity_increment = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement', :float)
       @apply_ashrae140_assumptions = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions', :boolean)
       @whole_sfa_or_mf_building_sim = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/WholeSFAorMFBuildingSimulation', :boolean)
       @emissions_scenarios.from_doc(XMLHelper.get_element(hpxml, 'SoftwareInfo'))
