@@ -11,9 +11,7 @@ __New Features__
 __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
 - Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
-- ReportUtilityBills measure:
-  - When PV is present, account for battery storage and generator production as Energy instead of PV Credit.
-  - Fixes not accounting for battery storage and generator production when PV is not present.
+- ReportUtilityBills measure: Fixes handling of battery storage and generator production.
 
 ## OpenStudio-HPXML v1.8.1
 
