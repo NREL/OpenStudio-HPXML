@@ -9,7 +9,8 @@ __New Features__
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
-- Allows additional flexibility for multiple `Attic`/`Foundation` elements.
+- Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
+- Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
 - ReportUtilityBills measure:
   - When PV is present, account for battery storage and generator production as Energy instead of PV Credit.
   - Fixes not accounting for battery storage and generator production when PV is not present.
