@@ -2231,6 +2231,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                       used_for_whole_building_ventilation: true)
     elsif ['base-mechvent-cfis-airflow-fraction-zero.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_vent_mode_airflow_fraction = 0.0
+    elsif ['base-mechvent-cfis-no-additional-runtime.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeNone
     elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
            'base-mechvent-cfis-supplemental-fan-supply.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
