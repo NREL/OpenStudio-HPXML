@@ -94,9 +94,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  # TODO
+  # Check for situations that are currently not supported when calculating any type of utility bill scenario.
   #
-  # @return [TODO] TODO
+  # @return [Array<String>] array of warnings
   def check_for_return_type_warnings()
     warnings = []
 
@@ -132,10 +132,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings.uniq
   end
 
-  # TODO
+  # Check for situations that are currently not supported for certain types of utility bill scenarios.
   #
-  # @param utility_bill_scenario [TODO] TODO
-  # @return [TODO] TODO
+  # @param utility_bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
+  # @return [Array<String>] array of warnings
   def check_for_next_type_warnings(utility_bill_scenario)
     warnings = []
 
@@ -153,7 +153,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [TODO] TODO
+  # @return [Array<OpenStudio::IdfObject>] array of OpenStudio IdfObject objects
   def energyPlusOutputRequests(runner, user_arguments)
     super(runner, user_arguments)
 
@@ -202,18 +202,22 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     has_fuel = hpxml.has_fuels(Constants.FossilFuels, hpxml.to_doc)
     has_fuel[HPXML::FuelTypeElectricity] = true
 
-    # Fuel outputs
+    # Has production
     has_pv = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.pv_systems.empty? }.size > 0
+    has_battery = @model.getElectricLoadCenterStorageLiIonNMCBatterys.size > 0 # has modeled battery
+    has_generator = @hpxml_buildings.select { |hpxml_bldg| !hpxml_bldg.generators.empty? }.size > 0
+
+    # Fuel outputs
     fuels.each do |(fuel_type, is_production), fuel|
       fuel.meters.each do |meter|
         next unless has_fuel[hpxml_fuel_map[fuel_type]]
-        next if is_production && !has_pv
+        next if is_production && !has_pv # we don't need to request these meters if there isn't pv
+        next if meter.include?('ElectricStorage') && !has_battery # we don't need to request this meter if there isn't a modeled battery
+        next if meter.include?('Cogeneration') && !has_generator # we don't need to request this meter if there isn't a generator
 
         result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         if fuel_type == FT::Elec && @hpxml_header.utility_bill_scenarios.has_detailed_electric_rates
           result << OpenStudio::IdfObject.load("Output:Meter,#{meter},hourly;").get
-        else
-          result << OpenStudio::IdfObject.load("Output:Meter,#{meter},monthly;").get
         end
       end
     end
@@ -221,11 +225,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return result.uniq
   end
 
-  # TODO
+  # Register to the runner each warning.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param warnings [TODO] TODO
-  # @return [TODO] TODO
+  # @param warnings [Array<String>] array of warnings
+  # @return [Boolean] true if any warnings were registered
   def register_warnings(runner, warnings)
     return false if warnings.empty?
 
@@ -239,7 +243,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] TODO
+  # @return [Boolean] true if successful
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
@@ -348,11 +352,11 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  # TODO
+  # Get the monthly grid connection fee.
   #
-  # @param bill_scenario [TODO] TODO
-  # @param hpxml_buildings [TODO] TODO
-  # @return [TODO] TODO
+  # @param bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
+  # @param hpxml_buildings [HPXML::Buildings] HPXML Buildings object
+  # @return [Double] the sum of the monthly grid connection fees ($) across HPXML Buildings
   def get_monthly_fee(bill_scenario, hpxml_buildings)
     monthly_fee = 0.0
     if not bill_scenario.pv_monthly_grid_connection_fee_dollars_per_kw.nil?
@@ -370,10 +374,10 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return monthly_fee
   end
 
-  # TODO
+  # Get monthly timestamps for reporting.
   #
   # @param args [Hash] Map of :argument_name => value
-  # @return [TODO] TODO
+  # @return [Array<String>] array of monthly timestamps (e.g., 2007-01-01T00:00:00)
   def get_timestamps(args)
     ep_timestamps = @msgpackData['MeterData']['Monthly']['Rows'].map { |r| r.keys[0] }
 
@@ -398,14 +402,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return timestamps
   end
 
-  # TODO
+  # Write and/or register to the runner the calculated runperiod utility bills.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param args [Hash] Map of :argument_name => value
-  # @param utility_bills [TODO] TODO
-  # @param annual_output_path [TODO] TODO
-  # @param bill_scenario_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param utility_bills [Hash] Fuel type => UtilityRate object
+  # @param annual_output_path [String] the file path containing annual utility bills
+  # @param bill_scenario_name [String] the name of the HPXML Utility Bill Scenario
   def report_runperiod_output_results(runner, args, utility_bills, annual_output_path, bill_scenario_name)
     return unless (args[:include_annual_bills] || args[:register_annual_bills])
 
@@ -439,14 +442,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Get monthly utility bill data from the utility_bills Hash.
   #
   # @param args [Hash] Map of :argument_name => value
-  # @param utility_bills [TODO] TODO
-  # @param bill_scenario_name [TODO] TODO
-  # @param monthly_data [TODO] TODO
-  # @param header [TODO] TODO
-  # @return [TODO] TODO
+  # @param utility_bills [Hash] Fuel type => UtilityBill object
+  # @param bill_scenario_name [String] the name of the HPXML Utility Bill Scenario
+  # @param monthly_data [Array<String>] lines of monthly utility bill data
+  # @param header [HPXML::Header] HPXML Header object (one per HPXML file)
   def get_monthly_output_results(args, utility_bills, bill_scenario_name, monthly_data, header)
     run_period = (header.sim_begin_month - 1)..(header.sim_end_month - 1)
     monthly_data << ["#{bill_scenario_name}: Total", 'USD'] + ([0.0] * run_period.size)
@@ -463,14 +465,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Write and/or register to the runner the calculated monthly utility bills.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param args [Hash] Map of :argument_name => value
-  # @param timestamps [TODO] TODO
-  # @param monthly_data [TODO] TODO
-  # @param monthly_output_path [TODO] TODO
-  # @return [TODO] TODO
+  # @param timestamps [Array<String>] array of monthly timestamps (e.g., 2007-01-01T00:00:00)
+  # @param monthly_data [Array<String>] lines of monthly utility bill data
+  # @param monthly_output_path [String] the file path containing monthly utility bills
   def report_monthly_output_results(runner, args, timestamps, monthly_data, monthly_output_path)
     return unless (args[:include_monthly_bills] || args[:register_monthly_bills])
 
@@ -527,15 +528,15 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Fill each UtilityRate object based on simple or detailed utility rate information.
   #
-  # @param hpxml_path [TODO] TODO
-  # @param fuels [TODO] TODO
-  # @param utility_rates [TODO] TODO
-  # @param bill_scenario [TODO] TODO
-  # @param monthly_fee [TODO] TODO
-  # @param num_units [TODO] TODO
-  # @return [TODO] TODO
+  # @param hpxml_path [String] path of the input HPXML file
+  # @param fuels [Hash] Fuel type, is_production => Fuel object
+  # @param utility_rates [Hash] Fuel Type => UtilityRate object
+  # @param bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
+  # @param monthly_fee [Double] the sum of the monthly grid connection fees ($) across HPXML Buildings
+  # @param num_units [Integer] total number of units represented by the HPXML file
+  # @return [Array<String>] array of warnings
   def get_utility_rates(hpxml_path, fuels, utility_rates, bill_scenario, monthly_fee, num_units = 1)
     warnings = []
     utility_rates.each do |fuel_type, rate|
@@ -647,14 +648,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return warnings
   end
 
-  # TODO
+  # Fill each UtilityBill object based on both fuel and utility rate information.
   #
-  # @param fuels [TODO] TODO
-  # @param utility_rates [TODO] TODO
-  # @param utility_bills [TODO] TODO
-  # @param utility_bill_scenario [TODO] TODO
-  # @param header [TODO] TODO
-  # @return [TODO] TODO
+  # @param fuels [Hash] Fuel type, is_production => Fuel object
+  # @param utility_rates [Hash] Fuel Type => UtilityRate object
+  # @param utility_bills [Hash] Fuel type => UtilityBill object
+  # @param utility_bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
+  # @param header [HPXML::Header] HPXML Header object (one per HPXML file)
   def get_utility_bills(fuels, utility_rates, utility_bills, utility_bill_scenario, header)
     net_elec = 0
 
@@ -697,13 +697,13 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     end
   end
 
-  # TODO
+  # Initialize the Fuel objects with meters and units.
   #
-  # @return [TODO] TODO
+  # @return [Hash] Fuel type, is_production => Fuel object
   def setup_fuel_outputs()
     fuels = {}
-    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
-    fuels[[FT::Elec, true]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}Produced:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    fuels[[FT::Elec, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeElectricity}:Facility", "ElectricStorage:#{EPlus::FuelTypeElectricity}Produced", "Cogeneration:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
+    fuels[[FT::Elec, true]] = Fuel.new(meters: ["Photovoltaic:#{EPlus::FuelTypeElectricity}Produced", "PowerConversion:#{EPlus::FuelTypeElectricity}Produced"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeElectricity))
     fuels[[FT::Gas, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeNaturalGas}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeNaturalGas))
     fuels[[FT::Oil, false]] = Fuel.new(meters: ["#{EPlus::FuelTypeOil}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypeOil))
     fuels[[FT::Propane, false]] = Fuel.new(meters: ["#{EPlus::FuelTypePropane}:Facility"], units: UtilityBills.get_fuel_units(HPXML::FuelTypePropane))
@@ -713,9 +713,9 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return fuels
   end
 
-  # TODO
+  # Initialize both the UtilityRate and UtilityBill objects.
   #
-  # @return [TODO] TODO
+  # @return [Array<Hash, Hash>] Fuel Type => UtilityRate object, Fuel type => UtilityBill object
   def setup_utility_outputs()
     utility_rates = {}
     utility_rates[FT::Elec] = UtilityRate.new
@@ -738,29 +738,27 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
     return utility_rates, utility_bills
   end
 
-  # TODO
+  # Fill each Fuel object with timeseries data.
   #
-  # @param fuels [TODO] TODO
-  # @param utility_bill_scenario [TODO] TODO
-  # @return [TODO] TODO
+  # @param fuels [Hash] Fuel type, is_production => Fuel object
+  # @param utility_bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
   def get_outputs(fuels, utility_bill_scenario)
     fuels.each do |(fuel_type, _is_production), fuel|
       unit_conv = UnitConversions.convert(1.0, 'J', fuel.units)
 
       timeseries_freq = 'monthly'
       timeseries_freq = 'hourly' if fuel_type == FT::Elec && !utility_bill_scenario.elec_tariff_filepath.nil?
-      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, 0, timeseries_freq)
+      fuel.timeseries = get_report_meter_data_timeseries(fuel.meters, unit_conv, timeseries_freq)
     end
   end
 
-  # TODO
+  # Get the reported timeseries data from the fuel meters.
   #
-  # @param meter_names [TODO] TODO
-  # @param unit_conv [TODO] TODO
-  # @param unit_adder [TODO] TODO
-  # @param timeseries_freq [TODO] TODO
-  # @return [TODO] TODO
-  def get_report_meter_data_timeseries(meter_names, unit_conv, unit_adder, timeseries_freq)
+  # @param meter_names [Array<String>] array of EnergyPlus meter names
+  # @param unit_conv [Double] the scalar that converts 1 Joule into units of the fuel meters
+  # @param timeseries_freq [String] the frequency of the requested timeseries data
+  # @return [Array<Double>] array of timeseries data
+  def get_report_meter_data_timeseries(meter_names, unit_conv, timeseries_freq)
     msgpack_timeseries_name = { 'hourly' => 'Hourly',
                                 'monthly' => 'Monthly' }[timeseries_freq]
     begin
@@ -771,12 +769,18 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       return [0.0]
     end
     indexes = cols.each_index.select { |i| meter_names.include? cols[i]['Variable'] }
+    meter_names = indexes.each.collect { |i| cols[i]['Variable'] }
+    indexes = Hash[indexes.zip(meter_names)]
+
     vals = []
     rows.each do |row|
       row = row[row.keys[0]]
       val = 0.0
-      indexes.each do |i|
-        val += row[i] * unit_conv + unit_adder
+      indexes.each do |i, meter_name|
+        r = row[i]
+        r *= -1 if ["ElectricStorage:#{EPlus::FuelTypeElectricity}Produced", "Cogeneration:#{EPlus::FuelTypeElectricity}Produced"].include?(meter_name) # positive for this meter means producing
+
+        val += r * unit_conv
       end
       vals << val
     end

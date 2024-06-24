@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>2b64d6ee-3ffd-4cc9-8d03-d4d074889bd0</version_id>
-  <version_modified>2024-06-05T21:34:48Z</version_modified>
+  <version_id>7a771c54-4bba-4a64-bbc3-230311117b0e</version_id>
+  <version_modified>2024-06-24T16:04:41Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -180,7 +180,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>AD1D9C67</checksum>
+      <checksum>C0D15021</checksum>
     </file>
     <file>
       <filename>detailed_rates/Sample Flat Rate Min Annual Charge.json</filename>
@@ -255,6 +255,12 @@
       <checksum>4508028D</checksum>
     </file>
     <file>
+      <filename>detailed_rates/Sample Time-of-Use Rate High Peak.json</filename>
+      <filetype>json</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1F5FA05C</checksum>
+    </file>
+    <file>
       <filename>detailed_rates/Sample Time-of-Use Rate Min Annual Charge.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -300,7 +306,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4286D643</checksum>
+      <checksum>07D547F6</checksum>
     </file>
     <file>
       <filename>Contains Demand Charges.json</filename>
@@ -342,7 +348,7 @@
       <filename>test_report_utility_bills.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CDF8B24F</checksum>
+      <checksum>7B65C730</checksum>
     </file>
   </files>
 </measure>

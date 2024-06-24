@@ -28,7 +28,7 @@ end
 class WeatherProcess
   # TODO
   #
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
@@ -52,7 +52,7 @@ class WeatherProcess
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def process_epw(runner, epw_file, hpxml)
@@ -213,7 +213,7 @@ class WeatherProcess
   # TODO
   #
   # @param rowdata [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def calc_ashrae_622_wsf(rowdata, epw_file)
     require 'csv'
@@ -267,7 +267,7 @@ class WeatherProcess
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def get_design_info_from_epw(runner, epw_file)
     # Retrieve design conditions from weather header
@@ -292,7 +292,7 @@ class WeatherProcess
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param rowdata [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param data [TODO] TODO
   # @return [TODO] TODO
   def calc_design_info(runner, rowdata, epw_file, data)
@@ -329,7 +329,7 @@ class WeatherProcess
 
   # TODO
   #
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def calc_shallow_ground_temperatures(epw_file)
     # Return shallow monthly/annual ground temperatures.
@@ -366,7 +366,7 @@ class WeatherProcess
   # TODO
   #
   # @param hpxml [HPXML] HPXML object
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def calc_deep_ground_temperatures(hpxml, epw_file)
     # Return deep annual ground temperature.
@@ -412,7 +412,7 @@ class WeatherProcess
   # TODO
   #
   # @param n_days [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def calc_mains_temperatures(n_days, epw_file)
     # Algorithm based on Burch & Christensen "Towards Development of an Algorithm for Mains Water Temperature"

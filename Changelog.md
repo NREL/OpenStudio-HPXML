@@ -2,9 +2,16 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- HVAC Manual J design load and sizing calculations:
+  - Adds optional inputs and outputs for blower fan heat and piping load.
+  - Miscellaneous improvements.
+- Advanced research features:
+  - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
-- Allows additional flexibility for multiple `Attic`/`Foundation` elements.
+- Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
+- Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
+- Fixes utility bill calculations if there is battery storage or a generator.
 
 ## OpenStudio-HPXML v1.8.1
 
