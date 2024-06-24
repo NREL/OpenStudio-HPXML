@@ -1,10 +1,23 @@
 # frozen_string_literal: true
 
+# TODO
 class MathTools
+  # TODO
+  #
+  # @param str [TODO] TODO
+  # @return [TODO] TODO
   def self.valid_float?(str)
     !!Float(str) rescue false
   end
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param x0 [TODO] TODO
+  # @param x1 [TODO] TODO
+  # @param f0 [TODO] TODO
+  # @param f1 [TODO] TODO
+  # @return [TODO] TODO
   def self.interp2(x, x0, x1, f0, f1)
     '''
     Returns the linear interpolation between two results.
@@ -13,6 +26,19 @@ class MathTools
     return f0 + ((x - x0) / (x1 - x0)) * (f1 - f0)
   end
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param y [TODO] TODO
+  # @param x1 [TODO] TODO
+  # @param x2 [TODO] TODO
+  # @param y1 [TODO] TODO
+  # @param y2 [TODO] TODO
+  # @param fx1y1 [TODO] TODO
+  # @param fx1y2 [TODO] TODO
+  # @param fx2y1 [TODO] TODO
+  # @param fx2y2 [TODO] TODO
+  # @return [TODO] TODO
   def self.interp4(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
     '''
     Returns the bilinear interpolation between four results.
@@ -24,6 +50,12 @@ class MathTools
           + (fx2y2 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y - y1)
   end
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param y [TODO] TODO
+  # @param c [TODO] TODO
+  # @return [TODO] TODO
   def self.biquadratic(x, y, c)
     '''
     Description:
@@ -41,12 +73,18 @@ class MathTools
         z       float      result of biquadratic polynomial
     '''
     if c.length != 6
-      puts 'Error: There must be 6 coefficients in a biquadratic polynomial'
+      fail 'Error: There must be 6 coefficients in a biquadratic polynomial'
     end
+
     z = c[0] + c[1] * x + c[2] * x**2 + c[3] * y + c[4] * y**2 + c[5] * y * x
     return z
   end
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param c [TODO] TODO
+  # @return [TODO] TODO
   def self.quadratic(x, c)
     '''
     Description:
@@ -66,13 +104,20 @@ class MathTools
         y       float      result of biquadratic polynomial
     '''
     if c.size != 3
-      puts 'Error: There must be 3 coefficients in a quadratic polynomial'
+      fail 'Error: There must be 3 coefficients in a quadratic polynomial'
     end
+
     y = c[0] + c[1] * x + c[2] * x**2
 
     return y
   end
 
+  # TODO
+  #
+  # @param x [TODO] TODO
+  # @param y [TODO] TODO
+  # @param c [TODO] TODO
+  # @return [TODO] TODO
   def self.bicubic(x, y, c)
     '''
     Description:
@@ -94,14 +139,26 @@ class MathTools
         z       float      result of bicubic polynomial
     '''
     if c.size != 10
-      puts 'Error: There must be 10 coefficients in a bicubic polynomial'
+      fail 'Error: There must be 10 coefficients in a bicubic polynomial'
     end
+
     z = c[0] + c[1] * x + c[2] * x**2 + c[3] * y + c[4] * y**2 + c[5] * x * y + \
         c[6] * x**3 + c[7] * y**3 + c[8] * x**2 * y + c[9] * x * y**2
 
     return z
   end
 
+  # TODO
+  #
+  # @param x0 [TODO] TODO
+  # @param f0 [TODO] TODO
+  # @param x1 [TODO] TODO
+  # @param f1 [TODO] TODO
+  # @param x2 [TODO] TODO
+  # @param f2 [TODO] TODO
+  # @param icount [TODO] TODO
+  # @param cvg [TODO] TODO
+  # @return [TODO] TODO
   def self.Iterate(x0, f0, x1, f1, x2, f2, icount, cvg)
     '''
     Description:
@@ -257,6 +314,14 @@ end
 
 # Adapted from https://stackoverflow.com/questions/6934185/ruby-net-http-following-redirects
 class UrlResolver
+  # TODO
+  #
+  # @param uri_str [TODO] TODO
+  # @param outfile [TODO] TODO
+  # @param agent [TODO] TODO
+  # @param max_attempts [TODO] TODO
+  # @param timeout [TODO] TODO
+  # @return [TODO] TODO
   def self.fetch(uri_str, outfile, agent = 'curl/7.43.0', max_attempts = 10, timeout = 10)
     attempts = 0
     cookie = nil
@@ -277,6 +342,7 @@ class UrlResolver
       request = Net::HTTP::Get.new(path, params)
 
       if url.instance_of?(URI::HTTPS)
+        require 'openssl'
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
@@ -322,7 +388,14 @@ class UrlResolver
   end
 end
 
+# TODO
 class FilePath
+  # TODO
+  #
+  # @param path [TODO] TODO
+  # @param relative_dir [TODO] TODO
+  # @param name [TODO] TODO
+  # @return [TODO] TODO
   def self.check_path(path, relative_dir, name)
     return if path.nil?
     return File.absolute_path(path) if File.exist? path

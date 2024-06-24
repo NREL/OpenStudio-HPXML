@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO
 class EPlus
   # Constants
   EMSActuatorElectricEquipmentPower = 'ElectricEquipment', 'Electricity Rate'
@@ -24,6 +25,10 @@ class EPlus
   FuelTypeWoodPellets = 'OtherFuel2'
   FuelTypeCoal = 'Coal'
 
+  # TODO
+  #
+  # @param hpxml_fuel [TODO] TODO
+  # @return [TODO] TODO
   def self.fuel_type(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
     if [HPXML::FuelTypeElectricity].include? hpxml_fuel
