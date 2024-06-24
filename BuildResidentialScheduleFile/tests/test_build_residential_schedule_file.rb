@@ -333,7 +333,7 @@ class BuildResidentialScheduleFileTest < Minitest::Test
   end
 
   def test_ev_battery
-    num_occupants = 0.0
+    num_occupants = 1.0
 
     hpxml = _create_hpxml('base-battery-ev.xml')
     hpxml.buildings[0].building_occupancy.number_of_residents = num_occupants
@@ -341,12 +341,11 @@ class BuildResidentialScheduleFileTest < Minitest::Test
 
     @args_hash['output_csv_path'] = File.absolute_path(File.join(@tmp_output_path, 'occupancy-stochastic.csv'))
     _hpxml, result = _test_measure()
-
-    info_msgs = result.info.map { |x| x.logMessage }
-    assert(1, info_msgs.size)
-    assert(info_msgs.any? { |info_msg| info_msg.include?('Number of occupants set to zero; skipping generation of stochastic schedules.') })
-    assert(!File.exist?(@args_hash['output_csv_path']))
-    assert_empty(hpxml.buildings[0].header.schedules_filepaths)
+    sf = SchedulesFile.new(schedules_paths: _hpxml.buildings[0].header.schedules_filepaths,
+                           year: @year,
+                           output_path: @tmp_schedule_file_path)
+    assert_in_epsilon(6201, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryCharging].name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(125, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:EVBatteryDischarging].name, schedules: sf.tmp_schedules), @tol)
   end
 
   def test_multiple_buildings
