@@ -5079,7 +5079,7 @@ class HPXMLFile
                            thickness: args[:slab_thickness],
                            exposed_perimeter: exposed_perimeter,
                            perimeter_insulation_depth: args[:slab_perimeter_depth],
-                           exterior_horizontal_insulation_r: args[:slab_exterior_horizontal_insulation_r],
+                           exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_r],
                            exterior_horizontal_insulation_width: args[:slab_exterior_horizontal_insulation_width],
                            exterior_horizontal_insulation_depth_below_grade: args[:slab_exterior_horizontal_insulation_depth_below_grade],
                            under_slab_insulation_width: under_slab_insulation_width,

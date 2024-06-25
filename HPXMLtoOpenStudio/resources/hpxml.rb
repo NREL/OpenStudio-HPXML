@@ -4108,7 +4108,7 @@ class HPXML < Object
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
              :carpet_r_value, :perimeter_insulation_id, :perimeter_insulation_r_value,
              :exterior_horizontal_insulation_id, :exterior_horizontal_insulation_material, :exterior_horizontal_insulation_r_value,
-             :exterior_horizontal_depth_below_grade, :exterior_horizontal_insulation_width,
+             :exterior_horizontal_insulation_depth_below_grade, :exterior_horizontal_insulation_width,
              :under_slab_insulation_id, :under_slab_insulation_r_value, :perimeter_insulation_material,
              :under_slab_insulation_material, :gap_insulation_r_value, :attached_to_space_idref]
     attr_accessor(*ATTRS)
