@@ -528,7 +528,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, epw_path)
-    add_cooling_system(model, runner, weather, spaces, airloop_map)
+    add_cooling_system(runner, model, weather, spaces, airloop_map)
     add_heating_system(runner, model, weather, spaces, airloop_map)
     add_heat_pump(runner, model, weather, spaces, airloop_map)
     add_dehumidifiers(runner, model, spaces)
@@ -1818,7 +1818,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
-  def add_cooling_system(model, runner, weather, spaces, airloop_map)
+  def add_cooling_system(runner, model, weather, spaces, airloop_map)
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
 
     HVAC.get_hpxml_hvac_systems(@hpxml_bldg).each do |hvac_system|
