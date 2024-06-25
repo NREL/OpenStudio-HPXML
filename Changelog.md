@@ -11,6 +11,7 @@ __New Features__
 __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
 - Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
+- Fixes utility bill calculations if there is battery storage or a generator.
 
 ## OpenStudio-HPXML v1.8.1
 
