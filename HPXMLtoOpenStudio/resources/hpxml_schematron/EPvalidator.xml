@@ -769,9 +769,9 @@
       <sch:assert role='ERROR' test='count(h:PerimeterInsulation/h:Layer/h:NominalRValue) = 1'>Expected 1 element(s) for xpath: PerimeterInsulation/Layer/NominalRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:PerimeterInsulation/h:Layer/h:InsulationDepth) = 1'>Expected 1 element(s) for xpath: PerimeterInsulation/Layer/InsulationDepth</sch:assert>
       
-      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:NominalRValue) = 1'>Expected 1 element(s) for xpath: PerimeterInsulation/Layer/NominalRValue</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:InsulationWidth) = 1'>Expected 1 element(s) for xpath: PerimeterInsulation/Layer/InsulationWidth</sch:assert>
-      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:InsulationDepthBelowGrade) = 1'>Expected 1 element(s) for xpath: PerimeterInsulation/Layer/InsulationDepthBelowGrade</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:NominalRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorHorizontalInsulation/Layer/NominalRValue</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:InsulationWidth) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorHorizontalInsulation/Layer/InsulationWidth</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ExteriorHorizontalInsulation/h:Layer/h:InsulationDepthBelowGrade) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ExteriorHorizontalInsulation/Layer/InsulationDepthBelowGrade</sch:assert>
 
       <sch:assert role='ERROR' test='count(h:UnderSlabInsulation/h:Layer/h:NominalRValue) = 1'>Expected 1 element(s) for xpath: UnderSlabInsulation/Layer/NominalRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:UnderSlabInsulation/h:Layer/h:InsulationWidth) + count(h:UnderSlabInsulation/h:Layer/h:InsulationSpansEntireSlab[text()="true"]) = 1'>Expected 1 element(s) for xpath: UnderSlabInsulation/Layer/InsulationWidth | UnderSlabInsulation/Layer/InsulationSpansEntireSlab[text()="true"]</sch:assert>

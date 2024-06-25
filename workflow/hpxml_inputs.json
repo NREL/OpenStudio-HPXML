@@ -1837,7 +1837,7 @@
     "misc_plug_loads_other_annual_kwh": 1228.5
   },
   "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
-    "parent_hpxml": "sample_files/base.xml",
+    "parent_hpxml": "sample_files/base-foundation-slab.xml",
     "slab_exterior_horizontal_insulation_r": 5.4,
     "slab_exterior_horizontal_insulation_width": 2.5,
     "slab_exterior_horizontal_insulation_depth_below_grade": 1

@@ -4246,7 +4246,7 @@ class HPXML < Object
       @thickness = XMLHelper.get_value(slab, 'Thickness', :float)
       @exposed_perimeter = XMLHelper.get_value(slab, 'ExposedPerimeter', :float)
       @depth_below_grade = XMLHelper.get_value(slab, 'DepthBelowGrade', :float)
-      @perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
+      perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
       if not perimeter_insulation.nil?
         @perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
         @perimeter_insulation_material = XMLHelper.get_child_name(perimeter_insulation, 'Layer/InsulationMaterial')
@@ -4258,7 +4258,7 @@ class HPXML < Object
         @perimeter_insulation_depth = XMLHelper.get_value(perimeter_insulation, 'Layer/InsulationDepth', :float)
       end
 
-      @exterior_horizontal_insulation = XMLHelper.get_element(slab, 'ExteriorHorizontalInsulation')
+      exterior_horizontal_insulation = XMLHelper.get_element(slab, 'ExteriorHorizontalInsulation')
       if not exterior_horizontal_insulation.nil?
         @exterior_horizontal_insulation_id = HPXML::get_id(exterior_horizontal_insulation)
         @exterior_horizontal_insulation_material = XMLHelper.get_child_name(exterior_horizontal_insulation, 'Layer/InsulationMaterial')
@@ -4271,7 +4271,7 @@ class HPXML < Object
         @exterior_horizontal_insulation_depth_below_grade = XMLHelper.get_value(exterior_horizontal_insulation, 'Layer/InsulationDepthBelowGrade', :float)
       end
 
-      @under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
+      under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
       if not under_slab_insulation.nil?
         @under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
         @under_slab_insulation_material = XMLHelper.get_child_name(under_slab_insulation, 'Layer/InsulationMaterial')

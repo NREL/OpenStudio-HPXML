@@ -2,11 +2,15 @@
 <HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>BuildResidentialHPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2024-06-25T13:18:58-06:00</CreatedDateAndTime>
+    <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo/>
+  <SoftwareInfo>
+    <extension>
+      <ApplyASHRAE140Assumptions>true</ApplyASHRAE140Assumptions>
+    </extension>
+  </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
     <ProjectStatus>
@@ -17,7 +21,6 @@
         <Site>
           <Surroundings>stand-alone</Surroundings>
           <VerticalSurroundings>no units above or below</VerticalSurroundings>
-          <AzimuthOfFrontOfHome>180</AzimuthOfFrontOfHome>
         </Site>
         <BuildingOccupancy>
           <NumberofResidents>0.0</NumberofResidents>
@@ -60,6 +63,10 @@
                 <Vented>true</Vented>
               </Attic>
             </AtticType>
+            <VentilationRate>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
+              <Value>2.4</Value>
+            </VentilationRate>
             <AttachedToRoof idref='Roof1'/>
             <AttachedToRoof idref='Roof2'/>
             <AttachedToWall idref='Wall5'/>
@@ -67,15 +74,6 @@
             <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
-        <Foundations>
-          <Foundation>
-            <SystemIdentifier id='Foundation1'/>
-            <FoundationType>
-              <SlabOnGrade/>
-            </FoundationType>
-            <AttachedToSlab idref='Slab1'/>
-          </Foundation>
-        </Foundations>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof1'/>
@@ -83,7 +81,8 @@
             <Area>811.1</Area>
             <Azimuth>0</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
@@ -96,7 +95,8 @@
             <Area>811.1</Area>
             <Azimuth>180</Azimuth>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
             <Insulation>
               <SystemIdentifier id='Roof2Insulation'/>
@@ -115,7 +115,12 @@
             <Area>456.0</Area>
             <Azimuth>0</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
@@ -131,7 +136,12 @@
             <Area>216.0</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
@@ -147,7 +157,12 @@
             <Area>456.0</Area>
             <Azimuth>180</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
@@ -163,7 +178,12 @@
             <Area>216.0</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
               <AssemblyEffectiveRValue>11.76</AssemblyEffectiveRValue>
@@ -180,10 +200,11 @@
             <Area>60.8</Area>
             <Azimuth>90</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall5Insulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.15</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -197,10 +218,11 @@
             <Area>60.8</Area>
             <Azimuth>270</Azimuth>
             <Siding>wood siding</Siding>
-            <Color>medium</Color>
+            <SolarAbsorptance>0.6</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall6Insulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.15</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -214,6 +236,10 @@
               <WoodFrame/>
             </FloorType>
             <Area>1539.0</Area>
+            <InteriorFinish>
+              <Type>gypsum board</Type>
+              <Thickness>0.5</Thickness>
+            </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>18.45</AssemblyEffectiveRValue>
@@ -317,12 +343,28 @@
           <Door>
             <SystemIdentifier id='Door1'/>
             <AttachedToWall idref='Wall3'/>
-            <Area>40.0</Area>
+            <Area>20.0</Area>
             <Azimuth>180</Azimuth>
+            <RValue>3.04</RValue>
+          </Door>
+          <Door>
+            <SystemIdentifier id='Door2'/>
+            <AttachedToWall idref='Wall3'/>
+            <Area>20.0</Area>
+            <Azimuth>0</Azimuth>
             <RValue>3.04</RValue>
           </Door>
         </Doors>
       </Enclosure>
+      <Systems>
+        <HVAC>
+          <HVACControl>
+            <SystemIdentifier id='HVACControl1'/>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
+          </HVACControl>
+        </HVAC>
+      </Systems>
       <MiscLoads>
         <PlugLoad>
           <SystemIdentifier id='PlugLoad1'/>
@@ -334,6 +376,9 @@
           <extension>
             <FracSensible>0.822</FracSensible>
             <FracLatent>0.178</FracLatent>
+            <WeekdayScheduleFractions>0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660</WeekdayScheduleFractions>
+            <WeekendScheduleFractions>0.0203, 0.0203, 0.0203, 0.0203, 0.0203, 0.0339, 0.0426, 0.0852, 0.0497, 0.0304, 0.0304, 0.0406, 0.0304, 0.0254, 0.0264, 0.0264, 0.0386, 0.0416, 0.0447, 0.0700, 0.0700, 0.0731, 0.0731, 0.0660</WeekendScheduleFractions>
+            <MonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</MonthlyScheduleMultipliers>
           </extension>
         </PlugLoad>
       </MiscLoads>

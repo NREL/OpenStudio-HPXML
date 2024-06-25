@@ -187,12 +187,12 @@
               </Layer>
             </PerimeterInsulation>
             <ExteriorHorizontalInsulation>
-                <SystemIdentifier id='SlabExteriorHorizontalInsulation'/>
-                <Layer>
-                  <NominalRValue>0.0</NominalRValue>
-                  <InsulationWidth>0.0</InsulationWidth>
-                  <InsulationDepthBelowGrade>0.0</InsulationDepthBelowGrade>
-                </Layer>
+              <SystemIdentifier id='Slab1ExteriorHorizontalInsulation'/>
+              <Layer>
+                <NominalRValue>5.4</NominalRValue>
+                <InsulationWidth>2.5</InsulationWidth>
+                <InsulationDepthBelowGrade>1.0</InsulationDepthBelowGrade>
+              </Layer>
             </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab1UnderSlabInsulation'/>
@@ -202,7 +202,6 @@
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <GapInsulationRValue>0.0</GapInsulationRValue>
               <CarpetFraction>1.0</CarpetFraction>
               <CarpetRValue>2.5</CarpetRValue>
             </extension>
