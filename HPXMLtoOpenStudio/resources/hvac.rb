@@ -2218,7 +2218,7 @@ class HVAC
         else
           increment = backup_heating_capacity_increment
         end
-        next if increment <= 5 # Tolerance to avoid modeling small capacity stage, Fixme: Is 5 a good tolerance?
+        next if increment <= 5 # Tolerance to avoid modeling small capacity stage
 
         # There're two cases to throw this warning: 1. More stages are needed so that the remaining capacities are combined in last stage. 2. Total capacity is not able to be perfectly divided by increment.
         # For the first case, the above warning of num_stages has already thrown
