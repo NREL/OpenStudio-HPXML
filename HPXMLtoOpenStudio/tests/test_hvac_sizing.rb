@@ -1476,4 +1476,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
       hpsys.cooling_capacity = nil
     end
   end
+
+  def test_calculate_SHR(dBin, p, q, cfm, ao, win, tol)
+    #TODO: what needs to be compared? what is the appropriate assertion?
+  end
 end
