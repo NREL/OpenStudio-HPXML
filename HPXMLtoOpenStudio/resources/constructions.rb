@@ -2034,10 +2034,24 @@ class Constructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, 'ft', 'm'))
     end
 
+    # Exterior horizontal insulation
+    if (ext_horiz_r > 0) && (ext_horiz_depth > 0)
+      ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
+      foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
+      foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
+    end
+
     foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, 'in', 'm'))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, 'in', 'm'))
 
     apply_kiva_settings(model, soil_k_in)
+
+    # Exterior vertical insulation
+    if (ext_horiz_r > 0) && (ext_horiz_depth > 0)
+      ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
+      foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
+      foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
+    end
 
     return foundation
   end

@@ -587,6 +587,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabBedroom1ExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabBedroom1UnderSlabInsulation'/>
               <Layer>
@@ -608,6 +612,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabBedroom2ExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabBedroom2UnderSlabInsulation'/>
               <Layer>
@@ -629,6 +637,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabBathroom1ExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabBathroom1UnderSlabInsulation'/>
               <Layer>
@@ -650,6 +662,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabBedroom3ExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabBedroom3UnderSlabInsulation'/>
               <Layer>
@@ -671,6 +687,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabHallClosetsExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabHallClosetsUnderSlabInsulation'/>
               <Layer>
@@ -692,6 +712,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabBathroom2ExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabBathroom2UnderSlabInsulation'/>
               <Layer>
@@ -713,6 +737,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabUtilityExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabUtilityUnderSlabInsulation'/>
               <Layer>
@@ -734,6 +762,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabKitchenEntryExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabKitchenEntryUnderSlabInsulation'/>
               <Layer>
@@ -755,6 +787,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabFamilyRoomExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabFamilyRoomUnderSlabInsulation'/>
               <Layer>
@@ -776,6 +812,10 @@
                 <InsulationDepth>0.333</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='SlabDiningExteriorHorizontalInsulation'/>
+              <Layer/>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabDiningUnderSlabInsulation'/>
               <Layer>

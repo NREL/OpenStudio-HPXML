@@ -458,6 +458,14 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='Slab1ExteriorHorizontalInsulation'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+                <InsulationDepthBelowGrade>0.0</InsulationDepthBelowGrade>
+              </Layer>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab1UnderSlabInsulation'/>
               <Layer>
@@ -484,6 +492,14 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='Slab2ExteriorHorizontalInsulationSpace3'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+                <InsulationDepthBelowGrade>0.0</InsulationDepthBelowGrade>
+              </Layer>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab2UnderSlabInsulationSpace3'/>
               <Layer>
@@ -510,6 +526,14 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
+            <ExteriorHorizontalInsulation>
+              <SystemIdentifier id='Slab2ExteriorHorizontalInsulationSpace4'/>
+              <Layer>
+                <NominalRValue>0.0</NominalRValue>
+                <InsulationWidth>0.0</InsulationWidth>
+                <InsulationDepthBelowGrade>0.0</InsulationDepthBelowGrade>
+              </Layer>
+            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab2UnderSlabInsulationSpace4'/>
               <Layer>

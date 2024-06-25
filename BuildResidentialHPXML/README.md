@@ -994,6 +994,45 @@ Depth from grade to bottom of vertical slab perimeter insulation. Applies to sla
 
 <br/>
 
+**Slab: Exterior Horizontal Insulation Nominal R-value**
+
+Nominal R-value of the slab perimeter exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_r``
+- **Type:** ``Double``
+
+- **Units:** ``h-ft^2-R/Btu``
+
+- **Required:** ``true``
+
+<br/>
+
+**Slab: Exterior Horizontal Insulation Width**
+
+Width of the slab exterior horizontal (wing/skirt) insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_width``
+- **Type:** ``Double``
+
+- **Units:** ``ft``
+
+- **Required:** ``true``
+
+<br/>
+
+**Slab: Exterior Horizontal Insulation Depth Below Grade**
+
+Depth of the slab exterior horizontal (wing/skirt) insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_depth_below_grade``
+- **Type:** ``Double``
+
+- **Units:** ``ft``
+
+- **Required:** ``true``
+
+<br/>
+
 **Slab: Under Slab Insulation Nominal R-value**
 
 Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
