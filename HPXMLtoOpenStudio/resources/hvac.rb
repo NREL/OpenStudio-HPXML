@@ -3969,7 +3969,7 @@ class HVAC
       program.addLine('EndIf')
     end
 
-    program.addLine("Set #{supp_coil_avail_act.name} = #{global_var_supp_avail.name}")
+    program.addLine("Set #{supp_coil_avail_act.name} = #{global_var_supp_avail.name}") unless htg_supp_coil.nil?
     program.addLine('If htg_mode > 0 || clg_mode > 0')
     program.addLine("  If (#{pow_ratio_sensor.name} == 1) || ((@Abs (#{indoor_temp_sensor.name} - setpoint)) > #{UnitConversions.convert(4, 'deltaF', 'deltaC')}) || #{temp_offset_signal.name} == 1")
     program.addLine("    Set #{coil_speed_act.name} = NULL")
