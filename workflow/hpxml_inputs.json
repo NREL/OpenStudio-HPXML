@@ -1266,15 +1266,27 @@
     "water_heater_num_bedrooms_served": 18
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml",
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "timer",
+    "hot_water_distribution_recirc_pump_power": 220.0,
+    "hot_water_distribution_recirc_num_bedrooms_served": 18
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc-beds-0.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater.xml",
     "geometry_unit_num_bedrooms": 0,
-    "water_heater_num_bedrooms_served": 6
+    "water_heater_num_bedrooms_served": 6,
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "timer",
+    "hot_water_distribution_recirc_pump_power": 220.0,
+    "hot_water_distribution_recirc_num_bedrooms_served": 6
   },
   "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc-scheduled.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml"
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit-shared-water-heater-recirc.xml",
+    "hot_water_distribution_system_type": "Recirculation",
+    "hot_water_distribution_recirc_control_type": "timer",
+    "hot_water_distribution_recirc_pump_power": 220.0,
+    "hot_water_distribution_recirc_num_bedrooms_served": 18
   },
   "sample_files/base-dhw-combi-tankless.xml": {
     "parent_hpxml": "sample_files/base-dhw-indirect.xml",
