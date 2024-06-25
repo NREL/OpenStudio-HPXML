@@ -2602,6 +2602,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_energy_efficiency', false)
+    arg.setDisplayName('Electric Vehicle: Energy Efficiency')
+    arg.setDescription('The efficiency of the EV. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh/mile')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_miles_traveled', false)
+    arg.setDisplayName('Electric Vehicle: Miles Traveled')
+    arg.setDescription('The annual miles traveled by the EV.')
+    arg.setUnits('miles')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
     arg.setDisplayName('Electric Vehicle Charger: Present')
     arg.setDescription('Whether there is an electric vehicle charger present.')
@@ -6684,6 +6696,8 @@ class HPXMLFile
                             rated_power_output: args[:ev_battery_discharge_power],
                             nominal_capacity_kwh: args[:ev_battery_capacity],
                             usable_capacity_kwh: args[:ev_battery_usable_capacity],
+                            energy_efficiency: args[:ev_energy_efficiency],
+                            miles_traveled: args[:ev_miles_traveled],
                             ev_charger_idref: charger_id)
   end
 
