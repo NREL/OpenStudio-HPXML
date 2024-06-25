@@ -1235,12 +1235,12 @@ class Geometry
     return true
   end
 
-  # TODO
+  # Place a door subsurface on an exterior wall surface (with enough area) prioritized by front, then back, then left, then right, and lowest story.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param door_area [TODO] TODO
-  # @return [TODO] TODO
+  # @param door_area [Double] the area of the opaque door(s) (ft^2)
+  # @return [Boolean] true if successful
   def self.create_doors(runner:,
                         model:,
                         door_area:,
@@ -1371,24 +1371,24 @@ class Geometry
     return true
   end
 
-  # TODO
+  # Place window subsurfaces on exterior wall surfaces (or skylight subsurfaces on roof surfaces) using target facade areas based on either window to wall area ratios or window areas.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_front_wwr [TODO] TODO
-  # @param window_back_wwr [TODO] TODO
-  # @param window_left_wwr [TODO] TODO
-  # @param window_right_wwr [TODO] TODO
-  # @param window_area_front [TODO] TODO
-  # @param window_area_back [TODO] TODO
-  # @param window_area_left [TODO] TODO
-  # @param window_area_right [TODO] TODO
-  # @param window_aspect_ratio [TODO] TODO
-  # @param skylight_area_front [TODO] TODO
-  # @param skylight_area_back [TODO] TODO
-  # @param skylight_area_left [TODO] TODO
-  # @param skylight_area_right [TODO] TODO
-  # @return [TODO] TODO
+  # @param window_front_wwr [Double] ratio of window to wall area for the unit's front facade
+  # @param window_back_wwr [Double] ratio of window to wall area for the unit's back facade
+  # @param window_left_wwr [Double] ratio of window to wall area for the unit's left facade
+  # @param window_right_wwr [Double] ratio of window to wall area for the unit's right facade
+  # @param window_area_front [Double] amount of window area on unit's front facade (ft^2)
+  # @param window_area_back [Double] amount of window area on unit's back facade (ft^2)
+  # @param window_area_left [Double] amount of window area on unit's left facade (ft^2)
+  # @param window_area_right [Double] amount of window area on unit's right facade (ft^2)
+  # @param window_aspect_ratio [Double] ratio of window height to width
+  # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft^2)
+  # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft^2)
+  # @param skylight_area_left [Double] amount of skylight area on the unit's left conditioned roof facade (ft^2)
+  # @param skylight_area_right [Double] amount of skylight area on the unit's right conditioned roof facade (ft^2)
+  # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner:,
                                         model:,
                                         window_front_wwr:,
@@ -1750,10 +1750,10 @@ class Geometry
     return true
   end
 
-  # TODO
+  # Return the HPXML location that is assigned to an OpenStudio Surface object.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [String] the HPXML location assigned to the OpenStudio Surface object
   def self.get_adjacent_to(surface:)
     space = surface.space.get
     st = space.spaceType.get
@@ -1762,22 +1762,22 @@ class Geometry
     return space_type
   end
 
-  # TODO
+  # Return the absolute azimuth of an OpenStudio Surface object.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param orientation [TODO] TODO
-  # @return [TODO] TODO
+  # @param orientation [Double] the orientation of the building measured clockwise from north (degrees)
+  # @return [Double] the absolute azimuth based on surface facade and building orientation
   def self.get_surface_azimuth(surface:,
                                orientation:)
     facade = get_facade_for_surface(surface: surface)
     return get_azimuth_from_facade(facade: facade, orientation: orientation)
   end
 
-  # TODO
+  # Identify whether an OpenStudio Surface object is a rim joist.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param height [TODO] TODO
-  # @return [TODO] TODO
+  # @param height [Double] height of the rim joist (ft)
+  # @return [Boolean] true if successful
   def self.surface_is_rim_joist(surface:,
                                 height:)
     return false unless (height - get_surface_height(surface: surface)).abs < 0.00001
@@ -1791,9 +1791,9 @@ class Geometry
   # NOTE: Does not work for buildings with non-orthogonal walls.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param ground_floor_surfaces [TODO] TODO
-  # @param has_foundation_walls [TODO] TODO
-  # @return [TODO] TODO
+  # @param ground_floor_surfaces [Array<OpenStudio::Model::Surface>] the array of OpenStudio Surface objects for which to calculate exposed perimeter
+  # @param has_foundation_walls [Boolean] whether the ground floor surfaces have foundation walls
+  # @return [Double] the exposed perimeter (ft)
   def self.calculate_exposed_perimeter(model:,
                                        ground_floor_surfaces:,
                                        has_foundation_walls: false)
@@ -1851,12 +1851,13 @@ class Geometry
     return UnitConversions.convert(perimeter, 'm', 'ft')
   end
 
-  # TODO
+  # This is perimeter adjacent to a 100% protruding garage that is not exposed.
+  # We need this because it's difficult to set this surface to Adiabatic using our geometry methods.
   #
-  # @param geometry_garage_protrusion [TODO] TODO
-  # @param geometry_garage_width [TODO] TODO
-  # @param geometry_garage_depth [TODO] TODO
-  # @return [TODO] TODO
+  # @param geometry_garage_protrusion [Double] fraction of the garage that is protruding from the conditioned space
+  # @param geometry_garage_width [Double] width of the garage (ft)
+  # @param geometry_garage_depth [Double] depth of the garage (ft)
+  # @return [Double] the unexposed garage perimeter
   def self.get_unexposed_garage_perimeter(geometry_garage_protrusion:,
                                           geometry_garage_width:,
                                           geometry_garage_depth:,
@@ -1864,8 +1865,7 @@ class Geometry
     protrusion = geometry_garage_protrusion
     width = geometry_garage_width
     depth = geometry_garage_depth
-    # this is perimeter adjacent to a 100% protruding garage that is not exposed
-    # we need this because it's difficult to set this surface to Adiabatic using our geometry methods
+
     if (protrusion == 1.0) && (width * depth > 0)
       return width
     end
@@ -1873,10 +1873,10 @@ class Geometry
     return 0
   end
 
-  # TODO
+  # Return the facade for the given OpenStudio Surface object.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [String] front, back, left, or right based on the OpenStudio Surface outward normal
   def self.get_facade_for_surface(surface:)
     tol = 0.001
     n = surface.outwardNormal
@@ -1905,11 +1905,11 @@ class Geometry
     return facade
   end
 
-  # TODO
+  # Return the absolute azimuth of a facade.
   #
-  # @param facade [TODO] TODO
-  # @param orientation [TODO] TODO
-  # @return [TODO] TODO
+  # @param facade [String] front, back, left, or right
+  # @param orientation [Double] the orientation of the building measured clockwise from north (degrees)
+  # @return [Double] the absolute azimuth based on relative azimuth of the facade and building orientation
   def self.get_azimuth_from_facade(facade:,
                                    orientation:)
     if facade == Constants.FacadeFront
@@ -1925,11 +1925,11 @@ class Geometry
     end
   end
 
-  # TODO
+  # Get the adiabatic OpenStudio Surface object adjacent to an adiabatic OpenStudio Surface object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Surface] the adiabatic adjacent OpenStudio Surface
   def self.get_adiabatic_adjacent_surface(model:,
                                           surface:)
     return if surface.outsideBoundaryCondition != 'Adiabatic'
@@ -1972,10 +1972,10 @@ class Geometry
     end
   end
 
-  # TODO
+  # Get the height of the conditioned attic for gable or hip roof type.
   #
   # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
-  # @return [TODO] TODO
+  # @return [Double] the height of the conditioned attic (ft)
   def self.get_conditioned_attic_height(spaces:)
     # gable roof type
     get_conditioned_spaces(spaces: spaces).each do |space|
@@ -2006,7 +2006,7 @@ class Geometry
   # Get the absolute azimuth based on relative azimuth and building orientation.
   #
   # @param relative_azimuth [Double] relative azimuth (degrees)
-  # @param building_orientation [Double] building orientation (degrees)
+  # @param building_orientation [Double] dwelling unit orientation (degrees)
   # @return [Double] absolute azimuth
   def self.get_abs_azimuth(relative_azimuth:,
                            building_orientation:)
@@ -2024,14 +2024,14 @@ class Geometry
     return azimuth
   end
 
-  # TODO
+  # Add a rim joist OpenStudio Surface to a space.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param polygon [TODO] TODO
+  # @param polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param rim_joist_height [TODO] TODO
-  # @param z [TODO] TODO
-  # @return [TODO] TODO
+  # @param rim_joist_height [Double] height of the rim joists (ft)
+  # @param z [Double] z coordinate of the bottom of the rim joists
+  # @return nil
   def self.add_rim_joist(model:,
                          polygon:,
                          space:,
@@ -2073,9 +2073,9 @@ class Geometry
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param footprint_polygon [TODO] TODO
+  # @param footprint_polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [TODO] TODO
+  # @return nil
   def self.assign_indexes(model:,
                           footprint_polygon:,
                           space:)
@@ -2198,7 +2198,7 @@ class Geometry
 
   # Creates a polygon using an array of points.
   #
-  # @param pts [TODO] TODO
+  # @param pts [Array<OpenStudio::Point3d] array of OpenStudio Point3d objects
   # @return [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new

@@ -417,6 +417,8 @@
       <sch:assert role='ERROR' test='count(h:NumberofUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofUnits</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofConditionedFloors) = 1'>Expected 1 element(s) for xpath: NumberofConditionedFloors</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofConditionedFloorsAboveGrade) = 1'>Expected 1 element(s) for xpath: NumberofConditionedFloorsAboveGrade</sch:assert>
+      <!-- We are more strict than HPXML schema for NumberofConditionedFloorsAboveGrade; see https://github.com/NREL/OpenStudio-HPXML/issues/1755 -->
+      <sch:assert role='ERROR' test='number(h:NumberofConditionedFloorsAboveGrade) &gt; 0 or not(h:NumberofConditionedFloorsAboveGrade)'>Expected NumberofConditionedFloorsAboveGrade to be greater than 0</sch:assert>
       <sch:assert role='ERROR' test='number(h:NumberofConditionedFloors) &gt;= number(h:NumberofConditionedFloorsAboveGrade) or not(h:NumberofConditionedFloors) or not(h:NumberofConditionedFloorsAboveGrade)'>Expected NumberofConditionedFloors to be greater than or equal to NumberofConditionedFloorsAboveGrade</sch:assert>
       <sch:assert role='ERROR' test='count(h:AverageCeilingHeight) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AverageCeilingHeight</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofBedrooms) = 1'>Expected 1 element(s) for xpath: NumberofBedrooms</sch:assert>
@@ -861,6 +863,8 @@
       <sch:assert role='ERROR' test='count(h:StormWindow) &lt;= 1'>Expected 0 or 1 element(s) for xpath: StormWindow</sch:assert> <!-- See [SkylightStorm] -->
       <sch:assert role='ERROR' test='count(h:AttachedToRoof) = 1'>Expected 1 element(s) for xpath: AttachedToRoof</sch:assert>
       <sch:assert role='ERROR' test='count(h:AttachedToFloor) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AttachedToFloor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:Curb) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Curb</sch:assert> <!-- See [SkylightCurb] -->
+      <sch:assert role='ERROR' test='count(h:extension/h:Shaft) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Shaft</sch:assert> <!-- See [SkylightShaft] -->
     </sch:rule>
   </sch:pattern>
 
@@ -887,6 +891,27 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:StormWindow'>
       <sch:assert role='ERROR' test='count(h:GlassType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: GlassType</sch:assert>
       <sch:assert role='ERROR' test='h:GlassType[text()="clear" or text()="low-e"] or not(h:GlassType)'>Expected GlassType to be 'clear' or 'low-e'</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SkylightCurb]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:extension/h:Curb'>
+      <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[SkylightShaft]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight/h:extension/h:Shaft'>
+      <sch:assert role='ERROR' test='count(../../h:AttachedToFloor) = 1'>Expected 1 element(s) for xpath: ../../AttachedToFloor</sch:assert>
+      <sch:assert role='ERROR' test='count(h:Area) = 1'>Expected 1 element(s) for xpath: Area</sch:assert>
+      <sch:assert role='ERROR' test='number(h:Area) &gt; 0 or not(h:Area)'>Expected Area to be greater than 0</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: AssemblyEffectiveRValue</sch:assert>
+      <sch:assert role='ERROR' test='number(h:AssemblyEffectiveRValue) &gt; 0 or not(h:AssemblyEffectiveRValue)'>Expected AssemblyEffectiveRValue to be greater than 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -1741,6 +1766,8 @@
       <sch:assert role='ERROR' test='count(h:AirDistributionType) = 1'>Expected 1 element(s) for xpath: AirDistributionType</sch:assert>
       <sch:assert role='ERROR' test='h:AirDistributionType[text()="regular velocity" or text()="gravity" or text()="fan coil"] or not(h:AirDistributionType)'>Expected AirDistributionType to be 'regular velocity' or 'gravity' or 'fan coil'</sch:assert> <!-- See [AirDistributionType=RegularVelocityOrGravity] or [AirDistributionType=FanCoil] -->
       <sch:assert role='ERROR' test='count(h:Ducts) &gt;= 0'>Expected 0 or more element(s) for xpath: Ducts</sch:assert> <!-- See [HVACDuct] -->
+      <sch:assert role='ERROR' test='count(h:extension/h:ManualJInputs/h:BlowerFanHeatBtuh) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ManualJInputs/BlowerFanHeatBtuh</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:ManualJInputs/h:BlowerFanHeatBtuh) &gt;= 0 or not(h:extension/h:ManualJInputs/h:BlowerFanHeatBtuh)'>Expected extension/ManualJInputs/BlowerFanHeatBtuh to be greater than or equal to 0</sch:assert>
       <!-- Sum Checks -->
       <sch:assert role='ERROR' test='(sum(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) &gt;= 0.99 and sum(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) &lt;= 1.01) or count(h:Ducts[h:DuctType="supply"]/h:FractionDuctArea) = 0'>Expected sum(Ducts/FractionDuctArea) for DuctType="supply" to be 1</sch:assert>
       <sch:assert role='ERROR' test='(sum(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) &gt;= 0.99 and sum(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) &lt;= 1.01) or count(h:Ducts[h:DuctType="return"]/h:FractionDuctArea) = 0'>Expected sum(Ducts/FractionDuctArea) for DuctType="return" to be 1</sch:assert>
@@ -1783,6 +1810,8 @@
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution/h:DistributionSystemType/h:HydronicDistribution'>
       <sch:assert role='ERROR' test='count(h:HydronicDistributionType) = 1'>Expected 1 element(s) for xpath: HydronicDistributionType</sch:assert>
       <sch:assert role='ERROR' test='h:HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling" or text()="water loop"] or not(h:HydronicDistributionType)'>Expected HydronicDistributionType to be 'radiator' or 'baseboard' or 'radiant floor' or 'radiant ceiling' or 'water loop'</sch:assert>
+      <sch:assert role='ERROR' test='count(h:extension/h:ManualJInputs/h:HotWaterPipingBtuh) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/ManualJInputs/HotWaterPipingBtuh</sch:assert>
+      <sch:assert role='ERROR' test='number(h:extension/h:ManualJInputs/h:HotWaterPipingBtuh) &gt;= 0 or not(h:extension/h:ManualJInputs/h:HotWaterPipingBtuh)'>Expected extension/ManualJInputs/HotWaterPipingBtuh to be greater than or equal to 0</sch:assert>
     </sch:rule>
   </sch:pattern>
 
