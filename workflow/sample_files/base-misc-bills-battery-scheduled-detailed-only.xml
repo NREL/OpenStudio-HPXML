@@ -13,7 +13,32 @@
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
-          <Name>Bills</Name>
+          <Name>Tiered</Name>
+          <UtilityRate>
+            <FuelType>electricity</FuelType>
+            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json</TariffFilePath>
+          </UtilityRate>
+        </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>TOU</Name>
+          <UtilityRate>
+            <FuelType>electricity</FuelType>
+            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json</TariffFilePath>
+          </UtilityRate>
+        </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>Tiered and TOU</Name>
+          <UtilityRate>
+            <FuelType>electricity</FuelType>
+            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json</TariffFilePath>
+          </UtilityRate>
+        </UtilityBillScenario>
+        <UtilityBillScenario>
+          <Name>Real-Time Pricing</Name>
+          <UtilityRate>
+            <FuelType>electricity</FuelType>
+            <TariffFilePath>../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json</TariffFilePath>
+          </UtilityRate>
         </UtilityBillScenario>
       </UtilityBillScenarios>
     </extension>
@@ -51,6 +76,9 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv</SchedulesFilePath>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -303,58 +331,6 @@
             <AttachedToWall idref='Wall1'/>
           </Window>
         </Windows>
-        <Skylights>
-          <Skylight>
-            <SystemIdentifier id='Skylight1'/>
-            <Area>15.0</Area>
-            <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Skylight1ExteriorShading'/>
-              <SummerShadingCoefficient>0.1</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.9</WinterShadingCoefficient>
-            </ExteriorShading>
-            <InteriorShading>
-              <SystemIdentifier id='Skylight1InteriorShading'/>
-              <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
-            </InteriorShading>
-            <AttachedToRoof idref='Roof1'/>
-            <AttachedToFloor idref='Floor1'/>
-            <extension>
-              <Shaft>
-                <Area>60.0</Area>
-                <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
-              </Shaft>
-            </extension>
-          </Skylight>
-          <Skylight>
-            <SystemIdentifier id='Skylight2'/>
-            <Area>15.0</Area>
-            <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Skylight2ExteriorShading'/>
-              <SummerShadingCoefficient>0.5</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.0</WinterShadingCoefficient>
-            </ExteriorShading>
-            <InteriorShading>
-              <SystemIdentifier id='Skylight2InteriorShading'/>
-              <SummerShadingCoefficient>0.5</SummerShadingCoefficient>
-              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
-            </InteriorShading>
-            <AttachedToRoof idref='Roof1'/>
-            <AttachedToFloor idref='Floor1'/>
-            <extension>
-              <Shaft>
-                <Area>60.0</Area>
-                <AssemblyEffectiveRValue>6.25</AssemblyEffectiveRValue>
-              </Shaft>
-            </extension>
-          </Skylight>
-        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='Door1'/>
@@ -479,6 +455,22 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <Batteries>
+          <Battery>
+            <SystemIdentifier id='Battery1'/>
+            <Location>outside</Location>
+            <BatteryType>Li-ion</BatteryType>
+            <NominalCapacity>
+              <Units>kWh</Units>
+              <Value>20.0</Value>
+            </NominalCapacity>
+            <UsableCapacity>
+              <Units>kWh</Units>
+              <Value>18.0</Value>
+            </UsableCapacity>
+            <RatedPowerOutput>6000.0</RatedPowerOutput>
+          </Battery>
+        </Batteries>
       </Systems>
       <Appliances>
         <ClothesWasher>

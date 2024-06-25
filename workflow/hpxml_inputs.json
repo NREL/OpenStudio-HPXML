@@ -3165,6 +3165,16 @@
     "utility_bill_electricity_marginal_rates": 0.12,
     "utility_bill_natural_gas_marginal_rates": 1.1
   },
+  "sample_files/base-misc-bills-detailed-only.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "utility_bill_scenario_names": "Tiered, TOU, Tiered and TOU, Real-Time Pricing",
+    "utility_bill_electricity_filepaths": "../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json"
+  },
+  "sample_files/base-misc-bills-battery-scheduled-detailed-only.xml": {
+    "parent_hpxml": "sample_files/base-battery-scheduled.xml",
+    "utility_bill_scenario_names": "Tiered, TOU, Tiered and TOU, Real-Time Pricing",
+    "utility_bill_electricity_filepaths": "../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Time-of-Use Rate High Peak.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Tiered Time-of-Use Rate.json, ../../ReportUtilityBills/resources/detailed_rates/Sample Real-Time Pricing Rate.json"
+  },
   "sample_files/base-misc-bills-pv.xml": {
     "parent_hpxml": "sample_files/base-pv.xml",
     "pv_system_max_power_output": 10000,
