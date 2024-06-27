@@ -8342,7 +8342,7 @@ class HPXML < Object
   end
 
   def self.all_fuels
-    return fossil_fuels + [HPXML::FuelTypeElectricity]
+    return [HPXML::FuelTypeElectricity] + fossil_fuels
   end
 
   def self.vented_locations

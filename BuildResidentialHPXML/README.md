@@ -5912,6 +5912,17 @@ Electricity tariff file specified as an absolute/relative path to a file with ut
 
 <br/>
 
+**Utility Bills: Electricity Fixed Charges**
+
+Electricity utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
+
+- **Name:** ``utility_bill_electricity_fixed_charges``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Utility Bills: Natural Gas Fixed Charges**
 
 Natural gas utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
@@ -5978,11 +5989,11 @@ Wood pellets utility bill monthly fixed charges. If multiple scenarios, use a co
 
 <br/>
 
-**Utility Bills: Electricity Fixed Charges**
+**Utility Bills: Electricity Marginal Rates**
 
-Electricity utility bill monthly fixed charges. If multiple scenarios, use a comma-separated list.
+Electricity utility bill marginal rates. If multiple scenarios, use a comma-separated list.
 
-- **Name:** ``utility_bill_electricity_fixed_charges``
+- **Name:** ``utility_bill_electricity_marginal_rates``
 - **Type:** ``String``
 
 - **Required:** ``false``
@@ -6049,17 +6060,6 @@ Wood utility bill marginal rates. If multiple scenarios, use a comma-separated l
 Wood pellets utility bill marginal rates. If multiple scenarios, use a comma-separated list.
 
 - **Name:** ``utility_bill_wood_pellets_marginal_rates``
-- **Type:** ``String``
-
-- **Required:** ``false``
-
-<br/>
-
-**Utility Bills: Electricity Marginal Rates**
-
-Electricity utility bill marginal rates. If multiple scenarios, use a comma-separated list.
-
-- **Name:** ``utility_bill_electricity_marginal_rates``
 - **Type:** ``String``
 
 - **Required:** ``false``
