@@ -3769,7 +3769,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 # collection of methods for creating the HPXML file and setting properties based on user arguments
-class HPXMLFile
+module HPXMLFile
   # create the closed-form geometry, and then call individual set_xxx methods
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)

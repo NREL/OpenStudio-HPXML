@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
-class Geometry
+# Collection of methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
+module Geometry
   # Create a 3D representation of a single-family detached home using the following arguments.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
