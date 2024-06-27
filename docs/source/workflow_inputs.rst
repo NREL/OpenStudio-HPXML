@@ -4080,6 +4080,7 @@ Additional information can be entered in ``/HPXML/Building/BuildingDetails/Syste
   .. [#] If WaterFixturesMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
 Water fixture hot water use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+If NumberofResidents is provided, then water fixture use from Equation 14 of `Estimating Daily Domestic Hot-Water Use in North American Homes <http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf>`_ is substituted into the ANSI/RESNET/ICC 301 equations.
 
 HPXML Solar Thermal
 *******************
