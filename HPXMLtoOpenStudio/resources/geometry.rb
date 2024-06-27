@@ -341,11 +341,12 @@ class Geometry
   end
 
   # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
+  # Horizontally pushes out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [Double] the total height of the dwelling unit
-  # @return [nil] horizontally pushed out OpenStudio::Model::Surface, OpenStudio::Model::SubSurface, and OpenStudio::Model::ShadingSurface objects
+  # @return [void]
   def self.explode_surfaces(model:,
                             hpxml_bldg:,
                             walls_top:)
@@ -714,12 +715,11 @@ class Geometry
     fail "Unhandled location: #{location}."
   end
 
-  # TODO
+  # Calculates space heights as the max z coordinate minus the min z coordinate.
   #
   # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
-  # @return [TODO] TODO
+  # @return [Double] max z coordinate minus min z coordinate for a collection of spaces (ft)
   def self.get_height_of_spaces(spaces:)
-    # Calculates space heights as the max z coordinate minus the min z coordinate
     minzs = []
     maxzs = []
     spaces.each do |space|
@@ -748,7 +748,7 @@ class Geometry
 
   # Table 4.2.2(3). Internal Gains for Reference Homes
   #
-  # @return heat_gain [Double], hrs_per_day [Double], sens_frac [Double], lat_frac [Double]
+  # @return [Array<Double, Double, Double, Double>] TODO
   def self.get_occupancy_default_values()
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day

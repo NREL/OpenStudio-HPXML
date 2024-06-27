@@ -416,7 +416,9 @@ class HPXML < Object
   UnitsKwh = 'kWh'
   UnitsKwhPerYear = 'kWh/year'
   UnitsKwhPerDay = 'kWh/day'
+  UnitsKwhPerMile = 'kWh/mile'
   UnitsKwPerTon = 'kW/ton'
+  UnitsMiles = 'miles'
   UnitsPercent = 'Percent'
   UnitsPercentPerHour = '%/hr'
   UnitsSEER = 'SEER'
@@ -497,7 +499,8 @@ class HPXML < Object
                 hdl_slabs: 'Slabs',
                 hdl_ceilings: 'Ceilings',
                 hdl_infil: 'Infiltration',
-                hdl_vent: 'Ventilation' }
+                hdl_vent: 'Ventilation',
+                hdl_piping: 'Piping' }
   CDL_SENS_ATTRS = { cdl_sens_total: 'Total',
                      cdl_sens_ducts: 'Ducts',
                      cdl_sens_windows: 'Windows',
@@ -511,6 +514,7 @@ class HPXML < Object
                      cdl_sens_infil: 'Infiltration',
                      cdl_sens_vent: 'Ventilation',
                      cdl_sens_intgains: 'InternalLoads',
+                     cdl_sens_blowerheat: 'BlowerHeat',
                      cdl_sens_aedexcursion: 'AEDExcursion',
                      cdl_sens_aed_curve: 'AEDCurve' }
   CDL_LAT_ATTRS = { cdl_lat_total: 'Total',
@@ -2475,7 +2479,7 @@ class HPXML < Object
     end
 
     def skylights
-      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id }
+      return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id || ((not s.floor.nil?) && s.floor.attached_to_space_idref == @id) }
     end
 
     def surfaces
@@ -4440,7 +4444,8 @@ class HPXML < Object
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
-             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref, :attached_to_floor_idref]
+             :exterior_shading_factor_winter, :exterior_shading_type, :storm_type, :attached_to_roof_idref,
+             :attached_to_floor_idref, :curb_area, :curb_assembly_r_value, :shaft_area, :shaft_assembly_r_value]
     attr_accessor(*ATTRS)
 
     def roof
@@ -4552,6 +4557,16 @@ class HPXML < Object
         attached_to_floor = XMLHelper.add_element(skylight, 'AttachedToFloor')
         XMLHelper.add_attribute(attached_to_floor, 'idref', @attached_to_floor_idref)
       end
+      if (not @curb_area.nil?) || (not @curb_assembly_r_value.nil?)
+        curb = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Curb'])
+        XMLHelper.add_element(curb, 'Area', @curb_area, :float) unless @curb_area.nil?
+        XMLHelper.add_element(curb, 'AssemblyEffectiveRValue', @curb_assembly_r_value, :float) unless @curb_assembly_r_value.nil?
+      end
+      if (not @shaft_area.nil?) || (not @shaft_assembly_r_value.nil?)
+        shaft = XMLHelper.create_elements_as_needed(skylight, ['extension', 'Shaft'])
+        XMLHelper.add_element(shaft, 'Area', @shaft_area, :float) unless @shaft_area.nil?
+        XMLHelper.add_element(shaft, 'AssemblyEffectiveRValue', @shaft_assembly_r_value, :float) unless @shaft_assembly_r_value.nil?
+      end
     end
 
     def from_doc(skylight)
@@ -4581,6 +4596,10 @@ class HPXML < Object
       @attached_to_roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
       @attached_to_floor_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToFloor'))
       @storm_type = XMLHelper.get_value(skylight, 'StormWindow/GlassType', :string)
+      @curb_area = XMLHelper.get_value(skylight, 'extension/Curb/Area', :float)
+      @curb_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Curb/AssemblyEffectiveRValue', :float)
+      @shaft_area = XMLHelper.get_value(skylight, 'extension/Shaft/Area', :float)
+      @shaft_assembly_r_value = XMLHelper.get_value(skylight, 'extension/Shaft/AssemblyEffectiveRValue', :float)
     end
   end
 
@@ -4765,7 +4784,8 @@ class HPXML < Object
              :third_party_certification, :htg_seed_id, :is_shared_system, :number_of_units_served,
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
-             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor, :heating_autosizing_limit]
+             :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor,
+             :heating_autosizing_limit]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
 
@@ -5765,7 +5785,8 @@ class HPXML < Object
       super(hpxml_bldg, *args, **kwargs)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse, :duct_system_sealed,
-             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type]
+             :conditioned_floor_area_served, :number_of_return_registers, :air_type, :hydronic_type,
+             :manualj_blower_fan_heat_btuh, :manualj_hot_water_piping_btuh]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -5846,15 +5867,23 @@ class HPXML < Object
       end
 
       if [HPXML::HVACDistributionTypeHydronic].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
-        XMLHelper.add_element(distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
+        XMLHelper.add_element(hydronic_distribution, 'HydronicDistributionType', @hydronic_type, :string) unless @hydronic_type.nil?
+        if not @manualj_hot_water_piping_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(hydronic_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'HotWaterPipingBtuh', @manualj_hot_water_piping_btuh, :float, @manualj_hot_water_piping_btuh_isdefaulted)
+        end
       end
       if [HPXML::HVACDistributionTypeAir].include? @distribution_system_type
-        distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
-        XMLHelper.add_element(distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
-        @duct_leakage_measurements.to_doc(distribution)
-        @ducts.to_doc(distribution)
-        XMLHelper.add_element(distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
+        XMLHelper.add_element(air_distribution, 'AirDistributionType', @air_type, :string) unless @air_type.nil?
+        @duct_leakage_measurements.to_doc(air_distribution)
+        @ducts.to_doc(air_distribution)
+        XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', @number_of_return_registers, :integer, @number_of_return_registers_isdefaulted) unless @number_of_return_registers.nil?
+        if not @manualj_blower_fan_heat_btuh.nil?
+          manualj_inputs = XMLHelper.create_elements_as_needed(air_distribution, ['extension', 'ManualJInputs'])
+          XMLHelper.add_element(manualj_inputs, 'BlowerFanHeatBtuh', @manualj_blower_fan_heat_btuh, :float, @manualj_blower_fan_heat_btuh_isdefaulted)
+        end
       end
 
       if not @duct_system_sealed.nil?
@@ -5881,12 +5910,14 @@ class HPXML < Object
 
       if not hydronic_distribution.nil?
         @hydronic_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType', :string)
+        @manualj_hot_water_piping_btuh = XMLHelper.get_value(hydronic_distribution, 'extension/ManualJInputs/HotWaterPipingBtuh', :float)
       end
       if not air_distribution.nil?
         @air_type = XMLHelper.get_value(air_distribution, 'AirDistributionType', :string)
         @number_of_return_registers = XMLHelper.get_value(air_distribution, 'NumberofReturnRegisters', :integer)
         @duct_leakage_measurements.from_doc(air_distribution)
         @ducts.from_doc(air_distribution)
+        @manualj_blower_fan_heat_btuh = XMLHelper.get_value(air_distribution, 'extension/ManualJInputs/BlowerFanHeatBtuh', :float)
       end
     end
   end
@@ -6961,22 +6992,23 @@ class HPXML < Object
 
   class Vehicles < BaseArrayElement
     def add(**kwargs)
-      self << ElectricVehicle.new(@parent_object, **kwargs)
+      self << Vehicle.new(@parent_object, **kwargs)
     end
 
     def from_doc(building)
       return if building.nil?
 
-      XMLHelper.get_elements(building, 'BuildingDetails/Systems/Vehicles/ElectricVehicle').each do |vehicle|
-        self << ElectricVehicle.new(@parent_object, vehicle)
+      XMLHelper.get_elements(building, 'BuildingDetails/Systems/Vehicles/Vehicle').each do |vehicle|
+        self << Vehicle.new(@parent_object, vehicle)
       end
     end
   end
 
-  class ElectricVehicle < BaseElement
+  class Vehicle < BaseElement
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
-             :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah, :ev_charger_idref]
+             :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
+             :energy_efficiency, :miles_traveled, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
     def delete
@@ -6992,55 +7024,68 @@ class HPXML < Object
       return if nil?
 
       vehicles = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Vehicles'])
-      electric_vehicle = XMLHelper.add_element(vehicles, 'ElectricVehicle')
-      sys_id = XMLHelper.add_element(electric_vehicle, 'SystemIdentifier')
+      vehicle = XMLHelper.add_element(vehicles, 'Vehicle')
+      sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(electric_vehicle, 'BatteryType', @type, :string) unless @type.nil?
+      XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_traveled, :float) unless @miles_traveled.nil?
+      if not @energy_efficiency.nil?
+        fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomy')
+        XMLHelper.add_element(fuel_econonmy, 'Units', UnitsKwhPerMile, :string)
+        XMLHelper.add_element(fuel_econonmy, 'Value', @energy_efficiency, :float)
+      end
+      ev_type = XMLHelper.add_element(vehicle, 'VehicleType')
+      electric_vehicle = XMLHelper.add_element(ev_type, 'BEV')
+      battery = XMLHelper.add_element(electric_vehicle, 'Battery')
+
       if not @nominal_capacity_kwh.nil?
-        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'NominalCapacity')
+        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
         XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
         XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_kwh, :float, @nominal_capacity_kwh_isdefaulted)
       end
       if not @nominal_capacity_ah.nil?
-        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'NominalCapacity')
+        nominal_capacity = XMLHelper.add_element(battery, 'NominalCapacity')
         XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
         XMLHelper.add_element(nominal_capacity, 'Value', @nominal_capacity_ah, :float, @nominal_capacity_ah_isdefaulted)
       end
       if not @usable_capacity_kwh.nil?
-        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'UsableCapacity')
-        XMLHelper.add_element(nominal_capacity, 'Units', UnitsKwh, :string)
-        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
+        usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+        XMLHelper.add_element(usable_capacity, 'Units', UnitsKwh, :string)
+        XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_kwh, :float, @usable_capacity_kwh_isdefaulted)
       end
       if not @usable_capacity_ah.nil?
-        nominal_capacity = XMLHelper.add_element(electric_vehicle, 'UsableCapacity')
-        XMLHelper.add_element(nominal_capacity, 'Units', UnitsAh, :string)
-        XMLHelper.add_element(nominal_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
+        usable_capacity = XMLHelper.add_element(battery, 'UsableCapacity')
+        XMLHelper.add_element(usable_capacity, 'Units', UnitsAh, :string)
+        XMLHelper.add_element(usable_capacity, 'Value', @usable_capacity_ah, :float, @usable_capacity_ah_isdefaulted)
       end
-      XMLHelper.add_element(electric_vehicle, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
-      XMLHelper.add_element(electric_vehicle, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
-      XMLHelper.add_element(electric_vehicle, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
+      XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
+      XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
+      XMLHelper.add_element(battery, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
       if not @ev_charger_idref.nil?
-        charger = XMLHelper.add_element(electric_vehicle, 'ElectricVehicleCharger')
+        charger = XMLHelper.add_element(electric_vehicle, 'ConnectedCharger')
         XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
       end
-      XMLHelper.add_extension(electric_vehicle, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
+      XMLHelper.add_extension(battery, 'LifetimeModel', @lifetime_model, :string, @lifetime_model_isdefaulted) unless @lifetime_model.nil?
     end
 
-    def from_doc(electric_vehicle)
-      return if electric_vehicle.nil?
+    def from_doc(vehicle)
+      return if vehicle.nil?
 
-      @id = HPXML::get_id(electric_vehicle)
-      @location = XMLHelper.get_value(electric_vehicle, 'Location', :string)
-      @type = XMLHelper.get_value(electric_vehicle, 'BatteryType', :string)
-      @nominal_capacity_kwh = XMLHelper.get_value(electric_vehicle, "NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
-      @nominal_capacity_ah = XMLHelper.get_value(electric_vehicle, "NominalCapacity[Units='#{UnitsAh}']/Value", :float)
-      @usable_capacity_kwh = XMLHelper.get_value(electric_vehicle, "UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
-      @usable_capacity_ah = XMLHelper.get_value(electric_vehicle, "UsableCapacity[Units='#{UnitsAh}']/Value", :float)
-      @rated_power_output = XMLHelper.get_value(electric_vehicle, 'RatedPowerOutput', :float)
-      @nominal_voltage = XMLHelper.get_value(electric_vehicle, 'NominalVoltage', :float)
-      @round_trip_efficiency = XMLHelper.get_value(electric_vehicle, 'RoundTripEFficiency', :float)
-      @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(electric_vehicle, 'ElectricVehicleCharger'))
-      @lifetime_model = XMLHelper.get_value(electric_vehicle, 'extension/LifetimeModel', :string)
+      @id = HPXML::get_id(vehicle)
+      @miles_traveled = XMLHelper.get_value(vehicle, "MilesDrivenPeryear", :float)
+      @energy_efficiency = XMLHelper.get_value(vehicle, "FuelEconomy[Units='#{UnitsKwhPerMile}']/Value", :float)
+      @vehicle_type = XMLHelper.get_child_name(vehicle, "VehicleType")
+
+      @type = XMLHelper.get_value(vehicle, "BatteryType", :string)
+      battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
+      @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)
+      @usable_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsKwh}']/Value", :float)
+      @usable_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/UsableCapacity[Units='#{UnitsAh}']/Value", :float)
+      @rated_power_output = XMLHelper.get_value(vehicle, "#{battery_prefix}/RatedPowerOutput", :float)
+      @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
+      @round_trip_efficiency = XMLHelper.get_value(vehicle, "#{battery_prefix}/RoundTripEFficiency", :float)
+      @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
+      @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
     end
   end
 

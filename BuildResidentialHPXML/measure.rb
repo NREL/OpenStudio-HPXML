@@ -2602,6 +2602,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_energy_efficiency', false)
+    arg.setDisplayName('Electric Vehicle: Energy Efficiency')
+    arg.setDescription('The efficiency of the EV. If not provided, the OS-HPXML default is used.')
+    arg.setUnits('kWh/mile')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_miles_traveled', false)
+    arg.setDisplayName('Electric Vehicle: Miles Traveled')
+    arg.setDescription('The annual miles traveled by the EV.')
+    arg.setUnits('miles')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('ev_charger_present', false)
     arg.setDisplayName('Electric Vehicle Charger: Present')
     arg.setDescription('Whether there is an electric vehicle charger present.')
@@ -3485,7 +3497,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
-  # @return [Boolean] TODO
+  # @return [Boolean] true if successful
   def run(model, runner, user_arguments)
     super(model, runner, user_arguments)
 
@@ -4028,7 +4040,7 @@ class HPXMLFile
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
   # @param args [Hash] Map of :argument_name => value
-  # @return [Boolean] TODO
+  # @return [Boolean] true if no errors, otherwise false
   def self.set_header(runner, hpxml, args)
     errors = []
 
@@ -4693,7 +4705,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_roofs(hpxml_bldg, args, sorted_surfaces)
     args[:geometry_roof_pitch] *= 12.0
     if (args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof) || (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
@@ -4741,7 +4753,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_rim_joists(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4803,7 +4815,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4896,7 +4908,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_foundation_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4982,7 +4994,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
         HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
@@ -5064,7 +5076,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
   def self.set_slabs(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
@@ -5134,7 +5146,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_surfaces [TODO] TODO
+  # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
   def self.set_windows(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'FixedWindow'
@@ -5210,7 +5222,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_subsurfaces [TODO] TODO
+  # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
   def self.set_skylights(hpxml_bldg, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'Skylight'
@@ -5250,7 +5262,7 @@ class HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
-  # @param sorted_subsurfaces [TODO] TODO
+  # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
   def self.set_doors(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'Door'
@@ -5958,11 +5970,11 @@ class HPXMLFile
                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   end
 
-  # Get the specific HPXML location based on general location and foundation/attic type
+  # Get the specific HPXML foundation or attic location based on general HPXML location and specific HPXML foundation or attic type.
   #
-  # @param location [TODO] TODO
-  # @param foundation_type [TODO] TODO
-  # @param attic_type [TODO] TODO
+  # @param location [String] the general HPXML location (crawlspace or attic)
+  # @param foundation_type [String] the specific HPXML foundation type (unvented crawlspace, vented crawlspace, conditioned crawlspace)
+  # @param attic_type [String] the specific HPXML attic type (unvented attic, vented attic, conditioned attic)
   def self.get_location(location, foundation_type, attic_type)
     return if location.nil?
 
@@ -5998,7 +6010,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param hvac_distribution [TODO] TODO
+  # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
   def self.set_ducts(hpxml_bldg, args, hvac_distribution)
     ducts_supply_location = get_location(args[:ducts_supply_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
     ducts_return_location = get_location(args[:ducts_return_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
@@ -6115,7 +6127,7 @@ class HPXMLFile
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param weather [WeatherProcess] Weather object
   def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
@@ -6534,7 +6546,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   def self.set_solar_thermal(hpxml_bldg, args, epw_file)
     return if args[:solar_thermal_system_type] == 'none'
 
@@ -6583,7 +6595,7 @@ class HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] TODO
+  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   def self.set_pv_systems(hpxml_bldg, args, epw_file)
     return unless args[:pv_system_present]
 
@@ -6684,6 +6696,8 @@ class HPXMLFile
                             rated_power_output: args[:ev_battery_discharge_power],
                             nominal_capacity_kwh: args[:ev_battery_capacity],
                             usable_capacity_kwh: args[:ev_battery_usable_capacity],
+                            energy_efficiency: args[:ev_energy_efficiency],
+                            miles_traveled: args[:ev_miles_traveled],
                             ev_charger_idref: charger_id)
   end
 

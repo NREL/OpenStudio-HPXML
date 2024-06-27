@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-# As there is a performance penalty to using OpenStudio's built-in unit convert()
-# method, we use our own approach here.
-class UnitConversions
-  # Hash value is [scalar, delta]
+# Collection of helper methods for performing unit conversions.
+module UnitConversions
   @Scalars = {
     # Energy
     ['btu', 'j'] => 1055.05585262,
@@ -150,12 +148,15 @@ class UnitConversions
     ['lbm/lbm', 'grains'] => 7000.0,
   }
 
-  # TODO
+  # Converts a number from one unit (e.g., 'ft') to another unit (e.g, 'm').
   #
-  # @param x [TODO] TODO
-  # @param from [TODO] TODO
-  # @param to [TODO] TODO
-  # @return [TODO] TODO
+  # As there is a *significant* performance penalty to using OpenStudio's built-in
+  # unit convert() method, we use our own approach here.
+  #
+  # @param x [Double] value to be converted from
+  # @param from [String] type of unit to convert from
+  # @param to [String] type of unit to convert to
+  # @return [Double] value converted to
   def self.convert(x, from, to)
     from_d = from.downcase
     to_d = to.downcase
