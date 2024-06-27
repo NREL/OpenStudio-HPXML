@@ -1334,11 +1334,48 @@ module HVACSizing
   # @return [void]
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-    sla = infil_values[:sla] * infil_values[:a_ext]
-    ela = sla * cfa
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    if (measurement.unit_of_measure) || (measurement.effective_leakage_area)
+      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+      sla = infil_values[:sla] * infil_values[:a_ext]
+      ela = sla * cfa
+      ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
-    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+      # Determine if we are in a higher or lower shielding class
+      # Combines the effects of terrain and wind shielding
+      shielding_class = 4
+      if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
+        shielding_class += 1
+      elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
+        shielding_class -= 1
+      end
+      if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
+        shielding_class += 1
+      elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
+        shielding_class -= 1
+      end
+      shielding_class = [[shielding_class, 5].min, 1].max
+
+      # Set stack/wind coefficients from Tables 5D/5E
+      c_s = 0.015 * ncfl_ag
+      c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
+
+      ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
+      windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
+      windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+      # Calculate infiltration airflow rates
+      icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
+      icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
+      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+    elsif measurement.leakiness_description
+      ach_htg, ach_clg = Airflow.get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, measurement.infiltration_volume)
+      q_fireplace = Airflow.get_mj_fireplace_cfm_by_leakiness(measurement)
+      icfm_cool = (ach_clg * measurement.infiltration_volume) / 60.0
+      icfm_heat = (ach_htg * measurement.infiltration_volume) / 60.0
+    else
+      fail 'Unexpected error.'
+    end
 
     # Check for fireplace (for heating infiltration adjustment)
     has_fireplace = false
@@ -1348,38 +1385,9 @@ module HVACSizing
     if hpxml_bldg.heating_systems.count { |htg| htg.heating_system_type == HPXML::HVACTypeFireplace } > 0
       has_fireplace = true
     end
-    q_fireplace = 0.0
     if has_fireplace
-      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+      icfm_heat += q_fireplace
     end
-
-    # Determine if we are in a higher or lower shielding class
-    # Combines the effects of terrain and wind shielding
-    shielding_class = 4
-    if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
-      shielding_class += 1
-    elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
-      shielding_class -= 1
-    end
-    if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
-      shielding_class += 1
-    elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
-      shielding_class -= 1
-    end
-    shielding_class = [[shielding_class, 5].min, 1].max
-
-    # Set stack/wind coefficients from Tables 5D/5E
-    c_s = 0.015 * ncfl_ag
-    c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
-
-    ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
-    windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
-    windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
-
-    # Calculate infiltration airflow rates
-    icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
-    icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
-    icfm_heat += q_fireplace
 
     # Calculate ventilation airflow rates
     q_unb_cfm, q_bal_cfm, q_preheat, q_precool, q_recirc, bal_sens_eff, bal_lat_eff = get_ventilation_data(hpxml_bldg)

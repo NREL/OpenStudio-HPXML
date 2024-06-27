@@ -259,8 +259,11 @@ class HPXML < Object
   InteriorShadingTypeNone = 'none'
   InfiltrationTypeUnitTotal = 'unit total'
   InfiltrationTypeUnitExterior = 'unit exterior only'
+  LeakinessVeryTight = 'very tight'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
+  LeakinessLeaky = 'leaky'
+  LeakinessVeryLeaky = 'very leaky'
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
@@ -2865,8 +2868,6 @@ class HPXML < Object
         return LocationCrawlspaceVented
       elsif @foundation_type == FoundationTypeCrawlspaceConditioned
         return LocationCrawlspaceConditioned
-      elsif @foundation_type == FoundationTypeSlab
-        return LocationConditionedSpace
       elsif @foundation_type == FoundationTypeBellyAndWing
         return LocationManufacturedHomeUnderBelly
       else

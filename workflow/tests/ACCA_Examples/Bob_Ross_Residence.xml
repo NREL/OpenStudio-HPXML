@@ -28,9 +28,11 @@
           </Soil>
         </Site>
         <BuildingConstruction>
+          <YearBuilt>2000</YearBuilt> <!--No info, put a number here to successfully run annual simulation-->
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
+          <AverageCeilingHeight>10.0</AverageCeilingHeight>
           <NumberofBedrooms>4</NumberofBedrooms>
           <ConditionedFloorArea>4800.0</ConditionedFloorArea>
         </BuildingConstruction>
@@ -130,13 +132,22 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <HousePressure>50.0</HousePressure>
-            <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>2.8</AirLeakage>
-            </BuildingAirLeakage>
+            <LeakinessDescription>very tight</LeakinessDescription>
+            <InfiltrationVolume>24008.0</InfiltrationVolume> <!-- Should be 12 ft * 2400 sqft = 28800 cubic feet, but use 24008 here to make the look up right-->
+            <InfiltrationHeight>10.0</InfiltrationHeight>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
+        <Foundations>
+          <Foundation>
+            <SystemIdentifier id='Foundation1'/>
+            <FoundationType>
+              <Basement>
+                <Conditioned>true</Conditioned>
+              </Basement>
+            </FoundationType>
+            <WithinInfiltrationVolume>true</WithinInfiltrationVolume>
+          </Foundation>
+        </Foundations>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof1'/>

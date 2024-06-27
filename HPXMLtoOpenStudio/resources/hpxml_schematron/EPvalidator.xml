@@ -219,7 +219,7 @@
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Attics/h:Attic) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Attics/Attic</sch:assert> <!-- See [VentedAttic] or [UnventedAttic] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Foundations/h:Foundation) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Foundations/Foundation</sch:assert> <!-- See [VentedCrawl] or [UnventedCrawl] or [UncondBasement] or [ManufacturedHomeBelly] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:extension/h:HasFlueOrChimneyInConditionedSpace) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Enclosure/AirInfiltration/extension/HasFlueOrChimneyInConditionedSpace</sch:assert>
-      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea]</sch:assert> <!-- See [AirInfiltrationMeasurement] -->
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:LeakinessDescription]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/AirLeakage | EffectiveLeakageArea | LeakinessDescription]</sch:assert> <!-- See [AirInfiltrationMeasurement] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/Roofs/Roof</sch:assert> <!-- See [Roof] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:RimJoists/h:RimJoist) &gt;= 0'>Expected 0 or more element(s) for xpath: Enclosure/RimJoists/RimJoist</sch:assert> <!-- See [RimJoist] -->
       <sch:assert role='ERROR' test='count(h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: Enclosure/Walls/Wall</sch:assert> <!-- See [Wall] -->
@@ -412,6 +412,7 @@
   <sch:pattern>
     <sch:title>[BuildingConstruction]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction'>
+      <sch:assert role='ERROR' test='count(h:YearBuilt) &lt;= 1'>Expected 0 or 1 element(s) for xpath: YearBuilt</sch:assert> <!-- See [LeakinessDescription] -->
       <sch:assert role='ERROR' test='count(h:ResidentialFacilityType) = 1'>Expected 1 element(s) for xpath: ResidentialFacilityType</sch:assert> <!-- See [BuildingType=SFAorMF] -->
       <sch:assert role='ERROR' test='h:ResidentialFacilityType[text()="single-family detached" or text()="single-family attached" or text()="apartment unit" or text()="manufactured home"] or not(h:ResidentialFacilityType)'>Expected ResidentialFacilityType to be 'single-family detached' or 'single-family attached' or 'apartment unit' or 'manufactured home'</sch:assert>
       <sch:assert role='ERROR' test='count(h:NumberofUnits) &lt;= 1'>Expected 0 or 1 element(s) for xpath: NumberofUnits</sch:assert>
@@ -519,8 +520,9 @@
 
   <sch:pattern>
     <sch:title>[AirInfiltrationMeasurement]</sch:title>
-    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea | h:LeakinessDescription]'>
       <sch:assert role='ERROR' test='h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="ACHnatural" or text()="CFM" or text()="CFMnatural"] or not(h:BuildingAirLeakage/h:UnitofMeasure)'>Expected BuildingAirLeakage/UnitofMeasure to be 'ACH' or 'ACHnatural' or 'CFM' or 'CFMnatural'</sch:assert>
+      <sch:assert role='ERROR' test='h:LeakinessDescription[text()="very tight" or text()="tight" or text()="average" or text()="leaky" or text()="very leaky"] or not(h:LeakinessDescription)'>Expected LeakinessDescription to be 'very tight' or 'tight' or 'average' or 'leaky' or 'very leaky'</sch:assert> <!-- See [LeakinessDescription] -->
       <sch:assert role='ERROR' test='count(h:InfiltrationVolume) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InfiltrationVolume</sch:assert>
       <sch:assert role='ERROR' test='count(h:InfiltrationHeight) &lt;= 1'>Expected 0 or 1 element(s) for xpath: InfiltrationHeight</sch:assert>
     </sch:rule>
@@ -540,6 +542,13 @@
     <sch:title>[AirInfiltrationMeasurement=ACHorCFM]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM"]]'>
       <sch:assert role='ERROR' test='count(h:HousePressure) = 1'>Expected 1 element(s) for xpath: HousePressure</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[LeakinessDescription]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:LeakinessDescription]'>
+      <sch:assert role='ERROR' test='count(h:BuildingSummary/h:BuildingConstruction/h:YearBuilt) = 1'>Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction/YearBuilt</sch:assert>
     </sch:rule>
   </sch:pattern>
 

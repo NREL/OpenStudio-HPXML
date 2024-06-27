@@ -84,6 +84,9 @@ module HPXMLDefaults
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
+    # Set infiltration values for energy simulation after sizing
+    apply_leakiness_description(hpxml_bldg)
+
     # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
 
@@ -2286,8 +2289,6 @@ module HPXMLDefaults
       end
 
       # Calculate FractionDuctArea from DuctSurfaceArea
-      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
-      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
       total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
       total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
       (supply_ducts + return_ducts).each do |duct|
@@ -3694,6 +3695,20 @@ module HPXMLDefaults
   def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
     HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
+  end
+
+  # Apply default ACH calculation for annual energy simulation when only leakiness description is provided, after Manual J sizing done
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
+  def self.apply_leakiness_description(hpxml_bldg)
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    return if (measurement.unit_of_measure) || (measurement.effective_leakage_area)
+    ach50 = Airflow.calc_ach50(hpxml_bldg)
+    measurement.house_pressure = 50
+    measurement.unit_of_measure = HPXML::UnitsACH
+    measurement.air_leakage = ach50
+    measurement.infiltration_type = HPXML::InfiltrationTypeUnitTotal
   end
 
   # TODO
