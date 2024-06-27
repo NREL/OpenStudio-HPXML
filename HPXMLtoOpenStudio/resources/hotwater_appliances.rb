@@ -32,6 +32,7 @@ class HotWaterAndAppliances
     general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
+    nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
 
     # Get appliances, etc.
@@ -243,7 +244,7 @@ class HotWaterAndAppliances
 
     # Cooking Range energy
     if not cooking_range.nil?
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds_eq, cooking_range, oven, cooking_range.additional_properties.space.nil?)
 
       # Create schedule
       cook_schedule = nil
@@ -309,7 +310,7 @@ class HotWaterAndAppliances
         wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
-      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, frac_low_flow_fixtures)
+      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
       daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, avg_setpoint_temp, t_mix)
 
@@ -461,7 +462,7 @@ class HotWaterAndAppliances
     if not apply_ashrae140_assumptions
       # General water use internal gains
       # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
-      water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier)
+      water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier)
 
       # Create schedule
       water_schedule = nil
@@ -501,12 +502,12 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param cooking_range [TODO] TODO
   # @param oven [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_range_oven_energy(nbeds, cooking_range, oven, is_outside = false)
+  def self.calc_range_oven_energy(nbeds_eq, cooking_range, oven, is_outside = false)
     if cooking_range.is_induction
       burner_ef = 0.91
     else
@@ -517,11 +518,12 @@ class HotWaterAndAppliances
     else
       oven_ef = 1.0
     end
+
     if cooking_range.fuel_type != HPXML::FuelTypeElectricity
-      annual_kwh = 22.6 + 2.7 * nbeds
-      annual_therm = oven_ef * (22.6 + 2.7 * nbeds)
+      annual_kwh = 22.6 + 2.7 * nbeds_eq
+      annual_therm = oven_ef * (22.6 + 2.7 * nbeds_eq)
     else
-      annual_kwh = burner_ef * oven_ef * (331 + 39.0 * nbeds)
+      annual_kwh = burner_ef * oven_ef * (331 + 39.0 * nbeds_eq)
       annual_therm = 0.0
     end
 
@@ -1144,18 +1146,18 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @return [TODO] TODO
-  def self.get_dwhr_factors(nbeds, hot_water_distribution, frac_low_flow_fixtures)
+  def self.get_dwhr_factors(nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     # Eq. 4.2-14
 
     eff_adj = 1.0 + 0.082 * frac_low_flow_fixtures
 
-    iFrac = 0.56 + 0.015 * nbeds - 0.0004 * nbeds**2 # fraction of hot water use impacted by DWHR
+    iFrac = 0.56 + 0.015 * nbeds_eq - 0.0004 * nbeds_eq**2 # fraction of hot water use impacted by DWHR
 
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       pLength = hot_water_distribution.recirculation_branch_piping_length
@@ -1184,14 +1186,14 @@ class HotWaterAndAppliances
   # TODO
   #
   # @param weather [WeatherProcess] Weather object
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, frac_low_flow_fixtures)
+  def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
     wh_temps_daily = weather.data.MainsDailyTemps.dup
     if (not hot_water_distribution.dwhr_efficiency.nil?)
-      dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, hot_water_distribution, frac_low_flow_fixtures)
+      dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
       # Adjust inlet temperatures
       dwhr_inT = 97.0 # F
       for day in 0..wh_temps_daily.size - 1
@@ -1311,13 +1313,13 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param general_water_use_usage_multiplier [TODO] TODO
   # @return [TODO] TODO
-  def self.get_water_gains_sens_lat(nbeds, general_water_use_usage_multiplier = 1.0)
+  def self.get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier = 1.0)
     # Table 4.2.2(3). Internal Gains for Reference Homes
-    sens_gains = (-1227.0 - 409.0 * nbeds) * general_water_use_usage_multiplier # Btu/day
-    lat_gains = (1245.0 + 415.0 * nbeds) * general_water_use_usage_multiplier # Btu/day
+    sens_gains = (-1227.0 - 409.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
+    lat_gains = (1245.0 + 415.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
     return sens_gains * 365.0, lat_gains * 365.0
   end
 

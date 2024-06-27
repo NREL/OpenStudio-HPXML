@@ -615,25 +615,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
 
-    # Handle operational calculation
-    if not @hpxml_bldg.building_occupancy.number_of_residents.nil?
-      # Set equivalent number of bedrooms for operational calculation; this is an Noccupant adjustment
-      # to ANSI 301 or Building America equations, which are based on number of bedrooms.
-      @hpxml_bldg.building_construction.number_of_bedrooms = HPXMLDefaults.get_equivalent_nbeds_for_operational_calculation(@hpxml_bldg)
-
-      # If zero occupants, ensure end uses of interest are zeroed out
-      if (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
-        @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
-                                              begin_month: @hpxml_header.sim_begin_month,
-                                              begin_day: @hpxml_header.sim_begin_day,
-                                              begin_hour: 0,
-                                              end_month: @hpxml_header.sim_end_month,
-                                              end_day: @hpxml_header.sim_end_day,
-                                              end_hour: 24,
-                                              natvent_availability: HPXML::ScheduleUnavailable)
-      end
-    end
-
     # Set globals
     @cfa = @hpxml_bldg.building_construction.conditioned_floor_area
     @ncfl = @hpxml_bldg.building_construction.number_of_conditioned_floors
@@ -649,6 +630,20 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
     @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
+
+    if not @hpxml_bldg.building_occupancy.number_of_residents.nil?
+      # If zero occupants, ensure end uses of interest are zeroed out
+      if (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
+        @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
+                                              begin_month: @hpxml_header.sim_begin_month,
+                                              begin_day: @hpxml_header.sim_begin_day,
+                                              begin_hour: 0,
+                                              end_month: @hpxml_header.sim_end_month,
+                                              end_day: @hpxml_header.sim_end_day,
+                                              end_hour: 24,
+                                              natvent_availability: HPXML::ScheduleUnavailable)
+      end
+    end
   end
 
   # TODO
