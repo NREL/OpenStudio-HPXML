@@ -19,7 +19,7 @@ def create_hpxmls
   dirs = json_inputs.keys.map { |file_path| File.dirname(file_path) }.uniq
 
   schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-  schema_validator = XMLValidator.get_schema_validator(schema_path)
+  schema_validator = XMLValidator.get_xml_validator(schema_path)
 
   schedules_regenerated = []
 

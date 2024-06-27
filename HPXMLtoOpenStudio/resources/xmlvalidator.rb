@@ -1,24 +1,22 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of helper methods related to XML validation.
 module XMLValidator
-  # TODO
+  # Gets an OpenStudio::XMLValidator object for the supplied XSD schema or Schematron path.
   #
-  # @param schema_path [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_schema_validator(schema_path)
-    return OpenStudio::XMLValidator.new(schema_path)
+  # @param schema_or_schematron_path [String] Path to the XSD schema or Schematron file
+  # @return [OpenStudio::XMLValidator] OpenStudio XMLValidator object
+  def self.get_xml_validator(schema_or_schematron_path)
+    return OpenStudio::XMLValidator.new(schema_or_schematron_path)
   end
 
-  # TODO
+  # Validates an HPXML file against a XSD schema file.
   #
-  # @param hpxml_path [TODO] TODO
-  # @param validator [TODO] TODO
-  # @param errors [TODO] TODO
-  # @param warnings [TODO] TODO
-  # @return [TODO] TODO
-  def self.validate_against_schema(hpxml_path, validator, errors = [], warnings = [])
-    # Validate against XSD
+  # @param hpxml_path [String] Path to the HPXML file
+  # @param validator [OpenStudio::XMLValidator] OpenStudio XMLValidator object
+  # @return [Array<Array<String>, Array<String>>] list of error messages, list of warning messages
+  def self.validate_against_schema(hpxml_path, validator)
+    errors, warnings = [], []
     validator.validate(hpxml_path)
     validator.errors.each do |e|
       next unless e.logMessage.count(':') >= 2
@@ -32,24 +30,14 @@ module XMLValidator
     return errors, warnings
   end
 
-  # TODO
+  # Validates an HPXML file against a Schematron file.
   #
-  # @param schematron_path [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_schematron_validator(schematron_path)
-    return OpenStudio::XMLValidator.new(schematron_path)
-  end
-
-  # TODO
-  #
-  # @param hpxml_path [TODO] TODO
-  # @param validator [TODO] TODO
-  # @param hpxml_doc [TODO] TODO
-  # @param errors [TODO] TODO
-  # @param warnings [TODO] TODO
-  # @return [TODO] TODO
-  def self.validate_against_schematron(hpxml_path, validator, hpxml_doc, errors = [], warnings = [])
-    # Validate against Schematron doc
+  # @param hpxml_path [String] Path to the HPXML file
+  # @param validator [OpenStudio::XMLValidator] OpenStudio XMLValidator object
+  # @param hpxml_doc [Oga::XML::Element] Root XML element of the HPXML document
+  # @return [Array<Array<String>, Array<String>>] list of error messages, list of warning messages
+  def self.validate_against_schematron(hpxml_path, validator, hpxml_doc)
+    errors, warnings = [], []
     validator.validate(hpxml_path)
     if validator.fullValidationReport.is_initialized
       report_doc = Oga.parse_xml(validator.fullValidationReport.get)
@@ -99,11 +87,12 @@ module XMLValidator
     return errors, warnings
   end
 
-  # TODO
+  # Gets the ID of the specified HPXML element
   #
-  # @param element [TODO] TODO
-  # @return [TODO] TODO
+  # @param element [Oga::XML::Element] XML element of interest
+  # @return [String] ID of the HPXML element
   def self.get_element_id(element)
+    puts element.class
     if element.name.to_s == 'Building'
       return XMLHelper.get_attribute_value(XMLHelper.get_element(element, 'BuildingID'), 'id')
     else
