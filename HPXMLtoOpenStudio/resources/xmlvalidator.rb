@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class XMLValidator
+module XMLValidator
   # TODO
   #
   # @param schema_path [TODO] TODO

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class HotWaterAndAppliances
+module HotWaterAndAppliances
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -951,7 +951,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param water_heating_system [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
@@ -987,7 +987,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @return [TODO] TODO
   def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
@@ -1035,8 +1035,6 @@ class HotWaterAndAppliances
     pump_kw = pump_horsepower * 0.746 / motor_efficiency
     return UnitConversions.convert(pump_kw, 'kW', 'W')
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
@@ -1313,7 +1311,7 @@ class HotWaterAndAppliances
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO

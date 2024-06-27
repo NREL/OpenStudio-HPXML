@@ -723,7 +723,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 # TODO
-class Schedule
+module Schedule
   # TODO
   #
   # @return [TODO] TODO

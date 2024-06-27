@@ -199,7 +199,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
                        FT::Coal => HPXML::FuelTypeCoal }
 
     # Check for presence of fuels once
-    has_fuel = hpxml.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+    has_fuel = hpxml.has_fuels(hpxml.to_doc)
     has_fuel[HPXML::FuelTypeElectricity] = true
 
     # Has production

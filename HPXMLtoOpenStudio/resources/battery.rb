@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Battery
+module Battery
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object

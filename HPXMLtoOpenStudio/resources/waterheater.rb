@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Waterheater
+module Waterheater
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -706,8 +706,6 @@ class Waterheater
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(swh_program)
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #

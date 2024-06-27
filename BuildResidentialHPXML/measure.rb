@@ -147,9 +147,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
 
+    soil_types = [HPXML::SiteSoilTypeClay,
+                  HPXML::SiteSoilTypeGravel,
+                  HPXML::SiteSoilTypeLoam,
+                  HPXML::SiteSoilTypeSand,
+                  HPXML::SiteSoilTypeSilt,
+                  HPXML::SiteSoilTypeUnknown]
+
+    moisture_types = [HPXML::SiteSoilMoistureTypeDry,
+                      HPXML::SiteSoilMoistureTypeMixed,
+                      HPXML::SiteSoilMoistureTypeWet]
+
     site_soil_and_moisture_type_choices = OpenStudio::StringVector.new
-    Constants.SoilTypes.each do |soil_type|
-      Constants.MoistureTypes.each do |moisture_type|
+    soil_types.each do |soil_type|
+      moisture_types.each do |moisture_type|
         site_soil_and_moisture_type_choices << "#{soil_type}, #{moisture_type}"
       end
     end
@@ -3336,7 +3347,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Fossil fuel emissions factors units. If multiple scenarios, use a comma-separated list. Only lb/MBtu and kg/MBtu are allowed.')
     args << arg
 
-    Constants.FossilFuels.each do |fossil_fuel|
+    HPXML::fossil_fuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
       all_caps_case = fossil_fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fossil_fuel.capitalize
@@ -3357,7 +3368,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+    HPXML::all_fuels.each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
@@ -3368,7 +3379,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
-    ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+    HPXML::all_fuels.each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
@@ -3675,7 +3686,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (emissions_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required emissions arguments.' if error
 
-    Constants.FossilFuels.each do |fossil_fuel|
+    HPXML::fossil_fuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
       if !args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -3693,7 +3704,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       emissions_scenario_lengths += [args[:emissions_electricity_number_of_header_rows].count(',')] unless args[:emissions_electricity_number_of_header_rows].nil?
       emissions_scenario_lengths += [args[:emissions_electricity_column_numbers].count(',')] unless args[:emissions_electricity_column_numbers].nil?
 
-      Constants.FossilFuels.each do |fossil_fuel|
+      HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -3706,7 +3717,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     bills_args_initialized = [!args[:utility_bill_scenario_names].nil?]
     if bills_args_initialized.uniq[0]
       bills_scenario_lengths = [args[:utility_bill_scenario_names].count(',')]
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         bills_scenario_lengths += [args["utility_bill_#{underscore_case}_fixed_charges".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
@@ -4099,7 +4110,7 @@ class HPXMLFile
       end
 
       fuel_values = {}
-      Constants.FossilFuels.each do |fossil_fuel|
+      HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         if not args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -4201,7 +4212,7 @@ class HPXMLFile
       end
 
       fixed_charges = {}
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
@@ -4212,7 +4223,7 @@ class HPXMLFile
       end
 
       marginal_rates = {}
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?

@@ -631,11 +631,10 @@ class HPXML < Object
     end
   end
 
-  def has_fuels(fuels_array, hpxml_doc, building_id = nil)
-    # Returns a hash with whether each fuel in fuels_array exists
-    # across all the buildings
+  def has_fuels(hpxml_doc, building_id = nil)
+    # Returns a hash with whether each fuel exists in the HPXML Building or Buildings
     has_fuels = {}
-    fuels_array.each do |fuel|
+    HPXML::fossil_fuels.each do |fuel|
       has_fuels[fuel] = false
       FuelElementNames.each do |fuel_element_name|
         if fuel_element_name == 'Heater/Type' && fuel == HPXML::FuelTypeNaturalGas
@@ -1429,12 +1428,9 @@ class HPXML < Object
       return false
     end
 
-    def has_fuels(fuels_array, hpxml_doc)
-      # Returns a hash with whether each fuel in fuels_array exists
-      # in the HPXML Building
-      has_fuels = @parent_object.has_fuels(fuels_array, hpxml_doc, @building_id)
-
-      return has_fuels
+    def has_fuels(hpxml_doc)
+      # Returns a hash with whether each fuel exists in the HPXML Building
+      return @parent_object.has_fuels(hpxml_doc, @building_id)
     end
 
     def predominant_heating_fuel
@@ -8332,6 +8328,21 @@ class HPXML < Object
     XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
     return doc
+  end
+
+  def self.fossil_fuels
+    # The unique set of HPXML fuel types that end up used in the EnergyPlus model.
+    # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
+    return [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane,
+            HPXML::FuelTypeOil,
+            HPXML::FuelTypeCoal,
+            HPXML::FuelTypeWoodCord,
+            HPXML::FuelTypeWoodPellets]
+  end
+
+  def self.all_fuels
+    return fossil_fuels + [HPXML::FuelTypeElectricity]
   end
 
   def self.vented_locations

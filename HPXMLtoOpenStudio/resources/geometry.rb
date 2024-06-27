@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
-class Geometry
+# Collection of methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
+module Geometry
   # Tear down the existing model if it exists.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -34,7 +34,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of x-coordinates in ft
+  # @return [Array<Double>] array of x-coordinates (ft)
   def self.get_surface_x_values(surfaceArray:)
     xValueArray = []
     surfaceArray.each do |surface|
@@ -50,7 +50,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of y-coordinates in ft
+  # @return [Array<Double>] array of y-coordinates (ft)
   def self.get_surface_y_values(surfaceArray:)
     yValueArray = []
     surfaceArray.each do |surface|
@@ -66,7 +66,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of z-coordinates in ft
+  # @return [Array<Double>] array of z-coordinates (ft)
   def self.get_surface_z_values(surfaceArray:)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
@@ -180,7 +180,7 @@ class Geometry
   # For an array of roof surfaces, get the maximum tilt.
   #
   # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Double] the maximum of surface tilts in degrees
+  # @return [Double] the maximum of surface tilts (degrees)
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
@@ -194,12 +194,12 @@ class Geometry
 
   # Create vertices for a vertical plane based on length, height, z origin, azimuth, presence of a buffer, and any subsurface area.
   #
-  # @param length [Double] length of the wall in ft
-  # @param height [Double] height of the wall in ft
-  # @param z_origin [Double] The z-coordinate for which the length and height are relative, in ft
-  # @param azimuth [Double] azimuth in degrees
+  # @param length [Double] length of the wall (ft)
+  # @param height [Double] height of the wall (ft)
+  # @param z_origin [Double] The z-coordinate for which the length and height are relative (ft)
+  # @param azimuth [Double] azimuth (degrees)
   # @param add_buffer [Boolean] whether to use a buffer on each side of a subsurface
-  # @param subsurface_area [Double] the area of a subsurface within the parent surface, in ft^2
+  # @param subsurface_area [Double] the area of a subsurface within the parent surface (ft2)
   # @return [OpenStudio::Point3dVector] an array of points
   def self.create_wall_vertices(length:,
                                 height:,
@@ -558,12 +558,10 @@ class Geometry
     return z_origins.min
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # Get the surface transformation using the translation matrix defined by an offset multiplied by 3D translation vector (x, y, z).
   # Applying the affine transformation will shift a set of vertices.
   #
-  # @param offset [Double] the magnitude of the vector in ft
+  # @param offset [Double] the magnitude of the vector (ft)
   # @param x [Double] the x-coordinate of the translation vector
   # @param y [Double] the y-coordinate of the translation vector
   # @param z [Double] the z-coordinate of the translation vector
@@ -764,9 +762,9 @@ class Geometry
   # needs relative to the subsurface in order to prevent E+ warnings
   # about "Very small surface area".
   #
-  # @param length [Double] length of the subsurface in m
-  # @param width [Double] width of the subsurface in m
-  # @return [Double] minimum needed buffer distance in m
+  # @param length [Double] length of the subsurface (m)
+  # @param width [Double] width of the subsurface (m)
+  # @return [Double] minimum needed buffer distance (m)
   def self.calculate_subsurface_parent_buffer(length:,
                                               width:)
     min_surface_area = 0.005 # m^2
