@@ -1299,7 +1299,7 @@ class HotWaterAndAppliances
       if n_occ.nil? # Asset calculation
         ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
       else # Operational calculation
-        ref_f_gpd = -4.84 + 18.6 * n_occ # Eq. 14 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+        ref_f_gpd = [-4.84 + 18.6 * n_occ, 0.0].max # Eq. 14 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
       end
       f_eff = get_fixtures_effectiveness(frac_low_flow_fixtures)
       return f_eff * ref_f_gpd * fixtures_usage_multiplier
