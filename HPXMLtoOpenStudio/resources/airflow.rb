@@ -290,32 +290,32 @@ class Airflow
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     # Manual J Table 5A
     ach_table_sfd_htg = [
-    # single story
-    { HPXML::LeakinessVeryTight => [0.21, 0.16, 0.14, 0.11, 0.10],
-      HPXML::LeakinessTight => [0.41, 0.31, 0.26, 0.22, 0.19],
-      HPXML::LeakinessAverage => [0.61, 0.45, 0.38, 0.32, 0.28],
-      HPXML::LeakinessLeaky => [0.95, 0.70, 0.59, 0.49, 0.43],
-      HPXML::LeakinessVeryLeaky => [1.29, 0.94, 0.80, 0.66, 0.58] },
-    # two story
-    { HPXML::LeakinessVeryTight => [0.27, 0.20, 0.18, 0.15, 0.13],
-      HPXML::LeakinessTight => [0.53, 0.39, 0.34, 0.28, 0.25],
-      HPXML::LeakinessAverage => [0.79, 0.58, 0.50, 0.41, 0.37],
-      HPXML::LeakinessLeaky => [1.23, 0.90, 0.77, 0.63, 0.56],
-      HPXML::LeakinessVeryLeaky => [1.67, 1.22, 1.04, 0.85, 0.75] }
+      # single story
+      { HPXML::LeakinessVeryTight => [0.21, 0.16, 0.14, 0.11, 0.10],
+        HPXML::LeakinessTight => [0.41, 0.31, 0.26, 0.22, 0.19],
+        HPXML::LeakinessAverage => [0.61, 0.45, 0.38, 0.32, 0.28],
+        HPXML::LeakinessLeaky => [0.95, 0.70, 0.59, 0.49, 0.43],
+        HPXML::LeakinessVeryLeaky => [1.29, 0.94, 0.80, 0.66, 0.58] },
+      # two story
+      { HPXML::LeakinessVeryTight => [0.27, 0.20, 0.18, 0.15, 0.13],
+        HPXML::LeakinessTight => [0.53, 0.39, 0.34, 0.28, 0.25],
+        HPXML::LeakinessAverage => [0.79, 0.58, 0.50, 0.41, 0.37],
+        HPXML::LeakinessLeaky => [1.23, 0.90, 0.77, 0.63, 0.56],
+        HPXML::LeakinessVeryLeaky => [1.67, 1.22, 1.04, 0.85, 0.75] }
     ]
     ach_table_sfd_clg = [
-    # single story
-    { HPXML::LeakinessVeryTight => [0.11, 0.08, 0.07, 0.06, 0.05],
-      HPXML::LeakinessTight => [0.22, 0.16, 0.14, 0.11, 0.10],
-      HPXML::LeakinessAverage => [0.32, 0.23, 0.20, 0.16, 0.15],
-      HPXML::LeakinessLeaky => [0.50, 0.36, 0.31, 0.25, 0.23],
-      HPXML::LeakinessVeryLeaky => [0.67, 0.49, 0.42, 0.34, 0.30] },
-    # two story
-    { HPXML::LeakinessVeryTight => [0.14, 0.11, 0.09, 0.08, 0.07],
-      HPXML::LeakinessTight => [0.28, 0.21, 0.18, 0.15, 0.13],
-      HPXML::LeakinessAverage => [0.41, 0.30, 0.26, 0.21, 0.19],
-      HPXML::LeakinessLeaky => [0.64, 0.47, 0.40, 0.33, 0.29],
-      HPXML::LeakinessVeryLeaky => [0.87, 0.64, 0.54, 0.44, 0.39] }
+      # single story
+      { HPXML::LeakinessVeryTight => [0.11, 0.08, 0.07, 0.06, 0.05],
+        HPXML::LeakinessTight => [0.22, 0.16, 0.14, 0.11, 0.10],
+        HPXML::LeakinessAverage => [0.32, 0.23, 0.20, 0.16, 0.15],
+        HPXML::LeakinessLeaky => [0.50, 0.36, 0.31, 0.25, 0.23],
+        HPXML::LeakinessVeryLeaky => [0.67, 0.49, 0.42, 0.34, 0.30] },
+      # two story
+      { HPXML::LeakinessVeryTight => [0.14, 0.11, 0.09, 0.08, 0.07],
+        HPXML::LeakinessTight => [0.28, 0.21, 0.18, 0.15, 0.13],
+        HPXML::LeakinessAverage => [0.41, 0.30, 0.26, 0.21, 0.19],
+        HPXML::LeakinessLeaky => [0.64, 0.47, 0.40, 0.33, 0.29],
+        HPXML::LeakinessVeryLeaky => [0.87, 0.64, 0.54, 0.44, 0.39] }
     ]
     # Manual J Table 5B
     ach_table_mf_htg = { HPXML::LeakinessVeryTight => [0.24, 0.18, 0.15, 0.13, 0.12],
@@ -340,7 +340,7 @@ class Airflow
         break
       end
     end
-    
+
     if hpxml_bldg.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
       if ncfl_ag > 1
         ach_htg = ach_table_sfd_htg[1][leakiness_description][index]
@@ -384,11 +384,11 @@ class Airflow
     c_floor_area = -0.002078
     c_height = 0.06375
     # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
-    leakage_multiplier = {HPXML::LeakinessVeryTight => 0.355,
-                          HPXML::LeakinessTight => 0.686,
-                          HPXML::LeakinessAverage => 1.0,
-                          HPXML::LeakinessLeaky => 1.549,
-                          HPXML::LeakinessVeryLeaky => 2.085 }[measurement.leakiness_description]
+    leakage_multiplier = { HPXML::LeakinessVeryTight => 0.355,
+                           HPXML::LeakinessTight => 0.686,
+                           HPXML::LeakinessAverage => 1.0,
+                           HPXML::LeakinessLeaky => 1.549,
+                           HPXML::LeakinessVeryLeaky => 2.085 }[measurement.leakiness_description]
     # Vintage
     c_vintage = nil
     if year_built < 1960
@@ -440,7 +440,8 @@ class Airflow
     sum_fnd_area = 0.0
     hpxml_bldg.foundations.each do |foundation|
       next unless foundation.within_infiltration_volume
-      area = (hpxml_bldg.floors + hpxml_bldg.slabs).select{ |surface| surface.interior_adjacent_to == foundation.to_location}.map{ |surface| surface.area}.sum
+
+      area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
       case foundation.foundation_type
       when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
         c_foundation -= 0.036992 * area
@@ -456,7 +457,6 @@ class Airflow
     c_foundation /= sum_fnd_area unless sum_fnd_area == 0.0
 
     # Ducts (weighted by duct fraction and hvac fraction)
-    sum_duct_hvac_frac = 0.0
     c_duct = 0.0
     ducts = [] # List of [fraction, duct_location] pair for each duct
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
@@ -480,7 +480,7 @@ class Airflow
         ducts << [duct.duct_fraction_area * supply_or_return_fraction * hvac_frac, duct.duct_location]
       end
     end
-    sum_duct_hvac_frac = ducts.map{|pair| pair[0]}.sum
+    sum_duct_hvac_frac = ducts.map { |pair| pair[0] }.sum
     if sum_duct_hvac_frac > 1.0001 # Using 1.0001 to allow small tolerance on sum
       fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
     elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system

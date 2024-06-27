@@ -3703,7 +3703,8 @@ module HPXMLDefaults
   # @return [void]
   def self.apply_leakiness_description(hpxml_bldg)
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
-    return if (measurement.unit_of_measure) || (measurement.effective_leakage_area)
+    return if measurement.unit_of_measure || measurement.effective_leakage_area
+
     ach50 = Airflow.calc_ach50(hpxml_bldg)
     measurement.house_pressure = 50
     measurement.unit_of_measure = HPXML::UnitsACH
