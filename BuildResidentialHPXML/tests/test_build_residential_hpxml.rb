@@ -300,7 +300,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     }
 
     schema_path = File.join(File.dirname(__FILE__), '../..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schema_validator = XMLValidator.get_xml_validator(schema_path)
 
     puts "Generating #{hpxmls_files.size} HPXML files..."
 

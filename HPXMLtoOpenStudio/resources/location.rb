@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Location
+module Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -16,8 +16,6 @@ class Location
     apply_dst(model, hpxml_bldg)
     apply_ground_temps(model, weather, hpxml_bldg)
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #

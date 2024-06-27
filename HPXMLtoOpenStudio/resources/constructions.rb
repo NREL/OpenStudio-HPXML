@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Constructions
+module Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
   # TODO
@@ -1898,8 +1898,6 @@ class Constructions
 
     fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window_or_skylight.id}'."
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
