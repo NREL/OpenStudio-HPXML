@@ -580,6 +580,7 @@ class HotWaterAndAppliances
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param dishwasher [TODO] TODO
   # @param is_outside [TODO] TODO
+  # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
   def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
@@ -697,6 +698,7 @@ class HotWaterAndAppliances
   # @param clothes_dryer [TODO] TODO
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
+  # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
   def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
@@ -812,6 +814,7 @@ class HotWaterAndAppliances
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
+  # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
   def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
@@ -1291,6 +1294,7 @@ class HotWaterAndAppliances
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param daily_mw_fractions [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
+  # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
   def self.get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
@@ -1334,6 +1338,7 @@ class HotWaterAndAppliances
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
+  # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution,
                               frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0, n_occ = nil)
