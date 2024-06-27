@@ -498,7 +498,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Init
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-    set_defaults_and_globals()
+    set_inits_and_globals()
     Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
 
@@ -610,10 +610,29 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @return [TODO] TODO
-  def set_defaults_and_globals()
+  def set_inits_and_globals()
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
+
+    # Handle operational calculation
+    if not @hpxml_bldg.building_occupancy.number_of_residents.nil?
+      # Set equivalent number of bedrooms for operational calculation; this is an Noccupant adjustment
+      # to ANSI 301 or Building America equations, which are based on number of bedrooms.
+      @hpxml_bldg.building_construction.number_of_bedrooms = HPXMLDefaults.get_equivalent_nbeds_for_operational_calculation(@hpxml_bldg)
+
+      # If zero occupants, ensure end uses of interest are zeroed out
+      if (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
+        @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
+                                              begin_month: @hpxml_header.sim_begin_month,
+                                              begin_day: @hpxml_header.sim_begin_day,
+                                              begin_hour: 0,
+                                              end_month: @hpxml_header.sim_end_month,
+                                              end_day: @hpxml_header.sim_end_day,
+                                              end_hour: 24,
+                                              natvent_availability: HPXML::ScheduleUnavailable)
+      end
+    end
 
     # Set globals
     @cfa = @hpxml_bldg.building_construction.conditioned_floor_area
@@ -630,23 +649,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @frac_windows_operable = @hpxml_bldg.fraction_of_windows_operable()
     @hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
     @hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
-
-    # We don't want this to be written to in.xml, because then if you ran the in.xml
-    # file, you would get different results (operational calculation) relative to the
-    # original file (asset calculation).
-    if @hpxml_bldg.building_occupancy.number_of_residents.nil?
-      @hpxml_bldg.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(nbeds: @nbeds)
-    elsif (@hpxml_bldg.building_occupancy.number_of_residents == 0) && (not @apply_ashrae140_assumptions)
-      # If zero occupants, ensure end uses of interest are zeroed out
-      @hpxml_header.unavailable_periods.add(column_name: 'Vacancy',
-                                            begin_month: @hpxml_header.sim_begin_month,
-                                            begin_day: @hpxml_header.sim_begin_day,
-                                            begin_hour: 0,
-                                            end_month: @hpxml_header.sim_end_month,
-                                            end_day: @hpxml_header.sim_end_day,
-                                            end_hour: 24,
-                                            natvent_availability: HPXML::ScheduleUnavailable)
-    end
   end
 
   # TODO
@@ -665,8 +667,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @return [TODO] TODO
   def add_num_occupants(model, runner, spaces)
     # Occupants
-    num_occ = @hpxml_bldg.building_occupancy.number_of_residents
-    return if num_occ <= 0
+    if @hpxml_bldg.building_occupancy.number_of_residents.nil? # Asset calculation
+      num_occ = Geometry.get_occupancy_default_num(nbeds: @nbeds)
+    else # Operational calculation
+      num_occ = @hpxml_bldg.building_occupancy.number_of_residents
+    end
 
     Geometry.apply_occupants(model, runner, @hpxml_bldg, num_occ, spaces[HPXML::LocationConditionedSpace],
                              @schedules_file, @hpxml_header.unavailable_periods)

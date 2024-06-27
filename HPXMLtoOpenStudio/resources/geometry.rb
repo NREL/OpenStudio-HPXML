@@ -497,6 +497,8 @@ class Geometry
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
+    return if num_occ <= 0
+
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 

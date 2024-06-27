@@ -31,7 +31,8 @@ class HotWaterAndAppliances
     fixtures_usage_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier
     general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
-    nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
+    nbeds = hpxml_bldg.building_construction.number_of_bedrooms
+    n_occ = hpxml_bldg.building_occupancy.number_of_residents
 
     # Get appliances, etc.
     if not hpxml_bldg.clothes_washers.empty?
@@ -62,7 +63,7 @@ class HotWaterAndAppliances
 
     # Clothes washer energy
     if not clothes_washer.nil?
-      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?, n_occ)
 
       # Create schedule
       cw_power_schedule = nil
@@ -93,7 +94,7 @@ class HotWaterAndAppliances
 
     # Clothes dryer energy
     if not clothes_dryer.nil?
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?, n_occ)
 
       # Create schedule
       cd_schedule = nil
@@ -127,7 +128,7 @@ class HotWaterAndAppliances
 
     # Dishwasher energy
     if not dishwasher.nil?
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?, n_occ)
 
       # Create schedule
       dw_power_schedule = nil
@@ -353,8 +354,8 @@ class HotWaterAndAppliances
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
       if gpd_frac > 0
 
-        fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
-        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
+        fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier, n_occ)
+        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier, n_occ)
 
         fx_peak_flow = nil
         if not schedules_file.nil?
@@ -578,14 +579,19 @@ class HotWaterAndAppliances
   # @param dishwasher [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false)
+  def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if dishwasher.rated_annual_kwh.nil?
         dishwasher.rated_annual_kwh = calc_dishwasher_annual_kwh_from_ef(dishwasher.energy_factor)
       end
       lcy = dishwasher.label_usage * 52.0
       kwh_per_cyc = ((dishwasher.label_annual_gas_cost * 0.5497 / dishwasher.label_gas_rate - dishwasher.rated_annual_kwh * dishwasher.label_electric_rate * 0.02504 / dishwasher.label_electric_rate) / (dishwasher.label_electric_rate * 0.5497 / dishwasher.label_gas_rate - 0.02504)) / lcy
-      dwcpy = (88.4 + 34.9 * nbeds) * (12.0 / dishwasher.place_setting_capacity)
+      if n_occ.nil? # Asset calculation
+        scy = 88.4 + 34.9 * nbeds
+      else # Operational calculation
+        scy = 91.0 + 30.0 * n_occ # Eq. 3 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+      end
+      dwcpy = scy * (12.0 / dishwasher.place_setting_capacity)
       annual_kwh = kwh_per_cyc * dwcpy
 
       gpd = (dishwasher.rated_annual_kwh - kwh_per_cyc * lcy) * 0.02504 * dwcpy / 365.0
@@ -690,7 +696,7 @@ class HotWaterAndAppliances
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false)
+  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
         clothes_dryer.combined_energy_factor = calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
@@ -699,7 +705,12 @@ class HotWaterAndAppliances
         clothes_washer.integrated_modified_energy_factor = calc_clothes_washer_imef_from_mef(clothes_washer.modified_energy_factor)
       end
       rmc = (0.97 * (clothes_washer.capacity / clothes_washer.integrated_modified_energy_factor) - clothes_washer.rated_annual_kwh / 312.0) / ((2.0104 * clothes_washer.capacity + 1.4242) * 0.455) + 0.04
-      acy = (164.0 + 46.5 * nbeds) * ((3.0 * 2.08 + 1.59) / (clothes_washer.capacity * 2.08 + 1.59))
+      if n_occ.nil? # Asset calculation
+        scy = 164.0 + 46.5 * nbeds
+      else # Operational calculation
+        scy = 123.0 + 61.0 * n_occ # Eq. 1 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+      end
+      acy = scy * ((3.0 * 2.08 + 1.59) / (clothes_washer.capacity * 2.08 + 1.59))
       annual_kwh = (((rmc - 0.04) * 100) / 55.5) * (8.45 / clothes_dryer.combined_energy_factor) * acy
       if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
         annual_therm = 0.0
@@ -800,12 +811,16 @@ class HotWaterAndAppliances
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false)
+  def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false, n_occ = nil)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       gas_h20 = 0.3914 # (gal/cyc) per (therm/y)
       elec_h20 = 0.0178 # (gal/cyc) per (kWh/y)
       lcy = clothes_washer.label_usage * 52.0 # label cycles per year
-      scy = 164.0 + nbeds * 46.5
+      if n_occ.nil? # Asset calculation
+        scy = 164.0 + nbeds * 46.5
+      else # Operational calculation
+        scy = 123.0 + 61.0 * n_occ # Eq. 1 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+      end
       acy = scy * ((3.0 * 2.08 + 1.59) / (clothes_washer.capacity * 2.08 + 1.59)) # Annual Cycles per Year
       cw_appl = (clothes_washer.label_annual_gas_cost * gas_h20 / clothes_washer.label_gas_rate - (clothes_washer.rated_annual_kwh * clothes_washer.label_electric_rate) * elec_h20 / clothes_washer.label_electric_rate) / (clothes_washer.label_electric_rate * gas_h20 / clothes_washer.label_gas_rate - elec_h20)
       annual_kwh = cw_appl / lcy * acy
@@ -1275,24 +1290,23 @@ class HotWaterAndAppliances
   # @param daily_mw_fractions [TODO] TODO
   # @param fixtures_usage_multiplier [TODO] TODO
   # @return [TODO] TODO
-  def self.get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
-    if nbeds < 0.0
-      return 0.0
-    end
-
-    if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
+  def self.get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0, n_occ = nil)
+    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
+      # ANSI/RESNET 301-2014 Addendum A-2015
+      # Amendment on Domestic Hot Water (DHW) Systems
+      if n_occ.nil? # Asset calculation
+        ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
+      else # Operational calculation
+        ref_f_gpd = -4.84 + 18.6 * n_occ # Eq. 14 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+      end
+      f_eff = get_fixtures_effectiveness(frac_low_flow_fixtures)
+      return f_eff * ref_f_gpd * fixtures_usage_multiplier
+    else
       hw_gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
       # Convert to mixed water gpd
       avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
       return hw_gpd / avg_mw_fraction * fixtures_usage_multiplier
     end
-
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-    ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
-    f_eff = get_fixtures_effectiveness(frac_low_flow_fixtures)
-
-    return f_eff * ref_f_gpd * fixtures_usage_multiplier
   end
 
   # TODO
@@ -1320,8 +1334,8 @@ class HotWaterAndAppliances
   # @param fixtures_usage_multiplier [TODO] TODO
   # @return [TODO] TODO
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution,
-                              frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0)
-    if (Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')) || (nbeds < 0.0)
+                              frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0, n_occ = nil)
+    if Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')
       return 0.0
     end
 
@@ -1341,7 +1355,11 @@ class HotWaterAndAppliances
       sys_factor = 1.0
     end
 
-    ref_w_gpd = 9.8 * (nbeds**0.43) # Eq. 4.2-2 (refWgpd)
+    if n_occ.nil? # Asset calculation
+      ref_w_gpd = 9.8 * (nbeds**0.43) # Eq. 4.2-2 (refWgpd)
+    else # Operational calculation
+      ref_w_gpd = 7.16 * (n_occ**0.7) # Eq. 14 from http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf
+    end
     o_frac = 0.25
     o_cd_eff = 0.0
 
