@@ -256,12 +256,12 @@ module HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_heating_setpoint.nil?
-      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # F, per Manual J
       hpxml_bldg.header.manualj_heating_setpoint_isdefaulted = true
     end
 
     if hpxml_bldg.header.manualj_cooling_setpoint.nil?
-      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # F, per Manual J
       hpxml_bldg.header.manualj_cooling_setpoint_isdefaulted = true
     end
 
@@ -1688,13 +1688,13 @@ module HPXMLDefaults
 
       if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
         # Fuel backup
-        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+        heat_pump.compressor_lockout_temp = 25.0 # F
       else
         # Electric backup or no backup
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-          heat_pump.compressor_lockout_temp = -20.0 # deg-F
+          heat_pump.compressor_lockout_temp = -20.0 # F
         else
-          heat_pump.compressor_lockout_temp = 0.0 # deg-F
+          heat_pump.compressor_lockout_temp = 0.0 # F
         end
       end
       heat_pump.compressor_lockout_temp_isdefaulted = true
@@ -1713,9 +1713,9 @@ module HPXMLDefaults
       end
 
       if hp_backup_fuel == HPXML::FuelTypeElectricity
-        heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 40.0 # F
       else
-        heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 50.0 # F
       end
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end

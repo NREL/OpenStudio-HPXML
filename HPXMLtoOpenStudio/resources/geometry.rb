@@ -666,14 +666,14 @@ module Geometry
                ground_weight: 0.0,
                f_regain: 0.0 }
     elsif location == HPXML::LocationOtherMultifamilyBufferSpace
-      # Average of indoor/outdoor temperatures with minimum of 50 deg-F
+      # Average of indoor/outdoor temperatures with minimum of 50 F
       return { temp_min: 50,
                indoor_weight: 0.5,
                outdoor_weight: 0.5,
                ground_weight: 0.0,
                f_regain: 0.0 }
     elsif location == HPXML::LocationOtherNonFreezingSpace
-      # Floating with outdoor air temperature with minimum of 40 deg-F
+      # Floating with outdoor air temperature with minimum of 40 F
       return { temp_min: 40,
                indoor_weight: 0.0,
                outdoor_weight: 1.0,

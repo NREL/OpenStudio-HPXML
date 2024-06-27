@@ -322,9 +322,9 @@ module HVACSizing
   # of water.
   #
   # DRs are reduced to three categories:
-  # - Low (swing less than 16 deg-F)
-  # - Medium (swing between 16 deg-F and 25 deg-F)
-  # - High (swing exceeds 25 deg-F)
+  # - Low (swing less than 16 F)
+  # - Medium (swing between 16 F and 25 F)
+  # - High (swing exceeds 25 F)
   #
   # @param daily_temperature_range [Double] Daily temperature range (delta F)
   # @return [String] DR category

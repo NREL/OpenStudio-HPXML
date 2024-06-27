@@ -577,7 +577,7 @@ module HVAC
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
-    design_temp = 180.0 # deg-F
+    design_temp = 180.0 # F
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -1782,7 +1782,7 @@ module HVAC
     # Per ANSI/RESNET/ICC 301
     months = [0] * 12
     weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-      next unless val > 63.0 # deg-F
+      next unless val > 63.0 # F
 
       months[m] = 1
     end
@@ -3488,7 +3488,7 @@ module HVAC
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
       # rated shr gross and fan speed ratios
-      dB_rated = 80.0 # deg-F
+      dB_rated = 80.0 # F
       win = 0.01118470 # Humidity ratio corresponding to 80F dry bulb/67F wet bulb (from EnergyPlus)
 
       if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -3788,8 +3788,8 @@ module HVAC
     hp_ap = heat_pump.additional_properties
 
     # Sets:
-    # 1. Minimum temperature (deg-F) for HP compressor operation
-    # 2. Maximum temperature (deg-F) for HP supplemental heating operation
+    # 1. Minimum temperature (F) for HP compressor operation
+    # 2. Maximum temperature (F) for HP supplemental heating operation
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp

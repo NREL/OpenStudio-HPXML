@@ -8,7 +8,7 @@ module Constants
   #
   # @return [TODO] TODO
   def self.AssumedInsideTemp
-    return 73.5 # deg-F
+    return 73.5 # F
   end
 
   # TODO

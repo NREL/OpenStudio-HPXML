@@ -13,7 +13,7 @@ module Psychrometrics
   #      = 2581600 - 1531.72*T + 49015.1 (J/kg with T in degF)
   #      = 1083 - 0.6585*T + 21.07 (Btu/lbm with T in degF)
   #
-  # @param t [Double] temperature(F)
+  # @param t [Double] temperature (F)
   # @return [Double] latent heat of vaporization (Btu/lbm)
   def self.H_fg_fT(t)
     h_fg = 1083 - 0.6585 * t + 21.07
@@ -25,7 +25,7 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param tdb [Double] drybulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
   # @return [Double] saturated vapor pressure (psia)
   def self.Psat_fT(tdb)
     c1 = -1.0214165e4
@@ -61,7 +61,7 @@ module Psychrometrics
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param p [Double] pressure (psia)
-  # @return [Double] saturated vapor temperature(F)
+  # @return [Double] saturated vapor temperature (F)
   def self.Tsat_fP(runner, p)
     # Initialize
     tsat = 212.0 # (F)
@@ -101,7 +101,7 @@ module Psychrometrics
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param h [Double] enthalpy (Btu/lbm)
   # @param p [Double] pressure (psia)
-  # @return [Double] drybulb temperature(F)
+  # @return [Double] drybulb temperature (F)
   def self.Tsat_fh_P(runner, h, p)
     # Initialize
     tdb = 50
@@ -138,7 +138,7 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param tdb [Double] drybulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
   # @param w [Double] humidity ratio (lbm/lbm)
   # @param p [Double] pressure (psia)
   # @return [Double] density of dry air (lbm/ft3)
@@ -165,7 +165,7 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param tdb [Double] drybulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
   # @param w [Double] humidity ratio (lbm/lbm)
   # @return [Double] enthalpy (Btu/lb)
   def self.h_fT_w(tdb, w)
@@ -202,10 +202,10 @@ module Psychrometrics
   # Source: Based on WETBULB f77 code in ResAC (Brandemuehl)
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param tdb [Double] drybulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
   # @param w [Double] humidity ratio (lbm/lbm)
   # @param p [Double] pressure (psia)
-  # @return [Double] wetbulb temperature(F)
+  # @return [Double] wetbulb temperature (F)
   def self.Twb_fT_w_P(runner, tdb, w, p)
     # Initialize
     tboil = self.Tsat_fP(runner, p) # (F)
@@ -280,7 +280,7 @@ module Psychrometrics
   # @param tdb [Double] drybulb temperature(C)
   # @param w [Double] humidity ratio (g/g)
   # @param p [Double] pressure (kPa)
-  # @return [Double] relative humidity (1/1)
+  # @return [Double] relative humidity (frac)
   def self.R_fT_w_P_SI(tdb, w, p)
     return self.R_fT_w_P(UnitConversions.convert(tdb, 'C', 'F'), w, UnitConversions.convert(p, 'kPa', 'psi'))
   end
@@ -312,8 +312,8 @@ module Psychrometrics
   #
   # Source: ASHRAE Handbook 2009
   #
-  # @param tdb [Double] drybulb temperature(F)
-  # @param twb [Double] wetbulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
+  # @param twb [Double] wetbulb temperature (F)
   # @param p [Double] pressure (psia)
   # @return [Double] humidity ratio (lbm/lbm)
   def self.w_fT_Twb_P(tdb, twb, p)
@@ -328,10 +328,10 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param tdb [Double] drybulb temperature(F)
+  # @param tdb [Double] drybulb temperature (F)
   # @param w [Double] humidity ratio (lbm/lbm)
   # @param p [Double] pressure (psia)
-  # @return [Double] relative humidity (1/1)
+  # @return [Double] relative humidity (frac)
   def self.R_fT_w_P(tdb, w, p)
     pw = self.Pw_fP_w(p, w)
     r = pw / self.Psat_fT(tdb)
@@ -356,7 +356,7 @@ module Psychrometrics
   #
   # @param p [Double] pressure (psia)
   # @param w [Double] humidity ratio (lbm/lbm)
-  # @return [Double] dewpoint temperature(F)
+  # @return [Double] dewpoint temperature (F)
   def self.Tdp_fP_w(p, w)
     c14 = 100.45
     c15 = 33.193
@@ -379,8 +379,8 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param tdb [Double] drybulb temperature(F)
-  # @param r [Double] relative humidity (1/1)
+  # @param tdb [Double] drybulb temperature (F)
+  # @param r [Double] relative humidity (frac)
   # @param p [Double] pressure (psia)
   # @return [Double] humidity ratio (lbm/lbm)
   def self.w_fT_R_P(tdb, r, p)
@@ -396,7 +396,7 @@ module Psychrometrics
   # Source: 2009 ASHRAE Handbook
   #
   # @param tdb [Double] drybulb temperature(C)
-  # @param r [Double] relative humidity (1/1)
+  # @param r [Double] relative humidity (frac)
   # @param p [Double] pressure (kPa)
   # @return [Double] humidity ratio (g/g)
   def self.w_fT_R_P_SI(tdb, r, p)
@@ -409,10 +409,10 @@ module Psychrometrics
   # Calculate the wetbulb temperature at a given drybulb temperature, relative humidity, and pressure.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param tdb [Double] drybulb temperature(F)
-  # @param r [Double] relative humidity (1/1)
+  # @param tdb [Double] drybulb temperature (F)
+  # @param r [Double] relative humidity (frac)
   # @param p [Double] pressure (psia)
-  # @return [Double] wetbulb temperature(F)
+  # @return [Double] wetbulb temperature (F)
   def self.Twb_fT_R_P(runner, tdb, r, p)
     w = w_fT_R_P(tdb, r, p)
     twb = self.Twb_fT_w_P(runner, tdb, w, p)
@@ -423,7 +423,7 @@ module Psychrometrics
   #
   # Source: EnergyPlus source code
   #
-  # @param dBin [Double] Entering Dry Bulb(F)
+  # @param dBin [Double] Entering Dry Bulb (F)
   # @param p [Double] Barometric pressure (psi)
   # @param qdot [Double] Total capacity of unit (kBtu/h)
   # @param cfm [Double] Volumetric flow rate of unit (CFM)
@@ -443,7 +443,7 @@ module Psychrometrics
   #
   # Source: EnergyPlus source code
   #
-  # @param dBin [Double] Entering Dry Bulb(F)
+  # @param dBin [Double] Entering Dry Bulb (F)
   # @param p [Double] Barometric pressure (psi)
   # @param qdot [Double] Total capacity of unit (kBtu/h)
   # @param cfm [Double] Volumetric flow rate of unit (CFM)
@@ -516,7 +516,7 @@ module Psychrometrics
   #
   # Source: EnergyPlus source code
   #
-  # @param dBin [Double] Entering Dry Bulb(F)
+  # @param dBin [Double] Entering Dry Bulb (F)
   # @param p [Double] Barometric pressure (psi)
   # @param q [Double] Total capacity of unit (kBtu/h)
   # @param cfm [Double] Volumetric flow rate of unit (CFM)
@@ -575,7 +575,7 @@ module Psychrometrics
 
   # Calculate the mass flow rate at the given incoming air state (entering drybulb and wetbulb) and CFM.
   #
-  # @param dBin [Double] Entering Dry Bulb(F)
+  # @param dBin [Double] Entering Dry Bulb (F)
   # @param p [Double] Barometric pressure (psi)
   # @param cfm [Double] Volumetric flow rate of unit (CFM)
   # @param win [Double] Entering humidity ratio
