@@ -283,15 +283,7 @@ module Airflow
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Float] Calculated ACH50 value based on IECC zone, cfa, infiltration height, year built, foundation type, ducts and leakiness description
-  def self.calc_ach50(hpxml_bldg)
-    measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
-    cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
-    year_built = hpxml_bldg.building_construction.year_built
-    ceil_height = hpxml_bldg.building_construction.average_ceiling_height # Fixme: Can you verify is this the ceiling height or infiltration height that is meant to be used?
-    infil_volume = measurement.infiltration_volume
-    iecc_cz = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
-
+  def self.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, leakiness_description)
     # Constants
     c_floor_area = -0.002078
     c_height = 0.06375
@@ -300,7 +292,7 @@ module Airflow
                            HPXML::LeakinessTight => 0.686,
                            HPXML::LeakinessAverage => 1.0,
                            HPXML::LeakinessLeaky => 1.549,
-                           HPXML::LeakinessVeryLeaky => 2.085 }[measurement.leakiness_description]
+                           HPXML::LeakinessVeryLeaky => 2.085 }[leakiness_description]
     # Vintage
     c_vintage = nil
     if year_built < 1960
@@ -349,59 +341,20 @@ module Airflow
 
     # Foundation type (weight by area)
     c_foundation = 0.0
-    sum_fnd_area = 0.0
-    hpxml_bldg.foundations.each do |foundation|
-      area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
-      case foundation.foundation_type
+    foundations.each do |area_fraction, foundation_type|
+      case foundation_type
       when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
-        c_foundation -= 0.036992 * area
+        c_foundation -= 0.036992 * area_fraction
       when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented
-        c_foundation += 0.108713 * area
+        c_foundation += 0.108713 * area_fraction
       when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceConditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
-        c_foundation += 0.180352 * area
+        c_foundation += 0.180352 * area_fraction
       else
-        fail "Unexpected foundation type: #{foundation.foundation_type}"
+        fail "Unexpected foundation type: #{foundation_type}"
       end
-      sum_fnd_area += area
     end
-    c_foundation /= sum_fnd_area unless sum_fnd_area == 0.0
 
-    # Ducts (weighted by duct fraction and hvac fraction)
     c_duct = 0.0
-    ducts = [] # List of [fraction, duct_location] pair for each duct
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      htg_fraction = 0.0
-      clg_fraction = 0.0
-      hvac_distribution.hvac_systems.each do |hvac_system|
-        if hvac_system.respond_to? :fraction_heat_load_served
-          htg_fraction += hvac_system.fraction_heat_load_served
-        end
-        if hvac_system.respond_to? :fraction_cool_load_served
-          clg_fraction += hvac_system.fraction_cool_load_served
-        end
-      end
-      hvac_frac = (htg_fraction + clg_fraction) / 2.0
-      break if hvac_distribution.ducts.empty?
-
-      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
-      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
-      total_supply_fraction = supply_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
-      total_return_fraction = return_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
-      hvac_distribution.ducts.each do |duct|
-        supply_or_return_fraction = (duct.duct_type == HPXML::DuctTypeSupply) ? total_supply_fraction : total_return_fraction
-        ducts << [duct.duct_fraction_area * supply_or_return_fraction * hvac_frac, duct.duct_location]
-      end
-    end
-    sum_duct_hvac_frac = ducts.empty? ? 0.0 : ducts.map { |pair| pair[0] }.sum
-    if sum_duct_hvac_frac > 1.0001 # Using 1.0001 to allow small tolerance on sum
-      fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
-    elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
-      # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
-      # This will ensure ductless systems have same result as ducts in conditioned space.
-      # See https://github.com/NREL/OpenStudio-HEScore/issues/211
-      ducts << [1.0 - sum_duct_hvac_frac, HPXML::LocationConditionedSpace]
-    end
-
     ducts.each do |frac, duct_location|
       if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
         c_duct -= 0.12381 * frac
