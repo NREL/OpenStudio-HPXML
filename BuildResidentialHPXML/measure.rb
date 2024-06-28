@@ -233,7 +233,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('year_built', false)
     arg.setDisplayName('Building Construction: Year Built')
-    arg.setDescription('The year the building was built.')
+    arg.setDescription('The year the building was built. Required if only leakiness description is provided in air leakage inputs.')
     args << arg
 
     unit_type_choices = OpenStudio::StringVector.new
@@ -1037,23 +1037,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     air_leakage_units_choices << HPXML::UnitsCFMNatural
     air_leakage_units_choices << HPXML::UnitsELA
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_units', air_leakage_units_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_units', air_leakage_units_choices, false)
     arg.setDisplayName('Air Leakage: Units')
     arg.setDescription('The unit of measure for the air leakage.')
-    arg.setDefaultValue(HPXML::UnitsACH)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_house_pressure', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_house_pressure', false)
     arg.setDisplayName('Air Leakage: House Pressure')
     arg.setUnits('Pa')
     arg.setDescription("The house pressure relative to outside. Required when units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}.")
-    arg.setDefaultValue(50)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', false)
     arg.setDisplayName('Air Leakage: Value')
     arg.setDescription("Air exchange rate value. For '#{HPXML::UnitsELA}', provide value in sq. in.")
-    arg.setDefaultValue(3)
     args << arg
 
     air_leakage_type_choices = OpenStudio::StringVector.new
@@ -1063,6 +1060,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_type', air_leakage_type_choices, false)
     arg.setDisplayName('Air Leakage: Type')
     arg.setDescription("Type of air leakage. If '#{HPXML::InfiltrationTypeUnitTotal}', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if '#{HPXML::InfiltrationTypeUnitExterior}', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
+    args << arg
+
+    leakiness_description_choices = OpenStudio::StringVector.new
+    leakiness_description_choices << HPXML::LeakinessVeryTight
+    leakiness_description_choices << HPXML::LeakinessTight
+    leakiness_description_choices << HPXML::LeakinessAverage
+    leakiness_description_choices << HPXML::LeakinessLeaky
+    leakiness_description_choices << HPXML::LeakinessVeryLeaky
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('leakiness_description', leakiness_description_choices, false)
+    arg.setDisplayName('Air Leakage: Leakiness Description')
+    arg.setDescription('Qualitative description of infiltration. If provided, Manual J Table 5A/5B look up ACH values will be used for hvac sizing, and the annual average ACH will be calculated based on year built, iecc zone, cfa, infiltration height, foundation type, ducts and leakiness description.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('air_leakage_has_flue_or_chimney_in_conditioned_space', false)
@@ -4623,6 +4632,9 @@ class HPXMLFile
         air_leakage_type = args[:air_leakage_type]
       end
     end
+    if not args[:leakiness_description].nil?
+      leakiness_description = args[:leakiness_description]
+    end
     infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
 
     hpxml_bldg.air_infiltration_measurements.add(id: "AirInfiltrationMeasurement#{hpxml_bldg.air_infiltration_measurements.size + 1}",
@@ -4631,7 +4643,8 @@ class HPXMLFile
                                                  air_leakage: air_leakage,
                                                  effective_leakage_area: effective_leakage_area,
                                                  infiltration_volume: infiltration_volume,
-                                                 infiltration_type: air_leakage_type)
+                                                 infiltration_type: air_leakage_type,
+                                                 leakiness_description: leakiness_description)
 
     hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = args[:air_leakage_has_flue_or_chimney_in_conditioned_space]
   end

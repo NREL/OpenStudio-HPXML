@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>514b8817-b636-4743-a20a-ceddc241ea69</version_id>
-  <version_modified>2024-06-27T00:54:04Z</version_modified>
+  <version_id>bdcb8ce2-fd96-4575-b08e-59ac2302a6d8</version_id>
+  <version_modified>2024-06-28T04:02:43Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>099C3DC4</checksum>
+      <checksum>0E31669F</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -351,7 +351,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A28FC647</checksum>
+      <checksum>517B3B02</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F1D9CF86</checksum>
+      <checksum>28755EAE</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -639,7 +639,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>B645C92F</checksum>
+      <checksum>47FCD484</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -711,7 +711,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>EE974D71</checksum>
+      <checksum>CE2AD50E</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

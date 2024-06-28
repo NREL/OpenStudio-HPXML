@@ -371,7 +371,7 @@ Path of the EPW file.
 
 **Building Construction: Year Built**
 
-The year the building was built.
+The year the building was built. Required if only leakiness description is provided in air leakage inputs.
 
 - **Name:** ``year_built``
 - **Type:** ``Integer``
@@ -1710,7 +1710,7 @@ The unit of measure for the air leakage.
 - **Name:** ``air_leakage_units``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `ACH`, `CFM`, `ACHnatural`, `CFMnatural`, `EffectiveLeakageArea`
 
@@ -1725,7 +1725,7 @@ The house pressure relative to outside. Required when units are ACH or CFM.
 
 - **Units:** ``Pa``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1736,7 +1736,7 @@ Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in.
 - **Name:** ``air_leakage_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1750,6 +1750,19 @@ Type of air leakage. If 'unit total', represents the total infiltration to the u
 - **Required:** ``false``
 
 - **Choices:** `unit total`, `unit exterior only`
+
+<br/>
+
+**Air Leakage: Leakiness Description**
+
+Qualitative description of infiltration. If provided, Manual J Table 5A/5B look up ACH values will be used for hvac sizing, and the annual average ACH will be calculated based on year built, iecc zone, cfa, infiltration height, foundation type, ducts and leakiness description.
+
+- **Name:** ``leakiness_description``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `very tight`, `tight`, `average`, `leaky`, `very leaky`
 
 <br/>
 

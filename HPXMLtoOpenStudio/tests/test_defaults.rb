@@ -530,6 +530,195 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_infiltration_values(default_hpxml_bldg, 900 * 8, false)
+
+    # Tests from ResDB.Infiltration.Model.v2.xlsx
+
+    # Version 1, Test #1
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories-infil-leakiness-description.xml')
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.rim_joists[0].delete
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessAverage
+    hpxml_bldg.air_infiltration_measurements[0].air_leakage = nil
+    hpxml_bldg.air_infiltration_measurements[0].unit_of_measure = nil
+    hpxml_bldg.air_infiltration_measurements[0].house_pressure = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '3B'
+    hpxml_bldg.foundations[0].foundation_type = HPXML::FoundationTypeSlab
+    hpxml_bldg.foundation_walls.reverse_each do |fw|
+      fw.delete
+    end
+    hpxml_bldg.slabs[0].interior_adjacent_to = HPXML::LocationConditionedSpace
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 9.7)
+
+    # Version 1, Test #2
+    hpxml_bldg.building_construction.conditioned_floor_area = 1000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.slabs[0].area = 500.0
+    hpxml_bldg.floors[0].area = 500.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 1000 * 8, false, 11.8)
+
+    # Version 1, Test #3
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.slabs[0].area = 2000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 10.2)
+
+    # Version 1, Test #4
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 12.0
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 12.0, false, 7.6)
+
+    # Version 1, Test #5
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 2013
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 5.3)
+
+    # Version 1, Test #6
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '4C'
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 13.1)
+
+    # Version 1, Test #7
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories-infil-leakiness-description.xml')
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessAverage
+    hpxml_bldg.air_infiltration_measurements[0].air_leakage = nil
+    hpxml_bldg.air_infiltration_measurements[0].unit_of_measure = nil
+    hpxml_bldg.air_infiltration_measurements[0].house_pressure = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.rim_joists[0].delete
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '3B'
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 11.2)
+
+    # Version 1, Test #8
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories-infil-leakiness-description.xml')
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.rim_joists[0].delete
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessAverage
+    hpxml_bldg.air_infiltration_measurements[0].air_leakage = nil
+    hpxml_bldg.air_infiltration_measurements[0].unit_of_measure = nil
+    hpxml_bldg.air_infiltration_measurements[0].house_pressure = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '3B'
+    hpxml_bldg.foundations[0].foundation_type = HPXML::FoundationTypeSlab
+    hpxml_bldg.foundation_walls.reverse_each do |fw|
+      fw.delete
+    end
+    hpxml_bldg.slabs[0].interior_adjacent_to = HPXML::LocationConditionedSpace
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+      duct.duct_location = HPXML::LocationConditionedSpace
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 8.0)
+
+    # Version 1, Test #9
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessTight
+    hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+      duct.duct_location = HPXML::LocationAtticUnvented
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 9.7 * 0.686)
+
+    # Version 2, Test #1, remove since it's too impractical to configure
+
+    # Add test for ductless == conditioned ducts
+    # See https://github.com/NREL/OpenStudio-HEScore/issues/211)
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories-infil-leakiness-description.xml')
+    hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+    hpxml_bldg.building_construction.average_ceiling_height = 8.0
+    hpxml_bldg.building_construction.year_built = 1975
+    hpxml_bldg.building_construction.conditioned_building_volume = nil
+    hpxml_bldg.rim_joists[0].delete
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessAverage
+    hpxml_bldg.air_infiltration_measurements[0].air_leakage = nil
+    hpxml_bldg.air_infiltration_measurements[0].unit_of_measure = nil
+    hpxml_bldg.air_infiltration_measurements[0].house_pressure = nil
+    hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '3B'
+    hpxml_bldg.foundations[0].foundation_type = HPXML::FoundationTypeSlab
+    hpxml_bldg.foundation_walls.reverse_each do |fw|
+      fw.delete
+    end
+    hpxml_bldg.slabs[0].interior_adjacent_to = HPXML::LocationConditionedSpace
+    hpxml_bldg.slabs[0].area = 1000.0
+    hpxml_bldg.floors[0].area = 1000.0
+    hpxml_bldg.hvac_distributions[0].ducts.reverse_each do |duct|
+      duct.delete
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 8.0)
+
+    # Add test for ducted + ductless system ~= average(conditioned ducts, unconditioned ducts)
+    # See https://github.com/NREL/OpenStudio-HEScore/issues/211)
+    hpxml_bldg.hvac_distributions[0].ducts.add(id: 'Ducts1',
+                                               duct_type: HPXML::DuctTypeSupply,
+                                               duct_insulation_r_value: 8,
+                                               duct_location: HPXML::LocationAtticUnvented,
+                                               duct_surface_area: 50)
+    hpxml_bldg.hvac_distributions[0].ducts.add(id: 'Ducts2',
+                                               duct_type: HPXML::DuctTypeReturn,
+                                               duct_insulation_r_value: 8,
+                                               duct_location: HPXML::LocationAtticUnvented,
+                                               duct_surface_area: 50)
+    hpxml_bldg.heating_systems[0].fraction_heat_load_served = 0.5 # 50% ducts in attic
+    hpxml_bldg.cooling_systems[0].fraction_cool_load_served = 0.5
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, (8.0 + 9.7) / 2)
   end
 
   def test_infiltration_compartmentaliztion_test_adjustment
@@ -4343,9 +4532,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(n_units, hpxml_bldg.building_construction.number_of_units)
   end
 
-  def _test_default_infiltration_values(hpxml_bldg, volume, has_flue_or_chimney_in_conditioned_space)
+  def _test_default_infiltration_values(hpxml_bldg, volume, has_flue_or_chimney_in_conditioned_space, ach50 = nil)
     assert_equal(volume, hpxml_bldg.air_infiltration_measurements[0].infiltration_volume)
     assert_equal(has_flue_or_chimney_in_conditioned_space, hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space)
+    if not ach50.nil?
+      assert_in_epsilon(ach50, hpxml_bldg.air_infiltration_measurements[0].air_leakage, 0.01)
+      assert_equal(HPXML::UnitsACH, hpxml_bldg.air_infiltration_measurements[0].unit_of_measure)
+      assert_equal(50, hpxml_bldg.air_infiltration_measurements[0].house_pressure)
+    end
   end
 
   def _test_default_infiltration_compartmentalization_test_values(air_infiltration_measurement, a_ext)

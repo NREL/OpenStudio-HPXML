@@ -2276,7 +2276,6 @@ module HPXMLDefaults
             end
           end
         end
-
       elsif hvac_distribution.ducts[0].duct_surface_area.nil?
         # Default duct surface area(s)
         [supply_ducts, return_ducts].each do |ducts|
@@ -2287,7 +2286,8 @@ module HPXMLDefaults
           end
         end
       end
-
+      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
+      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
       # Calculate FractionDuctArea from DuctSurfaceArea
       total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
       total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
@@ -3707,9 +3707,13 @@ module HPXMLDefaults
 
     ach50 = Airflow.calc_ach50(hpxml_bldg)
     measurement.house_pressure = 50
+    measurement.house_pressure_isdefaulted = true
     measurement.unit_of_measure = HPXML::UnitsACH
+    measurement.unit_of_measure_isdefaulted = true
     measurement.air_leakage = ach50
+    measurement.air_leakage_isdefaulted = true
     measurement.infiltration_type = HPXML::InfiltrationTypeUnitTotal
+    measurement.infiltration_type_isdefaulted = true
   end
 
   # TODO
