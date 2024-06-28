@@ -304,9 +304,9 @@ module HVACSizing
   # air and the humidity ratio of the indoor air. They are used to estimate the latent
   # infiltration/ventilation loads for the cooling season.
   #
-  # @param hr_outdoor_cooling [Double] Outdoor humidity ratio during cooling in lb/lb
-  # @param hr_indoor_cooling [Double] Indoor humidity ratio during cooling in lb/lb
-  # @return [Double] Indoor-outdoor humidity ratio difference in grains
+  # @param hr_outdoor_cooling [Double] Outdoor humidity ratio during cooling (lb/lb)
+  # @param hr_indoor_cooling [Double] Indoor humidity ratio during cooling (lb/lb)
+  # @return [Double] Indoor-outdoor humidity ratio difference (grains)
   def self.calculate_design_grains(hr_outdoor_cooling, hr_indoor_cooling)
     cool_outdoor_grains = UnitConversions.convert(hr_outdoor_cooling, 'lbm/lbm', 'grains')
     cool_indoor_grains = UnitConversions.convert(hr_indoor_cooling, 'lbm/lbm', 'grains')
@@ -322,11 +322,11 @@ module HVACSizing
   # of water.
   #
   # DRs are reduced to three categories:
-  # - Low (swing less than 16 deg-F)
-  # - Medium (swing between 16 deg-F and 25 deg-F)
-  # - High (swing exceeds 25 deg-F)
+  # - Low (swing less than 16 F)
+  # - Medium (swing between 16 F and 25 F)
+  # - High (swing exceeds 25 F)
   #
-  # @param daily_temperature_range [Double] Daily temperature range in delta deg-F
+  # @param daily_temperature_range [Double] Daily temperature range (delta F)
   # @return [String] DR category
   def self.determine_daily_temperature_range_class(daily_temperature_range)
     if daily_temperature_range < 16.0
@@ -344,7 +344,7 @@ module HVACSizing
   # @param weather [WeatherProcess] Weather object
   # @param location [String] The location (e.g., HPXML::LocationAtticVented) of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Double] Heating design temperature in deg-F
+  # @return [Double] Heating design temperature (F)
   def self.process_design_temp_heating(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       heat_temp = mj.heat_setpoint
@@ -388,7 +388,7 @@ module HVACSizing
   # @param weather [WeatherProcess] Weather object
   # @param location [String] The location (e.g., HPXML::LocationAtticVented) of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Double] Cooling design temperature in deg-F
+  # @return [Double] Cooling design temperature (F)
   def self.process_design_temp_cooling(mj, weather, location, hpxml_bldg)
     if location == HPXML::LocationConditionedSpace
       cool_temp = mj.cool_setpoint
@@ -1612,7 +1612,7 @@ module HVACSizing
   # design loads into corresponding equipment capacities.
   #
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [Array<Double, Double, Double>] Oversize fraction, oversize delta in Btuh, undersize fraction
+  # @return [Array<Double, Double, Double>] Oversize fraction (frac), oversize delta (Btuh), undersize fraction (frac)
   def self.get_hvac_size_limits(hvac_cooling)
     oversize_limit = 1.15
     oversize_delta = 15000.0
@@ -1677,7 +1677,7 @@ module HVACSizing
   #
   # @param duct [HPXML::Duct] The duct to calculate regain for
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Double] The duct regain factor (fraction)
+  # @return [Double] The duct regain factor (frac)
   def self.get_duct_regain_factor(duct, hpxml_bldg)
     f_regain = nil
 
@@ -2433,7 +2433,8 @@ module HVACSizing
     return odb_adj
   end
 
-  # TODO
+  # Increases the autosized heating/cooling capacities to account for any reduction in
+  # capacity due to HVAC installation quality. This is done to prevent unmet hours.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
@@ -2444,10 +2445,6 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
-    # Increases the autosized heating/cooling capacities to account for any reduction
-    # in capacity due to HVAC installation quality. This is done to prevent causing
-    # unmet loads.
-
     cool_charge_defect_ratio = 0.0
     cool_airflow_defect_ratio = 0.0
     heat_airflow_defect_ratio = 0.0
@@ -2933,8 +2930,8 @@ module HVACSizing
   # @param total_cap_curve_value [TODO] TODO
   # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
   # @param hvac_heating_speed [Integer] 0-based heating speed index of the HVAC system
-  # @param oversize_limit [Double] Oversize fraction
-  # @param oversize_delta [Double] Oversize delta in Btuh
+  # @param oversize_limit [Double] Oversize fraction (frac)
+  # @param oversize_delta [Double] Oversize delta (Btuh)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed,
@@ -3059,7 +3056,7 @@ module HVACSizing
   # @param delta_t [TODO] TODO
   # @param dx_capacity [TODO] TODO
   # @param hp_cooling_cfm [TODO] TODO
-  # @return [Double] Airflow rate in cfm
+  # @return [Double] Airflow rate (cfm)
   def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, delta_t, dx_capacity: nil, hp_cooling_cfm: nil)
     # Airflow sizing following Manual S based on design calculation
     airflow_cfm = sens_load_or_capacity / (1.1 * mj.acf * delta_t)
@@ -3146,19 +3143,19 @@ module HVACSizing
   # of Residential Thermal Distribution Systems"
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param q_s [Double] Heating supply duct leakage in cfm
-  # @param q_r [Double] Heating return duct leakage in cfm
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @param load_sens [Double] Sensible heating load in Btu/hr
-  # @param t_amb_s [Double] Ambient temperature of supply duct location in deg-F
-  # @param t_amb_r [Double] Ambient temperature of return duct location in deg-F
-  # @param area_s [Double] Supply duct surface area in ft2
-  # @param area_r [Double] Return duct surface area in ft2
-  # @param t_setpoint [Double] HVAC setpoint temperature in deg-F
-  # @param f_regain_s [Double] Supply duct regain factor
-  # @param f_regain_r [Double] Return duct regain factor
-  # @param rvalue_s [Double] Supply duct R-value in hr-ft2-F/Btu
-  # @param rvalue_r [Double] Return duct R-value in hr-ft2-F/Btu
+  # @param q_s [Double] Heating supply duct leakage (cfm)
+  # @param q_r [Double] Heating return duct leakage (cfm)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @param load_sens [Double] Sensible heating load (Btu/hr)
+  # @param t_amb_s [Double] Ambient temperature of supply duct location (F)
+  # @param t_amb_r [Double] Ambient temperature of return duct location (F)
+  # @param area_s [Double] Supply duct surface area (ft2)
+  # @param area_r [Double] Return duct surface area (ft2)
+  # @param t_setpoint [Double] HVAC setpoint temperature (F)
+  # @param f_regain_s [Double] Supply duct regain factor (frac)
+  # @param f_regain_r [Double] Return duct regain factor (frac)
+  # @param rvalue_s [Double] Supply duct R-value (hr-ft2-F/Btu)
+  # @param rvalue_r [Double] Return duct R-value (hr-ft2-F/Btu)
   # @return [Double] Heating delivery effectiveness of the distribution system
   def self.calc_delivery_effectiveness_heating(mj, q_s, q_r, system_cfm, load_sens, t_amb_s, t_amb_r, area_s, area_r, t_setpoint, f_regain_s, f_regain_r, rvalue_s, rvalue_r)
     b_s, b_r = _calc_de_conduction_fractions(area_s, area_r, rvalue_s, rvalue_r, system_cfm, mj.inside_air_dens, Gas.Air.cp)
@@ -3176,22 +3173,22 @@ module HVACSizing
   # of Residential Thermal Distribution Systems"
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param q_s [Double] Heating supply duct leakage in cfm
-  # @param q_r [Double] Heating return duct leakage in cfm
-  # @param leaving_air_temp [Double] HVAC system leaving air temperature in deg-F
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @param load_sens [Double] Sensible cooling load in Btu/hr
-  # @param load_total [Double] Total cooling load in Btu/hr
-  # @param t_amb_s [Double] Ambient temperature of supply duct location in deg-F
-  # @param t_amb_r [Double] Ambient temperature of return duct location in deg-F
-  # @param area_s [Double] Supply duct surface area in ft2
-  # @param area_r [Double] Return duct surface area in ft2
-  # @param t_setpoint [Double] HVAC setpoint temperature in deg-F
-  # @param f_regain_s [Double] Supply duct regain factor
-  # @param f_regain_r [Double] Return duct regain factor
-  # @param h_r [Double] Air enthalpy in return duct location in Btu/lb
-  # @param rvalue_s [Double] Supply duct R-value in hr-ft2-F/Btu
-  # @param rvalue_r [Double] Return duct R-value in hr-ft2-F/Btu
+  # @param q_s [Double] Heating supply duct leakage (cfm)
+  # @param q_r [Double] Heating return duct leakage (cfm)
+  # @param leaving_air_temp [Double] HVAC system leaving air temperature (F)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @param load_sens [Double] Sensible cooling load (Btu/hr)
+  # @param load_total [Double] Total cooling load (Btu/hr)
+  # @param t_amb_s [Double] Ambient temperature of supply duct location (F)
+  # @param t_amb_r [Double] Ambient temperature of return duct location (F)
+  # @param area_s [Double] Supply duct surface area (ft2)
+  # @param area_r [Double] Return duct surface area (ft2)
+  # @param t_setpoint [Double] HVAC setpoint temperature (F)
+  # @param f_regain_s [Double] Supply duct regain factor (frac)
+  # @param f_regain_r [Double] Return duct regain factor (frac)
+  # @param h_r [Double] Air enthalpy in return duct location (Btu/lb)
+  # @param rvalue_s [Double] Supply duct R-value (hr-ft2-F/Btu)
+  # @param rvalue_r [Double] Return duct R-value (hr-ft2-F/Btu)
   # @return [Double] Cooling delivery effectiveness of the distribution system
   def self.calc_delivery_effectiveness_cooling(mj, q_s, q_r, leaving_air_temp, system_cfm, load_sens, load_total, t_amb_s, t_amb_r, area_s, area_r, t_setpoint, f_regain_s, f_regain_r, h_r, rvalue_s, rvalue_r)
     b_s, b_r = _calc_de_conduction_fractions(area_s, area_r, rvalue_s, rvalue_r, system_cfm, mj.inside_air_dens, Gas.Air.cp)
@@ -3208,13 +3205,13 @@ module HVACSizing
   # Source: ASHRAE Standard 152 "Method of Test for Determining the Design and Seasonal Efficiencies
   # of Residential Thermal Distribution Systems"
   #
-  # @param area_s [Double] Supply duct surface area in ft2
-  # @param area_r [Double] Return duct surface area in ft2
-  # @param rvalue_s [Double] Supply duct R-value in hr-ft2-F/Btu
-  # @param rvalue_r [Double] Return duct R-value in hr-ft2-F/Btu
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @param air_dens [Double] Inside air density in lb/ft3
-  # @param air_cp [Double] Air specific heat in Btu/lb-R
+  # @param area_s [Double] Supply duct surface area (ft2)
+  # @param area_r [Double] Return duct surface area (ft2)
+  # @param rvalue_s [Double] Supply duct R-value (hr-ft2-F/Btu)
+  # @param rvalue_r [Double] Return duct R-value (hr-ft2-F/Btu)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @param air_dens [Double] Inside air density (lb/ft3)
+  # @param air_cp [Double] Air specific heat (Btu/lb-R)
   # @return [Array<Double, Double>] Supply/return conduction factors
   def self._calc_de_conduction_fractions(area_s, area_r, rvalue_s, rvalue_r, system_cfm, air_dens, air_cp)
     b_s = Math.exp((-1.0 * area_s) / (60.0 * system_cfm * air_dens * air_cp * rvalue_s))
@@ -3227,10 +3224,10 @@ module HVACSizing
   # Source: ASHRAE Standard 152 "Method of Test for Determining the Design and Seasonal Efficiencies
   # of Residential Thermal Distribution Systems"
   #
-  # @param q_s [Double] Heating supply duct leakage in cfm
-  # @param q_r [Double] Heating return duct leakage in cfm
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @return [Array<Double, Double>] Supply/return leakage factors
+  # @param q_s [Double] Heating supply duct leakage (cfm)
+  # @param q_r [Double] Heating return duct leakage (cfm)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @return [Array<Double, Double>] Supply/return leakage factors (frac)
   def self._calc_de_leakage_factors(q_s, q_r, system_cfm)
     a_s = (system_cfm - q_s) / system_cfm
     a_r = (system_cfm - q_r) / system_cfm
@@ -3242,14 +3239,14 @@ module HVACSizing
   # Source: ASHRAE Standard 152 "Method of Test for Determining the Design and Seasonal Efficiencies
   # of Residential Thermal Distribution Systems"
   #
-  # @param t_amb_s [Double] Ambient temperature of supply duct location in deg-F
-  # @param t_amb_r [Double] Ambient temperature of return duct location in deg-F
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @param load_sens [Double] Sensible load in Btu/hr
-  # @param t_setpoint [Double] HVAC setpoint temperature in deg-F
-  # @param air_dens [Double] Inside air density in lb/ft3
-  # @param air_cp [Double] Air specific heat in Btu/lb-R
-  # @return [Array<Double, Double, Double>] Heat exchanger temperature difference in deg-F, supply/return temperature differences in deg-F
+  # @param t_amb_s [Double] Ambient temperature of supply duct location (F)
+  # @param t_amb_r [Double] Ambient temperature of return duct location (F)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @param load_sens [Double] Sensible load (Btu/hr)
+  # @param t_setpoint [Double] HVAC setpoint temperature (F)
+  # @param air_dens [Double] Inside air density (lb/ft3)
+  # @param air_cp [Double] Air specific heat (Btu/lb-R)
+  # @return [Array<Double, Double, Double>] Heat exchanger temperature difference, supply/return temperature differences (F)
   def self._calc_de_temperature_differences(t_amb_s, t_amb_r, system_cfm, load_sens, t_setpoint, air_dens, air_cp)
     dt_e = load_sens / (60.0 * system_cfm * air_dens * air_cp)
     dt_s = t_setpoint - t_amb_s
@@ -3262,19 +3259,19 @@ module HVACSizing
   # Source: ASHRAE Standard 152 "Method of Test for Determining the Design and Seasonal Efficiencies
   # of Residential Thermal Distribution Systems"
   #
-  # @param a_s [Double] Supply duct leakage factor
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @param load_total [Double] Total cooling load in Btu/hr
-  # @param a_r [Double] Return duct leakage factor
-  # @param h_r [Double] Air enthalpy in return duct location in Btu/lb
-  # @param b_r [Double] Return duct conduction fraction
-  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature in deg-F
-  # @param b_s [Double] Supply duct conduction fraction
-  # @param leaving_air_temp [Double] HVAC system leaving air temperature in deg-F
-  # @param t_amb_s [Double] Ambient temperature of supply duct location in deg-F
-  # @param air_dens [Double] Inside air density in lb/ft3
-  # @param air_cp [Double] Air specific heat in Btu/lb-R
-  # @param h_in [Double] Indoor enthalpy in Btu/lb
+  # @param a_s [Double] Supply duct leakage factor (frac)
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @param load_total [Double] Total cooling load (Btu/hr)
+  # @param a_r [Double] Return duct leakage factor (frac)
+  # @param h_r [Double] Air enthalpy in return duct location (Btu/lb)
+  # @param b_r [Double] Return duct conduction fraction (frac)
+  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature (F)
+  # @param b_s [Double] Supply duct conduction fraction (frac)
+  # @param leaving_air_temp [Double] HVAC system leaving air temperature (F)
+  # @param t_amb_s [Double] Ambient temperature of supply duct location (F)
+  # @param air_dens [Double] Inside air density (lb/ft3)
+  # @param air_cp [Double] Air specific heat (Btu/lb-R)
+  # @param h_in [Double] Indoor enthalpy (Btu/lb)
   # @return [Double] Delivery effectiveness
   def self._calc_de_cooling(a_s, system_cfm, load_total, a_r, h_r, b_r, dt_r, b_s, leaving_air_temp, t_amb_s, air_dens, air_cp, h_in)
     # Calculate the delivery effectiveness (Equation 6-25)
@@ -3292,13 +3289,13 @@ module HVACSizing
   # Source: ASHRAE Standard 152 "Method of Test for Determining the Design and Seasonal Efficiencies
   # of Residential Thermal Distribution Systems"
   #
-  # @param a_s [Double] Supply duct leakage factor
-  # @param b_s [Double] Supply duct conduction fraction
-  # @param a_r [Double] Return duct leakage factor
-  # @param b_r [Double] Return duct conduction fraction
-  # @param dt_s [Double] Temperature difference between indoors and supply duct ambient temperature in deg-F
-  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature in deg-F
-  # @param dt_e [Double] Temperature difference across heat exchanger in deg-F
+  # @param a_s [Double] Supply duct leakage factor (frac)
+  # @param b_s [Double] Supply duct conduction fraction (frac)
+  # @param a_r [Double] Return duct leakage factor (frac)
+  # @param b_r [Double] Return duct conduction fraction (frac)
+  # @param dt_s [Double] Temperature difference between indoors and supply duct ambient temperature (F)
+  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature (F)
+  # @param dt_e [Double] Temperature difference across heat exchanger (F)
   # @return [Double] Delivery effectiveness
   def self._calc_de_heating(a_s, b_s, a_r, b_r, dt_s, dt_r, dt_e)
     # Calculate the delivery effectiveness (Equation 6-23)
@@ -3315,12 +3312,12 @@ module HVACSizing
   # of Residential Thermal Distribution Systems"
   #
   # @param de [Double] Delivered effectiveness (without regain)
-  # @param f_regain_s [Double] Supply duct regain factor
-  # @param f_regain_r [Double] Return duct regain factor
-  # @param b_r [Double] Return duct conduction fraction
-  # @param a_r [Double] Return duct leakage factor
-  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature in deg-F
-  # @param dt_e [Double] Temperature difference across heat exchanger in deg-F
+  # @param f_regain_s [Double] Supply duct regain factor (frac)
+  # @param f_regain_r [Double] Return duct regain factor (frac)
+  # @param b_r [Double] Return duct conduction fraction (frac)
+  # @param a_r [Double] Return duct leakage factor (frac)
+  # @param dt_r [Double] Temperature difference between indoors and return duct ambient temperature (F)
+  # @param dt_e [Double] Temperature difference across heat exchanger (F)
   # @return [Double] Corrected delivery effectiveness
   def self._calc_decorr(de, f_regain_s, f_regain_r, b_r, a_r, dt_r, dt_e)
     # Equation 6-40
@@ -3355,9 +3352,9 @@ module HVACSizing
   # Returns a variety of area-weighted duct values for a given HVAC distribution system.
   #
   # @param distribution_system [HPXML::HVACDistribution] HVAC distribution system of interest
-  # @param design_temps [Hash] Map of HPXML locations => design temperatures in deg-F
+  # @param design_temps [Hash] Map of HPXML locations => design temperatures (F)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double, Double, Double, Double, Double, Double, Double>] Supply/return area in ft2, supply/return R-value in hr-ft2-F/Btu, supply/return ambient temperature in deg-F, supply/return regain factors
+  # @return [Array<Double, Double, Double, Double, Double, Double, Double, Double>] Supply/return area (ft2), supply/return R-value (hr-ft2-F/Btu), supply/return ambient temperature (F), supply/return regain factors (frac)
   def self.calc_duct_conduction_values(distribution_system, design_temps, hpxml_bldg)
     dse_a = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     dse_ufactor = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
@@ -3403,8 +3400,8 @@ module HVACSizing
   # Calculates supply & return duct leakage in cfm25.
   #
   # @param distribution_system [HPXML::HVACDistribution] HVAC distribution system of interest
-  # @param system_cfm [Double] Total system airflow rate in cfm
-  # @return [Array<Double, Double>] Supply duct leakage in cfm, Return duct leakage in cfm
+  # @param system_cfm [Double] Total system airflow rate (cfm)
+  # @return [Array<Double, Double>] Supply duct leakage (cfm), Return duct leakage (cfm)
   def self.calc_duct_leakages_cfm25(distribution_system, system_cfm)
     cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
 
@@ -4766,7 +4763,7 @@ module HVACSizing
     # Zone results
     all_zone_loads.keys.each_with_index do |zone, i|
       results_out << [line_break]
-      results_out << ["Report: #{zone_col_names[i]}: Loads", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
+      results_out << ["Report: #{zone_col_names[i]}: Loads", 'Area (ft2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
       windows(zone).each do |window|
         fj1 = window.additional_properties.formj1_values
         results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
@@ -4805,7 +4802,7 @@ module HVACSizing
     # Space results
     all_space_loads.keys.each_with_index do |space, i|
       results_out << [line_break]
-      results_out << ["Report: #{space_col_names[i]}: Loads", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)']
+      results_out << ["Report: #{space_col_names[i]}: Loads", 'Area (ft2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)']
       windows(space).select { |s| s.wall.space == space }.each do |window|
         fj1 = window.additional_properties.formj1_values
         results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]

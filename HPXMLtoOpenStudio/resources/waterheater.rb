@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Waterheater
+module Waterheater
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -707,8 +707,6 @@ class Waterheater
     program_calling_manager.addProgram(swh_program)
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1147,7 +1145,7 @@ class Waterheater
       runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
     end
 
-    t_offset = 9.0 # deg-C
+    t_offset = 9.0 # C
     min_temp_c = UnitConversions.convert(min_temp, 'F', 'C').round(2)
     max_temp_c = UnitConversions.convert(max_temp, 'F', 'C').round(2)
 
@@ -1678,7 +1676,7 @@ class Waterheater
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_hot_water_temperature(eri_version)
-    # Returns hot water temperature in deg-F
+    # Returns hot water temperature in F
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
       # 2014 w/ Addendum A or newer
       return 125.0
@@ -1740,9 +1738,9 @@ class Waterheater
   # @return [TODO] TODO
   def self.deadband(wh_type)
     if [HPXML::WaterHeaterTypeStorage, HPXML::WaterHeaterTypeCombiStorage].include? wh_type
-      return 2.0 # deg-C
+      return 2.0 # C
     else
-      return 0.0 # deg-C
+      return 0.0 # C
     end
   end
 
