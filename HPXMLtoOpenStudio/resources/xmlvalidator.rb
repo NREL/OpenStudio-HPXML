@@ -92,7 +92,6 @@ module XMLValidator
   # @param element [Oga::XML::Element] XML element of interest
   # @return [String] ID of the HPXML element
   def self.get_element_id(element)
-    puts element.class
     if element.name.to_s == 'Building'
       return XMLHelper.get_attribute_value(XMLHelper.get_element(element, 'BuildingID'), 'id')
     else
