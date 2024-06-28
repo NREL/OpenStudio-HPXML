@@ -7008,7 +7008,7 @@ class HPXML < Object
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
              :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
-             :energy_efficiency, :miles_traveled, :ev_charger_idref]
+             :energy_efficiency, :miles_per_year, :hours_per_week, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
     def delete
@@ -7027,7 +7027,8 @@ class HPXML < Object
       vehicle = XMLHelper.add_element(vehicles, 'Vehicle')
       sys_id = XMLHelper.add_element(vehicle, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_traveled, :float) unless @miles_traveled.nil?
+      XMLHelper.add_element(vehicle, 'MilesDrivenPerYear', @miles_per_year, :float, @miles_per_year_isdefaulted) unless @miles_per_year.nil?
+      XMLHelper.add_element(vehicle, 'HoursDrivenPerWeek', @hours_per_week, :float, @hours_per_week_isdefaulted) unless @hours_per_week.nil?
       if not @energy_efficiency.nil?
         fuel_econonmy = XMLHelper.add_element(vehicle, 'FuelEconomy')
         XMLHelper.add_element(fuel_econonmy, 'Units', UnitsKwhPerMile, :string)
@@ -7071,10 +7072,10 @@ class HPXML < Object
       return if vehicle.nil?
 
       @id = HPXML::get_id(vehicle)
-      @miles_traveled = XMLHelper.get_value(vehicle, "MilesDrivenPeryear", :float)
+      @miles_per_year = XMLHelper.get_value(vehicle, "MilesDrivenPeryear", :float)
+      @hours_per_week = XMLHelper.get_value(vehicle, "HoursDrivenPerWeek", :float)
       @energy_efficiency = XMLHelper.get_value(vehicle, "FuelEconomy[Units='#{UnitsKwhPerMile}']/Value", :float)
       @vehicle_type = XMLHelper.get_child_name(vehicle, "VehicleType")
-
       @type = XMLHelper.get_value(vehicle, "BatteryType", :string)
       battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
       @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)

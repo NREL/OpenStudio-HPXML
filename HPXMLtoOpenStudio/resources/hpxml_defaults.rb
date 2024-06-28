@@ -2845,6 +2845,15 @@ module HPXMLDefaults
       default_values = ElectricVehicle.get_ev_battery_default_values()
       apply_battery(vehicle, default_values)
 
+      if vehicle.miles_per_year.nil?
+        vehicle.miles_per_year = default_values[:miles_per_year]
+        vehicle.miles_per_year_isdefaulted = true
+      end
+      if vehicle.hours_per_week.nil?
+        vehicle.hours_per_week = default_values[:hours_per_week]
+        vehicle.hours_per_week_isdefaulted = true
+      end
+
       ev_charger = nil
       if not vehicle.ev_charger_idref.nil?
         hpxml_bldg.ev_chargers.each do |charger|
