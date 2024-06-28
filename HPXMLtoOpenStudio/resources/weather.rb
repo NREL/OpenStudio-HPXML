@@ -2,11 +2,6 @@
 
 # TODO
 class WeatherData
-  # TODO
-  #
-  # @return [TODO] TODO
-  def initialize
-  end
   ATTRS ||= [:AnnualAvgDrybulb, :AnnualMinDrybulb, :AnnualMaxDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :MonthlyAvgDrybulbs, :ShallowGroundAnnualTemp, :ShallowGroundMonthlyTemps,
              :DeepGroundAnnualTemp, :DeepGroundSurfTempAmp1, :DeepGroundSurfTempAmp2, :DeepGroundPhaseShiftTempAmp1, :DeepGroundPhaseShiftTempAmp2,
              :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs, :MainsAnnualTemp, :MainsDailyTemps, :MainsMonthlyTemps]
@@ -15,23 +10,15 @@ end
 
 # TODO
 class WeatherDesign
-  # TODO
-  #
-  # @return [TODO] TODO
-  def initialize
-  end
   ATTRS ||= [:HeatingDrybulb, :CoolingDrybulb, :CoolingHumidityRatio, :DailyTemperatureRange]
   attr_accessor(*ATTRS)
 end
 
 # TODO
 class WeatherProcess
-  # TODO
-  #
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
-  # @return [TODO] TODO
   def initialize(epw_path:, runner:, hpxml: nil)
     @data = WeatherData.new
     @design = WeatherDesign.new
