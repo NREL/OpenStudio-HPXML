@@ -2256,6 +2256,11 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
+															<xs:element minOccurs="0" name="FractionChargedAtHome" type="Fraction">
+																<xs:annotation>
+																	<xs:documentation>The fraction of charging energy provided by an at-home charger.</xs:documentation>
+																</xs:annotation>
+															</xs:element>
 															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
 														</xs:sequence>
 													</xs:complexType>
@@ -2267,6 +2272,11 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
+															<xs:element minOccurs="0" name="FractionChargedAtHome" type="Fraction">
+																<xs:annotation>
+																	<xs:documentation>The fraction of charging energy provided by an at-home charger.</xs:documentation>
+																</xs:annotation>
+															</xs:element>
 															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
 															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
 														</xs:sequence>
@@ -6281,11 +6291,6 @@
 				<xs:annotation>
 					<xs:documentation>Not all the power that is used to charge the battery is available during discharge. Round trip efficiency is the ratio of the energy put
 												in to the energy retrieved from storage.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="FractionChargedAtHome" type="Fraction">
-				<xs:annotation>
-					<xs:documentation>The fraction of charging energy provided by an at-home charger.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>

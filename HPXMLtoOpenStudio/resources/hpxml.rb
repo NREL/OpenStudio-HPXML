@@ -7008,7 +7008,8 @@ class HPXML < Object
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
              :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
-             :energy_efficiency, :miles_per_year, :hours_per_week, :ev_charger_idref]
+             :energy_efficiency, :miles_per_year, :hours_per_week, 
+             :fraction_charged_home, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
     def delete
@@ -7061,6 +7062,7 @@ class HPXML < Object
       XMLHelper.add_element(battery, 'RatedPowerOutput', @rated_power_output, :float, @rated_power_output_isdefaulted) unless @rated_power_output.nil?
       XMLHelper.add_element(battery, 'NominalVoltage', @nominal_voltage, :float, @nominal_voltage_isdefaulted) unless @nominal_voltage.nil?
       XMLHelper.add_element(battery, 'RoundTripEfficiency', @round_trip_efficiency, :float, @round_trip_efficiency_isdefaulted) unless @round_trip_efficiency.nil?
+      XMLHelper.add_element(electric_vehicle, 'FractionChargedAtHome', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
       if not @ev_charger_idref.nil?
         charger = XMLHelper.add_element(electric_vehicle, 'ConnectedCharger')
         XMLHelper.add_attribute(charger, 'idref', @ev_charger_idref)
@@ -7085,6 +7087,7 @@ class HPXML < Object
       @rated_power_output = XMLHelper.get_value(vehicle, "#{battery_prefix}/RatedPowerOutput", :float)
       @nominal_voltage = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalVoltage", :float)
       @round_trip_efficiency = XMLHelper.get_value(vehicle, "#{battery_prefix}/RoundTripEFficiency", :float)
+      @fraction_charged_home = XMLHelper.get_value(vehicle, "VehicleType/#{@vehicle_type}/FractionChargedAtHome", :float)
       @ev_charger_idref = HPXML::get_idref(XMLHelper.get_element(vehicle, "VehicleType/#{@vehicle_type}/ConnectedCharger"))
       @lifetime_model = XMLHelper.get_value(vehicle, "#{battery_prefix}/extension/LifetimeModel", :string)
     end

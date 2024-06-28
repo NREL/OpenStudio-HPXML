@@ -6710,6 +6710,7 @@ class HPXMLFile
                             energy_efficiency: args[:ev_energy_efficiency],
                             miles_per_year: args[:ev_miles_per_year],
                             hours_per_week: args[:ev_hours_per_week],
+                            fraction_charged_home: args[:ev_fraction_charged_home],
                             ev_charger_idref: charger_id)
   end
 

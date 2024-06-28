@@ -2853,6 +2853,10 @@ module HPXMLDefaults
         vehicle.hours_per_week = default_values[:hours_per_week]
         vehicle.hours_per_week_isdefaulted = true
       end
+      if vehicle.fraction_charged_home.nil?
+        vehicle.fraction_charged_home = default_values[:fraction_charged_home]
+        vehicle.fraction_charged_home_isdefaulted = true
+      end
 
       ev_charger = nil
       if not vehicle.ev_charger_idref.nil?
