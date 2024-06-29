@@ -1276,21 +1276,21 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(0.174, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
   end
 
-  def test_manual_j_basement_effective_uvalue
+  def test_manual_j_basement_slab_ufactor
     # Check values against MJ8 Table 4A Construction Number 21 (Basement Floor)
     tol = 0.002
 
     # 21A — No Insulation Below Floor, Any Floor Cover
-    assert_in_delta(0.027, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.025, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.022, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.020, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.027, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.025, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.022, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.020, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
 
     # 21B — Insulation Installed Below Floor, Any Floor Cover
-    assert_in_delta(0.019, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.017, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.015, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.014, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.019, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.017, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.015, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_delta(0.014, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
   end
 
   def test_multiple_zones
@@ -1378,14 +1378,16 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def test_gshp_g_function_library_linear_interpolation_example
     bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     num_bore_holes = 40
-    bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
     bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
-    bore_diameter = UnitConversions.convert(UnitConversions.convert(80.0, 'mm', 'm'), 'm', 'in') * 2
     valid_bore_configs = HVACSizing.valid_bore_configs
     g_functions_filename = valid_bore_configs[bore_config]
     g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
 
-    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    geothermal_loop = HPXML::GeothermalLoop.new(nil)
+    geothermal_loop.bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
+    geothermal_loop.bore_diameter = UnitConversions.convert(80.0 * 2, 'mm', 'in')
+
+    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
 
     expected_lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
     expected_gfnc_coeff = [2.619, 2.967, 3.279, 3.700, 4.190, 5.107, 6.680, 8.537, 11.991, 14.633, 16.767, 20.083, 22.593, 28.734, 34.345, 35.927, 37.342, 38.715, 39.768, 40.664, 41.426, 42.056, 42.524, 43.054, 43.416, 43.594, 43.885]
