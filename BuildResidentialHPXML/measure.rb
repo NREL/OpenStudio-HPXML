@@ -1583,7 +1583,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    valid_bore_configs = HVACSizing.valid_bore_configs
+    valid_bore_configs = HVACSizing.get_geothermal_loop_valid_configurations
     valid_bore_configs.keys.each do |valid_bore_config|
       geothermal_loop_borefield_configuration_choices << valid_bore_config
     end
@@ -2973,7 +2973,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_rated_annual_kwh', false)
     arg.setDisplayName('Extra Refrigerator: Rated Annual Consumption')
     arg.setUnits('kWh/yr')
-    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra rrefrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
+    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', false)
@@ -4567,7 +4567,7 @@ module HPXMLFile
   end
 
   # Set building header properties, including:
-  # - detailed schedule filepaths
+  # - detailed schedule file paths
   # - heat pump sizing methodologies
   # - natural ventilation availability
   # - summer shading season
@@ -4603,7 +4603,7 @@ module HPXMLFile
 
   # Set climate and risk zones properties, including:
   # - 2006 IECC zone
-  # - weather station name / EPW filepath
+  # - weather station name / EPW file path
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7054,7 +7054,7 @@ module HPXMLFile
                               usage_multiplier: args[:misc_fuel_loads_fireplace_usage_multiplier])
   end
 
-  # Set the pool prooperties, including:
+  # Set the pool properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7091,7 +7091,7 @@ module HPXMLFile
                          heater_usage_multiplier: args[:pool_heater_usage_multiplier])
   end
 
-  # Set the permanent spa prooperties, including:
+  # Set the permanent spa properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7153,7 +7153,7 @@ module HPXMLFile
     end
   end
 
-  # Sfter having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
+  # After having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def self.renumber_hpxml_ids(hpxml_bldg)

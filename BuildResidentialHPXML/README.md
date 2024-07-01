@@ -5062,7 +5062,7 @@ The space type for the extra refrigerator location. If not provided, the OS-HPXM
 
 **Extra Refrigerator: Rated Annual Consumption**
 
-The EnergyGuide rated annual energy consumption for an extra rrefrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
+The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.
 
 - **Name:** ``extra_refrigerator_rated_annual_kwh``
 - **Type:** ``Double``

@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>e1db3d45-edf7-49d7-b94e-4086bc079157</version_id>
-  <version_modified>2024-06-28T22:03:42Z</version_modified>
+  <version_id>a86d11ec-175e-45ba-8c01-76645c20edc5</version_id>
+  <version_modified>2024-07-01T21:16:03Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>99A0678D</checksum>
+      <checksum>E066192A</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -207,7 +207,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8A26AE6D</checksum>
+      <checksum>4CDDBA0B</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -381,13 +381,13 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C2D489D6</checksum>
+      <checksum>FE5DC522</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>98AC48FE</checksum>
+      <checksum>33983CA5</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -405,7 +405,7 @@
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3F00DA1A</checksum>
+      <checksum>85FA948A</checksum>
     </file>
     <file>
       <filename>meta_measure.rb</filename>
@@ -567,7 +567,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E3B4D108</checksum>
+      <checksum>22139ABB</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -579,7 +579,7 @@
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3B50EF19</checksum>
+      <checksum>1AB34E95</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
@@ -609,7 +609,7 @@
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>51448764</checksum>
+      <checksum>2910E077</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>36E97140</checksum>
+      <checksum>AB856D44</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>

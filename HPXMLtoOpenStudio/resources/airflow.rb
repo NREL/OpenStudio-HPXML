@@ -2737,8 +2737,6 @@ end
 
 # TODO
 class Duct
-  # TODO
-  #
   # @param side [TODO] TODO
   # @param loc_space [TODO] TODO
   # @param loc_schedule [TODO] TODO
@@ -2748,7 +2746,6 @@ class Duct
   # @param area [TODO] TODO
   # @param effective_rvalue [TODO] TODO
   # @param buried_level [TODO] TODO
-  # @return [TODO] TODO
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space
