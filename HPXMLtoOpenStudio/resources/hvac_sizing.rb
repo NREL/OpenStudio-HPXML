@@ -2041,7 +2041,7 @@ module HVACSizing
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
-        odb_adj = adjust_outdoor_condition_var_speed(hvac_cooling.cooling_detailed_performance_data, entering_temp, hvac_cooling, :clg)
+        odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
         total_cap_curve_value = odb_adj * idb_adj
       else
         coefficients = hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed]
@@ -2157,7 +2157,7 @@ module HVACSizing
       else
         entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
-        odb_adj = adjust_outdoor_condition_var_speed(hvac_cooling.cooling_detailed_performance_data, entering_temp, hvac_cooling, :clg)
+        odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
         total_cap_curve_value = odb_adj * idb_adj
 
         hvac_sizings.Cool_Capacity = (hvac_sizings.Cool_Load_Tot / total_cap_curve_value)
@@ -2198,15 +2198,9 @@ module HVACSizing
       # Calculate an initial air flow rate assuming 400 cfm/ton
       hvac_sizings.Cool_Airflow = 400.0 * UnitConversions.convert(hvac_sizings.Cool_Load_Sens, 'Btu/hr', 'ton')
 
-      # Neglecting the water flow rate for now because it's not available yet. Air flow rate is pre-adjusted values.
-      design_wb_temp = UnitConversions.convert(mj.cool_indoor_wetbulb, 'f', 'k')
-      design_db_temp = UnitConversions.convert(mj.cool_setpoint, 'f', 'k')
-      design_w_temp = UnitConversions.convert(entering_temp, 'f', 'k')
-      design_vfr_air = UnitConversions.convert(hvac_sizings.Cool_Airflow, 'cfm', 'm^3/s')
-
       cool_cap_curve_spec = hvac_cooling_ap.cool_cap_curve_spec[hvac_cooling_speed]
       cool_sh_curve_spec = hvac_cooling_ap.cool_sh_curve_spec[hvac_cooling_speed]
-      total_cap_curve_value, sensible_cap_curve_value = calc_gshp_clg_curve_value(cool_cap_curve_spec, cool_sh_curve_spec, design_wb_temp, design_db_temp, design_w_temp, design_vfr_air, nil)
+      total_cap_curve_value, sensible_cap_curve_value = calc_gshp_clg_curve_value(cool_cap_curve_spec, cool_sh_curve_spec, mj.cool_indoor_wetbulb, mj.cool_setpoint, entering_temp, hvac_sizings.Cool_Airflow)
 
       bypass_factor_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, mj.cool_setpoint, gshp_coil_bf_ft_spec)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
@@ -2399,13 +2393,14 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Calculates the heat pump's heating or cooling capacity at the specified indoor temperature, as a fraction
+  # of the heat pump's nominal heating or cooling capacity.
   #
-  # @param adjusted_outdoor_temp [TODO] TODO
-  # @param adjusted_indoor_temp [TODO] TODO
-  # @param mode [TODO] TODO
-  # @return [TODO] TODO
-  def self.adjust_indoor_condition_var_speed(adjusted_outdoor_temp, adjusted_indoor_temp, mode)
+  # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
+  # @param indoor_temp [Double] Indoor drybulb (heating) or wetbulb (cooling) temperature (F)
+  # @param mode [Symbol] Heating or cooling
+  # @return [Double] Heat pump adjustment factor (capacity fraction)
+  def self.adjust_indoor_condition_var_speed(outdoor_temp, indoor_temp, mode)
     if mode == :clg
       rated_indoor_temp = HVAC::AirSourceCoolRatedIWB
       coefficients_1speed = HVAC.get_cool_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage)[0][0]
@@ -2414,18 +2409,19 @@ module HVACSizing
       capacity_retention_temp_1speed, capacity_retention_fraction_1speed = HVAC.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       coefficients_1speed = HVAC.get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, capacity_retention_temp_1speed, capacity_retention_fraction_1speed)[0][0]
     end
-    return MathTools.biquadratic(adjusted_indoor_temp, adjusted_outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, adjusted_outdoor_temp, coefficients_1speed)
+    return MathTools.biquadratic(indoor_temp, outdoor_temp, coefficients_1speed) / MathTools.biquadratic(rated_indoor_temp, outdoor_temp, coefficients_1speed)
   end
 
-  # TODO
+  # Calculates the heat pump's heating or cooling capacity at the specified outdoor temperature, as a fraction
+  # of the heat pump's nominal heating or cooling capacity.
   #
-  # @param detailed_performance_data [TODO] TODO
-  # @param adjusted_outdoor_temp [TODO] TODO
-  # @param hvac_sys [TODO] TODO
-  # @param mode [TODO] TODO
-  # @return [TODO] TODO
-  def self.adjust_outdoor_condition_var_speed(detailed_performance_data, adjusted_outdoor_temp, hvac_sys, mode)
+  # @param outdoor_temp [Double] Outdoor drybulb temperature (F)
+  # @param hvac_sys [HPXML::CoolingSystem or HPXML::HeatPump] HPXML HVAC system of interest
+  # @param mode [Symbol] Heating or cooling
+  # @return [Double] Heat pump adjustment factor (capacity fraction)
+  def self.adjust_outdoor_condition_var_speed(outdoor_temp, hvac_sys, mode)
     rated_odb = (mode == :clg) ? HVAC::AirSourceCoolRatedODB : HVAC::AirSourceHeatRatedODB
+    detailed_performance_data = (mode == :clg) ? hvac_sys.cooling_detailed_performance_data : hvac_sys.heating_detailed_performance_data
     if detailed_performance_data.empty?
       # Based on retention fraction and retention temperature
       if mode == :clg
@@ -2434,7 +2430,7 @@ module HVACSizing
       elsif mode == :htg
         capacity_retention_temperature, capacity_retention_fraction = HVAC.get_heating_capacity_retention(hvac_sys)
       end
-      odb_adj = (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (adjusted_outdoor_temp - rated_odb) + 1.0
+      odb_adj = (1.0 - capacity_retention_fraction) / (rated_odb - capacity_retention_temperature) * (outdoor_temp - rated_odb) + 1.0
     else # there are detailed performance data
       # Based on detailed performance data
       max_rated_dp = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }
@@ -2444,7 +2440,7 @@ module HVACSizing
         property = :capacity
       end
       capacity_max = detailed_performance_data.find { |dp| dp.outdoor_temperature == rated_odb && dp.capacity_description == HPXML::CapacityDescriptionMaximum }.send(property)
-      odb_adj = HVAC.interpolate_to_odb_table_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, adjusted_outdoor_temp, property) / capacity_max
+      odb_adj = HVAC.interpolate_to_odb_table_point(detailed_performance_data, HPXML::CapacityDescriptionMaximum, outdoor_temp, property) / capacity_max
     end
     return odb_adj
   end
@@ -2742,8 +2738,8 @@ module HVACSizing
     if num_bore_holes.nil? || bore_depth.nil?
       # Autosize ground loop heat exchanger length
       nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
-      bore_length_heat = nom_length_heat * hvac_sizings.Heat_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-      bore_length_cool = nom_length_cool * hvac_sizings.Cool_Capacity / UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+      bore_length_heat = nom_length_heat * UnitConversions.convert(hvac_sizings.Heat_Capacity, 'Btu/hr', 'ton')
+      bore_length_cool = nom_length_cool * UnitConversions.convert(hvac_sizings.Cool_Capacity, 'Btu/hr', 'ton')
       bore_length = [bore_length_heat, bore_length_cool].max
 
       if num_bore_holes.nil? && bore_depth.nil?
@@ -2801,13 +2797,12 @@ module HVACSizing
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
     end
 
-    lntts, gfnc_coeff = gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
-
     hvac_sizings.GSHP_Loop_Flow = loop_flow
     hvac_sizings.GSHP_Bore_Depth = bore_depth
     hvac_sizings.GSHP_Bore_Holes = num_bore_holes
-    hvac_sizings.GSHP_G_Functions = [lntts, gfnc_coeff]
     hvac_sizings.GSHP_Bore_Config = bore_config
+
+    hvac_sizings.GSHP_G_Functions = gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
   end
 
   # Returns a set of valid geothermal loop bore configurations and their corresponding g-function data files.
@@ -2877,22 +2872,22 @@ module HVACSizing
     end
   end
 
-  # Calculates the heat pump's heating capacity at a specified outdoor drybulb temperature, as a fraction
+  # Calculates the heat pump's heating capacity at the specified outdoor/indoor temperatures, as a fraction
   # of the heat pump's nominal heating capacity.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
-  # @param heating_db [Double] Outdoor drybulb temperature (F)
+  # @param heating_temp [Double] Outdoor drybulb temperature (F)
   # @param hvac_heating_speed [Integer] 0-based heating speed index of the HVAC system
   # @return [Double] Heat pump adjustment factor (capacity fraction)
-  def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
+  def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
     if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-      idb_adj = adjust_indoor_condition_var_speed(heating_db, mj.heat_setpoint, :htg)
-      odb_adj = adjust_outdoor_condition_var_speed(hvac_heating.heating_detailed_performance_data, heating_db, hvac_heating, :htg)
+      idb_adj = adjust_indoor_condition_var_speed(heating_temp, mj.heat_setpoint, :htg)
+      odb_adj = adjust_outdoor_condition_var_speed(heating_temp, hvac_heating, :htg)
       return odb_adj * idb_adj
     else
       coefficients = hvac_heating.additional_properties.heat_cap_ft_spec[hvac_heating_speed]
-      return MathTools.biquadratic(mj.heat_setpoint, heating_db, coefficients)
+      return MathTools.biquadratic(mj.heat_setpoint, heating_temp, coefficients)
     end
   end
 
@@ -2964,14 +2959,14 @@ module HVACSizing
       hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
       alternate_all_hvac_sizings = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)
       heating_load = alternate_all_hvac_sizings[hvac_system].Heat_Load
-      heating_db = min_compressor_temp
+      heating_temp = min_compressor_temp
       hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp
     else
       heating_load = hvac_sizings.Heat_Load
-      heating_db = hpxml_bldg.header.manualj_heating_design_temp
+      heating_temp = hpxml_bldg.header.manualj_heating_design_temp
     end
 
-    heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_db, hvac_heating_speed)
+    heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
     heat_cap_rated = (heating_load / heat_cap_adj_factor) / capacity_ratio
 
     if cool_cap_adj_factor.nil? # Heat pump has no cooling
@@ -3065,6 +3060,7 @@ module HVACSizing
   end
 
   # Calculates the airflow rate associated with a given load/capacity per ACCA Manual S.
+  # Used for central HVAC equipment with an air distribution system.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param sens_load_or_capacity [Double] Load or capacity value to use for calculating corresponding airflow rate (Btu/hr)
@@ -3073,7 +3069,6 @@ module HVACSizing
   # @param hp_cooling_cfm [Double] Cooling airflow rate optionally used to ensure a heat pump's heating/cooling airflow rates are similar (cfm)
   # @return [Double] Airflow rate (cfm)
   def self.calc_airflow_rate_manual_s(mj, sens_load_or_capacity, delta_t, dx_capacity: nil, hp_cooling_cfm: nil)
-    # Airflow sizing following Manual S based on design calculation
     airflow_cfm = sens_load_or_capacity / (1.1 * mj.acf * delta_t)
 
     # The following recommendations are from Hugh Henderson.
@@ -3097,39 +3092,32 @@ module HVACSizing
     return airflow_cfm
   end
 
-  # TODO
+  # Calculates the airflow rate associated with a given capacity based on the assumed rated cfm/ton.
+  # Used for non-central HVAC equipment (no air distribution system).
   #
-  # @param capacity [TODO] TODO
-  # @param rated_cfm_per_ton [TODO] TODO
-  # @param capacity_ratio [TODO] TODO
-  # @return [TODO] TODO
+  # @param capacity [Double] Capacity value to use for calculating corresponding airflow rate (Btu/hr)
+  # @param rated_cfm_per_ton [Double] Airflow per ton of rated capacity (cfm/ton)
+  # @param capacity_ratio [Double] Ratio of capacity (at the speed during design conditions) to rated capacity (frac)
+  # @return [Double] Airflow rate (cfm)
   def self.calc_airflow_rate_user(capacity, rated_cfm_per_ton, capacity_ratio)
-    # Airflow determined by user setting, not based on design
     airflow_cfm = rated_cfm_per_ton * capacity_ratio * UnitConversions.convert(capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
     return airflow_cfm
   end
 
-  # TODO
+  # Calculates the ground source heat pump's total/sensible cooling capacities at the design conditions as a fraction of the nominal cooling capacity.
   #
-  # @param cool_cap_curve_spec [TODO] TODO
-  # @param cool_sh_curve_spec [TODO] TODO
-  # @param wb_temp [TODO] TODO
-  # @param db_temp [TODO] TODO
-  # @param w_temp [TODO] TODO
-  # @param vfr_air [TODO] TODO
-  # @param loop_flow [TODO] TODO
-  # @param rated_vfr_air [TODO] TODO
-  # @return [TODO] TODO
-  def self.calc_gshp_clg_curve_value(cool_cap_curve_spec, cool_sh_curve_spec, wb_temp, db_temp, w_temp, vfr_air, loop_flow = nil, rated_vfr_air = nil)
+  # @param cool_cap_curve_spec [Array<Double>] Total cooling capacity performance curve coefficients
+  # @param cool_sh_curve_spec [Array<Double>] Sensible cooling capacity performance curve coefficients
+  # @param wb_temp [Double] Indoor design wetbulb temperature (F)
+  # @param db_temp [Double] Indoor design drybulb temperature (F)
+  # @param w_temp [Double] Temperature of water entering indoor coil (F)
+  # @param vfr_air [Double] Cooling design airflow rate (cfm)
+  # @return [Double] Total capacity fraction of nominal, Sensible capacity fraction of nominal
+  def self.calc_gshp_clg_curve_value(cool_cap_curve_spec, cool_sh_curve_spec, wb_temp, db_temp, w_temp, vfr_air)
     # Reference conditions in thesis with largest capacity:
     # See Appendix B Figure B.3 of  https://hvac.okstate.edu/sites/default/files/pubs/theses/MS/27-Tang_Thesis_05.pdf
     ref_temp = 283 # K
-    if rated_vfr_air.nil?
-      # rated volume flow rate used to fit the curve
-      ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s')
-    else
-      ref_vfr_air = UnitConversions.convert(rated_vfr_air, 'cfm', 'm^3/s')
-    end
+    ref_vfr_air = UnitConversions.convert(1200, 'cfm', 'm^3/s') # rated volume flow rate used to fit the curve
     ref_vfr_water = 0.000284
 
     a_1 = cool_cap_curve_spec[0]
@@ -3144,7 +3132,12 @@ module HVACSizing
     b_5 = cool_sh_curve_spec[4]
     b_6 = cool_sh_curve_spec[5]
 
-    loop_flow = 0.0 if loop_flow.nil?
+    loop_flow = 0.0 # Neglecting the water flow rate for now because it's not available yet
+
+    wb_temp = UnitConversions.convert(wb_temp, 'F', 'K')
+    db_temp = UnitConversions.convert(db_temp, 'F', 'K')
+    w_temp = UnitConversions.convert(w_temp, 'F', 'K')
+    vfr_air = UnitConversions.convert(vfr_air, 'cfm', 'm^3/s')
 
     total_cap_curve_value = a_1 + wb_temp / ref_temp * a_2 + w_temp / ref_temp * a_3 + vfr_air / ref_vfr_air * a_4 + loop_flow / ref_vfr_water * a_5
     sensible_cap_curve_value = b_1 + db_temp / ref_temp * b_2 + wb_temp / ref_temp * b_3 + w_temp / ref_temp * b_4 + vfr_air / ref_vfr_air * b_5 + loop_flow / ref_vfr_water * b_6
@@ -3346,15 +3339,14 @@ module HVACSizing
     return decorr
   end
 
-  # TODO
+  # Calculates the latent duct leakage load (Manual J accounts only for return duct leakage).
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param return_leakage_cfm [TODO] TODO
-  # @param cool_load_tot [TODO] TODO
-  # @param cool_load_lat [TODO] TODO
-  # @return [TODO] TODO
+  # @param return_leakage_cfm [Double] Return duct leakage (cfm)
+  # @param cool_load_tot [Double] Total cooling load excluding ducts (Btu/hr)
+  # @param cool_load_lat [Double] Latent cooling load excluding ducts (Btu/hr)
+  # @return [Array<Double, Double>] Latent cooling load including ducts, Sensible cooling load including ducts (Btu/hr)
   def self.calculate_sensible_latent_split(mj, return_leakage_cfm, cool_load_tot, cool_load_lat)
-    # Calculate the latent duct leakage load (Manual J accounts only for return duct leakage)
     cool_load_latent = [0.0, 0.68 * mj.acf * return_leakage_cfm * mj.cool_design_grains].max
 
     # Calculate final latent and load
@@ -3846,14 +3838,14 @@ module HVACSizing
     return ashrae_wall_group
   end
 
-  # TODO
+  # Calculates the total needed length of heating/cooling borehole length for the geothermal loop.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param geothermal_loop [TODO] TODO
+  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
   # @param weather [WeatherProcess] Weather object
   # @param hvac_cooling [HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [TODO] TODO
+  # @return [Array<Double, Double>] Nominal heating length, nominal cooling length (ft/ton)
   def self.gshp_hxbore_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
     hvac_cooling_ap = hvac_cooling.additional_properties
 
@@ -3892,14 +3884,14 @@ module HVACSizing
     return nom_length_heat, nom_length_cool
   end
 
-  # TODO
+  # Returns the geothermal loop g-function response factors.
   #
-  # @param bore_config [TODO] TODO
-  # @param g_functions_json [TODO] TODO
-  # @param geothermal_loop [TODO] TODO
-  # @param num_bore_holes [TODO] TODO
-  # @param bore_depth [TODO] TODO
-  # @return [TODO] TODO
+  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param g_functions_json [JSON] JSON object with g-function data
+  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
+  # @param num_bore_holes [Integer] Total number of boreholes
+  # @param bore_depth [Double] Depth of each borehole (ft)
+  # @return [Array<Array<Double>, Array<Double>>] List of g-function lntts (natural log of time/steady state time) values, list of g-function values
   def self.gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
     actuals = { 'b' => UnitConversions.convert(geothermal_loop.bore_spacing, 'ft', 'm'),
                 'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
@@ -3931,7 +3923,7 @@ module HVACSizing
         rb = b_d_rb['rb']
         b_h_rb = "#{b}._#{h}._#{rb}"
 
-        logtime, g = get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+        logtime, g = get_g_function(g_functions_json, bore_config, num_bore_holes, b_h_rb)
         logtimes << logtime
         gs << g
       end
@@ -3956,15 +3948,15 @@ module HVACSizing
     end
   end
 
-  # TODO
+  # Returns the geothermal loop g-function logtimes/values for a specific configuration.
   #
-  # @param g_functions_json [TODO] TODO
-  # @param bore_config [TODO] TODO
-  # @param num_bore_holes [TODO] TODO
-  # @param b_h_rb [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_g_functions(g_functions_json, bore_config, num_bore_holes, b_h_rb)
-    g_functions_json.each do |_key_1, values_1|
+  # @param g_functions_json [JSON] JSON object with g-function data
+  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param num_bore_holes [Integer] Total number of boreholes
+  # @param b_h_rb [String] The lookup key (B._H._rb) in the g-function data.
+  # @return [Array<Array<Double>, Array<Double>>] List of logtimes, list of g-function values
+  def self.get_g_function(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+    g_functions_json.values.each do |values_1|
       if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
           HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
         bore_locations = values_1[:bore_locations]
@@ -3978,7 +3970,7 @@ module HVACSizing
              HPXML::GeothermalLoopBorefieldConfigurationC,
              HPXML::GeothermalLoopBorefieldConfigurationLopsidedU,
              HPXML::GeothermalLoopBorefieldConfigurationU].include?(bore_config)
-        values_1.each do |_key_2, values_2|
+        values_1.values.each do |values_2|
           bore_locations = values_2[:bore_locations]
           next if bore_locations.size != num_bore_holes
 
