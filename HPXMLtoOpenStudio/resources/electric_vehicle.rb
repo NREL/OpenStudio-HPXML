@@ -22,9 +22,11 @@ class ElectricVehicle
         end
       end
 
-      # Adjust discharge power
-      design_discharge_power = ev_elcd.designStorageControlDischargePower
-      eff_discharge_power = design_discharge_power.get/2  ### FIXME: calculate effective discharge using constant mph and fuel economy
+      # Calculate effective discharge power
+      hrs_driven_year = electric_vehicle.hours_per_week / 7 * 365  # hrs/year
+      ev_annl_energy = electric_vehicle.energy_efficiency * electric_vehicle.miles_per_year  # kWh/year
+      eff_discharge_power = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w')  # W
+
       eff_charge_power = ev_elcd.designStorageControlChargePower
       discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
       charging_schedule = ev_elcd.storageChargePowerFractionSchedule.get
@@ -101,9 +103,12 @@ class ElectricVehicle
 
   def self.get_ev_battery_default_values
     return { lifetime_model: HPXML::BatteryLifetimeModelNone,
+             miles_per_year: 5000,
+             hours_per_week: 11.6,
              nominal_capacity_kwh: 100.0,
              nominal_voltage: 50.0,
              round_trip_efficiency: 0.925,
+             fraction_charged_home: 1.0,
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
   end
 
