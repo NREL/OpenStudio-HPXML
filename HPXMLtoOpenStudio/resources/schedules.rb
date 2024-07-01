@@ -1995,6 +1995,7 @@ class SchedulesFile
     return if schedules_paths.empty?
 
     @year = year
+    @runner = runner
     import(schedules_paths)
     create_battery_charging_discharging_schedules
     expand_schedules
@@ -2035,6 +2036,7 @@ class SchedulesFile
   def import(schedules_paths)
     num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
+    col2path = {}
     schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
       columns.each do |col|
@@ -2050,7 +2052,11 @@ class SchedulesFile
         end
 
         if @schedules.keys.include? col_name
-          fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
+          if col2path[col_name] == schedules_path
+            fail "Schedule column name '#{col_name}' is duplicated. [context: #{schedules_path}]"
+          else
+            @runner.registerWarning("Schedule column name '#{col_name}' already exist in #{col2path[col_name]}. Overwriting with #{schedules_path}.")
+          end
         end
 
         if column.type == :frac
@@ -2085,8 +2091,8 @@ class SchedulesFile
         unless valid_num_rows.include? values.length
           fail "Schedule has invalid number of rows (#{values.length}) for column '#{col_name}'. Must be one of: #{valid_num_rows.reverse.join(', ')}. [context: #{@schedules_path}]"
         end
-
         @schedules[col_name] = values
+        col2path[col_name] = schedules_path
       end
     end
   end
