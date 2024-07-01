@@ -2737,7 +2737,7 @@ module HVACSizing
 
     if num_bore_holes.nil? || bore_depth.nil?
       # Autosize ground loop heat exchanger length
-      nom_length_heat, nom_length_cool = gshp_hxbore_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
+      nom_length_heat, nom_length_cool = get_geothermal_loop_borefield_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
       bore_length_heat = nom_length_heat * UnitConversions.convert(hvac_sizings.Heat_Capacity, 'Btu/hr', 'ton')
       bore_length_cool = nom_length_cool * UnitConversions.convert(hvac_sizings.Cool_Capacity, 'Btu/hr', 'ton')
       bore_length = [bore_length_heat, bore_length_cool].max
@@ -2788,10 +2788,8 @@ module HVACSizing
       bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     end
 
-    valid_configs = valid_bore_configs
-    g_functions_filename = valid_configs[bore_config]
-    g_functions_json = get_g_functions_json(g_functions_filename)
-    valid_num_bores = get_valid_num_bores(g_functions_json)
+    g_functions_json = get_geothermal_loop_g_functions_json(get_geothermal_loop_valid_configurations[bore_config])
+    valid_num_bores = get_geothermal_loop_valid_num_bores(g_functions_json)
 
     unless valid_num_bores.include? num_bore_holes
       fail "Number of bore holes (#{num_bore_holes}) with borefield configuration '#{bore_config}' not supported."
@@ -2802,13 +2800,158 @@ module HVACSizing
     hvac_sizings.GSHP_Bore_Holes = num_bore_holes
     hvac_sizings.GSHP_Bore_Config = bore_config
 
-    hvac_sizings.GSHP_G_Functions = gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
+    hvac_sizings.GSHP_G_Functions = get_geothermal_g_functions_data(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
+  end
+
+  # Calculates the total needed length of heating/cooling borehole length for the geothermal loop.
+  #
+  # @param mj [MJValues] Object with a collection of misc Manual J values
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
+  # @param weather [WeatherProcess] Weather object
+  # @param hvac_cooling [HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
+  # @return [Array<Double, Double>] Nominal heating length, nominal cooling length (ft/ton)
+  def self.get_geothermal_loop_borefield_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
+    hvac_cooling_ap = hvac_cooling.additional_properties
+
+    if hvac_cooling_ap.u_tube_spacing_type == 'b'
+      beta_0 = 17.4427
+      beta_1 = -0.6052
+    elsif hvac_cooling_ap.u_tube_spacing_type == 'c'
+      beta_0 = 21.9059
+      beta_1 = -0.3796
+    elsif hvac_cooling_ap.u_tube_spacing_type == 'as'
+      beta_0 = 20.1004
+      beta_1 = -0.94467
+    end
+
+    r_value_ground = Math.log(geothermal_loop.bore_spacing / geothermal_loop.bore_diameter * 12.0) / 2.0 / Math::PI / hpxml_bldg.site.ground_conductivity
+    r_value_grout = 1.0 / geothermal_loop.grout_conductivity / beta_0 / ((geothermal_loop.bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
+    r_value_pipe = Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_conductivity
+    r_value_bore = r_value_grout + r_value_pipe / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
+
+    is_southern_hemisphere = (hpxml_bldg.latitude < 0)
+
+    if is_southern_hemisphere
+      heating_month = 6 # July
+      cooling_month = 0 # January
+    else
+      heating_month = 0 # January
+      cooling_month = 6 # July
+    end
+
+    rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[heating_month]) / mj.htd].max
+    rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[cooling_month] - 76.0) / mj.ctd].max
+
+    nom_length_heat = (1.0 - 1.0 / hvac_cooling_ap.heat_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.DeepGroundAnnualTemp - (2.0 * hvac_cooling_ap.design_hw - hvac_cooling_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+    nom_length_cool = (1.0 + 1.0 / hvac_cooling_ap.cool_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac_cooling_ap.design_chw + hvac_cooling_ap.design_delta_t) / 2.0 - weather.data.DeepGroundAnnualTemp) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
+
+    return nom_length_heat, nom_length_cool
+  end
+
+  # Returns the geothermal loop g-function response factors.
+  #
+  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param g_functions_json [JSON] JSON object with g-function data
+  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
+  # @param num_bore_holes [Integer] Total number of boreholes
+  # @param bore_depth [Double] Depth of each borehole (ft)
+  # @return [Array<Array<Double>, Array<Double>>] List of g-function lntts (natural log of time/steady state time) values, list of g-function values
+  def self.get_geothermal_g_functions_data(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
+    actuals = { 'b' => UnitConversions.convert(geothermal_loop.bore_spacing, 'ft', 'm'),
+                'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
+                'rb' => UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm') }
+    actuals['b_over_h'] = actuals['b'] / actuals['h']
+
+    g_library = { 24 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  48 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  96 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
+                  192 => { 'b' => 5, 'd' => 2, 'rb' => 0.08 },
+                  384 => { 'b' => 5, 'd' => 2, 'rb' => 0.0875 } }
+    g_library.each do |h, b_d_rb|
+      g_library[h]['b_over_h'] = Float(b_d_rb['b']) / h
+      g_library[h]['rb_over_h'] = Float(b_d_rb['rb']) / h
+    end
+
+    [[24, 48], [48, 96], [96, 192], [192, 384]].each do |h1, h2|
+      next unless actuals['h'] >= h1 && actuals['h'] < h2
+
+      pt1 = g_library[h1]
+      pt2 = g_library[h2]
+
+      # linear interpolation on "g" values
+      logtimes = []
+      gs = []
+      [h1, h2].each do |h|
+        b_d_rb = g_library[h]
+        b = b_d_rb['b']
+        rb = b_d_rb['rb']
+        b_h_rb = "#{b}._#{h}._#{rb}"
+
+        logtime, g = get_geothermal_loop_g_functions_data_from_json(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+        logtimes << logtime
+        gs << g
+      end
+      x = actuals['b_over_h']
+      x0 = pt1['b_over_h']
+      x1 = pt2['b_over_h']
+      g_functions = gs[0].zip(gs[1]).map { |v| MathTools.interp2(x, x0, x1, v[0], v[1]) }
+
+      # linear interpolation on rb/h for correction factor
+      x = actuals['b_over_h']
+      x0 = pt1['b_over_h']
+      x1 = pt2['b_over_h']
+      f0 = pt1['rb_over_h']
+      f1 = pt2['rb_over_h']
+      actuals['rb_over_h'] = MathTools.interp2(x, x0, x1, f0, f1)
+      rb = actuals['rb_over_h'] * actuals['h']
+      rb_actual_over_rb = actuals['rb'] / rb
+      correction_factor = Math.log(rb_actual_over_rb)
+      g_functions = g_functions.map { |v| v - correction_factor }
+
+      return logtimes[0], g_functions
+    end
+  end
+
+  # Returns the geothermal loop g-function logtimes/values for a specific configuration in the JSON file.
+  #
+  # @param g_functions_json [JSON] JSON object with g-function data
+  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param num_bore_holes [Integer] Total number of boreholes
+  # @param b_h_rb [String] The lookup key (B._H._rb) in the g-function data.
+  # @return [Array<Array<Double>, Array<Double>>] List of logtimes, list of g-function values
+  def self.get_geothermal_loop_g_functions_data_from_json(g_functions_json, bore_config, num_bore_holes, b_h_rb)
+    g_functions_json.values.each do |values_1|
+      if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
+          HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
+        bore_locations = values_1[:bore_locations]
+        next if bore_locations.size != num_bore_holes
+
+        logtime = values_1[:logtime].map { |v| Float(v) }
+        g = values_1[:g][b_h_rb.to_sym].map { |v| Float(v) }
+
+        return logtime, g
+      elsif [HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle,
+             HPXML::GeothermalLoopBorefieldConfigurationC,
+             HPXML::GeothermalLoopBorefieldConfigurationLopsidedU,
+             HPXML::GeothermalLoopBorefieldConfigurationU].include?(bore_config)
+        values_1.values.each do |values_2|
+          bore_locations = values_2[:bore_locations]
+          next if bore_locations.size != num_bore_holes
+
+          logtime = values_2[:logtime].map { |v| Float(v) }
+          g = values_2[:g][b_h_rb.to_sym].map { |v| Float(v) }
+
+          return logtime, g
+        end
+      end
+    end
   end
 
   # Returns a set of valid geothermal loop bore configurations and their corresponding g-function data files.
   #
   # @return [Hash] Map of configuration => datafile
-  def self.valid_bore_configs
+  def self.get_geothermal_loop_valid_configurations
     valid_configs = { HPXML::GeothermalLoopBorefieldConfigurationRectangle => 'rectangle_5m_v1.0.json',
                       HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle => 'Open_configurations_5m_v1.0.json',
                       HPXML::GeothermalLoopBorefieldConfigurationC => 'C_configurations_5m_v1.0.json',
@@ -2822,7 +2965,7 @@ module HVACSizing
   #
   # @param g_functions_filename [String] G-function data filename
   # @return [JSON] JSON object with g-function data
-  def self.get_g_functions_json(g_functions_filename)
+  def self.get_geothermal_loop_g_functions_json(g_functions_filename)
     require 'json'
 
     g_functions_filepath = File.join(File.dirname(__FILE__), 'data/g_functions', g_functions_filename)
@@ -2834,7 +2977,7 @@ module HVACSizing
   #
   # @param g_functions_json [JSON] JSON object with g-function data
   # @return [Array<Integer>] List of valid numbers of boreholes
-  def self.get_valid_num_bores(g_functions_json)
+  def self.get_geothermal_loop_valid_num_bores(g_functions_json)
     valid_num_bores = []
     g_functions_json.each do |_key_1, values_1|
       if values_1.keys.include?(:bore_locations)
@@ -3836,151 +3979,6 @@ module HVACSizing
     fail "Unexpected Table 4A wall group: #{table_4a_wall_group}" if ashrae_wall_group.nil?
 
     return ashrae_wall_group
-  end
-
-  # Calculates the total needed length of heating/cooling borehole length for the geothermal loop.
-  #
-  # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
-  # @param weather [WeatherProcess] Weather object
-  # @param hvac_cooling [HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [Array<Double, Double>] Nominal heating length, nominal cooling length (ft/ton)
-  def self.gshp_hxbore_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
-    hvac_cooling_ap = hvac_cooling.additional_properties
-
-    if hvac_cooling_ap.u_tube_spacing_type == 'b'
-      beta_0 = 17.4427
-      beta_1 = -0.6052
-    elsif hvac_cooling_ap.u_tube_spacing_type == 'c'
-      beta_0 = 21.9059
-      beta_1 = -0.3796
-    elsif hvac_cooling_ap.u_tube_spacing_type == 'as'
-      beta_0 = 20.1004
-      beta_1 = -0.94467
-    end
-
-    r_value_ground = Math.log(geothermal_loop.bore_spacing / geothermal_loop.bore_diameter * 12.0) / 2.0 / Math::PI / hpxml_bldg.site.ground_conductivity
-    r_value_grout = 1.0 / geothermal_loop.grout_conductivity / beta_0 / ((geothermal_loop.bore_diameter / hvac_cooling_ap.pipe_od)**beta_1)
-    r_value_pipe = Math.log(hvac_cooling_ap.pipe_od / hvac_cooling_ap.pipe_id) / 2.0 / Math::PI / hvac_cooling.geothermal_loop.pipe_conductivity
-    r_value_bore = r_value_grout + r_value_pipe / 2.0 # Note: Convection resistance is negligible when calculated against Glhepro (Jeffrey D. Spitler, 2000)
-
-    is_southern_hemisphere = (hpxml_bldg.latitude < 0)
-
-    if is_southern_hemisphere
-      heating_month = 6 # July
-      cooling_month = 0 # January
-    else
-      heating_month = 0 # January
-      cooling_month = 6 # July
-    end
-
-    rtf_DesignMon_Heat = [0.25, (71.0 - weather.data.MonthlyAvgDrybulbs[heating_month]) / mj.htd].max
-    rtf_DesignMon_Cool = [0.25, (weather.data.MonthlyAvgDrybulbs[cooling_month] - 76.0) / mj.ctd].max
-
-    nom_length_heat = (1.0 - 1.0 / hvac_cooling_ap.heat_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.DeepGroundAnnualTemp - (2.0 * hvac_cooling_ap.design_hw - hvac_cooling_ap.design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-    nom_length_cool = (1.0 + 1.0 / hvac_cooling_ap.cool_rated_cops[0]) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * hvac_cooling_ap.design_chw + hvac_cooling_ap.design_delta_t) / 2.0 - weather.data.DeepGroundAnnualTemp) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
-
-    return nom_length_heat, nom_length_cool
-  end
-
-  # Returns the geothermal loop g-function response factors.
-  #
-  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
-  # @param g_functions_json [JSON] JSON object with g-function data
-  # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
-  # @param num_bore_holes [Integer] Total number of boreholes
-  # @param bore_depth [Double] Depth of each borehole (ft)
-  # @return [Array<Array<Double>, Array<Double>>] List of g-function lntts (natural log of time/steady state time) values, list of g-function values
-  def self.gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
-    actuals = { 'b' => UnitConversions.convert(geothermal_loop.bore_spacing, 'ft', 'm'),
-                'h' => UnitConversions.convert(bore_depth, 'ft', 'm'),
-                'rb' => UnitConversions.convert(geothermal_loop.bore_diameter / 2.0, 'in', 'm') }
-    actuals['b_over_h'] = actuals['b'] / actuals['h']
-
-    g_library = { 24 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
-                  48 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
-                  96 => { 'b' => 5, 'd' => 2, 'rb' => 0.075 },
-                  192 => { 'b' => 5, 'd' => 2, 'rb' => 0.08 },
-                  384 => { 'b' => 5, 'd' => 2, 'rb' => 0.0875 } }
-    g_library.each do |h, b_d_rb|
-      g_library[h]['b_over_h'] = Float(b_d_rb['b']) / h
-      g_library[h]['rb_over_h'] = Float(b_d_rb['rb']) / h
-    end
-
-    [[24, 48], [48, 96], [96, 192], [192, 384]].each do |h1, h2|
-      next unless actuals['h'] >= h1 && actuals['h'] < h2
-
-      pt1 = g_library[h1]
-      pt2 = g_library[h2]
-
-      # linear interpolation on "g" values
-      logtimes = []
-      gs = []
-      [h1, h2].each do |h|
-        b_d_rb = g_library[h]
-        b = b_d_rb['b']
-        rb = b_d_rb['rb']
-        b_h_rb = "#{b}._#{h}._#{rb}"
-
-        logtime, g = get_g_function(g_functions_json, bore_config, num_bore_holes, b_h_rb)
-        logtimes << logtime
-        gs << g
-      end
-      x = actuals['b_over_h']
-      x0 = pt1['b_over_h']
-      x1 = pt2['b_over_h']
-      g_functions = gs[0].zip(gs[1]).map { |v| MathTools.interp2(x, x0, x1, v[0], v[1]) }
-
-      # linear interpolation on rb/h for correction factor
-      x = actuals['b_over_h']
-      x0 = pt1['b_over_h']
-      x1 = pt2['b_over_h']
-      f0 = pt1['rb_over_h']
-      f1 = pt2['rb_over_h']
-      actuals['rb_over_h'] = MathTools.interp2(x, x0, x1, f0, f1)
-      rb = actuals['rb_over_h'] * actuals['h']
-      rb_actual_over_rb = actuals['rb'] / rb
-      correction_factor = Math.log(rb_actual_over_rb)
-      g_functions = g_functions.map { |v| v - correction_factor }
-
-      return logtimes[0], g_functions
-    end
-  end
-
-  # Returns the geothermal loop g-function logtimes/values for a specific configuration.
-  #
-  # @param g_functions_json [JSON] JSON object with g-function data
-  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
-  # @param num_bore_holes [Integer] Total number of boreholes
-  # @param b_h_rb [String] The lookup key (B._H._rb) in the g-function data.
-  # @return [Array<Array<Double>, Array<Double>>] List of logtimes, list of g-function values
-  def self.get_g_function(g_functions_json, bore_config, num_bore_holes, b_h_rb)
-    g_functions_json.values.each do |values_1|
-      if [HPXML::GeothermalLoopBorefieldConfigurationRectangle,
-          HPXML::GeothermalLoopBorefieldConfigurationL].include?(bore_config)
-        bore_locations = values_1[:bore_locations]
-        next if bore_locations.size != num_bore_holes
-
-        logtime = values_1[:logtime].map { |v| Float(v) }
-        g = values_1[:g][b_h_rb.to_sym].map { |v| Float(v) }
-
-        return logtime, g
-      elsif [HPXML::GeothermalLoopBorefieldConfigurationOpenRectangle,
-             HPXML::GeothermalLoopBorefieldConfigurationC,
-             HPXML::GeothermalLoopBorefieldConfigurationLopsidedU,
-             HPXML::GeothermalLoopBorefieldConfigurationU].include?(bore_config)
-        values_1.values.each do |values_2|
-          bore_locations = values_2[:bore_locations]
-          next if bore_locations.size != num_bore_holes
-
-          logtime = values_2[:logtime].map { |v| Float(v) }
-          g = values_2[:g][b_h_rb.to_sym].map { |v| Float(v) }
-
-          return logtime, g
-        end
-      end
-    end
   end
 
   # Calculates a crude approximation for the average R-value of a set of surfaces.

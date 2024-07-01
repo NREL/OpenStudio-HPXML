@@ -1339,7 +1339,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     end
   end
 
-  def test_gshp_ground_loop
+  def test_gshp_geothermal_loop
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
@@ -1379,15 +1379,14 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     num_bore_holes = 40
     bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
-    valid_bore_configs = HVACSizing.valid_bore_configs
-    g_functions_filename = valid_bore_configs[bore_config]
-    g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
+    g_functions_filename = HVACSizing.get_geothermal_loop_valid_configurations[bore_config]
+    g_functions_json = HVACSizing.get_geothermal_loop_g_functions_json(g_functions_filename)
 
     geothermal_loop = HPXML::GeothermalLoop.new(nil)
     geothermal_loop.bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
     geothermal_loop.bore_diameter = UnitConversions.convert(80.0 * 2, 'mm', 'in')
 
-    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
+    actual_lntts, actual_gfnc_coeff = HVACSizing.get_geothermal_g_functions_data(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
 
     expected_lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
     expected_gfnc_coeff = [2.619, 2.967, 3.279, 3.700, 4.190, 5.107, 6.680, 8.537, 11.991, 14.633, 16.767, 20.083, 22.593, 28.734, 34.345, 35.927, 37.342, 38.715, 39.768, 40.664, 41.426, 42.056, 42.524, 43.054, 43.416, 43.594, 43.885]
@@ -1409,10 +1408,10 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
                       HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => [6, 7, 8, 9, 10] }
 
     valid_configs.each do |bore_config, valid_num_bores|
-      g_functions_filename = HVACSizing.valid_bore_configs[bore_config]
-      g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
+      g_functions_filename = HVACSizing.get_geothermal_loop_valid_configurations[bore_config]
+      g_functions_json = HVACSizing.get_geothermal_loop_g_functions_json(g_functions_filename)
       valid_num_bores.each do |num_bore_holes|
-        HVACSizing.get_g_functions(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
+        HVACSizing.get_geothermal_loop_g_functions_data_from_json(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
       end
     end
   end
