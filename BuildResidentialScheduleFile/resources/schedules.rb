@@ -9,6 +9,8 @@ class ScheduleGenerator
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param state [TODO] TODO
+  # @param hpxml_bldg [TODO] TODO
+  # @param epl_file [TODO] TODO
   # @param minutes_per_step [TODO] TODO
   # @param steps_in_day [TODO] TODO
   # @param mkc_ts_per_day [TODO] TODO
@@ -22,6 +24,8 @@ class ScheduleGenerator
   # @param random_seed [TODO] TODO
   # @return [TODO] TODO
   def initialize(runner:,
+                 hpxml_bldg:,
+                 epw_file:,
                  state:,
                  column_names: nil,
                  random_seed: nil,
@@ -36,6 +40,8 @@ class ScheduleGenerator
                  append_output:,
                  **)
     @runner = runner
+    @hpxml_bldg = hpxml_bldg
+    @epw_file = epw_file
     @state = state
     @column_names = column_names
     @random_seed = random_seed
@@ -102,7 +108,7 @@ class ScheduleGenerator
                                   weather:)
     # initialize a random number generator
     prng = Random.new(@random_seed)
-
+    @num_occupants = args[:geometry_num_occupants].to_i
     # pre-load the probability distribution csv files for speed
     cluster_size_prob_map = read_activity_cluster_size_probs(resources_path: args[:resources_path])
     event_duration_prob_map = read_event_duration_probs(resources_path: args[:resources_path])
@@ -615,7 +621,7 @@ class ScheduleGenerator
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = [showers, sinks, baths].transpose.map { |flow| flow.reduce(:+) }
     fixtures_peak_flow = @schedules[SchedulesFile::Columns[:HotWaterFixtures].name].max
     @schedules[SchedulesFile::Columns[:HotWaterFixtures].name] = @schedules[SchedulesFile::Columns[:HotWaterFixtures].name].map { |flow| flow / fixtures_peak_flow }
-
+    fill_ev_battery_schedule(all_simulated_values, prng)
     return true
   end
 
@@ -1074,5 +1080,77 @@ class ScheduleGenerator
     end
 
     return lighting_sch
+  end
+  def _get_ev_battery_schedule(away_schedule, hours_driven_per_year)
+    total_driving_minutes_per_year = hours_driven_per_year * 60
+
+    expanded_away_schedule = away_schedule.flat_map { |status| [status] * 15 }
+
+    charging_schedule = []
+    discharging_schedule = []
+    driving_minutes_used = 0
+
+    chunk_counts = expanded_away_schedule.chunk(&:itself).map { |value, elements| [value, elements.size] }
+    total_away_minutes = chunk_counts.map {|value, size| value * size}.sum
+
+    chunk_counts.each do |is_away, activity_minutes|
+      if is_away == 1
+        current_chunk_proportion = (1.0 * activity_minutes) / total_away_minutes
+
+        expected_driving_time = (total_driving_minutes_per_year * current_chunk_proportion).ceil
+        max_driving_time = [expected_driving_time, total_driving_minutes_per_year - driving_minutes_used].min
+
+        max_possible_driving_time = (activity_minutes * 0.8).ceil
+        actual_driving_time = [max_driving_time, max_possible_driving_time].min
+
+        idle_time = activity_minutes - actual_driving_time
+        first_half_driving = (actual_driving_time / 2.0).ceil
+        second_half_driving = actual_driving_time - first_half_driving
+
+        discharging_schedule += [1] * first_half_driving  # Start driving
+        discharging_schedule += [0] * idle_time           # Idle in the middle
+        discharging_schedule += [1] * second_half_driving # End driving
+        charging_schedule += [0] * activity_minutes
+
+        driving_minutes_used += actual_driving_time
+      else
+        charging_schedule += [1] * activity_minutes
+        discharging_schedule += [0] * activity_minutes
+      end
+    end
+
+    if driving_minutes_used < total_driving_minutes_per_year
+      msg = "Insufficient away minutes (#{total_away_minutes}) for required driving minutes (#{hours_driven_per_year * 60})"
+      msg += "Only #{driving_minutes_used} minutes was used."
+      @runner.registerError(msg)
+      raise msg
+    end
+    return charging_schedule, discharging_schedule
+  end
+
+  def fill_ev_battery_schedule(markov_chain_simulation_result, prng)
+    if @hpxml_bldg.vehicles.nil?
+      return
+    end
+    vehicle = @hpxml_bldg.vehicles[0]
+
+    if vehicle.instance_variable_defined?(:@miles_per_year)
+      miles_per_year = vehicle.miles_per_year or 10000
+    else
+      miles_per_year = 5000
+    end
+    average_mph = 40
+    hours_per_year = miles_per_year / average_mph
+
+    # randomly pick 1 occupant
+    # TODO: determine the occupant based on best match for miles driven and occupant behavior
+    occupant_number = prng.rand(@num_occupants)
+    away_index = 5  # Index of away activity in the markov-chain simulator
+    away_schedule = markov_chain_simulation_result[occupant_number].column(away_index)
+    charging_schedule, discharging_schedule = _get_ev_battery_schedule(away_schedule, hours_per_year)
+    agg_charging_schedule = aggregate_array(charging_schedule, @minutes_per_step).map { |val| val / 60.0 }
+    agg_discharging_schedule = aggregate_array(discharging_schedule, @minutes_per_step).map { |val| val / 60.0 }
+    @schedules[SchedulesFile::Columns[:EVBatteryCharging].name] = agg_charging_schedule
+    @schedules[SchedulesFile::Columns[:EVBatteryDischarging].name] = agg_discharging_schedule
   end
 end
