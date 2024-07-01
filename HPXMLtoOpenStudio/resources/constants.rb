@@ -27,7 +27,7 @@ module Constants
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.NumDaysInMonths(year)
     num_days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -37,7 +37,7 @@ module Constants
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.NumDaysInYear(year)
     num_days_in_months = NumDaysInMonths(year)
@@ -47,7 +47,7 @@ module Constants
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.NumHoursInYear(year)
     num_days_in_year = NumDaysInYear(year)
