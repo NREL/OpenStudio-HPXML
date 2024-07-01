@@ -3002,11 +3002,8 @@ end
 # Facilitates creating and assigning an OpenStudio construction (with accompanying
 # OpenStudio Materials) from Material objects. Handles parallel path calculations.
 class Construction
-  # TODO
-  #
   # @param name [TODO] TODO
   # @param path_widths [TODO] TODO
-  # @return [TODO] TODO
   def initialize(name, path_widths)
     @name = name
     @path_widths = path_widths
@@ -3374,15 +3371,12 @@ end
 
 # TODO
 class WoodStudConstructionSet
-  # TODO
-  #
   # @param stud [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param rigid_r [TODO] TODO
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
@@ -3396,15 +3390,12 @@ end
 
 # TODO
 class SteelStudConstructionSet
-  # TODO
-  #
   # @param cavity_thick_in [TODO] TODO
   # @param corr_factor [TODO] TODO
   # @param rigid_r [TODO] TODO
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @cavity_thick_in = cavity_thick_in
     @corr_factor = corr_factor
@@ -3419,15 +3410,12 @@ end
 
 # TODO
 class DoubleStudConstructionSet
-  # TODO
-  #
   # @param stud [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param framing_spacing [TODO] TODO
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @stud = stud
     @framing_factor = framing_factor
@@ -3442,8 +3430,6 @@ end
 
 # TODO
 class SIPConstructionSet
-  # TODO
-  #
   # @param thick_in [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param rigid_r [TODO] TODO
@@ -3451,7 +3437,6 @@ class SIPConstructionSet
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @framing_factor = framing_factor
@@ -3466,15 +3451,12 @@ end
 
 # TODO
 class CMUConstructionSet
-  # TODO
-  #
   # @param thick_in [TODO] TODO
   # @param cond_in [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(thick_in, cond_in, framing_factor, osb_thick_in, mat_int_finish, mat_ext_finish)
     @thick_in = thick_in
     @cond_in = cond_in
@@ -3489,15 +3471,12 @@ end
 
 # TODO
 class ICFConstructionSet
-  # TODO
-  #
   # @param ins_thick_in [TODO] TODO
   # @param concrete_thick_in [TODO] TODO
   # @param framing_factor [TODO] TODO
   # @param rigid_r [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @ins_thick_in = ins_thick_in
     @concrete_thick_in = concrete_thick_in
@@ -3512,13 +3491,10 @@ end
 
 # TODO
 class GenericConstructionSet
-  # TODO
-  #
   # @param rigid_r [TODO] TODO
   # @param osb_thick_in [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param mat_ext_finish [TODO] TODO
-  # @return [TODO] TODO
   def initialize(rigid_r, osb_thick_in, mat_int_finish, mat_ext_finish)
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
