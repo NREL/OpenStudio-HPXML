@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Generator
+module Generator
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object

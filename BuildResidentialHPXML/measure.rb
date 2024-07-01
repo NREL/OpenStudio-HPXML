@@ -159,9 +159,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Presence of nearby buildings, trees, obstructions for infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-site'>HPXML Site</a>) is used.")
     args << arg
 
+    soil_types = [HPXML::SiteSoilTypeClay,
+                  HPXML::SiteSoilTypeGravel,
+                  HPXML::SiteSoilTypeLoam,
+                  HPXML::SiteSoilTypeSand,
+                  HPXML::SiteSoilTypeSilt,
+                  HPXML::SiteSoilTypeUnknown]
+
+    moisture_types = [HPXML::SiteSoilMoistureTypeDry,
+                      HPXML::SiteSoilMoistureTypeMixed,
+                      HPXML::SiteSoilMoistureTypeWet]
+
     site_soil_and_moisture_type_choices = OpenStudio::StringVector.new
-    Constants.SoilTypes.each do |soil_type|
-      Constants.MoistureTypes.each do |moisture_type|
+    soil_types.each do |soil_type|
+      moisture_types.each do |moisture_type|
         site_soil_and_moisture_type_choices << "#{soil_type}, #{moisture_type}"
       end
     end
@@ -1378,7 +1389,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_capacity_retention_temp', false)
     arg.setDisplayName('Heat Pump: Heating Capacity Retention Temperature')
     arg.setDescription("The user-specified temperature (e.g., 17F or 5F) for the above heating capacity retention fraction. Applies to all heat pump types except #{HPXML::HVACTypeHeatPumpGroundToAir}. Required if the Heating Capacity Retention Fraction is provided.")
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_capacity', false)
@@ -1415,7 +1426,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_compressor_lockout_temp', false)
     arg.setDisplayName('Heat Pump: Compressor Lockout Temperature')
     arg.setDescription("The temperature below which the heat pump compressor is disabled. If both this and Backup Heating Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies to all heat pump types other than #{HPXML::HVACTypeHeatPumpGroundToAir}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#air-to-air-heat-pump'>Air-to-Air Heat Pump</a>, <a href='#{docs_base_url}#mini-split-heat-pump'>Mini-Split Heat Pump</a>, <a href='#{docs_base_url}#packaged-terminal-heat-pump'>Packaged Terminal Heat Pump</a>, <a href='#{docs_base_url}#room-air-conditioner-w-reverse-cycle'>Room Air Conditioner w/ Reverse Cycle</a>) is used.")
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
@@ -1456,7 +1467,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_lockout_temp', false)
     arg.setDisplayName('Heat Pump: Backup Heating Lockout Temperature')
     arg.setDescription("The temperature above which the heat pump backup system is disabled. If both this and Compressor Lockout Temperature are provided and use the same value, it essentially defines a switchover temperature (for, e.g., a dual-fuel heat pump). Applies for both Backup Type of '#{HPXML::HeatPumpBackupTypeIntegrated}' and '#{HPXML::HeatPumpBackupTypeSeparate}'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#backup'>Backup</a>) is used.")
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_sizing_methodology', heat_pump_sizing_choices, false)
@@ -1504,8 +1515,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_outdoor_temperatures', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Heating Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 deg-F. At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('deg-F')
+    arg.setDescription('Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_heating_min_speed_capacities', false)
@@ -1534,8 +1545,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_outdoor_temperatures', false)
     arg.setDisplayName('HVAC Detailed Performance Data: Cooling Outdoor Temperatures')
-    arg.setDescription('Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 deg-F. At least two performance data points are required using a comma-separated list.')
-    arg.setUnits('deg-F')
+    arg.setDescription('Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hvac_perf_data_cooling_min_speed_capacities', false)
@@ -1575,7 +1586,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    valid_bore_configs = HVACSizing.valid_bore_configs
+    valid_bore_configs = HVACSizing.get_geothermal_loop_valid_configurations
     valid_bore_configs.keys.each do |valid_bore_config|
       geothermal_loop_borefield_configuration_choices << valid_bore_config
     end
@@ -1697,25 +1708,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekday Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekday heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Heating Weekend Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekend heating setpoint schedule. Required unless a detailed CSV schedule is provided.')
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_weekday_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekday Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekday cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_weekend_setpoint', false)
     arg.setDisplayName('HVAC Control: Cooling Weekend Setpoint Schedule')
     arg.setDescription('Specify the constant or 24-hour comma-separated weekend cooling setpoint schedule. Required unless a detailed CSV schedule is provided.')
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_season_period', false)
@@ -2200,7 +2211,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)
     arg.setDisplayName('Water Heater: Standby Loss')
     arg.setDescription("The standby loss of water heater. Only applies to space-heating boilers. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>) is used.")
-    arg.setUnits('deg-F/hr')
+    arg.setUnits('F/hr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
@@ -2212,7 +2223,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_setpoint_temperature', false)
     arg.setDisplayName('Water Heater: Setpoint Temperature')
     arg.setDescription("The setpoint temperature of water heater. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-water-heating-systems'>HPXML Water Heating Systems</a>) is used.")
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('water_heater_num_bedrooms_served', false)
@@ -2965,7 +2976,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_rated_annual_kwh', false)
     arg.setDisplayName('Extra Refrigerator: Rated Annual Consumption')
     arg.setUnits('kWh/yr')
-    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra rrefrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
+    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', false)
@@ -3061,7 +3072,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_cooling_setpoint_temp_offset', false)
     arg.setDisplayName('Ceiling Fan: Cooling Setpoint Temperature Offset')
-    arg.setUnits('deg-F')
+    arg.setUnits('F')
     arg.setDescription("The cooling setpoint temperature offset during months when the ceiling fans are operating. Only applies if ceiling fan quantity is greater than zero. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-ceiling-fans'>HPXML Ceiling Fans</a>) is used.")
     args << arg
 
@@ -3348,7 +3359,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Fossil fuel emissions factors units. If multiple scenarios, use a comma-separated list. Only lb/MBtu and kg/MBtu are allowed.')
     args << arg
 
-    Constants.FossilFuels.each do |fossil_fuel|
+    HPXML::fossil_fuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
       all_caps_case = fossil_fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fossil_fuel.capitalize
@@ -3369,7 +3380,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Electricity tariff file specified as an absolute/relative path to a file with utility rate structure information. Tariff file must be formatted to OpenEI API version 7. If multiple scenarios, use a comma-separated list.')
     args << arg
 
-    ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+    HPXML::all_fuels.each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
@@ -3380,7 +3391,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
-    ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+    HPXML::all_fuels.each do |fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fuel)
       all_caps_case = fuel.split(' ').map(&:capitalize).join(' ')
       cap_case = fuel.capitalize
@@ -3687,7 +3698,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     error = (emissions_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required emissions arguments.' if error
 
-    Constants.FossilFuels.each do |fossil_fuel|
+    HPXML::fossil_fuels.each do |fossil_fuel|
       underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
       if !args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -3705,7 +3716,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       emissions_scenario_lengths += [args[:emissions_electricity_number_of_header_rows].count(',')] unless args[:emissions_electricity_number_of_header_rows].nil?
       emissions_scenario_lengths += [args[:emissions_electricity_column_numbers].count(',')] unless args[:emissions_electricity_column_numbers].nil?
 
-      Constants.FossilFuels.each do |fossil_fuel|
+      HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         emissions_scenario_lengths += [args["emissions_#{underscore_case}_values".to_sym].count(',')] unless args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -3718,7 +3729,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     bills_args_initialized = [!args[:utility_bill_scenario_names].nil?]
     if bills_args_initialized.uniq[0]
       bills_scenario_lengths = [args[:utility_bill_scenario_names].count(',')]
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         bills_scenario_lengths += [args["utility_bill_#{underscore_case}_fixed_charges".to_sym].count(',')] unless args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
@@ -3770,7 +3781,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 end
 
 # collection of methods for creating the HPXML file and setting properties based on user arguments
-class HPXMLFile
+module HPXMLFile
   # create the closed-form geometry, and then call individual set_xxx methods
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     epw_file = OpenStudio::EpwFile.new(epw_path)
@@ -3891,12 +3902,12 @@ class HPXMLFile
 
     # Validate input HPXML against schema
     schema_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schema_validator = XMLValidator.get_xml_validator(schema_path)
     xsd_errors, xsd_warnings = XMLValidator.validate_against_schema(hpxml_path, schema_validator)
 
     # Validate input HPXML against schematron docs
     schematron_path = File.join(File.dirname(__FILE__), '..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
+    schematron_validator = XMLValidator.get_xml_validator(schematron_path)
     sct_errors, sct_warnings = XMLValidator.validate_against_schematron(hpxml_path, schematron_validator, hpxml_doc)
 
     # Handle errors/warnings
@@ -4125,7 +4136,7 @@ class HPXMLFile
       end
 
       fuel_values = {}
-      Constants.FossilFuels.each do |fossil_fuel|
+      HPXML::fossil_fuels.each do |fossil_fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fossil_fuel)
 
         if not args["emissions_#{underscore_case}_values".to_sym].nil?
@@ -4227,7 +4238,7 @@ class HPXMLFile
       end
 
       fixed_charges = {}
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_fixed_charges".to_sym].nil?
@@ -4238,7 +4249,7 @@ class HPXMLFile
       end
 
       marginal_rates = {}
-      ([HPXML::FuelTypeElectricity] + Constants.FossilFuels).each do |fuel|
+      HPXML::all_fuels.each do |fuel|
         underscore_case = OpenStudio::toUnderscoreCase(fuel)
 
         if not args["utility_bill_#{underscore_case}_marginal_rates".to_sym].nil?
@@ -4573,7 +4584,7 @@ class HPXMLFile
   end
 
   # Set building header properties, including:
-  # - detailed schedule filepaths
+  # - detailed schedule file paths
   # - heat pump sizing methodologies
   # - natural ventilation availability
   # - summer shading season
@@ -4609,7 +4620,7 @@ class HPXMLFile
 
   # Set climate and risk zones properties, including:
   # - 2006 IECC zone
-  # - weather station name / EPW filepath
+  # - weather station name / EPW file path
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
@@ -7056,7 +7067,7 @@ class HPXMLFile
                               usage_multiplier: args[:misc_fuel_loads_fireplace_usage_multiplier])
   end
 
-  # Set the pool prooperties, including:
+  # Set the pool properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7093,7 +7104,7 @@ class HPXMLFile
                          heater_usage_multiplier: args[:pool_heater_usage_multiplier])
   end
 
-  # Set the permanent spa prooperties, including:
+  # Set the permanent spa properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7155,7 +7166,7 @@ class HPXMLFile
     end
   end
 
-  # Sfter having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
+  # After having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def self.renumber_hpxml_ids(hpxml_bldg)

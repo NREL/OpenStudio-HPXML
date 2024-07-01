@@ -14,9 +14,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
     schema_path = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd'))
-    @schema_validator = XMLValidator.get_schema_validator(schema_path)
+    @schema_validator = XMLValidator.get_xml_validator(schema_path)
     @schematron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-    @schematron_validator = XMLValidator.get_schematron_validator(@schematron_path)
+    @schematron_validator = XMLValidator.get_xml_validator(@schematron_path)
 
     @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
     @tmp_csv_path = File.join(@sample_files_path, 'tmp.csv')
@@ -33,7 +33,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
   def test_validation_of_schematron_doc
     # Check that the schematron file is valid
     schematron_schema_path = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'hpxml_schematron', 'iso-schematron.xsd'))
-    schematron_schema_validator = XMLValidator.get_schema_validator(schematron_schema_path)
+    schematron_schema_validator = XMLValidator.get_xml_validator(schematron_schema_path)
     _test_schema_validation(@schematron_path, schematron_schema_validator)
   end
 

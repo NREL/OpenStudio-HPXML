@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-# The Fuel class stores collections of EnergyPlus meter names, units, and timeseries data.
+# Object that stores collections of EnergyPlus meter names, units, and timeseries data.
 class Fuel
-  # Initialize a Fuel object with meters and units.
-  #
   # @param meters [Array<String>] array of EnergyPlus meter names
-  # @param units [String] fuel units corresponding to HPXML::FuelTypeXXX
-  # @return [void]
+  # @param units [String] fuel units of type HPXML::FuelTypeXXX
   def initialize(meters: [], units:)
     @meters = meters
     @timeseries = []
@@ -15,11 +12,8 @@ class Fuel
   attr_accessor(:meters, :timeseries, :units)
 end
 
-# The UtilityRate class stores collections of fixed monthly rates, marginal rates, real-time rates, minimum monthly/annual charges, net metering and feed-in tariff information, and detailed tariff file information.
+# Object that stores collections of fixed monthly rates, marginal rates, real-time rates, minimum monthly/annual charges, net metering and feed-in tariff information, and detailed tariff file information.
 class UtilityRate
-  # Initialize a UtilityRate object.
-  #
-  # @return [void]
   def initialize()
     @fixedmonthlycharge = nil
     @flatratebuy = 0.0
@@ -44,11 +38,8 @@ class UtilityRate
                 :energyratestructure, :energyweekdayschedule, :energyweekendschedule)
 end
 
-# The UtilityBill class stores collections of monthly/annual/total fixed/energy charges, as well as monthly/annual production credit.
+# Object that stores collections of monthly/annual/total fixed/energy charges, as well as monthly/annual production credit.
 class UtilityBill
-  # Initialize a UtilityBill object.
-  #
-  # @return [void]
   def initialize()
     @annual_energy_charge = 0.0
     @annual_fixed_charge = 0.0
@@ -66,8 +57,8 @@ class UtilityBill
                 :monthly_production_credit, :annual_production_credit)
 end
 
-# The CalculateUtilityBill class contains various methods for calculating simple bills for all fuel types, as well as detailed bills for electricity.
-class CalculateUtilityBill
+# Collection of methods for calculating simple bills for all fuel types, as well as detailed bills for electricity.
+module CalculateUtilityBill
   # Method for calculating utility bills based on simple utility rate structures.
   #
   # @param fuel_type [String] fuel type defined in the FT class
@@ -77,7 +68,7 @@ class CalculateUtilityBill
   # @param rate [UtilityRate] UtilityRate object
   # @param bill [UtilityBill] UtilityBill object
   # @param net_elec [Double] net electricity production tallied by month
-  # @return [Double] net eletricity production for the run period
+  # @return [Double] net electricity production for the run period
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     if fuel_time_series.size > 12
       # Must be no more than 12 months worth of simulation data
