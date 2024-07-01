@@ -2,6 +2,7 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Updates hot water end uses for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
