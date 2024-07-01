@@ -82,15 +82,21 @@ class ElectricVehicle
       ev_discharge_offset_obj.setName(obj_name)
       ev_discharge_offset_obj.setEndUseSubcategory(obj_name)
       ev_discharge_offset_obj.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
-      ev_discharge_offset_obj.setSpace(electric_vehicle.additional_properties.space)
+      offset_space = nil
+      if not electric_vehicle.additional_properties.space.nil?
+        offset_space = electric_vehicle.additional_properties.space
+      else
+        offset_space = model.getSpaces[0]
+      end
+      ev_discharge_offset_obj.setSpace(offset_space)
       ev_discharge_offset_obj_def.setName(obj_name)
       ev_discharge_offset_obj_def.setDesignLevel(0)
       ev_discharge_offset_obj_def.setFractionRadiant(0)
       ev_discharge_offset_obj_def.setFractionLatent(0)
       ev_discharge_offset_obj_def.setFractionLost(1)
       ev_discharge_offset_obj.setSchedule(model.alwaysOnDiscreteSchedule)
-
-      ev_discharge_offset_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_discharge_offset_obj, *EPlus::EMSActuatorOtherEquipmentPower, ev_discharge_offset_obj.space.get)
+      ev_discharge_offset_act = nil
+      ev_discharge_offset_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_discharge_offset_obj, *EPlus::EMSActuatorOtherEquipmentPower, offset_space)
       ev_discharge_offset_act.setName('ev_discharge_offset_act')
       ev_discharge_program.addLine("Set #{ev_discharge_offset_act.name} = #{discharge_power_act.name}")
 
