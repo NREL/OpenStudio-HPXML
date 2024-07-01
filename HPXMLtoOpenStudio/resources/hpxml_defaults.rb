@@ -4,11 +4,18 @@
 # that were not provided.
 #
 # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-# child object where custom information can be attached to the object without
-# being written to the HPXML file. This will allow the custom information to
-# be used by subsequent calculations/logic.
+# child object that can be used to store custom information on the object without
+# being written to the HPXML file. This allows the custom information to
+# be used by downstream calculations/logic.
 module HPXMLDefaults
-  # TODO
+  # Assigns default values to the HPXML Building object for optional HPXML inputs
+  # that are not provided.
+  #
+  # When a default value is assigned to an HPXML object property (like wall.azimuth),
+  # the corresponding foo_isdefaulted (e.g., wall.azimuth_isdefaulted) should be set
+  # to true so that the in.xml that is exported includes 'dataSource="software"'
+  # attributes for all defaulted values. This allows the user to easily observe which
+  # values were defaulted and what default values were used.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
@@ -17,7 +24,7 @@ module HPXMLDefaults
   # @param weather [WeatherProcess] Weather object
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param convert_shared_systems [TODO] TODO
+  # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
   # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
   # @param output_format [String] Detailed HVAC sizing output file format ('csv', 'json', or 'msgpack')
   # @return [void]
@@ -27,11 +34,9 @@ module HPXMLDefaults
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
-    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
-    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
 
     # Check for presence of fuels once
-    has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+    has_fuel = hpxml_bldg.has_fuels(hpxml.to_doc)
 
     add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
@@ -68,7 +73,7 @@ module HPXMLDefaults
     apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
     apply_water_heaters(hpxml_bldg, nbeds, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml_bldg)
-    apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, has_uncond_bsmnt, has_cond_bsmnt, schedules_file)
+    apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, schedules_file)
     apply_water_fixtures(hpxml_bldg, schedules_file)
     apply_solar_thermal_systems(hpxml_bldg)
     apply_appliances(hpxml_bldg, nbeds, eri_version, schedules_file)
@@ -90,17 +95,19 @@ module HPXMLDefaults
     cleanup_zones_spaces(hpxml_bldg)
   end
 
-  # TODO
+  # Returns a list of four azimuths (facing each direction). Determined based
+  # on the primary azimuth, as defined by the azimuth with the largest surface
+  # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+  # surfaces that may not have an azimuth defined (e.g., walls).
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double>] Azimuths for the four sides of the home
   def self.get_default_azimuths(hpxml_bldg)
-    # TODO
+    # Ensures 0 <= azimuth < 360
     #
-    # @param azimuth [TODO] TODO
-    # @return [TODO] TODO
-    def self.sanitize_azimuth(azimuth)
-      # Ensure 0 <= orientation < 360
+    # @param azimuth [Double] Azimuth to unspin
+    # @return [Double] Resulting azimuth
+    def self.unspin_azimuth(azimuth)
       while azimuth < 0
         azimuth += 360
       end
@@ -110,10 +117,6 @@ module HPXMLDefaults
       return azimuth
     end
 
-    # Returns a list of four azimuths (facing each direction). Determined based
-    # on the primary azimuth, as defined by the azimuth with the largest surface
-    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
-    # surfaces that may not have an azimuth defined (e.g., walls).
     azimuth_areas = {}
     (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surface|
       next unless surface.respond_to?(:azimuth)
@@ -130,21 +133,20 @@ module HPXMLDefaults
       primary_azimuth = azimuth_areas.max_by { |_k, v| v }[0]
     end
     return [primary_azimuth,
-            sanitize_azimuth(primary_azimuth + 90),
-            sanitize_azimuth(primary_azimuth + 180),
-            sanitize_azimuth(primary_azimuth + 270)].sort
+            unspin_azimuth(primary_azimuth + 90),
+            unspin_azimuth(primary_azimuth + 180),
+            unspin_azimuth(primary_azimuth + 270)].sort
   end
 
-  # FIXME: The following class methods are meant to be private.
-
-  # TODO
+  # Automatically adds a single conditioned zone/space to the HPXML Building if not provided.
+  # Simplifies the HVAC autosizing code so that it can operate on zones/spaces whether the HPXML
+  # file includes them or not.
   #
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [void]
   def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
-    # Automatically add conditioned zone/space if not provided to simplify the HVAC sizing code
     bldg_idx = hpxml.buildings.index(hpxml_bldg)
     if hpxml_bldg.conditioned_zones.empty?
       hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
@@ -254,12 +256,12 @@ module HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_heating_setpoint.nil?
-      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # F, per Manual J
       hpxml_bldg.header.manualj_heating_setpoint_isdefaulted = true
     end
 
     if hpxml_bldg.header.manualj_cooling_setpoint.nil?
-      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # F, per Manual J
       hpxml_bldg.header.manualj_cooling_setpoint_isdefaulted = true
     end
 
@@ -389,7 +391,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::EmissionsScenarios objects
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param has_fuel [TODO] TODO
+  # @param has_fuel [Hash] Map of HPXML fuel type => boolean of whether fuel type is used
   # @return [void]
   def self.apply_emissions_scenarios(hpxml_header, has_fuel)
     hpxml_header.emissions_scenarios.each do |scenario|
@@ -472,7 +474,7 @@ module HPXMLDefaults
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param has_fuel [TODO] TODO
+  # @param has_fuel [Hash] Map of HPXML fuel type => boolean of whether fuel type is used
   # @return [void]
   def self.apply_utility_bill_scenarios(runner, hpxml_header, hpxml_bldg, has_fuel)
     hpxml_header.utility_bill_scenarios.each do |scenario|
@@ -820,7 +822,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::BuildingConstruction object
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [void]
   def self.apply_building_construction(hpxml_bldg, cfa, nbeds)
@@ -1562,7 +1564,7 @@ module HPXMLDefaults
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherProcess] Weather object
-  # @param convert_shared_systems [TODO] TODO
+  # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
   # @return [void]
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     if convert_shared_systems
@@ -1686,13 +1688,13 @@ module HPXMLDefaults
 
       if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
         # Fuel backup
-        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+        heat_pump.compressor_lockout_temp = 25.0 # F
       else
         # Electric backup or no backup
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-          heat_pump.compressor_lockout_temp = -20.0 # deg-F
+          heat_pump.compressor_lockout_temp = -20.0 # F
         else
-          heat_pump.compressor_lockout_temp = 0.0 # deg-F
+          heat_pump.compressor_lockout_temp = 0.0 # F
         end
       end
       heat_pump.compressor_lockout_temp_isdefaulted = true
@@ -1711,9 +1713,9 @@ module HPXMLDefaults
       end
 
       if hp_backup_fuel == HPXML::FuelTypeElectricity
-        heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 40.0 # F
       else
-        heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 50.0 # F
       end
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
@@ -2442,7 +2444,7 @@ module HPXMLDefaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherProcess] Weather object
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [void]
@@ -2643,16 +2645,16 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::HotWaterDistribution objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
-  # @param has_uncond_bsmnt [TODO] TODO
-  # @param has_cond_bsmnt [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [void]
-  def self.apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, has_uncond_bsmnt, has_cond_bsmnt, schedules_file)
+  def self.apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, schedules_file)
     return if hpxml_bldg.hot_water_distributions.size == 0
 
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
+    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
 
     if hot_water_distribution.pipe_r_value.nil?
       hot_water_distribution.pipe_r_value = 0.0
@@ -3345,7 +3347,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::Pool and HPXML::PermanentSpa objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [void]
   def self.apply_pools_and_permanent_spas(hpxml_bldg, cfa, schedules_file)
@@ -3466,7 +3468,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::PlugLoad objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [void]
   def self.apply_plug_loads(hpxml_bldg, cfa, schedules_file)
@@ -3591,7 +3593,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::FuelLoad objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [void]
   def self.apply_fuel_loads(hpxml_bldg, cfa, schedules_file)
@@ -3696,10 +3698,10 @@ module HPXMLDefaults
     HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
-  # TODO
+  # Converts an HPXML orientation to an HPXML azimuth.
   #
-  # @param orientation [TODO] TODO
-  # @return [TODO] TODO
+  # @param orientation [String] HPXML orientation enumeration
+  # @return [Integer] Azimuth (degrees)
   def self.get_azimuth_from_orientation(orientation)
     return if orientation.nil?
 
@@ -3724,10 +3726,10 @@ module HPXMLDefaults
     fail "Unexpected orientation: #{orientation}."
   end
 
-  # TODO
+  # Converts an HPXML azimuth to a closest HPXML orientation.
   #
-  # @param azimuth [TODO] TODO
-  # @return [TODO] TODO
+  # @param azimuth [Integer] (degrees)
+  # @return [String] HPXML orientation enumeration
   def self.get_orientation_from_azimuth(azimuth)
     return if azimuth.nil?
 
@@ -3750,10 +3752,15 @@ module HPXMLDefaults
     end
   end
 
-  # TODO
+  # Gets the equivalent number of bedrooms for an operational calculation (i.e., when number
+  # of occupants are provided in the HPXML); this is an adjustment to the ANSI 301 or Building
+  # America equations, which are based on number of bedrooms.
+  #
+  # This is used to adjust occupancy-driven end uses from asset calculations (based on number
+  # of bedrooms) to operational calculations (based on number of occupants).
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Equivalent number of bedrooms
   def self.get_equivalent_nbeds_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
     unit_type = hpxml_bldg.building_construction.residential_facility_type
@@ -3766,10 +3773,11 @@ module HPXMLDefaults
     end
   end
 
-  # TODO
+  # Gets the default assumption for whether there's a flue/chimney in conditioned space.
+  # Determined by whether we find any systems indicating this is likely the case.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Boolean] Default value for presence of flue/chimney in conditioned space
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
     # Check for atmospheric heating system in conditioned space
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -3810,56 +3818,55 @@ module HPXMLDefaults
     return false
   end
 
-  # TODO
+  # Gets the default latitude from the HPXML file or, as backup, weather file.
   #
-  # @param latitude [TODO] TODO
+  # @param latitude [Double] Latitude from the HPXML file (degrees)
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @return [TODO] TODO
+  # @return [Double] Default value for latitude (degrees)
   def self.get_default_latitude(latitude, epw_file)
     return latitude unless latitude.nil?
 
     return epw_file.latitude
   end
 
-  # TODO
+  # Gets the default longitude from the HPXML file or, as backup, weather file.
   #
-  # @param longitude [TODO] TODO
+  # @param longitude [Double] Longitude from the HPXML file (degrees)
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @return [TODO] TODO
+  # @return [Double] Default value for longitude (degrees)
   def self.get_default_longitude(longitude, epw_file)
     return longitude unless longitude.nil?
 
     return epw_file.longitude
   end
 
-  # TODO
+  # Gets the default time zone from the HPXML file or, as backup, weather file.
   #
-  # @param time_zone [TODO] TODO
+  # @param time_zone [Double] Time zone (UTC offset) from the HPXML file
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @return [TODO] TODO
+  # @return [Double] Default value for time zone (UTC offset)
   def self.get_default_time_zone(time_zone, epw_file)
     return time_zone unless time_zone.nil?
 
     return epw_file.timeZone
   end
 
-  # TODO
+  # Gets the default state code from the HPXML file or, as backup, weather file.
   #
-  # @param state_code [TODO] TODO
+  # @param state_code [String] State code from the HPXML file
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @return [TODO] TODO
+  # @return [String] Uppercase state code
   def self.get_default_state_code(state_code, epw_file)
     return state_code unless state_code.nil?
 
     return epw_file.stateProvinceRegion.upcase
   end
 
-  # TODO
+  # Removes any zones/spaces that were automatically created in the add_zones_spaces_if_needed method.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.cleanup_zones_spaces(hpxml_bldg)
-    # Remove any automatically created zones/spaces
     auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
     auto_space.delete if not auto_space.nil?
     auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }

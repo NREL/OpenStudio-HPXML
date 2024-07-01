@@ -2238,7 +2238,7 @@ The user-specified temperature (e.g., 17F or 5F) for the above heating capacity 
 - **Name:** ``heat_pump_heating_capacity_retention_temp``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F``
+- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2314,7 +2314,7 @@ The temperature below which the heat pump compressor is disabled. If both this a
 - **Name:** ``heat_pump_compressor_lockout_temp``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F``
+- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2401,7 +2401,7 @@ The temperature above which the heat pump backup system is disabled. If both thi
 - **Name:** ``heat_pump_backup_heating_lockout_temp``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F``
+- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -2498,7 +2498,7 @@ Type of capacity values for detailed performance data if available. Applies only
 
 **HVAC Detailed Performance Data: Heating Outdoor Temperatures**
 
-Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 deg-F. At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of heating detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 47 F. At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_heating_outdoor_temperatures``
 - **Type:** ``String``
@@ -2553,7 +2553,7 @@ Maximum speed efficiency COP values of heating detailed performance data if avai
 
 **HVAC Detailed Performance Data: Cooling Outdoor Temperatures**
 
-Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 deg-F. At least two performance data points are required using a comma-separated list.
+Outdoor temperatures of cooling detailed performance data if available. Applies only to variable-speed air-source HVAC systems (central air conditioners, mini-split air conditioners, air-to-air heat pumps, and mini-split heat pumps). One of the outdoor temperatures must be 95 F. At least two performance data points are required using a comma-separated list.
 
 - **Name:** ``hvac_perf_data_cooling_outdoor_temperatures``
 - **Type:** ``String``
@@ -3683,7 +3683,7 @@ The standby loss of water heater. Only applies to space-heating boilers. If not 
 - **Name:** ``water_heater_standby_loss``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F/hr``
+- **Units:** ``F/hr``
 
 - **Required:** ``false``
 
@@ -3709,7 +3709,7 @@ The setpoint temperature of water heater. If not provided, the OS-HPXML default 
 - **Name:** ``water_heater_setpoint_temperature``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F``
+- **Units:** ``F``
 
 - **Required:** ``false``
 
@@ -5246,7 +5246,7 @@ The cooling setpoint temperature offset during months when the ceiling fans are 
 - **Name:** ``ceiling_fan_cooling_setpoint_temp_offset``
 - **Type:** ``Double``
 
-- **Units:** ``deg-F``
+- **Units:** ``F``
 
 - **Required:** ``false``
 

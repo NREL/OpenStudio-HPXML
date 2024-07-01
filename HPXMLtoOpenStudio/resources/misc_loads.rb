@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class MiscLoads
+module MiscLoads
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -279,11 +279,9 @@ class MiscLoads
     mel.setSchedule(pump_sch)
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa
@@ -295,7 +293,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_televisions_default_values(cfa, nbeds)
@@ -308,7 +306,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_pool_pump_default_values(cfa, nbeds)
@@ -317,7 +315,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
@@ -339,7 +337,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_permanent_spa_pump_default_values(cfa, nbeds)
@@ -348,7 +346,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
@@ -381,7 +379,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_well_pump_default_values(cfa, nbeds)
@@ -390,7 +388,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_grill_default_values(cfa, nbeds)
@@ -399,7 +397,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_lighting_default_values(cfa, nbeds)
@@ -408,7 +406,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_fireplace_default_values(cfa, nbeds)

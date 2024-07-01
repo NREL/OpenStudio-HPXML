@@ -66,8 +66,8 @@ class UtilityBill
                 :monthly_production_credit, :annual_production_credit)
 end
 
-# The CalculateUtilityBill class contains various methods for calculating simple bills for all fuel types, as well as detailed bills for electricity.
-class CalculateUtilityBill
+# Collection of methods for calculating simple bills for all fuel types, as well as detailed bills for electricity.
+module CalculateUtilityBill
   # Method for calculating utility bills based on simple utility rate structures.
   #
   # @param fuel_type [String] fuel type defined in the FT class
@@ -77,7 +77,7 @@ class CalculateUtilityBill
   # @param rate [UtilityRate] UtilityRate object
   # @param bill [UtilityBill] UtilityBill object
   # @param net_elec [Double] net electricity production tallied by month
-  # @return [Double] net eletricity production for the run period
+  # @return [Double] net electricity production for the run period
   def self.simple(fuel_type, header, fuel_time_series, is_production, rate, bill, net_elec)
     if fuel_time_series.size > 12
       # Must be no more than 12 months worth of simulation data

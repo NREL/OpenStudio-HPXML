@@ -141,9 +141,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         schematron_validator = nil
       else
         schema_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schema', 'HPXML.xsd')
-        schema_validator = XMLValidator.get_schema_validator(schema_path)
+        schema_validator = XMLValidator.get_xml_validator(schema_path)
         schematron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-        schematron_validator = XMLValidator.get_schematron_validator(schematron_path)
+        schematron_validator = XMLValidator.get_xml_validator(schematron_path)
       end
 
       hpxml = HPXML.new(hpxml_path: args[:hpxml_path], schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: args[:building_id])
