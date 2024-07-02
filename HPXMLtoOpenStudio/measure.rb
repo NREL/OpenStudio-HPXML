@@ -3382,7 +3382,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_surface [TODO] TODO
-  # @return [TODO] TODO
+  # @return [void]
   def set_subsurface_exterior(surface, spaces, model, hpxml_surface)
     # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
     # The parent surface is entirely comprised of the subsurface.
@@ -3397,7 +3397,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [void]
   def set_foundation_and_walls_top()
     @foundation_top = 0
     @hpxml_bldg.floors.each do |floor|
@@ -3416,7 +3416,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @return [TODO] TODO
+  # @return [void]
   def set_heating_and_cooling_seasons(runner)
     return if @hpxml_bldg.hvac_controls.size == 0
 

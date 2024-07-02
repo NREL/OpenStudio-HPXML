@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0e50095b-5993-4594-a329-f5fbc3dbf8de</version_id>
-  <version_modified>2024-07-01T23:46:50Z</version_modified>
+  <version_id>1555911b-a6c2-43ef-adb3-6fa78d82d467</version_id>
+  <version_modified>2024-07-02T03:33:04Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>67427AF1</checksum>
+      <checksum>5236F0FE</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -201,7 +201,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>00F6768E</checksum>
+      <checksum>8727ED9E</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -567,7 +567,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ED4FF479</checksum>
+      <checksum>C6073CB6</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

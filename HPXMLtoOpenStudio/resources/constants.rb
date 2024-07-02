@@ -6,21 +6,21 @@ module Constants
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] the assumed inside temperature (F)
   def self.AssumedInsideTemp
-    return 73.5 # F
+    return 73.5
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] gravity (ft/s2)
   def self.g
-    return 32.174 # gravity (ft/s2)
+    return 32.174
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] a small constant number
   def self.small
     return 1e-9
   end
@@ -38,7 +38,7 @@ module Constants
   # TODO
   #
   # @param year [Integer] the calendar year
-  # @return [TODO] TODO
+  # @return [Integer] number of days in the calendar year
   def self.NumDaysInYear(year)
     num_days_in_months = NumDaysInMonths(year)
     num_days_in_year = num_days_in_months.sum
@@ -48,7 +48,7 @@ module Constants
   # TODO
   #
   # @param year [Integer] the calendar year
-  # @return [TODO] TODO
+  # @return [Integer] number of hours in the calendar year
   def self.NumHoursInYear(year)
     num_days_in_year = NumDaysInYear(year)
     num_hours_in_year = num_days_in_year * 24

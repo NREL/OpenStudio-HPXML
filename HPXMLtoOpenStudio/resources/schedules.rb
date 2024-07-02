@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Annual constant schedule
+# Annual constant schedule.
 class ScheduleConstant
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -63,15 +63,12 @@ end
 
 # Annual schedule defined by 12 24-hour values for weekdays and weekends.
 class HourlyByMonthSchedule
-  # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
-  # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
-  # @param weekday_month_by_hour_values [TODO] TODO
-  # @param weekday_month_by_hour_values [TODO] TODO
-  # @param weekend_month_by_hour_values [TODO] TODO
-  # @param normalize_values [TODO] TODO
+  # @param weekday_month_by_hour_values [Array<Array<Double>>] a 12-element array of 24-element arrays of numbers
+  # @param weekday_month_by_hour_values [Array<Array<Double>>] a 12-element array of 24-element arrays of numbers
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
@@ -86,44 +83,36 @@ class HourlyByMonthSchedule
     @schedule = create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
   end
 
-  # TODO
+  # Return the hourly-by-month OpenStudio Schedule object.
   #
-  # @param val [TODO] TODO
-  # @return [TODO] TODO
-  def calc_design_level(val)
-    return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with hourly-by-month schedule
   def schedule
     return @schedule
   end
 
-  # TODO
+  # Return the schedule max value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def maxval
     return @maxval
   end
 
   private
 
-  # TODO
+  # Ensure that defined schedule value arrays are the correct lengths.
   #
-  # @param vals [TODO] TODO
-  # @param num_outter_values [TODO] TODO
-  # @param num_inner_values [TODO] TODO
-  # @return [TODO] TODO
-  def validate_values(vals, num_outter_values, num_inner_values)
-    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
+  # @param vals [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  # @param num_outer_values [Integer] expected number of values in the outer array
+  # @param num_inner_values [Integer] expected number of values in the inner arrays
+  # @return [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  def validate_values(vals, num_outer_values, num_inner_values)
+    err_msg = "A #{num_outer_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
     end
 
     begin
-      if vals.length != num_outter_values
+      if vals.length != num_outer_values
         fail err_msg
       end
 
@@ -141,9 +130,9 @@ class HourlyByMonthSchedule
     return vals
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -152,14 +141,14 @@ class HourlyByMonthSchedule
     return maxval
   end
 
-  # TODO
+  # Create the ruleset OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
   # @param year [Integer] the calendar year
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Ruleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
     day_startm = Schedule.day_start_months(year)
     day_endm = Schedule.day_end_months(year)
@@ -261,14 +250,11 @@ end
 
 # Annual schedule defined by 365 24-hour values for weekdays and weekends.
 class HourlyByDaySchedule
-  # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
-  # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
-  # @param weekday_day_by_hour_values [TODO] TODO
-  # @param weekend_day_by_hour_values [TODO] TODO
-  # @param normalize_values [TODO] TODO
+  # @param weekday_day_by_hour_values [Array<Array<Double>>] a 365-element array of 24-element arrays of numbers
+  # @param weekend_day_by_hour_values [Array<Array<Double>>] a 365-element array of 24-element arrays of numbers
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
@@ -284,44 +270,36 @@ class HourlyByDaySchedule
     @schedule = create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
   end
 
-  # TODO
+  # Return the hourly-by-day OpenStudio Schedule object.
   #
-  # @param val [TODO] TODO
-  # @return [TODO] TODO
-  def calc_design_level(val)
-    return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with hourly-by-day schedule
   def schedule
     return @schedule
   end
 
-  # TODO
+  # Return the schedule max value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def maxval
     return @maxval
   end
 
   private
 
-  # TODO
+  # Ensure that defined schedule value arrays are the correct lengths.
   #
-  # @param vals [TODO] TODO
-  # @param num_outter_values [TODO] TODO
-  # @param num_inner_values [TODO] TODO
-  # @return [TODO] TODO
-  def validate_values(vals, num_outter_values, num_inner_values)
-    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
+  # @param vals [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  # @param num_outer_values [Integer] expected number of values in the outer array
+  # @param num_inner_values [Integer] expected number of values in the inner arrays
+  # @return [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  def validate_values(vals, num_outer_values, num_inner_values)
+    err_msg = "A #{num_outer_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
     end
 
     begin
-      if vals.length != num_outter_values
+      if vals.length != num_outer_values
         fail err_msg
       end
 
@@ -339,9 +317,9 @@ class HourlyByDaySchedule
     return vals
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     maxval = [@weekday_day_by_hour_values.flatten.max, @weekend_day_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -350,15 +328,15 @@ class HourlyByDaySchedule
     return maxval
   end
 
-  # TODO
+  # Create the ruleset OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
   # @param year [Integer] the calendar year
-  # @param num_days [TODO] TODO
+  # @param num_days [Integer] the number of days in the calendar year
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Ruleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
     time = []
     for h in 1..24
@@ -455,23 +433,19 @@ class HourlyByDaySchedule
   end
 end
 
-# Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values
+# Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values.
 class MonthWeekdayWeekendSchedule
-  # weekday_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
-  # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
-  # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
-  # @param weekday_hourly_values [TODO] TODO
-  # @param weekend_hourly_values [TODO] TODO
-  # @param monthly_values [TODO] TODO
+  # @param weekday_hourly_values [String or Array<Double>] a comma-separated string of 24 numbers or a 24-element array of numbers
+  # @param weekend_hourly_values [String or Array<Double>] a comma-separated string of 24 numbers or a 24-element array of numbers
+  # @param monthly_values [String or Array<Double>] a comma-separated string of 12 numbers or a 12-element array of numbers
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
-  # @param normalize_values [TODO] TODO
-  # @param begin_month [TODO] TODO
-  # @param begin_day [TODO] TODO
-  # @param end_month [TODO] TODO
-  # @param end_day [TODO] TODO
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
+  # @param begin_month [Integer] TODO
+  # @param begin_day [Integer] TODO
+  # @param end_month [Integer] TODO
+  # @param end_day [Integer] TODO
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
@@ -494,35 +468,35 @@ class MonthWeekdayWeekendSchedule
                                 schedule_type_limits_name, unavailable_periods)
   end
 
-  # TODO
+  # Calculate the design level from daily kWh.
   #
-  # @param daily_kwh [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_kwh [Double] daily energy use (kWh)
+  # @return [Double] design level used to represent maximum input (W)
   def calc_design_level_from_daily_kwh(daily_kwh)
     design_level_kw = daily_kwh * @maxval * @schadjust
     return UnitConversions.convert(design_level_kw, 'kW', 'W')
   end
 
-  # TODO
+  # Calculate the design level from daily therm.
   #
-  # @param daily_therm [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_therm [Double] daily energy use (therm)
+  # @return [Double] design level used to represent maximum input (W)
   def calc_design_level_from_daily_therm(daily_therm)
     return calc_design_level_from_daily_kwh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
   end
 
-  # TODO
+  # Calculate the water design level from daily use.
   #
-  # @param daily_water [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_water [Double] daily water use (gal/day)
+  # @return [Double] design level used to represent maximum input (m3/s)
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
   end
 
-  # TODO
+  # Return the month-weekday-weekend OpenStudio Schedule object.
   #
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with month-weekday-weekend schedule
   def schedule
     return @schedule
   end
@@ -555,9 +529,9 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / avg }
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
       maxval = @monthly_values.max * @weekday_hourly_values.max
@@ -590,7 +564,7 @@ class MonthWeekdayWeekendSchedule
     return 1 / sum_wkdy
   end
 
-  # TODO
+  # Create the constant OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -601,7 +575,7 @@ class MonthWeekdayWeekendSchedule
   # @param end_day [TODO] TODO
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, begin_month, begin_day, end_month, end_day,
                       schedule_type_limits_name, unavailable_periods)
     month_num_days = Constants.NumDaysInMonths(year)
@@ -739,11 +713,11 @@ module Schedule
     return 'weekend'
   end
 
-  # return [Double] The total number of full load hours for this schedule.
+  # Get the total number of full load hours for this schedule.
   #
-  # @param modelYear [TODO] TODO
-  # @param schedule [TODO] TODO
-  # @return [TODO] TODO
+  # @param modelYear [Integer] the calendar year
+  # @param schedule [OpenStudio::Model::ScheduleInterval or OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object
+  # @return [Double] annual equivalent full load hours
   def self.annual_equivalent_full_load_hrs(modelYear, schedule)
     if schedule.to_ScheduleInterval.is_initialized
       timeSeries = schedule.to_ScheduleInterval.get.timeSeries
@@ -836,10 +810,10 @@ module Schedule
     return annual_flh
   end
 
-  # TODO
+  # Set the lower/upper limit values and numeric type for the given schedule type limits.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param schedule [TODO] TODO
+  # @param schedule [OpenStudio::Model::ScheduleInterval or OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
   # @return [void]
   def self.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
@@ -2160,7 +2134,7 @@ class SchedulesFile
     return schedule_file
   end
 
-  # the equivalent number of hours in the year, if the schedule was at full load (1.0)
+  # The equivalent number of hours in the year, if the schedule was at full load (1.0).
   #
   # @param col_name [TODO] TODO
   # @param schedules [TODO] TODO
@@ -2173,7 +2147,7 @@ class SchedulesFile
     return ann_equiv_full_load_hrs
   end
 
-  # the equivalent number of hours in the period, if the schedule was at full load (1.0)
+  # The equivalent number of hours in the period, if the schedule was at full load (1.0).
   #
   # @param col_name [TODO] TODO
   # @param schedules [TODO] TODO
@@ -2230,7 +2204,7 @@ class SchedulesFile
     return equiv_full_load_hrs
   end
 
-  # the power in watts the equipment needs to consume so that, if it were to run annual_equivalent_full_load_hrs hours,
+  # The power in watts the equipment needs to consume so that, if it were to run annual_equivalent_full_load_hrs hours,
   # it would consume the annual_kwh energy in the year. Essentially, returns the watts for the equipment when schedule
   # is at 1.0, so that, for the given schedule values, the equipment will consume annual_kwh energy in a year.
   #
@@ -2251,7 +2225,7 @@ class SchedulesFile
     return design_level
   end
 
-  # Similar to ann_equiv_full_load_hrs, but for thermal energy
+  # Similar to ann_equiv_full_load_hrs, but for thermal energy.
   #
   # @param col_name [TODO] TODO
   # @param annual_therm [TODO] TODO
@@ -2268,8 +2242,7 @@ class SchedulesFile
     return design_level
   end
 
-  # similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design
-  # level
+  # Similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design level.
   #
   # @param col_name [TODO] TODO
   # @param daily_kwh [TODO] TODO
@@ -2290,7 +2263,7 @@ class SchedulesFile
     return design_level
   end
 
-  # similar to calc_design_level_from_daily_kwh but for water usage
+  # Similar to calc_design_level_from_daily_kwh but for water usage.
   #
   # @param col_name [TODO] TODO
   # @param daily_water [TODO] TODO
@@ -2312,13 +2285,12 @@ class SchedulesFile
     return peak_flow
   end
 
-  # TODO
+  # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods.
   #
   # @param col_name [TODO] TODO
   # @param periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [void]
   def create_column_values_from_periods(col_name, periods)
-    # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
     num_days_in_year = Constants.NumDaysInYear(@year)
     steps_in_day = n_steps / num_days_in_year
@@ -2347,11 +2319,10 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Expand schedules with fewer elements such that all the schedules have the same number of elements.
   #
-  # @return [TODO] TODO
+  # @return [void]
   def expand_schedules
-    # Expand schedules with fewer elements such that all the schedules have the same number of elements
     max_size = @schedules.map { |_k, v| v.size }.uniq.max
     @schedules.each do |col, values|
       if values.size < max_size
@@ -2364,7 +2335,7 @@ class SchedulesFile
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
-  # @return [TODO] TODO
+  # @return [void]
   def set_unavailable_periods(runner, unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -2405,7 +2376,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [void]
   def convert_setpoints
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
@@ -2423,7 +2394,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [void]
   def create_battery_charging_discharging_schedules
     battery_col_name = Columns[:Battery].name
     return if !@schedules.keys.include?(battery_col_name)
