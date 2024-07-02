@@ -3772,9 +3772,8 @@ end
 module HPXMLFile
   # create the closed-form geometry, and then call individual set_xxx methods
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
-    epw_file = OpenStudio::EpwFile.new(epw_path)
     if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
-      weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
+      weather = WeatherFile.new(epw_path: epw_path, runner: nil)
     end
 
     success = create_geometry_envelope(runner, model, args)
@@ -3818,13 +3817,13 @@ module HPXMLFile
     set_secondary_heating_systems(hpxml_bldg, args)
     set_hvac_distribution(hpxml_bldg, args)
     set_hvac_blower(hpxml_bldg, args)
-    set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
+    set_hvac_control(hpxml, hpxml_bldg, args, weather)
     set_ventilation_fans(hpxml_bldg, args)
     set_water_heating_systems(hpxml_bldg, args)
     set_hot_water_distribution(hpxml_bldg, args)
     set_water_fixtures(hpxml_bldg, args)
-    set_solar_thermal(hpxml_bldg, args, epw_file)
-    set_pv_systems(hpxml_bldg, args, epw_file)
+    set_solar_thermal(hpxml_bldg, args, weather)
+    set_pv_systems(hpxml_bldg, args, weather)
     set_battery(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
@@ -3859,7 +3858,7 @@ module HPXMLFile
       end
 
       eri_version = Constants.ERIVersions[-1]
-      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -6080,12 +6079,11 @@ module HPXMLFile
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @param weather [WeatherProcess] Weather object
-  def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
+  # @param weather [WeatherFile] Weather object
+  def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -6103,7 +6101,7 @@ module HPXMLFile
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period]
         if hvac_control_heating_season_period == HPXML::BuildingAmerica
           heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
-          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
           begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_heating_season_period)
@@ -6132,7 +6130,7 @@ module HPXMLFile
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period]
         if hvac_control_cooling_season_period == HPXML::BuildingAmerica
           _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
-          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
           begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_cooling_season_period)
@@ -6499,8 +6497,8 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  def self.set_solar_thermal(hpxml_bldg, args, epw_file)
+  # @param weather [WeatherFile] Weather object
+  def self.set_solar_thermal(hpxml_bldg, args, weather)
     return if args[:solar_thermal_system_type] == 'none'
 
     if args[:solar_thermal_solar_fraction] > 0
@@ -6510,7 +6508,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
@@ -6548,8 +6546,8 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  def self.set_pv_systems(hpxml_bldg, args, epw_file)
+  # @param weather [WeatherFile] Weather object
+  def self.set_pv_systems(hpxml_bldg, args, weather)
     return unless args[:pv_system_present]
 
     if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
@@ -6559,7 +6557,7 @@ module HPXMLFile
       end
     end
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
