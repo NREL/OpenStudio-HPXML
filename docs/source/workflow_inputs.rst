@@ -583,6 +583,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
   Element                                  Type      Units      Constraints                        Required  Default   Notes
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
+  ``YearBuilt``                            integer              > 0                                See [#]_            Year of dwelling unit being built
   ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
   ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
@@ -594,6 +595,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   ``ConditionedBuildingVolume``            double    ft3        > 0                                No        See [#]_  Volume within conditioned space boundary (including a conditioned basement/crawlspace)
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
 
+  .. [#] YearBuilt is required when :ref:`infil_leakiness_description` is the only air leakage type specified.
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
@@ -951,6 +953,7 @@ In addition, one of the following air leakage types must also be defined:
 - :ref:`infil_ach_cfm`
 - :ref:`infil_natural_ach_cfm`
 - :ref:`infil_ela`
+- :ref:`infil_leakiness_description`
 
 .. note::
 
@@ -1007,6 +1010,26 @@ Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   ``EffectiveLeakageArea``              double  sq. in.  >= 0         Yes                                   Effective leakage area value
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
+
+.. _infil_leakiness_description:
+
+Leakiness Description
+~~~~~~~~~~~~~~~~~~~~~~
+
+If entering air leakage as Leakiness Description, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Leakiness Description is a qualitative description of infiltration air leakiness. ACCA Manual J Table 5A/5B is used to look up the design ACH values for hvac sizing
+(with HPXML "very tight" maps to Manual J "Tight", HPXML "tight" maps to Manual J "Semi-Tight", HPXML "average" maps to Manual J "Average", HPXML "leaky" maps to Manual J "Semi-Loose", HPXML "very leaky" maps to Manual J "Loose").
+Annual average SLA will be estimated with leakiness description, iecc zone, year built, conditioned floor area, average ceiling height, foundation type, and ducts. When other air leakage inputs are entered(ACH, CFM or SLA), leakiness description input will be ignored.
+
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  Element                               Type    Units    Constraints  Required   Default                    Notes
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+  ``LeakinessDescription``              string           See [#]_     Yes                                   Leakiness Description of Air Leakage
+  ====================================  ======  =======  ===========  =========  =========================  ===============================================
+
+  .. [#] LeakinessDescription choices are "very tight", "tight", "average", "leaky" or "very leaky".
+  
+Additional information is entered in ``BuildingConstruction``.
 
 .. _flueorchimney:
 

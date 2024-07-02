@@ -206,6 +206,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-ventilation-recovery' => ['Expected 0 element(s) for xpath: TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency',
                                                                'Expected 0 element(s) for xpath: SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency'],
                             'invalid-window-height' => ['Expected DistanceToBottomOfWindow to be greater than DistanceToTopOfWindow [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0], id: "Window2"]'],
+                            'leakiness-description-missing-year-built' => ['Expected 1 element(s) for xpath: BuildingSummary/BuildingConstruction/YearBuilt'],
                             'lighting-fractions' => ['Expected sum(LightingGroup/FractionofUnitsInLocation) for Location="interior" to be less than or equal to 1 [context: /HPXML/Building/BuildingDetails/Lighting, id: "MyBuilding"]'],
                             'manufactured-home-reference-duct' => ['There are references to "manufactured home belly" or "manufactured home underbelly" but ResidentialFacilityType is not "manufactured home".',
                                                                    'A location is specified as "manufactured home belly" but no surfaces were found adjacent to the "manufactured home underbelly" space type.'],
@@ -618,6 +619,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['invalid-window-height'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-enclosure-overhangs.xml')
         hpxml_bldg.windows[1].overhangs_distance_to_bottom_of_window = 1.0
+      elsif ['leakiness-description-missing-year-built'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')
+        hpxml_bldg.building_construction.year_built = nil
       elsif ['lighting-fractions'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         int_cfl = hpxml_bldg.lighting_groups.find { |lg| lg.location == HPXML::LocationInterior && lg.lighting_type == HPXML::LightingTypeCFL }
@@ -1092,7 +1096,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unique-objects-vary-across-units-tmains' => ['Unique object (OS:Site:WaterMainsTemperature) has different values across dwelling units.'],
                             'whole-mf-building-batteries' => ['Modeling batteries for whole SFA/MF buildings is not currently supported.'],
                             'whole-mf-building-dehumidifiers-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for dehumidifiers.'],
-                            'whole-mf-building-gshps-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'] }
+                            'whole-mf-building-gshps-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'],
+                            'wrong-infiltration-method-blower-door' => ['Missing air leakage inputs.'],
+                            'wrong-infiltration-method-default-table' => ['Missing leakiness description inputs.'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -1598,6 +1604,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['whole-mf-building-gshps-unit-multiplier'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.building_construction.number_of_units = 2
+      elsif ['wrong-infiltration-method-blower-door'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
+      elsif ['wrong-infiltration-method-default-table'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
       else
         fail "Unhandled case: #{error_case}."
       end

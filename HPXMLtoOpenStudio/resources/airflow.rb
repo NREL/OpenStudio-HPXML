@@ -216,11 +216,15 @@ module Airflow
   def self.get_infiltration_measurement_of_interest(infil_measurements)
     # Returns the infiltration measurement that has the minimum information needed for simulation
     infil_measurements.each do |measurement|
-      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+      if measurement.air_leakage
+        if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+          return measurement
+        elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+          return measurement
+        end
+      elsif measurement.effective_leakage_area
         return measurement
-      elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
-        return measurement
-      elsif !measurement.effective_leakage_area.nil?
+      elsif measurement.leakiness_description
         return measurement
       end
     end
@@ -275,6 +279,109 @@ module Airflow
     a_ext = 1.0 if a_ext.nil?
 
     return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
+  end
+
+  # Calculate ACH50 for annual energy simulation when only leakiness description is provided
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Float] Calculated ACH50 value based on IECC zone, cfa, infiltration height, year built, foundation type, ducts and leakiness description
+  def self.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, leakiness_description)
+    # Constants
+    c_floor_area = -0.002078
+    c_height = 0.06375
+    # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
+    leakage_multiplier = { HPXML::LeakinessVeryTight => 0.355,
+                           HPXML::LeakinessTight => 0.686,
+                           HPXML::LeakinessAverage => 1.0,
+                           HPXML::LeakinessLeaky => 1.549,
+                           HPXML::LeakinessVeryLeaky => 2.085 }[leakiness_description]
+    # Vintage
+    c_vintage = nil
+    if year_built < 1960
+      c_vintage = -0.2498
+    elsif year_built <= 1969
+      c_vintage = -0.4327
+    elsif year_built <= 1979
+      c_vintage = -0.4521
+    elsif year_built <= 1989
+      c_vintage = -0.6536
+    elsif year_built <= 1999
+      c_vintage = -0.9152
+    elsif year_built >= 2000
+      c_vintage = -1.058
+    else
+      fail "Unexpected vintage: #{year_built}"
+    end
+
+    # Climate zone
+    c_iecc = nil
+    if (iecc_cz == '1A') || (iecc_cz == '2A')
+      c_iecc = 0.4727
+    elsif iecc_cz == '3A'
+      c_iecc = 0.2529
+    elsif iecc_cz == '4A'
+      c_iecc = 0.3261
+    elsif iecc_cz == '5A'
+      c_iecc = 0.1118
+    elsif (iecc_cz == '6A') || (iecc_cz == '7')
+      c_iecc = 0.0
+    elsif (iecc_cz == '2B') || (iecc_cz == '3B')
+      c_iecc = -0.03755
+    elsif (iecc_cz == '4B') || (iecc_cz == '5B')
+      c_iecc = -0.008774
+    elsif iecc_cz == '6B'
+      c_iecc = 0.01944
+    elsif iecc_cz == '3C'
+      c_iecc = 0.04827
+    elsif iecc_cz == '4C'
+      c_iecc = 0.2584
+    elsif iecc_cz == '8'
+      c_iecc = -0.5119
+    else
+      fail "Unexpected IECC climate zone: #{c_iecc}"
+    end
+
+    # Foundation type (weight by area)
+    c_foundation = 0.0
+    foundations.each do |area_fraction, foundation_type|
+      case foundation_type
+      when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
+        c_foundation -= 0.036992 * area_fraction
+      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented
+        c_foundation += 0.108713 * area_fraction
+      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceConditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
+        c_foundation += 0.180352 * area_fraction
+      else
+        fail "Unexpected foundation type: #{foundation_type}"
+      end
+    end
+
+    c_duct = 0.0
+    ducts.each do |frac, duct_location|
+      if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
+        c_duct -= 0.12381 * frac
+      elsif [HPXML::LocationAtticUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationGarage, HPXML::LocationCrawlspaceUnvented].include? duct_location
+        c_duct += 0.07126 * frac
+      elsif HPXML::vented_locations.include? duct_location
+        c_duct += 0.18072 * frac
+      else
+        fail "Unexpected duct location: #{duct_location}"
+      end
+    end
+
+    floor_area_m2 = UnitConversions.convert(cfa, 'ft^2', 'm^2')
+    height_m = UnitConversions.convert(ncfl_ag * ceil_height, 'ft', 'm') + 0.5
+
+    # Normalized leakage
+    nl = Math.exp(floor_area_m2 * c_floor_area +
+                  height_m * c_height + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
+
+    # Specific Leakage Area
+    sla = nl / (1000.0 * ncfl_ag**0.3)
+
+    ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
+
+    return ach50
   end
 
   # TODO

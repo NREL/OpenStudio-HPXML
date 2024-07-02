@@ -1349,11 +1349,56 @@ module HVACSizing
   # @return [void]
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-    sla = infil_values[:sla] * infil_values[:a_ext]
-    ela = sla * cfa
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
+      if !measurement.unit_of_measure && !measurement.unit_of_measure
+        fail 'Missing air leakage inputs.'
+      end
 
-    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+      sla = infil_values[:sla] * infil_values[:a_ext]
+      ela = sla * cfa
+      ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+
+      # Determine if we are in a higher or lower shielding class
+      # Combines the effects of terrain and wind shielding
+      shielding_class = 4
+      if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
+        shielding_class += 1
+      elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
+        shielding_class -= 1
+      end
+      if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
+        shielding_class += 1
+      elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
+        shielding_class -= 1
+      end
+      shielding_class = [[shielding_class, 5].min, 1].max
+
+      # Set stack/wind coefficients from Tables 5D/5E
+      c_s = 0.015 * ncfl_ag
+      c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
+
+      ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
+      windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
+      windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+      # Calculate infiltration airflow rates
+      icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
+      icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
+      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+    elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
+      if !measurement.leakiness_description
+        fail 'Missing leakiness description inputs.'
+      end
+
+      ach_htg, ach_clg = get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, measurement.infiltration_volume)
+      q_fireplace = get_mj_fireplace_cfm_by_leakiness(measurement)
+      icfm_cool = (ach_clg * measurement.infiltration_volume) / 60.0
+      icfm_heat = (ach_htg * measurement.infiltration_volume) / 60.0
+    else
+      fail 'Unexpected error.'
+    end
 
     # Check for fireplace (for heating infiltration adjustment)
     has_fireplace = false
@@ -1363,38 +1408,9 @@ module HVACSizing
     if hpxml_bldg.heating_systems.count { |htg| htg.heating_system_type == HPXML::HVACTypeFireplace } > 0
       has_fireplace = true
     end
-    q_fireplace = 0.0
     if has_fireplace
-      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+      icfm_heat += q_fireplace
     end
-
-    # Determine if we are in a higher or lower shielding class
-    # Combines the effects of terrain and wind shielding
-    shielding_class = 4
-    if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
-      shielding_class += 1
-    elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
-      shielding_class -= 1
-    end
-    if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
-      shielding_class += 1
-    elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
-      shielding_class -= 1
-    end
-    shielding_class = [[shielding_class, 5].min, 1].max
-
-    # Set stack/wind coefficients from Tables 5D/5E
-    c_s = 0.015 * ncfl_ag
-    c_w = (0.0065 - 0.00266 * (shielding_class - 3)) * ncfl_ag**0.4
-
-    ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
-    windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
-    windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
-
-    # Calculate infiltration airflow rates
-    icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
-    icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
-    icfm_heat += q_fireplace
 
     # Calculate ventilation airflow rates
     ventilation_data = get_ventilation_data(hpxml_bldg)
@@ -3168,17 +3184,17 @@ module HVACSizing
     vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    # In-unit CFMs (include recirculation from in unit CFMs for shared systems)
+    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
 
-    # Average preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
-    q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
-    q_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
-    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
+    # Preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
+    q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
+    q_precool = vent_mech_precool.map { |vent_mech| vent_mech.oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
+    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.total_unit_flow_rate - vent_mech.oa_unit_flow_rate }.sum(0.0)
 
     # Total CFMS
     q_tot_sup = q_sup_tot + q_bal_tot + q_erv_hrv_tot + q_cfis_tot
@@ -3194,8 +3210,8 @@ module HVACSizing
     bal_sens_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
     vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      bal_lat_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      bal_sens_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      bal_lat_eff += vent_mech.oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      bal_sens_eff += vent_mech.oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
 
     return { q_unbal: q_unbal, q_bal: q_bal, q_preheat: q_preheat, q_precool: q_precool,
@@ -3979,6 +3995,95 @@ module HVACSizing
     fail "Unexpected Table 4A wall group: #{table_4a_wall_group}" if ashrae_wall_group.nil?
 
     return ashrae_wall_group
+  end
+
+  # return ACH lookup values from Manual J Table 5A & Table 5B based on leakiness description
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param leakiness_description [String] Leakiness description to look up the infiltration ach value
+  # @param infiltration_volume [Float] Volume associated with infiltration measurement
+  # @return [Array<Float, Float>] Heating and cooling ACH values from Manual J Table 5A/5B
+  def self.get_mj_default_ach_values(hpxml_bldg, leakiness_description, infiltration_volume)
+    mj_cfa = (infiltration_volume / 8.0).ceil # Word doc for Bob Ross Residence says using 3001 sqft, I assume that table 5A and 5B has assumption of 8 ft ceiling, so areas are adjusted to keep volume correct
+    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+    # Manual J Table 5A
+    ach_table_sfd_htg = [
+      # single story
+      { HPXML::LeakinessVeryTight => [0.21, 0.16, 0.14, 0.11, 0.10],
+        HPXML::LeakinessTight => [0.41, 0.31, 0.26, 0.22, 0.19],
+        HPXML::LeakinessAverage => [0.61, 0.45, 0.38, 0.32, 0.28],
+        HPXML::LeakinessLeaky => [0.95, 0.70, 0.59, 0.49, 0.43],
+        HPXML::LeakinessVeryLeaky => [1.29, 0.94, 0.80, 0.66, 0.58] },
+      # two story
+      { HPXML::LeakinessVeryTight => [0.27, 0.20, 0.18, 0.15, 0.13],
+        HPXML::LeakinessTight => [0.53, 0.39, 0.34, 0.28, 0.25],
+        HPXML::LeakinessAverage => [0.79, 0.58, 0.50, 0.41, 0.37],
+        HPXML::LeakinessLeaky => [1.23, 0.90, 0.77, 0.63, 0.56],
+        HPXML::LeakinessVeryLeaky => [1.67, 1.22, 1.04, 0.85, 0.75] }
+    ]
+    ach_table_sfd_clg = [
+      # single story
+      { HPXML::LeakinessVeryTight => [0.11, 0.08, 0.07, 0.06, 0.05],
+        HPXML::LeakinessTight => [0.22, 0.16, 0.14, 0.11, 0.10],
+        HPXML::LeakinessAverage => [0.32, 0.23, 0.20, 0.16, 0.15],
+        HPXML::LeakinessLeaky => [0.50, 0.36, 0.31, 0.25, 0.23],
+        HPXML::LeakinessVeryLeaky => [0.67, 0.49, 0.42, 0.34, 0.30] },
+      # two story
+      { HPXML::LeakinessVeryTight => [0.14, 0.11, 0.09, 0.08, 0.07],
+        HPXML::LeakinessTight => [0.28, 0.21, 0.18, 0.15, 0.13],
+        HPXML::LeakinessAverage => [0.41, 0.30, 0.26, 0.21, 0.19],
+        HPXML::LeakinessLeaky => [0.64, 0.47, 0.40, 0.33, 0.29],
+        HPXML::LeakinessVeryLeaky => [0.87, 0.64, 0.54, 0.44, 0.39] }
+    ]
+    # Manual J Table 5B
+    ach_table_mf_htg = { HPXML::LeakinessVeryTight => [0.24, 0.18, 0.15, 0.13, 0.12],
+                         HPXML::LeakinessTight => [0.47, 0.34, 0.29, 0.25, 0.22],
+                         HPXML::LeakinessAverage => [0.69, 0.50, 0.43, 0.36, 0.32],
+                         HPXML::LeakinessLeaky => [1.08, 0.78, 0.67, 0.55, 0.49],
+                         HPXML::LeakinessVeryLeaky => [1.46, 1.06, 0.91, 0.74, 0.65] }
+    ach_table_mf_clg = { HPXML::LeakinessVeryTight => [0.13, 0.09, 0.08, 0.07, 0.06],
+                         HPXML::LeakinessTight => [0.25, 0.18, 0.16, 0.13, 0.12],
+                         HPXML::LeakinessAverage => [0.36, 0.27, 0.23, 0.19, 0.17],
+                         HPXML::LeakinessLeaky => [0.57, 0.42, 0.36, 0.29, 0.26],
+                         HPXML::LeakinessVeryLeaky => [0.77, 0.56, 0.48, 0.39, 0.34] }
+    groupings = [lambda { |v| v <= 900.0 },
+                 lambda { |v| v > 900.0 && v <= 1500.0 },
+                 lambda { |v| v > 1500.0 && v <= 2000.0 },
+                 lambda { |v| v > 2000.0 && v <= 3000.0 },
+                 lambda { |v| v > 3000.0 }]
+    index = nil
+    groupings.each_with_index do |fn, i|
+      if fn.call(mj_cfa)
+        index = i
+        break
+      end
+    end
+
+    if hpxml_bldg.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
+      if ncfl_ag < 2
+        ach_htg = ach_table_sfd_htg[0][leakiness_description][index]
+        ach_clg = ach_table_sfd_clg[0][leakiness_description][index]
+      else
+        ach_htg = ach_table_sfd_htg[1][leakiness_description][index]
+        ach_clg = ach_table_sfd_clg[1][leakiness_description][index]
+      end
+    else
+      ach_htg = ach_table_mf_htg[leakiness_description][index]
+      ach_clg = ach_table_mf_clg[leakiness_description][index]
+    end
+    return ach_htg, ach_clg
+  end
+
+  # return fireplace cfm lookup values from Manual J Table 5A & Table 5B based on leakiness description
+  #
+  # @param measurement [HPXML::AirInfiltrationMeasurement] HPXML AirInfiltrationMeasurement object to process leakiness description from
+  # @return [Float] fireplace cfm value from Manual J Table 5A/5B
+  def self.get_mj_fireplace_cfm_by_leakiness(measurement)
+    return { HPXML::LeakinessVeryTight => 0.0,
+             HPXML::LeakinessTight => 13.0,
+             HPXML::LeakinessAverage => 20.0,
+             HPXML::LeakinessLeaky => 27.0,
+             HPXML::LeakinessVeryLeaky => 33.0 }[measurement.leakiness_description]
   end
 
   # Calculates a crude approximation for the average R-value of a set of surfaces.
