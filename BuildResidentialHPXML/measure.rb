@@ -3772,7 +3772,12 @@ end
 module HPXMLFile
   # create the closed-form geometry, and then call individual set_xxx methods
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
-    if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
+    if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) ||
+       (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) ||
+       (args[:solar_thermal_system_type] != 'none' && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
+       (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
+       (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
+       (args[:apply_defaults])
       weather = WeatherFile.new(epw_path: epw_path, runner: nil)
     end
 
@@ -6083,7 +6088,7 @@ module HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -6508,7 +6513,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
+      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
@@ -6557,7 +6562,7 @@ module HPXMLFile
       end
     end
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],

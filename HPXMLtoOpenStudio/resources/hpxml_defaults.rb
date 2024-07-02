@@ -690,7 +690,7 @@ module HPXMLDefaults
 
       if hpxml_bldg.dst_enabled
         if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
-          if (not weather.header.DSTStartDate.nil?) && (not weather.DSTEndDate.nil?)
+          if (not weather.header.DSTStartDate.nil?) && (not weather.header.DSTEndDate.nil?)
             # Use weather file DST dates if available
             dst_start_date = weather.header.DSTStartDate
             dst_end_date = weather.header.DSTEndDate
