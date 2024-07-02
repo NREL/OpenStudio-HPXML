@@ -6079,7 +6079,7 @@ module HPXMLFile
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
@@ -6497,7 +6497,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   def self.set_solar_thermal(hpxml_bldg, args, weather)
     return if args[:solar_thermal_system_type] == 'none'
 
@@ -6546,7 +6546,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   def self.set_pv_systems(hpxml_bldg, args, weather)
     return unless args[:pv_system_present]
 

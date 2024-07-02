@@ -470,7 +470,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param epw_path [String] Path to the EPW weather file
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param debug [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
@@ -1047,7 +1047,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_foundation_walls_slabs(runner, model, weather, spaces)
@@ -1260,7 +1260,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param slab [TODO] TODO
   # @param z_origin [TODO] TODO
@@ -1728,7 +1728,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_hot_water_and_appliances(runner, model, weather, spaces)
@@ -1812,7 +1812,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -1867,7 +1867,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -1940,7 +1940,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -2051,7 +2051,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_setpoints(runner, model, weather, spaces)
@@ -2068,7 +2068,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_ceiling_fans(runner, model, weather, spaces)
@@ -2203,7 +2203,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO

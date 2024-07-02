@@ -5,7 +5,7 @@ module Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
@@ -35,7 +35,7 @@ module Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.apply_year(model, hpxml_header, weather)
     if Date.leap?(hpxml_header.sim_calendar_year)
@@ -69,7 +69,7 @@ module Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_ground_temps(model, weather, hpxml_bldg)
@@ -152,7 +152,7 @@ module Location
   # TODO
   #
   # @param sim_calendar_year [TODO] TODO
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_sim_calendar_year(sim_calendar_year, weather)
     if not weather.nil? # AMY

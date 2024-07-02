@@ -195,7 +195,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param args [Hash] Map of :argument_name => value
   # @return [Boolean] true if successful
   def create_schedules(runner, hpxml, hpxml_bldg, weather, args)
@@ -236,7 +236,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # Get simulation parameters that are required for the stochastic schedule generator.
   #
   # @param hpxml [HPXML] HPXML object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param args [Hash] Map of :argument_name => value
   def get_simulation_parameters(hpxml, weather, args)
     args[:minutes_per_step] = 60
@@ -256,7 +256,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # Get generator inputs that are required for the stochastic schedule generator.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param args [Hash] Map of :argument_name => value
   def get_generator_inputs(hpxml_bldg, weather, args)
     state_code = HPXMLDefaults.get_default_state_code(hpxml_bldg.state_code, weather)

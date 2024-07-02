@@ -21,7 +21,7 @@ module HPXMLDefaults
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
   # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
@@ -168,7 +168,7 @@ module HPXMLDefaults
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.apply_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_header.timestep.nil?
@@ -235,7 +235,7 @@ module HPXMLDefaults
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [void]
   def self.apply_building_header_sizing(runner, hpxml_bldg, weather, nbeds)
@@ -345,7 +345,7 @@ module HPXMLDefaults
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_bldg.header.natvent_days_per_week.nil?
@@ -589,7 +589,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::Building object
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.apply_building(hpxml_bldg, weather)
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
@@ -861,7 +861,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::ClimateandRiskZones object
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.apply_climate_and_risk_zones(hpxml_bldg, weather)
     if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
@@ -1562,7 +1562,7 @@ module HPXMLDefaults
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
   # @return [void]
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
@@ -2442,7 +2442,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::VentilationFan objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
@@ -3313,7 +3313,7 @@ module HPXMLDefaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [void]
   def self.apply_ceiling_fans(hpxml_bldg, nbeds, weather, schedules_file)
@@ -3688,7 +3688,7 @@ module HPXMLDefaults
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
   # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
   # @return [void]
@@ -3820,7 +3820,7 @@ module HPXMLDefaults
   # Gets the default latitude from the HPXML file or, as backup, weather file.
   #
   # @param latitude [Double] Latitude from the HPXML file (degrees)
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Default value for latitude (degrees)
   def self.get_default_latitude(latitude, weather)
     return latitude unless latitude.nil?
@@ -3831,7 +3831,7 @@ module HPXMLDefaults
   # Gets the default longitude from the HPXML file or, as backup, weather file.
   #
   # @param longitude [Double] Longitude from the HPXML file (degrees)
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Default value for longitude (degrees)
   def self.get_default_longitude(longitude, weather)
     return longitude unless longitude.nil?
@@ -3842,7 +3842,7 @@ module HPXMLDefaults
   # Gets the default time zone from the HPXML file or, as backup, weather file.
   #
   # @param time_zone [Double] Time zone (UTC offset) from the HPXML file
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [Double] Default value for time zone (UTC offset)
   def self.get_default_time_zone(time_zone, weather)
     return time_zone unless time_zone.nil?
@@ -3853,7 +3853,7 @@ module HPXMLDefaults
   # Gets the default state code from the HPXML file or, as backup, weather file.
   #
   # @param state_code [String] State code from the HPXML file
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [String] Uppercase state code
   def self.get_default_state_code(state_code, weather)
     return state_code unless state_code.nil?

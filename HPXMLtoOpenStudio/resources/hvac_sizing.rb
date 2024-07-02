@@ -7,7 +7,7 @@ module HVACSizing
   # Calculations follow ACCA Manual J (and S).
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports capacities/airflows
@@ -193,7 +193,7 @@ module HVACSizing
   # Assigns site values and design temperatures to the mj object.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.process_site_calcs_and_design_temps(mj, weather, hpxml_bldg)
@@ -336,7 +336,7 @@ module HVACSizing
   # Determines the heating design temperature for the given location (space type).
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param location [String] The HPXML::LocationXXX of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Heating design temperature (F)
@@ -389,7 +389,7 @@ module HVACSizing
   # Determines the cooling design temperature for the given location (space type).
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param location [String] The HPXML::LocationXXX of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Cooling design temperature (F)
@@ -1345,7 +1345,7 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param all_zone_loads [Hash] Map of HPXML::Zones => DesignLoadValues object
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
@@ -1836,7 +1836,7 @@ module HVACSizing
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [void]
   def self.apply_hvac_duct_loads_cooling(mj, zone, hvac_loads, zone_loads, all_space_loads, hvac_cooling, hpxml_bldg, weather)
     return if hvac_cooling.nil? || (hvac_loads.Cool_Sens <= 0) || hvac_cooling.distribution_system.nil? || hvac_cooling.distribution_system.ducts.empty?
@@ -2005,7 +2005,7 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
@@ -2709,7 +2709,7 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
@@ -2808,7 +2808,7 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_cooling [HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [Array<Double, Double>] Nominal heating length, nominal cooling length (ft/ton)
   def self.get_geothermal_loop_borefield_ft_per_ton(mj, hpxml_bldg, geothermal_loop, weather, hvac_cooling)
@@ -3076,7 +3076,7 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
   # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
@@ -3627,7 +3627,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [String] The HPXML::LocationXXX of interest
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Hash] UA values for adjacency to outdoor air, ground, or conditioned space (Btu/hr-F)
   def self.get_space_ua_values(mj, location, weather, hpxml_bldg)
@@ -3719,7 +3719,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param location [String] The HPXML::LocationXXX of interest
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param setpoint_temp [Double] The conditioned space heating or cooling setpoint temperature (F)
   # @param design_db [Double] The outdoor heating or cooling design temperature (F)

@@ -64,7 +64,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create(args:,
              weather:)
@@ -93,7 +93,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherFile] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create_stochastic_schedules(args:,
                                   weather:)
