@@ -2,6 +2,8 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
+  - Allows modeling systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
