@@ -1351,7 +1351,7 @@ module HVACSizing
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
-      if !measurement.unit_of_measure && !measurement.unit_of_measure
+      if !measurement.unit_of_measure && !measurement.effective_leakage_area
         fail 'Missing air leakage inputs.'
       end
 
