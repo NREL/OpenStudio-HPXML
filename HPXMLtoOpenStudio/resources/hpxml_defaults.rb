@@ -343,6 +343,19 @@ module HPXMLDefaults
     elsif (hpxml_bldg.header.manualj_num_occupants - sum_space_manualj_num_occupants).abs >= 1 # Tolerance for rounding
       runner.registerWarning("ManualJInputs/NumberofOccupants (#{hpxml_bldg.header.manualj_num_occupants}) does not match sum of conditioned spaces (#{sum_space_manualj_num_occupants}).")
     end
+    if hpxml_bldg.header.manualj_infiltration_method.nil?
+      is_blower_door = !hpxml_bldg.air_infiltration_measurements.select { |m| ([HPXML::UnitsACH, HPXML::UnitsCFM].include?(m.unit_of_measure) && !m.house_pressure.nil?) || ([HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? m.unit_of_measure) || !m.effective_leakage_area.nil? }.empty?
+      is_default_table = !hpxml_bldg.air_infiltration_measurements.select { |m| !m.leakiness_description.nil? }.empty?
+
+      if is_blower_door
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
+      elsif is_default_table
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
+      else
+        fail 'Missing air infiltration measurement inputs'
+      end
+      hpxml_bldg.header.manualj_infiltration_method_isdefaulted = true
+    end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object

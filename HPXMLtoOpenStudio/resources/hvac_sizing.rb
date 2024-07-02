@@ -1350,7 +1350,7 @@ module HVACSizing
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
-    if measurement.unit_of_measure || measurement.effective_leakage_area
+    if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
       infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
       sla = infil_values[:sla] * infil_values[:a_ext]
       ela = sla * cfa
@@ -1383,7 +1383,7 @@ module HVACSizing
       icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
       icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
       q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
-    elsif measurement.leakiness_description
+    elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
       ach_htg, ach_clg = get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, measurement.infiltration_volume)
       q_fireplace = get_mj_fireplace_cfm_by_leakiness(measurement)
       icfm_cool = (ach_clg * measurement.infiltration_volume) / 60.0
@@ -3176,17 +3176,17 @@ module HVACSizing
     vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    # In-unit CFMs (include recirculation from in unit CFMs for shared systems)
+    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
+    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.total_unit_flow_rate }.sum(0.0)
 
-    # Average preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
-    q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
-    q_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
-    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
+    # Preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
+    q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
+    q_precool = vent_mech_precool.map { |vent_mech| vent_mech.oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
+    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.total_unit_flow_rate - vent_mech.oa_unit_flow_rate }.sum(0.0)
 
     # Total CFMS
     q_tot_sup = q_sup_tot + q_bal_tot + q_erv_hrv_tot + q_cfis_tot
@@ -3202,8 +3202,8 @@ module HVACSizing
     bal_sens_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
     vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      bal_lat_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      bal_sens_eff += vent_mech.average_oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      bal_lat_eff += vent_mech.oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      bal_sens_eff += vent_mech.oa_unit_flow_rate / q_bal * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
 
     return { q_unbal: q_unbal, q_bal: q_bal, q_preheat: q_preheat, q_precool: q_precool,
@@ -4052,12 +4052,12 @@ module HVACSizing
     end
 
     if hpxml_bldg.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
-      if ncfl_ag > 1
-        ach_htg = ach_table_sfd_htg[1][leakiness_description][index]
-        ach_clg = ach_table_sfd_clg[1][leakiness_description][index]
-      else
+      if ncfl_ag < 2
         ach_htg = ach_table_sfd_htg[0][leakiness_description][index]
         ach_clg = ach_table_sfd_clg[0][leakiness_description][index]
+      else
+        ach_htg = ach_table_sfd_htg[1][leakiness_description][index]
+        ach_clg = ach_table_sfd_clg[1][leakiness_description][index]
       end
     else
       ach_htg = ach_table_mf_htg[leakiness_description][index]

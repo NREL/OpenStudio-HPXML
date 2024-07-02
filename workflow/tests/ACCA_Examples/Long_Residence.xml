@@ -26,9 +26,11 @@
           <ShieldingofHome>normal</ShieldingofHome>
         </Site>
         <BuildingConstruction>
+          <YearBuilt>2000</YearBuilt>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>2.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
+          <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2958.0</ConditionedFloorArea>
         </BuildingConstruction>
@@ -210,11 +212,8 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <HousePressure>50.0</HousePressure>
-            <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>2.8</AirLeakage>
-            </BuildingAirLeakage>
+            <LeakinessDescription>average</LeakinessDescription>
+            <InfiltrationVolume>16269.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>
