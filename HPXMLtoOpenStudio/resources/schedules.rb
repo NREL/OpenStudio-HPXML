@@ -2,14 +2,11 @@
 
 # Annual constant schedule
 class ScheduleConstant
-  # TODO
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, unavailable_periods: [])
     year = model.getYearDescription.assumedYear
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
@@ -76,7 +73,6 @@ class HourlyByMonthSchedule
   # @param weekend_month_by_hour_values [TODO] TODO
   # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -274,7 +270,6 @@ class HourlyByDaySchedule
   # @param weekend_day_by_hour_values [TODO] TODO
   # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -478,7 +473,6 @@ class MonthWeekdayWeekendSchedule
   # @param end_month [TODO] TODO
   # @param end_day [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
                  begin_day = 1, end_month = 12, end_day = 31, unavailable_periods: nil)
@@ -723,7 +717,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 # TODO
-class Schedule
+module Schedule
   # TODO
   #
   # @return [TODO] TODO
@@ -1909,13 +1903,10 @@ end
 class SchedulesFile
   # TODO
   class Column
-    # TODO
-    #
     # @param name [TODO] TODO
     # @param used_by_unavailable_periods [TODO] TODO
     # @param can_be_stochastic [TODO] TODO
     # @param type [TODO] TODO
-    # @return [TODO] TODO
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
       @used_by_unavailable_periods = used_by_unavailable_periods
@@ -1976,14 +1967,11 @@ class SchedulesFile
     WholeHouseFan: Column.new('whole_house_fan', true, false, nil),
   }
 
-  # TODO
-  #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedules_paths [TODO] TODO
   # @param year [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param output_path [TODO] TODO
-  # @return [TODO] TODO
   def initialize(runner: nil,
                  schedules_paths:,
                  year:,

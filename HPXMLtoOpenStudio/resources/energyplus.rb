@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class EPlus
+module EPlus
   # Constants
   EMSActuatorElectricEquipmentPower = 'ElectricEquipment', 'Electricity Rate'
   EMSActuatorOtherEquipmentPower = 'OtherEquipment', 'Power Level'

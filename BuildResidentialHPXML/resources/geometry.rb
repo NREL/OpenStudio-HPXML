@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
-class Geometry
+# Collection of methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
+module Geometry
   # Create a 3D representation of a single-family detached home using the following arguments.
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
-  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
+  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_garage_width [Double] width of the garage (ft)
   # @param geometry_garage_depth [Double] depth of the garage (ft)
   # @param geometry_garage_protrusion [Double] fraction of garage that protrudes from conditioned space
@@ -19,7 +19,7 @@ class Geometry
   # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
-  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
+  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @return [Boolean] true if model is successfully updated with a single-family detached unit
   def self.create_single_family_detached(runner:,
                                          model:,
@@ -650,16 +650,16 @@ class Geometry
   # Create a 3D representation of a single-family attached home using the following arguments.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
-  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
+  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_foundation_type [String] foundation type of the building
   # @param geometry_foundation_height [Double] height of the foundation (ft)
   # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
-  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
+  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
   # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
   # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
@@ -950,16 +950,16 @@ class Geometry
   # Create a 3D representation of an apartment (dwelling unit in a multifamily building) home using the following arguments.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param geometry_unit_cfa [Double] conditioned floor area (ft^2)
+  # @param geometry_unit_cfa [Double] conditioned floor area (ft2)
   # @param geometry_average_ceiling_height [Double] average ceiling height (ft)
   # @param geometry_unit_num_floors_above_grade [Integer] number of floors above grade
-  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length
+  # @param geometry_unit_aspect_ratio [Double] ratio of front/back wall length to left/right wall length (frac)
   # @param geometry_foundation_type [String] foundation type of the building
   # @param geometry_foundation_height [Double] height of the foundation (ft)
   # @param geometry_rim_joist_height [Double] height of the rim joists (ft)
   # @param geometry_attic_type [String] attic type of the building
   # @param geometry_roof_type [String] roof type of the building
-  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run
+  # @param geometry_roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
   # @param geometry_unit_left_wall_is_adiabatic [Boolean] presence of an adiabatic left wall
   # @param geometry_unit_right_wall_is_adiabatic [Boolean] presence of an adiabatic right wall
   # @param geometry_unit_front_wall_is_adiabatic [Boolean] presence of an adiabatic front wall
@@ -1239,7 +1239,7 @@ class Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param door_area [Double] the area of the opaque door(s) (ft^2)
+  # @param door_area [Double] the area of the opaque door(s) (ft2)
   # @return [Boolean] true if successful
   def self.create_doors(runner:,
                         model:,
@@ -1375,19 +1375,19 @@ class Geometry
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param window_front_wwr [Double] ratio of window to wall area for the unit's front facade
-  # @param window_back_wwr [Double] ratio of window to wall area for the unit's back facade
-  # @param window_left_wwr [Double] ratio of window to wall area for the unit's left facade
-  # @param window_right_wwr [Double] ratio of window to wall area for the unit's right facade
-  # @param window_area_front [Double] amount of window area on unit's front facade (ft^2)
-  # @param window_area_back [Double] amount of window area on unit's back facade (ft^2)
-  # @param window_area_left [Double] amount of window area on unit's left facade (ft^2)
-  # @param window_area_right [Double] amount of window area on unit's right facade (ft^2)
-  # @param window_aspect_ratio [Double] ratio of window height to width
-  # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft^2)
-  # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft^2)
-  # @param skylight_area_left [Double] amount of skylight area on the unit's left conditioned roof facade (ft^2)
-  # @param skylight_area_right [Double] amount of skylight area on the unit's right conditioned roof facade (ft^2)
+  # @param window_front_wwr [Double] ratio of window to wall area for the unit's front facade (frac)
+  # @param window_back_wwr [Double] ratio of window to wall area for the unit's back facade (frac)
+  # @param window_left_wwr [Double] ratio of window to wall area for the unit's left facade (frac)
+  # @param window_right_wwr [Double] ratio of window to wall area for the unit's right facade (frac)
+  # @param window_area_front [Double] amount of window area on unit's front facade (ft2)
+  # @param window_area_back [Double] amount of window area on unit's back facade (ft2)
+  # @param window_area_left [Double] amount of window area on unit's left facade (ft2)
+  # @param window_area_right [Double] amount of window area on unit's right facade (ft2)
+  # @param window_aspect_ratio [Double] ratio of window height to width (frac)
+  # @param skylight_area_front [Double] amount of skylight area on the unit's front conditioned roof facade (ft2)
+  # @param skylight_area_back [Double] amount of skylight area on the unit's back conditioned roof facade (ft2)
+  # @param skylight_area_left [Double] amount of skylight area on the unit's left conditioned roof facade (ft2)
+  # @param skylight_area_right [Double] amount of skylight area on the unit's right conditioned roof facade (ft2)
   # @return [Boolean] true if successful
   def self.create_windows_and_skylights(runner:,
                                         model:,
@@ -1954,7 +1954,7 @@ class Geometry
 
   # Get the absolute tilt based on tilt, roof pitch, and latitude.
   #
-  # @param tilt_str [Double, String] tilt (degrees) or RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
+  # @param tilt_str [Double, String] tilt in degrees or RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.
   # @param roof_pitch [Double] roof pitch in vertical rise inches for every 12 inches of horizontal run
   # @param latitude [Double] latitude (degrees)
   # @return [Double] absolute tilt
@@ -2001,8 +2001,6 @@ class Geometry
     return false
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # Get the absolute azimuth based on relative azimuth and building orientation.
   #
   # @param relative_azimuth [Double] relative azimuth (degrees)
@@ -2012,7 +2010,7 @@ class Geometry
                            building_orientation:)
     azimuth = relative_azimuth + building_orientation
 
-    # Ensure azimuth is >=0 and <=360
+    # Ensure azimuth is >=0 and <360
     while azimuth < 0.0
       azimuth += 360.0
     end
@@ -2031,7 +2029,7 @@ class Geometry
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param rim_joist_height [Double] height of the rim joists (ft)
   # @param z [Double] z coordinate of the bottom of the rim joists
-  # @return nil
+  # @return [void]
   def self.add_rim_joist(model:,
                          polygon:,
                          space:,
@@ -2075,7 +2073,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param footprint_polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return nil
+  # @return [void]
   def self.assign_indexes(model:,
                           footprint_polygon:,
                           space:)

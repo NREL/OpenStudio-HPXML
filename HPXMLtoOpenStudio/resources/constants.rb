@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # TODO
-class Constants
+module Constants
   # Numbers --------------------
 
   # TODO
   #
   # @return [TODO] TODO
   def self.AssumedInsideTemp
-    return 73.5 # deg-F
+    return 73.5 # F
   end
 
   # TODO
@@ -131,30 +131,9 @@ class Constants
   # TODO
   #
   # @return [TODO] TODO
-  def self.FossilFuels
-    return [HPXML::FuelTypeNaturalGas,
-            HPXML::FuelTypePropane,
-            HPXML::FuelTypeOil,
-            HPXML::FuelTypeCoal,
-            HPXML::FuelTypeWoodCord,
-            HPXML::FuelTypeWoodPellets]
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
   def self.IECCZones
     return ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
             '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8']
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.MoistureTypes
-    return [HPXML::SiteSoilMoistureTypeDry,
-            HPXML::SiteSoilMoistureTypeMixed,
-            HPXML::SiteSoilMoistureTypeWet]
   end
 
   # TODO
@@ -694,19 +673,6 @@ class Constants
   # @return [TODO] TODO
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.SoilTypes
-    return [HPXML::SiteSoilTypeClay,
-            HPXML::SiteSoilTypeGravel,
-            HPXML::SiteSoilTypeLoam,
-            # HPXML::SiteSoilTypeOther,
-            HPXML::SiteSoilTypeSand,
-            HPXML::SiteSoilTypeSilt,
-            HPXML::SiteSoilTypeUnknown]
   end
 
   # TODO
