@@ -6,6 +6,7 @@ __New Features__
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
+  - Adds optional `InfiltrationMethod` input to specify which infiltration inputs to use for manual J load calculations.
 - Advanced research features:
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 

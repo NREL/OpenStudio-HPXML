@@ -1349,12 +1349,8 @@ module HVACSizing
   # @return [void]
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
-      if !measurement.unit_of_measure && !measurement.effective_leakage_area
-        fail 'Missing air leakage inputs.'
-      end
-
       infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
       sla = infil_values[:sla] * infil_values[:a_ext]
       ela = sla * cfa
@@ -1388,10 +1384,6 @@ module HVACSizing
       icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
       q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
     elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
-      if !measurement.leakiness_description
-        fail 'Missing leakiness description inputs.'
-      end
-
       ach_htg, ach_clg = get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, measurement.infiltration_volume)
       q_fireplace = get_mj_fireplace_cfm_by_leakiness(measurement)
       icfm_cool = (ach_clg * measurement.infiltration_volume) / 60.0

@@ -344,8 +344,8 @@ module HPXMLDefaults
       runner.registerWarning("ManualJInputs/NumberofOccupants (#{hpxml_bldg.header.manualj_num_occupants}) does not match sum of conditioned spaces (#{sum_space_manualj_num_occupants}).")
     end
     if hpxml_bldg.header.manualj_infiltration_method.nil?
-      is_blower_door = !hpxml_bldg.air_infiltration_measurements.select { |m| ([HPXML::UnitsACH, HPXML::UnitsCFM].include?(m.unit_of_measure) && !m.house_pressure.nil?) || ([HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? m.unit_of_measure) || !m.effective_leakage_area.nil? }.empty?
-      is_default_table = !hpxml_bldg.air_infiltration_measurements.select { |m| !m.leakiness_description.nil? }.empty?
+      is_blower_door = !hpxml_bldg.air_infiltration_measurements.select { |m| ([HPXML::UnitsACH, HPXML::UnitsCFM].include?(m.unit_of_measure) && m.house_pressure && m.air_leakage) || ([HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include?(m.unit_of_measure) && m.air_leakage) || m.effective_leakage_area }.empty?
+      is_default_table = !hpxml_bldg.air_infiltration_measurements.select { |m| m.leakiness_description }.empty?
 
       if is_blower_door
         hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
@@ -1020,7 +1020,7 @@ module HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_infiltration(hpxml_bldg)
-    infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
     if infil_measurement.infiltration_volume.nil?
       infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
       infil_measurement.infiltration_volume_isdefaulted = true
@@ -3717,8 +3717,9 @@ module HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_leakiness_description(hpxml_bldg)
-    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
-    return if measurement.unit_of_measure || measurement.effective_leakage_area
+    return unless hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
+
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
 
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade

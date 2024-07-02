@@ -209,26 +209,31 @@ module Airflow
     end
   end
 
-  # TODO
+  # Return the infiltration measurement object based on infiltration method and contains the complete information for modeling
   #
-  # @param infil_measurements [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_infiltration_measurement_of_interest(infil_measurements)
-    # Returns the infiltration measurement that has the minimum information needed for simulation
-    infil_measurements.each do |measurement|
-      if measurement.air_leakage
-        if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
-          return measurement
-        elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return measurement [HPXML::AirInfiltrationMeasurement] AirInfiltrationMeasurement to be used in sizing and simulation
+  def self.get_infiltration_measurement_of_interest(hpxml_bldg)
+    if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
+      hpxml_bldg.air_infiltration_measurements.each do |measurement|
+        # Returns the infiltration measurement that has the minimum information needed for simulation
+        if measurement.air_leakage
+          if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+            return measurement
+          elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+            return measurement
+          end
+        elsif measurement.effective_leakage_area
           return measurement
         end
-      elsif measurement.effective_leakage_area
-        return measurement
-      elsif measurement.leakiness_description
-        return measurement
       end
+      fail 'Missing air leakage inputs.'
+    elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
+      hpxml_bldg.air_infiltration_measurements.each do |measurement|
+        return measurement if measurement.leakiness_description
+      end
+      fail 'Missing leakiness description inputs.'
     end
-    fail 'Unexpected error.'
   end
 
   # TODO
@@ -238,7 +243,7 @@ module Airflow
   # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-    measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    measurement = get_infiltration_measurement_of_interest(hpxml_bldg)
 
     infil_volume = measurement.infiltration_volume
     infil_height = measurement.infiltration_height

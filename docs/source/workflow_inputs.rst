@@ -771,6 +771,7 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
   ``InternalLoadsSensible``          double    Btu/hr  >= 0         No        See [#]_      Sensible internal loads for cooling design load
   ``InternalLoadsLatent``            double    Btu/hr  >= 0         No        0             Latent internal loads for cooling design load
   ``NumberofOccupants``              integer           >= 0         No        See [#]_      Number of occupants for cooling design load
+  ``InfiltrationMethod``             string            See [#]_     No        See [#]_      Method to calculate infiltration design loads
   =================================  ========  ======  ===========  ========  ============  ============================================
 
   .. [#] If HeatingDesignTemperature not provided, the 99% heating design temperature is obtained from the DESIGN CONDITIONS header section inside the EPW weather file.
@@ -792,6 +793,9 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
   .. [#] If NumberofOccupants not provided, defaults to the sum of conditioned spaces' NumberofOccupants values if provided (see :ref:`zones_spaces`).
          Otherwise defaults to the number of bedrooms plus one per Manual J.
          Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
+  .. [#] InfiltrationMethod choices are "default infiltration table" or "blower door".
+  .. [#] If InfiltrationMethod not provided, defaults based on the current inputs in HPXML, if :ref:`infil_ach_cfm`, :ref:`infil_natural_ach_cfm`, or :ref:`infil_ela` inputs are provided,
+         defaults to "blower door", otherwise if :ref:`infil_leakiness_description` is provided, defaults to "default infiltration table". When both are provided, defaults to "blower door".
 
 .. _shadingcontrol:
 
@@ -1019,7 +1023,7 @@ Leakiness Description
 If entering air leakage as Leakiness Description, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 Leakiness Description is a qualitative description of infiltration air leakiness. ACCA Manual J Table 5A/5B is used to look up the design ACH values for hvac sizing
 (with HPXML "very tight" maps to Manual J "Tight", HPXML "tight" maps to Manual J "Semi-Tight", HPXML "average" maps to Manual J "Average", HPXML "leaky" maps to Manual J "Semi-Loose", HPXML "very leaky" maps to Manual J "Loose").
-Annual average SLA will be estimated with leakiness description, iecc zone, year built, conditioned floor area, average ceiling height, foundation type, and ducts. When other air leakage inputs are entered(ACH, CFM or SLA), leakiness description input will be ignored.
+Annual average SLA will be estimated with leakiness description, iecc zone, year built, conditioned floor area, average ceiling height, foundation type, and ducts.
 
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   Element                               Type    Units    Constraints  Required   Default                    Notes
