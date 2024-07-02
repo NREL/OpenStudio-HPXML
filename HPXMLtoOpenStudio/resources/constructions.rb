@@ -2119,7 +2119,7 @@ module Constructions
   #
   # @param foundation [TODO] TODO
   # @param slab [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param conditioned_zone [TODO] TODO
   # @param sim_begin_month [TODO] TODO
   # @param sim_begin_day [TODO] TODO
