@@ -155,7 +155,7 @@ module Location
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_sim_calendar_year(sim_calendar_year, weather)
-    if not weather.nil? # AMY
+    if (not weather.nil?) & (not weather.header.ActualYearStartDate.nil?) # AMY
       sim_calendar_year = weather.header.ActualYearStartDate
     end
     if sim_calendar_year.nil?
