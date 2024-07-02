@@ -13,7 +13,7 @@ module Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -57,7 +57,7 @@ module Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -104,7 +104,7 @@ module Waterheater
   # @param conditioned_zone [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -203,7 +203,7 @@ module Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -1941,7 +1941,7 @@ module Waterheater
   # @param is_dsh_storage [TODO] TODO
   # @param is_combi [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, runner:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, unavailable_periods: [], unit_multiplier: 1.0)
@@ -2086,7 +2086,7 @@ module Waterheater
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil
@@ -2112,7 +2112,7 @@ module Waterheater
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil

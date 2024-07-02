@@ -870,7 +870,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param dehumidifiers [TODO] TODO
   # @param conditioned_space [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods, unit_multiplier)
@@ -959,7 +959,7 @@ module HVAC
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
@@ -1021,7 +1021,7 @@ module HVAC
   # @param has_ceiling_fan [TODO] TODO
   # @param heating_days [TODO] TODO
   # @param cooling_days [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [TODO] TODO
   def self.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
@@ -1079,7 +1079,7 @@ module HVAC
   # @param htg_weekend_setpoints [TODO] TODO
   # @param clg_weekday_setpoints [TODO] TODO
   # @param clg_weekend_setpoints [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
     # Create setpoint schedules
@@ -1129,7 +1129,7 @@ module HVAC
   # TODO
   #
   # @param hvac_control [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.get_heating_setpoints(hvac_control, year)
     num_days = Constants.NumDaysInYear(year)
@@ -1168,7 +1168,7 @@ module HVAC
   #
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @param weather [WeatherProcess] Weather object
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
@@ -3702,7 +3702,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fractions [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.get_sequential_load_schedule(model, fractions, unavailable_periods)
     if fractions.nil?

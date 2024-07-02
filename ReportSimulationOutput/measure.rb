@@ -700,7 +700,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param timeseries_frequency [TODO] TODO
   # @param sim_start_day [TODO] TODO
   # @param sim_end_day [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def get_n_hours_per_period(timeseries_frequency, sim_start_day, sim_end_day, year)
     if timeseries_frequency == 'daily'
@@ -1375,7 +1375,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def get_sim_times_of_year(year)
     sim_start_day = Schedule.get_day_num_from_month_day(year, @hpxml_header.sim_begin_month, @hpxml_header.sim_begin_day)
@@ -1390,7 +1390,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   # @param timeseries_frequency [TODO] TODO
   # @param sim_start_day [TODO] TODO
   # @param sim_end_day [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def check_for_errors(runner, outputs)
     tol = 0.1

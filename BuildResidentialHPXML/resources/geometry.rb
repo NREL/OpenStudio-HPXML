@@ -2068,7 +2068,7 @@ module Geometry
     end
   end
 
-  # TODO
+  # For a given polygon and space, assign Index values to the (in order) space, floor surface, wall surfaces, and roofceiling surface.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param footprint_polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
@@ -2116,11 +2116,11 @@ module Geometry
     end
   end
 
-  # Index any remaining surfaces created from intersecting/matching
-  # We can't deterministically assign indexes to these surfaces
+  # Index any remaining surfaces created from intersecting/matching.
+  # We can't deterministically assign indexes to these surfaces.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [void]
   def self.assign_remaining_surface_indexes(model:)
     model.getSurfaces.each do |surface|
       next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
@@ -2129,21 +2129,21 @@ module Geometry
     end
   end
 
-  # TODO
+  # Create a new OpenStudio space and assign an Index to it.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   def self.create_space(model:)
     space = OpenStudio::Model::Space.new(model)
     space.additionalProperties.setFeature('Index', indexer(model: model))
     return space
   end
 
-  # TODO
+  # Create a new OpenStudio surface and assign an Index to it.
   #
-  # @param polygon [TODO] TODO
+  # @param polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   def self.create_surface(polygon:,
                           model:)
     surface = OpenStudio::Model::Surface.new(polygon, model)
@@ -2151,11 +2151,11 @@ module Geometry
     return surface
   end
 
-  # TODO
+  # Create a new OpenStudio subsurface and assign an Index to it.
   #
-  # @param polygon [TODO] TODO
+  # @param polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::SubSurface] an OpenStudio::Model::SubSurface object
   def self.create_sub_surface(polygon:,
                               model:)
     sub_surface = OpenStudio::Model::SubSurface.new(polygon, model)
@@ -2163,10 +2163,11 @@ module Geometry
     return sub_surface
   end
 
-  # TODO
+  # Search through all spaces, surfaces, and subsurfaces, and populate an array of Index values.
+  # Return an Index integer value equal to one more than the max of existing Index values.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [Integer] the incremented Index value
   def self.indexer(model:)
     indexes = [0]
     (model.getSpaces + model.getSurfaces + model.getSubSurfaces).each do |s|
@@ -2177,11 +2178,11 @@ module Geometry
     return indexes.max + 1
   end
 
-  # TODO
+  # Determine whether two OpenStudio surface objects share the same set of vertices.
   #
   # @param surface1 [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param surface2 [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [Boolean] true if two surfaces share the same vertices
   def self.has_same_vertices(surface1:,
                              surface2:)
     if get_surface_x_values(surfaceArray: [surface1]).sort == get_surface_x_values(surfaceArray: [surface2]).sort &&
@@ -2196,7 +2197,7 @@ module Geometry
 
   # Creates a polygon using an array of points.
   #
-  # @param pts [Array<OpenStudio::Point3d] array of OpenStudio Point3d objects
+  # @param pts [Array<OpenStudio::Point3d>] array of OpenStudio Point3d objects
   # @return [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new
@@ -2218,10 +2219,10 @@ module Geometry
     return m
   end
 
-  # TODO
+  # Return the z value for the floor surface of a space.
   #
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [TODO] TODO
+  # @return [Double] the z value corresponding to floor surface in the provided space
   def self.get_space_floor_z(space:)
     space.surfaces.each do |surface|
       next unless surface.surfaceType.downcase == 'floor'
@@ -2233,9 +2234,9 @@ module Geometry
   # TODO
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param min_average_ceiling_height_for_window [TODO] TODO
-  # @param min_window_width [TODO] TODO
-  # @return [TODO] TODO
+  # @param min_average_ceiling_height_for_window [Double] TODO
+  # @param min_window_width [Double] TODO
+  # @return [Double] the gross area of the surface for which windows may be applied (ft2)
   def self.get_wall_area_for_windows(surface:,
                                      min_average_ceiling_height_for_window:,
                                      min_window_width:)
@@ -2271,15 +2272,15 @@ module Geometry
   # TODO
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param window_area [TODO] TODO
-  # @param window_gap_y [TODO] TODO
-  # @param window_gap_x [TODO] TODO
-  # @param window_aspect_ratio [TODO] TODO
-  # @param max_single_window_area [TODO] TODO
-  # @param facade [TODO] TODO
+  # @param window_area [Double] amount of window area (ft2)
+  # @param window_gap_y [Double] distance from top of wall (ft)
+  # @param window_gap_x [Double] distance between windows in a two-window group (ft)
+  # @param window_aspect_ratio [Double] ratio of window height to width (frac)
+  # @param max_single_window_area [Double] maximum area for a single window (ft2)
+  # @param facade [String] front, back, left, or right
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @return [TODO] TODO
+  # @return [Boolean] true if TODO
   def self.add_windows_to_wall(surface:,
                                window_area:,
                                window_gap_y:,
@@ -2375,14 +2376,14 @@ module Geometry
   # TODO
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param win_width [TODO] TODO
-  # @param win_height [TODO] TODO
-  # @param win_center_x [TODO] TODO
-  # @param win_center_y [TODO] TODO
-  # @param win_num [TODO] TODO
-  # @param facade [TODO] TODO
+  # @param win_width [Double] width of the window (ft)
+  # @param win_height [Double] height of the window (ft)
+  # @param win_center_x [Double] TODO
+  # @param win_center_y [Double] TODO
+  # @param win_num [Integer] TODO
+  # @param facade [String] front, back, left, or right
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
+  # @return [void]
   def self.add_window_to_wall(surface:,
                               win_width:,
                               win_height:,
@@ -2433,10 +2434,10 @@ module Geometry
     sub_surface.setSubSurfaceType('FixedWindow')
   end
 
-  # TODO
+  # From a provided array of OpenStudio spaces, return the subset for which the standards space type is equal to the HPXML location for conditioned space.
   #
   # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
-  # @return [TODO] TODO
+  # @return [Array<OpenStudio::Model::Space>] array of conditioned OpenStudio spaces
   def self.get_conditioned_spaces(spaces:)
     conditioned_spaces = []
     spaces.each do |space|
@@ -2447,10 +2448,10 @@ module Geometry
     return conditioned_spaces
   end
 
-  # TODO
+  # From a provided array of OpenStudio spaces, return the subset for which the standards space type is equal to the HPXML location for garage.
   #
   # @param spaces [Array<OpenStudio::Model::Space>] array of OpenStudio::Model::Space objects
-  # @return [TODO] TODO
+  # @return [Array<OpenStudio::Model::Space>] array of garage OpenStudio spaces
   def self.get_garage_spaces(spaces:)
     garage_spaces = []
     spaces.each do |space|
@@ -2461,10 +2462,13 @@ module Geometry
     return garage_spaces
   end
 
-  # TODO
+  # An OpenStudio surface is a rectangular wall if:
+  # - surface type is wall
+  # - outside boundary condition is outdoors
+  # - vertically oriented with 4 vertices
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [Boolean] true if surface satisfies rectangular wall criteria
   def self.is_rectangular_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
       return false
@@ -2487,10 +2491,14 @@ module Geometry
     return true
   end
 
-  # TODO
+  # An OpenStudio surface is a gable wall if:
+  # - surface type is wall
+  # - outside boundary condition is outdoors
+  # - has 3 vertices
+  # - its space has a roof
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [Boolean] true if surface satisfies gable wall criteria
   def self.is_gable_wall(surface:)
     if ((surface.surfaceType.downcase != 'wall') || (surface.outsideBoundaryCondition.downcase != 'outdoors'))
       return false
@@ -2510,10 +2518,13 @@ module Geometry
     return true
   end
 
-  # TODO
+  # An OpenStudio space has a roof if there is at least one surface that:
+  # - surface type is roofceiling
+  # - outside boundary condition is outdoors
+  # - tilt is zero
   #
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [TODO] TODO
+  # @return [Boolean] true if space has a roof deck
   def self.space_has_roof(space:)
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != 'roofceiling'
@@ -2525,17 +2536,17 @@ module Geometry
     return false
   end
 
-  # TODO
+  # Create and return an OpenStudio attic space provided the following information.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param x [TODO] TODO
-  # @param y [TODO] TODO
-  # @param average_ceiling_height [TODO] TODO
-  # @param num_floors [TODO] TODO
-  # @param roof_pitch [TODO] TODO
-  # @param roof_type [TODO] TODO
-  # @param rim_joist_height [TODO] TODO
-  # @return [TODO] TODO
+  # @param x [Double] the front-back length (m)
+  # @param y [Double] the left-right length (m)
+  # @param average_ceiling_height [Double] average ceiling height (m)
+  # @param num_floors [Integer] number of floors
+  # @param roof_pitch [Double] ratio of vertical rise to horizontal run (frac)
+  # @param roof_type [String] roof type of the building
+  # @param rim_joist_height [Double] height of the rim joists (ft)
+  # @return [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   def self.get_attic_space(model:,
                            x:,
                            y:,
@@ -2632,9 +2643,9 @@ module Geometry
   # Shift all spaces up by foundation height for ambient foundation.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param foundation_type [TODO] TODO
-  # @param foundation_height [TODO] TODO
-  # @return [TODO] TODO
+  # @param foundation_type [String] HPXML location for foundation type
+  # @param foundation_height [Double] height of the foundation (m)
+  # @return [void]
   def self.apply_ambient_foundation_shift(model:,
                                           foundation_type:,
                                           foundation_height:)
@@ -2650,10 +2661,10 @@ module Geometry
     end
   end
 
-  # Returns true if space is either fully or partially below grade.
+  # Returns true if space is either fully or partially below grade (i.e., space has a surface with outside boundary condition of foundation).
   #
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [TODO] TODO
+  # @return [Boolean] true if space is below grade
   def self.space_is_below_grade(space:)
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != 'wall'
@@ -2664,16 +2675,15 @@ module Geometry
     return false
   end
 
-  # TODO
+  # Checks if point p is between points v1 and v2.
   #
   # @param p [OpenStudio::Point3d] an OpenStudio::Point3dVector object
   # @param v1 [OpenStudio::Point3d] an OpenStudio::Point3dVector object
   # @param v2 [OpenStudio::Point3d] an OpenStudio::Point3dVector object
-  # @return [TODO] TODO
+  # @return [Boolean] true if point is between the other two points
   def self.is_point_between(p:,
                             v1:,
                             v2:)
-    # Checks if point p is between points v1 and v2
     is_between = false
     tol = 0.001
     if ((p[2] - v1[2]).abs <= tol) && ((p[2] - v2[2]).abs <= tol) # equal z
@@ -2694,12 +2704,12 @@ module Geometry
     return is_between
   end
 
-  # TODO
+  # Get and return an array of OpenStudio wall surfaces that are adjacent to an OpenStudio floor surface.
   #
   # @param wall_surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
   # @param floor_surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param same_space [TODO] TODO
-  # @return [TODO] TODO
+  # @param same_space [Boolean] true if connected walls should share the space of the floor surface
+  # @return [Array<OpenStudio::Model::Surface>] subset of wall surfaces adjacent to the floor surface
   def self.get_walls_connected_to_floor(wall_surfaces:,
                                         floor_surface:,
                                         same_space: true)
@@ -2739,8 +2749,8 @@ module Geometry
   # TODO
   #
   # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @param use_top_edge [TODO] TODO
-  # @return [TODO] TODO
+  # @param use_top_edge [Boolean] true if matching on max z values for surfaces
+  # @return [Array<TODO>] TODO
   def self.get_edges_for_surfaces(surfaces:,
                                   use_top_edge:)
     edges = []
