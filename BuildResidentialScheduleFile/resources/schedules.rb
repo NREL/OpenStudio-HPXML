@@ -47,18 +47,13 @@ class ScheduleGenerator
     @append_output = append_output
   end
 
+  attr_accessor(:schedules)
+
   # TODO
   #
   # @return [TODO] TODO
   def self.export_columns
     return SchedulesFile::Columns.values.select { |c| c.can_be_stochastic }.map { |c| c.name }
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
   end
 
   # TODO

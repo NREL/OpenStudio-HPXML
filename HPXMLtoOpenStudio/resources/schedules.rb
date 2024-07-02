@@ -12,12 +12,7 @@ class ScheduleConstant
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
   end
 
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
+  attr_accessor(:schedule)
 
   private
 
@@ -86,26 +81,14 @@ class HourlyByMonthSchedule
     @schedule = create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule, :maxval)
+
   # TODO
   #
   # @param val [TODO] TODO
   # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def maxval
-    return @maxval
   end
 
   private
@@ -284,26 +267,14 @@ class HourlyByDaySchedule
     @schedule = create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule, :maxval)
+
   # TODO
   #
   # @param val [TODO] TODO
   # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def maxval
-    return @maxval
   end
 
   private
@@ -494,6 +465,8 @@ class MonthWeekdayWeekendSchedule
                                 schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule)
+
   # TODO
   #
   # @param daily_kwh [TODO] TODO
@@ -518,13 +491,6 @@ class MonthWeekdayWeekendSchedule
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
   end
 
   private
@@ -1990,6 +1956,8 @@ class SchedulesFile
     export()
   end
 
+  attr_accessor(:schedules, :tmp_schedules)
+
   # TODO
   #
   # @return [TODO] TODO
@@ -2091,20 +2059,6 @@ class SchedulesFile
     end
 
     return true
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def tmp_schedules
-    return @tmp_schedules
   end
 
   # TODO
