@@ -539,6 +539,13 @@
   </sch:pattern>
 
   <sch:pattern>
+    <sch:title>[AirLeakage]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement/h:BuildingAirLeakage[h:AirLeakage]'>
+      <sch:assert role='ERROR' test='count(h:UnitofMeasure) = 1'>Expected 1 element(s) for xpath: UnitofMeasure</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
     <sch:title>[AirInfiltrationMeasurement=ACHorCFM]</sch:title>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM"]]'>
       <sch:assert role='ERROR' test='count(h:HousePressure) = 1'>Expected 1 element(s) for xpath: HousePressure</sch:assert>

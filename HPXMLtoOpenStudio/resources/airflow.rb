@@ -216,13 +216,15 @@ module Airflow
   def self.get_infiltration_measurement_of_interest(infil_measurements)
     # Returns the infiltration measurement that has the minimum information needed for simulation
     infil_measurements.each do |measurement|
-      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+      if measurement.air_leakage
+        if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+          return measurement
+        elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+          return measurement
+        end
+      elsif measurement.effective_leakage_area
         return measurement
-      elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
-        return measurement
-      elsif !measurement.effective_leakage_area.nil?
-        return measurement
-      elsif !measurement.leakiness_description.nil?
+      elsif measurement.leakiness_description
         return measurement
       end
     end
