@@ -503,10 +503,10 @@ class MonthWeekdayWeekendSchedule
 
   private
 
-  # TODO
+  # Divide each value in the array by the sum of all values in the array.
   #
-  # @param values [TODO] TODO
-  # @return [TODO] TODO
+  # @param values [Array<Double>] an array of numbers
+  # @return [Array<Double>] normalized values that sum to one
   def normalize_sum_to_one(values)
     sum = values.reduce(:+).to_f
     if sum == 0.0
@@ -516,10 +516,10 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / sum }
   end
 
-  # TODO
+  # Divide each value in the array by the average all values in the array.
   #
-  # @param values [TODO] TODO
-  # @return [TODO] TODO
+  # @param values [Array<Double>] an array of numbers
+  # @return [Array<Double>] normalized values that average to one
   def normalize_avg_to_one(values)
     avg = values.reduce(:+).to_f / values.size
     if avg == 0.0
@@ -839,9 +839,9 @@ module Schedule
     schedule.setScheduleTypeLimits(schedule_type_limits)
   end
 
-  # TODO
+  # Apply true for all weekday days of an OpenStudio ScheduleRule object.
   #
-  # @param rule [TODO] TODO
+  # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
   # @return [void]
   def self.set_weekday_rule(rule)
     rule.setApplyMonday(true)
@@ -851,9 +851,9 @@ module Schedule
     rule.setApplyFriday(true)
   end
 
-  # TODO
+  # Apply true for all weekend days of an OpenStudio ScheduleRule object.
   #
-  # @param rule [TODO] TODO
+  # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
   # @return [void]
   def self.set_weekend_rule(rule)
     rule.setApplySaturday(true)
@@ -1824,12 +1824,12 @@ module Schedule
     fail "Could not find row='#{schedule_name}' in unavailable_periods.csv"
   end
 
-  # TODO
+  # Ensure that the defined schedule value array (or string of numbers) is the correct length.
   #
-  # @param values [TODO] TODO
-  # @param num_values [TODO] TODO
+  # @param values [Array<Double> or String] a num_values-element array of numbers or a comma-seperated string of numbers
+  # @param num_values [Integer] expected number of values in the outer array
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
-  # @return [TODO] TODO
+  # @return [Array<Double>] a num_values-element array of numbers
   def self.validate_values(values, num_values, sch_name)
     err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
     if values.is_a?(Array)
@@ -1864,23 +1864,23 @@ module Schedule
     return floats
   end
 
-  # TODO
+  # Check whether string is a valid float.
   #
-  # @param str [TODO] TODO
-  # @return [TODO] TODO
+  # @param str [String] string representation of a possible float
+  # @return [Boolean] true if valid float
   def self.valid_float?(str)
     !!Float(str) rescue false
   end
 end
 
-# TODO
+# Wrapper for detailed schedule CSVs.
 class SchedulesFile
-  # TODO
+  # Struct for storing schedule CSV column information.
   class Column
-    # @param name [TODO] TODO
-    # @param used_by_unavailable_periods [TODO] TODO
-    # @param can_be_stochastic [TODO] TODO
-    # @param type [TODO] TODO
+    # @param name [String] the column header of the detailed schedule
+    # @param used_by_unavailable_periods [Boolean] affected by unavailable periods
+    # @param can_be_stochastic [Boolean] detailed stochastic occupancy schedule can be automatically generated
+    # @param type [Symbol] units
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
       @used_by_unavailable_periods = used_by_unavailable_periods
@@ -1942,10 +1942,10 @@ class SchedulesFile
   }
 
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param schedules_paths [TODO] TODO
+  # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
   # @param year [Integer] the calendar year
   # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
-  # @param output_path [TODO] TODO
+  # @param output_path [String] the file path for which to export a single detailed schedule CSV file and also reference from OpenStudio ScheduleFile objects
   def initialize(runner: nil,
                  schedules_paths:,
                  year:,
@@ -1957,16 +1957,16 @@ class SchedulesFile
     import(schedules_paths)
     create_battery_charging_discharging_schedules
     expand_schedules
-    @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+    @tmp_schedules = Marshal.load(Marshal.dump(@schedules)) # make a deep copy because we use unmodified schedules downstream
     set_unavailable_periods(runner, unavailable_periods)
     convert_setpoints
     @output_schedules_path = output_path
     export()
   end
 
-  # TODO
+  # Check if any detailed schedules are referenced.
   #
-  # @return [TODO] TODO
+  # @return [Boolean] true if SchedulesFile was instantiated without any schedule file paths
   def nil?
     if @schedules.nil?
       return true
@@ -1975,10 +1975,10 @@ class SchedulesFile
     return false
   end
 
-  # TODO
+  # Check whether the detailed schedules include a specific column.
   #
-  # @param col_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @return [Boolean] true if schedules include the provided column name.
   def includes_col_name(col_name)
     if @schedules.keys.include?(col_name)
       return true
@@ -1987,10 +1987,10 @@ class SchedulesFile
     return false
   end
 
-  # TODO
+  # Assemble schedules from all detailed schedule CSVs into a hash.
   #
-  # @param schedules_paths [TODO] TODO
-  # @return [TODO] TODO
+  # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
+  # @return [void]
   def import(schedules_paths)
     num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
@@ -2050,9 +2050,9 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Export a single detailed schedule CSV file.
   #
-  # @return [TODO] TODO
+  # @return [Boolean] true if schedule is exported
   def export()
     return false if @output_schedules_path.nil?
 
@@ -2067,24 +2067,25 @@ class SchedulesFile
     return true
   end
 
-  # TODO
+  # Return the hash of (unmodified) detailed schedule values.
   #
-  # @return [TODO] TODO
+  # @return [Hash] the (unmodified) detailed schedules
   def schedules
     return @schedules
   end
 
-  # TODO
+  # Return the hash of (actual) detailed schedule values.
+  # These are the schedules referenced by OpenStudio ScheduleFile objects.
   #
-  # @return [TODO] TODO
+  # @return [Hash] the (actual) detailed schedules
   def tmp_schedules
     return @tmp_schedules
   end
 
-  # TODO
+  # Get the column index from the schedules hash to be referenced by OpenStudio ScheduleFile objects.
   #
-  # @param col_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @return [Integer] the column index of the hash
   def get_col_index(col_name:)
     headers = @tmp_schedules.keys
 
@@ -2092,13 +2093,13 @@ class SchedulesFile
     return col_num
   end
 
-  # TODO
+  # Create a new OpenStudio ScheduleFile object for a column name if one doesn't already exist.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param col_name [TODO] TODO
-  # @param rows_to_skip [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @param rows_to_skip [Integer] number of metadata rows (column headers) in detailed schedule CSV
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::ScheduleFile] an OpenStudio ScheduleFile object
   def create_schedule_file(model, col_name:, rows_to_skip: 1,
                            schedule_type_limits_name: nil)
     model.getScheduleFiles.each do |schedule_file|
