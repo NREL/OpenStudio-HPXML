@@ -324,7 +324,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -980,7 +980,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -1040,7 +1040,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_control [TODO] TODO
   # @param conditioned_zone [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
@@ -1201,7 +1201,7 @@ module HVAC
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param offset_db [Float] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, offset_db)
@@ -1812,7 +1812,7 @@ module HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
@@ -1827,7 +1827,7 @@ module HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param latitude [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_heating_and_cooling_seasons(weather, latitude)
@@ -3631,7 +3631,7 @@ module HVAC
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
 
     number_of_timestep_logged = 5 # wait 5 mins to check demand
-    
+
     is_heatpump = cooling_system.is_a? HPXML::HeatPump
 
     # Sensors
@@ -4250,7 +4250,7 @@ module HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties

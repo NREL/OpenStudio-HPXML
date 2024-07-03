@@ -161,8 +161,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Process weather once upfront
       epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
-      weather = WeatherProcess.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
-      epw_file = OpenStudio::EpwFile.new(epw_path)
+      weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
         next if i == 0
         next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
@@ -190,11 +189,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
         schedules_file = SchedulesFile.new(runner: runner,
                                            schedules_paths: hpxml_bldg.header.schedules_filepaths,
-                                           year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file),
+                                           year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather),
                                            unavailable_periods: hpxml.header.unavailable_periods,
                                            output_path: File.join(args[:output_dir], in_schedules_csv),
                                            offset_db: hpxml.header.hvac_onoff_thermostat_deadband)
-        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file, schedules_file: schedules_file,
+        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, schedules_file: schedules_file,
                                                                              design_load_details_output_file_path: design_load_details_output_file_path,
                                                                              output_format: args[:output_format])
         hpxml_sch_map[hpxml_bldg] = schedules_file
@@ -219,10 +218,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         if hpxml.buildings.size > 1
           # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, epw_file, weather, args[:debug], schedules_file, eri_version, i + 1)
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, args[:debug], schedules_file, eri_version, i + 1)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, args[:debug], schedules_file, eri_version, i + 1)
+          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, args[:debug], schedules_file, eri_version, i + 1)
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
@@ -471,15 +470,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param epw_path [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @param weather [WeatherProcess] Weather object
+  # @param epw_path [String] Path to the EPW weather file
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param debug [TODO] TODO
   # @param schedules_file [TODO] TODO
   # @param eri_version [TODO] TODO
   # @param unit_num [TODO] TODO
   # @return [void]
-  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, epw_file, weather, debug, schedules_file, eri_version, unit_num)
+  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, debug, schedules_file, eri_version, unit_num)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
     @debug = debug
@@ -498,9 +496,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     model.setStrictnessLevel('None'.to_StrictnessLevel)
 
     # Init
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, OpenStudio::EpwFile.new(epw_path))
     set_defaults_and_globals()
-    Location.apply(model, weather, epw_file, @hpxml_header, @hpxml_bldg)
+    Location.apply(model, weather, @hpxml_header, @hpxml_bldg)
     add_simulation_params(model)
 
     # Conditioned space/zone
@@ -1050,7 +1048,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_foundation_walls_slabs(runner, model, weather, spaces)
@@ -1263,7 +1261,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param slab [TODO] TODO
   # @param z_origin [TODO] TODO
@@ -1731,7 +1729,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_hot_water_and_appliances(runner, model, weather, spaces)
@@ -1815,7 +1813,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -1870,7 +1868,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -1943,7 +1941,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
@@ -2003,7 +2001,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param epw_path [TODO] TODO
+  # @param epw_path [String] Path to the EPW weather file
   # @return [TODO] TODO
   def add_ideal_system(model, spaces, epw_path)
     # Adds an ideal air system as needed to meet the load under certain circumstances:
@@ -2052,7 +2050,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_setpoints(runner, model, weather, spaces)
@@ -2069,7 +2067,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_ceiling_fans(runner, model, weather, spaces)
@@ -2204,7 +2202,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param airloop_map [TODO] TODO
   # @return [TODO] TODO
