@@ -2007,7 +2007,7 @@ class Constructions
   # @param soil_k_in [TODO] TODO
   # @return [TODO] TODO
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
-                                       ext_vert_r, ext_vert_depth, concrete_thick_in, soil_k_in)
+                                       ext_vert_r, ext_horiz_r = nil, ext_horiz_width = nil, ext_horiz_depth = nil, ext_vert_depth, concrete_thick_in, soil_k_in)
 
     # Create the Foundation:Kiva object for slab foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -2034,24 +2034,20 @@ class Constructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, 'ft', 'm'))
     end
 
-    # Exterior horizontal insulation
-    if (ext_horiz_r > 0) && (ext_horiz_depth > 0)
-      ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
-      foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
-      foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
+    if ext_horiz_r && ext_horiz_width && ext_horiz_depth
+      # Exterior horizontal insulation
+      if (ext_horiz_r > 0) && (ext_horiz_depth > 0) && (ext_horiz_width > 0)
+        ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
+        foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
+        foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
+        foundation.setExteriorHorizontalInsulationWidth(ext_horiz_width)
+      end
     end
 
     foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, 'in', 'm'))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, 'in', 'm'))
 
     apply_kiva_settings(model, soil_k_in)
-
-    # Exterior vertical insulation
-    if (ext_horiz_r > 0) && (ext_horiz_depth > 0)
-      ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
-      foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
-      foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
-    end
 
     return foundation
   end
