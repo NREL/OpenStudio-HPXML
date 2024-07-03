@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class HVAC
+module HVAC
   AirSourceHeatRatedODB = 47.0 # degF, Rated outdoor drybulb for air-source systems, heating
   AirSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for air-source systems, heating
   AirSourceCoolRatedODB = 95.0 # degF, Rated outdoor drybulb for air-source systems, cooling
@@ -299,7 +299,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -577,7 +577,7 @@ class HVAC
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
-    design_temp = 180.0 # deg-F
+    design_temp = 180.0 # F
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -955,7 +955,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
@@ -1015,7 +1015,7 @@ class HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hvac_control [TODO] TODO
   # @param conditioned_zone [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
@@ -1169,7 +1169,7 @@ class HVAC
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
     num_days = Constants.NumDaysInYear(year)
@@ -1776,13 +1776,13 @@ class HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
     months = [0] * 12
     weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-      next unless val > 63.0 # deg-F
+      next unless val > 63.0 # F
 
       months[m] = 1
     end
@@ -1791,7 +1791,7 @@ class HVAC
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param latitude [TODO] TODO
   # @return [TODO] TODO
   def self.get_default_heating_and_cooling_seasons(weather, latitude)
@@ -1857,8 +1857,6 @@ class HVAC
 
     return heating_season, cooling_season
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
@@ -3490,7 +3488,7 @@ class HVAC
       clg_ap.cool_rated_shrs_gross = [cooling_system.cooling_shr] # We don't model the fan separately, so set gross == net
     else
       # rated shr gross and fan speed ratios
-      dB_rated = 80.0 # deg-F
+      dB_rated = 80.0 # F
       win = 0.01118470 # Humidity ratio corresponding to 80F dry bulb/67F wet bulb (from EnergyPlus)
 
       if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -3638,13 +3636,13 @@ class HVAC
   # TODO
   #
   # @param heat_pump [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.set_gshp_assumptions(heat_pump, weather)
     hp_ap = heat_pump.additional_properties
     geothermal_loop = heat_pump.geothermal_loop
 
-    hp_ap.design_chw = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.DeepGroundAnnualTemp + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
+    hp_ap.design_chw = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.DeepGroundAnnualTemp + 10.0].max # Temperature of water entering indoor coil, use 85F as lower bound
     hp_ap.design_delta_t = 10.0
     hp_ap.fluid_type = Constants.FluidPropyleneGlycol
     hp_ap.frac_glycol = 0.2 # This was changed from 0.3 to 0.2 -- more typical based on experts/spec sheets
@@ -3790,8 +3788,8 @@ class HVAC
     hp_ap = heat_pump.additional_properties
 
     # Sets:
-    # 1. Minimum temperature (deg-F) for HP compressor operation
-    # 2. Maximum temperature (deg-F) for HP supplemental heating operation
+    # 1. Minimum temperature (F) for HP compressor operation
+    # 2. Maximum temperature (F) for HP supplemental heating operation
     if not heat_pump.backup_heating_switchover_temp.nil?
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp

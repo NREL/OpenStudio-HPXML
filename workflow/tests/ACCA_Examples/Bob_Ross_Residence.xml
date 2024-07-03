@@ -1477,6 +1477,11 @@
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>93.0</DuctSurfaceArea>
                 </Ducts>
+                <extension>
+                  <ManualJInputs>
+                    <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
+                  </ManualJInputs>
+                </extension>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>

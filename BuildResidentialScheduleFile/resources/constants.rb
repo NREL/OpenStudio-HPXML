@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Constants
+module Constants
   # TODO
   #
   # @return [TODO] TODO
