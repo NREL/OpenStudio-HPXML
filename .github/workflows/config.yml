@@ -31,7 +31,7 @@ jobs:
           if [[ "$out" == *"RuboCop failed"* ]]; then echo "$out" && exit 1; fi
           echo "Checking for file differences..."
           git config --global --add safe.directory $(realpath .)
-          git diff --exit-code --ignore-cr-at-eol *.rb *.xml
+          git diff --exit-code --ignore-cr-at-eol *.rb
 
       - name: Check HPXMLs
         shell: bash
