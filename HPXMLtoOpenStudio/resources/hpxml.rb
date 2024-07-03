@@ -1922,7 +1922,7 @@ class HPXML < Object
       end
 
       if site.children.size == 0
-        bldg_summary = XMLHelper.get_element(doc, '/HPXML/Building/BuildingDetails/BuildingSummary')
+        bldg_summary = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary')
         XMLHelper.delete_element(bldg_summary, 'Site')
       end
     end

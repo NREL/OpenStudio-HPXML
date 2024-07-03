@@ -3466,7 +3466,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
 
   .. [#] All other UsedFor... elements (i.e., ``UsedForLocalVentilation``, ``UsedForSeasonalCoolingLoadReduction``, ``UsedForGarageVentilation``) must be omitted or false.
-  .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan" or "supplemental fan".
+  .. [#] AdditionalRuntimeOperatingMode choices are "air handler fan", "supplemental fan", or "none".
   .. [#] SupplementalFan must reference another ``VentilationFan`` where UsedForWholeBuildingVentilation=true, IsSharedSystem=false, and FanType="exhaust only" or "supply only".
   .. [#] SupplementalFan only required if AdditionalRuntimeOperatingMode is "supplemental fan".
   .. [#] If flow rate not provided, defaults to the required mechanical ventilation rate per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_:
@@ -3486,7 +3486,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
          OpenStudio-HPXML does not currently support defaulting flow rates for multiple mechanical ventilation fans.
          
   .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
-  .. [#] The HoursInOperation and the flow rate are combined to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
+  .. [#] HoursInOperation is combined with the flow rate to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
   .. [#] If FanPower not provided, defaults to 0.58 W/cfm based on ANSI/RESNET/ICC 301-2022 Addendum C.
   .. [#] HVACDistribution type cannot be :ref:`hvac_distribution_hydronic`.
   .. [#] Blower airflow rate when operating in ventilation only mode (i.e., not heating or cooling mode), as a fraction of the maximum blower airflow rate.

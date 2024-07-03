@@ -3129,6 +3129,9 @@
     "mech_vent_fan_power": 300,
     "mech_vent_num_units_served": 1
   },
+  "sample_files/base-mechvent-cfis-no-additional-runtime.xml": {
+    "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
+  },
   "sample_files/base-mechvent-cfis-supplemental-fan-exhaust.xml": {
     "parent_hpxml": "sample_files/base-mechvent-cfis.xml"
   },
