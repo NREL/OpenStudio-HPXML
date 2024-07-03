@@ -135,7 +135,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_heat_pump_backup_heating_capacity_increment', false)
     arg.setDisplayName('Simulation Control: Heat Pump Backup Heating Capacity Increment')
-    arg.setDescription("Research feature to model capacity increment of the multi-staging heat pump backup system with time-based staging. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.")
+    arg.setDescription("Research feature to model capacity increment of multi-stage heat pump backup systems with time-based staging. Only applies to air-source heat pumps where Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.")
     arg.setUnits('Btu/hr')
     args << arg
 

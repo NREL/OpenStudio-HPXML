@@ -18,11 +18,11 @@ module HVAC
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param weather_max_drybulb [TODO] TODO
   # @param weather_min_drybulb [TODO] TODO
-  # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_header [HPXML::Header] HPXML Header
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [TODO] TODO
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
@@ -266,7 +266,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param cooling_system [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
@@ -328,7 +328,7 @@ module HVAC
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param ground_conductivity [TODO] TODO
   # @param ground_diffusivity [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
@@ -537,7 +537,7 @@ module HVAC
   # @param heat_pump [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_water_loop_to_air_heat_pump(model, heat_pump,
@@ -591,7 +591,7 @@ module HVAC
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
@@ -785,7 +785,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_electric_baseboard(model, heating_system,
@@ -810,7 +810,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param heating_system [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_unit_heater(model, heating_system,
@@ -855,7 +855,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sequential_cool_load_fracs [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_ideal_air_loads(model, sequential_cool_load_fracs,
@@ -1046,7 +1046,7 @@ module HVAC
   # @param has_ceiling_fan [TODO] TODO
   # @param heating_days [TODO] TODO
   # @param cooling_days [TODO] TODO
-  # @param hpxml_header [HPXML::Header] HPXML Header
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [TODO] TODO
   def self.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, heating_days, cooling_days, hpxml_header, schedules_file)
@@ -1158,7 +1158,7 @@ module HVAC
   #
   # @param hvac_control [TODO] TODO
   # @param year [TODO] TODO
-  # @param offset_db [Float] On-off thermostat deadband in deg-F
+  # @param offset_db [Float] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_heating_setpoints(hvac_control, year, offset_db)
     num_days = Constants.NumDaysInYear(year)
@@ -1202,7 +1202,7 @@ module HVAC
   # @param has_ceiling_fan [TODO] TODO
   # @param year [TODO] TODO
   # @param weather [WeatherProcess] Weather object
-  # @param offset_db [Float] On-off thermostat deadband in deg-F
+  # @param offset_db [Float] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, offset_db)
     num_days = Constants.NumDaysInYear(year)
@@ -2178,7 +2178,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param heat_pump [TODO] TODO
-  # @param hpxml_header [HPXML::Header] HPXML Header
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
@@ -2358,7 +2358,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param system [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
   # @param airflow_cfm [TODO] TODO
@@ -3357,7 +3357,7 @@ module HVAC
   # Return the time needed to reach full capacity based on c_d assumption, used for degradation EMS program.
   #
   # @param c_d [Float] Degradation coefficient
-  # @return [Float] Time in minutes to reach full capacity
+  # @return [Float] Time to reach full capacity (minutes)
   def self.calc_time_to_full_cap(c_d)
     # assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
     time = (20.0 * c_d + 0.4).round
@@ -3368,15 +3368,16 @@ module HVAC
 
   # Return min and max limit to time needed to reach full capacity
   #
-  # @return [2, 5] Minimum and maximum time in minutes to reach full capacity
+  # @return [Array<Integer, Integer>] Minimum and maximum time to reach full capacity (minutes)
   def self.get_time_to_full_cap_limits()
     return [2, 5]
   end
 
-  # Return the EMS actuator and EMS global variable for backup coil availability schedule, this is called every time EMS uses this actuator to avoid conflicts across different EMS programs.
+  # Return the EMS actuator and EMS global variable for backup coil availability schedule.
+  # This is called every time EMS uses this actuator to avoid conflicts across different EMS programs.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
+  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @return [Array<OpenStudio::Model::EnergyManagementSystemActuator, OpenStudio::Model::EnergyManagementSystemGlobalVariable>] OpenStudio EMS Actuator and Global Variable objects for supplemental coil availability schedule
   def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') }
@@ -3410,12 +3411,12 @@ module HVAC
   # Back up coil is turned on after 5 mins that heat pump is not able to maintain setpoints.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
-  # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
+  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
-  # @return nil
+  # @return [void]
   def self.apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
     return if htg_supp_coil.nil?
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -3499,7 +3500,8 @@ module HVAC
   end
 
   # Apply capacity degradation EMS to account for realistic start-up losses.
-  # Capacity function of airflow rate curve and EIR function of airflow rate curve are actuated to capture the impact of start-up losses.
+  # Capacity function of airflow rate curve and EIR function of airflow rate curve are actuated to
+  # capture the impact of start-up losses.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param system_ap [HPXML::AdditionalProperties] HPXML Cooling System or HPXML Heating System Additional Properties
@@ -3507,7 +3509,7 @@ module HVAC
   # @param is_cooling [Boolean] True if apply to cooling system
   # @param cap_fff_curve [OpenStudio::Model::CurveQuadratic] OpenStudio CurveQuadratic object for heat pump capacity function of air flow rates
   # @param eir_fff_curve [OpenStudio::Model::CurveQuadratic] OpenStudio CurveQuadratic object for heat pump eir function of air flow rates
-  # @return nil
+  # @return [void]
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     if is_cooling
@@ -3613,16 +3615,17 @@ module HVAC
     program_calling_manager.addProgram(cycling_degrad_program)
   end
 
-  # Apply time-based realistic staging EMS program for two speed system. Observe 5 mins before ramping up the speed level, or enable the backup coil.
+  # Apply time-based realistic staging EMS program for two speed system.
+  # Observe 5 mins before ramping up the speed level, or enable the backup coil.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
-  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
-  # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
+  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param is_heatpump [Boolean] True if cooling_system is a heat pump
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
-  # @return nil
+  # @return [void]
   def self.apply_two_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, is_heatpump, is_onoff_thermostat_ddb, cooling_system)
     # Note: Currently only available in 1 min time step
     return unless is_onoff_thermostat_ddb
@@ -3737,19 +3740,20 @@ module HVAC
     program_calling_manager.addProgram(realistic_cycling_program)
   end
 
-  # Apply maximum power ratio schedule for variable speed system. Creates EMS program to determine and control the stage that can reach the maximum power constraint.
+  # Apply maximum power ratio schedule for variable speed system.
+  # Creates EMS program to determine and control the stage that can reach the maximum power constraint.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
-  # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param heating_system [HPXML::HeatingSystem] HPXML Heating System
   # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param clg_coil [OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio MultiStage Cooling Coil object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio MultiStage Heating Coil object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return nil
+  # @return [void]
   def self.apply_max_power_EMS(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
     return if schedules_file.nil?
     return if clg_coil.nil? && htg_coil.nil?
@@ -3997,14 +4001,15 @@ module HVAC
     program_calling_manager.addProgram(program)
   end
 
-  # Apply time-based realistic staging EMS program for integrated multi-stage backup system. Observe 5 mins before ramping up the speed level.
+  # Apply time-based realistic staging EMS program for integrated multi-stage backup system.
+  # Observe 5 mins before ramping up the speed level.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
-  # @param control_zone [OpenStudio::Model::ThermalZone] OpenStudio Thermal Zone object for conditioned space
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
-  # @return nil
+  # @return [void]
   def self.add_backup_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, htg_coil)
     return unless htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
 
@@ -4337,7 +4342,7 @@ module HVAC
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_object [TODO] TODO
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param sequential_cool_load_fracs [TODO] TODO
@@ -4713,7 +4718,7 @@ module HVAC
   # @param unitary_system [TODO] TODO
   # @param htg_coil [TODO] TODO
   # @param clg_coil [TODO] TODO
-  # @param control_zone [TODO] TODO
+  # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @return [TODO] TODO
   def self.apply_installation_quality(model, heating_system, cooling_system, unitary_system, htg_coil, clg_coil, control_zone)
     if not cooling_system.nil?
@@ -4824,7 +4829,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [TODO] TODO
-  # @param air_loop_unitary [TODO] TODO
+  # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
   # @param conditioned_space [TODO] TODO
   # @param htg_supp_coil [TODO] TODO
   # @param heat_pump [TODO] TODO
@@ -5250,7 +5255,7 @@ module HVAC
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_header [HPXML::Header] HPXML Header
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [TODO] TODO
   def self.apply_unit_multiplier(hpxml_bldg, hpxml_header)
     # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the

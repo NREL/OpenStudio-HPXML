@@ -8,6 +8,8 @@ __New Features__
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
 - Advanced research features:
+  - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed central AC/ASHP systems and time-based realistic staging for two speed central AC/ASHP systems.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
@@ -98,8 +100,6 @@ __New Features__
 - Advanced research features:
   - **Breaking change**: Replaces `SimulationControl/TemperatureCapacitanceMultiplier` with `SimulationControl/AdvancedResearchFeatures/TemperatureCapacitanceMultiplier`.
   - Allows an optional boolean input `SimulationControl/AdvancedResearchFeatures/DefrostModelType` for heat pump advanced defrost model.
-  - Allow an optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed central AC/ASHP systems and time-based realistic staging for two speed central AC/ASHP systems.
-  - Allow an optional input `SimulationControl/AdvancedResearchFeatures/BackupHeatingCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Adds maximum power ratio detailed schedule for variable-speed HVAC systems to model shedding controls per [AHRI 1380](https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small).
 
 __Bugfixes__

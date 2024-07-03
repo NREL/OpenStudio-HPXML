@@ -107,8 +107,8 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   ======================================  ========  =======  ================  ========  ========  ========================================================
   ``TemperatureCapacitanceMultiplier``    double             > 0               No        7.0 [#]_  Multiplier on air heat capacitance [#]_
   ``DefrostModelType``                    string             See [#]_          No        standard  Defrost model type for air source heat pumps [#]_
-  ``OnOffThermostatDeadbandTemperature``  double    F        See [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operations [#]_
-  ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   See [#]_          No                  Capacity increment of multi-staging heat pump backup systems [#]_
+  ``OnOffThermostatDeadbandTemperature``  double    F        > 0 [#]_          No                  Temperature difference between cut-in and cut-out temperature for HVAC operation [#]_
+  ``HeatPumpBackupCapacityIncrement``     double    Btu/hr   > 0 [#]_          No                  Capacity increment of multi-stage heat pump backup systems [#]_
   ======================================  ========  =======  ================  ========  ========  ========================================================
 
   .. [#] The default value of 7 is an average value found in the literature when calibrating timeseries EnergyPlus indoor temperatures to field data.
@@ -118,10 +118,19 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] DefrostModelType choices are "standard" and "advanced".
   .. [#] Use "standard" for default E+ defrost setting.
          Use "advanced" for an improved model that better accounts for load and energy use during defrost; using "advanced" may impact simulation runtime.
-  .. [#] OnOffThermostatDeadbandTemperature is currently only allowed with a 1 minute timestep. Currently only supports homes with at most one cooling system (including heat pumps) serving 100% cooling loads, and one heating system (including heat pumps) serving 100% heating loads (i.e., FractionHeatLoadServed and FractionCoolLoadServed sum to 1.0). Applies to single speed and two speed air-source AC/ASHP only.
-  .. [#] An on/off thermostat deadband temperature is applied to both heating and cooling. Typical values are between 2-4 F, with actual values being specific to the thermostat installed. Note that thermostat deadbands are two sided. As an example, if you had a heating setpoint of 71 F and a 2 F deadband, the heating equipment will turn on when the space temperature hits 70 F and off when it hits 72 F. When this feature is enabled, the model will also explicitly model cycling, such that it will take several minutes for the HVAC to reach full capacity for single and two speed air-source AC/ASHP systems, and time-based realistic staging (stay at low speed for 5 minutes before transitioning to the higher stage, and stay at high speed until cut-out deadband temperature is reached) for two speed air-source AC/ASHP systems. This feature should only be used if detailed power profiles and loads are required. Common use cases for this feature are when modeling advanced controls, such as a Home Energy Management System, or if performing co-simulation with a grid model. 
+  .. [#] OnOffThermostatDeadbandTemperature is currently only allowed with a 1 minute timestep.
+         Currently only supports homes with at most one cooling system (including heat pumps) serving 100% of the cooling load and at most one heating system (including heat pumps) serving 100% of the heating load (i.e., FractionHeatLoadServed and FractionCoolLoadServed are 1.0).
+         Applies to single speed and two speed air-source AC/ASHP only.
+  .. [#] An on/off thermostat deadband temperature is applied to both heating and cooling.
+         Typical values are between 2-4 F, with actual values being specific to the thermostat installed.
+         Note that thermostat deadbands are two sided.
+         As an example, if you had a heating setpoint of 71 F and a 2 F deadband, the heating equipment will turn on when the space temperature hits 70 F and off when it hits 72 F.
+         When this feature is enabled, the model will also explicitly model cycling, such that it will take several minutes for the HVAC to reach full capacity for single and two speed air-source AC/ASHP systems, and time-based realistic staging (stay at low speed for 5 minutes before transitioning to the higher stage, and stay at high speed until cut-out deadband temperature is reached) for two speed air-source AC/ASHP systems.
+         This feature should only be used if detailed power profiles and loads are required.
+         Common use cases for this feature are when modeling advanced controls, such as a Home Energy Management System, or if performing co-simulation with a grid model. 
   .. [#] HeatPumpBackupCapacityIncrement is currently only allowed with a 1 minute timestep.
-  .. [#] HeatPumpBackupCapacityIncrement allows modeling multi-stage electric heat pump backup with time-based staging. If not provided, the heat pump backup is modeled with a single stage.
+  .. [#] HeatPumpBackupCapacityIncrement allows modeling multi-stage electric heat pump backup with time-based staging.
+         If not provided, the heat pump backup is modeled with a single stage.
 
 HPXML Emissions Scenarios
 *************************
@@ -606,13 +615,13 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
          For example, when modeling :ref:`bldg_type_bldgs`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.
          Note that when NumberofUnits is greater than 1, a few capabilities are not currently supported:
          
-         \- Dehumidifiers
+         \- :ref:`hpxml_dehumidifier`
          
-         \- Ground-source heat pumps
+         \- :ref:`hvac_hp_ground_to_air`
          
-         \- On-Off ThermostatDeadband Temperature
+         \- On-Off Thermostat Deadband Temperature (see :ref:`hpxml_simulation_control`)
          
-         \- Heat Pump Backup Capacity Increment
+         \- Heat Pump Backup Capacity Increment (see :ref:`hpxml_simulation_control`)
          
   .. [#] If NumberofBathrooms not provided, calculated as NumberofBedrooms/2 + 0.5 based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] If ConditionedBuildingVolume not provided, defaults to ConditionedFloorArea * AverageCeilingHeight + ConditionedCrawlspaceVolume.
@@ -4525,6 +4534,8 @@ If not entered, the simulation will not include a standalone freezer.
   ((RatedAnnualkWh / 8760) * (ConstantScheduleCoefficients[hr] + TemperatureScheduleCoefficients[hr] * T_space)
   
   where T_space is the ambient temperature (F) where the freezer is located and hr is the hour of the day.
+
+.. _hpxml_dehumidifier:
 
 HPXML Dehumidifier
 ******************
