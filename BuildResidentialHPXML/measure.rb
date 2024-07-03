@@ -129,7 +129,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
     arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
-    arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed central AC/ASHP systems, and realistic time-based staging for two speed central AC/ASHP systems. Currently only supported with 1 min timestep.')
+    arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
     arg.setUnits('deg-F')
     args << arg
 

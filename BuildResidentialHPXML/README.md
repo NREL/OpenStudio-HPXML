@@ -195,7 +195,7 @@ Research feature to select the type of defrost model. Use standard for default E
 
 **Simulation Control: HVAC On-Off Thermostat Deadband**
 
-Research feature to model on-off thermostat deadband and start-up degradation for single or two speed central AC/ASHP systems, and realistic time-based staging for two speed central AC/ASHP systems. Currently only supported with 1 min timestep.
+Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.
 
 - **Name:** ``simulation_control_onoff_thermostat_deadband``
 - **Type:** ``Double``
