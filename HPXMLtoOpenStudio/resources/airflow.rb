@@ -9,7 +9,7 @@ module Airflow
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
@@ -240,7 +240,7 @@ module Airflow
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
     measurement = get_infiltration_measurement_of_interest(hpxml_bldg)
@@ -393,7 +393,7 @@ module Airflow
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param vent_fan [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
@@ -1560,7 +1560,7 @@ module Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param vented_crawl [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
@@ -1590,7 +1590,7 @@ module Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param site [TODO] TODO
   # @param vented_attic [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
@@ -2250,7 +2250,7 @@ module Airflow
   # @param conditioned_const_ach [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param vent_fans_kitchen [TODO] TODO
   # @param vent_fans_bath [TODO] TODO
   # @param vented_dryers [TODO] TODO
@@ -2348,7 +2348,7 @@ module Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param site [TODO] TODO
   # @param vent_fans_mech [TODO] TODO
   # @param vent_fans_kitchen [TODO] TODO
@@ -2392,7 +2392,7 @@ module Airflow
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
   # @param infil_program [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
@@ -2540,7 +2540,7 @@ module Airflow
   #
   # @param sla [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     # Returns the infiltration annual average ACH given a SLA.
@@ -2556,7 +2556,7 @@ module Airflow
   # @param ach [TODO] TODO
   # @param infil_height [TODO] TODO
   # @param avg_ceiling_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)
     # Returns the infiltration SLA given an annual average ACH.
@@ -2590,7 +2590,7 @@ module Airflow
   # TODO
   #
   # @param nl [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
