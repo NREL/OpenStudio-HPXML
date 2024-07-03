@@ -11,6 +11,8 @@
       <SimulationControl>
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
+          <DefrostModelType>advanced</DefrostModelType>
+          <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
           <HeatPumpBackupCapacityIncrement>17060.71</HeatPumpBackupCapacityIncrement>
         </AdvancedResearchFeatures>
       </SimulationControl>
@@ -328,9 +330,9 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>10000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>two stage</CompressorType>
+              <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -343,11 +345,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>18.0</Value>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>9.3</Value>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <HeatingCapacityRetention>

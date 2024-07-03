@@ -248,7 +248,7 @@ module HVAC
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
 
     # supp coil control in staing EMS
-    apply_two_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, is_heatpump, is_onoff_thermostat_ddb, cooling_system)
+    apply_two_speed_realistic_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, is_onoff_thermostat_ddb, cooling_system)
 
     apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
 
@@ -3415,7 +3415,7 @@ module HVAC
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
-  # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] HPXML Cooling System or HPXML Heat Pump object
   # @return [void]
   def self.apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
     return if htg_supp_coil.nil?
@@ -3622,16 +3622,17 @@ module HVAC
   # @param unitary_system [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param is_heatpump [Boolean] True if cooling_system is a heat pump
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
-  # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] HPXML Cooling System or HPXML Heat Pump object
   # @return [void]
-  def self.apply_two_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, is_heatpump, is_onoff_thermostat_ddb, cooling_system)
+  def self.apply_two_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, is_onoff_thermostat_ddb, cooling_system)
     # Note: Currently only available in 1 min time step
     return unless is_onoff_thermostat_ddb
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
 
     number_of_timestep_logged = 5 # wait 5 mins to check demand
+    
+    is_heatpump = cooling_system.is_a? HPXML::HeatPump
 
     # Sensors
     if not htg_supp_coil.nil?
@@ -3747,8 +3748,8 @@ module HVAC
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
-  # @param heating_system [HPXML::HeatingSystem] HPXML Heating System
-  # @param cooling_system [HPXML::CoolingSystem] HPXML Cooling System
+  # @param heating_system [HPXML::HeatingSystem or HPXML::HeatPump] HPXML Heating System or HPXML Heat Pump object
+  # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] HPXML Cooling System or HPXML Heat Pump object
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param clg_coil [OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio MultiStage Cooling Coil object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio MultiStage Heating Coil object

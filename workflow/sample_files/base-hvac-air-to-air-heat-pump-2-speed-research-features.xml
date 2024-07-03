@@ -11,6 +11,8 @@
       <SimulationControl>
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
+          <DefrostModelType>advanced</DefrostModelType>
+          <OnOffThermostatDeadbandTemperature>2.0</OnOffThermostatDeadbandTemperature>
           <HeatPumpBackupCapacityIncrement>17060.71</HeatPumpBackupCapacityIncrement>
         </AdvancedResearchFeatures>
       </SimulationControl>
@@ -54,9 +56,6 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
-        <extension>
-          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv</SchedulesFilePath>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -333,8 +332,8 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>10000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>variable speed</CompressorType>
-              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
+              <CompressorType>two stage</CompressorType>
+              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -346,11 +345,11 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>22.0</Value>
+                <Value>18.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Value>9.3</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <HeatingCapacityRetention>

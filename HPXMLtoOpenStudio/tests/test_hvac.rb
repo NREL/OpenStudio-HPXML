@@ -516,9 +516,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   end
 
   def test_air_to_air_heat_pump_multistage_backup_system
-    ['base-hvac-air-to-air-heat-pump-1-speed-geb.xml',
-     'base-hvac-air-to-air-heat-pump-2-speed-geb-multistage-backup.xml',
-     'base-hvac-air-to-air-heat-pump-var-speed-geb-multistage-backup.xml'].each do |hpxml_path|
+    ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
+     'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml',
+     'base-hvac-air-to-air-heat-pump-var-speed-research-features.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
       model, _hpxml, hpxml_bldg = _test_measure(args_hash)
@@ -730,7 +730,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_var_speed_max_power_ratio
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-research-features.xml'))
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
@@ -744,11 +744,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(2, htg_coil.stages.size)
 
     # Check supp heating coil
-    assert_equal(1, model.getCoilHeatingElectrics.size)
+    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
 
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77)
+    _check_max_power_ratio_EMS_multispeed(model, 1079.2, 4.525, 3010.4, 3.684, 4169.30, 5.39, 10752.98, 4.77)
 
     # two systems
     args_hash = {}
@@ -778,9 +778,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     _check_max_power_ratio_EMS_multispeed(model, 3875.80, 4.56, 10634.05, 3.88, 4169.30, 5.39, 10752.98, 4.77, 2, 1)
   end
 
-  def test_air_to_air_heat_pump_1_speed_geb_onoff_thermostat
+  def test_air_to_air_heat_pump_1_speed_onoff_thermostat
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-geb.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-research-features.xml'))
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
@@ -807,7 +807,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Onoff thermostat with detailed setpoints
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-geb-onoff-detailed-setpoints.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-research-features-detailed-setpoints.xml'))
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
@@ -825,9 +825,9 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     _check_onoff_thermostat_EMS(model, clg_coil, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
   end
 
-  def test_air_to_air_heat_pump_2_speed_geb_onoff_thermostat
+  def test_air_to_air_heat_pump_2_speed_onoff_thermostat
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-2-speed-geb-onoff.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml'))
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
@@ -839,7 +839,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
 
     # Check supp heating coil
-    assert_equal(1, model.getCoilHeatingElectrics.size)
+    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
 
     # E+ thermostat
     onoff_thermostat_deadband = hpxml.header.hvac_onoff_thermostat_deadband
@@ -859,7 +859,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def test_heat_pump_advanced_defrost
     # Var Speed heat pump test
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-advanced-defrost.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-var-speed-research-features.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -869,11 +869,11 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
     htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 1215.05)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.06667, 808.2)
 
     # Single Speed heat pump test
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-advanced-defrost.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-1-speed-research-features.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     # Get HPXML values
@@ -883,7 +883,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
     # q_dot smaller than backup capacity
-    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1572.8)
+    _check_advanced_defrost(model, htg_coil, 4747.75, 4747.75, backup_fuel, 0.1, 1074.6)
 
     # Ductless heat pump test
     args_hash = {}

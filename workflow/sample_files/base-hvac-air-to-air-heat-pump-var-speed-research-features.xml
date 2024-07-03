@@ -11,6 +11,7 @@
       <SimulationControl>
         <Timestep>1</Timestep>
         <AdvancedResearchFeatures>
+          <DefrostModelType>advanced</DefrostModelType>
           <HeatPumpBackupCapacityIncrement>17060.71</HeatPumpBackupCapacityIncrement>
         </AdvancedResearchFeatures>
       </SimulationControl>
@@ -54,6 +55,9 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
+        <extension>
+          <SchedulesFilePath>../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv</SchedulesFilePath>
+        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
@@ -328,11 +332,10 @@
               <DistributionSystem idref='HVACDistribution1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>12000.0</HeatingCapacity>
+              <HeatingCapacity>10000.0</HeatingCapacity>
               <CoolingCapacity>36000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
-              <CompressorLockoutTemperature>5.0</CompressorLockoutTemperature>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
+              <CompressorType>variable speed</CompressorType>
+              <CoolingSensibleHeatFraction>0.78</CoolingSensibleHeatFraction>
               <BackupType>integrated</BackupType>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -340,16 +343,15 @@
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
               <BackupHeatingCapacity>34121.4</BackupHeatingCapacity>
-              <BackupHeatingLockoutTemperature>35.0</BackupHeatingLockoutTemperature>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Value>22.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Value>10.0</Value>
               </AnnualHeatingEfficiency>
               <extension>
                 <HeatingCapacityRetention>
@@ -361,11 +363,8 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
-            <extension>
-              <WeekdaySetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64</WeekdaySetpointTempsHeatingSeason>
-              <WeekendSetpointTempsHeatingSeason>64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64</WeekendSetpointTempsHeatingSeason>
-            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
