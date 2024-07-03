@@ -47,6 +47,8 @@ class ScheduleGenerator
     @append_output = append_output
   end
 
+  attr_accessor(:schedules)
+
   # TODO
   #
   # @return [TODO] TODO
@@ -56,15 +58,8 @@ class ScheduleGenerator
 
   # TODO
   #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
-  end
-
-  # TODO
-  #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create(args:,
              weather:)
@@ -93,7 +88,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create_stochastic_schedules(args:,
                                   weather:)
