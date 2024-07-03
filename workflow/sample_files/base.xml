@@ -9,7 +9,7 @@
   <SoftwareInfo>
     <extension>
       <SimulationControl>
-        <Timestep>30</Timestep>
+        <Timestep>60</Timestep>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
