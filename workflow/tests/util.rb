@@ -1039,7 +1039,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       assert_equal(0, unmet_hours_htg)
     else
       # for realistic backup staging, unmet hours are expected.
-      assert_operator(unmet_hours_htg, :<, 500) unless hpxml_path.include? 'multistage-backup'
+      assert_operator(unmet_hours_htg, :<, 500) unless hpxml_path.include? 'research-features'
     end
     if hpxml_bldg.total_fraction_cool_load_served == 0
       assert_equal(0, unmet_hours_clg)
