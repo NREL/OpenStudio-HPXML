@@ -1703,9 +1703,22 @@ R-value of the opaque door(s).
 
 <br/>
 
+**Air Leakage: Leakiness Description**
+
+Qualitative description of infiltration.
+
+- **Name:** ``air_leakage_leakiness_description``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `very tight`, `tight`, `average`, `leaky`, `very leaky`
+
+<br/>
+
 **Air Leakage: Units**
 
-The unit of measure for the air leakage.
+The unit of measure for the air leakage. Required when air leakage value is provided.
 
 - **Name:** ``air_leakage_units``
 - **Type:** ``Choice``
@@ -1731,7 +1744,7 @@ The house pressure relative to outside. Required when units are ACH or CFM.
 
 **Air Leakage: Value**
 
-Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in.
+Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in. If provided, it overrides leakiness description input.
 
 - **Name:** ``air_leakage_value``
 - **Type:** ``Double``
@@ -1750,19 +1763,6 @@ Type of air leakage. If 'unit total', represents the total infiltration to the u
 - **Required:** ``false``
 
 - **Choices:** `unit total`, `unit exterior only`
-
-<br/>
-
-**Air Leakage: Leakiness Description**
-
-Qualitative description of infiltration. If provided, Manual J Table 5A/5B look up ACH values will be used for hvac sizing, and the annual average ACH will be calculated based on year built, iecc zone, cfa, infiltration height, foundation type, ducts and leakiness description.
-
-- **Name:** ``leakiness_description``
-- **Type:** ``Choice``
-
-- **Required:** ``false``
-
-- **Choices:** `very tight`, `tight`, `average`, `leaky`, `very leaky`
 
 <br/>
 

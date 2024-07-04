@@ -288,18 +288,30 @@ module Airflow
 
   # Calculate ACH50 for annual energy simulation when only leakiness description is provided
   #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Float] Calculated ACH50 value based on IECC zone, cfa, infiltration height, year built, foundation type, ducts and leakiness description
-  def self.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, leakiness_description)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl_ag [Double] Number of conditioned floors above grade
+  # @param year_built [Integer] Year the dwelling unit is built
+  # @param ceil_height [Double] Average ceiling height (ft2)
+  # @param infil_volume [Double] Infiltration volume (ft2)
+  # @param iecc_cz [String] IECC climate zone
+  # @param foundations [Array<Array>] Array of [fraction, foundation_type] pair for each foundation
+  # @param ducts [Array<Array>] Array of [fraction, duct_location] pair for each duct
+  # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
+  # @param air_sealed [Boolean] True if the dwelling unit is air sealed
+  # @return [Double] Calculated ACH50 value based on IECC zone, cfa, infiltration height, year built, foundation type, ducts and leakiness description
+  def self.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, leakiness_description = nil, is_sealed = false)
     # Constants
     c_floor_area = -0.002078
     c_height = 0.06375
     # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
-    leakage_multiplier = { HPXML::LeakinessVeryTight => 0.355,
-                           HPXML::LeakinessTight => 0.686,
-                           HPXML::LeakinessAverage => 1.0,
-                           HPXML::LeakinessLeaky => 1.549,
-                           HPXML::LeakinessVeryLeaky => 2.085 }[leakiness_description]
+    leakage_multiplier_map = { HPXML::LeakinessVeryTight => 0.355,
+                               HPXML::LeakinessTight => 0.686,
+                               HPXML::LeakinessAverage => 1.0,
+                               HPXML::LeakinessLeaky => 1.549,
+                               HPXML::LeakinessVeryLeaky => 2.085 }
+    leakage_multiplier = leakiness_description.nil? ? 1.0 : leakage_multiplier_map[leakiness_description]
+    c_sealed = is_sealed ? -0.288 : 0.0
+
     # Vintage
     c_vintage = nil
     if year_built < 1960
@@ -378,8 +390,8 @@ module Airflow
     height_m = UnitConversions.convert(ncfl_ag * ceil_height, 'ft', 'm') + 0.5
 
     # Normalized leakage
-    nl = Math.exp(floor_area_m2 * c_floor_area +
-                  height_m * c_height + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
+    nl = Math.exp(floor_area_m2 * c_floor_area + height_m * c_height +
+                  c_sealed + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
 
     # Specific Leakage Area
     sla = nl / (1000.0 * ncfl_ag**0.3)

@@ -3763,7 +3763,7 @@ module HPXMLDefaults
     end
 
     # Foundation type (weight by area)
-    foundations = [] # List of [fraction, foundation_type] pair for each duct
+    foundations = [] # List of [fraction, foundation_type] pair for each foundation
     sum_fnd_area = 0.0
     hpxml_bldg.foundations.each do |foundation|
       area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
