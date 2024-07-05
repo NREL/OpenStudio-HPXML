@@ -1923,6 +1923,9 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', false, false, nil),
     BatteryDischarging: Column.new('battery_discharging', false, false, nil),
+    EVBattery: Column.new('ev_battery', false, false, :neg_one_to_one),
+    EVBatteryCharging: Column.new('ev_battery_charging', false, false, nil),
+    EVBatteryDischarging: Column.new('ev_battery_discharging', false, false, nil),
     HVAC: Column.new('hvac', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
     WaterHeater: Column.new('water_heater', true, false, nil),
@@ -2380,17 +2383,33 @@ class SchedulesFile
   # @return [TODO] TODO
   def create_battery_charging_discharging_schedules
     battery_col_name = Columns[:Battery].name
-    return if !@schedules.keys.include?(battery_col_name)
+    ev_battery_col_name = Columns[:EVBattery].name
 
-    @schedules[SchedulesFile::Columns[:BatteryCharging].name] = Array.new(@schedules[battery_col_name].size, 0)
-    @schedules[SchedulesFile::Columns[:BatteryDischarging].name] = Array.new(@schedules[battery_col_name].size, 0)
-    @schedules[battery_col_name].each_with_index do |_ts, i|
-      if @schedules[battery_col_name][i] > 0
-        @schedules[SchedulesFile::Columns[:BatteryCharging].name][i] = @schedules[battery_col_name][i]
-      elsif @schedules[battery_col_name][i] < 0
-        @schedules[SchedulesFile::Columns[:BatteryDischarging].name][i] = -1 * @schedules[battery_col_name][i]
+    return if !@schedules.keys.include?(battery_col_name) && !@schedules.keys.include?(ev_battery_col_name)
+
+    if @schedules.keys.include?(battery_col_name)
+      charging_col = SchedulesFile::Columns[:BatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:BatteryDischarging].name
+      split_signed_column(battery_col_name, charging_col, discharging_col)
+    end
+    if @schedules.keys.include?(ev_battery_col_name)
+      charging_col = SchedulesFile::Columns[:EVBatteryCharging].name
+      discharging_col = SchedulesFile::Columns[:EVBatteryDischarging].name
+      split_signed_column(ev_battery_col_name, charging_col, discharging_col)
+    end
+  end
+
+  def split_signed_column(column, positive_col, negative_col)
+    # Takes a single column and writes two new columns, one with positive values, one with negative values
+    @schedules[positive_col] = Array.new(@schedules[column].size, 0)
+    @schedules[negative_col] = Array.new(@schedules[column].size, 0)
+    @schedules[column].each_with_index do |_ts, i|
+      if @schedules[column][i] > 0
+        @schedules[positive_col][i] = @schedules[column][i]
+      elsif @schedules[column][i] < 0
+        @schedules[negative_col][i] = -1 * @schedules[column][i]
       end
     end
-    @schedules.delete(battery_col_name)
+    @schedules.delete(column)
   end
 end

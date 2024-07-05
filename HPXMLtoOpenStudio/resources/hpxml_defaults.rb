@@ -84,6 +84,7 @@ module HPXMLDefaults
     apply_pv_systems(hpxml_bldg)
     apply_generators(hpxml_bldg)
     apply_batteries(hpxml_bldg)
+    apply_vehicles(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
@@ -2838,69 +2839,121 @@ module HPXMLDefaults
     end
   end
 
+  def self.apply_vehicles(hpxml_bldg)
+    hpxml_bldg.vehicles.each do |vehicle|
+      next unless vehicle.id.include?('ElectricVehicle')
+
+      default_values = ElectricVehicle.get_ev_battery_default_values()
+      apply_battery(vehicle, default_values)
+
+      if vehicle.miles_per_year.nil?
+        vehicle.miles_per_year = default_values[:miles_per_year]
+        vehicle.miles_per_year_isdefaulted = true
+      end
+      if vehicle.hours_per_week.nil?
+        vehicle.hours_per_week = default_values[:hours_per_week]
+        vehicle.hours_per_week_isdefaulted = true
+      end
+      if vehicle.fraction_charged_home.nil?
+        vehicle.fraction_charged_home = default_values[:fraction_charged_home]
+        vehicle.fraction_charged_home_isdefaulted = true
+      end
+
+      ev_charger = nil
+      if not vehicle.ev_charger_idref.nil?
+        hpxml_bldg.ev_chargers.each do |charger|
+          next unless vehicle.ev_charger_idref == charger.id
+
+          ev_charger = charger
+        end
+      end
+      next if ev_charger.nil?
+
+      default_values = ElectricVehicle.get_ev_charger_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
+      apply_ev_charger(ev_charger, default_values)
+    end
+  end
+
+  def self.apply_ev_charger(ev_charger, default_values)
+    if ev_charger.location.nil?
+      ev_charger.location = default_values[:location]
+      ev_charger.location_isdefaulted = true
+    end
+    if ev_charger.charging_power.nil?
+      ev_charger.charging_power = default_values[:charging_power]
+      ev_charger.charging_power_isdefaulted = true
+    end
+  end
+
   # Assigns default values for omitted optional inputs in the HPXML::Battery objects
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_batteries(hpxml_bldg)
-    default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
     hpxml_bldg.batteries.each do |battery|
+      default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
       if battery.location.nil?
         battery.location = default_values[:location]
         battery.location_isdefaulted = true
       end
+
       if battery.is_shared_system.nil?
         battery.is_shared_system = false
         battery.is_shared_system_isdefaulted = true
       end
-      # if battery.lifetime_model.nil?
-      # battery.lifetime_model = default_values[:lifetime_model]
-      # battery.lifetime_model_isdefaulted = true
-      # end
-      if battery.nominal_voltage.nil?
-        battery.nominal_voltage = default_values[:nominal_voltage] # V
-        battery.nominal_voltage_isdefaulted = true
-      end
-      if battery.round_trip_efficiency.nil?
-        battery.round_trip_efficiency = default_values[:round_trip_efficiency]
-        battery.round_trip_efficiency_isdefaulted = true
-      end
-      if battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
-        # Calculate nominal capacity from usable capacity or rated power output if available
-        if not battery.usable_capacity_kwh.nil?
-          battery.nominal_capacity_kwh = (battery.usable_capacity_kwh / default_values[:usable_fraction]).round(2)
-          battery.nominal_capacity_kwh_isdefaulted = true
-        elsif not battery.usable_capacity_ah.nil?
-          battery.nominal_capacity_ah = (battery.usable_capacity_ah / default_values[:usable_fraction]).round(2)
-          battery.nominal_capacity_ah_isdefaulted = true
-        elsif not battery.rated_power_output.nil?
-          battery.nominal_capacity_kwh = (UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5).round(2)
-          battery.nominal_capacity_kwh_isdefaulted = true
-        else
-          battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
-          battery.nominal_capacity_kwh_isdefaulted = true
-        end
-      end
-      if battery.usable_capacity_kwh.nil? && battery.usable_capacity_ah.nil?
-        # Calculate usable capacity from nominal capacity
-        if not battery.nominal_capacity_kwh.nil?
-          battery.usable_capacity_kwh = (battery.nominal_capacity_kwh * default_values[:usable_fraction]).round(2)
-          battery.usable_capacity_kwh_isdefaulted = true
-        elsif not battery.nominal_capacity_ah.nil?
-          battery.usable_capacity_ah = (battery.nominal_capacity_ah * default_values[:usable_fraction]).round(2)
-          battery.usable_capacity_ah_isdefaulted = true
-        end
-      end
-      next unless battery.rated_power_output.nil?
 
-      # Calculate rated power from nominal capacity
-      if not battery.nominal_capacity_kwh.nil?
-        battery.rated_power_output = (UnitConversions.convert(battery.nominal_capacity_kwh, 'kWh', 'Wh') * 0.5).round(0)
-      elsif not battery.nominal_capacity_ah.nil?
-        battery.rated_power_output = (UnitConversions.convert(Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage), 'kWh', 'Wh') * 0.5).round(0)
-      end
-      battery.rated_power_output_isdefaulted = true
+      apply_battery(battery, default_values)
     end
+  end
+
+  def self.apply_battery(battery, default_values)
+    # if battery.lifetime_model.nil?
+    #   battery.lifetime_model = default_values[:lifetime_model]
+    #   battery.lifetime_model_isdefaulted = true
+    # end
+    if battery.nominal_voltage.nil?
+      battery.nominal_voltage = default_values[:nominal_voltage] # V
+      battery.nominal_voltage_isdefaulted = true
+    end
+    if battery.round_trip_efficiency.nil?
+      battery.round_trip_efficiency = default_values[:round_trip_efficiency]
+      battery.round_trip_efficiency_isdefaulted = true
+    end
+    if battery.nominal_capacity_kwh.nil? && battery.nominal_capacity_ah.nil?
+      # Calculate nominal capacity from usable capacity or rated power output if available
+      if not battery.usable_capacity_kwh.nil?
+        battery.nominal_capacity_kwh = (battery.usable_capacity_kwh / default_values[:usable_fraction]).round(2)
+        battery.nominal_capacity_kwh_isdefaulted = true
+      elsif not battery.usable_capacity_ah.nil?
+        battery.nominal_capacity_ah = (battery.usable_capacity_ah / default_values[:usable_fraction]).round(2)
+        battery.nominal_capacity_ah_isdefaulted = true
+      elsif not battery.rated_power_output.nil?
+        battery.nominal_capacity_kwh = (UnitConversions.convert(battery.rated_power_output, 'W', 'kW') / 0.5).round(2)
+        battery.nominal_capacity_kwh_isdefaulted = true
+      else
+        battery.nominal_capacity_kwh = default_values[:nominal_capacity_kwh] # kWh
+        battery.nominal_capacity_kwh_isdefaulted = true
+      end
+    end
+    if battery.usable_capacity_kwh.nil? && battery.usable_capacity_ah.nil?
+      # Calculate usable capacity from nominal capacity
+      if not battery.nominal_capacity_kwh.nil?
+        battery.usable_capacity_kwh = (battery.nominal_capacity_kwh * default_values[:usable_fraction]).round(2)
+        battery.usable_capacity_kwh_isdefaulted = true
+      elsif not battery.nominal_capacity_ah.nil?
+        battery.usable_capacity_ah = (battery.nominal_capacity_ah * default_values[:usable_fraction]).round(2)
+        battery.usable_capacity_ah_isdefaulted = true
+      end
+    end
+    return unless battery.rated_power_output.nil?
+
+    # Calculate rated power from nominal capacity
+    if not battery.nominal_capacity_kwh.nil?
+      battery.rated_power_output = (UnitConversions.convert(battery.nominal_capacity_kwh, 'kWh', 'Wh') * 0.5).round(0)
+    elsif not battery.nominal_capacity_ah.nil?
+      battery.rated_power_output = (UnitConversions.convert(Battery.get_kWh_from_Ah(battery.nominal_capacity_ah, battery.nominal_voltage), 'kWh', 'Wh') * 0.5).round(0)
+    end
+    battery.rated_power_output_isdefaulted = true
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::ClothesWasher, HPXML::ClothesDryer,

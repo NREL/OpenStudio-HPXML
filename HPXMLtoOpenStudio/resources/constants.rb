@@ -150,6 +150,11 @@ module Constants
     return 'battery losses adjustment'
   end
 
+
+  def self.ObjectNameEVBatteryDischargeOffset
+    return 'ev battery discharge offset'
+  end
+
   # TODO
   #
   # @return [TODO] TODO
