@@ -191,7 +191,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                            schedules_paths: hpxml_bldg.header.schedules_filepaths,
                                            year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather),
                                            unavailable_periods: hpxml.header.unavailable_periods,
-                                           output_path: File.join(args[:output_dir], in_schedules_csv))
+                                           output_path: File.join(args[:output_dir], in_schedules_csv),
+                                           offset_db: hpxml.header.hvac_onoff_thermostat_deadband)
         HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, schedules_file: schedules_file,
                                                                              design_load_details_output_file_path: design_load_details_output_file_path,
                                                                              output_format: args[:output_format])
@@ -231,7 +232,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
 
       # Output
-      season_day_nums = add_unmet_hours_output(model, hpxml_osm_map)
+      season_day_nums = add_unmet_hours_output(model, hpxml_osm_map, hpxml)
       loads_data = add_total_loads_output(model, hpxml_osm_map)
       if args[:add_component_loads]
         add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
@@ -621,7 +622,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     @default_azimuths = HPXMLDefaults.get_default_azimuths(@hpxml_bldg)
 
     # Apply unit multipliers to HVAC systems and water heaters
-    HVAC.apply_unit_multiplier(@hpxml_bldg)
+    HVAC.apply_unit_multiplier(@hpxml_bldg, @hpxml_header)
     # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
     HVAC.ensure_nonzero_sizing_values(@hpxml_bldg)
     # Make adjustments for modeling purposes
@@ -1969,12 +1970,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         airloop_map[sys_id] = HVAC.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                                                      sequential_heat_load_fracs, sequential_cool_load_fracs,
                                                                      conditioned_zone, @hvac_unavailable_periods)
-
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
              HPXML::HVACTypeHeatPumpPTHP,
              HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
-
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, heat_pump, heat_pump, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
                                                                  conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg,
@@ -2061,7 +2060,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
     has_ceiling_fan = (@hpxml_bldg.ceiling_fans.size > 0)
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml_header.sim_calendar_year, @schedules_file)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, conditioned_zone, has_ceiling_fan, @heating_days, @cooling_days, @hpxml_header, @schedules_file)
   end
 
   # TODO
@@ -2453,33 +2452,53 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
-  def add_unmet_hours_output(model, hpxml_osm_map)
+  def add_unmet_hours_output(model, hpxml_osm_map, hpxml)
     # We do our own unmet hours calculation via EMS so that we can incorporate,
     # e.g., heating/cooling seasons into the logic. The calculation layers on top
     # of the built-in EnergyPlus unmet hours output.
 
     # Create sensors and gather data
     htg_sensors, clg_sensors = {}, {}
+    zone_air_temp_sensors, htg_spt_sensors, clg_spt_sensors = {}, {}, {}
     total_heat_load_serveds, total_cool_load_serveds = {}, {}
     season_day_nums = {}
+    onoff_deadbands = hpxml.header.hvac_onoff_thermostat_deadband.to_f
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
-      conditioned_zone_name = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }.name.to_s
+      conditioned_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }
+      conditioned_zone_name = conditioned_zone.name.to_s
 
       # EMS sensors
       htg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Heating Setpoint Not Met Time')
-      htg_sensors[unit].setName('zone htg unmet s')
+      htg_sensors[unit].setName("#{conditioned_zone_name} htg unmet s")
       htg_sensors[unit].setKeyName(conditioned_zone_name)
 
       clg_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Cooling Setpoint Not Met Time')
-      clg_sensors[unit].setName('zone clg unmet s')
+      clg_sensors[unit].setName("#{conditioned_zone_name} clg unmet s")
       clg_sensors[unit].setKeyName(conditioned_zone_name)
 
       total_heat_load_serveds[unit] = hpxml_bldg.total_fraction_heat_load_served
       total_cool_load_serveds[unit] = hpxml_bldg.total_fraction_cool_load_served
 
       hvac_control = hpxml_bldg.hvac_controls[0]
-      next unless not hvac_control.nil?
+      next if hvac_control.nil?
+
+      if (onoff_deadbands > 0)
+        zone_air_temp_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+        zone_air_temp_sensors[unit].setName("#{conditioned_zone_name} space temp")
+        zone_air_temp_sensors[unit].setKeyName(conditioned_zone_name)
+
+        htg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+        htg_spt_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        htg_spt_sensors[unit].setName("#{htg_sch.name} sch value")
+        htg_spt_sensors[unit].setKeyName(htg_sch.name.to_s)
+
+        clg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
+        clg_spt_sensors[unit] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+        clg_spt_sensors[unit].setName("#{clg_sch.name} sch value")
+        clg_spt_sensors[unit].setKeyName(clg_sch.name.to_s)
+      end
 
       sim_year = @hpxml_header.sim_calendar_year
       season_day_nums[unit] = {
@@ -2495,6 +2514,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # EMS program
     clg_hrs = 'clg_unmet_hours'
     htg_hrs = 'htg_unmet_hours'
+    unit_clg_hrs = 'unit_clg_unmet_hours'
+    unit_htg_hrs = 'unit_htg_unmet_hours'
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet hours program')
     program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetHoursProgram)
@@ -2502,6 +2523,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program.addLine("Set #{clg_hrs} = 0")
     for unit in 0..hpxml_osm_map.size - 1
       if total_heat_load_serveds[unit] > 0
+        program.addLine("Set #{unit_htg_hrs} = 0")
         if season_day_nums[unit][:htg_end] >= season_day_nums[unit][:htg_start]
           line = "If ((DayOfYear >= #{season_day_nums[unit][:htg_start]}) && (DayOfYear <= #{season_day_nums[unit][:htg_end]}))"
         else
@@ -2509,13 +2531,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
         line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
         program.addLine(line)
-        program.addLine("  If #{htg_sensors[unit].name} > #{htg_hrs}") # Use max hourly value across all units
-        program.addLine("    Set #{htg_hrs} = #{htg_sensors[unit].name}")
+        if zone_air_temp_sensors.keys.include? unit # on off deadband
+          program.addLine("  If #{zone_air_temp_sensors[unit].name} < (#{htg_spt_sensors[unit].name} - #{UnitConversions.convert(onoff_deadbands, 'deltaF', 'deltaC')})")
+          program.addLine("    Set #{unit_htg_hrs} = #{unit_htg_hrs} + #{htg_sensors[unit].name}")
+          program.addLine('  EndIf')
+        else
+          program.addLine("  Set #{unit_htg_hrs} = #{unit_htg_hrs} + #{htg_sensors[unit].name}")
+        end
+        program.addLine("  If #{unit_htg_hrs} > #{htg_hrs}") # Use max hourly value across all units
+        program.addLine("    Set #{htg_hrs} = #{unit_htg_hrs}")
         program.addLine('  EndIf')
         program.addLine('EndIf')
       end
       next unless total_cool_load_serveds[unit] > 0
 
+      program.addLine("Set #{unit_clg_hrs} = 0")
       if season_day_nums[unit][:clg_end] >= season_day_nums[unit][:clg_start]
         line = "If ((DayOfYear >= #{season_day_nums[unit][:clg_start]}) && (DayOfYear <= #{season_day_nums[unit][:clg_end]}))"
       else
@@ -2523,8 +2553,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       line += " && (#{hvac_availability_sensor.name} == 1)" if not hvac_availability_sensor.nil?
       program.addLine(line)
-      program.addLine("  If #{clg_sensors[unit].name} > #{clg_hrs}") # Use max hourly value across all units
-      program.addLine("    Set #{clg_hrs} = #{clg_sensors[unit].name}")
+      if zone_air_temp_sensors.keys.include? unit # on off deadband
+        program.addLine("  If #{zone_air_temp_sensors[unit].name} > (#{clg_spt_sensors[unit].name} + #{UnitConversions.convert(onoff_deadbands, 'deltaF', 'deltaC')})")
+        program.addLine("    Set #{unit_clg_hrs} = #{unit_clg_hrs} + #{clg_sensors[unit].name}")
+        program.addLine('  EndIf')
+      else
+        program.addLine("  Set #{unit_clg_hrs} = #{unit_clg_hrs} + #{clg_sensors[unit].name}")
+      end
+      program.addLine("  If #{unit_clg_hrs} > #{clg_hrs}") # Use max hourly value across all units
+      program.addLine("    Set #{clg_hrs} = #{unit_clg_hrs}")
       program.addLine('  EndIf')
       program.addLine('EndIf')
     end
