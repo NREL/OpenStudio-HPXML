@@ -1,23 +1,20 @@
 # frozen_string_literal: true
 
 # TODO
-class Location
+module Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
-  def self.apply(model, weather, epw_file, hpxml_header, hpxml_bldg)
-    apply_year(model, hpxml_header, epw_file)
+  def self.apply(model, weather, hpxml_header, hpxml_bldg)
+    apply_year(model, hpxml_header, weather)
     apply_site(model, hpxml_bldg)
     apply_dst(model, hpxml_bldg)
     apply_ground_temps(model, weather, hpxml_bldg)
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
@@ -38,11 +35,11 @@ class Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
-  def self.apply_year(model, hpxml_header, epw_file)
+  def self.apply_year(model, hpxml_header, weather)
     if Date.leap?(hpxml_header.sim_calendar_year)
-      n_hours = epw_file.data.size
+      n_hours = weather.header.NumRecords
       if n_hours != 8784
         fail "Specified a leap year (#{hpxml_header.sim_calendar_year}) but weather data has #{n_hours} hours."
       end
@@ -72,7 +69,7 @@ class Location
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_ground_temps(model, weather, hpxml_bldg)
@@ -155,14 +152,14 @@ class Location
   # TODO
   #
   # @param sim_calendar_year [TODO] TODO
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
-  def self.get_sim_calendar_year(sim_calendar_year, epw_file)
-    if (not epw_file.nil?) && epw_file.startDateActualYear.is_initialized # AMY
-      sim_calendar_year = epw_file.startDateActualYear.get
+  def self.get_sim_calendar_year(sim_calendar_year, weather)
+    if (not weather.nil?) && (not weather.header.ActualYearStartDate.nil?) # AMY
+      sim_calendar_year = weather.header.ActualYearStartDate
     end
     if sim_calendar_year.nil?
-      sim_calendar_year = 2007 # For consistency with SAM utility bill calculations
+      sim_calendar_year = 2007
     end
     return sim_calendar_year
   end

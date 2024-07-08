@@ -2252,7 +2252,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class TotalEnergy < BaseOutput
-    # TODO
     def initialize
       super()
     end
@@ -2261,8 +2260,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Fuel < BaseOutput
-    # TODO
-    #
     # @param meters [TODO] TODO
     def initialize(meters: [])
       super()
@@ -2274,8 +2271,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class EndUse < BaseOutput
-    # TODO
-    #
     # @param outputs [TODO] TODO
     # @param is_negative [TODO] TODO
     # @param is_storage [TODO] TODO
@@ -2297,7 +2292,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Emission < BaseOutput
-    # TODO
     def initialize()
       super()
       @timeseries_output_by_end_use = {}
@@ -2313,8 +2307,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class HotWater < BaseOutput
-    # TODO
-    #
     # @param outputs [TODO] TODO
     def initialize(outputs: [])
       super()
@@ -2328,8 +2320,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Resilience < BaseOutput
-    # TODO
-    #
     # @param variables [TODO] TODO
     def initialize(variables: [])
       super()
@@ -2340,8 +2330,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class PeakFuel < BaseOutput
-    # TODO
-    #
     # @param report [TODO] TODO
     def initialize(report:)
       super()
@@ -2352,8 +2340,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Load < BaseOutput
-    # TODO
-    #
     # @param variables [TODO] TODO
     # @param ems_variable [TODO] TODO
     # @param is_negative [TODO] TODO
@@ -2370,8 +2356,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class ComponentLoad < BaseOutput
-    # TODO
-    #
     # @param ems_variable [TODO] TODO
     def initialize(ems_variable:)
       super()
@@ -2382,8 +2366,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class UnmetHours < BaseOutput
-    # TODO
-    #
     # @param ems_variable [TODO] TODO
     def initialize(ems_variable:)
       super()
@@ -2394,6 +2376,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class IdealLoad < BaseOutput
+    # @param variables [TODO] TODO
     def initialize(variables: [])
       super()
       @variables = variables
@@ -2403,8 +2386,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class PeakLoad < BaseOutput
-    # TODO
-    #
     # @param ems_variable [TODO] TODO
     # @param report [TODO] TODO
     def initialize(ems_variable:, report:)
@@ -2417,7 +2398,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class ZoneTemp < BaseOutput
-    # TODO
     def initialize
       super()
     end
@@ -2426,8 +2406,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Airflow < BaseOutput
-    # TODO
-    #
     # @param ems_program [TODO] TODO
     # @param ems_variable [TODO] TODO
     def initialize(ems_program:, ems_variable:)
@@ -2440,8 +2418,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class Weather < BaseOutput
-    # TODO
-    #
     # @param variable [TODO] TODO
     # @param variable_units [TODO] TODO
     # @param timeseries_units [TODO] TODO
@@ -2456,7 +2432,6 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
   # TODO
   class OutputVariable < BaseOutput
-    # TODO
     def initialize
       super()
     end
@@ -2880,7 +2855,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       if object.to_CoilHeatingDXSingleSpeed.is_initialized || object.to_CoilHeatingDXMultiSpeed.is_initialized
         return { [FT::Elec, EUT::Heating] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Crankcase Heater #{EPlus::FuelTypeElectricity} Energy", "Heating Coil Defrost #{EPlus::FuelTypeElectricity} Energy"] }
 
-      elsif object.to_CoilHeatingElectric.is_initialized
+      elsif object.to_CoilHeatingElectric.is_initialized || object.to_CoilHeatingElectricMultiStage.is_initialized
         if object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').is_initialized && object.additionalProperties.getFeatureAsBoolean('IsHeatPumpBackup').get
           return { [FT::Elec, EUT::HeatingHeatPumpBackup] => ["Heating Coil #{EPlus::FuelTypeElectricity} Energy"] }
         else

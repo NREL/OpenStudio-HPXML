@@ -2,25 +2,17 @@
 
 # Annual constant schedule
 class ScheduleConstant
-  # TODO
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [TODO] TODO
   # @param val [TODO] TODO
   # @param schedule_type_limits_name [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, unavailable_periods: [])
     year = model.getYearDescription.assumedYear
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
   end
 
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
+  attr_accessor(:schedule)
 
   private
 
@@ -76,7 +68,6 @@ class HourlyByMonthSchedule
   # @param weekend_month_by_hour_values [TODO] TODO
   # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -90,26 +81,14 @@ class HourlyByMonthSchedule
     @schedule = create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule, :maxval)
+
   # TODO
   #
   # @param val [TODO] TODO
   # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def maxval
-    return @maxval
   end
 
   private
@@ -274,7 +253,6 @@ class HourlyByDaySchedule
   # @param weekend_day_by_hour_values [TODO] TODO
   # @param normalize_values [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -289,26 +267,14 @@ class HourlyByDaySchedule
     @schedule = create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule, :maxval)
+
   # TODO
   #
   # @param val [TODO] TODO
   # @return [TODO] TODO
   def calc_design_level(val)
     return val * 1000
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def maxval
-    return @maxval
   end
 
   private
@@ -478,7 +444,6 @@ class MonthWeekdayWeekendSchedule
   # @param end_month [TODO] TODO
   # @param end_day [TODO] TODO
   # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
                  begin_day = 1, end_month = 12, end_day = 31, unavailable_periods: nil)
@@ -499,6 +464,8 @@ class MonthWeekdayWeekendSchedule
     @schedule = create_schedule(model, sch_name, year, begin_month, begin_day, end_month, end_day,
                                 schedule_type_limits_name, unavailable_periods)
   end
+
+  attr_accessor(:schedule)
 
   # TODO
   #
@@ -524,13 +491,6 @@ class MonthWeekdayWeekendSchedule
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedule
-    return @schedule
   end
 
   private
@@ -723,7 +683,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 # TODO
-class Schedule
+module Schedule
   # TODO
   #
   # @return [TODO] TODO
@@ -1402,7 +1362,7 @@ class Schedule
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.CeilingFanMonthlyMultipliers(weather:)
     return HVAC.get_default_ceiling_fan_months(weather).join(', ')
@@ -1909,13 +1869,10 @@ end
 class SchedulesFile
   # TODO
   class Column
-    # TODO
-    #
     # @param name [TODO] TODO
     # @param used_by_unavailable_periods [TODO] TODO
     # @param can_be_stochastic [TODO] TODO
     # @param type [TODO] TODO
-    # @return [TODO] TODO
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
       @used_by_unavailable_periods = used_by_unavailable_periods
@@ -1976,19 +1933,17 @@ class SchedulesFile
     WholeHouseFan: Column.new('whole_house_fan', true, false, nil),
   }
 
-  # TODO
-  #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedules_paths [TODO] TODO
   # @param year [TODO] TODO
   # @param unavailable_periods [TODO] TODO
   # @param output_path [TODO] TODO
-  # @return [TODO] TODO
   def initialize(runner: nil,
                  schedules_paths:,
                  year:,
                  unavailable_periods: [],
-                 output_path:)
+                 output_path:,
+                 offset_db: nil)
     return if schedules_paths.empty?
 
     @year = year
@@ -1997,10 +1952,12 @@ class SchedulesFile
     expand_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
     set_unavailable_periods(runner, unavailable_periods)
-    convert_setpoints
+    convert_setpoints(offset_db)
     @output_schedules_path = output_path
     export()
   end
+
+  attr_accessor(:schedules, :tmp_schedules)
 
   # TODO
   #
@@ -2103,20 +2060,6 @@ class SchedulesFile
     end
 
     return true
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def tmp_schedules
-    return @tmp_schedules
   end
 
   # TODO
@@ -2417,18 +2360,24 @@ class SchedulesFile
 
   # TODO
   #
+  # @param offset_db [Float] On-off thermostat deadband
   # @return [TODO] TODO
-  def convert_setpoints
+  def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
 
     col_names = @tmp_schedules.keys
 
+    offset_db_c = UnitConversions.convert(offset_db.to_f / 2.0, 'deltaF', 'deltaC')
     @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
       setpoint_col_names.each do |setpoint_col_name|
         next unless col_names.include?(setpoint_col_name)
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c').round(4)
+        next if offset_db_c == 0.0
+
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] - offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:HeatingSetpoint].name)
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] + offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:CoolingSetpoint].name)
       end
     end
   end

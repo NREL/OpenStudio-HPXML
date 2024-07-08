@@ -78,8 +78,8 @@ class ReportUtilityBillsTest < Minitest::Test
                                              fuel_oil_marginal_rate: 3.495346153846154)
 
     # Check for presence of fuels once
-    has_fuel = @hpxml_bldg.has_fuels(Constants.FossilFuels, @hpxml.to_doc)
-    HPXMLDefaults.apply_header(@hpxml_header, nil, @hpxml_bldg)
+    has_fuel = @hpxml_bldg.has_fuels(@hpxml.to_doc)
+    HPXMLDefaults.apply_header(@hpxml_header, @hpxml_bldg, nil)
     HPXMLDefaults.apply_utility_bill_scenarios(nil, @hpxml_header, @hpxml_bldg, has_fuel)
 
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
