@@ -12,12 +12,7 @@ class ScheduleConstant
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
   end
 
-  # Return the constant OpenStudio Schedule object.
-  #
-  # @return [OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with constant schedule
-  def schedule
-    return @schedule
-  end
+  attr_accessor(:schedule)
 
   private
 
@@ -83,19 +78,7 @@ class HourlyByMonthSchedule
     @schedule = create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
   end
 
-  # Return the hourly-by-month OpenStudio Schedule object.
-  #
-  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with hourly-by-month schedule
-  def schedule
-    return @schedule
-  end
-
-  # Return the schedule max value.
-  #
-  # @return [Double] the max hourly schedule value
-  def maxval
-    return @maxval
-  end
+  attr_accessor(:schedule, :maxval)
 
   private
 
@@ -270,19 +253,7 @@ class HourlyByDaySchedule
     @schedule = create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
   end
 
-  # Return the hourly-by-day OpenStudio Schedule object.
-  #
-  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with hourly-by-day schedule
-  def schedule
-    return @schedule
-  end
-
-  # Return the schedule max value.
-  #
-  # @return [Double] the max hourly schedule value
-  def maxval
-    return @maxval
-  end
+  attr_accessor(:schedule, :maxval)
 
   private
 
@@ -468,6 +439,8 @@ class MonthWeekdayWeekendSchedule
                                 schedule_type_limits_name, unavailable_periods)
   end
 
+  attr_accessor(:schedule)
+
   # Calculate the design level from daily kWh.
   #
   # @param daily_kwh [Double] daily energy use (kWh)
@@ -492,13 +465,6 @@ class MonthWeekdayWeekendSchedule
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
-  end
-
-  # Return the month-weekday-weekend OpenStudio Schedule object.
-  #
-  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with month-weekday-weekend schedule
-  def schedule
-    return @schedule
   end
 
   private
@@ -1370,7 +1336,7 @@ module Schedule
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherProcess] Weather object containing EPW information
   # @return [String] 12 comma-separated monthly multipliers
   def self.CeilingFanMonthlyMultipliers(weather:)
     return HVAC.get_default_ceiling_fan_months(weather).join(', ')
@@ -1950,7 +1916,8 @@ class SchedulesFile
                  schedules_paths:,
                  year:,
                  unavailable_periods: [],
-                 output_path:)
+                 output_path:,
+                 offset_db: nil)
     return if schedules_paths.empty?
 
     @year = year
@@ -1959,10 +1926,12 @@ class SchedulesFile
     expand_schedules
     @tmp_schedules = Marshal.load(Marshal.dump(@schedules)) # make a deep copy because we use unmodified schedules downstream
     set_unavailable_periods(runner, unavailable_periods)
-    convert_setpoints
+    convert_setpoints(offset_db)
     @output_schedules_path = output_path
     export()
   end
+
+  attr_accessor(:schedules, :tmp_schedules)
 
   # Check if any detailed schedules are referenced.
   #
@@ -2065,21 +2034,6 @@ class SchedulesFile
     end
 
     return true
-  end
-
-  # Return the hash of (unmodified) detailed schedule values.
-  #
-  # @return [Hash] the (unmodified) detailed schedules
-  def schedules
-    return @schedules
-  end
-
-  # Return the hash of (actual) detailed schedule values.
-  # These are the schedules referenced by OpenStudio ScheduleFile objects.
-  #
-  # @return [Hash] the (actual) detailed schedules
-  def tmp_schedules
-    return @tmp_schedules
   end
 
   # Get the column index from the schedules hash to be referenced by OpenStudio ScheduleFile objects.
@@ -2377,18 +2331,24 @@ class SchedulesFile
 
   # TODO
   #
+  # @param offset_db [Float] On-off thermostat deadband
   # @return [void]
-  def convert_setpoints
+  def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
 
     col_names = @tmp_schedules.keys
 
+    offset_db_c = UnitConversions.convert(offset_db.to_f / 2.0, 'deltaF', 'deltaC')
     @tmp_schedules[col_names[0]].each_with_index do |_ts, i|
       setpoint_col_names.each do |setpoint_col_name|
         next unless col_names.include?(setpoint_col_name)
 
         @tmp_schedules[setpoint_col_name][i] = UnitConversions.convert(@tmp_schedules[setpoint_col_name][i], 'f', 'c').round(4)
+        next if offset_db_c == 0.0
+
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] - offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:HeatingSetpoint].name)
+        @tmp_schedules[setpoint_col_name][i] = (@tmp_schedules[setpoint_col_name][i] + offset_db_c).round(4) if (setpoint_col_name == SchedulesFile::Columns[:CoolingSetpoint].name)
       end
     end
   end
