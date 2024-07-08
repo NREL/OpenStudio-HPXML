@@ -90,6 +90,7 @@ __New Features__
   - Add soil and moisture type arguments (for determining ground conductivity and diffusivity) and optional geothermal loop arguments for ground source heat pumps.
   - The "Geometry: Building Number of Units" input is now written to the HPXML `NumberofUnitsInBuilding` element.
   - Adds a blower fan efficiency input for specifying fan power W/cfm at maximum speed.
+  - Allows specifying number of bedrooms served by the recirculation system which is used for apportioning recirculation pump power.
 - BuildResidentialScheduleFile measure:
   - Allows appending columns to an existing CSV file rather than overwriting.
   - Other plug load schedules now use Other schedule fractions per ANSI/RESNET/ICC 301-2022 Addendum C.
