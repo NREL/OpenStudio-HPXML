@@ -44,7 +44,7 @@ hpxml.walls[-1].area = 1000
 XMLHelper.write_file(hpxml.to_doc, "out.xml")
 
 '''
-
+# TODO
 class HPXML < Object
   HPXML_ATTRS = [:header, :buildings]
   attr_reader(*HPXML_ATTRS, :doc, :errors, :warnings, :hpxml_path)
@@ -521,6 +521,7 @@ class HPXML < Object
                     cdl_lat_vent: 'Ventilation',
                     cdl_lat_intgains: 'InternalLoads' }
 
+  # TODO
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
     @errors = []
@@ -599,19 +600,19 @@ class HPXML < Object
     return unless @errors.empty?
   end
 
-  def to_doc()
+  def to_doc() # rubocop:disable Style/DocumentationMethod
     doc = _create_hpxml_document()
     @header.to_doc(doc)
     @buildings.to_doc(doc)
     return doc
   end
 
-  def from_doc(hpxml)
+  def from_doc(hpxml) # rubocop:disable Style/DocumentationMethod
     @header = Header.new(self, hpxml)
     @buildings = Buildings.new(self, hpxml)
   end
 
-  def set_unique_hpxml_ids(hpxml_doc, last_building_only = false)
+  def set_unique_hpxml_ids(hpxml_doc, last_building_only = false) # rubocop:disable Style/DocumentationMethod
     buildings = XMLHelper.get_elements(hpxml_doc, '/HPXML/Building')
 
     # Make all IDs unique so the HPXML is valid
@@ -631,7 +632,7 @@ class HPXML < Object
     end
   end
 
-  def has_fuels(hpxml_doc, building_id = nil)
+  def has_fuels(hpxml_doc, building_id = nil) # rubocop:disable Style/DocumentationMethod
     # Returns a hash with whether each fuel exists in the HPXML Building or Buildings
     has_fuels = {}
     HPXML::fossil_fuels.each do |fuel|
@@ -660,6 +661,7 @@ class HPXML < Object
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
   class AdditionalProperties < OpenStruct
+    # TODO
     def method_missing(meth, *args, **kwargs)
       # Complain if no value has been set rather than just returning nil
       raise NoMethodError, "undefined method '#{meth}' for #{self}" unless meth.to_s.end_with?('=')
@@ -672,7 +674,7 @@ class HPXML < Object
   class BaseElement
     attr_accessor(:parent_object, :additional_properties)
 
-    def initialize(parent_object, hpxml_element = nil, **kwargs)
+    def initialize(parent_object, hpxml_element = nil, **kwargs) # rubocop:disable Style/DocumentationMethod
       @parent_object = parent_object
       @additional_properties = AdditionalProperties.new
 
@@ -699,16 +701,16 @@ class HPXML < Object
       end
     end
 
-    def create_method(name, &block)
+    def create_method(name, &block) # rubocop:disable Style/DocumentationMethod
       self.class.send(:define_method, name, &block)
     end
 
-    def create_attr(name)
+    def create_attr(name) # rubocop:disable Style/DocumentationMethod
       create_method("#{name}=".to_sym) { |val| instance_variable_set('@' + name, val) }
       create_method(name.to_sym) { instance_variable_get('@' + name) }
     end
 
-    def to_h
+    def to_h # rubocop:disable Style/DocumentationMethod
       h = {}
       self.class::ATTRS.each do |attribute|
         h[attribute] = send(attribute)
@@ -716,11 +718,11 @@ class HPXML < Object
       return h
     end
 
-    def to_s
+    def to_s # rubocop:disable Style/DocumentationMethod
       return to_h.to_s
     end
 
-    def nil?
+    def nil? # rubocop:disable Style/DocumentationMethod
       # Returns true if all attributes are nil
       to_h.each do |k, v|
         next if k.to_s.end_with? '_isdefaulted'
@@ -734,7 +736,7 @@ class HPXML < Object
   class BaseArrayElement < Array
     attr_accessor(:parent_object, :additional_properties)
 
-    def initialize(parent_object, hpxml_element = nil)
+    def initialize(parent_object, hpxml_element = nil) # rubocop:disable Style/DocumentationMethod
       @parent_object = parent_object
       @additional_properties = AdditionalProperties.new
 
@@ -744,7 +746,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       each do |child|
         if not child.respond_to? :check_for_errors
@@ -756,19 +758,19 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(doc) # rubocop:disable Style/DocumentationMethod
       each do |child|
         child.to_doc(doc)
       end
     end
 
-    def to_s
+    def to_s # rubocop:disable Style/DocumentationMethod
       return map { |x| x.to_s }
     end
   end
 
-  class Header < BaseElement
-    def initialize(hpxml_object, *args, **kwargs)
+  class Header < BaseElement # rubocop:disable Style/Documentation
+    def initialize(hpxml_object, *args, **kwargs) # rubocop:disable Style/DocumentationMethod
       @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
       @utility_bill_scenarios = UtilityBillScenarios.new(hpxml_object)
       @unavailable_periods = UnavailablePeriods.new(hpxml_object)
@@ -785,7 +787,7 @@ class HPXML < Object
     attr_reader(:utility_bill_scenarios)
     attr_reader(:unavailable_periods)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
 
       errors += HPXML::check_dates('Run Period', @sim_begin_month, @sim_begin_day, @sim_end_month, @sim_end_day)
@@ -809,7 +811,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc)
+    def to_doc(doc) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hpxml = XMLHelper.get_element(doc, '/HPXML')
@@ -861,7 +863,7 @@ class HPXML < Object
       @unavailable_periods.to_doc(software_info)
     end
 
-    def from_doc(hpxml)
+    def from_doc(hpxml) # rubocop:disable Style/DocumentationMethod
       return if hpxml.nil?
 
       @xml_type = XMLHelper.get_value(hpxml, 'XMLTransactionHeaderInformation/XMLType', :string)
@@ -893,12 +895,12 @@ class HPXML < Object
     end
   end
 
-  class EmissionsScenarios < BaseArrayElement
-    def add(**kwargs)
+  class EmissionsScenarios < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << EmissionsScenario.new(@parent_object, **kwargs)
     end
 
-    def from_doc(software_info)
+    def from_doc(software_info) # rubocop:disable Style/DocumentationMethod
       return if software_info.nil?
 
       XMLHelper.get_elements(software_info, 'extension/EmissionsScenarios/EmissionsScenario').each do |emissions_scenario|
@@ -907,7 +909,7 @@ class HPXML < Object
     end
   end
 
-  class EmissionsScenario < BaseElement
+  class EmissionsScenario < BaseElement # rubocop:disable Style/Documentation
     UnitsKgPerMWh = 'kg/MWh'
     UnitsKgPerMBtu = 'kg/MBtu'
     UnitsLbPerMWh = 'lb/MWh'
@@ -920,16 +922,16 @@ class HPXML < Object
              :wood_units, :wood_value, :wood_pellets_units, :wood_pellets_value]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.header.emissions_scenarios.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(software_info)
+    def to_doc(software_info) # rubocop:disable Style/DocumentationMethod
       emissions_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'EmissionsScenarios'])
       emissions_scenario = XMLHelper.add_element(emissions_scenarios, 'EmissionsScenario')
       XMLHelper.add_element(emissions_scenario, 'Name', @name, :string) unless @name.nil?
@@ -966,7 +968,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(emissions_scenario)
+    def from_doc(emissions_scenario) # rubocop:disable Style/DocumentationMethod
       return if emissions_scenario.nil?
 
       @name = XMLHelper.get_value(emissions_scenario, 'Name', :string)
@@ -991,12 +993,12 @@ class HPXML < Object
     end
   end
 
-  class UtilityBillScenarios < BaseArrayElement
-    def add(**kwargs)
+  class UtilityBillScenarios < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << UtilityBillScenario.new(@parent_object, **kwargs)
     end
 
-    def from_doc(software_info)
+    def from_doc(software_info) # rubocop:disable Style/DocumentationMethod
       return if software_info.nil?
 
       XMLHelper.get_elements(software_info, 'extension/UtilityBillScenarios/UtilityBillScenario').each do |utility_bill_scenario|
@@ -1004,16 +1006,18 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def has_simple_electric_rates
       any? { |bill_scen| !bill_scen.elec_fixed_charge.nil? || !bill_scen.elec_marginal_rate.nil? }
     end
 
+    # TODO
     def has_detailed_electric_rates
       any? { |bill_scen| !bill_scen.elec_tariff_filepath.nil? }
     end
   end
 
-  class UtilityBillScenario < BaseElement
+  class UtilityBillScenario < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:name,
              :elec_tariff_filepath,
              :elec_fixed_charge, :natural_gas_fixed_charge, :propane_fixed_charge, :fuel_oil_fixed_charge,
@@ -1026,16 +1030,16 @@ class HPXML < Object
              :pv_monthly_grid_connection_fee_dollars_per_kw, :pv_monthly_grid_connection_fee_dollars]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.header.utility_bill_scenarios.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(software_info)
+    def to_doc(software_info) # rubocop:disable Style/DocumentationMethod
       utility_bill_scenarios = XMLHelper.create_elements_as_needed(software_info, ['extension', 'UtilityBillScenarios'])
       utility_bill_scenario = XMLHelper.add_element(utility_bill_scenarios, 'UtilityBillScenario')
       XMLHelper.add_element(utility_bill_scenario, 'Name', @name, :string) unless @name.nil?
@@ -1080,7 +1084,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(utility_bill_scenario)
+    def from_doc(utility_bill_scenario) # rubocop:disable Style/DocumentationMethod
       return if utility_bill_scenario.nil?
 
       @name = XMLHelper.get_value(utility_bill_scenario, 'Name', :string)
@@ -1113,12 +1117,12 @@ class HPXML < Object
     end
   end
 
-  class UnavailablePeriods < BaseArrayElement
-    def add(**kwargs)
+  class UnavailablePeriods < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << UnavailablePeriod.new(@parent_object, **kwargs)
     end
 
-    def from_doc(software_info)
+    def from_doc(software_info) # rubocop:disable Style/DocumentationMethod
       return if software_info.nil?
 
       XMLHelper.get_elements(software_info, 'extension/UnavailablePeriods/UnavailablePeriod').each do |unavailable_period|
@@ -1127,21 +1131,21 @@ class HPXML < Object
     end
   end
 
-  class UnavailablePeriod < BaseElement
+  class UnavailablePeriod < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:column_name, :begin_month, :begin_day, :begin_hour, :end_month, :end_day, :end_hour, :natvent_availability]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.header.unavailable_periods.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       errors += HPXML::check_dates('Unavailable Period', @begin_month, @begin_day, @end_month, @end_day)
       return errors
     end
 
-    def to_doc(software_info)
+    def to_doc(software_info) # rubocop:disable Style/DocumentationMethod
       unavailable_periods = XMLHelper.create_elements_as_needed(software_info, ['extension', 'UnavailablePeriods'])
       unavailable_period = XMLHelper.add_element(unavailable_periods, 'UnavailablePeriod')
       XMLHelper.add_element(unavailable_period, 'ColumnName', @column_name, :string) unless @column_name.nil?
@@ -1154,7 +1158,7 @@ class HPXML < Object
       XMLHelper.add_element(unavailable_period, 'NaturalVentilation', @natvent_availability, :string, @natvent_availability_isdefaulted) unless @natvent_availability.nil?
     end
 
-    def from_doc(unavailable_period)
+    def from_doc(unavailable_period) # rubocop:disable Style/DocumentationMethod
       return if unavailable_period.nil?
 
       @column_name = XMLHelper.get_value(unavailable_period, 'ColumnName', :string)
@@ -1168,12 +1172,12 @@ class HPXML < Object
     end
   end
 
-  class Buildings < BaseArrayElement
-    def add(**kwargs)
+  class Buildings < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Building.new(@parent_object, **kwargs)
     end
 
-    def from_doc(hpxml)
+    def from_doc(hpxml) # rubocop:disable Style/DocumentationMethod
       return if hpxml.nil?
 
       XMLHelper.get_elements(hpxml, 'Building').each do |building|
@@ -1182,7 +1186,7 @@ class HPXML < Object
     end
   end
 
-  class Building < BaseElement
+  class Building < BaseElement # rubocop:disable Style/Documentation
     CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :header,
                    :climate_and_risk_zones, :zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
@@ -1206,7 +1210,7 @@ class HPXML < Object
       super(*args, **kwargs)
     end
 
-    def to_doc(doc)
+    def to_doc(doc) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hpxml = XMLHelper.create_elements_as_needed(doc, ['HPXML'])
@@ -1320,7 +1324,7 @@ class HPXML < Object
       @fuel_loads.to_doc(building)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       if not building.nil?
         @building_id = HPXML::get_id(building, 'BuildingID')
         @event_type = XMLHelper.get_value(building, 'ProjectStatus/EventType', :string)
@@ -1402,18 +1406,22 @@ class HPXML < Object
       @fuel_loads = FuelLoads.new(self, building)
     end
 
+    # TODO
     def surfaces
       return (@roofs + @rim_joists + @walls + @foundation_walls + @floors + @slabs)
     end
 
+    # TODO
     def subsurfaces
       return (@windows + @skylights + @doors)
     end
 
+    # TODO
     def hvac_systems
       return (@heating_systems + @cooling_systems + @heat_pumps)
     end
 
+    # TODO
     def has_location(location)
       # Search for surfaces attached to this location
       surfaces.each do |surface|
@@ -1423,6 +1431,7 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def has_fuel_access
       @site.fuels.each do |fuel|
         if fuel != FuelTypeElectricity
@@ -1432,11 +1441,13 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def has_fuels(hpxml_doc)
       # Returns a hash with whether each fuel exists in the HPXML Building
       return @parent_object.has_fuels(hpxml_doc, @building_id)
     end
 
+    # TODO
     def predominant_heating_fuel
       fuel_fracs = {}
       @heating_systems.each do |heating_system|
@@ -1457,6 +1468,7 @@ class HPXML < Object
       return fuel_fracs.key(fuel_fracs.values.max)
     end
 
+    # TODO
     def predominant_water_heating_fuel
       fuel_fracs = {}
       @water_heating_systems.each do |water_heating_system|
@@ -1475,6 +1487,7 @@ class HPXML < Object
       return fuel_fracs.key(fuel_fracs.values.max)
     end
 
+    # TODO
     def fraction_of_windows_operable()
       # Calculates the fraction of windows that are operable.
       # Since we don't have count available, we use area as an approximation.
@@ -1487,26 +1500,32 @@ class HPXML < Object
       return window_area_operable / window_area_total
     end
 
+    # TODO
     def conditioned_zones()
       return zones.select { |z| z.zone_type == ZoneTypeConditioned }
     end
 
+    # TODO
     def conditioned_spaces()
       return conditioned_zones.map { |z| z.spaces }.flatten
     end
 
+    # TODO
     def primary_hvac_systems()
       return hvac_systems.select { |h| h.primary_system }
     end
 
+    # TODO
     def total_fraction_cool_load_served()
       return @cooling_systems.total_fraction_cool_load_served + @heat_pumps.total_fraction_cool_load_served
     end
 
+    # TODO
     def total_fraction_heat_load_served()
       return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served + @cooling_systems.total_fraction_heat_load_served
     end
 
+    # TODO
     def has_walkout_basement()
       has_conditioned_basement = has_location(LocationBasementConditioned)
       ncfl = @building_construction.number_of_conditioned_floors
@@ -1514,6 +1533,7 @@ class HPXML < Object
       return (has_conditioned_basement && (ncfl == ncfl_ag))
     end
 
+    # TODO
     def thermal_boundary_wall_areas()
       above_grade_area = 0.0 # Thermal boundary walls not in contact with soil
       below_grade_area = 0.0 # Thermal boundary walls in contact with soil
@@ -1536,6 +1556,7 @@ class HPXML < Object
       return above_grade_area, below_grade_area
     end
 
+    # TODO
     def common_wall_area()
       # Wall area for walls adjacent to Unrated Conditioned Space, not including
       # foundation walls.
@@ -1554,6 +1575,7 @@ class HPXML < Object
       return area
     end
 
+    # TODO
     def compartmentalization_boundary_areas()
       # Returns the infiltration compartmentalization boundary areas
       total_area = 0.0 # Total surface area that bounds the Infiltration Volume
@@ -1603,6 +1625,7 @@ class HPXML < Object
       return total_area, exterior_area
     end
 
+    # TODO
     def inferred_infiltration_height(infil_volume)
       # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
       # Height is inferred from available HPXML properties.
@@ -1639,6 +1662,7 @@ class HPXML < Object
       return infil_height
     end
 
+    # TODO
     def inferred_conditioned_crawlspace_volume
       if has_location(HPXML::LocationCrawlspaceConditioned)
         conditioned_crawl_area = @slabs.select { |s| s.interior_adjacent_to == HPXML::LocationCrawlspaceConditioned }.map { |s| s.area }.sum
@@ -1648,7 +1672,7 @@ class HPXML < Object
       return 0.0
     end
 
-    def delete_adiabatic_subsurfaces()
+    def delete # rubocop:disable Style/DocumentationMethod
       @doors.reverse_each do |door|
         next if door.wall.nil?
         next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
@@ -1663,7 +1687,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors()
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
@@ -1785,6 +1809,7 @@ class HPXML < Object
       return errors
     end
 
+    # TODO
     def collapse_enclosure_surfaces(surf_types_of_interest = nil)
       # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
       # This can significantly speed up performance for HPXML files with lots of individual
@@ -1884,17 +1909,17 @@ class HPXML < Object
     end
   end
 
-  class Site < BaseElement
+  class Site < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:site_type, :surroundings, :vertical_surroundings, :shielding_of_home, :orientation_of_front_of_home, :azimuth_of_front_of_home, :fuels,
              :soil_type, :moisture_type, :ground_conductivity, :ground_diffusivity]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       site = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'Site'])
@@ -1927,7 +1952,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       site = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary/Site')
@@ -1947,12 +1972,12 @@ class HPXML < Object
     end
   end
 
-  class NeighborBuildings < BaseArrayElement
-    def add(**kwargs)
+  class NeighborBuildings < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << NeighborBuilding.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding').each do |neighbor_building|
@@ -1961,16 +1986,16 @@ class HPXML < Object
     end
   end
 
-  class NeighborBuilding < BaseElement
+  class NeighborBuilding < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:azimuth, :orientation, :distance, :height]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       neighbors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'Site', 'extension', 'Neighbors'])
@@ -1981,7 +2006,7 @@ class HPXML < Object
       XMLHelper.add_element(neighbor_building, 'Height', @height, :float) unless @height.nil?
     end
 
-    def from_doc(neighbor_building)
+    def from_doc(neighbor_building) # rubocop:disable Style/DocumentationMethod
       return if neighbor_building.nil?
 
       @orientation = XMLHelper.get_value(neighbor_building, 'Orientation', :string)
@@ -1991,17 +2016,17 @@ class HPXML < Object
     end
   end
 
-  class BuildingOccupancy < BaseElement
+  class BuildingOccupancy < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers, :general_water_use_usage_multiplier,
              :general_water_use_weekday_fractions, :general_water_use_weekend_fractions, :general_water_use_monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       building_occupancy = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'BuildingOccupancy'])
@@ -2015,7 +2040,7 @@ class HPXML < Object
       XMLHelper.add_extension(building_occupancy, 'GeneralWaterUseMonthlyScheduleMultipliers', @general_water_use_monthly_multipliers, :string, @general_water_use_monthly_multipliers_isdefaulted) unless @general_water_use_monthly_multipliers.nil?
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       building_occupancy = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary/BuildingOccupancy')
@@ -2032,7 +2057,7 @@ class HPXML < Object
     end
   end
 
-  class BuildingConstruction < BaseElement
+  class BuildingConstruction < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
@@ -2040,12 +2065,12 @@ class HPXML < Object
              :manufactured_home_sections]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       building_construction = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
@@ -2064,7 +2089,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'ManufacturedHomeSections', @manufactured_home_sections, :string) unless @manufactured_home_sections.nil?
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       building_construction = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary/BuildingConstruction')
@@ -2086,7 +2111,7 @@ class HPXML < Object
     end
   end
 
-  class BuildingHeader < BaseElement
+  class BuildingHeader < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:schedules_filepaths, :extension_properties, :natvent_days_per_week,
              :heat_pump_sizing_methodology, :heat_pump_backup_sizing_methodology, :allow_increased_fixed_capacities,
              :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
@@ -2096,13 +2121,13 @@ class HPXML < Object
              :manualj_daily_temp_range, :manualj_humidity_difference]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       errors += HPXML::check_dates('Shading Summer Season', @shading_summer_begin_month, @shading_summer_begin_day, @shading_summer_end_month, @shading_summer_end_day)
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       building_summary = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'BuildingSummary'])
@@ -2146,7 +2171,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       building_summary = XMLHelper.get_element(building, 'BuildingDetails/BuildingSummary')
@@ -2183,7 +2208,7 @@ class HPXML < Object
     end
   end
 
-  class ClimateandRiskZones < BaseElement
+  class ClimateandRiskZones < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_bldg, *args, **kwargs)
       @climate_zone_ieccs = ClimateZoneIECCs.new(hpxml_bldg)
       super(hpxml_bldg, *args, **kwargs)
@@ -2192,13 +2217,13 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:climate_zone_ieccs)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       errors += @climate_zone_ieccs.check_for_errors
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'ClimateandRiskZones'])
@@ -2215,7 +2240,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       climate_and_risk_zones = XMLHelper.get_element(building, 'BuildingDetails/ClimateandRiskZones')
@@ -2233,12 +2258,12 @@ class HPXML < Object
     end
   end
 
-  class ClimateZoneIECCs < BaseArrayElement
-    def add(**kwargs)
+  class ClimateZoneIECCs < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClimateZoneIECC.new(@parent_object, **kwargs)
     end
 
-    def from_doc(climate_and_risk_zones)
+    def from_doc(climate_and_risk_zones) # rubocop:disable Style/DocumentationMethod
       return if climate_and_risk_zones.nil?
 
       XMLHelper.get_elements(climate_and_risk_zones, 'ClimateZoneIECC').each do |climate_zone_iecc|
@@ -2247,26 +2272,26 @@ class HPXML < Object
     end
   end
 
-  class ClimateZoneIECC < BaseElement
+  class ClimateZoneIECC < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:year, :zone]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.climate_and_risk_zones.climate_zone_ieccs.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(climate_and_risk_zones)
+    def to_doc(climate_and_risk_zones) # rubocop:disable Style/DocumentationMethod
       climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
       XMLHelper.add_element(climate_zone_iecc, 'Year', @year, :integer, @year_isdefaulted) unless @year.nil?
       XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @zone, :string, @zone_isdefaulted) unless @zone.nil?
     end
 
-    def from_doc(climate_zone_iecc)
+    def from_doc(climate_zone_iecc) # rubocop:disable Style/DocumentationMethod
       return if climate_zone_iecc.nil?
 
       @year = XMLHelper.get_value(climate_zone_iecc, 'Year', :integer)
@@ -2274,12 +2299,12 @@ class HPXML < Object
     end
   end
 
-  class Zones < BaseArrayElement
-    def add(**kwargs)
+  class Zones < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Zone.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Zones/Zone').each do |zone|
@@ -2288,7 +2313,7 @@ class HPXML < Object
     end
   end
 
-  class Zone < BaseElement
+  class Zone < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_bldg, *args, **kwargs)
       @spaces = Spaces.new(hpxml_bldg)
       super(hpxml_bldg, *args, **kwargs)
@@ -2296,7 +2321,7 @@ class HPXML < Object
     ATTRS = [:id, :zone_type, :spaces] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       if zone_type == ZoneTypeConditioned
         # Check all surfaces attached to the zone are adjacent to conditioned space
@@ -2310,78 +2335,94 @@ class HPXML < Object
       return errors
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       hvac_systems.reverse_each do |hvac_system|
         hvac_system.attached_to_zone_idref = nil
       end
       @parent_object.zones.delete(self)
     end
 
+    # TODO
     def heating_systems
       return @parent_object.heating_systems.select { |s| s.attached_to_zone_idref == @id }
     end
 
+    # TODO
     def cooling_systems
       return @parent_object.cooling_systems.select { |s| s.attached_to_zone_idref == @id }
     end
 
+    # TODO
     def heat_pumps
       return @parent_object.heat_pumps.select { |s| s.attached_to_zone_idref == @id }
     end
 
+    # TODO
     def hvac_systems
       return @parent_object.hvac_systems.select { |s| s.attached_to_zone_idref == @id }
     end
 
+    # TODO
     def hvac_distributions
       return hvac_systems.select { |s| !s.distribution_system.nil? }.map { |s| s.distribution_system }.uniq
     end
 
+    # TODO
     def floor_area
       return spaces.map { |space| space.floor_area }.sum
     end
 
+    # TODO
     def roofs
       return spaces.map { |space| space.roofs }.flatten
     end
 
+    # TODO
     def rim_joists
       return spaces.map { |space| space.rim_joists }.flatten
     end
 
+    # TODO
     def walls
       return spaces.map { |space| space.walls }.flatten
     end
 
+    # TODO
     def foundation_walls
       return spaces.map { |space| space.foundation_walls }.flatten
     end
 
+    # TODO
     def floors
       return spaces.map { |space| space.floors }.flatten
     end
 
+    # TODO
     def slabs
       return spaces.map { |space| space.slabs }.flatten
     end
 
+    # TODO
     def windows
       return spaces.map { |space| space.windows }.flatten
     end
 
+    # TODO
     def doors
       return spaces.map { |space| space.doors }.flatten
     end
 
+    # TODO
     def skylights
       return spaces.map { |space| space.skylights }.flatten
     end
 
+    # TODO
     def surfaces
       return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       zones = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Zones'])
@@ -2395,7 +2436,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(zone)
+    def from_doc(zone) # rubocop:disable Style/DocumentationMethod
       return if zone.nil?
 
       @id = HPXML::get_id(zone)
@@ -2405,12 +2446,12 @@ class HPXML < Object
     end
   end
 
-  class Spaces < BaseArrayElement
-    def add(**kwargs)
+  class Spaces < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Space.new(@parent_object, **kwargs)
     end
 
-    def from_doc(zone)
+    def from_doc(zone) # rubocop:disable Style/DocumentationMethod
       return if zone.nil?
 
       XMLHelper.get_elements(zone, 'Spaces/Space').each do |space|
@@ -2419,68 +2460,79 @@ class HPXML < Object
     end
   end
 
-  class Space < BaseElement
+  class Space < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible, :manualj_internal_loads_latent,
              :manualj_num_occupants, :fenestration_load_procedure] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       surfaces.reverse_each do |surface|
         surface.attached_to_space_idref = nil
       end
       zone.spaces.delete(self)
     end
 
+    # TODO
     def zone
       return @parent_object.zones.find { |zone| zone.spaces.include? self }
     end
 
+    # TODO
     def roofs
       return @parent_object.roofs.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def rim_joists
       return @parent_object.rim_joists.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def walls
       return @parent_object.walls.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def foundation_walls
       return @parent_object.foundation_walls.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def floors
       return @parent_object.floors.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def slabs
       return @parent_object.slabs.select { |s| s.attached_to_space_idref == @id }
     end
 
+    # TODO
     def windows
       return @parent_object.windows.select { |s| s.wall.attached_to_space_idref == @id }
     end
 
+    # TODO
     def doors
       return @parent_object.doors.select { |s| s.wall.attached_to_space_idref == @id }
     end
 
+    # TODO
     def skylights
       return @parent_object.skylights.select { |s| s.roof.attached_to_space_idref == @id || ((not s.floor.nil?) && s.floor.attached_to_space_idref == @id) }
     end
 
+    # TODO
     def surfaces
       return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
     end
 
-    def to_doc(zone)
+    def to_doc(zone) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       spaces = XMLHelper.create_elements_as_needed(zone, ['Spaces'])
@@ -2500,7 +2552,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(space)
+    def from_doc(space) # rubocop:disable Style/DocumentationMethod
       return if space.nil?
 
       @id = HPXML::get_id(space)
@@ -2513,23 +2565,23 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltration < BaseElement
+  class AirInfiltration < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:has_flue_or_chimney_in_conditioned_space]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       air_infiltration = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'AirInfiltration'])
       XMLHelper.add_extension(air_infiltration, 'HasFlueOrChimneyInConditionedSpace', @has_flue_or_chimney_in_conditioned_space, :boolean, @has_flue_or_chimney_in_conditioned_space_isdefaulted) unless @has_flue_or_chimney_in_conditioned_space.nil?
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       air_infiltration = XMLHelper.get_element(building, 'BuildingDetails/Enclosure/AirInfiltration')
@@ -2539,12 +2591,12 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltrationMeasurements < BaseArrayElement
-    def add(**kwargs)
+  class AirInfiltrationMeasurements < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << AirInfiltrationMeasurement.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement').each do |air_infiltration_measurement|
@@ -2553,17 +2605,17 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltrationMeasurement < BaseElement
+  class AirInfiltrationMeasurement < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area, :type_of_measurement,
              :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext, :infiltration_type]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       air_infiltration = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'AirInfiltration'])
@@ -2585,7 +2637,7 @@ class HPXML < Object
       XMLHelper.add_extension(air_infiltration_measurement, 'Aext', @a_ext, :float, @a_ext_isdefaulted) unless @a_ext.nil?
     end
 
-    def from_doc(air_infiltration_measurement)
+    def from_doc(air_infiltration_measurement) # rubocop:disable Style/DocumentationMethod
       return if air_infiltration_measurement.nil?
 
       @id = HPXML::get_id(air_infiltration_measurement)
@@ -2602,12 +2654,12 @@ class HPXML < Object
     end
   end
 
-  class Attics < BaseArrayElement
-    def add(**kwargs)
+  class Attics < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Attic.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Attics/Attic').each do |attic|
@@ -2616,11 +2668,12 @@ class HPXML < Object
     end
   end
 
-  class Attic < BaseElement
+  class Attic < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_ach, :within_infiltration_volume,
              :attached_to_roof_idrefs, :attached_to_wall_idrefs, :attached_to_floor_idrefs]
     attr_accessor(*ATTRS)
 
+    # TODO
     def attached_roofs
       return [] if @attached_to_roof_idrefs.nil?
 
@@ -2632,6 +2685,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_walls
       return [] if @attached_to_wall_idrefs.nil?
 
@@ -2643,6 +2697,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_floors
       return [] if @attached_to_floor_idrefs.nil?
 
@@ -2654,6 +2709,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def to_location
       return if @attic_type.nil?
 
@@ -2668,11 +2724,11 @@ class HPXML < Object
       end
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.attics.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; attached_roofs; rescue StandardError => e; errors << e.message; end
       begin; attached_walls; rescue StandardError => e; errors << e.message; end
@@ -2681,7 +2737,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       attics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Attics'])
@@ -2735,7 +2791,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(attic)
+    def from_doc(attic) # rubocop:disable Style/DocumentationMethod
       return if attic.nil?
 
       @id = HPXML::get_id(attic)
@@ -2772,12 +2828,12 @@ class HPXML < Object
     end
   end
 
-  class Foundations < BaseArrayElement
-    def add(**kwargs)
+  class Foundations < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Foundation.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Foundations/Foundation').each do |foundation|
@@ -2786,13 +2842,14 @@ class HPXML < Object
     end
   end
 
-  class Foundation < BaseElement
+  class Foundation < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
              :belly_wing_skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
              :attached_to_foundation_wall_idrefs, :attached_to_wall_idrefs,
              :attached_to_rim_joist_idrefs]
     attr_accessor(*ATTRS)
 
+    # TODO
     def attached_slabs
       return [] if @attached_to_slab_idrefs.nil?
 
@@ -2804,6 +2861,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_floors
       return [] if @attached_to_floor_idrefs.nil?
 
@@ -2815,6 +2873,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_foundation_walls
       return [] if @attached_to_foundation_wall_idrefs.nil?
 
@@ -2826,6 +2885,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_walls
       return [] if @attached_to_wall_idrefs.nil?
 
@@ -2837,6 +2897,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def attached_rim_joists
       return [] if @attached_to_rim_joist_idrefs.nil?
 
@@ -2848,6 +2909,7 @@ class HPXML < Object
       return list
     end
 
+    # TODO
     def to_location
       return if @foundation_type.nil?
 
@@ -2874,6 +2936,7 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def area
       sum_area = 0.0
       # Check Slabs first
@@ -2889,11 +2952,11 @@ class HPXML < Object
       return sum_area
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.foundations.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; attached_slabs; rescue StandardError => e; errors << e.message; end
       begin; attached_floors; rescue StandardError => e; errors << e.message; end
@@ -2904,7 +2967,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       foundations = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Foundations'])
@@ -2975,7 +3038,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(foundation)
+    def from_doc(foundation) # rubocop:disable Style/DocumentationMethod
       return if foundation.nil?
 
       @id = HPXML::get_id(foundation)
@@ -3026,12 +3089,12 @@ class HPXML < Object
     end
   end
 
-  class Roofs < BaseArrayElement
-    def add(**kwargs)
+  class Roofs < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Roof.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Roofs/Roof').each do |roof|
@@ -3040,7 +3103,7 @@ class HPXML < Object
     end
   end
 
-  class Roof < BaseElement
+  class Roof < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
@@ -3050,10 +3113,12 @@ class HPXML < Object
              :insulation_continuous_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def skylights
       return @parent_object.skylights.select { |skylight| skylight.attached_to_roof_idref == @id }
     end
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3066,6 +3131,7 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for roof '#{@id}'."
     end
 
+    # TODO
     def net_area
       return if nil?
       return if @area.nil?
@@ -3079,31 +3145,37 @@ class HPXML < Object
       return val
     end
 
+    # TODO
     def exterior_adjacent_to
       return LocationOutside
     end
 
+    # TODO
     def is_exterior
       return true
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
         skylight.delete
@@ -3113,14 +3185,14 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       roofs = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Roofs'])
@@ -3184,7 +3256,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(roof)
+    def from_doc(roof) # rubocop:disable Style/DocumentationMethod
       return if roof.nil?
 
       @id = HPXML::get_id(roof)
@@ -3229,12 +3301,12 @@ class HPXML < Object
     end
   end
 
-  class RimJoists < BaseArrayElement
-    def add(**kwargs)
+  class RimJoists < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << RimJoist.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/RimJoists/RimJoist').each do |rim_joist|
@@ -3243,13 +3315,14 @@ class HPXML < Object
     end
   end
 
-  class RimJoist < BaseElement
+  class RimJoist < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :orientation, :azimuth, :siding,
              :color, :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
              :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size,
              :insulation_cavity_material, :insulation_continuous_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3262,6 +3335,7 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for rim joist '#{@id}'."
     end
 
+    # TODO
     def is_exterior
       if @exterior_adjacent_to == LocationOutside
         return true
@@ -3270,48 +3344,55 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def is_exposed
       return HPXML::is_exposed(self)
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
+    # TODO
     def net_area
       return area
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.rim_joists.delete(self)
       @parent_object.foundations.each do |foundation|
         foundation.attached_to_rim_joist_idrefs.delete(@id) unless foundation.attached_to_rim_joist_idrefs.nil?
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       rim_joists = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'RimJoists'])
@@ -3365,7 +3446,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(rim_joist)
+    def from_doc(rim_joist) # rubocop:disable Style/DocumentationMethod
       return if rim_joist.nil?
 
       @id = HPXML::get_id(rim_joist)
@@ -3400,12 +3481,12 @@ class HPXML < Object
     end
   end
 
-  class Walls < BaseArrayElement
-    def add(**kwargs)
+  class Walls < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Wall.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Walls/Wall').each do |wall|
@@ -3414,7 +3495,7 @@ class HPXML < Object
     end
   end
 
-  class Wall < BaseElement
+  class Wall < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :radiant_barrier,
              :radiant_barrier_grade, :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
@@ -3423,14 +3504,17 @@ class HPXML < Object
              :insulation_cavity_material, :insulation_continuous_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def windows
       return @parent_object.windows.select { |window| window.attached_to_wall_idref == @id }
     end
 
+    # TODO
     def doors
       return @parent_object.doors.select { |door| door.attached_to_wall_idref == @id }
     end
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3443,6 +3527,7 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for wall '#{@id}'."
     end
 
+    # TODO
     def net_area
       return if nil?
       return if @area.nil?
@@ -3456,6 +3541,7 @@ class HPXML < Object
       return val
     end
 
+    # TODO
     def is_exterior
       if @exterior_adjacent_to == LocationOutside
         return true
@@ -3464,35 +3550,42 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def is_exposed
       return HPXML::is_exposed(self)
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned_and_adjacent_to_multifamily_common_space
       return (HPXML::is_conditioned(self) && (HPXML::multifamily_common_space_locations.include? @exterior_adjacent_to))
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.walls.delete(self)
       windows.reverse_each do |window|
         window.delete
@@ -3508,14 +3601,14 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       walls = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Walls'])
@@ -3587,7 +3680,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(wall)
+    def from_doc(wall) # rubocop:disable Style/DocumentationMethod
       return if wall.nil?
 
       @id = HPXML::get_id(wall)
@@ -3637,12 +3730,12 @@ class HPXML < Object
     end
   end
 
-  class FoundationWalls < BaseArrayElement
-    def add(**kwargs)
+  class FoundationWalls < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << FoundationWall.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/FoundationWalls/FoundationWall').each do |foundation_wall|
@@ -3651,7 +3744,7 @@ class HPXML < Object
     end
   end
 
-  class FoundationWall < BaseElement
+  class FoundationWall < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :length, :height, :area, :orientation,
              :type, :azimuth, :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
@@ -3661,10 +3754,12 @@ class HPXML < Object
              :insulation_exterior_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def windows
       return @parent_object.windows.select { |window| window.attached_to_wall_idref == @id }
     end
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3677,10 +3772,12 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for foundation wall '#{@id}'."
     end
 
+    # TODO
     def doors
       return @parent_object.doors.select { |door| door.attached_to_wall_idref == @id }
     end
 
+    # TODO
     def net_area
       return if nil?
       return if @area.nil?
@@ -3696,10 +3793,12 @@ class HPXML < Object
       return val
     end
 
+    # TODO
     def connected_slabs
       return @parent_object.slabs.select { |s| s.connected_foundation_walls.include? self }
     end
 
+    # TODO
     def exposed_fraction
       # Calculate total slab exposed perimeter
       slab_exposed_length = connected_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
@@ -3716,6 +3815,7 @@ class HPXML < Object
       return 1.0
     end
 
+    # TODO
     def is_exterior
       if @exterior_adjacent_to == LocationGround
         return true
@@ -3724,31 +3824,37 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def is_exposed
       return HPXML::is_exposed(self)
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.foundation_walls.delete(self)
       windows.reverse_each do |window|
         window.delete
@@ -3761,14 +3867,14 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       foundation_walls = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'FoundationWalls'])
@@ -3828,7 +3934,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(foundation_wall)
+    def from_doc(foundation_wall) # rubocop:disable Style/DocumentationMethod
       return if foundation_wall.nil?
 
       @id = HPXML::get_id(foundation_wall)
@@ -3872,12 +3978,12 @@ class HPXML < Object
     end
   end
 
-  class Floors < BaseArrayElement
-    def add(**kwargs)
+  class Floors < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Floor.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Floors/Floor').each do |floor|
@@ -3886,7 +3992,7 @@ class HPXML < Object
     end
   end
 
-  class Floor < BaseElement
+  class Floor < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness, :insulation_grade,
@@ -3894,10 +4000,12 @@ class HPXML < Object
              :insulation_cavity_material, :insulation_continuous_material, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def skylights
       return @parent_object.skylights.select { |skylight| skylight.attached_to_floor_idref == @id }
     end
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -3910,6 +4018,7 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for floor '#{@id}'."
     end
 
+    # TODO
     def is_ceiling
       # From the perspective of the conditioned space
       if @floor_or_ceiling.nil?
@@ -3919,6 +4028,7 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def net_area
       return if nil?
       return if @area.nil?
@@ -3932,35 +4042,42 @@ class HPXML < Object
       return val
     end
 
+    # TODO
     def is_floor
       return !is_ceiling
     end
 
+    # TODO
     def is_exterior
       return [LocationOutside, LocationManufacturedHomeUnderBelly].include?(@exterior_adjacent_to)
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.floors.delete(self)
       skylights.reverse_each do |skylight|
         skylight.delete
@@ -3976,14 +4093,14 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; net_area; rescue StandardError => e; errors << e.message; end
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       floors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Floors'])
@@ -4046,7 +4163,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(floor)
+    def from_doc(floor) # rubocop:disable Style/DocumentationMethod
       return if floor.nil?
 
       @id = HPXML::get_id(floor)
@@ -4087,12 +4204,12 @@ class HPXML < Object
     end
   end
 
-  class Slabs < BaseArrayElement
-    def add(**kwargs)
+  class Slabs < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Slab.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Slabs/Slab').each do |slab|
@@ -4101,7 +4218,7 @@ class HPXML < Object
     end
   end
 
-  class Slab < BaseElement
+  class Slab < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :interior_adjacent_to, :exterior_adjacent_to, :area, :thickness, :exposed_perimeter,
              :perimeter_insulation_depth, :under_slab_insulation_width,
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
@@ -4110,6 +4227,7 @@ class HPXML < Object
              :under_slab_insulation_material, :gap_insulation_r_value, :attached_to_space_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def space
       return if @attached_to_space_idref.nil?
 
@@ -4122,48 +4240,55 @@ class HPXML < Object
       fail "Attached space '#{@attached_to_space_idref}' not found for slab '#{@id}'."
     end
 
+    # TODO
     def exterior_adjacent_to
       return LocationGround
     end
 
+    # TODO
     def is_exterior
       return true
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
+    # TODO
     def connected_foundation_walls
       return @parent_object.foundation_walls.select { |fw| interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to }
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.slabs.delete(self)
       @parent_object.foundations.each do |foundation|
         foundation.attached_to_slab_idrefs.delete(@id) unless foundation.attached_to_slab_idrefs.nil?
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; space; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       slabs = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Slabs'])
@@ -4215,7 +4340,7 @@ class HPXML < Object
       XMLHelper.add_extension(slab, 'CarpetRValue', @carpet_r_value, :float, @carpet_r_value_isdefaulted) unless @carpet_r_value.nil?
     end
 
-    def from_doc(slab)
+    def from_doc(slab) # rubocop:disable Style/DocumentationMethod
       return if slab.nil?
 
       @id = HPXML::get_id(slab)
@@ -4254,12 +4379,12 @@ class HPXML < Object
     end
   end
 
-  class Windows < BaseArrayElement
-    def add(**kwargs)
+  class Windows < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Window.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Windows/Window').each do |window|
@@ -4268,7 +4393,7 @@ class HPXML < Object
     end
   end
 
-  class Window < BaseElement
+  class Window < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_id, :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
@@ -4277,6 +4402,7 @@ class HPXML < Object
              :fraction_operable, :performance_class, :attached_to_wall_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def wall
       return if @attached_to_wall_idref.nil?
 
@@ -4288,37 +4414,42 @@ class HPXML < Object
       fail "Attached wall '#{@attached_to_wall_idref}' not found for window '#{@id}'."
     end
 
+    # TODO
     def is_exterior
       return wall.is_exterior
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(wall)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.windows.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; wall; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       windows = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Windows'])
@@ -4384,7 +4515,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(window)
+    def from_doc(window) # rubocop:disable Style/DocumentationMethod
       return if window.nil?
 
       @id = HPXML::get_id(window)
@@ -4420,12 +4551,12 @@ class HPXML < Object
     end
   end
 
-  class Skylights < BaseArrayElement
-    def add(**kwargs)
+  class Skylights < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Skylight.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Skylights/Skylight').each do |skylight|
@@ -4434,7 +4565,7 @@ class HPXML < Object
     end
   end
 
-  class Skylight < BaseElement
+  class Skylight < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
@@ -4442,6 +4573,7 @@ class HPXML < Object
              :attached_to_floor_idref, :curb_area, :curb_assembly_r_value, :shaft_area, :shaft_assembly_r_value]
     attr_accessor(*ATTRS)
 
+    # TODO
     def roof
       return if @attached_to_roof_idref.nil?
 
@@ -4453,6 +4585,7 @@ class HPXML < Object
       fail "Attached roof '#{@attached_to_roof_idref}' not found for skylight '#{@id}'."
     end
 
+    # TODO
     def floor
       return if @attached_to_floor_idref.nil?
 
@@ -4464,22 +4597,27 @@ class HPXML < Object
       fail "Attached floor '#{@attached_to_floor_idref}' not found for skylight '#{@id}'."
     end
 
+    # TODO
     def is_exterior
       return roof.is_exterior
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(roof)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       if not floor.nil?
         return HPXML::is_conditioned(floor)
@@ -4488,18 +4626,18 @@ class HPXML < Object
       end
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.skylights.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; roof; rescue StandardError => e; errors << e.message; end
       begin; floor; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       skylights = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Skylights'])
@@ -4563,7 +4701,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(skylight)
+    def from_doc(skylight) # rubocop:disable Style/DocumentationMethod
       return if skylight.nil?
 
       @id = HPXML::get_id(skylight)
@@ -4597,12 +4735,12 @@ class HPXML < Object
     end
   end
 
-  class Doors < BaseArrayElement
-    def add(**kwargs)
+  class Doors < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Door.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Enclosure/Doors/Door').each do |door|
@@ -4611,10 +4749,11 @@ class HPXML < Object
     end
   end
 
-  class Door < BaseElement
+  class Door < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :attached_to_wall_idref, :area, :azimuth, :orientation, :r_value]
     attr_accessor(*ATTRS)
 
+    # TODO
     def wall
       return if @attached_to_wall_idref.nil?
 
@@ -4626,37 +4765,42 @@ class HPXML < Object
       fail "Attached wall '#{@attached_to_wall_idref}' not found for door '#{@id}'."
     end
 
+    # TODO
     def is_exterior
       return wall.is_exterior
     end
 
+    # TODO
     def is_interior
       return !is_exterior
     end
 
+    # TODO
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(wall)
     end
 
+    # TODO
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
+    # TODO
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.doors.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; wall; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       doors = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'Doors'])
@@ -4673,7 +4817,7 @@ class HPXML < Object
       XMLHelper.add_element(door, 'RValue', @r_value, :float) unless @r_value.nil?
     end
 
-    def from_doc(door)
+    def from_doc(door) # rubocop:disable Style/DocumentationMethod
       return if door.nil?
 
       @id = HPXML::get_id(door)
@@ -4685,16 +4829,16 @@ class HPXML < Object
     end
   end
 
-  class PartitionWallMass < BaseElement
+  class PartitionWallMass < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:area_fraction, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       partition_wall_mass = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'extension', 'PartitionWallMass'])
@@ -4706,7 +4850,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       partition_wall_mass = XMLHelper.get_element(building, 'BuildingDetails/Enclosure/extension/PartitionWallMass')
@@ -4721,16 +4865,16 @@ class HPXML < Object
     end
   end
 
-  class FurnitureMass < BaseElement
+  class FurnitureMass < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:area_fraction, :type]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       furniture_mass = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Enclosure', 'extension', 'FurnitureMass'])
@@ -4738,7 +4882,7 @@ class HPXML < Object
       XMLHelper.add_element(furniture_mass, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       furniture_mass = XMLHelper.get_element(building, 'BuildingDetails/Enclosure/extension/FurnitureMass')
@@ -4749,12 +4893,12 @@ class HPXML < Object
     end
   end
 
-  class HeatingSystems < BaseArrayElement
-    def add(**kwargs)
+  class HeatingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatingSystem.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem').each do |heating_system|
@@ -4762,12 +4906,13 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def total_fraction_heat_load_served
       map { |htg_sys| htg_sys.fraction_heat_load_served.to_f }.sum(0.0)
     end
   end
 
-  class HeatingSystem < BaseElement
+  class HeatingSystem < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_object, *args, **kwargs)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args, **kwargs)
@@ -4783,6 +4928,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
 
+    # TODO
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -4793,6 +4939,7 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for heating system '#{@id}'."
     end
 
+    # TODO
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -4804,6 +4951,7 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
+    # TODO
     def attached_cooling_system
       return if distribution_system.nil?
 
@@ -4817,6 +4965,7 @@ class HPXML < Object
       return
     end
 
+    # TODO
     def related_water_heating_system
       @parent_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
@@ -4826,6 +4975,7 @@ class HPXML < Object
       return
     end
 
+    # TODO
     def primary_heat_pump
       # Returns the HP for which this heating system is backup
       @parent_object.heat_pumps.each do |heat_pump|
@@ -4837,11 +4987,12 @@ class HPXML < Object
       return
     end
 
+    # TODO
     def is_heat_pump_backup_system
       return !primary_heat_pump.nil?
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.heating_systems.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
@@ -4850,7 +5001,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; zone; rescue StandardError => e; errors << e.message; end
@@ -4858,7 +5009,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -4928,7 +5079,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(heating_system)
+    def from_doc(heating_system) # rubocop:disable Style/DocumentationMethod
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
@@ -4973,12 +5124,12 @@ class HPXML < Object
     end
   end
 
-  class CoolingSystems < BaseArrayElement
-    def add(**kwargs)
+  class CoolingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CoolingSystem.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem').each do |cooling_system|
@@ -4986,16 +5137,18 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def total_fraction_cool_load_served
       map { |clg_sys| clg_sys.fraction_cool_load_served.to_f }.sum(0.0)
     end
 
+    # TODO
     def total_fraction_heat_load_served
       map { |clg_sys| clg_sys.integrated_heating_system_fraction_heat_load_served.to_f }.sum(0.0)
     end
   end
 
-  class CoolingSystem < BaseElement
+  class CoolingSystem < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args, **kwargs)
@@ -5012,6 +5165,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:cooling_detailed_performance_data)
 
+    # TODO
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -5022,6 +5176,7 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for cooling system '#{@id}'."
     end
 
+    # TODO
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -5033,6 +5188,7 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
+    # TODO
     def attached_heating_system
       # by distribution system
       return if distribution_system.nil?
@@ -5045,6 +5201,7 @@ class HPXML < Object
       return
     end
 
+    # TODO
     def has_integrated_heating
       return false unless [HVACTypePTAC, HVACTypeRoomAirConditioner].include? @cooling_system_type
       return false if @integrated_heating_system_fuel.nil?
@@ -5052,7 +5209,7 @@ class HPXML < Object
       return true
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.cooling_systems.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
@@ -5061,7 +5218,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; zone; rescue StandardError => e; errors << e.message; end
@@ -5069,7 +5226,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -5149,7 +5306,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(cooling_system)
+    def from_doc(cooling_system) # rubocop:disable Style/DocumentationMethod
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
@@ -5198,12 +5355,12 @@ class HPXML < Object
     end
   end
 
-  class HeatPumps < BaseArrayElement
-    def add(**kwargs)
+  class HeatPumps < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatPump.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/HeatPump').each do |heat_pump|
@@ -5211,16 +5368,18 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def total_fraction_heat_load_served
       map { |hp| hp.fraction_heat_load_served.to_f }.sum(0.0)
     end
 
+    # TODO
     def total_fraction_cool_load_served
       map { |hp| hp.fraction_cool_load_served.to_f }.sum(0.0)
     end
   end
 
-  class HeatPump < BaseElement
+  class HeatPump < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
@@ -5243,6 +5402,7 @@ class HPXML < Object
     attr_reader(:cooling_detailed_performance_data)
     attr_reader(:heating_detailed_performance_data)
 
+    # TODO
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -5253,6 +5413,7 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for heat pump '#{@id}'."
     end
 
+    # TODO
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -5264,6 +5425,7 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
+    # TODO
     def geothermal_loop
       return if @geothermal_loop_idref.nil?
 
@@ -5275,6 +5437,7 @@ class HPXML < Object
       fail "Attached geothermal loop '#{@geothermal_loop_idref}' not found for heat pump '#{@id}'."
     end
 
+    # TODO
     def is_dual_fuel
       if backup_system.nil?
         if @backup_heating_fuel.nil?
@@ -5292,12 +5455,14 @@ class HPXML < Object
       return true
     end
 
+    # TODO
     def primary_system
       return true if @primary_heating_system || @primary_cooling_system
 
       return false
     end
 
+    # TODO
     def backup_system
       return if @backup_system_idref.nil?
 
@@ -5308,7 +5473,7 @@ class HPXML < Object
       end
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.heat_pumps.delete(self)
       @parent_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
@@ -5317,7 +5482,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; zone; rescue StandardError => e; errors << e.message; end
@@ -5327,7 +5492,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -5450,7 +5615,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(heat_pump)
+    def from_doc(heat_pump) # rubocop:disable Style/DocumentationMethod
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
@@ -5523,12 +5688,12 @@ class HPXML < Object
     end
   end
 
-  class GeothermalLoops < BaseArrayElement
-    def add(**kwargs)
+  class GeothermalLoops < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << GeothermalLoop.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACPlant/GeothermalLoop').each do |geothermal_loop|
@@ -5537,12 +5702,13 @@ class HPXML < Object
     end
   end
 
-  class GeothermalLoop < BaseElement
+  class GeothermalLoop < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :loop_configuration, :loop_flow, :bore_config, :num_bore_holes, :bore_spacing,
              :bore_length, :bore_diameter, :grout_type, :grout_conductivity, :pipe_type,
              :pipe_conductivity, :pipe_diameter, :shank_spacing]
     attr_accessor(*ATTRS)
 
+    # TODO
     def heat_pump
       list = []
       @parent_object.heat_pumps.each do |heat_pump|
@@ -5559,7 +5725,7 @@ class HPXML < Object
       end
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.geothermal_loops.delete(self)
       @parent_object.heat_pumps.each do |heat_pump|
         next unless heat_pump.geothermal_loop_idref == @id
@@ -5568,13 +5734,13 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; heat_pump; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -5608,7 +5774,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(geothermal_loop)
+    def from_doc(geothermal_loop) # rubocop:disable Style/DocumentationMethod
       return if geothermal_loop.nil?
 
       @id = HPXML::get_id(geothermal_loop)
@@ -5628,23 +5794,23 @@ class HPXML < Object
     end
   end
 
-  class HVACPlant < BaseElement
+  class HVACPlant < BaseElement # rubocop:disable Style/Documentation
     ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
       HPXML.design_loads_to_doc(self, hvac_plant)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       hvac_plant = XMLHelper.get_element(building, 'BuildingDetails/Systems/HVAC/HVACPlant')
@@ -5654,12 +5820,12 @@ class HPXML < Object
     end
   end
 
-  class HVACControls < BaseArrayElement
-    def add(**kwargs)
+  class HVACControls < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HVACControl.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACControl').each do |hvac_control|
@@ -5668,7 +5834,7 @@ class HPXML < Object
     end
   end
 
-  class HVACControl < BaseElement
+  class HVACControl < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
@@ -5678,11 +5844,11 @@ class HPXML < Object
              :seasons_cooling_begin_month, :seasons_cooling_begin_day, :seasons_cooling_end_month, :seasons_cooling_end_day]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.hvac_controls.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
 
       errors += HPXML::check_dates('Heating Season', @seasons_heating_begin_month, @seasons_heating_begin_day, @seasons_heating_end_month, @seasons_heating_end_day)
@@ -5691,7 +5857,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC'])
@@ -5728,7 +5894,7 @@ class HPXML < Object
       XMLHelper.add_extension(hvac_control, 'WeekendSetpointTempsCoolingSeason', @weekend_cooling_setpoints, :string) unless @weekend_cooling_setpoints.nil?
     end
 
-    def from_doc(hvac_control)
+    def from_doc(hvac_control) # rubocop:disable Style/DocumentationMethod
       return if hvac_control.nil?
 
       @id = HPXML::get_id(hvac_control)
@@ -5757,12 +5923,12 @@ class HPXML < Object
     end
   end
 
-  class HVACDistributions < BaseArrayElement
-    def add(**kwargs)
+  class HVACDistributions < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HVACDistribution.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/HVAC/HVACDistribution').each do |hvac_distribution|
@@ -5771,7 +5937,7 @@ class HPXML < Object
     end
   end
 
-  class HVACDistribution < BaseElement
+  class HVACDistribution < BaseElement # rubocop:disable Style/Documentation
     def initialize(hpxml_bldg, *args, **kwargs)
       @duct_leakage_measurements = DuctLeakageMeasurements.new(hpxml_bldg)
       @ducts = Ducts.new(hpxml_bldg)
@@ -5783,6 +5949,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
+    # TODO
     def hvac_systems
       list = []
       @parent_object.hvac_systems.each do |hvac_system|
@@ -5817,7 +5984,7 @@ class HPXML < Object
       return list
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.hvac_distributions.delete(self)
       @parent_object.hvac_systems.each do |hvac_system|
         next if hvac_system.distribution_system_idref.nil?
@@ -5832,7 +5999,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; hvac_systems; rescue StandardError => e; errors << e.message; end
       errors += @duct_leakage_measurements.check_for_errors
@@ -5840,7 +6007,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       hvac = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'HVAC'])
@@ -5885,7 +6052,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(hvac_distribution)
+    def from_doc(hvac_distribution) # rubocop:disable Style/DocumentationMethod
       return if hvac_distribution.nil?
 
       @id = HPXML::get_id(hvac_distribution)
@@ -5915,12 +6082,12 @@ class HPXML < Object
     end
   end
 
-  class DuctLeakageMeasurements < BaseArrayElement
-    def add(**kwargs)
+  class DuctLeakageMeasurements < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << DuctLeakageMeasurement.new(@parent_object, **kwargs)
     end
 
-    def from_doc(hvac_distribution)
+    def from_doc(hvac_distribution) # rubocop:disable Style/DocumentationMethod
       return if hvac_distribution.nil?
 
       XMLHelper.get_elements(hvac_distribution, 'DuctLeakageMeasurement').each do |duct_leakage_measurement|
@@ -5929,12 +6096,12 @@ class HPXML < Object
     end
   end
 
-  class DuctLeakageMeasurement < BaseElement
+  class DuctLeakageMeasurement < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:duct_type, :duct_leakage_test_method, :duct_leakage_units, :duct_leakage_value,
              :duct_leakage_total_or_to_outside]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
 
@@ -5942,12 +6109,12 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(air_distribution)
+    def to_doc(air_distribution) # rubocop:disable Style/DocumentationMethod
       duct_leakage_measurement_el = XMLHelper.add_element(air_distribution, 'DuctLeakageMeasurement')
       XMLHelper.add_element(duct_leakage_measurement_el, 'DuctType', @duct_type, :string) unless @duct_type.nil?
       XMLHelper.add_element(duct_leakage_measurement_el, 'DuctLeakageTestMethod', @duct_leakage_test_method, :string) unless @duct_leakage_test_method.nil?
@@ -5959,7 +6126,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(duct_leakage_measurement)
+    def from_doc(duct_leakage_measurement) # rubocop:disable Style/DocumentationMethod
       return if duct_leakage_measurement.nil?
 
       @duct_type = XMLHelper.get_value(duct_leakage_measurement, 'DuctType', :string)
@@ -5970,12 +6137,12 @@ class HPXML < Object
     end
   end
 
-  class Ducts < BaseArrayElement
-    def add(**kwargs)
+  class Ducts < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Duct.new(@parent_object, **kwargs)
     end
 
-    def from_doc(hvac_distribution)
+    def from_doc(hvac_distribution) # rubocop:disable Style/DocumentationMethod
       return if hvac_distribution.nil?
 
       XMLHelper.get_elements(hvac_distribution, 'Ducts').each do |duct|
@@ -5984,13 +6151,13 @@ class HPXML < Object
     end
   end
 
-  class Duct < BaseElement
+  class Duct < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area, :duct_surface_area_multiplier, :duct_shape,
              :duct_buried_insulation_level, :duct_effective_r_value, :duct_fraction_rectangular]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
 
@@ -5998,12 +6165,12 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(air_distribution)
+    def to_doc(air_distribution) # rubocop:disable Style/DocumentationMethod
       ducts_el = XMLHelper.add_element(air_distribution, 'Ducts')
       sys_id = XMLHelper.add_element(ducts_el, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
@@ -6023,7 +6190,7 @@ class HPXML < Object
       XMLHelper.add_extension(ducts_el, 'DuctFractionRectangular', @duct_fraction_rectangular, :float, @duct_fraction_rectangular_isdefaulted) unless @duct_fraction_rectangular.nil?
     end
 
-    def from_doc(duct)
+    def from_doc(duct) # rubocop:disable Style/DocumentationMethod
       return if duct.nil?
 
       @id = HPXML::get_id(duct)
@@ -6041,12 +6208,12 @@ class HPXML < Object
     end
   end
 
-  class VentilationFans < BaseArrayElement
-    def add(**kwargs)
+  class VentilationFans < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << VentilationFan.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan').each do |ventilation_fan|
@@ -6055,7 +6222,7 @@ class HPXML < Object
     end
   end
 
-  class VentilationFan < BaseElement
+  class VentilationFan < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation, :flow_rate_not_tested,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
              :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
@@ -6068,6 +6235,7 @@ class HPXML < Object
              :cfis_supplemental_fan_idref]
     attr_accessor(*ATTRS)
 
+    # TODO
     def distribution_system
       return if @distribution_system_idref.nil?
       return unless @fan_type == MechVentTypeCFIS
@@ -6084,6 +6252,7 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
+    # TODO
     def flow_rate
       [@tested_flow_rate, @delivered_ventilation, @calculated_flow_rate, @rated_flow_rate].each do |fr|
         return fr unless fr.nil?
@@ -6091,6 +6260,7 @@ class HPXML < Object
       return
     end
 
+    # TODO
     def total_unit_flow_rate
       if not @is_shared_system
         return flow_rate
@@ -6099,6 +6269,7 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def oa_unit_flow_rate
       return if total_unit_flow_rate.nil?
       if not @is_shared_system
@@ -6112,6 +6283,7 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def average_oa_unit_flow_rate
       # Daily-average outdoor air (cfm) associated with the unit
       return if oa_unit_flow_rate.nil?
@@ -6120,6 +6292,7 @@ class HPXML < Object
       return oa_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
+    # TODO
     def average_total_unit_flow_rate
       # Daily-average total air (cfm) associated with the unit
       return if total_unit_flow_rate.nil?
@@ -6128,6 +6301,7 @@ class HPXML < Object
       return total_unit_flow_rate * (@hours_in_operation / 24.0)
     end
 
+    # TODO
     def unit_flow_rate_ratio
       return 1.0 unless @is_shared_system
       return if @in_unit_flow_rate.nil?
@@ -6138,6 +6312,7 @@ class HPXML < Object
       return ratio
     end
 
+    # TODO
     def unit_fan_power
       return if @fan_power.nil?
 
@@ -6150,6 +6325,7 @@ class HPXML < Object
       end
     end
 
+    # TODO
     def average_unit_fan_power
       return if unit_fan_power.nil?
       return if @hours_in_operation.nil?
@@ -6157,6 +6333,7 @@ class HPXML < Object
       return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
+    # TODO
     def includes_supply_air?
       if [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
@@ -6165,6 +6342,7 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def includes_exhaust_air?
       if [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
@@ -6173,6 +6351,7 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def is_balanced?
       if includes_supply_air? && includes_exhaust_air?
         return true
@@ -6181,6 +6360,7 @@ class HPXML < Object
       return false
     end
 
+    # TODO
     def cfis_supplemental_fan
       return if @cfis_supplemental_fan_idref.nil?
       return unless @fan_type == MechVentTypeCFIS
@@ -6206,6 +6386,7 @@ class HPXML < Object
       fail "CFIS Supplemental Fan '#{@cfis_supplemental_fan_idref}' not found for ventilation fan '#{@id}'."
     end
 
+    # TODO
     def is_cfis_supplemental_fan?
       @parent_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.fan_type == MechVentTypeCFIS
@@ -6216,11 +6397,11 @@ class HPXML < Object
       return false
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.ventilation_fans.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; oa_unit_flow_rate; rescue StandardError => e; errors << e.message; end
@@ -6229,7 +6410,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       ventilation_fans = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'MechanicalVentilation', 'VentilationFans'])
@@ -6290,7 +6471,7 @@ class HPXML < Object
       XMLHelper.add_extension(ventilation_fan, 'VentilationOnlyModeAirflowFraction', @cfis_vent_mode_airflow_fraction, :float, @cfis_vent_mode_airflow_fraction_isdefaulted) unless @cfis_vent_mode_airflow_fraction.nil?
     end
 
-    def from_doc(ventilation_fan)
+    def from_doc(ventilation_fan) # rubocop:disable Style/DocumentationMethod
       return if ventilation_fan.nil?
 
       @id = HPXML::get_id(ventilation_fan)
@@ -6330,12 +6511,12 @@ class HPXML < Object
     end
   end
 
-  class WaterHeatingSystems < BaseArrayElement
-    def add(**kwargs)
+  class WaterHeatingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << WaterHeatingSystem.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/WaterHeating/WaterHeatingSystem').each do |water_heating_system|
@@ -6344,7 +6525,7 @@ class HPXML < Object
     end
   end
 
-  class WaterHeatingSystem < BaseElement
+  class WaterHeatingSystem < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
@@ -6352,6 +6533,7 @@ class HPXML < Object
              :temperature, :is_shared_system, :number_of_bedrooms_served, :tank_model_type, :operating_mode]
     attr_accessor(*ATTRS)
 
+    # TODO
     def related_hvac_system
       return if @related_hvac_idref.nil?
 
@@ -6363,7 +6545,7 @@ class HPXML < Object
       fail "RelatedHVACSystem '#{@related_hvac_idref}' not found for water heating system '#{@id}'."
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.water_heating_systems.delete(self)
       @parent_object.solar_thermal_systems.each do |solar_thermal_system|
         next unless solar_thermal_system.water_heating_system_idref == @id
@@ -6382,13 +6564,13 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; related_hvac_system; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
@@ -6434,7 +6616,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(water_heating_system)
+    def from_doc(water_heating_system) # rubocop:disable Style/DocumentationMethod
       return if water_heating_system.nil?
 
       @id = HPXML::get_id(water_heating_system)
@@ -6465,12 +6647,12 @@ class HPXML < Object
     end
   end
 
-  class HotWaterDistributions < BaseArrayElement
-    def add(**kwargs)
+  class HotWaterDistributions < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HotWaterDistribution.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/WaterHeating/HotWaterDistribution').each do |hot_water_distribution|
@@ -6479,7 +6661,7 @@ class HPXML < Object
     end
   end
 
-  class HotWaterDistribution < BaseElement
+  class HotWaterDistribution < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :system_type, :pipe_r_value, :standard_piping_length, :recirculation_control_type,
              :recirculation_piping_length, :recirculation_branch_piping_length,
              :recirculation_pump_power, :dwhr_facilities_connected, :dwhr_equal_flow,
@@ -6489,16 +6671,16 @@ class HPXML < Object
              :recirculation_pump_weekday_fractions, :recirculation_pump_weekend_fractions, :recirculation_pump_monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.hot_water_distributions.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
@@ -6543,7 +6725,7 @@ class HPXML < Object
       XMLHelper.add_extension(hot_water_distribution, 'RecirculationPumpMonthlyScheduleMultipliers', @recirculation_pump_monthly_multipliers, :string, @recirculation_pump_monthly_multipliers_isdefaulted) unless @recirculation_pump_monthly_multipliers.nil?
     end
 
-    def from_doc(hot_water_distribution)
+    def from_doc(hot_water_distribution) # rubocop:disable Style/DocumentationMethod
       return if hot_water_distribution.nil?
 
       @id = HPXML::get_id(hot_water_distribution)
@@ -6573,12 +6755,12 @@ class HPXML < Object
     end
   end
 
-  class WaterFixtures < BaseArrayElement
-    def add(**kwargs)
+  class WaterFixtures < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << WaterFixture.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/WaterHeating/WaterFixture').each do |water_fixture|
@@ -6587,20 +6769,20 @@ class HPXML < Object
     end
   end
 
-  class WaterFixture < BaseElement
+  class WaterFixture < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :water_fixture_type, :low_flow, :flow_rate, :count]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.water_fixtures.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
@@ -6613,7 +6795,7 @@ class HPXML < Object
       XMLHelper.add_element(water_fixture, 'LowFlow', @low_flow, :boolean, @low_flow_isdefaulted) unless @low_flow.nil?
     end
 
-    def from_doc(water_fixture)
+    def from_doc(water_fixture) # rubocop:disable Style/DocumentationMethod
       return if water_fixture.nil?
 
       @id = HPXML::get_id(water_fixture)
@@ -6624,17 +6806,17 @@ class HPXML < Object
     end
   end
 
-  class WaterHeating < BaseElement
+  class WaterHeating < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:water_fixtures_usage_multiplier, :water_fixtures_weekday_fractions, :water_fixtures_weekend_fractions,
              :water_fixtures_monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'WaterHeating'])
@@ -6644,7 +6826,7 @@ class HPXML < Object
       XMLHelper.add_extension(water_heating, 'WaterFixturesMonthlyScheduleMultipliers', @water_fixtures_monthly_multipliers, :string, @water_fixtures_monthly_multipliers_isdefaulted) unless @water_fixtures_monthly_multipliers.nil?
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       water_heating = XMLHelper.get_element(building, 'BuildingDetails/Systems/WaterHeating')
@@ -6657,12 +6839,12 @@ class HPXML < Object
     end
   end
 
-  class SolarThermalSystems < BaseArrayElement
-    def add(**kwargs)
+  class SolarThermalSystems < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << SolarThermalSystem.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/SolarThermal/SolarThermalSystem').each do |solar_thermal_system|
@@ -6671,12 +6853,13 @@ class HPXML < Object
     end
   end
 
-  class SolarThermalSystem < BaseElement
+  class SolarThermalSystem < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :system_type, :collector_area, :collector_loop_type, :collector_orientation, :collector_azimuth,
              :collector_type, :collector_tilt, :collector_frta, :collector_frul, :storage_volume,
              :water_heating_system_idref, :solar_fraction]
     attr_accessor(*ATTRS)
 
+    # TODO
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -6688,17 +6871,17 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for solar thermal system '#{@id}'."
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.solar_thermal_systems.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; water_heating_system; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       solar_thermal = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'SolarThermal'])
@@ -6722,7 +6905,7 @@ class HPXML < Object
       XMLHelper.add_element(solar_thermal_system, 'SolarFraction', @solar_fraction, :float) unless @solar_fraction.nil?
     end
 
-    def from_doc(solar_thermal_system)
+    def from_doc(solar_thermal_system) # rubocop:disable Style/DocumentationMethod
       return if solar_thermal_system.nil?
 
       @id = HPXML::get_id(solar_thermal_system)
@@ -6741,12 +6924,12 @@ class HPXML < Object
     end
   end
 
-  class PVSystems < BaseArrayElement
-    def add(**kwargs)
+  class PVSystems < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PVSystem.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/Photovoltaics/PVSystem').each do |pv_system|
@@ -6755,12 +6938,13 @@ class HPXML < Object
     end
   end
 
-  class PVSystem < BaseElement
+  class PVSystem < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :module_type, :tracking, :array_orientation, :array_azimuth, :array_tilt,
              :max_power_output, :inverter_idref, :system_losses_fraction, :number_of_panels,
              :year_modules_manufactured, :is_shared_system, :number_of_bedrooms_served]
     attr_accessor(*ATTRS)
 
+    # TODO
     def inverter
       return if @inverter_idref.nil?
 
@@ -6772,17 +6956,17 @@ class HPXML < Object
       fail "Attached inverter '#{@inverter_idref}' not found for pv system '#{@id}'."
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.pv_systems.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; inverter; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       photovoltaics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Photovoltaics'])
@@ -6807,7 +6991,7 @@ class HPXML < Object
       XMLHelper.add_extension(pv_system, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer) unless @number_of_bedrooms_served.nil?
     end
 
-    def from_doc(pv_system)
+    def from_doc(pv_system) # rubocop:disable Style/DocumentationMethod
       return if pv_system.nil?
 
       @id = HPXML::get_id(pv_system)
@@ -6827,12 +7011,12 @@ class HPXML < Object
     end
   end
 
-  class Inverters < BaseArrayElement
-    def add(**kwargs)
+  class Inverters < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Inverter.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/Photovoltaics/Inverter').each do |inverter|
@@ -6841,10 +7025,11 @@ class HPXML < Object
     end
   end
 
-  class Inverter < BaseElement
+  class Inverter < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :inverter_efficiency]
     attr_accessor(*ATTRS)
 
+    # TODO
     def pv_system
       return if @id.nil?
 
@@ -6855,17 +7040,17 @@ class HPXML < Object
       end
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.inverters.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; pv_system; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       photovoltaics = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Photovoltaics'])
@@ -6875,7 +7060,7 @@ class HPXML < Object
       XMLHelper.add_element(inverter, 'InverterEfficiency', @inverter_efficiency, :float, @inverter_efficiency_isdefaulted) unless @inverter_efficiency.nil?
     end
 
-    def from_doc(inverter)
+    def from_doc(inverter) # rubocop:disable Style/DocumentationMethod
       return if inverter.nil?
 
       @id = HPXML::get_id(inverter)
@@ -6883,12 +7068,12 @@ class HPXML < Object
     end
   end
 
-  class Generators < BaseArrayElement
-    def add(**kwargs)
+  class Generators < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Generator.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/extension/Generators/Generator').each do |generator|
@@ -6897,20 +7082,20 @@ class HPXML < Object
     end
   end
 
-  class Generator < BaseElement
+  class Generator < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :fuel_type, :annual_consumption_kbtu, :annual_output_kwh, :is_shared_system, :number_of_bedrooms_served]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.generators.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       generators = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'extension', 'Generators'])
@@ -6924,7 +7109,7 @@ class HPXML < Object
       XMLHelper.add_element(generator, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer) unless @number_of_bedrooms_served.nil?
     end
 
-    def from_doc(generator)
+    def from_doc(generator) # rubocop:disable Style/DocumentationMethod
       return if generator.nil?
 
       @id = HPXML::get_id(generator)
@@ -6936,12 +7121,12 @@ class HPXML < Object
     end
   end
 
-  class Batteries < BaseArrayElement
-    def add(**kwargs)
+  class Batteries < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Battery.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Systems/Batteries/Battery').each do |battery|
@@ -6950,22 +7135,22 @@ class HPXML < Object
     end
   end
 
-  class Battery < BaseElement
+  class Battery < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output, :nominal_capacity_kwh, :nominal_capacity_ah,
              :nominal_voltage, :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah, :is_shared_system,
              :number_of_bedrooms_served]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.batteries.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       batteries = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Systems', 'Batteries'])
@@ -7002,7 +7187,7 @@ class HPXML < Object
       XMLHelper.add_extension(battery, 'NumberofBedroomsServed', @number_of_bedrooms_served, :integer) unless @number_of_bedrooms_served.nil?
     end
 
-    def from_doc(battery)
+    def from_doc(battery) # rubocop:disable Style/DocumentationMethod
       return if battery.nil?
 
       @id = HPXML::get_id(battery)
@@ -7021,12 +7206,12 @@ class HPXML < Object
     end
   end
 
-  class ClothesWashers < BaseArrayElement
-    def add(**kwargs)
+  class ClothesWashers < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClothesWasher.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/ClothesWasher').each do |clothes_washer|
@@ -7035,7 +7220,7 @@ class HPXML < Object
     end
   end
 
-  class ClothesWasher < BaseElement
+  class ClothesWasher < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :capacity, :label_usage, :usage_multiplier, :is_shared_appliance, :count,
@@ -7044,6 +7229,7 @@ class HPXML < Object
 
     attr_accessor(*ATTRS)
 
+    # TODO
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -7055,6 +7241,7 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for clothes washer '#{@id}'."
     end
 
+    # TODO
     def hot_water_distribution
       return if @hot_water_distribution_idref.nil?
 
@@ -7066,18 +7253,18 @@ class HPXML < Object
       fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for clothes washer '#{@id}'."
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.clothes_washers.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; water_heating_system; rescue StandardError => e; errors << e.message; end
       begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7109,7 +7296,7 @@ class HPXML < Object
       XMLHelper.add_extension(clothes_washer, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(clothes_washer)
+    def from_doc(clothes_washer) # rubocop:disable Style/DocumentationMethod
       return if clothes_washer.nil?
 
       @id = HPXML::get_id(clothes_washer)
@@ -7134,12 +7321,12 @@ class HPXML < Object
     end
   end
 
-  class ClothesDryers < BaseArrayElement
-    def add(**kwargs)
+  class ClothesDryers < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClothesDryer.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/ClothesDryer').each do |clothes_dryer|
@@ -7148,23 +7335,23 @@ class HPXML < Object
     end
   end
 
-  class ClothesDryer < BaseElement
+  class ClothesDryer < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
              :usage_multiplier, :is_shared_appliance, :count, :number_of_units_served,
              :is_vented, :vented_flow_rate, :weekday_fractions, :weekend_fractions,
              :monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.clothes_dryers.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7187,7 +7374,7 @@ class HPXML < Object
       XMLHelper.add_extension(clothes_dryer, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(clothes_dryer)
+    def from_doc(clothes_dryer) # rubocop:disable Style/DocumentationMethod
       return if clothes_dryer.nil?
 
       @id = HPXML::get_id(clothes_dryer)
@@ -7208,12 +7395,12 @@ class HPXML < Object
     end
   end
 
-  class Dishwashers < BaseArrayElement
-    def add(**kwargs)
+  class Dishwashers < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Dishwasher.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/Dishwasher').each do |dishwasher|
@@ -7222,13 +7409,14 @@ class HPXML < Object
     end
   end
 
-  class Dishwasher < BaseElement
+  class Dishwasher < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost, :label_usage,
              :usage_multiplier, :is_shared_appliance, :water_heating_system_idref,
              :hot_water_distribution_idref, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
+    # TODO
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -7240,6 +7428,7 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for dishwasher '#{@id}'."
     end
 
+    # TODO
     def hot_water_distribution
       return if @hot_water_distribution_idref.nil?
 
@@ -7251,18 +7440,18 @@ class HPXML < Object
       fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for dishwasher '#{@id}'."
     end
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.dishwashers.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       begin; water_heating_system; rescue StandardError => e; errors << e.message; end
       begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7291,7 +7480,7 @@ class HPXML < Object
       XMLHelper.add_extension(dishwasher, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(dishwasher)
+    def from_doc(dishwasher) # rubocop:disable Style/DocumentationMethod
       return if dishwasher.nil?
 
       @id = HPXML::get_id(dishwasher)
@@ -7313,12 +7502,12 @@ class HPXML < Object
     end
   end
 
-  class Refrigerators < BaseArrayElement
-    def add(**kwargs)
+  class Refrigerators < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Refrigerator.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/Refrigerator').each do |refrigerator|
@@ -7327,22 +7516,22 @@ class HPXML < Object
     end
   end
 
-  class Refrigerator < BaseElement
+  class Refrigerator < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :rated_annual_kwh, :usage_multiplier, :primary_indicator,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers,
              :constant_coefficients, :temperature_coefficients]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.refrigerators.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7360,7 +7549,7 @@ class HPXML < Object
       XMLHelper.add_extension(refrigerator, 'TemperatureScheduleCoefficients', @temperature_coefficients, :string, @temperature_coefficients_isdefaulted) unless @temperature_coefficients.nil?
     end
 
-    def from_doc(refrigerator)
+    def from_doc(refrigerator) # rubocop:disable Style/DocumentationMethod
       return if refrigerator.nil?
 
       @id = HPXML::get_id(refrigerator)
@@ -7376,12 +7565,12 @@ class HPXML < Object
     end
   end
 
-  class Freezers < BaseArrayElement
-    def add(**kwargs)
+  class Freezers < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Freezer.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/Freezer').each do |freezer|
@@ -7390,22 +7579,22 @@ class HPXML < Object
     end
   end
 
-  class Freezer < BaseElement
+  class Freezer < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :rated_annual_kwh, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers,
              :constant_coefficients, :temperature_coefficients]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.freezers.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7422,7 +7611,7 @@ class HPXML < Object
       XMLHelper.add_extension(freezer, 'TemperatureScheduleCoefficients', @temperature_coefficients, :string, @temperature_coefficients_isdefaulted) unless @temperature_coefficients.nil?
     end
 
-    def from_doc(freezer)
+    def from_doc(freezer) # rubocop:disable Style/DocumentationMethod
       return if freezer.nil?
 
       @id = HPXML::get_id(freezer)
@@ -7437,12 +7626,12 @@ class HPXML < Object
     end
   end
 
-  class Dehumidifiers < BaseArrayElement
-    def add(**kwargs)
+  class Dehumidifiers < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Dehumidifier.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/Dehumidifier').each do |dehumidifier|
@@ -7451,21 +7640,21 @@ class HPXML < Object
     end
   end
 
-  class Dehumidifier < BaseElement
+  class Dehumidifier < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :type, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served,
              :location]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.dehumidifiers.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7481,7 +7670,7 @@ class HPXML < Object
       XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', @fraction_served, :float) unless @fraction_served.nil?
     end
 
-    def from_doc(dehumidifier)
+    def from_doc(dehumidifier) # rubocop:disable Style/DocumentationMethod
       return if dehumidifier.nil?
 
       @id = HPXML::get_id(dehumidifier)
@@ -7495,12 +7684,12 @@ class HPXML < Object
     end
   end
 
-  class CookingRanges < BaseArrayElement
-    def add(**kwargs)
+  class CookingRanges < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CookingRange.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/CookingRange').each do |cooking_range|
@@ -7509,21 +7698,21 @@ class HPXML < Object
     end
   end
 
-  class CookingRange < BaseElement
+  class CookingRange < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.cooking_ranges.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7539,7 +7728,7 @@ class HPXML < Object
       XMLHelper.add_extension(cooking_range, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(cooking_range)
+    def from_doc(cooking_range) # rubocop:disable Style/DocumentationMethod
       return if cooking_range.nil?
 
       @id = HPXML::get_id(cooking_range)
@@ -7553,12 +7742,12 @@ class HPXML < Object
     end
   end
 
-  class Ovens < BaseArrayElement
-    def add(**kwargs)
+  class Ovens < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Oven.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Appliances/Oven').each do |oven|
@@ -7567,20 +7756,20 @@ class HPXML < Object
     end
   end
 
-  class Oven < BaseElement
+  class Oven < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :is_convection]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.ovens.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Appliances'])
@@ -7590,7 +7779,7 @@ class HPXML < Object
       XMLHelper.add_element(oven, 'IsConvection', @is_convection, :boolean, @is_convection_isdefaulted) unless @is_convection.nil?
     end
 
-    def from_doc(oven)
+    def from_doc(oven) # rubocop:disable Style/DocumentationMethod
       return if oven.nil?
 
       @id = HPXML::get_id(oven)
@@ -7598,12 +7787,12 @@ class HPXML < Object
     end
   end
 
-  class LightingGroups < BaseArrayElement
-    def add(**kwargs)
+  class LightingGroups < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << LightingGroup.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Lighting/LightingGroup').each do |lighting_group|
@@ -7612,20 +7801,20 @@ class HPXML < Object
     end
   end
 
-  class LightingGroup < BaseElement
+  class LightingGroup < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type, :kwh_per_year]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.lighting_groups.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
@@ -7645,7 +7834,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(lighting_group)
+    def from_doc(lighting_group) # rubocop:disable Style/DocumentationMethod
       return if lighting_group.nil?
 
       @id = HPXML::get_id(lighting_group)
@@ -7656,7 +7845,7 @@ class HPXML < Object
     end
   end
 
-  class Lighting < BaseElement
+  class Lighting < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:interior_usage_multiplier, :garage_usage_multiplier, :exterior_usage_multiplier,
              :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
              :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
@@ -7665,7 +7854,7 @@ class HPXML < Object
              :holiday_period_end_month, :holiday_period_end_day, :holiday_weekday_fractions, :holiday_weekend_fractions]
     attr_accessor(*ATTRS)
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
 
       errors += HPXML::check_dates('Exterior Holiday Lighting', @holiday_period_begin_month, @holiday_period_begin_day, @holiday_period_end_month, @holiday_period_end_day)
@@ -7673,7 +7862,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
@@ -7705,7 +7894,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       lighting = XMLHelper.get_element(building, 'BuildingDetails/Lighting')
@@ -7738,12 +7927,12 @@ class HPXML < Object
     end
   end
 
-  class CeilingFans < BaseArrayElement
-    def add(**kwargs)
+  class CeilingFans < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CeilingFan.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Lighting/CeilingFan').each do |ceiling_fan|
@@ -7752,20 +7941,20 @@ class HPXML < Object
     end
   end
 
-  class CeilingFan < BaseElement
+  class CeilingFan < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :efficiency, :label_energy_use, :count, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.ceiling_fans.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Lighting'])
@@ -7784,7 +7973,7 @@ class HPXML < Object
       XMLHelper.add_extension(ceiling_fan, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(ceiling_fan)
+    def from_doc(ceiling_fan) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(ceiling_fan)
       @efficiency = XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency", :float)
       @label_energy_use = XMLHelper.get_value(ceiling_fan, 'LabelEnergyUse', :float)
@@ -7795,12 +7984,12 @@ class HPXML < Object
     end
   end
 
-  class Pools < BaseArrayElement
-    def add(**kwargs)
+  class Pools < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Pool.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Pools/Pool').each do |pool|
@@ -7809,23 +7998,23 @@ class HPXML < Object
     end
   end
 
-  class Pool < BaseElement
+  class Pool < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :type, :heater_id, :heater_type, :heater_load_units, :heater_load_value, :heater_usage_multiplier,
              :pump_id, :pump_type, :pump_kwh_per_year, :pump_usage_multiplier,
              :heater_weekday_fractions, :heater_weekend_fractions, :heater_monthly_multipliers,
              :pump_weekday_fractions, :pump_weekend_fractions, :pump_monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.pools.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       pools = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Pools'])
@@ -7876,7 +8065,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(pool)
+    def from_doc(pool) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(pool)
       @type = XMLHelper.get_value(pool, 'Type', :string)
       pool_pump = XMLHelper.get_element(pool, 'Pumps/Pump')
@@ -7903,12 +8092,12 @@ class HPXML < Object
     end
   end
 
-  class PermanentSpas < BaseArrayElement
-    def add(**kwargs)
+  class PermanentSpas < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PermanentSpa.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Spas/PermanentSpa').each do |spa|
@@ -7917,23 +8106,23 @@ class HPXML < Object
     end
   end
 
-  class PermanentSpa < BaseElement
+  class PermanentSpa < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :type, :heater_id, :heater_type, :heater_load_units, :heater_load_value, :heater_usage_multiplier,
              :pump_id, :pump_type, :pump_kwh_per_year, :pump_usage_multiplier,
              :heater_weekday_fractions, :heater_weekend_fractions, :heater_monthly_multipliers,
              :pump_weekday_fractions, :pump_weekend_fractions, :pump_monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.permanent_spas.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       spas = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Spas'])
@@ -7984,7 +8173,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(spa)
+    def from_doc(spa) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(spa)
       @type = XMLHelper.get_value(spa, 'Type', :string)
       spa_pump = XMLHelper.get_element(spa, 'Pumps/Pump')
@@ -8011,12 +8200,12 @@ class HPXML < Object
     end
   end
 
-  class PortableSpas < BaseArrayElement
-    def add(**kwargs)
+  class PortableSpas < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PortableSpa.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/Spas/PortableSpa').each do |spa|
@@ -8025,20 +8214,20 @@ class HPXML < Object
     end
   end
 
-  class PortableSpa < BaseElement
+  class PortableSpa < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.portable_spas.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       spas = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'Spas'])
@@ -8047,17 +8236,17 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
     end
 
-    def from_doc(spa)
+    def from_doc(spa) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(spa)
     end
   end
 
-  class PlugLoads < BaseArrayElement
-    def add(**kwargs)
+  class PlugLoads < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PlugLoad.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/MiscLoads/PlugLoad').each do |plug_load|
@@ -8066,21 +8255,21 @@ class HPXML < Object
     end
   end
 
-  class PlugLoad < BaseElement
+  class PlugLoad < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :plug_load_type, :kwh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.plug_loads.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       misc_loads = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'MiscLoads'])
@@ -8101,7 +8290,7 @@ class HPXML < Object
       XMLHelper.add_extension(plug_load, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(plug_load)
+    def from_doc(plug_load) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(plug_load)
       @plug_load_type = XMLHelper.get_value(plug_load, 'PlugLoadType', :string)
       @kwh_per_year = XMLHelper.get_value(plug_load, "Load[Units='#{UnitsKwhPerYear}']/Value", :float)
@@ -8114,12 +8303,12 @@ class HPXML < Object
     end
   end
 
-  class FuelLoads < BaseArrayElement
-    def add(**kwargs)
+  class FuelLoads < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << FuelLoad.new(@parent_object, **kwargs)
     end
 
-    def from_doc(building)
+    def from_doc(building) # rubocop:disable Style/DocumentationMethod
       return if building.nil?
 
       XMLHelper.get_elements(building, 'BuildingDetails/MiscLoads/FuelLoad').each do |fuel_load|
@@ -8128,21 +8317,21 @@ class HPXML < Object
     end
   end
 
-  class FuelLoad < BaseElement
+  class FuelLoad < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       @parent_object.fuel_loads.delete(self)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(building)
+    def to_doc(building) # rubocop:disable Style/DocumentationMethod
       return if nil?
 
       misc_loads = XMLHelper.create_elements_as_needed(building, ['BuildingDetails', 'MiscLoads'])
@@ -8164,7 +8353,7 @@ class HPXML < Object
       XMLHelper.add_extension(fuel_load, 'MonthlyScheduleMultipliers', @monthly_multipliers, :string, @monthly_multipliers_isdefaulted) unless @monthly_multipliers.nil?
     end
 
-    def from_doc(fuel_load)
+    def from_doc(fuel_load) # rubocop:disable Style/DocumentationMethod
       @id = HPXML::get_id(fuel_load)
       @fuel_load_type = XMLHelper.get_value(fuel_load, 'FuelLoadType', :string)
       @therm_per_year = XMLHelper.get_value(fuel_load, "Load[Units='#{UnitsThermPerYear}']/Value", :float)
@@ -8178,12 +8367,12 @@ class HPXML < Object
     end
   end
 
-  class CoolingDetailedPerformanceData < BaseArrayElement
-    def add(**kwargs)
+  class CoolingDetailedPerformanceData < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CoolingPerformanceDataPoint.new(@parent_object, **kwargs)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
@@ -8197,7 +8386,7 @@ class HPXML < Object
       return errors
     end
 
-    def from_doc(hvac_system)
+    def from_doc(hvac_system) # rubocop:disable Style/DocumentationMethod
       return if hvac_system.nil?
 
       XMLHelper.get_elements(hvac_system, 'CoolingDetailedPerformanceData/PerformanceDataPoint').each do |performance_data_point|
@@ -8206,23 +8395,23 @@ class HPXML < Object
     end
   end
 
-  class CoolingPerformanceDataPoint < BaseElement
+  class CoolingPerformanceDataPoint < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:outdoor_temperature, :indoor_temperature, :indoor_wetbulb, :capacity, :capacity_fraction_of_nominal,
              :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop, :isdefaulted]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       (@parent_object.cooling_systems + @parent_object.heat_pumps).each do |cooling_system|
         cooling_system.cooling_detailed_performance_data.delete(self)
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(hvac_system)
+    def to_doc(hvac_system) # rubocop:disable Style/DocumentationMethod
       detailed_performance_data = XMLHelper.create_elements_as_needed(hvac_system, ['CoolingDetailedPerformanceData'])
       performance_data_point = XMLHelper.add_element(detailed_performance_data, 'PerformanceDataPoint')
       XMLHelper.add_attribute(performance_data_point, 'dataSource', 'software') if @isdefaulted
@@ -8239,7 +8428,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(performance_data_point)
+    def from_doc(performance_data_point) # rubocop:disable Style/DocumentationMethod
       return if performance_data_point.nil?
 
       @outdoor_temperature = XMLHelper.get_value(performance_data_point, 'OutdoorTemperature', :float)
@@ -8252,12 +8441,12 @@ class HPXML < Object
     end
   end
 
-  class HeatingDetailedPerformanceData < BaseArrayElement
-    def add(**kwargs)
+  class HeatingDetailedPerformanceData < BaseArrayElement # rubocop:disable Style/Documentation
+    def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatingPerformanceDataPoint.new(@parent_object, **kwargs)
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       # For every unique outdoor temperature, check we have exactly one minimum and one maximum datapoint
       outdoor_temps = self.select { |dp| [HPXML::CapacityDescriptionMinimum, HPXML::CapacityDescriptionMaximum].include? dp.capacity_description }.map { |dp| dp.outdoor_temperature }.uniq
@@ -8271,7 +8460,7 @@ class HPXML < Object
       return errors
     end
 
-    def from_doc(hvac_system)
+    def from_doc(hvac_system) # rubocop:disable Style/DocumentationMethod
       return if hvac_system.nil?
 
       XMLHelper.get_elements(hvac_system, 'HeatingDetailedPerformanceData/PerformanceDataPoint').each do |performance_data_point|
@@ -8280,24 +8469,24 @@ class HPXML < Object
     end
   end
 
-  class HeatingPerformanceDataPoint < BaseElement
+  class HeatingPerformanceDataPoint < BaseElement # rubocop:disable Style/Documentation
     ATTRS = [:outdoor_temperature, :indoor_temperature, :capacity, :capacity_fraction_of_nominal,
              :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop,
              :isdefaulted]
     attr_accessor(*ATTRS)
 
-    def delete
+    def delete # rubocop:disable Style/DocumentationMethod
       (@parent_object.heating_systems + @parent_object.heat_pumps).each do |heating_system|
         heating_system.cooling_detailed_performance_data.delete(self)
       end
     end
 
-    def check_for_errors
+    def check_for_errors # rubocop:disable Style/DocumentationMethod
       errors = []
       return errors
     end
 
-    def to_doc(hvac_system)
+    def to_doc(hvac_system) # rubocop:disable Style/DocumentationMethod
       detailed_performance_data = XMLHelper.create_elements_as_needed(hvac_system, ['HeatingDetailedPerformanceData'])
       performance_data_point = XMLHelper.add_element(detailed_performance_data, 'PerformanceDataPoint')
       XMLHelper.add_attribute(performance_data_point, 'dataSource', 'software') if @isdefaulted
@@ -8313,7 +8502,7 @@ class HPXML < Object
       end
     end
 
-    def from_doc(performance_data_point)
+    def from_doc(performance_data_point) # rubocop:disable Style/DocumentationMethod
       return if performance_data_point.nil?
 
       @outdoor_temperature = XMLHelper.get_value(performance_data_point, 'OutdoorTemperature', :float)
@@ -8325,6 +8514,7 @@ class HPXML < Object
     end
   end
 
+  # TODO
   def _create_hpxml_document()
     doc = XMLHelper.create_doc('1.0', 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
@@ -8333,6 +8523,7 @@ class HPXML < Object
     return doc
   end
 
+  # TODO
   def self.fossil_fuels
     # The unique set of HPXML fuel types that end up used in the EnergyPlus model.
     # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
@@ -8344,15 +8535,18 @@ class HPXML < Object
             HPXML::FuelTypeWoodPellets]
   end
 
+  # TODO
   def self.all_fuels
     return [HPXML::FuelTypeElectricity] + fossil_fuels
   end
 
+  # TODO
   def self.vented_locations
     return [HPXML::LocationAtticVented,
             HPXML::LocationCrawlspaceVented]
   end
 
+  # TODO
   def self.conditioned_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
@@ -8360,32 +8554,38 @@ class HPXML < Object
             HPXML::LocationOtherHousingUnit]
   end
 
+  # TODO
   def self.multifamily_common_space_locations
     return [HPXML::LocationOtherHeatedSpace,
             HPXML::LocationOtherMultifamilyBufferSpace,
             HPXML::LocationOtherNonFreezingSpace]
   end
 
+  # TODO
   def self.conditioned_locations_this_unit
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
   end
 
+  # TODO
   def self.conditioned_finished_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned]
   end
 
+  # TODO
   def self.conditioned_below_grade_locations
     return [HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
   end
 
+  # TODO
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
   end
 
+  # TODO
   def self.is_exposed(surface)
     if HPXML::is_conditioned(surface) &&
        (surface.exterior_adjacent_to == LocationOutside ||
@@ -8396,6 +8596,7 @@ class HPXML < Object
     return false
   end
 
+  # TODO
   def self.is_adiabatic(surface)
     if surface.exterior_adjacent_to == surface.interior_adjacent_to
       # E.g., wall between unit crawlspace and neighboring unit crawlspace
@@ -8410,6 +8611,7 @@ class HPXML < Object
     return false
   end
 
+  # TODO
   def self.is_thermal_boundary(surface)
     # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
     # Note: The location of insulation is not considered here, so an insulated foundation wall of an
@@ -8419,6 +8621,7 @@ class HPXML < Object
     return (interior_conditioned != exterior_conditioned)
   end
 
+  # TODO
   def self.is_floor_a_ceiling(surface, force_decision)
     ceiling_locations = [LocationAtticUnconditioned,
                          LocationAtticVented,
@@ -8439,14 +8642,17 @@ class HPXML < Object
     end
   end
 
+  # TODO
   def self.get_id(parent, element_name = 'SystemIdentifier')
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
+  # TODO
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
   end
 
+  # TODO
   def self.check_dates(str, begin_month, begin_day, end_month, end_day)
     errors = []
 
@@ -8483,6 +8689,7 @@ class HPXML < Object
     return errors
   end
 
+  # TODO
   def self.design_loads_to_doc(hpxml_object, hpxml_element)
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
@@ -8502,6 +8709,7 @@ class HPXML < Object
     end
   end
 
+  # TODO
   def self.design_loads_from_doc(hpxml_object, hpxml_element)
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
