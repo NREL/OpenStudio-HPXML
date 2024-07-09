@@ -50,6 +50,10 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
+      elsif hpxml.header.hvac_onoff_thermostat_deadband
+        # On off thermostat not supported with unit multiplier yet
+      elsif hpxml.header.heat_pump_backup_heating_capacity_increment
+        # multi-staging backup coil not supported with unit multiplier yet
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
@@ -381,6 +385,10 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     # Location doesn't match EPW station (see https://github.com/NREL/EnergyPlus/issues/10579)
     if hpxml_path.include? 'base-location-detailed.xml'
       next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
+    end
+    # Coil speed level EMS
+    if hpxml_header.hvac_onoff_thermostat_deadband
+      next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # Speed level actuator throws this error when speed is set to 1 but no load
     end
     # TODO: Check why this house produces this warning
     if hpxml_path.include? 'house044.xml'
@@ -1030,7 +1038,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)
     else
-      assert_operator(unmet_hours_htg, :<, 500)
+      # for realistic backup staging, unmet hours are expected.
+      assert_operator(unmet_hours_htg, :<, 500) unless hpxml_path.include? 'research-features'
     end
     if hpxml_bldg.total_fraction_cool_load_served == 0
       assert_equal(0, unmet_hours_clg)

@@ -181,16 +181,17 @@ base-foundation-unvented-crawlspace.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1688
 base-foundation-vented-crawlspace-above-grade.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1706.0,3190.6,3190.6,17.358,16.852,0.0
 base-foundation-vented-crawlspace.xml,0.0,0.0,1354.7,998.0,11171.5,2752.7,1698.2,2968.3,2968.3,17.366,16.513,0.0
 base-foundation-walkout-basement.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2119.8,4032.7,4032.7,27.437,20.698,0.0
-base-hvac-air-to-air-heat-pump-1-speed-advanced-defrost.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7442.2,3686.8,7442.2,24.708,16.2,0.0
 base-hvac-air-to-air-heat-pump-1-speed-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,6821.2,3528.7,6821.2,23.767,14.724,0.0
 base-hvac-air-to-air-heat-pump-1-speed-cooling-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,3314.8,3314.8,0.0,15.909,0.0
 base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7101.3,3686.8,7101.3,24.709,16.2,0.0
 base-hvac-air-to-air-heat-pump-1-speed-heating-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7150.4,1806.9,7150.4,24.936,0.0,0.0
+base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures-research-features.xml,128.3,0.0,1354.7,998.0,11924.7,2736.4,20130.9,9708.5,20130.9,61.57,33.665,0.0
 base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml,143.0,0.0,1354.7,998.0,11171.5,2563.5,14730.8,3332.2,14730.8,51.32,16.054,0.0
+base-hvac-air-to-air-heat-pump-1-speed-research-features.xml,0.0,0.0,1354.7,998.0,11924.7,2736.4,19839.1,9656.3,19839.1,56.074,35.273,0.0
 base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7101.3,3680.9,7101.3,24.709,16.2,0.0
 base-hvac-air-to-air-heat-pump-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7101.3,3686.8,7101.3,24.709,16.2,0.0
+base-hvac-air-to-air-heat-pump-2-speed-research-features.xml,0.0,0.0,1354.7,998.0,11924.7,2736.4,19212.4,8134.1,19212.4,56.618,28.32,0.0
 base-hvac-air-to-air-heat-pump-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7077.2,3208.0,7077.2,24.701,17.153,0.0
-base-hvac-air-to-air-heat-pump-var-speed-advanced-defrost.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,6190.2,3140.0,6190.2,24.759,18.05,0.0
 base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4174.2,2922.4,4174.2,22.525,15.668,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3212.5,2926.5,3212.5,22.974,17.734,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3217.7,2994.7,3217.7,22.974,17.728,0.0
@@ -205,7 +206,7 @@ base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5202.9,3838.4,5202.9,24.697,18.025,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,163.167,0.0,1354.7,998.0,11171.7,2563.6,15889.4,4519.8,15889.4,61.945,18.014,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,31.0,0.0,1354.7,998.0,11171.6,2563.5,5413.4,3149.4,5413.4,27.32,19.45,0.0
-base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml,155.0,0.0,1354.7,998.0,11171.6,2563.5,7522.8,2802.4,7522.8,27.211,18.049,0.0
+base-hvac-air-to-air-heat-pump-var-speed-research-features.xml,887.117,1.133,1354.7,998.0,11924.7,2736.4,19427.7,7400.8,19427.7,59.537,32.592,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5885.9,3140.0,5885.9,24.759,18.05,0.0
 base-hvac-autosize-sizing-controls.xml,0.0,0.0,2180.8,1715.9,21140.4,3685.8,2486.8,3567.5,3567.5,17.413,14.96,0.0
 base-hvac-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2064.5,3801.9,3801.9,24.092,18.509,0.0
@@ -220,6 +221,7 @@ base-hvac-boiler-wood-only.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1954.5,1806.9
 base-hvac-central-ac-only-1-speed-autosize-factor.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3328.4,3328.4,0.0,15.876,0.0
 base-hvac-central-ac-only-1-speed-seer2.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3584.2,3584.2,0.0,18.55,0.0
 base-hvac-central-ac-only-1-speed.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3590.8,3590.8,0.0,18.55,0.0
+base-hvac-central-ac-only-2-speed-research-features.xml,0.0,0.0,1354.7,998.0,11171.8,2563.6,6805.7,8523.3,8523.3,0.0,21.47,0.0
 base-hvac-central-ac-only-2-speed.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3109.2,3109.2,0.0,19.007,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance-autosize.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3994.6,3994.6,0.0,18.803,0.0
 base-hvac-central-ac-only-var-speed-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1974.5,3495.4,3495.4,0.0,17.773,0.0
@@ -311,6 +313,8 @@ base-hvac-pthp.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4859.0,3364.3,4859.0,16.7
 base-hvac-room-ac-only-33percent.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,2313.1,2313.1,0.0,3.903,0.0
 base-hvac-room-ac-only-ceer.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,3455.4,3455.4,0.0,11.827,0.0
 base-hvac-room-ac-only-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,1924.3,3605.6,3605.6,0.0,10.661,0.0
+base-hvac-room-ac-only-research-features-detailed-setpoints.xml,0.0,0.0,1354.7,998.0,11171.8,2563.6,6761.4,9475.8,9475.8,0.0,23.894,0.0
+base-hvac-room-ac-only-research-features.xml,0.0,0.0,1354.7,998.0,11171.8,2563.6,6757.1,9616.0,9616.0,0.0,23.71,0.0
 base-hvac-room-ac-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,3451.5,3451.5,0.0,11.827,0.0
 base-hvac-room-ac-with-heating.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5887.1,3815.0,5887.1,16.748,12.045,0.0
 base-hvac-room-ac-with-reverse-cycle.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4859.0,3364.3,4859.0,16.748,12.045,0.0

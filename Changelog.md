@@ -10,6 +10,8 @@ __New Features__
   - Miscellaneous improvements.
   - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which infiltration method to use for manual J load calculations.
 - Advanced research features:
+  - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__

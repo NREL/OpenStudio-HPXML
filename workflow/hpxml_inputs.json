@@ -1960,10 +1960,6 @@
     "heat_pump_heating_autosizing_limit": 44000,
     "heat_pump_backup_heating_autosizing_limit": 28000
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
-    "simulation_control_defrost_model_type": "advanced"
-  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-heating-capacity-17f.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml"
   },
@@ -1986,6 +1982,28 @@
     "hvac_control_heating_weekday_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64",
     "hvac_control_heating_weekend_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
+    "site_iecc_zone": 7,
+    "site_state_code": "MN",
+    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "simulation_control_timestep": 1,
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_onoff_thermostat_deadband": 2,
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_defrost_model_type": "advanced"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "site_iecc_zone": 7,
+    "site_state_code": "MN",
+    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "simulation_control_timestep": 1,
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_onoff_thermostat_deadband": 2,
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_defrost_model_type": "advanced"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_efficiency_type": "HSPF2",
@@ -1998,6 +2016,17 @@
     "heat_pump_heating_efficiency": 9.3,
     "heat_pump_cooling_efficiency": 18,
     "heat_pump_cooling_compressor_type": "two stage"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
+    "site_iecc_zone": 7,
+    "site_state_code": "MN",
+    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "simulation_control_timestep": 1,
+    "simulation_control_onoff_thermostat_deadband": 2,
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
@@ -2013,10 +2042,6 @@
     "heat_pump_backup_heating_capacity": null,
     "heat_pump_sizing_methodology": "MaxLoad",
     "heat_pump_backup_sizing_methodology": "supplemental"
-  },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-advanced-defrost.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
@@ -2059,15 +2084,24 @@
     "heat_pump_heating_autosizing_limit": 44000,
     "heating_system_2_heating_autosizing_limit": 29000
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml": {
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "site_iecc_zone": 7,
+    "site_state_code": "MN",
+    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
+    "simulation_control_timestep": 1,
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_defrost_model_type": "advanced"
+  },
+  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv"
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml"
-  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule.xml",
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
     "simulation_control_timestep": 10
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml": {
@@ -2203,6 +2237,11 @@
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "cooling_system_cooling_efficiency": 18,
     "cooling_system_cooling_compressor_type": "two stage"
+  },
+  "sample_files/base-hvac-central-ac-only-2-speed-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-central-ac-only-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2865,6 +2904,16 @@
     "hvac_control_cooling_weekday_setpoint": null,
     "hvac_control_cooling_weekend_setpoint": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-cooling-only.csv"
+  },
+  "sample_files/base-hvac-room-ac-only-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_onoff_thermostat_deadband": 2
+  },
+  "sample_files/base-hvac-room-ac-only-research-features-detailed-setpoints.xml": {
+    "parent_hpxml": "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml",
+    "simulation_control_timestep": 1,
+    "simulation_control_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-seasons.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -3666,19 +3715,11 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints.csv"
   },
   "sample_files/base-schedules-detailed-setpoints-daily-schedules.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "parent_hpxml": "sample_files/base-schedules-detailed-setpoints.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-schedules.csv"
   },
   "sample_files/base-schedules-detailed-setpoints-daily-setbacks.xml": {
-    "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_weekday_setpoint": null,
-    "hvac_control_heating_weekend_setpoint": null,
-    "hvac_control_cooling_weekday_setpoint": null,
-    "hvac_control_cooling_weekend_setpoint": null,
+    "parent_hpxml": "sample_files/base-schedules-detailed-setpoints.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-daily-setbacks.csv"
   },
   "sample_files/base-simcontrol-calendar-year-custom.xml": {
