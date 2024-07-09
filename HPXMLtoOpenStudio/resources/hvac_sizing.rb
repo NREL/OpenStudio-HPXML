@@ -3597,13 +3597,13 @@ module HVACSizing
       capacity_ratios = hvac_ap.heat_capacity_ratios
     end
     if not capacity_ratios.nil?
-      for speed in 0..(capacity_ratios.size - 1)
-        # Select curves for sizing using the speed with the capacity ratio of 1
-        next if capacity_ratios[speed] != 1
+      nominal_speed = capacity_ratios.index(1.0)
 
-        return speed
+      if nominal_speed.nil?
+        fail 'No nominal speed (with capacity ratio of 1.0) found.'
       end
-      fail 'No speed with capacity ratio of 1.0 found.'
+
+      return nominal_speed
     end
     return 0
   end
