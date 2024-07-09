@@ -2038,7 +2038,7 @@ module HVACSizing
       # Ductless systems don't offer this flexibility.
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
-      hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
+      hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
         odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
@@ -2148,7 +2148,7 @@ module HVACSizing
     elsif [HPXML::HVACTypeHeatPumpMiniSplit,
            HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_type) && !is_ducted
 
-      hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
+      hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
@@ -2164,14 +2164,14 @@ module HVACSizing
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
       end
 
-      hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed], hvac_cooling_ap.cool_capacity_ratios[hvac_cooling_speed])
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
 
     elsif [HPXML::HVACTypeRoomAirConditioner,
            HPXML::HVACTypePTAC,
            HPXML::HVACTypeHeatPumpPTHP,
            HPXML::HVACTypeHeatPumpRoom].include? cooling_type
 
-      hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
+      hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
@@ -2185,12 +2185,12 @@ module HVACSizing
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
       end
 
-      hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[0], 1.0)
+      hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[0])
 
     elsif HPXML::HVACTypeHeatPumpGroundToAir == cooling_type
 
       entering_temp = hvac_cooling_ap.design_chw
-      hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
+      hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
 
       gshp_coil_bf = 0.0806
       gshp_coil_bf_ft_spec = [1.21005458, -0.00664200, 0.00000000, 0.00348246, 0.00000000, 0.00000000]
@@ -2281,7 +2281,7 @@ module HVACSizing
           fail 'Primary heat pump should have been sized already.'
         end
 
-        hp_heating_speed = get_sizing_speed(hvac_hp.additional_properties, false)
+        hp_heating_speed = get_nominal_speed(hvac_hp.additional_properties, false)
         hvac_sizings.Heat_Load = calculate_heat_pump_backup_load(mj, hvac_hp, hvac_sizings.Heat_Load, hp_sizing_values.Heat_Capacity, hp_heating_speed, hpxml_bldg)
       end
     elsif not hvac_cooling.nil? && hvac_cooling.has_integrated_heating
@@ -2299,7 +2299,7 @@ module HVACSizing
            HPXML::HVACTypeHeatPumpPTHP,
            HPXML::HVACTypeHeatPumpRoom].include? heating_type
 
-      hvac_heating_speed = get_sizing_speed(hvac_heating_ap, false)
+      hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
       if hvac_heating.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
       else
@@ -2310,7 +2310,7 @@ module HVACSizing
       if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
         hvac_sizings.Heat_Airflow = calc_airflow_rate_manual_s(mj, hvac_sizings.Heat_Capacity, heating_delta_t, dx_capacity: hvac_sizings.Heat_Capacity, hp_cooling_cfm: hvac_sizings.Cool_Airflow)
       else
-        hvac_sizings.Heat_Airflow = calc_airflow_rate_user(hvac_sizings.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed], hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed])
+        hvac_sizings.Heat_Airflow = calc_airflow_rate_user(hvac_sizings.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
       end
 
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heating_type
@@ -2489,12 +2489,12 @@ module HVACSizing
         HPXML::HVACTypeHeatPumpGroundToAir].include?(cooling_type) && frac_zone_cool_load_served > 0
 
       hvac_cooling_ap = hvac_cooling.additional_properties
-      hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
+      hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
 
       if cooling_type != HPXML::HVACTypeHeatPumpGroundToAir
         cool_cfm_m3s = UnitConversions.convert(hvac_sizings.Cool_Airflow, 'cfm', 'm^3/s')
-        cool_airflow_rated_ratio = cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity * hvac_cooling_ap.cool_capacity_ratios[hvac_cooling_speed], hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
-        cool_airflow_rated_defect_ratio = cool_cfm_m3s * (1 + cool_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity * hvac_cooling_ap.cool_capacity_ratios[hvac_cooling_speed], hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
+        cool_airflow_rated_ratio = cool_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
+        cool_airflow_rated_defect_ratio = cool_cfm_m3s * (1 + cool_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
       else
         cool_airflow_rated_ratio = 1.0 # actual air flow is equal to rated (before applying defect ratio) in current methodology
         cool_airflow_rated_defect_ratio = 1 + cool_airflow_defect_ratio
@@ -2554,12 +2554,12 @@ module HVACSizing
         HPXML::HVACTypeHeatPumpGroundToAir].include?(heating_type) && frac_zone_heat_load_served > 0
 
       hvac_heating_ap = hvac_heating.additional_properties
-      hvac_heating_speed = get_sizing_speed(hvac_heating_ap, false)
+      hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
 
       if heating_type != HPXML::HVACTypeHeatPumpGroundToAir
         heat_cfm_m3s = UnitConversions.convert(hvac_sizings.Heat_Airflow, 'cfm', 'm^3/s')
-        heat_airflow_rated_ratio = heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity * hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed], hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
-        heat_airflow_rated_defect_ratio = heat_cfm_m3s * (1 + heat_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity * hvac_heating_ap.heat_capacity_ratios[hvac_heating_speed], hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
+        heat_airflow_rated_ratio = heat_cfm_m3s / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
+        heat_airflow_rated_defect_ratio = heat_cfm_m3s * (1 + heat_airflow_defect_ratio) / HVAC.calc_rated_airflow(hvac_sizings.Heat_Capacity, hvac_heating_ap.heat_rated_cfm_per_ton[hvac_heating_speed])
       else
         heat_airflow_rated_ratio = 1.0 # actual air flow is equal to rated (before applying defect ratio) in current methodology
         heat_airflow_rated_defect_ratio = 1 + heat_airflow_defect_ratio
@@ -3021,7 +3021,7 @@ module HVACSizing
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param heating_temp [Double] Outdoor drybulb temperature (F)
-  # @param hvac_heating_speed [Integer] 0-based heating speed index of the HVAC system
+  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @return [Double] Heat pump adjustment factor (capacity fraction)
   def self.calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
     if hvac_heating.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
@@ -3042,7 +3042,7 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param heating_load [Double] Full heating load (Btu/hr)
   # @param hp_nominal_heating_capacity [Double] Heat pump nominal heating capacity (Btu/hr)
-  # @param hvac_heating_speed [Integer] 0-based heating speed index of the HVAC system
+  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Heat pump backup load (Btu/hr)
   def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hvac_heating_speed, hpxml_bldg)
@@ -3080,15 +3080,13 @@ module HVACSizing
   # @param hvac_heating [HPXML::HeatPump] The HPXML heat pump of interest
   # @param cool_cap_adj_factor [Double] Heat pump's cooling capacity at the design temperature as a fraction of the nominal cooling capacity (frac)
   # @param hvac_system [Hash] HPXML HVAC (heating and/or cooling) system
-  # @param hvac_heating_speed [Integer] 0-based heating speed index of the HVAC system
+  # @param hvac_heating_speed [Integer] Nominal heating speed index of the HVAC system
   # @param oversize_limit [Double] Oversize fraction (frac)
   # @param oversize_delta [Double] Oversize delta (Btu/hr)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, cool_cap_adj_factor, hvac_system, hvac_heating_speed,
                                         oversize_limit, oversize_delta, hpxml_bldg)
-
-    capacity_ratio = hvac_heating.additional_properties.heat_capacity_ratios[hvac_heating_speed]
 
     if not hvac_heating.backup_heating_switchover_temp.nil?
       min_compressor_temp = hvac_heating.backup_heating_switchover_temp
@@ -3110,7 +3108,7 @@ module HVACSizing
     end
 
     heat_cap_adj_factor = calculate_heat_pump_adj_factor_at_outdoor_temperature(mj, hvac_heating, heating_temp, hvac_heating_speed)
-    heat_cap_rated = (heating_load / heat_cap_adj_factor) / capacity_ratio
+    heat_cap_rated = heating_load / heat_cap_adj_factor
 
     if cool_cap_adj_factor.nil? # Heat pump has no cooling
       if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingMaxLoad
@@ -3240,10 +3238,9 @@ module HVACSizing
   #
   # @param capacity [Double] Capacity value to use for calculating corresponding airflow rate (Btu/hr)
   # @param rated_cfm_per_ton [Double] Airflow per ton of rated capacity (cfm/ton)
-  # @param capacity_ratio [Double] Ratio of capacity (at the speed during design conditions) to rated capacity (frac)
   # @return [Double] Airflow rate (cfm)
-  def self.calc_airflow_rate_user(capacity, rated_cfm_per_ton, capacity_ratio)
-    airflow_cfm = rated_cfm_per_ton * capacity_ratio * UnitConversions.convert(capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
+  def self.calc_airflow_rate_user(capacity, rated_cfm_per_ton)
+    airflow_cfm = rated_cfm_per_ton * UnitConversions.convert(capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
     return airflow_cfm
   end
 
@@ -3588,12 +3585,12 @@ module HVACSizing
     return [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
   end
 
-  # Determines the speed (of a multi/variable-speed system) that is running during the design conditions.
+  # Determines the nominal speed (of a multi/variable-speed system).
   #
   # @param hvac_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC system
   # @param is_cooling [Boolean] True if cooling, otherwise heating
-  # @return [Integer] Speed index of the HVAC system
-  def self.get_sizing_speed(hvac_ap, is_cooling)
+  # @return [Integer] Array index of the nominal speed
+  def self.get_nominal_speed(hvac_ap, is_cooling)
     if is_cooling && hvac_ap.respond_to?(:cool_capacity_ratios)
       capacity_ratios = hvac_ap.cool_capacity_ratios
     elsif (not is_cooling) && hvac_ap.respond_to?(:heat_capacity_ratios)
