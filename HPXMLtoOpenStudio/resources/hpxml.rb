@@ -1672,7 +1672,7 @@ class HPXML < Object
       return 0.0
     end
 
-    def delete # rubocop:disable Style/DocumentationMethod
+    def delete_adiabatic_subsurfaces() # rubocop:disable Style/DocumentationMethod
       @doors.reverse_each do |door|
         next if door.wall.nil?
         next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
@@ -1687,7 +1687,7 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors # rubocop:disable Style/DocumentationMethod
+    def check_for_errors() # rubocop:disable Style/DocumentationMethod
       errors = []
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
