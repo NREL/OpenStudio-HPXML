@@ -598,7 +598,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
   Element                                  Type      Units      Constraints                        Required  Default   Notes
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
-  ``YearBuilt``                            integer              > 0                                See [#]_            Year of dwelling unit being built
+  ``YearBuilt``                            integer              > 0                                See [#]_            Year built of the dwelling unit
   ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
   ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
@@ -813,8 +813,8 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
          Otherwise defaults to the number of bedrooms plus one per Manual J.
          Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
   .. [#] InfiltrationMethod choices are "default infiltration table" or "blower door".
-  .. [#] If InfiltrationMethod not provided, defaults based on the current inputs in HPXML, if :ref:`infil_ach_cfm`, :ref:`infil_natural_ach_cfm`, or :ref:`infil_ela` inputs are provided,
-         defaults to "blower door", otherwise if :ref:`infil_leakiness_description` is provided, defaults to "default infiltration table". When both are provided, defaults to "blower door".
+  .. [#] If InfiltrationMethod not provided, defaults based on the current inputs in HPXML.
+         If :ref:`infil_leakiness_description` is the only air leakage type specified, defaults to "default infiltration table"; otherwise defaults to "blower door".
 
 .. _shadingcontrol:
 
@@ -1037,23 +1037,31 @@ Note that ELA is different than Equivalent Leakage Area (EqLA), which involves a
 .. _infil_leakiness_description:
 
 Leakiness Description
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
-If entering air leakage as Leakiness Description, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
-Leakiness Description is a qualitative description of infiltration air leakiness. ACCA Manual J Table 5A/5B is used to look up the design ACH values for hvac sizing
-(with HPXML "very tight" maps to Manual J "Tight", HPXML "tight" maps to Manual J "Semi-Tight", HPXML "average" maps to Manual J "Average", HPXML "leaky" maps to Manual J "Semi-Loose", HPXML "very leaky" maps to Manual J "Loose").
-Annual average SLA will be estimated with leakiness description, iecc zone, year built, conditioned floor area, average ceiling height, foundation type, and ducts.
+If entering air leakage using the Leakiness Description, additional information is entered in ``/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
   Element                               Type    Units    Constraints  Required   Default                    Notes
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
-  ``LeakinessDescription``              string           See [#]_     Yes                                   Leakiness Description of Air Leakage
+  ``LeakinessDescription``              string           See [#]_     Yes                                   Qualitative description of leakiness [#]_
   ====================================  ======  =======  ===========  =========  =========================  ===============================================
 
   .. [#] LeakinessDescription choices are "very tight", "tight", "average", "leaky" or "very leaky".
+  .. [#] For energy modeling, average air leakage is estimated via a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into account IECC climate zone, conditioned floor area, year built, foundation type, duct location, etc.
+         The leakiness description is then used to further adjust the default (average) infiltration rate using leakage multipliers derived from ACCA Manual J Table 5A.
+         HPXML inputs map to Manual J Table 5A inputs as follows:
+         
+         \- "very tight" => "Tight"
+         
+         \- "tight" => "Semi-Tight"
+         
+         \- "average" => "Average"
+         
+         \- "leaky" => "Semi-Loose"
+         
+         \- "very leaky" => "Loose"
   
-Additional information is entered in ``BuildingConstruction``.
-
 .. _flueorchimney:
 
 Flue or Chimney

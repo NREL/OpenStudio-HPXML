@@ -209,12 +209,16 @@ module Airflow
     end
   end
 
-  # Return the infiltration measurement object based on infiltration method and contains the complete information for modeling
+  # Returns the single infiltration measurement object of interest, from all possible infiltration measurements
+  # in the HPXML file, that has the sufficient inputs. For EnergyPlus, we return a measurement with a quantitative
+  # value (e.g., ACH50) if available, otherwise fallback to the qualitative input. For Manual J design loads, the
+  # returned measurement is controlled by the manualj_infiltration_method argument.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return measurement [HPXML::AirInfiltrationMeasurement] AirInfiltrationMeasurement to be used in sizing and simulation
-  def self.get_infiltration_measurement_of_interest(hpxml_bldg)
-    if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
+  # @param manualj_infiltration_method [String] Type of infiltration to retrieve for Manual J calculations
+  # @return measurement [HPXML::AirInfiltrationMeasurement] Air infiltration measurement of interest
+  def self.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: nil)
+    if manualj_infiltration_method.nil? || (manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor)
       hpxml_bldg.air_infiltration_measurements.each do |measurement|
         # Returns the infiltration measurement that has the minimum information needed for simulation
         if measurement.air_leakage
@@ -227,13 +231,15 @@ module Airflow
           return measurement
         end
       end
-      fail 'Missing air leakage inputs.'
-    elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
+    end
+
+    if manualj_infiltration_method.nil? || (manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable)
       hpxml_bldg.air_infiltration_measurements.each do |measurement|
         return measurement if measurement.leakiness_description
       end
-      fail 'Missing leakiness description inputs.'
     end
+
+    fail 'Could not find air infiltration measurement.'
   end
 
   # TODO
@@ -289,8 +295,8 @@ module Airflow
   # Calculate ACH50 for annual energy simulation when only leakiness description is provided.
   #
   # Uses a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into account IECC zone,
-  # cfa, infiltration height, year built, foundation types, and duct locations. The leakiness description is then used
-  # to further adjust the default (average) infiltration rate.
+  # cfa, year built, foundation type, duct location, etc. The leakiness description is then used to further adjust
+  # the default (average) infiltration rate.
   #
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl_ag [Double] Number of conditioned floors above grade
@@ -301,7 +307,7 @@ module Airflow
   # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
   # @param duct_loc_fracs [Hash] Map of duct location => area fraction
   # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
-  # @param air_sealed [Boolean] True if the dwelling unit is air sealed (intended to be used by Home Energy Score)
+  # @param air_sealed [Boolean] True if the dwelling unit was professionally air sealed (intended to be used by Home Energy Score)
   # @return [Double] Calculated ACH50 value
   def self.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
                                                  fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)

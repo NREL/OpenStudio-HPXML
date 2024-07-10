@@ -1349,7 +1349,7 @@ module HVACSizing
   # @return [void]
   def self.process_load_infiltration_ventilation(mj, hpxml_bldg, all_zone_loads, all_space_loads, weather)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
+    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: hpxml_bldg.header.manualj_infiltration_method)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
       infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
       sla = infil_values[:sla] * infil_values[:a_ext]
