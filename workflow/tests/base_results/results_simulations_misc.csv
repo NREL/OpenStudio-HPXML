@@ -28,7 +28,7 @@ base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml,0.0,0.0,1354.7,998.0,11
 base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1509.8,1998.7,1998.7,3.923,6.574,0.0
 base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1513.9,1968.2,1968.2,4.232,4.993,0.0
 base-bldgtype-mf-unit-infil-compartmentalization-test.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1614.7,2121.0,2121.0,3.617,7.738,0.0
-base-bldgtype-mf-unit-infil-leakiness-description.xml,0.0,0.0,1354.7,998.0,11171.6,3093.4,1549.9,2133.6,2133.6,4.374,7.839,0.0
+base-bldgtype-mf-unit-infil-leakiness-description.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1603.4,2053.4,2053.4,3.159,7.691,0.0
 base-bldgtype-mf-unit-residents-1.xml,0.0,0.0,817.1,530.8,4684.1,1314.5,1057.1,1663.9,1663.9,4.014,7.265,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1633.0,2287.6,2287.6,3.812,7.337,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml,0.0,2.0,1354.7,998.0,11171.5,3093.4,1666.9,2507.2,2507.2,3.982,8.634,0.0
