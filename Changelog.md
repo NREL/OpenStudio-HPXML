@@ -21,6 +21,7 @@ __Bugfixes__
 
 __Bugfixes__
 - Fixes cfm/ton restriction from incorrectly applying to furnace heating airflow rate.
+- BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
 
 ## OpenStudio-HPXML v1.8.0
 
