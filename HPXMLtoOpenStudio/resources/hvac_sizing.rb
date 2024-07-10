@@ -123,8 +123,6 @@ module HVACSizing
     return @all_hvac_sizings
   end
 
-  # FIXME: The following module methods are meant to be private.
-
   # Checks whether we will be performing sizing calculations on the given HPXML HVAC system.
   #
   # @param hvac_heating [HPXML::HeatingSystem or HPXML::HeatPump] The heating portion of the current HPXML HVAC system
