@@ -5,10 +5,10 @@ require 'matrix'
 
 # TODO
 class ScheduleGenerator
-  # TODO
-  #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param state [TODO] TODO
+  # @param column_names [TODO] TODO
+  # @param random_seed [TODO] TODO
   # @param minutes_per_step [TODO] TODO
   # @param steps_in_day [TODO] TODO
   # @param mkc_ts_per_day [TODO] TODO
@@ -18,9 +18,6 @@ class ScheduleGenerator
   # @param sim_start_day [TODO] TODO
   # @param debug [TODO] TODO
   # @param append_output [TODO] TODO
-  # @param column_names [TODO] TODO
-  # @param random_seed [TODO] TODO
-  # @return [TODO] TODO
   def initialize(runner:,
                  state:,
                  column_names: nil,
@@ -50,6 +47,8 @@ class ScheduleGenerator
     @append_output = append_output
   end
 
+  attr_accessor(:schedules)
+
   # TODO
   #
   # @return [TODO] TODO
@@ -59,15 +58,8 @@ class ScheduleGenerator
 
   # TODO
   #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
-  end
-
-  # TODO
-  #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create(args:,
              weather:)
@@ -96,7 +88,7 @@ class ScheduleGenerator
   # TODO
   #
   # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def create_stochastic_schedules(args:,
                                   weather:)

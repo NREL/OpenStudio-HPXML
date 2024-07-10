@@ -127,6 +127,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Research feature to select the type of defrost model. Use #{HPXML::AdvancedResearchDefrostModelTypeStandard} for default E+ defrost setting. Use #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} for an improved model that better accounts for load and energy use during defrost; using #{HPXML::AdvancedResearchDefrostModelTypeAdvanced} may impact simulation runtime. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_onoff_thermostat_deadband', false)
+    arg.setDisplayName('Simulation Control: HVAC On-Off Thermostat Deadband')
+    arg.setDescription('Research feature to model on-off thermostat deadband and start-up degradation for single or two speed AC/ASHP systems, and realistic time-based staging for two speed AC/ASHP systems. Currently only supported with 1 min timestep.')
+    arg.setUnits('deg-F')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('simulation_control_heat_pump_backup_heating_capacity_increment', false)
+    arg.setDisplayName('Simulation Control: Heat Pump Backup Heating Capacity Increment')
+    arg.setDescription("Research feature to model capacity increment of multi-stage heat pump backup systems with time-based staging. Only applies to air-source heat pumps where Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}' and Backup Fuel Type is '#{HPXML::FuelTypeElectricity}'. Currently only supported with 1 min timestep.")
+    arg.setUnits('Btu/hr')
+    args << arg
+
     site_type_choices = OpenStudio::StringVector.new
     site_type_choices << HPXML::SiteTypeSuburban
     site_type_choices << HPXML::SiteTypeUrban
@@ -1574,7 +1586,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     geothermal_loop_borefield_configuration_choices = OpenStudio::StringVector.new
-    valid_bore_configs = HVACSizing.valid_bore_configs
+    valid_bore_configs = HVACSizing.get_geothermal_loop_valid_configurations
     valid_bore_configs.keys.each do |valid_bore_config|
       geothermal_loop_borefield_configuration_choices << valid_bore_config
     end
@@ -2964,7 +2976,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_rated_annual_kwh', false)
     arg.setDisplayName('Extra Refrigerator: Rated Annual Consumption')
     arg.setUnits('kWh/yr')
-    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra rrefrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
+    arg.setDescription("The EnergyGuide rated annual energy consumption for an extra refrigerator. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-refrigerators'>HPXML Refrigerators</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', false)
@@ -3768,13 +3780,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   end
 end
 
-# collection of methods for creating the HPXML file and setting properties based on user arguments
+# Collection of methods for creating the HPXML file and setting properties based on user arguments
 module HPXMLFile
-  # create the closed-form geometry, and then call individual set_xxx methods
+  # Create the closed-form geometry, and then call individual set_xxx methods
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param args [Hash] Map of :argument_name => value
+  # @param epw_path [String] Path to the EPW weather file
+  # @param hpxml_path [TODO] TODO
+  # @param existing_hpxml_path [TODO] TODO
+  # @return [Oga::XML::Element] Root XML element of the updated HPXML document
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
-    epw_file = OpenStudio::EpwFile.new(epw_path)
-    if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) || (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) || (args[:apply_defaults])
-      weather = WeatherProcess.new(epw_path: epw_path, runner: nil)
+    if need_weather_based_on_args(args)
+      weather = WeatherFile.new(epw_path: epw_path, runner: nil)
     end
 
     success = create_geometry_envelope(runner, model, args)
@@ -3818,13 +3837,13 @@ module HPXMLFile
     set_secondary_heating_systems(hpxml_bldg, args)
     set_hvac_distribution(hpxml_bldg, args)
     set_hvac_blower(hpxml_bldg, args)
-    set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
+    set_hvac_control(hpxml, hpxml_bldg, args, weather)
     set_ventilation_fans(hpxml_bldg, args)
     set_water_heating_systems(hpxml_bldg, args)
     set_hot_water_distribution(hpxml_bldg, args)
     set_water_fixtures(hpxml_bldg, args)
-    set_solar_thermal(hpxml_bldg, args, epw_file)
-    set_pv_systems(hpxml_bldg, args, epw_file)
+    set_solar_thermal(hpxml_bldg, args, weather)
+    set_pv_systems(hpxml_bldg, args, weather)
     set_battery(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
@@ -3859,7 +3878,7 @@ module HPXMLFile
       end
 
       eri_version = Constants.ERIVersions[-1]
-      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: epw_file)
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -3875,7 +3894,30 @@ module HPXMLFile
     return hpxml_doc
   end
 
-  # check for errors in hpxml, and validate hpxml_doc against hpxml_path
+  # Determines if we need to process the weather; we avoid this if we can because it has a runtime performance impact
+  #
+  # @param args [Hash] Map of :argument_name => value
+  # @return [Boolean] True if we need to process the weather file
+  def self.need_weather_based_on_args(args)
+    if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) ||
+       (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) ||
+       (args[:solar_thermal_system_type] != 'none' && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
+       (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
+       (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
+       (args[:apply_defaults])
+      return true
+    end
+
+    return false
+  end
+
+  # Check for errors in hpxml, and validate hpxml_doc against hpxml_path
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_doc [Oga::XML::Element] Root XML element of the HPXML document
+  # @param hpxml_path [TODO] TODO
+  # @return [Boolean] True if the HPXML is valid
   def self.validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
     # Check for errors in the HPXML object
     errors = []
@@ -3910,7 +3952,12 @@ module HPXMLFile
     return is_valid
   end
 
-  # create 3D geometry (surface, subsurfaces) for a given unit type
+  # Create 3D geometry (surface, subsurfaces) for a given unit type
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param args [Hash] Map of :argument_name => value
+  # @return [Boolean] True if successful
   def self.create_geometry_envelope(runner, model, args)
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0,
                                    '2:12' => 2.0 / 12.0,
@@ -3960,7 +4007,18 @@ module HPXMLFile
     return true
   end
 
-  # check if unavailable period exists for given begin/end times
+  # Check if unavailable period already exists for given begin/end times
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @param column_name [TODO] TODO
+  # @param begin_month [TODO] TODO
+  # @param begin_day [TODO] TODO
+  # @param begin_hour [TODO] TODO
+  # @param end_month [TODO] TODO
+  # @param end_day [TODO] TODO
+  # @param end_hour [TODO] TODO
+  # @param natvent_availability [TODO] TODO
+  # @return [Boolean] True if the unavailability period already exists
   def self.unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability = nil)
     natvent_availability = HPXML::ScheduleUnavailable if natvent_availability.nil?
 
@@ -4085,6 +4143,20 @@ module HPXMLFile
         errors << "'Simulation Control: Defrost Model Type' cannot vary across dwelling units."
       end
       hpxml.header.defrost_model_type = args[:simulation_control_defrost_model_type]
+    end
+
+    if not args[:simulation_control_onoff_thermostat_deadband].nil?
+      if (not hpxml.header.hvac_onoff_thermostat_deadband.nil?) && (hpxml.header.hvac_onoff_thermostat_deadband != args[:simulation_control_onoff_thermostat_deadband])
+        errors << "'Simulation Control: HVAC On-Off Thermostat Deadband' cannot vary across dwelling units."
+      end
+      hpxml.header.hvac_onoff_thermostat_deadband = args[:simulation_control_onoff_thermostat_deadband]
+    end
+
+    if not args[:simulation_control_heat_pump_backup_heating_capacity_increment].nil?
+      if (not hpxml.header.heat_pump_backup_heating_capacity_increment.nil?) && (hpxml.header.heat_pump_backup_heating_capacity_increment != args[:simulation_control_heat_pump_backup_heating_capacity_increment])
+        errors << "'Simulation Control: Heat Pump Backup Heating Capacity Increment' cannot vary across dwelling units."
+      end
+      hpxml.header.heat_pump_backup_heating_capacity_increment = args[:simulation_control_heat_pump_backup_heating_capacity_increment]
     end
 
     if not args[:emissions_scenario_names].nil?
@@ -4435,6 +4507,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_site(hpxml_bldg, args)
     hpxml_bldg.site.shielding_of_home = args[:site_shielding_of_home]
     hpxml_bldg.site.ground_conductivity = args[:site_ground_conductivity]
@@ -4489,6 +4562,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_neighbor_buildings(hpxml_bldg, args)
     nbr_map = { Constants.FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
                 Constants.FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
@@ -4517,6 +4591,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_building_occupancy(hpxml_bldg, args)
     hpxml_bldg.building_occupancy.number_of_residents = args[:geometry_unit_num_occupants]
     hpxml_bldg.building_occupancy.general_water_use_usage_multiplier = args[:general_water_use_usage_multiplier]
@@ -4534,6 +4609,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_building_construction(hpxml_bldg, args)
     if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       args[:geometry_unit_num_floors_above_grade] = 1
@@ -4558,7 +4634,7 @@ module HPXMLFile
   end
 
   # Set building header properties, including:
-  # - detailed schedule filepaths
+  # - detailed schedule file paths
   # - heat pump sizing methodologies
   # - natural ventilation availability
   # - summer shading season
@@ -4566,6 +4642,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_building_header(hpxml_bldg, args)
     if not args[:schedules_filepaths].nil?
       hpxml_bldg.header.schedules_filepaths = args[:schedules_filepaths].split(',').map(&:strip)
@@ -4594,10 +4671,11 @@ module HPXMLFile
 
   # Set climate and risk zones properties, including:
   # - 2006 IECC zone
-  # - weather station name / EPW filepath
+  # - weather station name / EPW file path
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_climate_and_risk_zones(hpxml_bldg, args)
     hpxml_bldg.climate_and_risk_zones.weather_station_id = 'WeatherStation'
 
@@ -4619,6 +4697,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_air_infiltration_measurements(hpxml_bldg, args)
     if args[:air_leakage_units] == HPXML::UnitsELA
       effective_leakage_area = args[:air_leakage_value]
@@ -4659,6 +4738,7 @@ module HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_roofs(hpxml_bldg, args, sorted_surfaces)
     args[:geometry_roof_pitch] *= 12.0
     if (args[:geometry_attic_type] == HPXML::AtticTypeFlatRoof) || (args[:geometry_attic_type] == HPXML::AtticTypeBelowApartment)
@@ -4707,6 +4787,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_rim_joists(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4769,6 +4850,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4862,6 +4944,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_foundation_walls(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
@@ -4948,6 +5031,7 @@ module HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_floors(hpxml_bldg, args, sorted_surfaces)
     if [HPXML::FoundationTypeBasementConditioned,
         HPXML::FoundationTypeCrawlspaceConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_over_foundation_assembly_r] > 2.1)
@@ -5030,6 +5114,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_surfaces [Array<OpenStudio::Model::Surface>] surfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_slabs(hpxml_bldg, model, args, sorted_surfaces)
     sorted_surfaces.each do |surface|
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
@@ -5100,6 +5185,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_windows(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'FixedWindow'
@@ -5176,6 +5262,7 @@ module HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_skylights(hpxml_bldg, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'Skylight'
@@ -5216,6 +5303,7 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param sorted_subsurfaces [Array<OpenStudio::Model::SubSurface>] subsurfaces sorted by deterministically assigned Index
+  # @return [void]
   def self.set_doors(hpxml_bldg, model, args, sorted_subsurfaces)
     sorted_subsurfaces.each do |sub_surface|
       next if sub_surface.subSurfaceType != 'Door'
@@ -5246,6 +5334,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_attics(hpxml_bldg, args)
     surf_ids = { 'roofs' => { 'surfaces' => hpxml_bldg.roofs, 'ids' => [] },
                  'walls' => { 'surfaces' => hpxml_bldg.walls, 'ids' => [] },
@@ -5283,6 +5372,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_foundations(hpxml_bldg, args)
     surf_ids = { 'slabs' => { 'surfaces' => hpxml_bldg.slabs, 'ids' => [] },
                  'floors' => { 'surfaces' => hpxml_bldg.floors, 'ids' => [] },
@@ -5341,6 +5431,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_heating_systems(hpxml_bldg, args)
     heating_system_type = args[:heating_system_type]
 
@@ -5414,6 +5505,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_cooling_systems(hpxml_bldg, args)
     cooling_system_type = args[:cooling_system_type]
 
@@ -5532,6 +5624,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_heat_pumps(hpxml_bldg, args)
     heat_pump_type = args[:heat_pump_type]
 
@@ -5720,6 +5813,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_geothermal_loop(hpxml_bldg, args)
     return if hpxml_bldg.heat_pumps.select { |hp| hp.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir }.size == 0
     return if args[:geothermal_loop_configuration].nil? || args[:geothermal_loop_configuration] == 'none'
@@ -5758,6 +5852,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_secondary_heating_systems(hpxml_bldg, args)
     heating_system_type = args[:heating_system_2_type]
     heating_system_is_heatpump_backup = (args[:heat_pump_type] != 'none' && args[:heat_pump_backup_type] == HPXML::HeatPumpBackupTypeSeparate)
@@ -5800,6 +5895,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_hvac_distribution(hpxml_bldg, args)
     # HydronicDistribution?
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -5882,6 +5978,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_hvac_blower(hpxml_bldg, args)
     # Blower fan W/cfm
     hpxml_bldg.hvac_systems.each do |hvac_system|
@@ -5911,6 +6008,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_duct_leakages(args, hvac_distribution)
     hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                     duct_leakage_units: args[:ducts_leakage_units],
@@ -5928,6 +6026,7 @@ module HPXMLFile
   # @param location [String] the general HPXML location (crawlspace or attic)
   # @param foundation_type [String] the specific HPXML foundation type (unvented crawlspace, vented crawlspace, conditioned crawlspace)
   # @param attic_type [String] the specific HPXML attic type (unvented attic, vented attic, conditioned attic)
+  # @return [void]
   def self.get_location(location, foundation_type, attic_type)
     return if location.nil?
 
@@ -5964,6 +6063,7 @@ module HPXMLFile
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
   # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
+  # @return [void]
   def self.set_ducts(hpxml_bldg, args, hvac_distribution)
     ducts_supply_location = get_location(args[:ducts_supply_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
     ducts_return_location = get_location(args[:ducts_return_location], hpxml_bldg.foundations[-1].foundation_type, hpxml_bldg.attics[-1].attic_type)
@@ -6080,12 +6180,12 @@ module HPXMLFile
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  # @param weather [WeatherProcess] Weather object
-  def self.set_hvac_control(hpxml, hpxml_bldg, args, epw_file, weather)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [void]
+  def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == 'none') && (args[:cooling_system_type] == 'none') && (args[:heat_pump_type] == 'none')
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -6103,7 +6203,7 @@ module HPXMLFile
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period]
         if hvac_control_heating_season_period == HPXML::BuildingAmerica
           heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
-          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
           begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_heating_season_period)
@@ -6132,7 +6232,7 @@ module HPXMLFile
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period]
         if hvac_control_cooling_season_period == HPXML::BuildingAmerica
           _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
-          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, epw_file)
+          sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
           begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_cooling_season_period)
@@ -6182,6 +6282,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_ventilation_fans(hpxml_bldg, args)
     if args[:mech_vent_fan_type] != 'none'
 
@@ -6323,6 +6424,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_water_heating_systems(hpxml_bldg, args)
     water_heater_type = args[:water_heater_type]
     return if water_heater_type == 'none'
@@ -6440,6 +6542,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_hot_water_distribution(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
 
@@ -6477,6 +6580,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_water_fixtures(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
 
@@ -6499,8 +6603,9 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  def self.set_solar_thermal(hpxml_bldg, args, epw_file)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [void]
+  def self.set_solar_thermal(hpxml_bldg, args, weather)
     return if args[:solar_thermal_system_type] == 'none'
 
     if args[:solar_thermal_solar_fraction] > 0
@@ -6510,7 +6615,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
@@ -6548,8 +6653,9 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
-  # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
-  def self.set_pv_systems(hpxml_bldg, args, epw_file)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [void]
+  def self.set_pv_systems(hpxml_bldg, args, weather)
     return unless args[:pv_system_present]
 
     if [HPXML::ResidentialTypeSFA, HPXML::ResidentialTypeApartment].include? args[:geometry_unit_type]
@@ -6559,7 +6665,7 @@ module HPXMLFile
       end
     end
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], epw_file)
+    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],
@@ -6602,6 +6708,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_battery(hpxml_bldg, args)
     return unless args[:battery_present]
 
@@ -6632,6 +6739,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_lighting(hpxml_bldg, args)
     if args[:lighting_present]
       has_garage = (args[:geometry_garage_width] * args[:geometry_garage_depth] > 0)
@@ -6716,6 +6824,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_dehumidifier(hpxml_bldg, args)
     return if args[:dehumidifier_type] == 'none'
 
@@ -6746,6 +6855,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_clothes_washer(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:clothes_washer_present]
@@ -6778,6 +6888,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_clothes_dryer(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:clothes_washer_present]
@@ -6818,6 +6929,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_dishwasher(hpxml_bldg, args)
     return if args[:water_heater_type] == 'none'
     return unless args[:dishwasher_present]
@@ -6847,6 +6959,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_refrigerator(hpxml_bldg, args)
     return unless args[:refrigerator_present]
 
@@ -6863,6 +6976,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_extra_refrigerator(hpxml_bldg, args)
     return unless args[:extra_refrigerator_present]
 
@@ -6881,6 +6995,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_freezer(hpxml_bldg, args)
     return unless args[:freezer_present]
 
@@ -6897,6 +7012,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_cooking_range_oven(hpxml_bldg, args)
     return unless args[:cooking_range_oven_present]
 
@@ -6917,6 +7033,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_ceiling_fans(hpxml_bldg, args)
     return unless args[:ceiling_fan_present]
 
@@ -6932,6 +7049,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_plug_loads_television(hpxml_bldg, args)
     return unless args[:misc_plug_loads_television_present]
 
@@ -6948,6 +7066,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_plug_loads_other(hpxml_bldg, args)
     hpxml_bldg.plug_loads.add(id: "PlugLoad#{hpxml_bldg.plug_loads.size + 1}",
                               plug_load_type: HPXML::PlugLoadTypeOther,
@@ -6963,6 +7082,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_plug_loads_well_pump(hpxml_bldg, args)
     return unless args[:misc_plug_loads_well_pump_present]
 
@@ -6978,6 +7098,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_plug_loads_vehicle(hpxml_bldg, args)
     return unless args[:misc_plug_loads_vehicle_present]
 
@@ -6994,6 +7115,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_fuel_loads_grill(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_grill_present]
 
@@ -7011,6 +7133,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_fuel_loads_lighting(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_lighting_present]
 
@@ -7029,6 +7152,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_misc_fuel_loads_fireplace(hpxml_bldg, args)
     return unless args[:misc_fuel_loads_fireplace_present]
 
@@ -7041,7 +7165,7 @@ module HPXMLFile
                               usage_multiplier: args[:misc_fuel_loads_fireplace_usage_multiplier])
   end
 
-  # Set the pool prooperties, including:
+  # Set the pool properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7050,6 +7174,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_pool(hpxml_bldg, args)
     return unless args[:pool_present]
 
@@ -7078,7 +7203,7 @@ module HPXMLFile
                          heater_usage_multiplier: args[:pool_heater_usage_multiplier])
   end
 
-  # Set the permanent spa prooperties, including:
+  # Set the permanent spa properties, including:
   # - pump annual consumption
   # - pump usage multiplier
   # - heater type
@@ -7087,6 +7212,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.set_permanent_spa(hpxml_bldg, args)
     return unless args[:permanent_spa_present]
 
@@ -7119,6 +7245,7 @@ module HPXMLFile
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param args [Hash] Map of :argument_name => value
+  # @return [void]
   def self.collapse_surfaces(hpxml_bldg, args)
     if args[:combine_like_surfaces]
       # Collapse some surfaces whose azimuth is a minor effect to simplify HPXMLs.
@@ -7140,9 +7267,10 @@ module HPXMLFile
     end
   end
 
-  # Sfter having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
+  # After having collapsed some surfaces, renumber SystemIdentifier ids and AttachedToXXX idrefs.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [void]
   def self.renumber_hpxml_ids(hpxml_bldg)
     # Renumber surfaces
     indexes = {}

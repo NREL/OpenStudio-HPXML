@@ -8,14 +8,14 @@ module HotWaterAndAppliances
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hot_water_distribution [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param plantloop_map [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
@@ -911,7 +911,7 @@ module HotWaterAndAppliances
   # @param col_name [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
   # @param refrigerator_or_freezer [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
     # Create availability sensor
@@ -1186,7 +1186,7 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO

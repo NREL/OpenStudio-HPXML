@@ -3,10 +3,14 @@
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
 - Updates hot water end uses for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
+- Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
+  - Allows modeling systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
   - Miscellaneous improvements.
 - Advanced research features:
+  - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 
 __Bugfixes__
