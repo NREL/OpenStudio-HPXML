@@ -600,22 +600,28 @@ class HPXML < Object
     return unless @errors.empty?
   end
 
-  def to_doc() # rubocop:disable Style/DocumentationMethod
+  # TODO
+  def to_doc()
     doc = _create_hpxml_document()
     @header.to_doc(doc)
     @buildings.to_doc(doc)
     return doc
   end
 
-  def from_doc(hpxml) # rubocop:disable Style/DocumentationMethod
+  # TODO
+  def from_doc(hpxml)
     @header = Header.new(self, hpxml)
     @buildings = Buildings.new(self, hpxml)
   end
 
-  def set_unique_hpxml_ids(hpxml_doc, last_building_only = false) # rubocop:disable Style/DocumentationMethod
+  # Make all IDs unique so the HPXML is valid
+  #
+  # @param hpxml_doc [TODO] TODO
+  # @param last_building_only [TODO] TODO
+  # @return [TODO] TODO
+  def set_unique_hpxml_ids(hpxml_doc, last_building_only = false)
     buildings = XMLHelper.get_elements(hpxml_doc, '/HPXML/Building')
 
-    # Make all IDs unique so the HPXML is valid
     buildings.each_with_index do |building, i|
       next if last_building_only && (i != buildings.size - 1)
 
@@ -632,8 +638,11 @@ class HPXML < Object
     end
   end
 
-  def has_fuels(hpxml_doc, building_id = nil) # rubocop:disable Style/DocumentationMethod
-    # Returns a hash with whether each fuel exists in the HPXML Building or Buildings
+  # Returns a hash with whether each fuel exists in the HPXML Building or Buildings
+  #
+  # @param hpxml_doc [TODO] TODO
+  # @return [TODO] TODO
+  def has_fuels(hpxml_doc, building_id = nil)
     has_fuels = {}
     HPXML::fossil_fuels.each do |fuel|
       has_fuels[fuel] = false
@@ -657,7 +666,7 @@ class HPXML < Object
     return has_fuels
   end
 
-  # Class to store additional properties on an HPXML object that are not intended
+  # Object to store additional properties on an HPXML object that are not intended
   # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
   # object for an appliance.
   class AdditionalProperties < OpenStruct
@@ -674,7 +683,7 @@ class HPXML < Object
   class BaseElement
     attr_accessor(:parent_object, :additional_properties)
 
-    def initialize(parent_object, hpxml_element = nil, **kwargs) # rubocop:disable Style/DocumentationMethod
+    def initialize(parent_object, hpxml_element = nil, **kwargs)
       @parent_object = parent_object
       @additional_properties = AdditionalProperties.new
 
@@ -701,16 +710,19 @@ class HPXML < Object
       end
     end
 
-    def create_method(name, &block) # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def create_method(name, &block)
       self.class.send(:define_method, name, &block)
     end
 
-    def create_attr(name) # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def create_attr(name)
       create_method("#{name}=".to_sym) { |val| instance_variable_set('@' + name, val) }
       create_method(name.to_sym) { instance_variable_get('@' + name) }
     end
 
-    def to_h # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def to_h
       h = {}
       self.class::ATTRS.each do |attribute|
         h[attribute] = send(attribute)
@@ -718,12 +730,13 @@ class HPXML < Object
       return h
     end
 
-    def to_s # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def to_s
       return to_h.to_s
     end
 
-    def nil? # rubocop:disable Style/DocumentationMethod
-      # Returns true if all attributes are nil
+    # Returns true if all attributes are nil
+    def nil?
       to_h.each do |k, v|
         next if k.to_s.end_with? '_isdefaulted'
         return false if not v.nil?
@@ -736,7 +749,7 @@ class HPXML < Object
   class BaseArrayElement < Array
     attr_accessor(:parent_object, :additional_properties)
 
-    def initialize(parent_object, hpxml_element = nil) # rubocop:disable Style/DocumentationMethod
+    def initialize(parent_object, hpxml_element = nil)
       @parent_object = parent_object
       @additional_properties = AdditionalProperties.new
 
@@ -746,7 +759,8 @@ class HPXML < Object
       end
     end
 
-    def check_for_errors # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def check_for_errors
       errors = []
       each do |child|
         if not child.respond_to? :check_for_errors
@@ -758,19 +772,22 @@ class HPXML < Object
       return errors
     end
 
-    def to_doc(doc) # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def to_doc(doc)
       each do |child|
         child.to_doc(doc)
       end
     end
 
-    def to_s # rubocop:disable Style/DocumentationMethod
+    # TODO
+    def to_s
       return map { |x| x.to_s }
     end
   end
 
-  class Header < BaseElement # rubocop:disable Style/Documentation
-    def initialize(hpxml_object, *args, **kwargs) # rubocop:disable Style/DocumentationMethod
+  # TODO
+  class Header < BaseElement
+    def initialize(hpxml_object, *args, **kwargs)
       @emissions_scenarios = EmissionsScenarios.new(hpxml_object)
       @utility_bill_scenarios = UtilityBillScenarios.new(hpxml_object)
       @unavailable_periods = UnavailablePeriods.new(hpxml_object)
@@ -895,7 +912,8 @@ class HPXML < Object
     end
   end
 
-  class EmissionsScenarios < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class EmissionsScenarios < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << EmissionsScenario.new(@parent_object, **kwargs)
     end
@@ -909,7 +927,8 @@ class HPXML < Object
     end
   end
 
-  class EmissionsScenario < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class EmissionsScenario < BaseElement
     UnitsKgPerMWh = 'kg/MWh'
     UnitsKgPerMBtu = 'kg/MBtu'
     UnitsLbPerMWh = 'lb/MWh'
@@ -993,7 +1012,8 @@ class HPXML < Object
     end
   end
 
-  class UtilityBillScenarios < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class UtilityBillScenarios < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << UtilityBillScenario.new(@parent_object, **kwargs)
     end
@@ -1017,7 +1037,8 @@ class HPXML < Object
     end
   end
 
-  class UtilityBillScenario < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class UtilityBillScenario < BaseElement
     ATTRS = [:name,
              :elec_tariff_filepath,
              :elec_fixed_charge, :natural_gas_fixed_charge, :propane_fixed_charge, :fuel_oil_fixed_charge,
@@ -1117,7 +1138,8 @@ class HPXML < Object
     end
   end
 
-  class UnavailablePeriods < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class UnavailablePeriods < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << UnavailablePeriod.new(@parent_object, **kwargs)
     end
@@ -1131,7 +1153,8 @@ class HPXML < Object
     end
   end
 
-  class UnavailablePeriod < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class UnavailablePeriod < BaseElement
     ATTRS = [:column_name, :begin_month, :begin_day, :begin_hour, :end_month, :end_day, :end_hour, :natvent_availability]
     attr_accessor(*ATTRS)
 
@@ -1172,7 +1195,8 @@ class HPXML < Object
     end
   end
 
-  class Buildings < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Buildings < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Building.new(@parent_object, **kwargs)
     end
@@ -1186,7 +1210,8 @@ class HPXML < Object
     end
   end
 
-  class Building < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Building < BaseElement
     CLASS_ATTRS = [:site, :neighbor_buildings, :building_occupancy, :building_construction, :header,
                    :climate_and_risk_zones, :zones, :air_infiltration, :air_infiltration_measurements, :attics,
                    :foundations, :roofs, :rim_joists, :walls, :foundation_walls, :floors, :slabs, :windows,
@@ -1911,7 +1936,8 @@ class HPXML < Object
     end
   end
 
-  class Site < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Site < BaseElement
     ATTRS = [:site_type, :surroundings, :vertical_surroundings, :shielding_of_home, :orientation_of_front_of_home, :azimuth_of_front_of_home, :fuels,
              :soil_type, :moisture_type, :ground_conductivity, :ground_diffusivity]
     attr_accessor(*ATTRS)
@@ -1974,7 +2000,8 @@ class HPXML < Object
     end
   end
 
-  class NeighborBuildings < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class NeighborBuildings < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << NeighborBuilding.new(@parent_object, **kwargs)
     end
@@ -1988,7 +2015,8 @@ class HPXML < Object
     end
   end
 
-  class NeighborBuilding < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class NeighborBuilding < BaseElement
     ATTRS = [:azimuth, :orientation, :distance, :height]
     attr_accessor(*ATTRS)
 
@@ -2018,7 +2046,8 @@ class HPXML < Object
     end
   end
 
-  class BuildingOccupancy < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class BuildingOccupancy < BaseElement
     ATTRS = [:number_of_residents, :weekday_fractions, :weekend_fractions, :monthly_multipliers, :general_water_use_usage_multiplier,
              :general_water_use_weekday_fractions, :general_water_use_weekend_fractions, :general_water_use_monthly_multipliers]
     attr_accessor(*ATTRS)
@@ -2059,7 +2088,8 @@ class HPXML < Object
     end
   end
 
-  class BuildingConstruction < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class BuildingConstruction < BaseElement
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type,
@@ -2113,7 +2143,8 @@ class HPXML < Object
     end
   end
 
-  class BuildingHeader < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class BuildingHeader < BaseElement
     ATTRS = [:schedules_filepaths, :extension_properties, :natvent_days_per_week,
              :heat_pump_sizing_methodology, :heat_pump_backup_sizing_methodology, :allow_increased_fixed_capacities,
              :shading_summer_begin_month, :shading_summer_begin_day, :shading_summer_end_month,
@@ -2210,7 +2241,8 @@ class HPXML < Object
     end
   end
 
-  class ClimateandRiskZones < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClimateandRiskZones < BaseElement
     def initialize(hpxml_bldg, *args, **kwargs)
       @climate_zone_ieccs = ClimateZoneIECCs.new(hpxml_bldg)
       super(hpxml_bldg, *args, **kwargs)
@@ -2260,7 +2292,8 @@ class HPXML < Object
     end
   end
 
-  class ClimateZoneIECCs < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClimateZoneIECCs < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClimateZoneIECC.new(@parent_object, **kwargs)
     end
@@ -2274,7 +2307,8 @@ class HPXML < Object
     end
   end
 
-  class ClimateZoneIECC < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClimateZoneIECC < BaseElement
     ATTRS = [:year, :zone]
     attr_accessor(*ATTRS)
 
@@ -2301,7 +2335,8 @@ class HPXML < Object
     end
   end
 
-  class Zones < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Zones < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Zone.new(@parent_object, **kwargs)
     end
@@ -2315,7 +2350,8 @@ class HPXML < Object
     end
   end
 
-  class Zone < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Zone < BaseElement
     def initialize(hpxml_bldg, *args, **kwargs)
       @spaces = Spaces.new(hpxml_bldg)
       super(hpxml_bldg, *args, **kwargs)
@@ -2448,7 +2484,8 @@ class HPXML < Object
     end
   end
 
-  class Spaces < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Spaces < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Space.new(@parent_object, **kwargs)
     end
@@ -2462,7 +2499,8 @@ class HPXML < Object
     end
   end
 
-  class Space < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Space < BaseElement
     ATTRS = [:id, :floor_area, :manualj_internal_loads_sensible, :manualj_internal_loads_latent,
              :manualj_num_occupants, :fenestration_load_procedure] + HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
@@ -2567,7 +2605,8 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltration < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class AirInfiltration < BaseElement
     ATTRS = [:has_flue_or_chimney_in_conditioned_space]
     attr_accessor(*ATTRS)
 
@@ -2593,7 +2632,8 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltrationMeasurements < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class AirInfiltrationMeasurements < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << AirInfiltrationMeasurement.new(@parent_object, **kwargs)
     end
@@ -2607,7 +2647,8 @@ class HPXML < Object
     end
   end
 
-  class AirInfiltrationMeasurement < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area, :type_of_measurement,
              :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext, :infiltration_type]
     attr_accessor(*ATTRS)
@@ -2656,7 +2697,8 @@ class HPXML < Object
     end
   end
 
-  class Attics < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Attics < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Attic.new(@parent_object, **kwargs)
     end
@@ -2670,7 +2712,8 @@ class HPXML < Object
     end
   end
 
-  class Attic < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Attic < BaseElement
     ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_ach, :within_infiltration_volume,
              :attached_to_roof_idrefs, :attached_to_wall_idrefs, :attached_to_floor_idrefs]
     attr_accessor(*ATTRS)
@@ -2830,7 +2873,8 @@ class HPXML < Object
     end
   end
 
-  class Foundations < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Foundations < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Foundation.new(@parent_object, **kwargs)
     end
@@ -2844,7 +2888,8 @@ class HPXML < Object
     end
   end
 
-  class Foundation < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Foundation < BaseElement
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :within_infiltration_volume,
              :belly_wing_skirt_present, :attached_to_slab_idrefs, :attached_to_floor_idrefs,
              :attached_to_foundation_wall_idrefs, :attached_to_wall_idrefs,
@@ -3091,7 +3136,8 @@ class HPXML < Object
     end
   end
 
-  class Roofs < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Roofs < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Roof.new(@parent_object, **kwargs)
     end
@@ -3105,7 +3151,8 @@ class HPXML < Object
     end
   end
 
-  class Roof < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Roof < BaseElement
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :orientation, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
@@ -3303,7 +3350,8 @@ class HPXML < Object
     end
   end
 
-  class RimJoists < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class RimJoists < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << RimJoist.new(@parent_object, **kwargs)
     end
@@ -3317,7 +3365,8 @@ class HPXML < Object
     end
   end
 
-  class RimJoist < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class RimJoist < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :orientation, :azimuth, :siding,
              :color, :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
              :insulation_cavity_r_value, :insulation_continuous_r_value, :framing_size,
@@ -3483,7 +3532,8 @@ class HPXML < Object
     end
   end
 
-  class Walls < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Walls < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Wall.new(@parent_object, **kwargs)
     end
@@ -3497,7 +3547,8 @@ class HPXML < Object
     end
   end
 
-  class Wall < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :radiant_barrier,
              :radiant_barrier_grade, :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
@@ -3732,7 +3783,8 @@ class HPXML < Object
     end
   end
 
-  class FoundationWalls < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class FoundationWalls < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << FoundationWall.new(@parent_object, **kwargs)
     end
@@ -3746,7 +3798,8 @@ class HPXML < Object
     end
   end
 
-  class FoundationWall < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :length, :height, :area, :orientation,
              :type, :azimuth, :thickness, :depth_below_grade, :insulation_id, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
@@ -3980,7 +4033,8 @@ class HPXML < Object
     end
   end
 
-  class Floors < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Floors < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Floor.new(@parent_object, **kwargs)
     end
@@ -3994,7 +4048,8 @@ class HPXML < Object
     end
   end
 
-  class Floor < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Floor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :floor_type, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :floor_or_ceiling, :interior_finish_type, :interior_finish_thickness, :insulation_grade,
@@ -4206,7 +4261,8 @@ class HPXML < Object
     end
   end
 
-  class Slabs < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Slabs < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Slab.new(@parent_object, **kwargs)
     end
@@ -4220,7 +4276,8 @@ class HPXML < Object
     end
   end
 
-  class Slab < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Slab < BaseElement
     ATTRS = [:id, :interior_adjacent_to, :exterior_adjacent_to, :area, :thickness, :exposed_perimeter,
              :perimeter_insulation_depth, :under_slab_insulation_width,
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
@@ -4381,7 +4438,8 @@ class HPXML < Object
     end
   end
 
-  class Windows < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Windows < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Window.new(@parent_object, **kwargs)
     end
@@ -4395,7 +4453,8 @@ class HPXML < Object
     end
   end
 
-  class Window < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Window < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_id, :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
@@ -4553,7 +4612,8 @@ class HPXML < Object
     end
   end
 
-  class Skylights < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Skylights < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Skylight.new(@parent_object, **kwargs)
     end
@@ -4567,7 +4627,8 @@ class HPXML < Object
     end
   end
 
-  class Skylight < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :interior_shading_type, :exterior_shading_factor_summer,
@@ -4737,7 +4798,8 @@ class HPXML < Object
     end
   end
 
-  class Doors < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Doors < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Door.new(@parent_object, **kwargs)
     end
@@ -4751,7 +4813,8 @@ class HPXML < Object
     end
   end
 
-  class Door < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Door < BaseElement
     ATTRS = [:id, :attached_to_wall_idref, :area, :azimuth, :orientation, :r_value]
     attr_accessor(*ATTRS)
 
@@ -4831,7 +4894,8 @@ class HPXML < Object
     end
   end
 
-  class PartitionWallMass < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class PartitionWallMass < BaseElement
     ATTRS = [:area_fraction, :interior_finish_type, :interior_finish_thickness]
     attr_accessor(*ATTRS)
 
@@ -4867,7 +4931,8 @@ class HPXML < Object
     end
   end
 
-  class FurnitureMass < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class FurnitureMass < BaseElement
     ATTRS = [:area_fraction, :type]
     attr_accessor(*ATTRS)
 
@@ -4895,7 +4960,8 @@ class HPXML < Object
     end
   end
 
-  class HeatingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatingSystems < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatingSystem.new(@parent_object, **kwargs)
     end
@@ -4914,7 +4980,8 @@ class HPXML < Object
     end
   end
 
-  class HeatingSystem < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatingSystem < BaseElement
     def initialize(hpxml_object, *args, **kwargs)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args, **kwargs)
@@ -5126,7 +5193,8 @@ class HPXML < Object
     end
   end
 
-  class CoolingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class CoolingSystems < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CoolingSystem.new(@parent_object, **kwargs)
     end
@@ -5150,7 +5218,8 @@ class HPXML < Object
     end
   end
 
-  class CoolingSystem < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class CoolingSystem < BaseElement
     def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       super(hpxml_object, *args, **kwargs)
@@ -5357,7 +5426,8 @@ class HPXML < Object
     end
   end
 
-  class HeatPumps < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatPumps < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatPump.new(@parent_object, **kwargs)
     end
@@ -5381,7 +5451,8 @@ class HPXML < Object
     end
   end
 
-  class HeatPump < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatPump < BaseElement
     def initialize(hpxml_object, *args, **kwargs)
       @cooling_detailed_performance_data = CoolingDetailedPerformanceData.new(hpxml_object)
       @heating_detailed_performance_data = HeatingDetailedPerformanceData.new(hpxml_object)
@@ -5690,7 +5761,8 @@ class HPXML < Object
     end
   end
 
-  class GeothermalLoops < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class GeothermalLoops < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << GeothermalLoop.new(@parent_object, **kwargs)
     end
@@ -5704,7 +5776,8 @@ class HPXML < Object
     end
   end
 
-  class GeothermalLoop < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class GeothermalLoop < BaseElement
     ATTRS = [:id, :loop_configuration, :loop_flow, :bore_config, :num_bore_holes, :bore_spacing,
              :bore_length, :bore_diameter, :grout_type, :grout_conductivity, :pipe_type,
              :pipe_conductivity, :pipe_diameter, :shank_spacing]
@@ -5796,7 +5869,8 @@ class HPXML < Object
     end
   end
 
-  class HVACPlant < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HVACPlant < BaseElement
     ATTRS = HDL_ATTRS.keys + CDL_SENS_ATTRS.keys + CDL_LAT_ATTRS.keys
     attr_accessor(*ATTRS)
 
@@ -5822,7 +5896,8 @@ class HPXML < Object
     end
   end
 
-  class HVACControls < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HVACControls < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HVACControl.new(@parent_object, **kwargs)
     end
@@ -5836,7 +5911,8 @@ class HPXML < Object
     end
   end
 
-  class HVACControl < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HVACControl < BaseElement
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
@@ -5925,7 +6001,8 @@ class HPXML < Object
     end
   end
 
-  class HVACDistributions < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HVACDistributions < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HVACDistribution.new(@parent_object, **kwargs)
     end
@@ -5939,7 +6016,8 @@ class HPXML < Object
     end
   end
 
-  class HVACDistribution < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HVACDistribution < BaseElement
     def initialize(hpxml_bldg, *args, **kwargs)
       @duct_leakage_measurements = DuctLeakageMeasurements.new(hpxml_bldg)
       @ducts = Ducts.new(hpxml_bldg)
@@ -6084,7 +6162,8 @@ class HPXML < Object
     end
   end
 
-  class DuctLeakageMeasurements < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class DuctLeakageMeasurements < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << DuctLeakageMeasurement.new(@parent_object, **kwargs)
     end
@@ -6098,7 +6177,8 @@ class HPXML < Object
     end
   end
 
-  class DuctLeakageMeasurement < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class DuctLeakageMeasurement < BaseElement
     ATTRS = [:duct_type, :duct_leakage_test_method, :duct_leakage_units, :duct_leakage_value,
              :duct_leakage_total_or_to_outside]
     attr_accessor(*ATTRS)
@@ -6139,7 +6219,8 @@ class HPXML < Object
     end
   end
 
-  class Ducts < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Ducts < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Duct.new(@parent_object, **kwargs)
     end
@@ -6153,7 +6234,8 @@ class HPXML < Object
     end
   end
 
-  class Duct < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Duct < BaseElement
     ATTRS = [:id, :duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area, :duct_surface_area_multiplier, :duct_shape,
              :duct_buried_insulation_level, :duct_effective_r_value, :duct_fraction_rectangular]
@@ -6210,7 +6292,8 @@ class HPXML < Object
     end
   end
 
-  class VentilationFans < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class VentilationFans < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << VentilationFan.new(@parent_object, **kwargs)
     end
@@ -6224,7 +6307,8 @@ class HPXML < Object
     end
   end
 
-  class VentilationFan < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class VentilationFan < BaseElement
     ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation, :flow_rate_not_tested,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
              :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
@@ -6513,7 +6597,8 @@ class HPXML < Object
     end
   end
 
-  class WaterHeatingSystems < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class WaterHeatingSystems < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << WaterHeatingSystem.new(@parent_object, **kwargs)
     end
@@ -6527,7 +6612,8 @@ class HPXML < Object
     end
   end
 
-  class WaterHeatingSystem < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class WaterHeatingSystem < BaseElement
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
@@ -6649,7 +6735,8 @@ class HPXML < Object
     end
   end
 
-  class HotWaterDistributions < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HotWaterDistributions < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HotWaterDistribution.new(@parent_object, **kwargs)
     end
@@ -6663,7 +6750,8 @@ class HPXML < Object
     end
   end
 
-  class HotWaterDistribution < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HotWaterDistribution < BaseElement
     ATTRS = [:id, :system_type, :pipe_r_value, :standard_piping_length, :recirculation_control_type,
              :recirculation_piping_length, :recirculation_branch_piping_length,
              :recirculation_pump_power, :dwhr_facilities_connected, :dwhr_equal_flow,
@@ -6757,7 +6845,8 @@ class HPXML < Object
     end
   end
 
-  class WaterFixtures < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class WaterFixtures < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << WaterFixture.new(@parent_object, **kwargs)
     end
@@ -6771,7 +6860,8 @@ class HPXML < Object
     end
   end
 
-  class WaterFixture < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class WaterFixture < BaseElement
     ATTRS = [:id, :water_fixture_type, :low_flow, :flow_rate, :count]
     attr_accessor(*ATTRS)
 
@@ -6808,7 +6898,8 @@ class HPXML < Object
     end
   end
 
-  class WaterHeating < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class WaterHeating < BaseElement
     ATTRS = [:water_fixtures_usage_multiplier, :water_fixtures_weekday_fractions, :water_fixtures_weekend_fractions,
              :water_fixtures_monthly_multipliers]
     attr_accessor(*ATTRS)
@@ -6841,7 +6932,8 @@ class HPXML < Object
     end
   end
 
-  class SolarThermalSystems < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class SolarThermalSystems < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << SolarThermalSystem.new(@parent_object, **kwargs)
     end
@@ -6855,7 +6947,8 @@ class HPXML < Object
     end
   end
 
-  class SolarThermalSystem < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class SolarThermalSystem < BaseElement
     ATTRS = [:id, :system_type, :collector_area, :collector_loop_type, :collector_orientation, :collector_azimuth,
              :collector_type, :collector_tilt, :collector_frta, :collector_frul, :storage_volume,
              :water_heating_system_idref, :solar_fraction]
@@ -6926,7 +7019,8 @@ class HPXML < Object
     end
   end
 
-  class PVSystems < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class PVSystems < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PVSystem.new(@parent_object, **kwargs)
     end
@@ -6940,7 +7034,8 @@ class HPXML < Object
     end
   end
 
-  class PVSystem < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class PVSystem < BaseElement
     ATTRS = [:id, :location, :module_type, :tracking, :array_orientation, :array_azimuth, :array_tilt,
              :max_power_output, :inverter_idref, :system_losses_fraction, :number_of_panels,
              :year_modules_manufactured, :is_shared_system, :number_of_bedrooms_served]
@@ -7013,7 +7108,8 @@ class HPXML < Object
     end
   end
 
-  class Inverters < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Inverters < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Inverter.new(@parent_object, **kwargs)
     end
@@ -7027,7 +7123,8 @@ class HPXML < Object
     end
   end
 
-  class Inverter < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Inverter < BaseElement
     ATTRS = [:id, :inverter_efficiency]
     attr_accessor(*ATTRS)
 
@@ -7070,7 +7167,8 @@ class HPXML < Object
     end
   end
 
-  class Generators < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Generators < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Generator.new(@parent_object, **kwargs)
     end
@@ -7084,7 +7182,8 @@ class HPXML < Object
     end
   end
 
-  class Generator < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Generator < BaseElement
     ATTRS = [:id, :fuel_type, :annual_consumption_kbtu, :annual_output_kwh, :is_shared_system, :number_of_bedrooms_served]
     attr_accessor(*ATTRS)
 
@@ -7123,7 +7222,8 @@ class HPXML < Object
     end
   end
 
-  class Batteries < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Batteries < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Battery.new(@parent_object, **kwargs)
     end
@@ -7137,7 +7237,8 @@ class HPXML < Object
     end
   end
 
-  class Battery < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Battery < BaseElement
     ATTRS = [:id, :type, :location, :lifetime_model, :rated_power_output, :nominal_capacity_kwh, :nominal_capacity_ah,
              :nominal_voltage, :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah, :is_shared_system,
              :number_of_bedrooms_served]
@@ -7208,7 +7309,8 @@ class HPXML < Object
     end
   end
 
-  class ClothesWashers < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClothesWashers < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClothesWasher.new(@parent_object, **kwargs)
     end
@@ -7222,7 +7324,8 @@ class HPXML < Object
     end
   end
 
-  class ClothesWasher < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :capacity, :label_usage, :usage_multiplier, :is_shared_appliance, :count,
@@ -7323,7 +7426,8 @@ class HPXML < Object
     end
   end
 
-  class ClothesDryers < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClothesDryers < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << ClothesDryer.new(@parent_object, **kwargs)
     end
@@ -7337,7 +7441,8 @@ class HPXML < Object
     end
   end
 
-  class ClothesDryer < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
              :usage_multiplier, :is_shared_appliance, :count, :number_of_units_served,
              :is_vented, :vented_flow_rate, :weekday_fractions, :weekend_fractions,
@@ -7397,7 +7502,8 @@ class HPXML < Object
     end
   end
 
-  class Dishwashers < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Dishwashers < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Dishwasher.new(@parent_object, **kwargs)
     end
@@ -7411,7 +7517,8 @@ class HPXML < Object
     end
   end
 
-  class Dishwasher < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Dishwasher < BaseElement
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost, :label_usage,
              :usage_multiplier, :is_shared_appliance, :water_heating_system_idref,
@@ -7504,7 +7611,8 @@ class HPXML < Object
     end
   end
 
-  class Refrigerators < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Refrigerators < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Refrigerator.new(@parent_object, **kwargs)
     end
@@ -7518,7 +7626,8 @@ class HPXML < Object
     end
   end
 
-  class Refrigerator < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Refrigerator < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :usage_multiplier, :primary_indicator,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers,
              :constant_coefficients, :temperature_coefficients]
@@ -7567,7 +7676,8 @@ class HPXML < Object
     end
   end
 
-  class Freezers < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Freezers < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Freezer.new(@parent_object, **kwargs)
     end
@@ -7581,7 +7691,8 @@ class HPXML < Object
     end
   end
 
-  class Freezer < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Freezer < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers,
              :constant_coefficients, :temperature_coefficients]
@@ -7628,7 +7739,8 @@ class HPXML < Object
     end
   end
 
-  class Dehumidifiers < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Dehumidifiers < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Dehumidifier.new(@parent_object, **kwargs)
     end
@@ -7642,7 +7754,8 @@ class HPXML < Object
     end
   end
 
-  class Dehumidifier < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Dehumidifier < BaseElement
     ATTRS = [:id, :type, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served,
              :location]
     attr_accessor(*ATTRS)
@@ -7686,7 +7799,8 @@ class HPXML < Object
     end
   end
 
-  class CookingRanges < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class CookingRanges < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CookingRange.new(@parent_object, **kwargs)
     end
@@ -7700,7 +7814,8 @@ class HPXML < Object
     end
   end
 
-  class CookingRange < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class CookingRange < BaseElement
     ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
@@ -7744,7 +7859,8 @@ class HPXML < Object
     end
   end
 
-  class Ovens < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Ovens < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Oven.new(@parent_object, **kwargs)
     end
@@ -7758,7 +7874,8 @@ class HPXML < Object
     end
   end
 
-  class Oven < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Oven < BaseElement
     ATTRS = [:id, :is_convection]
     attr_accessor(*ATTRS)
 
@@ -7789,7 +7906,8 @@ class HPXML < Object
     end
   end
 
-  class LightingGroups < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class LightingGroups < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << LightingGroup.new(@parent_object, **kwargs)
     end
@@ -7803,7 +7921,8 @@ class HPXML < Object
     end
   end
 
-  class LightingGroup < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class LightingGroup < BaseElement
     ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type, :kwh_per_year]
     attr_accessor(*ATTRS)
 
@@ -7847,7 +7966,8 @@ class HPXML < Object
     end
   end
 
-  class Lighting < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Lighting < BaseElement
     ATTRS = [:interior_usage_multiplier, :garage_usage_multiplier, :exterior_usage_multiplier,
              :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
              :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
@@ -7929,7 +8049,8 @@ class HPXML < Object
     end
   end
 
-  class CeilingFans < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class CeilingFans < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CeilingFan.new(@parent_object, **kwargs)
     end
@@ -7943,7 +8064,8 @@ class HPXML < Object
     end
   end
 
-  class CeilingFan < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class CeilingFan < BaseElement
     ATTRS = [:id, :efficiency, :label_energy_use, :count, :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
@@ -7986,7 +8108,8 @@ class HPXML < Object
     end
   end
 
-  class Pools < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class Pools < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << Pool.new(@parent_object, **kwargs)
     end
@@ -8000,7 +8123,8 @@ class HPXML < Object
     end
   end
 
-  class Pool < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class Pool < BaseElement
     ATTRS = [:id, :type, :heater_id, :heater_type, :heater_load_units, :heater_load_value, :heater_usage_multiplier,
              :pump_id, :pump_type, :pump_kwh_per_year, :pump_usage_multiplier,
              :heater_weekday_fractions, :heater_weekend_fractions, :heater_monthly_multipliers,
@@ -8094,7 +8218,8 @@ class HPXML < Object
     end
   end
 
-  class PermanentSpas < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class PermanentSpas < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PermanentSpa.new(@parent_object, **kwargs)
     end
@@ -8108,7 +8233,8 @@ class HPXML < Object
     end
   end
 
-  class PermanentSpa < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class PermanentSpa < BaseElement
     ATTRS = [:id, :type, :heater_id, :heater_type, :heater_load_units, :heater_load_value, :heater_usage_multiplier,
              :pump_id, :pump_type, :pump_kwh_per_year, :pump_usage_multiplier,
              :heater_weekday_fractions, :heater_weekend_fractions, :heater_monthly_multipliers,
@@ -8202,7 +8328,8 @@ class HPXML < Object
     end
   end
 
-  class PortableSpas < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class PortableSpas < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PortableSpa.new(@parent_object, **kwargs)
     end
@@ -8216,7 +8343,8 @@ class HPXML < Object
     end
   end
 
-  class PortableSpa < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class PortableSpa < BaseElement
     ATTRS = [:id]
     attr_accessor(*ATTRS)
 
@@ -8243,7 +8371,8 @@ class HPXML < Object
     end
   end
 
-  class PlugLoads < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class PlugLoads < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << PlugLoad.new(@parent_object, **kwargs)
     end
@@ -8257,7 +8386,8 @@ class HPXML < Object
     end
   end
 
-  class PlugLoad < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class PlugLoad < BaseElement
     ATTRS = [:id, :plug_load_type, :kwh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
@@ -8305,7 +8435,8 @@ class HPXML < Object
     end
   end
 
-  class FuelLoads < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class FuelLoads < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << FuelLoad.new(@parent_object, **kwargs)
     end
@@ -8319,7 +8450,8 @@ class HPXML < Object
     end
   end
 
-  class FuelLoad < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class FuelLoad < BaseElement
     ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
@@ -8369,7 +8501,8 @@ class HPXML < Object
     end
   end
 
-  class CoolingDetailedPerformanceData < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class CoolingDetailedPerformanceData < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << CoolingPerformanceDataPoint.new(@parent_object, **kwargs)
     end
@@ -8397,7 +8530,8 @@ class HPXML < Object
     end
   end
 
-  class CoolingPerformanceDataPoint < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class CoolingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :indoor_wetbulb, :capacity, :capacity_fraction_of_nominal,
              :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop, :isdefaulted]
     attr_accessor(*ATTRS)
@@ -8443,7 +8577,8 @@ class HPXML < Object
     end
   end
 
-  class HeatingDetailedPerformanceData < BaseArrayElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatingDetailedPerformanceData < BaseArrayElement
     def add(**kwargs) # rubocop:disable Style/DocumentationMethod
       self << HeatingPerformanceDataPoint.new(@parent_object, **kwargs)
     end
@@ -8471,7 +8606,8 @@ class HPXML < Object
     end
   end
 
-  class HeatingPerformanceDataPoint < BaseElement # rubocop:disable Style/Documentation
+  # TODO
+  class HeatingPerformanceDataPoint < BaseElement
     ATTRS = [:outdoor_temperature, :indoor_temperature, :capacity, :capacity_fraction_of_nominal,
              :capacity_description, :efficiency_cop, :gross_capacity, :gross_efficiency_cop,
              :isdefaulted]
@@ -8525,10 +8661,11 @@ class HPXML < Object
     return doc
   end
 
-  # TODO
+  # The unique set of HPXML fuel types that end up used in the EnergyPlus model.
+  # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
+  #
+  # @return [Array<String>] List of HPXML::FuelTypeXXXs
   def self.fossil_fuels
-    # The unique set of HPXML fuel types that end up used in the EnergyPlus model.
-    # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
     return [HPXML::FuelTypeNaturalGas,
             HPXML::FuelTypePropane,
             HPXML::FuelTypeOil,
@@ -8613,11 +8750,13 @@ class HPXML < Object
     return false
   end
 
-  # TODO
+  # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
+  # Note: The location of insulation is not considered here, so an insulated foundation wall of an
+  # unconditioned basement, for example, returns false.
+  #
+  # @param surface [OpenStudio::Model::Surface] the surface of interest
+  # @return [Boolean] true if a thermal boundary surface
   def self.is_thermal_boundary(surface)
-    # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
-    # Note: The location of insulation is not considered here, so an insulated foundation wall of an
-    # unconditioned basement, for example, returns false.
     interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
     exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
     return (interior_conditioned != exterior_conditioned)
