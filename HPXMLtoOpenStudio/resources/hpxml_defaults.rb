@@ -342,7 +342,7 @@ module HPXMLDefaults
 
     if hpxml_bldg.header.manualj_infiltration_method.nil?
       infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
-      if not infil_measurement.air_leakage.nil?
+      if (not infil_measurement.air_leakage.nil?) || (not infil_measurement.effective_leakage_area.nil?)
         hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
       else
         hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
@@ -1024,7 +1024,7 @@ module HPXMLDefaults
       infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
       infil_measurement.infiltration_height_isdefaulted = true
     end
-    if (not infil_measurement.leakiness_description.nil?) && infil_measurement.air_leakage.nil?
+    if (not infil_measurement.leakiness_description.nil?) && infil_measurement.air_leakage.nil? && infil_measurement.effective_leakage_area.nil?
       cfa = hpxml_bldg.building_construction.conditioned_floor_area
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
       year_built = hpxml_bldg.building_construction.year_built

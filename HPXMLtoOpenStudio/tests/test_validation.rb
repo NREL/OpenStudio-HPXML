@@ -250,7 +250,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'sum-space-floor-area2' => ['Expected sum(Zones/Zone[ZoneType="conditioned"]/Spaces/Space/FloorArea) to be equal to BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
                             'water-heater-location' => ['A location is specified as "crawlspace - vented" but no surfaces were found adjacent to this space type.'],
                             'water-heater-location-other' => ["Expected Location to be 'conditioned space' or 'basement - unconditioned' or 'basement - conditioned' or 'attic - unvented' or 'attic - vented' or 'garage' or 'crawlspace - unvented' or 'crawlspace - vented' or 'crawlspace - conditioned' or 'other exterior' or 'other housing unit' or 'other heated space' or 'other multifamily buffer space' or 'other non-freezing space'"],
-                            'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'] }
+                            'water-heater-recovery-efficiency' => ['Expected RecoveryEfficiency to be greater than EnergyFactor'],
+                            'wrong-infiltration-method-blower-door' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea]'],
+                            'wrong-infiltration-method-default-table' => ['Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[LeakinessDescription]'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -756,6 +758,12 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['water-heater-recovery-efficiency'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas.xml')
         hpxml_bldg.water_heating_systems[0].recovery_efficiency = hpxml_bldg.water_heating_systems[0].energy_factor
+      elsif ['wrong-infiltration-method-blower-door'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
+      elsif ['wrong-infiltration-method-default-table'].include? error_case
+        hpxml, hpxml_bldg = _create_hpxml('base.xml')
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
       else
         fail "Unhandled case: #{error_case}."
       end
@@ -1135,9 +1143,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'unique-objects-vary-across-units-tmains' => ['Unique object (OS:Site:WaterMainsTemperature) has different values across dwelling units.'],
                             'whole-mf-building-batteries' => ['Modeling batteries for whole SFA/MF buildings is not currently supported.'],
                             'whole-mf-building-dehumidifiers-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for dehumidifiers.'],
-                            'whole-mf-building-gshps-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'],
-                            'wrong-infiltration-method-blower-door' => ['Missing air leakage inputs.'],
-                            'wrong-infiltration-method-default-table' => ['Missing leakiness description inputs.'] }
+                            'whole-mf-building-gshps-unit-multiplier' => ['NumberofUnits greater than 1 is not supported for ground-to-air heat pumps.'] }
 
     all_expected_errors.each_with_index do |(error_case, expected_errors), i|
       puts "[#{i + 1}/#{all_expected_errors.size}] Testing #{error_case}..."
@@ -1649,12 +1655,6 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['whole-mf-building-gshps-unit-multiplier'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-hvac-ground-to-air-heat-pump.xml')
         hpxml_bldg.building_construction.number_of_units = 2
-      elsif ['wrong-infiltration-method-blower-door'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')
-        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
-      elsif ['wrong-infiltration-method-default-table'].include? error_case
-        hpxml, hpxml_bldg = _create_hpxml('base.xml')
-        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
       else
         fail "Unhandled case: #{error_case}."
       end

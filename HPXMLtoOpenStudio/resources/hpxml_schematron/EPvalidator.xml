@@ -358,8 +358,24 @@
       <sch:assert role='ERROR' test='number(h:ManualJInputs/h:InternalLoadsLatent) &gt;= 0 or not(h:ManualJInputs/h:InternalLoadsLatent)'>Expected ManualJInputs/InternalLoadsLatent to be greater than or equal to 0</sch:assert>
       <sch:assert role='ERROR' test='count(h:ManualJInputs/h:NumberofOccupants) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ManualJInputs/NumberofOccupants</sch:assert>
       <sch:assert role='ERROR' test='number(h:ManualJInputs/h:NumberofOccupants) &gt;= 0 or not(h:ManualJInputs/h:NumberofOccupants)'>Expected ManualJInputs/NumberofOccupants to be greater than or equal to 0</sch:assert>
+      <sch:assert role='ERROR' test='count(h:ManualJInputs/h:InfiltrationMethod) &lt;= 1'>Expected 0 or 1 element(s) for xpath: ManualJInputs/InfiltrationMethod</sch:assert> <!-- See [ManualJInfiltrationMethod=DefaultInfiltrationTable] or [ManualJInfiltrationMethod=BlowerDoor] -->
+      <sch:assert role='ERROR' test='h:ManualJInputs/h:InfiltrationMethod[text()="default infiltration table" or text()="blower door"] or not(h:ManualJInputs/h:InfiltrationMethod)'>Expected InfiltrationMethod/DailyTemperatureRange to be 'default infiltration table' or 'blower door'</sch:assert>
       <!-- Moved/deprecated UseMaxLoadForHeatPumps input; see https://github.com/NREL/OpenStudio-HPXML/pull/1039 -->
       <sch:assert role='ERROR' test='count(h:UseMaxLoadForHeatPumps) = 0'>UseMaxLoadForHeatPumps has been replaced by HeatPumpSizingMethodology</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[ManualJInfiltrationMethod=DefaultInfiltrationTable]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:BuildingSummary/h:extension/h:HVACSizingControl/h:ManualJInputs/h:InfiltrationMethod="default infiltration table"]'>
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:LeakinessDescription]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[LeakinessDescription]</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern>
+    <sch:title>[ManualJInfiltrationMethod=BlowerDoor]</sch:title>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails[h:BuildingSummary/h:extension/h:HVACSizingControl/h:ManualJInputs/h:InfiltrationMethod="blower door"]'>
+      <sch:assert role='ERROR' test='count(h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:AirLeakage | h:EffectiveLeakageArea]) = 1'>Expected 1 element(s) for xpath: Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/h:AirLeakage | EffectiveLeakageArea]</sch:assert>
     </sch:rule>
   </sch:pattern>
 
