@@ -1201,7 +1201,7 @@ module HVAC
   # @param hvac_control [TODO] TODO
   # @param has_ceiling_fan [TODO] TODO
   # @param year [Integer] the calendar year
-  # @param weather [WeatherProcess] Weather object containing EPW information
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param offset_db [Float] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, offset_db)

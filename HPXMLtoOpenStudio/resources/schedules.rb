@@ -1336,7 +1336,7 @@ module Schedule
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object containing EPW information
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [String] 12 comma-separated monthly multipliers
   def self.CeilingFanMonthlyMultipliers(weather:)
     return HVAC.get_default_ceiling_fan_months(weather).join(', ')
