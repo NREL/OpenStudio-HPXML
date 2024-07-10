@@ -21,7 +21,7 @@ module Airflow
   # @param frac_windows_operable [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @param hvac_availability_sensor [TODO] TODO
   # @return [TODO] TODO
   def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa,
@@ -434,7 +434,7 @@ module Airflow
   # @param natvent_days_per_week [TODO] TODO
   # @param infil_volume [TODO] TODO
   # @param infil_height [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor, natvent_days_per_week,
                                                          infil_volume, infil_height, unavailable_periods)
@@ -630,7 +630,7 @@ module Airflow
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param num_days_per_week [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, unavailable_periods = [])
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
@@ -742,7 +742,7 @@ module Airflow
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vent_fans_mech [TODO] TODO
   # @param airloop_map [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.initialize_cfis(model, vent_fans_mech, airloop_map, unavailable_periods)
     # Get AirLoop associated with CFIS
@@ -1534,7 +1534,7 @@ module Airflow
   # @param vent_object [TODO] TODO
   # @param obj_type_name [TODO] TODO
   # @param index [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_local_ventilation(model, vent_object, obj_type_name, index, unavailable_periods)
     daily_sch = [0.0] * 24
@@ -1574,7 +1574,7 @@ module Airflow
   # @param vented_dryer [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param index [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index, unavailable_periods)
     obj_name = "#{Constants.ObjectNameClothesDryer} exhaust #{index}"
@@ -1794,7 +1794,7 @@ module Airflow
   # @param exh_fans [TODO] TODO
   # @param bal_fans [TODO] TODO
   # @param erv_hrv_fans [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [], unavailable_periods = [])
     # Calculate fan heat fraction
@@ -1893,7 +1893,7 @@ module Airflow
   # @param vent_mech_erv_hrv_tot [TODO] TODO
   # @param infil_flow_actuator [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_infiltration_adjustment_to_conditioned(model, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals, vent_mech_sup_tot,
                                                         vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, infil_flow_actuator, schedules_file, unavailable_periods)
@@ -2146,7 +2146,7 @@ module Airflow
   # @param clg_ssn_sensor [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
@@ -2253,7 +2253,7 @@ module Airflow
   # @param clg_ssn_sensor [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals,

@@ -895,7 +895,7 @@ module HVAC
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param dehumidifiers [TODO] TODO
   # @param conditioned_space [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_dehumidifiers(runner, model, dehumidifiers, conditioned_space, unavailable_periods, unit_multiplier)
@@ -984,7 +984,7 @@ module HVAC
   # @param ceiling_fan [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, conditioned_space, schedules_file,
                               unavailable_periods)
@@ -4316,7 +4316,7 @@ module HVAC
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param fractions [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.get_sequential_load_schedule(model, fractions, unavailable_periods)
     if fractions.nil?

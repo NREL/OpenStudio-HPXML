@@ -494,7 +494,7 @@ module Geometry
   # @param num_occ [TODO] TODO
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [void]
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()

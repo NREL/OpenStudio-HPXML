@@ -15,7 +15,7 @@ module HotWaterAndAppliances
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param plantloop_map [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
@@ -891,7 +891,7 @@ module HotWaterAndAppliances
   # @param col_name [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
   # @param refrigerator_or_freezer [TODO] TODO
-  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
     # Create availability sensor
