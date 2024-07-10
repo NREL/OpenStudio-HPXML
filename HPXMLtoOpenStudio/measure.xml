@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f9114a81-b3d3-4f32-a908-0e82f8d66cda</version_id>
-  <version_modified>2024-07-10T22:34:37Z</version_modified>
+  <version_id>df416770-fc8b-4aab-942c-fce940e7ab52</version_id>
+  <version_modified>2024-07-10T22:37:35Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -381,7 +381,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F2757039</checksum>
+      <checksum>9064B5DA</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -567,7 +567,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14748738</checksum>
+      <checksum>DE60E915</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
