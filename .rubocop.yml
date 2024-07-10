@@ -56,13 +56,11 @@ Style/CollectionCompact:
 Style/Documentation:
   Exclude:
     - '**/tests/*.rb'
-    - 'HPXMLtoOpenStudio/resources/hpxml.rb'
     - 'workflow/**/*.rb'
     - 'tasks.rb'
 Style/DocumentationMethod:
   Exclude:
     - '**/tests/*.rb'
-    - 'HPXMLtoOpenStudio/resources/hpxml.rb'
     - 'workflow/**/*.rb'
     - 'tasks.rb'
 Style/DocumentDynamicEvalDefinition:

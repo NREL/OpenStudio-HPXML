@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# Annual constant schedule
+# Annual constant schedule.
 class ScheduleConstant
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param val [Double] the constant schedule value
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, val = 1.0, schedule_type_limits_name = nil, unavailable_periods: [])
     year = model.getYearDescription.assumedYear
     @schedule = create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
@@ -16,15 +16,15 @@ class ScheduleConstant
 
   private
 
-  # TODO
+  # Create the constant OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param val [TODO] TODO
-  # @param year [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param val [Double] the constant schedule value
+  # @param year [Integer] the calendar year
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @return [OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with constant schedule
   def create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
     if unavailable_periods.empty?
       if val == 1.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
@@ -58,16 +58,13 @@ end
 
 # Annual schedule defined by 12 24-hour values for weekdays and weekends.
 class HourlyByMonthSchedule
-  # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
-  # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param weekday_month_by_hour_values [TODO] TODO
-  # @param weekday_month_by_hour_values [TODO] TODO
-  # @param weekend_month_by_hour_values [TODO] TODO
-  # @param normalize_values [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param weekday_month_by_hour_values [Array<Array<Double>>] a 12-element array of 24-element arrays of numbers
+  # @param weekday_month_by_hour_values [Array<Array<Double>>] a 12-element array of 24-element arrays of numbers
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -83,30 +80,22 @@ class HourlyByMonthSchedule
 
   attr_accessor(:schedule, :maxval)
 
-  # TODO
-  #
-  # @param val [TODO] TODO
-  # @return [TODO] TODO
-  def calc_design_level(val)
-    return val * 1000
-  end
-
   private
 
-  # TODO
+  # Ensure that defined schedule value arrays are the correct lengths.
   #
-  # @param vals [TODO] TODO
-  # @param num_outter_values [TODO] TODO
-  # @param num_inner_values [TODO] TODO
-  # @return [TODO] TODO
-  def validate_values(vals, num_outter_values, num_inner_values)
-    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
+  # @param vals [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  # @param num_outer_values [Integer] expected number of values in the outer array
+  # @param num_inner_values [Integer] expected number of values in the inner arrays
+  # @return [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  def validate_values(vals, num_outer_values, num_inner_values)
+    err_msg = "A #{num_outer_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
     end
 
     begin
-      if vals.length != num_outter_values
+      if vals.length != num_outer_values
         fail err_msg
       end
 
@@ -124,9 +113,9 @@ class HourlyByMonthSchedule
     return vals
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -135,14 +124,14 @@ class HourlyByMonthSchedule
     return maxval
   end
 
-  # TODO
+  # Create the ruleset OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param year [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param year [Integer] the calendar year
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @return [OpenStudio::Model::Ruleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
     day_startm = Schedule.day_start_months(year)
     day_endm = Schedule.day_end_months(year)
@@ -244,15 +233,12 @@ end
 
 # Annual schedule defined by 365 24-hour values for weekdays and weekends.
 class HourlyByDaySchedule
-  # weekday_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
-  # weekend_day_by_hour_values must be a 365-element array of 24-element arrays of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param weekday_day_by_hour_values [TODO] TODO
-  # @param weekend_day_by_hour_values [TODO] TODO
-  # @param normalize_values [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param weekday_day_by_hour_values [Array<Array<Double>>] a 365-element array of 24-element arrays of numbers
+  # @param weekend_day_by_hour_values [Array<Array<Double>>] a 365-element array of 24-element arrays of numbers
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
@@ -269,30 +255,22 @@ class HourlyByDaySchedule
 
   attr_accessor(:schedule, :maxval)
 
-  # TODO
-  #
-  # @param val [TODO] TODO
-  # @return [TODO] TODO
-  def calc_design_level(val)
-    return val * 1000
-  end
-
   private
 
-  # TODO
+  # Ensure that defined schedule value arrays are the correct lengths.
   #
-  # @param vals [TODO] TODO
-  # @param num_outter_values [TODO] TODO
-  # @param num_inner_values [TODO] TODO
-  # @return [TODO] TODO
-  def validate_values(vals, num_outter_values, num_inner_values)
-    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
+  # @param vals [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  # @param num_outer_values [Integer] expected number of values in the outer array
+  # @param num_inner_values [Integer] expected number of values in the inner arrays
+  # @return [Array<Array<Double>>] a num_outer_values-element array of num_inner_values-element arrays of numbers
+  def validate_values(vals, num_outer_values, num_inner_values)
+    err_msg = "A #{num_outer_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
     end
 
     begin
-      if vals.length != num_outter_values
+      if vals.length != num_outer_values
         fail err_msg
       end
 
@@ -310,9 +288,9 @@ class HourlyByDaySchedule
     return vals
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     maxval = [@weekday_day_by_hour_values.flatten.max, @weekend_day_by_hour_values.flatten.max].max
     if maxval == 0.0
@@ -321,15 +299,15 @@ class HourlyByDaySchedule
     return maxval
   end
 
-  # TODO
+  # Create the ruleset OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param year [TODO] TODO
-  # @param num_days [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param year [Integer] the calendar year
+  # @param num_days [Integer] the number of days in the calendar year
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @return [OpenStudio::Model::Ruleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, num_days, schedule_type_limits_name, unavailable_periods)
     time = []
     for h in 1..24
@@ -426,24 +404,20 @@ class HourlyByDaySchedule
   end
 end
 
-# Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values
+# Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values.
 class MonthWeekdayWeekendSchedule
-  # weekday_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
-  # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
-  # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param weekday_hourly_values [TODO] TODO
-  # @param weekend_hourly_values [TODO] TODO
-  # @param monthly_values [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param normalize_values [TODO] TODO
-  # @param begin_month [TODO] TODO
-  # @param begin_day [TODO] TODO
-  # @param end_month [TODO] TODO
-  # @param end_day [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param weekday_hourly_values [String or Array<Double>] a comma-separated string of 24 numbers or a 24-element array of numbers
+  # @param weekend_hourly_values [String or Array<Double>] a comma-separated string of 24 numbers or a 24-element array of numbers
+  # @param monthly_values [String or Array<Double>] a comma-separated string of 12 numbers or a 12-element array of numbers
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param normalize_values [Boolean] whether to divide schedule values by the max value
+  # @param begin_month [Integer] TODO
+  # @param begin_day [Integer] TODO
+  # @param end_month [Integer] TODO
+  # @param end_day [Integer] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
                  begin_day = 1, end_month = 12, end_day = 31, unavailable_periods: nil)
@@ -467,27 +441,27 @@ class MonthWeekdayWeekendSchedule
 
   attr_accessor(:schedule)
 
-  # TODO
+  # Calculate the design level from daily kWh.
   #
-  # @param daily_kwh [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_kwh [Double] daily energy use (kWh)
+  # @return [Double] design level used to represent maximum input (W)
   def calc_design_level_from_daily_kwh(daily_kwh)
     design_level_kw = daily_kwh * @maxval * @schadjust
     return UnitConversions.convert(design_level_kw, 'kW', 'W')
   end
 
-  # TODO
+  # Calculate the design level from daily therm.
   #
-  # @param daily_therm [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_therm [Double] daily energy use (therm)
+  # @return [Double] design level used to represent maximum input (W)
   def calc_design_level_from_daily_therm(daily_therm)
     return calc_design_level_from_daily_kwh(UnitConversions.convert(daily_therm, 'therm', 'kWh'))
   end
 
-  # TODO
+  # Calculate the water design level from daily use.
   #
-  # @param daily_water [TODO] TODO
-  # @return [TODO] TODO
+  # @param daily_water [Double] daily water use (gal/day)
+  # @return [Double] design level used to represent maximum input (m3/s)
   def calc_design_level_from_daily_gpm(daily_water)
     water_gpm = daily_water * @maxval * @schadjust / 60.0
     return UnitConversions.convert(water_gpm, 'gal/min', 'm^3/s')
@@ -495,10 +469,10 @@ class MonthWeekdayWeekendSchedule
 
   private
 
-  # TODO
+  # Divide each value in the array by the sum of all values in the array.
   #
-  # @param values [TODO] TODO
-  # @return [TODO] TODO
+  # @param values [Array<Double>] an array of numbers
+  # @return [Array<Double>] normalized values that sum to one
   def normalize_sum_to_one(values)
     sum = values.reduce(:+).to_f
     if sum == 0.0
@@ -508,10 +482,10 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / sum }
   end
 
-  # TODO
+  # Divide each value in the array by the average all values in the array.
   #
-  # @param values [TODO] TODO
-  # @return [TODO] TODO
+  # @param values [Array<Double>] an array of numbers
+  # @return [Array<Double>] normalized values that average to one
   def normalize_avg_to_one(values)
     avg = values.reduce(:+).to_f / values.size
     if avg == 0.0
@@ -521,9 +495,9 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / avg }
   end
 
-  # TODO
+  # Get the max weekday/weekend schedule value.
   #
-  # @return [TODO] TODO
+  # @return [Double] the max hourly schedule value
   def calc_max_val()
     if @weekday_hourly_values.max > @weekend_hourly_values.max
       maxval = @monthly_values.max * @weekday_hourly_values.max
@@ -556,18 +530,18 @@ class MonthWeekdayWeekendSchedule
     return 1 / sum_wkdy
   end
 
-  # TODO
+  # Create the constant OpenStudio Schedule object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param sch_name [TODO] TODO
-  # @param year [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param year [Integer] the calendar year
   # @param begin_month [TODO] TODO
   # @param begin_day [TODO] TODO
   # @param end_month [TODO] TODO
   # @param end_day [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, begin_month, begin_day, end_month, end_day,
                       schedule_type_limits_name, unavailable_periods)
     month_num_days = Constants.NumDaysInMonths(year)
@@ -686,30 +660,30 @@ end
 module Schedule
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] name for the allday schedule
   def self.allday_name
     return 'allday'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] name for the weekday schedule
   def self.weekday_name
     return 'weekday'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] name for the weekend schedule
   def self.weekend_name
     return 'weekend'
   end
 
-  # return [Double] The total number of full load hours for this schedule.
+  # Get the total number of full load hours for this schedule.
   #
-  # @param modelYear [TODO] TODO
-  # @param schedule [TODO] TODO
-  # @return [TODO] TODO
+  # @param modelYear [Integer] the calendar year
+  # @param schedule [OpenStudio::Model::ScheduleInterval or OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object
+  # @return [Double] annual equivalent full load hours
   def self.annual_equivalent_full_load_hrs(modelYear, schedule)
     if schedule.to_ScheduleInterval.is_initialized
       timeSeries = schedule.to_ScheduleInterval.get.timeSeries
@@ -802,12 +776,12 @@ module Schedule
     return annual_flh
   end
 
-  # TODO
+  # Set the lower/upper limit values and numeric type for the given schedule type limits.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param schedule [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param schedule [OpenStudio::Model::ScheduleInterval or OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @return [void]
   def self.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
     return if schedule_type_limits_name.nil?
 
@@ -831,10 +805,10 @@ module Schedule
     schedule.setScheduleTypeLimits(schedule_type_limits)
   end
 
-  # TODO
+  # Apply true for all weekday days of an OpenStudio ScheduleRule object.
   #
-  # @param rule [TODO] TODO
-  # @return [TODO] TODO
+  # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
+  # @return [void]
   def self.set_weekday_rule(rule)
     rule.setApplyMonday(true)
     rule.setApplyTuesday(true)
@@ -843,10 +817,10 @@ module Schedule
     rule.setApplyFriday(true)
   end
 
-  # TODO
+  # Apply true for all weekend days of an OpenStudio ScheduleRule object.
   #
-  # @param rule [TODO] TODO
-  # @return [TODO] TODO
+  # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
+  # @return [void]
   def self.set_weekend_rule(rule)
     rule.setApplySaturday(true)
     rule.setApplySunday(true)
@@ -856,7 +830,7 @@ module Schedule
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
   # @param schedule_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.get_unavailable_periods(runner, schedule_name, unavailable_periods)
     return unavailable_periods.select { |p| Schedule.unavailable_period_applies(runner, schedule_name, p.column_name) }
@@ -865,9 +839,9 @@ module Schedule
   # TODO
   #
   # @param schedule [TODO] TODO
-  # @param sch_name [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @param year [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
     return if unavailable_periods.nil?
@@ -953,7 +927,7 @@ module Schedule
   # TODO
   #
   # @param schedule [TODO] TODO
-  # @param sch_name [TODO] TODO
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
   # @param i [TODO] TODO
   # @param date_s [TODO] TODO
   # @param date_e [TODO] TODO
@@ -991,322 +965,322 @@ module Schedule
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.OccupantsWeekdayFractions
     return '0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.OccupantsWeekendFractions
     return '0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.OccupantsMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.LightingInteriorWeekdayFractions
     return '0.012, 0.010, 0.010, 0.010, 0.011, 0.018, 0.030, 0.038, 0.041, 0.041, 0.039, 0.037, 0.036, 0.035, 0.037, 0.041, 0.050, 0.065, 0.086, 0.106, 0.110, 0.079, 0.040, 0.018'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.LightingInteriorWeekendFractions
     return '0.012, 0.010, 0.010, 0.010, 0.011, 0.018, 0.030, 0.038, 0.041, 0.041, 0.039, 0.037, 0.036, 0.035, 0.037, 0.041, 0.050, 0.065, 0.086, 0.106, 0.110, 0.079, 0.040, 0.018'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.LightingExteriorWeekdayFractions
     return '0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.065, 0.056, 0.047'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.LightingExteriorWeekendFractions
     return '0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.065, 0.056, 0.047'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.LightingGarageWeekdayFractions
     return '0.023, 0.019, 0.015, 0.017, 0.021, 0.031, 0.042, 0.041, 0.034, 0.029, 0.027, 0.025, 0.021, 0.021, 0.021, 0.026, 0.031, 0.044, 0.084, 0.117, 0.113, 0.096, 0.063, 0.039'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.LightingGarageWeekendFractions
     return '0.023, 0.019, 0.015, 0.017, 0.021, 0.031, 0.042, 0.041, 0.034, 0.029, 0.027, 0.025, 0.021, 0.021, 0.021, 0.026, 0.031, 0.044, 0.084, 0.117, 0.113, 0.096, 0.063, 0.039'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.LightingMonthlyMultipliers
     return '1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.LightingExteriorHolidayWeekdayFractions
     return '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.LightingExteriorHolidayWeekendFractions
     return '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.LightingExteriorHolidayMonthlyMultipliers
     return '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.CookingRangeWeekdayFractions
     return '0.008, 0.008, 0.008, 0.008, 0.008, 0.015, 0.023, 0.039, 0.046, 0.046, 0.046, 0.054, 0.062, 0.046, 0.039, 0.054, 0.076, 0.134, 0.114, 0.058, 0.039, 0.031, 0.023, 0.015'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.CookingRangeWeekendFractions
     return '0.008, 0.008, 0.008, 0.008, 0.008, 0.015, 0.023, 0.039, 0.046, 0.046, 0.046, 0.054, 0.062, 0.046, 0.039, 0.054, 0.076, 0.134, 0.114, 0.058, 0.039, 0.031, 0.023, 0.015'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.CookingRangeMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.DishwasherWeekdayFractions
     return '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.042, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.DishwasherWeekendFractions
     return '0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.042, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.DishwasherMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.ClothesWasherWeekdayFractions
     return '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.051, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.ClothesWasherWeekendFractions
     return '0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.051, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.ClothesWasherMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.ClothesDryerWeekdayFractions
     return '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.058, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.ClothesDryerWeekendFractions
     return '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.058, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.ClothesDryerMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.FixturesWeekdayFractions
     return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.FixturesWeekendFractions
     return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.FixturesMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.GeneralWaterUseWeekdayFractions
     return '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.GeneralWaterUseWeekendFractions
     return '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.GeneralWaterUseMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.RecirculationPumpWithoutControlWeekdayFractions
     return '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.RecirculationPumpWithoutControlWeekendFractions
     return '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.RecirculationPumpDemandControlledWeekdayFractions
     return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.RecirculationPumpDemandControlledWeekendFractions
     return '0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.RecirculationPumpTemperatureControlledWeekdayFractions
     return '0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.RecirculationPumpTemperatureControlledWeekendFractions
     return '0.067, 0.072, 0.074, 0.073, 0.069, 0.048, 0.011, 0.003, 0.009, 0.020, 0.030, 0.037, 0.043, 0.047, 0.050, 0.051, 0.044, 0.034, 0.026, 0.026, 0.030, 0.036, 0.045, 0.055'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.RecirculationPumpMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.RefrigeratorWeekdayFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.RefrigeratorWeekendFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.RefrigeratorMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated constant coefficients
   def self.RefrigeratorConstantCoefficients
     return '-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544' # Table C.3(2) Daily Refrigerator Coefficient Schedules
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated temperature coefficients
   def self.RefrigeratorTemperatureCoefficients
     return '0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020' # Table C.3(2) Daily Refrigerator Coefficient Schedules
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.ExtraRefrigeratorWeekdayFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.ExtraRefrigeratorWeekendFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.ExtraRefrigeratorMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
@@ -1327,281 +1301,281 @@ module Schedule
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.FreezerWeekdayFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.FreezerWeekendFractions
     return '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.FreezerMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.CeilingFanWeekdayFractions
     return '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.052, 0.057, 0.057, 0.057, 0.057, 0.057'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.CeilingFanWeekendFractions
     return '0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.052, 0.057, 0.057, 0.057, 0.057, 0.057'
   end
 
   # TODO
   #
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [TODO] TODO
+  # @param weather [WeatherProcess] Weather object containing EPW information
+  # @return [String] 12 comma-separated monthly multipliers
   def self.CeilingFanMonthlyMultipliers(weather:)
     return HVAC.get_default_ceiling_fan_months(weather).join(', ')
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PlugLoadsOtherWeekdayFractions
     return '0.036, 0.036, 0.036, 0.036, 0.036, 0.036, 0.038, 0.041, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.044, 0.047, 0.050, 0.051, 0.050, 0.048, 0.044, 0.040, 0.037'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PlugLoadsOtherWeekendFractions
     return '0.036, 0.036, 0.036, 0.036, 0.036, 0.036, 0.038, 0.041, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.044, 0.047, 0.050, 0.051, 0.050, 0.048, 0.044, 0.040, 0.037'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PlugLoadsOtherMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PlugLoadsTVWeekdayFractions
     return '0.014, 0.007, 0.004, 0.003, 0.004, 0.006, 0.010, 0.015, 0.020, 0.025, 0.028, 0.031, 0.033, 0.038, 0.042, 0.046, 0.054, 0.062, 0.080, 0.110, 0.132, 0.125, 0.077, 0.034'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PlugLoadsTVWeekendFractions
     return '0.014, 0.007, 0.004, 0.003, 0.004, 0.006, 0.010, 0.015, 0.020, 0.025, 0.028, 0.031, 0.033, 0.038, 0.042, 0.046, 0.054, 0.062, 0.080, 0.110, 0.132, 0.125, 0.077, 0.034'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PlugLoadsTVMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PlugLoadsVehicleWeekdayFractions
     return '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PlugLoadsVehicleWeekendFractions
     return '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PlugLoadsVehicleMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PlugLoadsWellPumpWeekdayFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PlugLoadsWellPumpWeekendFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PlugLoadsWellPumpMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.FuelLoadsGrillWeekdayFractions
     return '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.FuelLoadsGrillWeekendFractions
     return '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.FuelLoadsGrillMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.FuelLoadsLightingWeekdayFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.FuelLoadsLightingWeekendFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.FuelLoadsLightingMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.FuelLoadsFireplaceWeekdayFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.FuelLoadsFireplaceWeekendFractions
     return '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.FuelLoadsFireplaceMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PoolPumpWeekdayFractions
     return '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PoolPumpWeekendFractions
     return '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PoolPumpMonthlyMultipliers
     return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PoolHeaterWeekdayFractions
     return '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PoolHeaterWeekendFractions
     return '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PoolHeaterMonthlyMultipliers
     return '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PermanentSpaPumpWeekdayFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PermanentSpaPumpWeekendFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PermanentSpaPumpMonthlyMultipliers
     return '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekday fractions
   def self.PermanentSpaHeaterWeekdayFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 24 comma-separated weekend fractions
   def self.PermanentSpaHeaterWeekendFractions
     return '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [String] 12 comma-separated monthly multipliers
   def self.PermanentSpaHeaterMonthlyMultipliers
     return '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
   end
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @param month [TODO] TODO
   # @param day [TODO] TODO
   # @return [TODO] TODO
@@ -1618,7 +1592,7 @@ module Schedule
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @param start_month [TODO] TODO
   # @param start_day [TODO] TODO
   # @param end_month [TODO] TODO
@@ -1640,7 +1614,7 @@ module Schedule
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @param months [TODO] TODO
   # @return [TODO] TODO
   def self.months_to_days(year, months)
@@ -1654,7 +1628,7 @@ module Schedule
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.day_start_months(year)
     month_num_days = Constants.NumDaysInMonths(year)
@@ -1663,7 +1637,7 @@ module Schedule
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.day_end_months(year)
     month_num_days = Constants.NumDaysInMonths(year)
@@ -1739,7 +1713,7 @@ module Schedule
   # TODO
   #
   # @param months [TODO] TODO
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.get_begin_and_end_dates_from_monthly_array(months, year)
     num_days_in_month = Constants.NumDaysInMonths(year)
@@ -1816,12 +1790,12 @@ module Schedule
     fail "Could not find row='#{schedule_name}' in unavailable_periods.csv"
   end
 
-  # TODO
+  # Ensure that the defined schedule value array (or string of numbers) is the correct length.
   #
-  # @param values [TODO] TODO
-  # @param num_values [TODO] TODO
-  # @param sch_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param values [Array<Double> or String] a num_values-element array of numbers or a comma-seperated string of numbers
+  # @param num_values [Integer] expected number of values in the outer array
+  # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
+  # @return [Array<Double>] a num_values-element array of numbers
   def self.validate_values(values, num_values, sch_name)
     err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
     if values.is_a?(Array)
@@ -1856,23 +1830,23 @@ module Schedule
     return floats
   end
 
-  # TODO
+  # Check whether string is a valid float.
   #
-  # @param str [TODO] TODO
-  # @return [TODO] TODO
+  # @param str [String] string representation of a possible float
+  # @return [Boolean] true if valid float
   def self.valid_float?(str)
     !!Float(str) rescue false
   end
 end
 
-# TODO
+# Wrapper for detailed schedule CSVs.
 class SchedulesFile
-  # TODO
+  # Struct for storing schedule CSV column information.
   class Column
-    # @param name [TODO] TODO
-    # @param used_by_unavailable_periods [TODO] TODO
-    # @param can_be_stochastic [TODO] TODO
-    # @param type [TODO] TODO
+    # @param name [String] the column header of the detailed schedule
+    # @param used_by_unavailable_periods [Boolean] affected by unavailable periods
+    # @param can_be_stochastic [Boolean] detailed stochastic occupancy schedule can be automatically generated
+    # @param type [Symbol] units
     def initialize(name, used_by_unavailable_periods, can_be_stochastic, type)
       @name = name
       @used_by_unavailable_periods = used_by_unavailable_periods
@@ -1934,10 +1908,10 @@ class SchedulesFile
   }
 
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param schedules_paths [TODO] TODO
-  # @param year [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
-  # @param output_path [TODO] TODO
+  # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
+  # @param year [Integer] the calendar year
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @param output_path [String] the file path for which to export a single detailed schedule CSV file and also reference from OpenStudio ScheduleFile objects
   def initialize(runner: nil,
                  schedules_paths:,
                  year:,
@@ -1950,7 +1924,7 @@ class SchedulesFile
     import(schedules_paths)
     create_battery_charging_discharging_schedules
     expand_schedules
-    @tmp_schedules = Marshal.load(Marshal.dump(@schedules))
+    @tmp_schedules = Marshal.load(Marshal.dump(@schedules)) # make a deep copy because we use unmodified schedules downstream
     set_unavailable_periods(runner, unavailable_periods)
     convert_setpoints(offset_db)
     @output_schedules_path = output_path
@@ -1959,9 +1933,9 @@ class SchedulesFile
 
   attr_accessor(:schedules, :tmp_schedules)
 
-  # TODO
+  # Check if any detailed schedules are referenced.
   #
-  # @return [TODO] TODO
+  # @return [Boolean] true if SchedulesFile was instantiated without any schedule file paths
   def nil?
     if @schedules.nil?
       return true
@@ -1970,10 +1944,10 @@ class SchedulesFile
     return false
   end
 
-  # TODO
+  # Check whether the detailed schedules include a specific column.
   #
-  # @param col_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @return [Boolean] true if schedules include the provided column name.
   def includes_col_name(col_name)
     if @schedules.keys.include?(col_name)
       return true
@@ -1982,10 +1956,10 @@ class SchedulesFile
     return false
   end
 
-  # TODO
+  # Assemble schedules from all detailed schedule CSVs into a hash.
   #
-  # @param schedules_paths [TODO] TODO
-  # @return [TODO] TODO
+  # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
+  # @return [void]
   def import(schedules_paths)
     num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
@@ -2045,9 +2019,9 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Export a single detailed schedule CSV file.
   #
-  # @return [TODO] TODO
+  # @return [Boolean] true if schedule is exported
   def export()
     return false if @output_schedules_path.nil?
 
@@ -2062,10 +2036,10 @@ class SchedulesFile
     return true
   end
 
-  # TODO
+  # Get the column index from the schedules hash to be referenced by OpenStudio ScheduleFile objects.
   #
-  # @param col_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @return [Integer] the column index of the hash
   def get_col_index(col_name:)
     headers = @tmp_schedules.keys
 
@@ -2073,13 +2047,13 @@ class SchedulesFile
     return col_num
   end
 
-  # TODO
+  # Create a new OpenStudio ScheduleFile object for a column name if one doesn't already exist.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param col_name [TODO] TODO
-  # @param rows_to_skip [TODO] TODO
-  # @param schedule_type_limits_name [TODO] TODO
-  # @return [TODO] TODO
+  # @param col_name [String] the column header of the detailed schedule
+  # @param rows_to_skip [Integer] number of metadata rows (column headers) in detailed schedule CSV
+  # @param schedule_type_limits_name [String] data type for the values contained in the schedule
+  # @return [OpenStudio::Model::ScheduleFile] an OpenStudio ScheduleFile object
   def create_schedule_file(model, col_name:, rows_to_skip: 1,
                            schedule_type_limits_name: nil)
     model.getScheduleFiles.each do |schedule_file|
@@ -2115,7 +2089,7 @@ class SchedulesFile
     return schedule_file
   end
 
-  # the equivalent number of hours in the year, if the schedule was at full load (1.0)
+  # The equivalent number of hours in the year, if the schedule was at full load (1.0).
   #
   # @param col_name [TODO] TODO
   # @param schedules [TODO] TODO
@@ -2128,7 +2102,7 @@ class SchedulesFile
     return ann_equiv_full_load_hrs
   end
 
-  # the equivalent number of hours in the period, if the schedule was at full load (1.0)
+  # The equivalent number of hours in the period, if the schedule was at full load (1.0).
   #
   # @param col_name [TODO] TODO
   # @param schedules [TODO] TODO
@@ -2185,7 +2159,7 @@ class SchedulesFile
     return equiv_full_load_hrs
   end
 
-  # the power in watts the equipment needs to consume so that, if it were to run annual_equivalent_full_load_hrs hours,
+  # The power in watts the equipment needs to consume so that, if it were to run annual_equivalent_full_load_hrs hours,
   # it would consume the annual_kwh energy in the year. Essentially, returns the watts for the equipment when schedule
   # is at 1.0, so that, for the given schedule values, the equipment will consume annual_kwh energy in a year.
   #
@@ -2206,7 +2180,7 @@ class SchedulesFile
     return design_level
   end
 
-  # Similar to ann_equiv_full_load_hrs, but for thermal energy
+  # Similar to ann_equiv_full_load_hrs, but for thermal energy.
   #
   # @param col_name [TODO] TODO
   # @param annual_therm [TODO] TODO
@@ -2223,8 +2197,7 @@ class SchedulesFile
     return design_level
   end
 
-  # similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design
-  # level
+  # Similar to the calc_design_level_from_annual_kwh, but use daily_kwh instead of annual_kwh to calculate the design level.
   #
   # @param col_name [TODO] TODO
   # @param daily_kwh [TODO] TODO
@@ -2245,7 +2218,7 @@ class SchedulesFile
     return design_level
   end
 
-  # similar to calc_design_level_from_daily_kwh but for water usage
+  # Similar to calc_design_level_from_daily_kwh but for water usage.
   #
   # @param col_name [TODO] TODO
   # @param daily_water [TODO] TODO
@@ -2267,13 +2240,12 @@ class SchedulesFile
     return peak_flow
   end
 
-  # TODO
+  # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods.
   #
   # @param col_name [TODO] TODO
   # @param periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [void]
   def create_column_values_from_periods(col_name, periods)
-    # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
     num_days_in_year = Constants.NumDaysInYear(@year)
     steps_in_day = n_steps / num_days_in_year
@@ -2302,11 +2274,10 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Expand schedules with fewer elements such that all the schedules have the same number of elements.
   #
-  # @return [TODO] TODO
+  # @return [void]
   def expand_schedules
-    # Expand schedules with fewer elements such that all the schedules have the same number of elements
     max_size = @schedules.map { |_k, v| v.size }.uniq.max
     @schedules.each do |col, values|
       if values.size < max_size
@@ -2318,8 +2289,8 @@ class SchedulesFile
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
+  # @return [void]
   def set_unavailable_periods(runner, unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -2361,7 +2332,7 @@ class SchedulesFile
   # TODO
   #
   # @param offset_db [Float] On-off thermostat deadband
-  # @return [TODO] TODO
+  # @return [void]
   def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
@@ -2384,7 +2355,7 @@ class SchedulesFile
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [void]
   def create_battery_charging_discharging_schedules
     battery_col_name = Columns[:Battery].name
     return if !@schedules.keys.include?(battery_col_name)
