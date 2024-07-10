@@ -1382,12 +1382,12 @@ module HVACSizing
       # Calculate infiltration airflow rates
       icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
       icfm_heat = ela_in2 * (c_s * mj.htd + c_w * windspeed_heating_mph**2)**0.5
-      q_fireplace = 20.0 # Assume 1 fireplace, average leakiness
+
     elsif hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
-      ach_htg, ach_clg = get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, measurement.infiltration_volume)
-      q_fireplace = get_mj_fireplace_cfm_by_leakiness(measurement)
-      icfm_cool = (ach_clg * measurement.infiltration_volume) / 60.0
-      icfm_heat = (ach_htg * measurement.infiltration_volume) / 60.0
+      ach_htg, ach_clg = get_mj_default_ach_values(hpxml_bldg, measurement.leakiness_description, cfa)
+      ag_volume = hpxml_bldg.above_grade_conditioned_volume()
+      icfm_cool = (ach_clg * ag_volume) / 60.0
+      icfm_heat = (ach_htg * ag_volume) / 60.0
     else
       fail 'Unexpected error.'
     end
@@ -1401,7 +1401,7 @@ module HVACSizing
       has_fireplace = true
     end
     if has_fireplace
-      icfm_heat += q_fireplace
+      icfm_heat += 20.0 # Assume 1 fireplace, average leakiness (note: this can be different than the leakiness of the house)
     end
 
     # Calculate ventilation airflow rates
@@ -3993,10 +3993,9 @@ module HVACSizing
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param leakiness_description [String] Leakiness description to look up the infiltration ach value
-  # @param infiltration_volume [Float] Volume associated with infiltration measurement
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [Array<Float, Float>] Heating and cooling ACH values from Manual J Table 5A/5B
-  def self.get_mj_default_ach_values(hpxml_bldg, leakiness_description, infiltration_volume)
-    mj_cfa = (infiltration_volume / 8.0).ceil # Word doc for Bob Ross Residence says using 3001 sqft, I assume that table 5A and 5B has assumption of 8 ft ceiling, so areas are adjusted to keep volume correct
+  def self.get_mj_default_ach_values(hpxml_bldg, leakiness_description, cfa)
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     # Manual J Table 5A
     ach_table_sfd_htg = [
@@ -4045,7 +4044,7 @@ module HVACSizing
                  lambda { |v| v > 3000.0 }]
     index = nil
     groupings.each_with_index do |fn, i|
-      if fn.call(mj_cfa)
+      if fn.call(cfa)
         index = i
         break
       end
@@ -4064,18 +4063,6 @@ module HVACSizing
       ach_clg = ach_table_mf_clg[leakiness_description][index]
     end
     return ach_htg, ach_clg
-  end
-
-  # return fireplace cfm lookup values from Manual J Table 5A & Table 5B based on leakiness description
-  #
-  # @param measurement [HPXML::AirInfiltrationMeasurement] HPXML AirInfiltrationMeasurement object to process leakiness description from
-  # @return [Float] fireplace cfm value from Manual J Table 5A/5B
-  def self.get_mj_fireplace_cfm_by_leakiness(measurement)
-    return { HPXML::LeakinessVeryTight => 0.0,
-             HPXML::LeakinessTight => 13.0,
-             HPXML::LeakinessAverage => 20.0,
-             HPXML::LeakinessLeaky => 27.0,
-             HPXML::LeakinessVeryLeaky => 33.0 }[measurement.leakiness_description]
   end
 
   # Calculates a crude approximation for the average R-value of a set of surfaces.

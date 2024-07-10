@@ -286,20 +286,25 @@ module Airflow
     return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
   end
 
-  # Calculate ACH50 for annual energy simulation when only leakiness description is provided
+  # Calculate ACH50 for annual energy simulation when only leakiness description is provided.
+  #
+  # Uses a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into account IECC zone,
+  # cfa, infiltration height, year built, foundation types, and duct locations. The leakiness description is then used
+  # to further adjust the default (average) infiltration rate.
   #
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl_ag [Double] Number of conditioned floors above grade
   # @param year_built [Integer] Year the dwelling unit is built
-  # @param ceil_height [Double] Average ceiling height (ft2)
-  # @param infil_volume [Double] Infiltration volume (ft2)
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
   # @param iecc_cz [String] IECC climate zone
-  # @param foundations [Array<Array>] Array of [fraction, foundation_type] pair for each foundation
-  # @param ducts [Array<Array>] Array of [fraction, duct_location] pair for each duct
+  # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
+  # @param duct_loc_fracs [Hash] Map of duct location => area fraction
   # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
-  # @param air_sealed [Boolean] True if the dwelling unit is air sealed
-  # @return [Double] Calculated ACH50 value based on IECC zone, cfa, infiltration height, year built, foundation type, ducts and leakiness description
-  def self.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, leakiness_description = nil, is_sealed = false)
+  # @param air_sealed [Boolean] True if the dwelling unit is air sealed (intended to be used by Home Energy Score)
+  # @return [Double] Calculated ACH50 value
+  def self.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
+                                                 fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)
     # Constants
     c_floor_area = -0.002078
     c_height = 0.06375
@@ -360,13 +365,13 @@ module Airflow
 
     # Foundation type (weight by area)
     c_foundation = 0.0
-    foundations.each do |area_fraction, foundation_type|
+    fnd_type_fracs.each do |foundation_type, area_fraction|
       case foundation_type
       when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
         c_foundation -= 0.036992 * area_fraction
-      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented
+      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeCrawlspaceConditioned
         c_foundation += 0.108713 * area_fraction
-      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceConditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
+      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
         c_foundation += 0.180352 * area_fraction
       else
         fail "Unexpected foundation type: #{foundation_type}"
@@ -374,20 +379,20 @@ module Airflow
     end
 
     c_duct = 0.0
-    ducts.each do |frac, duct_location|
+    duct_loc_fracs.each do |duct_location, area_fraction|
       if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
-        c_duct -= 0.12381 * frac
+        c_duct -= 0.12381 * area_fraction
       elsif [HPXML::LocationAtticUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationGarage, HPXML::LocationCrawlspaceUnvented].include? duct_location
-        c_duct += 0.07126 * frac
+        c_duct += 0.07126 * area_fraction
       elsif HPXML::vented_locations.include? duct_location
-        c_duct += 0.18072 * frac
+        c_duct += 0.18072 * area_fraction
       else
         fail "Unexpected duct location: #{duct_location}"
       end
     end
 
     floor_area_m2 = UnitConversions.convert(cfa, 'ft^2', 'm^2')
-    height_m = UnitConversions.convert(ncfl_ag * ceil_height, 'ft', 'm') + 0.5
+    height_m = UnitConversions.convert(ncfl_ag * avg_ceiling_height, 'ft', 'm') + 0.5
 
     # Normalized leakage
     nl = Math.exp(floor_area_m2 * c_floor_area + height_m * c_height +
@@ -556,8 +561,8 @@ module Airflow
   # @param open_window_area [TODO] TODO
   # @param nv_clg_ssn_sensor [TODO] TODO
   # @param natvent_days_per_week [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor, natvent_days_per_week,
@@ -2260,8 +2265,8 @@ module Airflow
   # @param vent_fans_mech [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param vent_fans_kitchen [TODO] TODO
   # @param vent_fans_bath [TODO] TODO
@@ -2370,8 +2375,8 @@ module Airflow
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param vented_attic [TODO] TODO
   # @param vented_crawl [TODO] TODO
   # @param clg_ssn_sensor [TODO] TODO
@@ -2406,8 +2411,8 @@ module Airflow
   # @param infil_program [TODO] TODO
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param has_flue_chimney_in_cond_space [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
@@ -2541,7 +2546,7 @@ module Airflow
   # TODO
   #
   # @param sla [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @return [TODO] TODO
   def self.get_infiltration_NL_from_SLA(sla, infil_height)
     # Returns infiltration normalized leakage given SLA.
@@ -2551,7 +2556,7 @@ module Airflow
   # TODO
   #
   # @param sla [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
@@ -2566,8 +2571,8 @@ module Airflow
   # TODO
   #
   # @param ach [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param avg_ceiling_height [TODO] TODO
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)

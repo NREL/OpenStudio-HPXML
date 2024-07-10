@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>72866ad8-ca67-4049-9214-b338d3cb268a</version_id>
-  <version_modified>2024-07-09T19:46:06Z</version_modified>
+  <version_id>41068238-3467-4277-9ee3-f9bf10bfaa88</version_id>
+  <version_modified>2024-07-10T02:18:19Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>71EB2FF1</checksum>
+      <checksum>109377E9</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -345,13 +345,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EA9D73FF</checksum>
+      <checksum>745B6D4F</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0D58AF76</checksum>
+      <checksum>ED747D5A</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>30CE6951</checksum>
+      <checksum>B7229ECD</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -639,7 +639,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CA9DCD6C</checksum>
+      <checksum>018D40ED</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3CE3C70E</checksum>
+      <checksum>77779EC6</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>

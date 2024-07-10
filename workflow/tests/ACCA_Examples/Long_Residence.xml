@@ -213,7 +213,6 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
             <LeakinessDescription>average</LeakinessDescription>
-            <InfiltrationVolume>16269.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>

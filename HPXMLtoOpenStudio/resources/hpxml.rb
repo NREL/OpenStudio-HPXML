@@ -1520,13 +1520,13 @@ class HPXML < Object
     end
 
     def thermal_boundary_wall_areas()
-      above_grade_area = 0.0 # Thermal boundary walls not in contact with soil
-      below_grade_area = 0.0 # Thermal boundary walls in contact with soil
+      ag_wall_area = 0.0 # Thermal boundary walls not in contact with soil
+      bg_wall_area = 0.0 # Thermal boundary walls in contact with soil
 
       (@walls + @rim_joists).each do |wall|
-        if wall.is_thermal_boundary
-          above_grade_area += wall.area
-        end
+        next unless wall.is_thermal_boundary
+
+        ag_wall_area += wall.area
       end
 
       @foundation_walls.each do |foundation_wall|
@@ -1534,11 +1534,17 @@ class HPXML < Object
 
         height = foundation_wall.height
         bg_depth = foundation_wall.depth_below_grade
-        above_grade_area += (height - bg_depth) / height * foundation_wall.area
-        below_grade_area += bg_depth / height * foundation_wall.area
+        ag_wall_area += (height - bg_depth) / height * foundation_wall.area
+        bg_wall_area += bg_depth / height * foundation_wall.area
       end
 
-      return above_grade_area, below_grade_area
+      return ag_wall_area, bg_wall_area
+    end
+
+    def above_grade_conditioned_volume()
+      ag_wall_area, bg_wall_area = thermal_boundary_wall_areas()
+      ag_ratio = ag_wall_area / (ag_wall_area + bg_wall_area)
+      return @building_construction.conditioned_building_volume * ag_ratio
     end
 
     def common_wall_area()

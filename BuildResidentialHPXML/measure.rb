@@ -256,7 +256,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('year_built', false)
     arg.setDisplayName('Building Construction: Year Built')
-    arg.setDescription('The year the building was built. Required if only leakiness description is provided in air leakage inputs.')
+    arg.setDescription('The year the building was built.')
     args << arg
 
     unit_type_choices = OpenStudio::StringVector.new
@@ -1062,7 +1062,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_leakiness_description', air_leakage_leakiness_description_choices, false)
     arg.setDisplayName('Air Leakage: Leakiness Description')
-    arg.setDescription('Qualitative description of infiltration.')
+    arg.setDescription('Qualitative description of infiltration. If provided, the Year Built of the home is required. Either provide this input or provide a numeric air leakage value below.')
     arg.setDefaultValue(HPXML::LeakinessAverage)
     args << arg
 
@@ -1075,18 +1075,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_units', air_leakage_units_choices, false)
     arg.setDisplayName('Air Leakage: Units')
-    arg.setDescription('The unit of measure for the air leakage. Required when air leakage value is provided.')
+    arg.setDescription('The unit of measure for the air leakage if providing a numeric air leakage value.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_house_pressure', false)
     arg.setDisplayName('Air Leakage: House Pressure')
     arg.setUnits('Pa')
-    arg.setDescription("The house pressure relative to outside. Required when units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}.")
+    arg.setDescription("The house pressure relative to outside if providing a numeric air leakage value. Required when units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', false)
     arg.setDisplayName('Air Leakage: Value')
-    arg.setDescription("Air exchange rate value. For '#{HPXML::UnitsELA}', provide value in sq. in. If provided, it overrides leakiness description input.")
+    arg.setDescription("Numeric air leakage value. For '#{HPXML::UnitsELA}', provide value in sq. in. If provided, overrides Leakiness Description input.")
     args << arg
 
     air_leakage_type_choices = OpenStudio::StringVector.new

@@ -397,7 +397,7 @@ Path of the EPW file.
 
 **Building Construction: Year Built**
 
-The year the building was built. Required if only leakiness description is provided in air leakage inputs.
+The year the building was built.
 
 - **Name:** ``year_built``
 - **Type:** ``Integer``
@@ -1731,7 +1731,7 @@ R-value of the opaque door(s).
 
 **Air Leakage: Leakiness Description**
 
-Qualitative description of infiltration.
+Qualitative description of infiltration. If provided, the Year Built of the home is required. Either provide this input or provide a numeric air leakage value below.
 
 - **Name:** ``air_leakage_leakiness_description``
 - **Type:** ``Choice``
@@ -1744,7 +1744,7 @@ Qualitative description of infiltration.
 
 **Air Leakage: Units**
 
-The unit of measure for the air leakage. Required when air leakage value is provided.
+The unit of measure for the air leakage if providing a numeric air leakage value.
 
 - **Name:** ``air_leakage_units``
 - **Type:** ``Choice``
@@ -1757,7 +1757,7 @@ The unit of measure for the air leakage. Required when air leakage value is prov
 
 **Air Leakage: House Pressure**
 
-The house pressure relative to outside. Required when units are ACH or CFM.
+The house pressure relative to outside if providing a numeric air leakage value. Required when units are ACH or CFM.
 
 - **Name:** ``air_leakage_house_pressure``
 - **Type:** ``Double``
@@ -1770,7 +1770,7 @@ The house pressure relative to outside. Required when units are ACH or CFM.
 
 **Air Leakage: Value**
 
-Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in. If provided, it overrides leakiness description input.
+Numeric air leakage value. For 'EffectiveLeakageArea', provide value in sq. in. If provided, overrides Leakiness Description input.
 
 - **Name:** ``air_leakage_value``
 - **Type:** ``Double``

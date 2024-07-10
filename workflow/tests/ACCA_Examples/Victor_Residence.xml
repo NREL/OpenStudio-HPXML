@@ -30,7 +30,7 @@
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
-          <AverageCeilingHeight>8.0</AverageCeilingHeight>
+          <AverageCeilingHeight>14.5</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>1800.0</ConditionedFloorArea>
         </BuildingConstruction>
@@ -65,7 +65,6 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
             <LeakinessDescription>leaky</LeakinessDescription>
-            <InfiltrationVolume>26100.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>

@@ -133,8 +133,6 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
             <LeakinessDescription>very tight</LeakinessDescription>
-            <InfiltrationVolume>24008.0</InfiltrationVolume>
-            <InfiltrationHeight>10.0</InfiltrationHeight>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Foundations>

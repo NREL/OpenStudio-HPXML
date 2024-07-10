@@ -53,7 +53,6 @@ module HPXMLDefaults
     apply_climate_and_risk_zones(hpxml_bldg, weather)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
-    apply_infiltration(hpxml_bldg)
     apply_roofs(hpxml_bldg)
     apply_rim_joists(hpxml_bldg)
     apply_walls(hpxml_bldg)
@@ -68,6 +67,7 @@ module HPXMLDefaults
     apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
+    apply_infiltration(hpxml_bldg)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
     apply_water_heaters(hpxml_bldg, nbeds, eri_version, schedules_file)
@@ -87,9 +87,6 @@ module HPXMLDefaults
 
     # Do HVAC sizing after all other defaults have been applied
     apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
-
-    # Set infiltration values for energy simulation after sizing
-    apply_leakiness_description(hpxml_bldg)
 
     # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
@@ -1016,6 +1013,8 @@ module HPXMLDefaults
 
   # Assigns default values for omitted optional inputs in the HPXML::AirInfiltrationMeasurement object
   #
+  # Note: This needs to be called after we have applied defaults for ducts.
+  #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_infiltration(hpxml_bldg)
@@ -1027,6 +1026,75 @@ module HPXMLDefaults
     if infil_measurement.infiltration_height.nil?
       infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
       infil_measurement.infiltration_height_isdefaulted = true
+    end
+    if (not infil_measurement.leakiness_description.nil?) && infil_measurement.air_leakage.nil?
+      cfa = hpxml_bldg.building_construction.conditioned_floor_area
+      ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+      year_built = hpxml_bldg.building_construction.year_built
+      avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+      infil_volume = infil_measurement.infiltration_volume
+      iecc_cz = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
+
+      # Duct location fractions
+      duct_loc_fracs = {}
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if hvac_distribution.ducts.empty?
+
+        # HVAC fraction
+        htg_fraction = 0.0
+        clg_fraction = 0.0
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.respond_to? :fraction_heat_load_served
+            htg_fraction += hvac_system.fraction_heat_load_served
+          end
+          if hvac_system.respond_to? :fraction_cool_load_served
+            clg_fraction += hvac_system.fraction_cool_load_served
+          end
+        end
+        hvac_frac = (htg_fraction + clg_fraction) / 2.0
+
+        supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
+        return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
+        total_supply_fraction = supply_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
+        total_return_fraction = return_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
+        hvac_distribution.ducts.each do |duct|
+          supply_or_return_fraction = (duct.duct_type == HPXML::DuctTypeSupply) ? total_supply_fraction : total_return_fraction
+          duct_loc_fracs[duct.duct_location] = 0.0 if duct_loc_fracs[duct.duct_location].nil?
+          duct_loc_fracs[duct.duct_location] += duct.duct_fraction_area * supply_or_return_fraction * hvac_frac
+        end
+      end
+      sum_duct_hvac_frac = duct_loc_fracs.empty? ? 0.0 : duct_loc_fracs.values.sum
+      if sum_duct_hvac_frac > 1.0001 # Using 1.0001 to allow small tolerance on sum
+        fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
+      elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
+        # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
+        # This will ensure ductless systems have same result as ducts in conditioned space.
+        duct_loc_fracs[HPXML::LocationConditionedSpace] = 0.0 if duct_loc_fracs[HPXML::LocationConditionedSpace].nil?
+        duct_loc_fracs[HPXML::LocationConditionedSpace] += 1.0 - sum_duct_hvac_frac
+      end
+
+      # Foundation type fractions
+      fnd_type_fracs = {}
+      hpxml_bldg.foundations.each do |foundation|
+        fnd_type_fracs[foundation.foundation_type] = 0.0 if fnd_type_fracs[foundation.foundation_type].nil?
+        area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
+        fnd_type_fracs[foundation.foundation_type] += area
+      end
+      sum_fnd_area = fnd_type_fracs.values.sum(0.0)
+      fnd_type_fracs.keys.each do |foundation_type|
+        # Convert to fractions that sum to 1
+        fnd_type_fracs[foundation_type] /= sum_fnd_area unless sum_fnd_area == 0.0
+      end
+
+      ach50 = Airflow.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
+      infil_measurement.house_pressure = 50
+      infil_measurement.house_pressure_isdefaulted = true
+      infil_measurement.unit_of_measure = HPXML::UnitsACH
+      infil_measurement.unit_of_measure_isdefaulted = true
+      infil_measurement.air_leakage = ach50
+      infil_measurement.air_leakage_isdefaulted = true
+      infil_measurement.infiltration_type = HPXML::InfiltrationTypeUnitTotal
+      infil_measurement.infiltration_type_isdefaulted = true
     end
     if infil_measurement.a_ext.nil?
       if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
@@ -3709,79 +3777,6 @@ module HPXMLDefaults
   def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
     HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
-  end
-
-  # Apply default ACH calculation for annual energy simulation when only leakiness description is provided, after Manual J sizing done
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [void]
-  def self.apply_leakiness_description(hpxml_bldg)
-    return unless hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable
-
-    measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
-
-    cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
-    year_built = hpxml_bldg.building_construction.year_built
-    ceil_height = hpxml_bldg.building_construction.average_ceiling_height # Fixme: Can you verify is this the ceiling height or infiltration height that is meant to be used?
-    infil_volume = measurement.infiltration_volume
-    iecc_cz = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
-
-    # Ducts (weighted by duct fraction and hvac fraction)
-    ducts = [] # List of [fraction, duct_location] pair for each duct
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      htg_fraction = 0.0
-      clg_fraction = 0.0
-      hvac_distribution.hvac_systems.each do |hvac_system|
-        if hvac_system.respond_to? :fraction_heat_load_served
-          htg_fraction += hvac_system.fraction_heat_load_served
-        end
-        if hvac_system.respond_to? :fraction_cool_load_served
-          clg_fraction += hvac_system.fraction_cool_load_served
-        end
-      end
-      hvac_frac = (htg_fraction + clg_fraction) / 2.0
-      break if hvac_distribution.ducts.empty?
-
-      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
-      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
-      total_supply_fraction = supply_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
-      total_return_fraction = return_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
-      hvac_distribution.ducts.each do |duct|
-        supply_or_return_fraction = (duct.duct_type == HPXML::DuctTypeSupply) ? total_supply_fraction : total_return_fraction
-        ducts << [duct.duct_fraction_area * supply_or_return_fraction * hvac_frac, duct.duct_location]
-      end
-    end
-    sum_duct_hvac_frac = ducts.empty? ? 0.0 : ducts.map { |pair| pair[0] }.sum
-    if sum_duct_hvac_frac > 1.0001 # Using 1.0001 to allow small tolerance on sum
-      fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
-    elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
-      # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
-      # This will ensure ductless systems have same result as ducts in conditioned space.
-      # See https://github.com/NREL/OpenStudio-HEScore/issues/211
-      ducts << [1.0 - sum_duct_hvac_frac, HPXML::LocationConditionedSpace]
-    end
-
-    # Foundation type (weight by area)
-    foundations = [] # List of [fraction, foundation_type] pair for each foundation
-    sum_fnd_area = 0.0
-    hpxml_bldg.foundations.each do |foundation|
-      area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
-      sum_fnd_area += area
-      foundations << [area, foundation.foundation_type]
-    end
-    foundations.each do |foundation_pair|
-      foundation_pair[0] /= sum_fnd_area unless sum_fnd_area == 0.0
-    end
-    ach50 = Airflow.calc_ach50(cfa, ncfl_ag, year_built, ceil_height, infil_volume, iecc_cz, foundations, ducts, measurement.leakiness_description)
-    measurement.house_pressure = 50
-    measurement.house_pressure_isdefaulted = true
-    measurement.unit_of_measure = HPXML::UnitsACH
-    measurement.unit_of_measure_isdefaulted = true
-    measurement.air_leakage = ach50
-    measurement.air_leakage_isdefaulted = true
-    measurement.infiltration_type = HPXML::InfiltrationTypeUnitTotal
-    measurement.infiltration_type_isdefaulted = true
   end
 
   # Converts an HPXML orientation to an HPXML azimuth.
