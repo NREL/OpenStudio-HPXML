@@ -1468,7 +1468,8 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>50.0</RatedFlowRate>
+              <RatedFlowRate>150.0</RatedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <AttachedToHVACDistributionSystem idref='HVACDistribution1'/>
             </VentilationFan>
