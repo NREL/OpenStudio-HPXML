@@ -371,7 +371,7 @@ class ScheduleGenerator
     dw_minutes_between_event_gap = Constants.HotWaterDishwasherMinutesBetweenEventGap
     dw_activity_sch = [0] * mins_in_year
     m = 0
-    dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std, 0)
+    dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std, 0.1)
 
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     # Fill in dw_water draw schedule
@@ -411,7 +411,7 @@ class ScheduleGenerator
     cw_activity_sch = [0] * mins_in_year # this is the clothes_washer water draw schedule
     cw_load_size_probability = Schedule.validate_values(Constants.HotWaterClothesWasherLoadSizeProbability, 4, 'hot_water_clothes_washer_load_size_probability')
     m = 0
-    cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std, 0)
+    cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std, 0.1)
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     step = 0
     # Fill in clothes washer water draw schedule based on markov-chain state 2 (laundry)
