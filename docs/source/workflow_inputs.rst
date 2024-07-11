@@ -578,7 +578,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   =======================================================  ========  =====  ===========  ========  ========  ========================
 
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which occupant-driven end uses (e.g., plug loads, appliances, hot water) are calculated based on NumberofBedrooms.
-         If NumberofResidents is provided, an *operational* calculation is instead performed, in which hot water end uses are calculated based on NumberofResidents from `Estimating Daily Domestic Hot-Water Use in North American Homes <http://www.fsec.ucf.edu/en/publications/pdf/fsec-pf-464-15.pdf>`_ and all other occupant-driven end uses are adjusted using the following relationship from `RECS 2015 <https://www.eia.gov/consumption/residential/reports/2015/overview/>`_:
+         If NumberofResidents is provided, an *operational* calculation is instead performed, in which *some* occupant-driven end uses, as described throughout the documentation, are adjusted using the following relationship from `RECS 2015 <https://www.eia.gov/consumption/residential/data/2015/>`_:
 
          \- **single-family detached or manufactured home**: NumberofBedrooms = -1.47 + 1.69 * NumberofResidents
 
@@ -4957,7 +4957,7 @@ If not entered, the simulation will not include that type of plug load.
   ========================================  =======  ======  ===========  ========  ========  =============================================================
 
   .. [#] PlugLoadType choices are "other", "TV other", "well pump", or "electric vehicle charging".
-  .. [#] If Value not provided, defaults as:
+  .. [#] If Value not provided, defaults as follows when NumberofResidents is not provided:
          
          \- **other**: 0.91 * ConditionedFloorArea (based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_)
          
@@ -4967,8 +4967,28 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **electric vehicle charging**: 1666.67 (calculated using AnnualMiles * kWhPerMile / (ChargerEfficiency * BatteryEfficiency) where AnnualMiles=4500, kWhPerMile=0.3, ChargerEfficiency=0.9, and BatteryEfficiency=0.9)
          
-         If NumberofResidents provided, any value based on NumberofBedrooms will be adjusted using the :ref:`buildingoccupancy`.
+         If NumberofResidents is provided, the following defaults are used instead:
          
+         \- **other** (single-family detached): 786.9 + 241.8 * NumberofResidents + 0.33 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+         
+         \- **other** (single-family attached): 654.9 + 206.5 * NumberofResidents + 0.21 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+         
+         \- **other** (apartment unit): 706.6 + 149.3 * NumberofResidents + 0.10 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+         
+         \- **other** (manufactured home): 1795.1 (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+         
+         \- **TV other** (single-family detached): 334.0 + 92.2 * NumberofResidents + 0.06 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+
+         \- **TV other** (single-family attached): 283.9 + 80.1 * NumberofResidents + 0.07 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+
+         \- **TV other** (apartment unit): 190.3 + 81.0 * NumberofResidents + 0.11 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+
+         \- **TV other** (manufactured home): 99.9 + 129.6 * NumberofResidents + 0.21 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
+
+         \- **well pump**: Same as above, but this value will be adjusted using the :ref:`buildingoccupancy`.
+
+         \- **electric vehicle charging**: Same as above
+
   .. [#] If FracSensible not provided, defaults as:
          
          \- **other**: 0.855
