@@ -1444,6 +1444,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``PerimeterInsulation/Layer/InsulationDepth``                       double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
   ``ExteriorHorizontalInsulation/SystemIdentifier``                   id                                   Yes                  Unique identifier
   ``ExteriorHorizontalInsulation/Layer/NominalRValue``                double    F-ft2-hr/Btu  >= 0         Yes                  R-value of exterior horizontal insulation (see figure below)
+  ``ExteriorHorizontalInsulation/Layer/InsulationWidth``              double    ft            >= 0         Yes                  Width of exterior horizontal insulation from slab edge outward 
   ``ExteriorHorizontalInsulation/Layer/InsulationDepthBelowGrade``    double    ft            >= 0         Yes                  Depth from grade to the top of exterior horizontal insulation
   ``UnderSlabInsulation/SystemIdentifier``                            id                                   Yes                  Unique identifier
   ``UnderSlabInsulation/Layer/NominalRValue``                         double    F-ft2-hr/Btu  >= 0         Yes                  R-value of horizontal insulation (see figure below)
