@@ -2037,23 +2037,23 @@ module HVACSizing
       cool_cap_rated = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
       # cool_cap_rated = hvac_sizings.Cool_Load_Tot / (total_cap_curve_value*total_cap_flow_mod_fac), in E+ Eng Reference
 
-      cool_cfm_rated = UnitConversions.convert(cool_cap_rated, 'btu/hr', 'ton')*hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed]
+      cool_cfm_rated = UnitConversions.convert(cool_cap_rated, 'btu/hr', 'ton') * hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed]
 
       # rated SHR
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
       rated_barometric_pressure_psi = UnitConversions.convert(1, 'atm', 'psi') # assume rated pressure is sea level
-      
-      hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB, rated_barometric_pressure_psi) #[lbm/lbm]
+
+      hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB, rated_barometric_pressure_psi) # [lbm/lbm]
 
       # calculate A_o using rated conditions
       a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
-      puts(rated_barometric_pressure_psi, "rated barometric pressure [psi]")
-      puts(cool_cap_rated, "rated cooling capacity [kbtu/hr]")
-      puts(cool_cfm_rated, "rated cooling cfm")
-      puts(hvac_cooling_shr, "rated SHR")
-      puts(hr_indoor_cooling_rated, "indoor humidity ratio (rated) [lbm/lbm]")
-      puts(a_o_rated,"coil Ao factor calculated at rated conditions")
+      puts(rated_barometric_pressure_psi, 'rated barometric pressure [psi]')
+      puts(cool_cap_rated, 'rated cooling capacity [kbtu/hr]')
+      puts(cool_cfm_rated, 'rated cooling cfm')
+      puts(hvac_cooling_shr, 'rated SHR')
+      puts(hr_indoor_cooling_rated, 'indoor humidity ratio (rated) [lbm/lbm]')
+      puts(a_o_rated, 'coil Ao factor calculated at rated conditions')
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
       # initial estimate for design airflow rate [cfm]
