@@ -18,12 +18,12 @@ __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
 - Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
 - Fixes utility bill calculations if there is battery storage or a generator.
+- BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
 
 ## OpenStudio-HPXML v1.8.1
 
 __Bugfixes__
 - Fixes cfm/ton restriction from incorrectly applying to furnace heating airflow rate.
-- BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
 
 ## OpenStudio-HPXML v1.8.0
 
