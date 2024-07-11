@@ -1429,9 +1429,9 @@ HPXML Slabs
 
 Each space type that borders the ground (i.e., basement, crawlspace, garage, and slab-on-grade foundation) should have a slab entered as an ``/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab``.
 
-  =================================================================  ========  ============  ===========  =========  ========  ===============================================================
+  ==================================================================  ========  ============  ===========  =========  ========  ===============================================================
   Element                                                             Type      Units         Constraints  Required   Default   Notes
-  =================================================================  ========  ============  ===========  =========  ========  ===============================================================
+  ==================================================================  ========  ============  ===========  =========  ========  ===============================================================
   ``SystemIdentifier``                                                id                                   Yes                  Unique identifier
   ``AttachedToSpace``                                                 idref                   See [#]_     See [#]_             ID of attached space
   ``InteriorAdjacentTo``                                              string                  See [#]_     Yes                  Interior adjacent space type
@@ -1452,7 +1452,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``extension/GapInsulationRValue``                                   double    F-ft2-hr/Btu  >= 0         No         See [#]_  R-value of gap insulation (see figure below)
   ``extension/CarpetFraction``                                        double    frac          >= 0, <= 1   No         See [#]_  Fraction of slab covered by carpet
   ``extension/CarpetRValue``                                          double    F-ft2-hr/Btu  >= 0         No         See [#]_  Carpet R-value
-  =================================================================  ========  ============  ===========  =========  ========  ===============================================================
+  ==================================================================  ========  ============  ===========  =========  ========  ===============================================================
 
   .. [#] If provided, AttachedToSpace must reference a ``Space`` (within a conditioned Zone).
   .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`) and the surface is adjacent to conditioned space.
