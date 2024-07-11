@@ -5,6 +5,8 @@
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
   <version_id>c6b58847-c7dd-4002-8ba0-f816c2cba7c8</version_id>
   <version_modified>2024-07-11T14:43:51Z</version_modified>
+  <version_id>635a8ab6-45f1-4969-b2c5-f308519438f8</version_id>
+  <version_modified>2024-07-11T16:09:59Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1403,7 +1405,7 @@
       <default_value>0</default_value>
     </argument>
     <argument>
-      <name>slab_perimeter_depth</name>
+      <name>slab_perimeter_insulation_depth</name>
       <display_name>Slab: Perimeter Insulation Depth</display_name>
       <description>Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
       <type>Double</type>
@@ -1453,7 +1455,7 @@
       <default_value>0</default_value>
     </argument>
     <argument>
-      <name>slab_under_width</name>
+      <name>slab_under_insulation_width</name>
       <display_name>Slab: Under Slab Insulation Width</display_name>
       <description>Width from slab edge inward of horizontal under-slab insulation. Enter 999 to specify that the under slab insulation spans the entire slab. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
       <type>Double</type>
@@ -7420,6 +7422,7 @@
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
       <checksum>99C49B2C</checksum>
+      <checksum>BD785B9E</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -7437,6 +7440,7 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>35600C68</checksum>
+      <checksum>F41033B3</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -7449,6 +7453,7 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>D8F9A809</checksum>
+      <checksum>C0AF4CE1</checksum>
     </file>
   </files>
 </measure>
