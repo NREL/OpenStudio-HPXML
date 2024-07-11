@@ -5189,14 +5189,10 @@ module HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            thickness: args[:slab_thickness],
                            exposed_perimeter: exposed_perimeter,
-
-                           perimeter_insulation_depth: args[:slab_perimeter_depth],
+                           perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
                            exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_r],
                            exterior_horizontal_insulation_width: args[:slab_exterior_horizontal_insulation_width],
                            exterior_horizontal_insulation_depth_below_grade: args[:slab_exterior_horizontal_insulation_depth_below_grade],
-
-                           perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
-
                            under_slab_insulation_width: under_slab_insulation_width,
                            perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
                            under_slab_insulation_r_value: args[:slab_under_insulation_r],
