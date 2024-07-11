@@ -259,8 +259,11 @@ class HPXML < Object
   InteriorShadingTypeNone = 'none'
   InfiltrationTypeUnitTotal = 'unit total'
   InfiltrationTypeUnitExterior = 'unit exterior only'
+  LeakinessVeryTight = 'very tight'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
+  LeakinessLeaky = 'leaky'
+  LeakinessVeryLeaky = 'very leaky'
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
@@ -297,6 +300,8 @@ class HPXML < Object
   ManualJDailyTempRangeLow = 'low'
   ManualJDailyTempRangeMedium = 'medium'
   ManualJDailyTempRangeHigh = 'high'
+  ManualJInfiltrationMethodDefaultTable = 'default infiltration table'
+  ManualJInfiltrationMethodBlowerDoor = 'blower door'
   MechVentTypeBalanced = 'balanced'
   MechVentTypeCFIS = 'central fan integrated supply'
   MechVentTypeERV = 'energy recovery ventilator'
@@ -1560,13 +1565,13 @@ class HPXML < Object
 
     # TODO
     def thermal_boundary_wall_areas()
-      above_grade_area = 0.0 # Thermal boundary walls not in contact with soil
-      below_grade_area = 0.0 # Thermal boundary walls in contact with soil
+      ag_wall_area = 0.0 # Thermal boundary walls not in contact with soil
+      bg_wall_area = 0.0 # Thermal boundary walls in contact with soil
 
       (@walls + @rim_joists).each do |wall|
-        if wall.is_thermal_boundary
-          above_grade_area += wall.area
-        end
+        next unless wall.is_thermal_boundary
+
+        ag_wall_area += wall.area
       end
 
       @foundation_walls.each do |foundation_wall|
@@ -1574,11 +1579,18 @@ class HPXML < Object
 
         height = foundation_wall.height
         bg_depth = foundation_wall.depth_below_grade
-        above_grade_area += (height - bg_depth) / height * foundation_wall.area
-        below_grade_area += bg_depth / height * foundation_wall.area
+        ag_wall_area += (height - bg_depth) / height * foundation_wall.area
+        bg_wall_area += bg_depth / height * foundation_wall.area
       end
 
-      return above_grade_area, below_grade_area
+      return ag_wall_area, bg_wall_area
+    end
+
+    # TODO
+    def above_grade_conditioned_volume()
+      ag_wall_area, bg_wall_area = thermal_boundary_wall_areas()
+      ag_ratio = ag_wall_area / (ag_wall_area + bg_wall_area)
+      return @building_construction.conditioned_building_volume * ag_ratio
     end
 
     # TODO
@@ -2151,7 +2163,7 @@ class HPXML < Object
              :shading_summer_end_day, :manualj_heating_design_temp, :manualj_cooling_design_temp,
              :manualj_heating_setpoint, :manualj_cooling_setpoint, :manualj_humidity_setpoint,
              :manualj_internal_loads_sensible, :manualj_internal_loads_latent, :manualj_num_occupants,
-             :manualj_daily_temp_range, :manualj_humidity_difference]
+             :manualj_daily_temp_range, :manualj_humidity_difference, :manualj_infiltration_method]
     attr_accessor(*ATTRS)
 
     def check_for_errors # rubocop:disable Style/DocumentationMethod
@@ -2170,7 +2182,7 @@ class HPXML < Object
         XMLHelper.add_element(hvac_sizing_control, 'HeatPumpBackupSizingMethodology', @heat_pump_backup_sizing_methodology, :string, @heat_pump_backup_sizing_methodology_isdefaulted) unless @heat_pump_backup_sizing_methodology.nil?
         XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', @allow_increased_fixed_capacities, :boolean, @allow_increased_fixed_capacities_isdefaulted) unless @allow_increased_fixed_capacities.nil?
       end
-      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_daily_temp_range.nil?) || (not @manualj_humidity_difference.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?)
+      if (not @manualj_heating_design_temp.nil?) || (not @manualj_cooling_design_temp.nil?) || (not @manualj_daily_temp_range.nil?) || (not @manualj_humidity_difference.nil?) || (not @manualj_heating_setpoint.nil?) || (not @manualj_cooling_setpoint.nil?) || (not @manualj_humidity_setpoint.nil?) || (not @manualj_internal_loads_sensible.nil?) || (not @manualj_internal_loads_latent.nil?) || (not @manualj_num_occupants.nil?) || (not @manualj_infiltration_method.nil?)
         manualj_sizing_inputs = XMLHelper.create_elements_as_needed(building_summary, ['extension', 'HVACSizingControl', 'ManualJInputs'])
         XMLHelper.add_element(manualj_sizing_inputs, 'HeatingDesignTemperature', @manualj_heating_design_temp, :float, @manualj_heating_design_temp_isdefaulted) unless @manualj_heating_design_temp.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'CoolingDesignTemperature', @manualj_cooling_design_temp, :float, @manualj_cooling_design_temp_isdefaulted) unless @manualj_cooling_design_temp.nil?
@@ -2182,6 +2194,7 @@ class HPXML < Object
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsSensible', @manualj_internal_loads_sensible, :float, @manualj_internal_loads_sensible_isdefaulted) unless @manualj_internal_loads_sensible.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'InternalLoadsLatent', @manualj_internal_loads_latent, :float, @manualj_internal_loads_latent_isdefaulted) unless @manualj_internal_loads_latent.nil?
         XMLHelper.add_element(manualj_sizing_inputs, 'NumberofOccupants', @manualj_num_occupants, :integer, @manualj_num_occupants_isdefaulted) unless @manualj_num_occupants.nil?
+        XMLHelper.add_element(manualj_sizing_inputs, 'InfiltrationMethod', @manualj_infiltration_method, :string, @manualj_infiltration_method_isdefaulted) unless @manualj_infiltration_method.nil?
       end
       XMLHelper.add_extension(building_summary, 'NaturalVentilationAvailabilityDaysperWeek', @natvent_days_per_week, :integer, @natvent_days_per_week_isdefaulted) unless @natvent_days_per_week.nil?
       if (not @schedules_filepaths.nil?) && (not @schedules_filepaths.empty?)
@@ -2229,6 +2242,7 @@ class HPXML < Object
       @manualj_internal_loads_sensible = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsSensible', :float)
       @manualj_internal_loads_latent = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InternalLoadsLatent', :float)
       @manualj_num_occupants = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/NumberofOccupants', :integer)
+      @manualj_infiltration_method = XMLHelper.get_value(building_summary, 'extension/HVACSizingControl/ManualJInputs/InfiltrationMethod', :string)
       @extension_properties = {}
       XMLHelper.get_elements(building_summary, 'extension/AdditionalProperties').each do |property|
         property.children.each do |child|
@@ -2666,13 +2680,13 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(air_infiltration_measurement, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationMeasurement', @type_of_measurement, :string) unless @type_of_measurement.nil?
-      XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationLeakage', @infiltration_type, :string) unless @infiltration_type.nil?
-      XMLHelper.add_element(air_infiltration_measurement, 'HousePressure', @house_pressure, :float) unless @house_pressure.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'TypeOfInfiltrationLeakage', @infiltration_type, :string, @infiltration_type_isdefaulted) unless @infiltration_type.nil?
+      XMLHelper.add_element(air_infiltration_measurement, 'HousePressure', @house_pressure, :float, @house_pressure_isdefaulted) unless @house_pressure.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'LeakinessDescription', @leakiness_description, :string) unless @leakiness_description.nil?
       if (not @unit_of_measure.nil?) && (not @air_leakage.nil?)
         building_air_leakage = XMLHelper.add_element(air_infiltration_measurement, 'BuildingAirLeakage')
-        XMLHelper.add_element(building_air_leakage, 'UnitofMeasure', @unit_of_measure, :string)
-        XMLHelper.add_element(building_air_leakage, 'AirLeakage', @air_leakage, :float)
+        XMLHelper.add_element(building_air_leakage, 'UnitofMeasure', @unit_of_measure, :string, @unit_of_measure_isdefaulted)
+        XMLHelper.add_element(building_air_leakage, 'AirLeakage', @air_leakage, :float, @air_leakage_isdefaulted)
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', @effective_leakage_area, :float) unless @effective_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', @infiltration_volume, :float, @infiltration_volume_isdefaulted) unless @infiltration_volume.nil?
@@ -2974,8 +2988,6 @@ class HPXML < Object
         return LocationCrawlspaceVented
       elsif @foundation_type == FoundationTypeCrawlspaceConditioned
         return LocationCrawlspaceConditioned
-      elsif @foundation_type == FoundationTypeSlab
-        return LocationConditionedSpace
       elsif @foundation_type == FoundationTypeBellyAndWing
         return LocationManufacturedHomeUnderBelly
       else

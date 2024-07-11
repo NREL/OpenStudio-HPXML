@@ -1729,14 +1729,27 @@ R-value of the opaque door(s).
 
 <br/>
 
+**Air Leakage: Leakiness Description**
+
+Qualitative description of infiltration. If provided, the Year Built of the home is required. Either provide this input or provide a numeric air leakage value below.
+
+- **Name:** ``air_leakage_leakiness_description``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `very tight`, `tight`, `average`, `leaky`, `very leaky`
+
+<br/>
+
 **Air Leakage: Units**
 
-The unit of measure for the air leakage.
+The unit of measure for the air leakage if providing a numeric air leakage value.
 
 - **Name:** ``air_leakage_units``
 - **Type:** ``Choice``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 - **Choices:** `ACH`, `CFM`, `ACHnatural`, `CFMnatural`, `EffectiveLeakageArea`
 
@@ -1744,31 +1757,31 @@ The unit of measure for the air leakage.
 
 **Air Leakage: House Pressure**
 
-The house pressure relative to outside. Required when units are ACH or CFM.
+The house pressure relative to outside if providing a numeric air leakage value. Required when units are ACH or CFM.
 
 - **Name:** ``air_leakage_house_pressure``
 - **Type:** ``Double``
 
 - **Units:** ``Pa``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
 **Air Leakage: Value**
 
-Air exchange rate value. For 'EffectiveLeakageArea', provide value in sq. in.
+Numeric air leakage value. For 'EffectiveLeakageArea', provide value in sq. in. If provided, overrides Leakiness Description input.
 
 - **Name:** ``air_leakage_value``
 - **Type:** ``Double``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
 **Air Leakage: Type**
 
-Type of air leakage. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.
+Type of air leakage if providing a numeric air leakage value. If 'unit total', represents the total infiltration to the unit as measured by a compartmentalization test, in which case the air leakage value will be adjusted by the ratio of exterior envelope surface area to total envelope surface area. Otherwise, if 'unit exterior only', represents the infiltration to the unit from outside only as measured by a guarded test. Required when unit type is single-family attached or apartment unit.
 
 - **Name:** ``air_leakage_type``
 - **Type:** ``Choice``
