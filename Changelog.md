@@ -2,10 +2,12 @@
 
 __New Features__
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - Allows modeling systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
+  - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which infiltration method to use for design load calculations.
   - Miscellaneous improvements.
 - Advanced research features:
   - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.

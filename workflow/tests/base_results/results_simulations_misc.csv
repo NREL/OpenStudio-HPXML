@@ -28,6 +28,7 @@ base-bldgtype-mf-unit-adjacent-to-non-freezing-space.xml,0.0,0.0,1354.7,998.0,11
 base-bldgtype-mf-unit-adjacent-to-other-heated-space.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1509.8,1998.7,1998.7,3.923,6.574,0.0
 base-bldgtype-mf-unit-adjacent-to-other-housing-unit.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1513.9,1968.2,1968.2,4.232,4.993,0.0
 base-bldgtype-mf-unit-infil-compartmentalization-test.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1614.7,2121.0,2121.0,3.617,7.738,0.0
+base-bldgtype-mf-unit-infil-leakiness-description.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1603.4,2053.4,2053.4,3.159,7.691,0.0
 base-bldgtype-mf-unit-residents-1.xml,0.0,0.0,817.1,530.8,4684.1,1314.5,1057.1,1663.9,1663.9,4.014,7.265,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-baseboard.xml,0.0,0.0,1354.7,998.0,11171.5,3093.4,1633.0,2287.6,2287.6,3.812,7.337,0.0
 base-bldgtype-mf-unit-shared-boiler-chiller-fan-coil-ducted.xml,0.0,2.0,1354.7,998.0,11171.5,3093.4,1666.9,2507.2,2507.2,3.982,8.634,0.0
@@ -127,6 +128,7 @@ base-dhw-tankless-gas-with-solar.xml,0.0,0.0,1344.7,989.2,9817.5,2252.8,1429.5,3
 base-dhw-tankless-gas.xml,0.0,0.0,1354.7,998.0,11169.0,2562.9,1429.8,3161.8,3161.8,23.823,18.643,0.0
 base-dhw-tankless-propane.xml,0.0,0.0,1354.7,998.0,11169.0,2562.9,1429.8,3161.8,3161.8,23.823,18.643,0.0
 base-enclosure-2stories-garage.xml,0.0,0.0,1354.7,998.0,11171.6,2524.9,2249.7,5018.3,5018.3,31.367,28.29,0.0
+base-enclosure-2stories-infil-leakiness-description.xml,0.0,0.0,1354.7,998.0,11171.6,2410.9,2449.1,5147.9,5147.9,30.747,28.042,0.0
 base-enclosure-2stories.xml,0.0,0.0,1354.7,998.0,11171.5,2410.9,2487.5,4873.2,4873.2,34.669,28.474,0.0
 base-enclosure-beds-1.xml,0.0,0.0,939.6,637.2,6162.0,1598.4,1710.5,3322.6,3322.6,24.095,18.102,0.0
 base-enclosure-beds-2.xml,0.0,0.0,1147.2,817.6,8666.7,2153.4,2016.6,3404.7,3404.7,23.906,18.424,0.0
@@ -140,6 +142,7 @@ base-enclosure-infil-cfm-house-pressure.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,
 base-enclosure-infil-cfm50.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2091.9,3823.9,3823.9,23.719,18.744,0.0
 base-enclosure-infil-ela.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2129.9,3710.0,3710.0,28.656,19.648,0.0
 base-enclosure-infil-flue.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2092.3,3507.2,3507.2,24.43,18.936,0.0
+base-enclosure-infil-leakiness-description.xml,4.0,0.0,1354.7,998.0,11171.5,2563.5,2204.8,3727.5,3727.5,37.208,21.075,0.0
 base-enclosure-infil-natural-ach.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2128.0,3706.8,3706.8,28.413,19.601,0.0
 base-enclosure-infil-natural-cfm.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2128.0,3706.8,3706.8,28.413,19.601,0.0
 base-enclosure-orientations.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2087.4,3482.6,3482.6,23.732,18.708,0.0
@@ -346,7 +349,7 @@ base-mechvent-balanced.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2226.6,3787.6,378
 base-mechvent-bath-kitchen-fans.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2098.4,3719.8,3719.8,26.174,20.522,0.0
 base-mechvent-cfis-airflow-fraction-zero.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2133.8,3702.5,3702.5,29.921,20.765,0.0
 base-mechvent-cfis-dse.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2086.6,2926.2,2926.2,21.554,13.58,0.0
-base-mechvent-cfis-evap-cooler-only-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2018.6,2256.8,2256.8,0.0,15.658,0.0
+base-mechvent-cfis-evap-cooler-only-ducted.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2018.6,2303.5,2303.5,0.0,16.183,0.0
 base-mechvent-cfis-no-additional-runtime.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2140.4,4049.8,4049.8,29.922,20.857,0.0
 base-mechvent-cfis-supplemental-fan-exhaust.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2140.9,3696.2,3696.2,29.923,20.705,0.0
 base-mechvent-cfis-supplemental-fan-supply.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2140.9,3697.7,3697.7,29.922,20.72,0.0
