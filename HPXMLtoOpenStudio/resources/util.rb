@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class MathTools
+module MathTools
   # TODO
   #
   # @param str [TODO] TODO
@@ -313,7 +313,7 @@ class MathTools
 end
 
 # Adapted from https://stackoverflow.com/questions/6934185/ruby-net-http-following-redirects
-class UrlResolver
+module UrlResolver
   # TODO
   #
   # @param uri_str [TODO] TODO
@@ -389,7 +389,7 @@ class UrlResolver
 end
 
 # TODO
-class FilePath
+module FilePath
   # TODO
   #
   # @param path [TODO] TODO

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Waterheater
+module Waterheater
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -13,7 +13,7 @@ class Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -57,7 +57,7 @@ class Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -104,7 +104,7 @@ class Waterheater
   # @param conditioned_zone [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -203,7 +203,7 @@ class Waterheater
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
@@ -707,8 +707,6 @@ class Waterheater
     program_calling_manager.addProgram(swh_program)
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1147,7 +1145,7 @@ class Waterheater
       runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
     end
 
-    t_offset = 9.0 # deg-C
+    t_offset = 9.0 # C
     min_temp_c = UnitConversions.convert(min_temp, 'F', 'C').round(2)
     max_temp_c = UnitConversions.convert(max_temp, 'F', 'C').round(2)
 
@@ -1678,7 +1676,7 @@ class Waterheater
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
   def self.get_default_hot_water_temperature(eri_version)
-    # Returns hot water temperature in deg-F
+    # Returns hot water temperature in F
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
       # 2014 w/ Addendum A or newer
       return 125.0
@@ -1740,9 +1738,9 @@ class Waterheater
   # @return [TODO] TODO
   def self.deadband(wh_type)
     if [HPXML::WaterHeaterTypeStorage, HPXML::WaterHeaterTypeCombiStorage].include? wh_type
-      return 2.0 # deg-C
+      return 2.0 # C
     else
-      return 0.0 # deg-C
+      return 0.0 # C
     end
   end
 
@@ -1943,7 +1941,7 @@ class Waterheater
   # @param is_dsh_storage [TODO] TODO
   # @param is_combi [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, runner:, u: nil, ua:, eta_c: nil, is_dsh_storage: false, is_combi: false, schedules_file: nil, unavailable_periods: [], unit_multiplier: 1.0)
@@ -2088,7 +2086,7 @@ class Waterheater
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil
@@ -2114,7 +2112,7 @@ class Waterheater
   # @param t_set_c [TODO] TODO
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @return [TODO] TODO
   def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
     new_schedule = nil

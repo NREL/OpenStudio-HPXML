@@ -1,33 +1,33 @@
 # frozen_string_literal: true
 
 # TODO
-class Constants
+module Constants
   # Numbers --------------------
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] the assumed inside temperature (F)
   def self.AssumedInsideTemp
-    return 73.5 # deg-F
+    return 73.5
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] gravity (ft/s2)
   def self.g
-    return 32.174 # gravity (ft/s2)
+    return 32.174
   end
 
   # TODO
   #
-  # @return [TODO] TODO
+  # @return [Double] a small constant number
   def self.small
     return 1e-9
   end
 
   # TODO
   #
-  # @param year [TODO] TODO
+  # @param year [Integer] the calendar year
   # @return [TODO] TODO
   def self.NumDaysInMonths(year)
     num_days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -37,8 +37,8 @@ class Constants
 
   # TODO
   #
-  # @param year [TODO] TODO
-  # @return [TODO] TODO
+  # @param year [Integer] the calendar year
+  # @return [Integer] number of days in the calendar year
   def self.NumDaysInYear(year)
     num_days_in_months = NumDaysInMonths(year)
     num_days_in_year = num_days_in_months.sum
@@ -47,8 +47,8 @@ class Constants
 
   # TODO
   #
-  # @param year [TODO] TODO
-  # @return [TODO] TODO
+  # @param year [Integer] the calendar year
+  # @return [Integer] number of hours in the calendar year
   def self.NumHoursInYear(year)
     num_days_in_year = NumDaysInYear(year)
     num_hours_in_year = num_days_in_year * 24
@@ -131,30 +131,9 @@ class Constants
   # TODO
   #
   # @return [TODO] TODO
-  def self.FossilFuels
-    return [HPXML::FuelTypeNaturalGas,
-            HPXML::FuelTypePropane,
-            HPXML::FuelTypeOil,
-            HPXML::FuelTypeCoal,
-            HPXML::FuelTypeWoodCord,
-            HPXML::FuelTypeWoodPellets]
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
   def self.IECCZones
     return ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
             '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8']
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.MoistureTypes
-    return [HPXML::SiteSoilMoistureTypeDry,
-            HPXML::SiteSoilMoistureTypeMixed,
-            HPXML::SiteSoilMoistureTypeWet]
   end
 
   # TODO
@@ -694,19 +673,6 @@ class Constants
   # @return [TODO] TODO
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.SoilTypes
-    return [HPXML::SiteSoilTypeClay,
-            HPXML::SiteSoilTypeGravel,
-            HPXML::SiteSoilTypeLoam,
-            # HPXML::SiteSoilTypeOther,
-            HPXML::SiteSoilTypeSand,
-            HPXML::SiteSoilTypeSilt,
-            HPXML::SiteSoilTypeUnknown]
   end
 
   # TODO

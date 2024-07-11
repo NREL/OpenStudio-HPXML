@@ -300,7 +300,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     }
 
     schema_path = File.join(File.dirname(__FILE__), '../..', 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-    schema_validator = XMLValidator.get_schema_validator(schema_path)
+    schema_validator = XMLValidator.get_xml_validator(schema_path)
 
     puts "Generating #{hpxmls_files.size} HPXML files..."
 
@@ -430,9 +430,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['foundation_wall_insulation_distance_to_bottom'] = 8.0
       args['rim_joist_assembly_r'] = 23.0
       args['slab_perimeter_insulation_r'] = 0
-      args['slab_perimeter_depth'] = 0
+      args['slab_perimeter_insulation_depth'] = 0
       args['slab_under_insulation_r'] = 0
-      args['slab_under_width'] = 0
+      args['slab_under_insulation_width'] = 0
       args['slab_thickness'] = 4.0
       args['slab_carpet_fraction'] = 0.0
       args['slab_carpet_r'] = 0.0

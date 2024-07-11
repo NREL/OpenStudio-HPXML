@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class XMLHelper
+module XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
   #

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class Lighting
+module Lighting
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
@@ -11,8 +11,8 @@ class Lighting
   # @param lighting [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
-  # @param unavailable_periods [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param unavailable_periods [HPXML::UnavailablePeriods] HPXML UnavailablePeriods object
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply(runner, model, spaces, lighting_groups, lighting, eri_version, schedules_file, cfa,
@@ -229,12 +229,10 @@ class Lighting
     return ltg_fracs
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # TODO
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param f_int_cfl [TODO] TODO
   # @param f_int_lfl [TODO] TODO
   # @param f_int_led [TODO] TODO
@@ -278,7 +276,7 @@ class Lighting
   # TODO
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param f_ext_cfl [TODO] TODO
   # @param f_ext_lfl [TODO] TODO
   # @param f_ext_led [TODO] TODO
