@@ -867,7 +867,7 @@ class ScheduleGenerator
   # @param min [TODO] TODO
   # @param max [TODO] TODO
   # @return [TODO] TODO
-  def gaussian_rand(prng, mean, std, min = nil, max = 0.1)
+  def gaussian_rand(prng, mean, std, min = 0.1, max = nil)
     t = 2 * Math::PI * prng.rand
     r = Math.sqrt(-2 * Math.log(1 - prng.rand))
     scale = std * r
