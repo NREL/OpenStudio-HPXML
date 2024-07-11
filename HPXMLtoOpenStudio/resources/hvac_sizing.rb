@@ -2019,11 +2019,11 @@ module HVACSizing
 
       entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
       hvac_cooling_speed = get_sizing_speed(hvac_cooling_ap, true)
-      # ADP/BF specified in E+ eng ref for Coil:Cooling:DX:SingleSpeed, but should be implemented for all DX coils
-      # rated total capacity and rated SHR are used to calculate coil constant A_o at rated conditions
-      # once A_o is determined, pass in design conditions to calculate an initial estimate for the design SHR
+      # ADP/BF specified in E+ eng ref for Coil:Cooling:DX:SingleSpeed, but should be implemented for all DX coils (2-speed, variable speed)
+      # rated total capacity, rated SHR, and rated cfm are used to calculate coil constant A_o at rated conditions
+      # once a_o_rated is determined, pass design conditions with a_o_rated to CalculateSHR() to determine an initial estimate for the design SHR
       # the design SHR is used to calculate the design sensible capacity, which is used to UPDATE the design airflow calculation.
-      # the updated design airflow value gets fed back to calculateSHR() and the process continues until the design airflow converges.
+      # the updated design airflow gets fed back to calculateSHR() and the process continues until the design airflow converges.
 
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
         idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
@@ -2042,11 +2042,12 @@ module HVACSizing
       # rated SHR
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
-      rated_barometric_pressure_psi = UnitConversions.convert(1, 'atm', 'psi') # assume rated pressure is sea level
+      rated_barometric_pressure_psi = UnitConversions.convert(1, 'atm', 'psi') # assume rated pressure is at sea level
 
       hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB, rated_barometric_pressure_psi) # [lbm/lbm]
 
       # calculate A_o using rated conditions
+      # Don't use coil ao factor in hvac.rb to calculate design SHR. That ao has specific use case of finding rated SHRs for variable speed equipment.
       a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
       puts(rated_barometric_pressure_psi, 'rated barometric pressure [psi]')
       puts(cool_cap_rated, 'rated cooling capacity [kbtu/hr]')
@@ -2061,7 +2062,7 @@ module HVACSizing
 
       hr_indoor_cooling_design = Psychrometrics.w_fT_R_P(mj.cool_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, mj.p_psi)
       # hr_indoor_cooling is calculated above in hvac_sizing.rb, but is calculated AFTER the method call of apply_hvac_equipment_adjustments.
-      # Therefore, it needs to calculated from MJ objects locally in apply_hvac_equipment_adjustments for use in CalculateSHR().
+      # Therefore, it needs to calculated from MJ objects locally in apply_hvac_equipment_adjustments for use in CalculateSHR()
 
       # initialize for iteration
       delta = 1
