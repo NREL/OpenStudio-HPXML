@@ -2044,11 +2044,16 @@ module HVACSizing
 
       rated_barometric_pressure_psi = UnitConversions.convert(1, 'atm', 'psi') # assume rated pressure is sea level
       
-      hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC.AirSourceCoolRatedIDB, HVAC.AirSourceCoolRatedIWB, rated_barometric_pressure_psi) #[lbm/lbm]
+      hr_indoor_cooling_rated = Psychrometrics.w_fT_Twb_P(HVAC::AirSourceCoolRatedIDB, HVAC::AirSourceCoolRatedIWB, rated_barometric_pressure_psi) #[lbm/lbm]
 
       # calculate A_o using rated conditions
-      a_o_rated = Psychrometrics.CoilAoFactor(HVAC.AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr') cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
-      puts(a_o_rated)
+      a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
+      puts(rated_barometric_pressure_psi, "rated barometric pressure [psi]")
+      puts(cool_cap_rated, "rated cooling capacity [kbtu/hr]")
+      puts(cool_cfm_rated, "rated cooling cfm")
+      puts(hvac_cooling_shr, "rated SHR")
+      puts(hr_indoor_cooling_rated, "indoor humidity ratio (rated) [lbm/lbm]")
+      puts(a_o_rated,"coil Ao factor calculated at rated conditions")
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
       # initial estimate for design airflow rate [cfm]
@@ -2072,7 +2077,7 @@ module HVACSizing
         # calculate design SHR --> design sensible capacity --> use design sensible capacity to RECALCULATE design airflow
         # note: using MJ cooling setpoint as EDB in Psychrometrics.calculateSHR() ignores return duct losses
 
-        hvac_sizings.Design_SHR = Psychrometrics.CalculateSHR(mj.cool_setpoint, mj.p_psi, UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, hvac_cooling_ap.a_o, hr_indoor_cooling_design)
+        hvac_sizings.Design_SHR = Psychrometrics.CalculateSHR(mj.cool_setpoint, mj.p_psi, UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, a_o_rated, hr_indoor_cooling_design)
         # Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor
         # CFM changes in the iteration based on current value of hvac_sizings.Design_SHR
 
