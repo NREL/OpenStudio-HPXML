@@ -34,7 +34,7 @@ module MathTools
           + (fx2y2 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y - y1)
   end
 
-  # Calculate the result of a biquadratic polynomial with independent variables
+  # Calculate the result of a biquadratic polynomial with independent variables.
   # x and y, and a list of coefficients, c:
   #
   # z = c[1] + c[2]*x + c[3]*x**2 + c[4]*y + c[5]*y**2 + c[6]*x*y
@@ -52,7 +52,7 @@ module MathTools
     return z
   end
 
-  # Calculate the result of a quadratic polynomial with independent variable
+  # Calculate the result of a quadratic polynomial with independent variable.
   # x and a list of coefficients, c:
   #
   # y = c[1] + c[2]*x + c[3]*x**2
@@ -70,7 +70,7 @@ module MathTools
     return y
   end
 
-  # Calculate the result of a bicubic polynomial with independent variables
+  # Calculate the result of a bicubic polynomial with independent variables.
   # x and y, and a list of coefficients, c:
 
   # z = c[1] + c[2]*x + c[3]*y + c[4]*x**2 + c[5]*x*y + c[6]*y**2 + \
@@ -91,36 +91,10 @@ module MathTools
     return z
   end
 
-  # Determine if a guess is within tolerance for convergence
-  # if not, output a new guess using the Newton-Raphson method
+  # Determine if a guess is within tolerance for convergence.
+  # If not, output a new guess using the Newton-Raphson method.
   #
   # Based on XITERATE f77 code in ResAC (Brandemuehl)
-  #
-  #
-  # Example:
-  # --------
-      # # Find a value of x that makes f(x) equal to some specific value f:
-      # # initial guess (all values of x)
-      # x = 1.0
-      # x1 = x
-      # x2 = x
-      # # initial error
-      # error = f - f(x)
-      # error1 = error
-      # error2 = error
-      # itmax = 50  # maximum iterations
-      # cvg = False # initialize convergence to "False"
-      # for i in range(1,itmax+1):
-          # error = f - f(x)
-          # x,cvg,x1,error1,x2,error2 = \
-                                   # Iterate(x,error,x1,error1,x2,error2,i,cvg)
-          # if cvg:
-              # break
-      # if cvg:
-          # print "x converged after", i, :iterations"
-      # else:
-          # print "x did NOT converge after", i, "iterations"
-      # print "x, when f(x) is", f,"is", x
   #
   # @param x0 [Double] current guess value
   # @param f0 [Double] value of function f(x) at current guess value
@@ -132,6 +106,33 @@ module MathTools
   # @param cvg [Boolean] whether the iteration has reached convergence
   # @return [Double, Boolean, Double, Double, Double, Double] new guess value, whether the iteration has reached convergence, updated previous two guess values, used to create quadratic (or linear fit), updated previous two values of f(x)
   def self.Iterate(x0, f0, x1, f1, x2, f2, icount, cvg)
+    '''
+    Example:
+    --------
+        # Find a value of x that makes f(x) equal to some specific value f:
+        # initial guess (all values of x)
+        x = 1.0
+        x1 = x
+        x2 = x
+        # initial error
+        error = f - f(x)
+        error1 = error
+        error2 = error
+        itmax = 50  # maximum iterations
+        cvg = False # initialize convergence to "False"
+        for i in range(1,itmax+1):
+            error = f - f(x)
+            x,cvg,x1,error1,x2,error2 = \
+                                     Iterate(x,error,x1,error1,x2,error2,i,cvg)
+            if cvg:
+                break
+        if cvg:
+            print "x converged after", i, :iterations"
+        else:
+            print "x did NOT converge after", i, "iterations"
+        print "x, when f(x) is", f,"is", x
+    '''
+
     tolRel = 1e-5
     dx = 0.1
 
@@ -234,7 +235,7 @@ module MathTools
   end
 end
 
-# Adapted from https://stackoverflow.com/questions/6934185/ruby-net-http-following-redirects
+# Adapted from https://stackoverflow.com/questions/6934185/ruby-net-http-following-redirects.
 module UrlResolver
   # Fetch specified outfile from specified uri_str.
   #
@@ -314,10 +315,10 @@ end
 module FilePath
   # TODO
   #
-  # @param path [TODO] TODO
-  # @param relative_dir [TODO] TODO
-  # @param name [TODO] TODO
-  # @return [TODO] TODO
+  # @param path [String] TODO
+  # @param relative_dir [String] TODO
+  # @param name [String] TODO
+  # @return [String] TODO
   def self.check_path(path, relative_dir, name)
     return if path.nil?
     return File.absolute_path(path) if File.exist? path
