@@ -1100,6 +1100,14 @@
     "air_leakage_value": 12.16,
     "air_leakage_type": "unit total"
   },
+  "sample_files/base-bldgtype-mf-unit-infil-leakiness-description.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "air_leakage_leakiness_description": "tight",
+    "year_built": 1990,
+    "air_leakage_value": null,
+    "air_leakage_units": null,
+    "air_leakage_type": null
+  },
   "sample_files/base-bldgtype-mf-unit-residents-1.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
     "geometry_unit_num_occupants": 1,
@@ -1684,6 +1692,22 @@
     "parent_hpxml": "sample_files/base.xml",
     "air_leakage_units": "CFMnatural",
     "air_leakage_value": 72
+  },
+  "sample_files/base-enclosure-infil-leakiness-description.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "air_leakage_leakiness_description": "leaky",
+    "year_built": 1988,
+    "air_leakage_value": null,
+    "air_leakage_units": null,
+    "air_leakage_type": null
+  },
+  "sample_files/base-enclosure-2stories-infil-leakiness-description.xml": {
+    "parent_hpxml": "sample_files/base-enclosure-2stories.xml",
+    "air_leakage_leakiness_description": "very tight",
+    "year_built": 1999,
+    "air_leakage_value": null,
+    "air_leakage_units": null,
+    "air_leakage_type": null
   },
   "sample_files/base-enclosure-orientations.xml": {
     "parent_hpxml": "sample_files/base.xml"
