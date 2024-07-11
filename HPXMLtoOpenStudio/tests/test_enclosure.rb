@@ -919,10 +919,20 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
           elsif [HPXML::FoundationWall].include? surf_class
             surfaces[-1].insulation_exterior_r_value += 0.01 * i
           elsif [HPXML::Slab].include? surf_class
-            if i < 4
+            if i < 2
               surfaces[-1].perimeter_insulation_depth += 0.01 * i
-            else
+            elsif i < 3
               surfaces[-1].perimeter_insulation_r_value += 0.01 * i
+            elsif i < 4
+              surfaces[-1].under_slab_insulation_r_value += 0.01 * i
+            elsif i < 5
+              surfaces[-1].under_slab_insulation_width += 0.01 * i
+            elsif i < 6
+              surfaces[-1].exterior_horizontal_insulation_r_value += 0.01 * i
+            elsif i < 7
+              surfaces[-1].exterior_horizontal_insulation_width += 0.01 * i
+            else
+              surfaces[-1].exterior_horizontal_insulation_depth_below_grade += 0.01 * i
             end
           elsif [HPXML::Window, HPXML::Skylight].include? surf_class
             if i < 3
@@ -1004,6 +1014,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
       hpxml_bldg.slabs[i].id = "Slab#{i + 1}"
       hpxml_bldg.slabs[i].perimeter_insulation_id = "Slab#{i + 1}PerimeterInsulation"
       hpxml_bldg.slabs[i].under_slab_insulation_id = "Slab#{i + 1}UnderSlabInsulation"
+      hpxml_bldg.slabs[i].exterior_horizontal_insulation_id = "Slab#{i + 1}ExteriorHorizontalInsulation"
       hpxml_bldg.slabs[i].depth_below_grade = hpxml_bldg.foundation_walls[i].depth_below_grade * i / 3.0
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
