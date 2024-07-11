@@ -2,15 +2,7 @@
 
 # TODO
 module MathTools
-  # TODO
-  #
-  # @param str [TODO] TODO
-  # @return [TODO] TODO
-  def self.valid_float?(str)
-    !!Float(str) rescue false
-  end
-
-  # TODO
+  # Returns the linear interpolation between two results.
   #
   # @param x [TODO] TODO
   # @param x0 [TODO] TODO
@@ -19,14 +11,10 @@ module MathTools
   # @param f1 [TODO] TODO
   # @return [TODO] TODO
   def self.interp2(x, x0, x1, f0, f1)
-    '''
-    Returns the linear interpolation between two results.
-    '''
-
     return f0 + ((x - x0) / (x1 - x0)) * (f1 - f0)
   end
 
-  # TODO
+  # Returns the bilinear interpolation between four results.
   #
   # @param x [TODO] TODO
   # @param y [TODO] TODO
@@ -40,38 +28,22 @@ module MathTools
   # @param fx2y2 [TODO] TODO
   # @return [TODO] TODO
   def self.interp4(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
-    '''
-    Returns the bilinear interpolation between four results.
-    '''
-
     return (fx1y1 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y2 - y) \
           + (fx2y1 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y2 - y) \
           + (fx1y2 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y - y1) \
           + (fx2y2 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y - y1)
   end
 
-  # TODO
+  # Calculate the result of a biquadratic polynomial with independent variables
+  # x and y, and a list of coefficients, c:
   #
-  # @param x [TODO] TODO
-  # @param y [TODO] TODO
-  # @param c [TODO] TODO
-  # @return [TODO] TODO
+  # z = c[1] + c[2]*x + c[3]*x**2 + c[4]*y + c[5]*y**2 + c[6]*x*y
+  #
+  # @param x [Double] independent variable 1
+  # @param y [Double] independent variable 2
+  # @param c [Array<Double>] list of 6 coefficients
+  # @return [Double] result of biquadratic polynomial
   def self.biquadratic(x, y, c)
-    '''
-    Description:
-    ------------
-        Calculate the result of a biquadratic polynomial with independent variables
-        x and y, and a list of coefficients, c:
-        z = c[1] + c[2]*x + c[3]*x**2 + c[4]*y + c[5]*y**2 + c[6]*x*y
-    Inputs:
-    -------
-        x       float      independent variable 1
-        y       float      independent variable 2
-        c       tuple      list of 6 coeffients [floats]
-    Outputs:
-    --------
-        z       float      result of biquadratic polynomial
-    '''
     if c.length != 6
       fail 'Error: There must be 6 coefficients in a biquadratic polynomial'
     end
@@ -80,29 +52,15 @@ module MathTools
     return z
   end
 
-  # TODO
+  # Calculate the result of a quadratic polynomial with independent variable
+  # x and a list of coefficients, c:
   #
-  # @param x [TODO] TODO
-  # @param c [TODO] TODO
-  # @return [TODO] TODO
+  # y = c[1] + c[2]*x + c[3]*x**2
+  #
+  # @param x [Double] independent variable
+  # @param c [Array<Double>] list of 3 coefficients
+  # @return [Double] result of quadratic polynomial
   def self.quadratic(x, c)
-    '''
-    Description:
-    ------------
-        Calculate the result of a quadratic polynomial with independent variable
-        x and a list of coefficients, c:
-
-        y = c[1] + c[2]*x + c[3]*x**2
-
-    Inputs:
-    -------
-        x       float      independent variable
-        c       tuple      list of 6 coeffients [floats]
-
-    Outputs:
-    --------
-        y       float      result of biquadratic polynomial
-    '''
     if c.size != 3
       fail 'Error: There must be 3 coefficients in a quadratic polynomial'
     end
@@ -112,32 +70,17 @@ module MathTools
     return y
   end
 
-  # TODO
+  # Calculate the result of a bicubic polynomial with independent variables
+  # x and y, and a list of coefficients, c:
+
+  # z = c[1] + c[2]*x + c[3]*y + c[4]*x**2 + c[5]*x*y + c[6]*y**2 + \
+  #     c[7]*x**3 + c[8]*y*x**2 + c[9]*x*y**2 + c[10]*y**3
   #
-  # @param x [TODO] TODO
-  # @param y [TODO] TODO
-  # @param c [TODO] TODO
-  # @return [TODO] TODO
+  # @param x [Double] independent variable 1
+  # @param y [Double] independent variable 2
+  # @param c [Array<Double>] list of 10 coefficients
+  # @return [Double] result of bicubic polynomial
   def self.bicubic(x, y, c)
-    '''
-    Description:
-    ------------
-        Calculate the result of a bicubic polynomial with independent variables
-        x and y, and a list of coefficients, c:
-
-        z = c[1] + c[2]*x + c[3]*y + c[4]*x**2 + c[5]*x*y + c[6]*y**2 + \
-            c[7]*x**3 + c[8]*y*x**2 + c[9]*x*y**2 + c[10]*y**3
-
-    Inputs:
-    -------
-        x       float      independent variable 1
-        y       float      independent variable 2
-        c       tuple      list of 10 coeffients [floats]
-
-    Outputs:
-    --------
-        z       float      result of bicubic polynomial
-    '''
     if c.size != 10
       fail 'Error: There must be 10 coefficients in a bicubic polynomial'
     end
@@ -148,68 +91,47 @@ module MathTools
     return z
   end
 
-  # TODO
+  # Determine if a guess is within tolerance for convergence
+  # if not, output a new guess using the Newton-Raphson method
   #
-  # @param x0 [TODO] TODO
-  # @param f0 [TODO] TODO
-  # @param x1 [TODO] TODO
-  # @param f1 [TODO] TODO
-  # @param x2 [TODO] TODO
-  # @param f2 [TODO] TODO
-  # @param icount [TODO] TODO
-  # @param cvg [TODO] TODO
-  # @return [TODO] TODO
+  # Based on XITERATE f77 code in ResAC (Brandemuehl)
+  #
+  #
+  # Example:
+  # --------
+      # # Find a value of x that makes f(x) equal to some specific value f:
+      # # initial guess (all values of x)
+      # x = 1.0
+      # x1 = x
+      # x2 = x
+      # # initial error
+      # error = f - f(x)
+      # error1 = error
+      # error2 = error
+      # itmax = 50  # maximum iterations
+      # cvg = False # initialize convergence to "False"
+      # for i in range(1,itmax+1):
+          # error = f - f(x)
+          # x,cvg,x1,error1,x2,error2 = \
+                                   # Iterate(x,error,x1,error1,x2,error2,i,cvg)
+          # if cvg:
+              # break
+      # if cvg:
+          # print "x converged after", i, :iterations"
+      # else:
+          # print "x did NOT converge after", i, "iterations"
+      # print "x, when f(x) is", f,"is", x
+  #
+  # @param x0 [Double] current guess value
+  # @param f0 [Double] value of function f(x) at current guess value
+  # @param x1 [Double] previous two guess values, used to create quadratic (or linear fit)
+  # @param f1 [Double] previous two values of f(x)
+  # @param x2 [Double] previous two guess values, used to create quadratic (or linear fit)
+  # @param f2 [Double] previous two values of f(x)
+  # @param icount [Integer] iteration count
+  # @param cvg [Boolean] whether the iteration has reached convergence
+  # @return [Double, Boolean, Double, Double, Double, Double] new guess value, whether the iteration has reached convergence, updated previous two guess values, used to create quadratic (or linear fit), updated previous two values of f(x)
   def self.Iterate(x0, f0, x1, f1, x2, f2, icount, cvg)
-    '''
-    Description:
-    ------------
-        Determine if a guess is within tolerance for convergence
-        if not, output a new guess using the Newton-Raphson method
-    Source:
-    -------
-        Based on XITERATE f77 code in ResAC (Brandemuehl)
-    Inputs:
-    -------
-        x0      float    current guess value
-        f0      float    value of function f(x) at current guess value
-        x1,x2   floats   previous two guess values, used to create quadratic
-                         (or linear fit)
-        f1,f2   floats   previous two values of f(x)
-        icount  int      iteration count
-        cvg     bool     Has the iteration reached convergence?
-    Outputs:
-    --------
-        x_new   float    new guess value
-        cvg     bool     Has the iteration reached convergence?
-        x1,x2   floats   updated previous two guess values, used to create quadratic
-                         (or linear fit)
-        f1,f2   floats   updated previous two values of f(x)
-    Example:
-    --------
-        # Find a value of x that makes f(x) equal to some specific value f:
-        # initial guess (all values of x)
-        x = 1.0
-        x1 = x
-        x2 = x
-        # initial error
-        error = f - f(x)
-        error1 = error
-        error2 = error
-        itmax = 50  # maximum iterations
-        cvg = False # initialize convergence to "False"
-        for i in range(1,itmax+1):
-            error = f - f(x)
-            x,cvg,x1,error1,x2,error2 = \
-                                     Iterate(x,error,x1,error1,x2,error2,i,cvg)
-            if cvg:
-                break
-        if cvg:
-            print "x converged after", i, :iterations"
-        else:
-            print "x did NOT converge after", i, "iterations"
-        print "x, when f(x) is", f,"is", x
-    '''
-
     tolRel = 1e-5
     dx = 0.1
 
@@ -314,14 +236,14 @@ end
 
 # Adapted from https://stackoverflow.com/questions/6934185/ruby-net-http-following-redirects
 module UrlResolver
-  # TODO
+  # Fetch specified outfile from specified uri_str.
   #
-  # @param uri_str [TODO] TODO
-  # @param outfile [TODO] TODO
-  # @param agent [TODO] TODO
-  # @param max_attempts [TODO] TODO
-  # @param timeout [TODO] TODO
-  # @return [TODO] TODO
+  # @param uri_str [String] uniform resource identifier string
+  # @param outfile [Tempfile] instance of a class for managing temporary files
+  # @param agent [String] TODO
+  # @param max_attempts [Integer] TODO
+  # @param timeout [Integer] TODO
+  # @return [void]
   def self.fetch(uri_str, outfile, agent = 'curl/7.43.0', max_attempts = 10, timeout = 10)
     attempts = 0
     cookie = nil

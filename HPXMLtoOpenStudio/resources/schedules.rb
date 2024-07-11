@@ -1792,7 +1792,7 @@ module Schedule
 
   # Ensure that the defined schedule value array (or string of numbers) is the correct length.
   #
-  # @param values [Array<Double> or String] a num_values-element array of numbers or a comma-seperated string of numbers
+  # @param values [Array<Double> or Array<String> or String] a num_values-element array of numbers or a comma-separated string of numbers
   # @param num_values [Integer] expected number of values in the outer array
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
   # @return [Array<Double>] a num_values-element array of numbers

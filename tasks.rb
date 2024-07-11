@@ -2493,9 +2493,9 @@ def download_utility_rates
   if !File.exist?(filepath)
     require 'tempfile'
     tmpfile = Tempfile.new('rates')
-
+puts "tmpfile #{tmpfile.class}"
     UrlResolver.fetch('https://openei.org/apps/USURDB/download/usurdb.csv.gz', tmpfile)
-
+exit!
     puts 'Extracting utility rates...'
     require 'zlib'
     Zlib::GzipReader.open(tmpfile.path.to_s) do |input_stream|
