@@ -431,13 +431,13 @@ end
 
 # WeatherFile child object with EPW header data
 class WeatherHeader
-  attr_accessor(:City,                # [String] Name of city
-                :StateProvinceRegion, # [String] State or province
-                :Latitude,            # [Double] Latitude (+/- degrees.minutes)
-                :Longitude,           # [Double] Longitude (+/- degrees.minutes)
-                :Elevation,           # [Double] Elevation (ft)
-                :TimeZone,            # [Double] Time zone (GTM +/-)
-                :WMONumber,           # [String] World Meteorological Organization station number
+  attr_accessor(:City,                # [String] Weather station name of city
+                :StateProvinceRegion, # [String] Weather station state or province
+                :Latitude,            # [Double] Weather station latitude (+/- degrees.minutes)
+                :Longitude,           # [Double] Weather station longitude (+/- degrees.minutes)
+                :Elevation,           # [Double] Weather station elevation (ft)
+                :TimeZone,            # [Double] Weather station time zone (GTM +/-)
+                :WMONumber,           # [String] Weather station World Meteorological Organization (WMO) number
                 :DSTStartDate,        # [OpenStudio::Date] Daylight Saving start date
                 :DSTEndDate,          # [OpenStudio::Date] Daylight Saving end date
                 :ActualYear,          # [Integer] Calendar year if an AMY (Actual Meteorological Year) weather file
@@ -476,5 +476,5 @@ class WeatherDesign
   attr_accessor(:HeatingDrybulb,        # [Double] 99% heating design drybulb temperature (F)
                 :CoolingDrybulb,        # [Double] 1% cooling design drybulb temperature (F)
                 :CoolingHumidityRatio,  # [Double] Humidity ratio corresponding to cooling mean coincident wetbulb temperature (lbm/lbm)
-                :DailyTemperatureRange) # [Double] Difference between daily high/low outdoor drybulb temperatures during the hottest month [deltaF]
+                :DailyTemperatureRange) # [Double] Difference between daily high/low outdoor drybulb temperatures during the hottest month (deltaF)
 end
