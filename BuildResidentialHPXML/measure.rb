@@ -3471,7 +3471,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # Define what happens when the measure is run.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] true if successful
   def run(model, runner, user_arguments)
@@ -3794,7 +3794,7 @@ end
 module HPXMLFile
   # Create the closed-form geometry, and then call individual set_xxx methods
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param epw_path [String] Path to the EPW weather file
@@ -3923,7 +3923,7 @@ module HPXMLFile
 
   # Check for errors in hpxml, and validate hpxml_doc against hpxml_path
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_doc [Oga::XML::Element] Root XML element of the HPXML document
   # @param hpxml_path [TODO] TODO
@@ -3964,7 +3964,7 @@ module HPXMLFile
 
   # Create 3D geometry (surface, subsurfaces) for a given unit type
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @return [Boolean] True if successful
@@ -4058,7 +4058,7 @@ module HPXMLFile
   # - emissions scenarios
   # - utility bill scenarios
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param args [Hash] Map of :argument_name => value
   # @return [Boolean] true if no errors, otherwise false

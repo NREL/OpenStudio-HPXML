@@ -5,7 +5,7 @@ require 'matrix'
 
 # TODO
 class ScheduleGenerator
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param state [TODO] TODO
   # @param column_names [TODO] TODO
   # @param random_seed [TODO] TODO

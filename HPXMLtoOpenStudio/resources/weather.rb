@@ -23,7 +23,7 @@ end
 # TODO
 class WeatherFile
   # @param epw_path [String] Path to the EPW weather file
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   def initialize(epw_path:, runner:, hpxml: nil)
     @header = WeatherHeader.new
@@ -43,7 +43,7 @@ class WeatherFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param epw_path [String] Path to the EPW weather file
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
@@ -283,7 +283,7 @@ class WeatherFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param epw_file [OpenStudio::EpwFile] OpenStudio EpwFile object
   # @return [TODO] TODO
   def get_design_info_from_epw(runner, epw_file)
@@ -307,7 +307,7 @@ class WeatherFile
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param rowdata [TODO] TODO
   # @param data [TODO] TODO
   # @return [TODO] TODO

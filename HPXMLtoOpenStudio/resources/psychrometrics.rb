@@ -59,7 +59,7 @@ module Psychrometrics
   #
   # Source: 2009 ASHRAE Handbook
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param p [Double] pressure (psia)
   # @return [Double] saturated vapor temperature (F)
   def self.Tsat_fP(runner, p)
@@ -98,7 +98,7 @@ module Psychrometrics
   #
   # Source: Based on TAIRSAT f77 code in ResAC (Brandemuehl)
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param h [Double] enthalpy (Btu/lbm)
   # @param p [Double] pressure (psia)
   # @return [Double] drybulb temperature (F)
@@ -201,7 +201,7 @@ module Psychrometrics
   #
   # Source: Based on WETBULB f77 code in ResAC (Brandemuehl)
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param tdb [Double] drybulb temperature (F)
   # @param w [Double] humidity ratio (lbm/lbm)
   # @param p [Double] pressure (psia)
@@ -408,7 +408,7 @@ module Psychrometrics
 
   # Calculate the wetbulb temperature at a given drybulb temperature, relative humidity, and pressure.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param tdb [Double] drybulb temperature (F)
   # @param r [Double] relative humidity (frac)
   # @param p [Double] pressure (psia)

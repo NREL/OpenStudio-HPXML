@@ -17,7 +17,7 @@ module HPXMLDefaults
   # attributes for all defaulted values. This allows the user to easily observe which
   # values were defaulted and what default values were used.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
@@ -233,7 +233,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
   # specific to HVAC equipment sizing
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
@@ -480,7 +480,7 @@ module HPXMLDefaults
 
   # Assigns default values for omitted optional inputs in the HPXML::UtilityBillScenarios objects
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param has_fuel [Hash] Map of HPXML fuel type => boolean of whether fuel type is used
@@ -1326,7 +1326,7 @@ module HPXMLDefaults
 
   # Assigns default values for omitted optional inputs in the HPXML::Floor objects
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
   def self.apply_floors(runner, hpxml_bldg)
@@ -1640,7 +1640,7 @@ module HPXMLDefaults
   # Assigns default values for omitted optional inputs in the HPXML::HeatingSystem,
   # HPXML::CoolingSystem, and HPXML::HeatPump objects
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
@@ -3765,7 +3765,7 @@ module HPXMLDefaults
 
   # Assigns default capacities/airflows for autosized HPXML HVAC equipment.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')

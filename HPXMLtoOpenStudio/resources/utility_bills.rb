@@ -18,7 +18,7 @@ class UtilityBills
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param state_code [TODO] TODO
   # @param fuel_type [TODO] TODO
   # @param fixed_charge [TODO] TODO
@@ -89,7 +89,7 @@ class UtilityBills
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param state_code [TODO] TODO
   # @param fuel_type [TODO] TODO
   # @return [TODO] TODO
