@@ -23,17 +23,17 @@ class ElectricVehicle
       end
 
       # Calculate effective discharge power
-      hrs_driven_year = electric_vehicle.hours_per_week / 7 * 365  # hrs/year
-      ev_annl_energy = electric_vehicle.energy_efficiency * electric_vehicle.miles_per_year  # kWh/year
-      eff_discharge_power = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w')  # W
+      hrs_driven_year = electric_vehicle.hours_per_week / 7 * 365 # hrs/year
+      ev_annl_energy = electric_vehicle.energy_efficiency * electric_vehicle.miles_per_year # kWh/year
+      eff_discharge_power = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w') # W
 
       eff_charge_power = ev_elcd.designStorageControlChargePower
       discharging_schedule = ev_elcd.storageDischargePowerFractionSchedule.get
       charging_schedule = ev_elcd.storageChargePowerFractionSchedule.get
 
-      discharge_power_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_elcd, "Electrical Storage", "Power Draw Rate")
+      discharge_power_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_elcd, 'Electrical Storage', 'Power Draw Rate')
       discharge_power_act.setName('battery_discharge_power_act')
-      charge_power_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_elcd, "Electrical Storage", "Power Charge Rate")
+      charge_power_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_elcd, 'Electrical Storage', 'Power Charge Rate')
       charge_power_act.setName('battery_charge_power_act')
 
       temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
@@ -52,16 +52,16 @@ class ElectricVehicle
       # Power adjustment vs ambient temperature curve; derived from most recent data for Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
       coefs = [1.412768, -3.910397E-02, 9.408235E-04, 8.971560E-06, -7.699244E-07, 1.265614E-08]
       power_curve = ''
-      coefs.each_with_index do |coef,i|
-        power_curve += "+(#{coef.to_s}*(site_temp_adj^#{i}))"
+      coefs.each_with_index do |coef, i|
+        power_curve += "+(#{coef}*(site_temp_adj^#{i}))"
       end
       power_curve = power_curve[1..]
       ev_discharge_program.addLine("  Set power_mult = #{power_curve}")
       ev_discharge_program.addLine("  Set site_temp_adj = #{temp_sensor.name}")
       ev_discharge_program.addLine("  If #{temp_sensor.name} < -17.778")
-      ev_discharge_program.addLine("    Set site_temp_adj = -17.778")
+      ev_discharge_program.addLine('    Set site_temp_adj = -17.778')
       ev_discharge_program.addLine("  ElseIf #{temp_sensor.name} > 37.609")
-      ev_discharge_program.addLine("    Set site_temp_adj = 37.609")
+      ev_discharge_program.addLine('    Set site_temp_adj = 37.609')
       ev_discharge_program.addLine('  EndIf')
 
       ev_discharge_program.addLine("  If #{discharge_sch_sensor.name} > 0.0")
@@ -70,7 +70,7 @@ class ElectricVehicle
       ev_discharge_program.addLine("  ElseIf #{charge_sch_sensor.name} > 0.0")
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = #{eff_charge_power}")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
-      ev_discharge_program.addLine("  Else")
+      ev_discharge_program.addLine('  Else')
       ev_discharge_program.addLine("    Set #{charge_power_act.name} = 0")
       ev_discharge_program.addLine("    Set #{discharge_power_act.name} = 0")
       ev_discharge_program.addLine('  EndIf')
