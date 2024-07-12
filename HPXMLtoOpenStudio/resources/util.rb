@@ -1,32 +1,32 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to various math tools.
 module MathTools
   # Returns the linear interpolation between two results.
   #
-  # @param x [TODO] TODO
-  # @param x0 [TODO] TODO
-  # @param x1 [TODO] TODO
-  # @param f0 [TODO] TODO
-  # @param f1 [TODO] TODO
-  # @return [TODO] TODO
+  # @param x [Double] the x-coordinate corresponding to the point to interpolate
+  # @param x0 [Double] known point 1 x-coordinate
+  # @param x1 [Double] known point 2 x-coordinate
+  # @param f0 [Double] known point 1 function value
+  # @param f1 [Double] known point 2 function value
+  # @return [Double] the interpolated value for given x-coordinate
   def self.interp2(x, x0, x1, f0, f1)
     return f0 + ((x - x0) / (x1 - x0)) * (f1 - f0)
   end
 
   # Returns the bilinear interpolation between four results.
   #
-  # @param x [TODO] TODO
-  # @param y [TODO] TODO
-  # @param x1 [TODO] TODO
-  # @param x2 [TODO] TODO
-  # @param y1 [TODO] TODO
-  # @param y2 [TODO] TODO
-  # @param fx1y1 [TODO] TODO
-  # @param fx1y2 [TODO] TODO
-  # @param fx2y1 [TODO] TODO
-  # @param fx2y2 [TODO] TODO
-  # @return [TODO] TODO
+  # @param x [Double] the x-coordinate corresponding to the point to interpolate
+  # @param y [Double] the y-coordinate corresponding to the point to interpolate
+  # @param x1 [Double] known points 1 and 2 x-coordinate
+  # @param x2 [Double] known points 3 and 4 x-coordinate
+  # @param y1 [Double] known points 1 and 3 y-coordinate
+  # @param y2 [Double] known points 2 and 4 y-coordinate
+  # @param fx1y1 [Double] known point 1 function value
+  # @param fx1y2 [Double] known point 2 function value
+  # @param fx2y1 [Double] known point 3 function value
+  # @param fx2y2 [Double] known point 4 function value
+  # @return [Double] the interpolated value for the given x- and y- coordinates
   def self.interp4(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
     return (fx1y1 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y2 - y) \
           + (fx2y1 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y2 - y) \
@@ -94,7 +94,7 @@ module MathTools
   # Determine if a guess is within tolerance for convergence.
   # If not, output a new guess using the Newton-Raphson method.
   #
-  # Based on XITERATE f77 code in ResAC (Brandemuehl)
+  # Based on XITERATE f77 code in ResAC (Brandemuehl).
   #
   # @param x0 [Double] current guess value
   # @param f0 [Double] value of function f(x) at current guess value
@@ -241,9 +241,9 @@ module UrlResolver
   #
   # @param uri_str [String] uniform resource identifier string
   # @param outfile [Tempfile] instance of a class for managing temporary files
-  # @param agent [String] TODO
-  # @param max_attempts [Integer] TODO
-  # @param timeout [Integer] TODO
+  # @param agent [String] a string of text that a web browser sends to a web server to identify itself and provide information about the browser's capabilities
+  # @param max_attempts [Integer] the maximum number of attempts
+  # @param timeout [Integer] both the number of seconds to (1) wait for the connection to open and (2) wait for one block to be read (via one read(2) call)
   # @return [void]
   def self.fetch(uri_str, outfile, agent = 'curl/7.43.0', max_attempts = 10, timeout = 10)
     attempts = 0
@@ -311,14 +311,14 @@ module UrlResolver
   end
 end
 
-# TODO
+# Collection of methods related to file paths.
 module FilePath
-  # TODO
+  # Check the existence of an absolute file path, or a file path relative a given directory.
   #
-  # @param path [String] TODO
-  # @param relative_dir [String] TODO
-  # @param name [String] TODO
-  # @return [String] TODO
+  # @param path [String] the file path to check
+  # @param relative_dir [String] relative directory for which to check file path against
+  # @param name [String] the name to report in case file path does not exist
+  # @return [String] the absolute file path if it exists
   def self.check_path(path, relative_dir, name)
     return if path.nil?
     return File.absolute_path(path) if File.exist? path
