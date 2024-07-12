@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'oga'
-require_relative '../../HPXMLtoOpenStudio/resources/utility_bills'
 require_relative '../../HPXMLtoOpenStudio/resources/constants'
 require_relative '../../HPXMLtoOpenStudio/resources/energyplus'
 require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
@@ -11,6 +10,7 @@ require_relative '../../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../../HPXMLtoOpenStudio/resources/version'
+require_relative '../resources/utility_bills'
 require_relative '../resources/util.rb'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
