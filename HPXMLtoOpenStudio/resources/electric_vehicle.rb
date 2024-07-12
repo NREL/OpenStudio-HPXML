@@ -38,7 +38,7 @@ class ElectricVehicle
 
       temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
       temp_sensor.setName('site_temp')
-      temp_sensor.setKeyName(elcs.name.to_s)
+      temp_sensor.setKeyName('Environment')
       discharge_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       discharge_sch_sensor.setName('discharge_sch_sensor')
       discharge_sch_sensor.setKeyName(discharging_schedule.name.to_s)
