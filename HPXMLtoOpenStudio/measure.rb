@@ -11,7 +11,6 @@ Dir["#{File.dirname(__FILE__)}/resources/*.rb"].each do |resource_file|
 
   require resource_file
 end
-require_relative '../ReportUtilityBills/resources/utility_bills.rb'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure

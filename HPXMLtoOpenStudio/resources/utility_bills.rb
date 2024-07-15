@@ -16,7 +16,7 @@ class UtilityBills
              HPXML::FuelTypeWoodPellets => 'kbtu' }[fuel_type]
   end
 
-  # Get marginal and average rates from EIA data.
+  # For a given state, get either the average rate from EIA data and calculate the marginal rate or calculate the average rate from a given marginal rate.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param state_code [String] State code from the HPXML file
