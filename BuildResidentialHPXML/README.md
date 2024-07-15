@@ -1892,9 +1892,20 @@ The heating load served by the heating system.
 
 <br/>
 
+**Heating System: Atmospheric Burner**
+
+Whether the heating system has an atmospheric burner. Applies only to Furnace, WallFurnace, FloorFurnace, Boiler, Stove, and SpaceHeater with non-electric fuel type. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.
+
+- **Name:** ``heating_system_atmospheric_burner``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Heating System: Pilot Light**
 
-The fuel usage of the pilot light. Applies only to Furnace, WallFurnace, FloorFurnace, Stove, Boiler, and Fireplace with non-electric fuel type. If not provided, assumes no pilot light.
+The fuel usage of the pilot light. Applies only to Furnace, WallFurnace, FloorFurnace, Boiler, Fireplace, Stove, and SpaceHeater with non-electric fuel type. If not provided, assumes no pilot light.
 
 - **Name:** ``heating_system_pilot_light``
 - **Type:** ``Double``

@@ -2030,12 +2030,14 @@ module HPXMLDefaults
 
     # Pilot Light
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
       next unless [HPXML::HVACTypeFurnace,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
+                   HPXML::HVACTypeBoiler,
                    HPXML::HVACTypeFireplace,
                    HPXML::HVACTypeStove,
-                   HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+                   HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
 
       if heating_system.pilot_light.nil?
         heating_system.pilot_light = false
@@ -2045,6 +2047,25 @@ module HPXMLDefaults
         heating_system.pilot_light_btuh = 500.0
         heating_system.pilot_light_btuh_isdefaulted = true
       end
+    end
+
+    # Atmospheric Burner
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.atmospheric_burner.nil?
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+      next unless [HPXML::HVACTypeFurnace,
+                   HPXML::HVACTypeWallFurnace,
+                   HPXML::HVACTypeFloorFurnace,
+                   HPXML::HVACTypeBoiler,
+                   HPXML::HVACTypeStove,
+                   HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
+
+      if not heating_system.heating_efficiency_afue.nil?
+        heating_system.atmospheric_burner = (heating_system.heating_efficiency_afue < 0.89)
+      elsif not heating_system.heating_efficiency_percent.nil?
+        heating_system.atmospheric_burner = (heating_system.heating_efficiency_percent < 0.89)
+      end
+      heating_system.atmospheric_burner_isdefaulted = true
     end
 
     # Detailed HVAC performance
@@ -3868,13 +3889,7 @@ module HPXMLDefaults
           HPXML::HVACTypeFloorFurnace,
           HPXML::HVACTypeStove,
           HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
-        if not heating_system.heating_efficiency_afue.nil?
-          next if heating_system.heating_efficiency_afue >= 0.89
-        elsif not heating_system.heating_efficiency_percent.nil?
-          next if heating_system.heating_efficiency_percent >= 0.89
-        end
-
-        return true
+        return heating_system.atmospheric_burner
       elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         return true
       end
