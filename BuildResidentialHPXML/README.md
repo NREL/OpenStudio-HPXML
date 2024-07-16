@@ -1022,7 +1022,7 @@ Depth from grade to bottom of vertical slab perimeter insulation. Applies to sla
 
 **Slab: Exterior Horizontal Insulation Nominal R-value**
 
-Nominal R-value of the slab perimeter exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+Nominal R-value of the slab exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
 
 - **Name:** ``slab_exterior_horizontal_insulation_r``
 - **Type:** ``Double``
