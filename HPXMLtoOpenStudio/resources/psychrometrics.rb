@@ -419,7 +419,8 @@ module Psychrometrics
     return twb
   end
 
-  # Find the coil Ao factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
+  # Calculate the coil Ao factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
+  # The Ao factor is the effective coil surface area as calculated using the relation BF = exp(-NTU) where NTU = Ao/(m*cp).
   #
   # Source: EnergyPlus source code
   #
@@ -434,12 +435,13 @@ module Psychrometrics
     bf = self.CoilBypassFactor(dBin, p, qdot, cfm, shr, win)
     mfr = UnitConversions.convert(self.CalculateMassflowRate(dBin, p, cfm, win), 'lbm/min', 'kg/s')
 
-    ntu = -1.0 * Math.log(bf)
+    ntu = -1.0 * Math.log(bf) # Number of Transfer Units
     ao = ntu * mfr
     return ao
   end
 
-  # Find the coil bypass factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
+  # Calculate the coil bypass factor at the given incoming air state (entering drybulb and wetbulb) and CFM, total capacity, and SHR.
+  # The bypass factor is analogous to the "ineffectiveness" (1-ε) of a heat exchanger.
   #
   # Source: EnergyPlus source code
   #
@@ -513,6 +515,8 @@ module Psychrometrics
   end
 
   # Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor.
+  # Uses the apparatus dewpoint (ADP)/bypass factor (BF) approach described in the EnergyPlus
+  # Engineering Reference documentation.
   #
   # Source: EnergyPlus source code
   #

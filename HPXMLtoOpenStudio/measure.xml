@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5c0f2eb6-fa50-4c23-86f9-63a9311a497f</version_id>
-  <version_modified>2024-07-15T22:47:25Z</version_modified>
+  <version_id>5e34c418-0276-422c-9b54-26d1872f4ec3</version_id>
+  <version_modified>2024-07-16T15:40:28Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -408,6 +408,12 @@
       <checksum>5E87EDAD</checksum>
     </file>
     <file>
+      <filename>math.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1BACCFF8</checksum>
+    </file>
+    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -435,7 +441,7 @@
       <filename>psychrometrics.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AAC47C41</checksum>
+      <checksum>86A74352</checksum>
     </file>
     <file>
       <filename>pv.rb</filename>
@@ -585,7 +591,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>75562A9A</checksum>
+      <checksum>1F7CD2A3</checksum>
     </file>
     <file>
       <filename>utility_bills.rb</filename>
