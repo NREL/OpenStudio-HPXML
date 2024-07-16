@@ -642,7 +642,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_r', true)
     arg.setDisplayName('Slab: Exterior Horizontal Insulation Nominal R-value')
     arg.setUnits('h-ft^2-R/Btu')
-    arg.setDescription('Nominal R-value of the slab perimeter exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
+    arg.setDescription('Nominal R-value of the slab exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     arg.setDefaultValue(0)
     args << arg
 
