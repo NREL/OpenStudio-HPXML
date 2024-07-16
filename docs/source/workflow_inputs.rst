@@ -1077,7 +1077,7 @@ The presence of a flue or chimney with combustion air from conditioned space can
 
   .. [#] If HasFlueOrChimneyInConditionedSpace not provided, defaults to true if any of the following conditions are met, otherwise false:
          
-         \- heating system is non-electric Furnace, Boiler, WallFurnace, FloorFurnace, Stove, or SpaceHeater located in conditioned space and AFUE/Percent is less than 0.89,
+         \- heating system has an atmospheric burner (see individual :ref:`hvac_heating` inputs) and is located in conditioned space,
          
          \- heating system is non-electric Fireplace located in conditioned space, or
          
@@ -1849,6 +1849,7 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
   ``UnitLocation``                                        string              See [#]_         No        See [#]_        Location of air handler
   ``DistributionSystem``                                  idref    See [#]_                    Yes                       ID of attached distribution system
   ``HeatingSystemType/Furnace``                           element                              Yes                       Type of heating system
+  ``HeatingSystemType/Furnace/AtmosphericBurner``         boolean                              No        See [#]_        Presence of atmospheric burner
   ``HeatingSystemType/Furnace/PilotLight``                boolean                              No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/Furnace/extension/PilotLightBtuh``  double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                   string              See [#]_         Yes                       Fuel type
@@ -1871,6 +1872,8 @@ Each central furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/H
          \- **DSE**: "conditioned space" if ``FractionHeatLoadServed`` is 1, otherwise "unconditioned space"
 
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity" or "gravity") or :ref:`hvac_distribution_dse`.
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the AFUE is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1894,6 +1897,7 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
   ``SystemIdentifier``                                        id                                Yes                       Unique identifier
   ``AttachedToZone``                                          idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/WallFurnace``                           element                           Yes                       Type of heating system
+  ``HeatingSystemType/WallFurnace/AtmosphericBurner``         boolean                           No        See [#]_        Presence of atmospheric burner
   ``HeatingSystemType/WallFurnace/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/WallFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                       string           See [#]_         Yes                       Fuel type
@@ -1907,6 +1911,8 @@ Each wall furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
   .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the AFUE is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1926,6 +1932,7 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
   ``SystemIdentifier``                                         id                                Yes                       Unique identifier
   ``AttachedToZone``                                           idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/FloorFurnace``                           element                           Yes                       Type of heating system
+  ``HeatingSystemType/FloorFurnace/AtmosphericBurner``         boolean                           No        See [#]_        Presence of atmospheric burner
   ``HeatingSystemType/FloorFurnace/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/FloorFurnace/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                        string           See [#]_         Yes                       Fuel type
@@ -1939,6 +1946,8 @@ Each floor furnace is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVA
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
   .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the AFUE is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -1960,6 +1969,7 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
   ``UnitLocation``                                       string              See [#]_         No        See [#]_        Location of boiler
   ``DistributionSystem``                                 idref    See [#]_   Yes                                        ID of attached distribution system
   ``HeatingSystemType/Boiler``                           element                              Yes                       Type of heating system
+  ``HeatingSystemType/Boiler/AtmosphericBurner``         boolean                              No        See [#]_        Presence of atmospheric burner
   ``HeatingSystemType/Boiler/PilotLight``                boolean                              No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``  double   Btu/hr     >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                  string              See [#]_         Yes                       Fuel type
@@ -1982,6 +1992,8 @@ Each in-unit boiler is entered as a ``/HPXML/Building/BuildingDetails/Systems/HV
          
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", or "radiant ceiling") or :ref:`hvac_distribution_dse`.
          Note: The choice of hydronic distribution type does not currently affect simulation results.
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the AFUE is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2010,6 +2022,7 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   ``IsSharedSystem``                                            boolean               true             Yes                           Whether it serves multiple dwelling units
   ``NumberofUnitsServed``                                       integer               > 1              Yes                           Number of dwelling units served
   ``HeatingSystemType/Boiler``                                  element                                Yes                           Type of heating system
+  ``HeatingSystemType/Boiler/AtmosphericBurner``                boolean                                No        See [#]_            Presence of atmospheric burner
   ``HeatingSystemType/Boiler/PilotLight``                       boolean                                No        false               Presence of standing pilot light (older systems)
   ``HeatingSystemType/Boiler/extension/PilotLightBtuh``         double   Btu/hr       >= 0             No        500                 Pilot light burn rate
   ``HeatingSystemFuel``                                         string                See [#]_         Yes                           Fuel type
@@ -2027,6 +2040,8 @@ Each shared boiler (serving multiple dwelling units) is entered as a ``/HPXML/Bu
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_hydronic` (type: "radiator", "baseboard", "radiant floor", "radiant ceiling", or "water loop") or :ref:`hvac_distribution_air` (type: "fan coil").
          If the shared boiler has "water loop" distribution, a :ref:`hvac_hp_water_loop` must also be specified.
          Note: The choice of hydronic distribution type does not currently affect simulation results; it is currently only used to know if there's an attached water loop heat pump or not.
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the AFUE is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] FractionHeatLoadServed is required unless the heating system is a heat pump backup system (i.e., referenced by a ``HeatPump[BackupType="separate"]/BackupSystem``; see :ref:`hvac_heatpump`), in which case FractionHeatLoadServed is not allowed.
@@ -2054,6 +2069,7 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
   ``SystemIdentifier``                                  id                                Yes                       Unique identifier
   ``AttachedToZone``                                    idref            See [#]_         See [#]_                  ID of attached zone
   ``HeatingSystemType/Stove``                           element                           Yes                       Type of heating system
+  ``HeatingSystemType/Stove/AtmosphericBurner``         boolean                           No        See [#]_        Presence of atmospheric burner
   ``HeatingSystemType/Stove/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
   ``HeatingSystemType/Stove/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
   ``HeatingSystemFuel``                                 string           See [#]_         Yes                       Fuel type
@@ -2067,6 +2083,8 @@ Each stove is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPl
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
   .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the Percent efficiency is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -2080,23 +2098,28 @@ Space Heater
 
 Each space heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem``.
 
-  ==================================================  =======  ======  ===============  ========  ==============  ===================
-  Element                                             Type     Units   Constraints      Required  Default         Notes
-  ==================================================  =======  ======  ===============  ========  ==============  ===================
-  ``SystemIdentifier``                                id                                Yes                       Unique identifier
-  ``AttachedToZone``                                  idref            See [#]_         See [#]_                  ID of attached zone
-  ``HeatingSystemType/SpaceHeater``                   element                           Yes                       Type of heating system
-  ``HeatingSystemFuel``                               string           See [#]_         Yes                       Fuel type
-  ``HeatingCapacity``                                 double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
-  ``AnnualHeatingEfficiency[Units="Percent"]/Value``  double   frac    > 0, <= 1        Yes                       Efficiency
-  ``FractionHeatLoadServed``                          double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
-  ``extension/FanPowerWatts``                         double   W       >= 0             No        0               Fan power
-  ``extension/HeatingAutosizingFactor``               double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
-  ``extension/HeatingAutosizingLimit``                double   Btu/hr  > 0              No                        Heating autosizing capacity limit
-  ==================================================  =======  ======  ===============  ========  ==============  ===================
+  ==========================================================  =======  ======  ===============  ========  ==============  ===================
+  Element                                                     Type     Units   Constraints      Required  Default         Notes
+  ==========================================================  =======  ======  ===============  ========  ==============  ===================
+  ``SystemIdentifier``                                        id                                Yes                       Unique identifier
+  ``AttachedToZone``                                          idref            See [#]_         See [#]_                  ID of attached zone
+  ``HeatingSystemType/SpaceHeater``                           element                           Yes                       Type of heating system
+  ``HeatingSystemType/SpaceHeater/AtmosphericBurner``         boolean                           No        See [#]_        Presence of atmospheric burner
+  ``HeatingSystemType/SpaceHeater/PilotLight``                boolean                           No        false           Presence of standing pilot light (older systems)
+  ``HeatingSystemType/SpaceHeater/extension/PilotLightBtuh``  double   Btu/hr  >= 0             No        500             Pilot light burn rate
+  ``HeatingSystemFuel``                                       string           See [#]_         Yes                       Fuel type
+  ``HeatingCapacity``                                         double   Btu/hr  >= 0             No        autosized [#]_  Heating output capacity
+  ``AnnualHeatingEfficiency[Units="Percent"]/Value``          double   frac    > 0, <= 1        Yes                       Efficiency
+  ``FractionHeatLoadServed``                                  double   frac    >= 0, <= 1 [#]_  See [#]_                  Fraction of heating load served
+  ``extension/FanPowerWatts``                                 double   W       >= 0             No        0               Fan power
+  ``extension/HeatingAutosizingFactor``                       double   frac    > 0              No        1.0             Heating autosizing capacity multiplier
+  ``extension/HeatingAutosizingLimit``                        double   Btu/hr  > 0              No                        Heating autosizing capacity limit
+  ==========================================================  =======  ======  ===============  ========  ==============  ===================
 
   .. [#] If provided, AttachedToZone must reference a conditioned ``Zone``.
   .. [#] Only required if zone-level and space-level HVAC design load calculations are desired (see :ref:`zones_spaces`).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the Percent efficiency is less than 0.89, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model.
   .. [#] HeatingSystemFuel choices are "electricity", "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "wood", or "wood pellets".
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
@@ -3675,7 +3698,10 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_        No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                  No        0         R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater [#]_
+  ``CondensingSystem``                           boolean                                                 No        See [#]_  Condensing water heater?
+  ``AtmosphericBurner``                          boolean                                                 No        See [#]_  Presence of atmospheric burner
+  ``PowerBurner``                                boolean                                                 No        See [#]_  Presence of power burner
   ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
   ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms    See [#]_            Number of bedrooms served directly or indirectly
   =============================================  =================  =============  ====================  ========  ========  =============================================
@@ -3709,6 +3735,12 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] If CondensingSystem not provided, defaults to true if the system is non-electric and the EF is greater than or equal to 0.77, otherwise false.
+         Used to inform the fraction of heat lost to the ambient environment vs outside (via the flue).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the EF is less than 0.63, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model, as well as the fraction of heat lost to the ambient environment vs outside (via the flue).
+  .. [#] If PowerBurner not provided, defaults to true if the system is non-electric and the EF is greater than or equal to 0.63, otherwise false.
+         Used to inform the fraction of heat lost to the ambient environment vs outside (via the flue).
   .. [#] TankModelType choices are "mixed" or "stratified".
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
@@ -3733,7 +3765,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
   ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater [#]_
   ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms          See [#]_                Number of bedrooms served directly or indirectly
   ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
 
@@ -3777,7 +3809,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_     EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0            R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double            F              > 0                     No        125          Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater [#]_
   ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_               Number of bedrooms served directly or indirectly
   =============================================  ================  =============  ======================  ========  ===========  =============================================
 

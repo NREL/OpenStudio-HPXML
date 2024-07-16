@@ -323,6 +323,7 @@
               <SystemIdentifier id='HeatingSystem1'/>
               <HeatingSystemType>
                 <FloorFurnace>
+                  <AtmosphericBurner>true</AtmosphericBurner>
                   <PilotLight>true</PilotLight>
                   <extension>
                     <PilotLightBtuh>600.0</PilotLightBtuh>

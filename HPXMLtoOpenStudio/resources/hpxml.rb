@@ -5005,7 +5005,7 @@ class HPXML < Object
              :shared_loop_watts, :shared_loop_motor_efficiency, :fan_coil_watts, :fan_watts_per_cfm,
              :airflow_defect_ratio, :fan_watts, :heating_airflow_cfm, :location, :primary_system,
              :pilot_light, :pilot_light_btuh, :electric_resistance_distribution, :heating_autosizing_factor,
-             :heating_autosizing_limit]
+             :heating_autosizing_limit, :atmospheric_burner]
     attr_accessor(*ATTRS)
     attr_reader(:heating_detailed_performance_data)
 
@@ -5117,9 +5117,18 @@ class HPXML < Object
         if [HPXML::HVACTypeFurnace,
             HPXML::HVACTypeWallFurnace,
             HPXML::HVACTypeFloorFurnace,
+            HPXML::HVACTypeBoiler,
+            HPXML::HVACTypeStove,
+            HPXML::HVACTypeSpaceHeater].include? @heating_system_type
+          XMLHelper.add_element(type_el, 'AtmosphericBurner', @atmospheric_burner, :boolean, @atmospheric_burner_isdefaulted) unless @atmospheric_burner.nil?
+        end
+        if [HPXML::HVACTypeFurnace,
+            HPXML::HVACTypeWallFurnace,
+            HPXML::HVACTypeFloorFurnace,
+            HPXML::HVACTypeBoiler,
             HPXML::HVACTypeFireplace,
             HPXML::HVACTypeStove,
-            HPXML::HVACTypeBoiler].include? @heating_system_type
+            HPXML::HVACTypeSpaceHeater].include? @heating_system_type
           XMLHelper.add_element(type_el, 'PilotLight', @pilot_light, :boolean, @pilot_light_isdefaulted) unless @pilot_light.nil?
           if @pilot_light
             XMLHelper.add_extension(type_el, 'PilotLightBtuh', @pilot_light_btuh, :float, @pilot_light_btuh_isdefaulted) unless @pilot_light_btuh.nil?
@@ -5173,6 +5182,7 @@ class HPXML < Object
       @number_of_units_served = XMLHelper.get_value(heating_system, 'NumberofUnitsServed', :integer)
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel', :string)
+      @atmospheric_burner = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/AtmosphericBurner", :boolean)
       @pilot_light = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/PilotLight", :boolean)
       if @pilot_light
         @pilot_light_btuh = XMLHelper.get_value(heating_system, "HeatingSystemType/#{@heating_system_type}/extension/PilotLightBtuh", :float)
@@ -6630,7 +6640,8 @@ class HPXML < Object
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor, :usage_bin,
              :uniform_energy_factor, :first_hour_rating, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :third_party_certification, :standby_loss_units, :standby_loss_value,
-             :temperature, :is_shared_system, :number_of_bedrooms_served, :tank_model_type, :operating_mode]
+             :temperature, :is_shared_system, :number_of_bedrooms_served, :tank_model_type, :operating_mode,
+             :condensing_system, :atmospheric_burner, :power_burner]
     attr_accessor(*ATTRS)
 
     # TODO
@@ -6705,6 +6716,9 @@ class HPXML < Object
       end
       XMLHelper.add_element(water_heating_system, 'HotWaterTemperature', @temperature, :float, @temperature_isdefaulted) unless @temperature.nil?
       XMLHelper.add_element(water_heating_system, 'UsesDesuperheater', @uses_desuperheater, :boolean) unless @uses_desuperheater.nil?
+      XMLHelper.add_element(water_heating_system, 'CondensingSystem', @condensing_system, :boolean, @condensing_system_isdefaulted) unless @condensing_system.nil?
+      XMLHelper.add_element(water_heating_system, 'AtmosphericBurner', @atmospheric_burner, :boolean, @atmospheric_burner_isdefaulted) unless @atmospheric_burner.nil?
+      XMLHelper.add_element(water_heating_system, 'PowerBurner', @power_burner, :boolean, @power_burner_isdefaulted) unless @power_burner.nil?
       if not @related_hvac_idref.nil?
         related_hvac_idref_el = XMLHelper.add_element(water_heating_system, 'RelatedHVACSystem')
         XMLHelper.add_attribute(related_hvac_idref_el, 'idref', @related_hvac_idref)
@@ -6741,6 +6755,9 @@ class HPXML < Object
       @standby_loss_value = XMLHelper.get_value(water_heating_system, 'StandbyLoss/Value', :float)
       @temperature = XMLHelper.get_value(water_heating_system, 'HotWaterTemperature', :float)
       @uses_desuperheater = XMLHelper.get_value(water_heating_system, 'UsesDesuperheater', :boolean)
+      @condensing_system = XMLHelper.get_value(water_heating_system, 'CondensingSystem', :boolean)
+      @atmospheric_burner = XMLHelper.get_value(water_heating_system, 'AtmosphericBurner', :boolean)
+      @power_burner = XMLHelper.get_value(water_heating_system, 'PowerBurner', :boolean)
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @tank_model_type = XMLHelper.get_value(water_heating_system, 'extension/TankModelType', :string)
       @number_of_bedrooms_served = XMLHelper.get_value(water_heating_system, 'extension/NumberofBedroomsServed', :integer)

@@ -2011,22 +2011,15 @@ module Waterheater
       new_heater.setHeaterMinimumCapacity(0.0)
 
       # Set fraction of heat loss from tank to ambient (vs out flue)
-      # Based on lab testing done by LBNL
       skinlossfrac = 1.0
       if (not is_dsh_storage) && (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
-        # Fuel storage water heater
-        # EF cutoffs derived from Figure 2 of http://title24stakeholders.com/wp-content/uploads/2017/10/2013_CASE-Report_High-efficiency-Water-Heater-Ready.pdf
-        # FUTURE: Add an optional HPXML input for water heater type for a user to specify this (and default based on EF as below)
-        ef = water_heating_system.energy_factor
-        if ef.nil?
-          ef = calc_ef_from_uef(water_heating_system)
-        end
-        if ef < 0.64
-          skinlossfrac = 0.64 # Natural draft
-        elsif ef < 0.77
-          skinlossfrac = 0.91 # Power vent
-        else
-          skinlossfrac = 0.96 # Condensing
+        # Fuel storage water heater (based on lab testing done by LBNL)
+        if water_heating_system.condensing_system
+          skinlossfrac = 0.96
+        elsif water_heating_system.power_burner
+          skinlossfrac = 0.91
+        elsif water_heating_system.atmospheric_burner
+          skinlossfrac = 0.64
         end
       end
       new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here

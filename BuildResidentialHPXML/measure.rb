@@ -1187,9 +1187,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
+    # FIXME: Change to a more generic argument (heating_system_sub_type?) that allows atmospheric, direct vent, power vent, condensing, etc?
+    # Could apply for water heaters too.
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_atmospheric_burner', false)
+    arg.setDisplayName('Heating System: Atmospheric Burner')
+    arg.setDescription("Whether the heating system has an atmospheric burner. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeBoiler}, #{HPXML::HVACTypeStove}, and #{HPXML::HVACTypeSpaceHeater} with non-electric fuel type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_pilot_light', false)
     arg.setDisplayName('Heating System: Pilot Light')
-    arg.setDescription("The fuel usage of the pilot light. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeStove}, #{HPXML::HVACTypeBoiler}, and #{HPXML::HVACTypeFireplace} with non-electric fuel type. If not provided, assumes no pilot light.")
+    arg.setDescription("The fuel usage of the pilot light. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeBoiler}, #{HPXML::HVACTypeFireplace}, #{HPXML::HVACTypeStove}, and #{HPXML::HVACTypeSpaceHeater} with non-electric fuel type. If not provided, assumes no pilot light.")
     arg.setUnits('Btuh')
     args << arg
 
@@ -5476,6 +5483,8 @@ module HPXMLFile
       if pilot_light_btuh > 0
         pilot_light = true
       end
+
+      atmospheric_burner = args[:heating_system_atmospheric_burner]
     end
 
     fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
@@ -5500,6 +5509,7 @@ module HPXMLFile
                                    heating_efficiency_afue: heating_efficiency_afue,
                                    heating_efficiency_percent: heating_efficiency_percent,
                                    airflow_defect_ratio: airflow_defect_ratio,
+                                   atmospheric_burner: atmospheric_burner,
                                    pilot_light: pilot_light,
                                    pilot_light_btuh: pilot_light_btuh,
                                    is_shared_system: is_shared_system,

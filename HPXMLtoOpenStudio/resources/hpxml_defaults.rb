@@ -2030,12 +2030,14 @@ module HPXMLDefaults
 
     # Pilot Light
     hpxml_bldg.heating_systems.each do |heating_system|
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
       next unless [HPXML::HVACTypeFurnace,
                    HPXML::HVACTypeWallFurnace,
                    HPXML::HVACTypeFloorFurnace,
+                   HPXML::HVACTypeBoiler,
                    HPXML::HVACTypeFireplace,
                    HPXML::HVACTypeStove,
-                   HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+                   HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
 
       if heating_system.pilot_light.nil?
         heating_system.pilot_light = false
@@ -2045,6 +2047,25 @@ module HPXMLDefaults
         heating_system.pilot_light_btuh = 500.0
         heating_system.pilot_light_btuh_isdefaulted = true
       end
+    end
+
+    # Atmospheric Burner
+    hpxml_bldg.heating_systems.each do |heating_system|
+      next unless heating_system.atmospheric_burner.nil?
+      next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+      next unless [HPXML::HVACTypeFurnace,
+                   HPXML::HVACTypeWallFurnace,
+                   HPXML::HVACTypeFloorFurnace,
+                   HPXML::HVACTypeBoiler,
+                   HPXML::HVACTypeStove,
+                   HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
+
+      if not heating_system.heating_efficiency_afue.nil?
+        heating_system.atmospheric_burner = (heating_system.heating_efficiency_afue < 0.89)
+      elsif not heating_system.heating_efficiency_percent.nil?
+        heating_system.atmospheric_burner = (heating_system.heating_efficiency_percent < 0.89)
+      end
+      heating_system.atmospheric_burner_isdefaulted = true
     end
 
     # Detailed HVAC performance
@@ -2682,6 +2703,27 @@ module HPXMLDefaults
         if water_heating_system.tank_model_type.nil?
           water_heating_system.tank_model_type = HPXML::WaterHeaterTankModelTypeMixed
           water_heating_system.tank_model_type_isdefaulted = true
+        end
+        # FIXME: Use SealedCombustion too?
+        if water_heating_system.atmospheric_burner.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          if not water_heating_system.energy_factor.nil?
+            water_heating_system.atmospheric_burner = (water_heating_system.energy_factor < 0.63)
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            water_heating_system.atmospheric_burner = (Waterheater.calc_ef_from_uef(water_heating_system) < 0.63)
+          end
+          water_heating_system.atmospheric_burner_isdefaulted = true
+        end
+        if water_heating_system.power_burner.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          water_heating_system.power_burner = (not water_heating_system.atmospheric_burner)
+          water_heating_system.power_burner_isdefaulted = true
+        end
+        if water_heating_system.condensing_system.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          if not water_heating_system.energy_factor.nil?
+            water_heating_system.condensing_system = (water_heating_system.energy_factor >= 0.77 && water_heating_system.power_burner)
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            water_heating_system.condensing_system = (Waterheater.calc_ef_from_uef(water_heating_system) >= 0.77 && water_heating_system.power_burner)
+          end
+          water_heating_system.condensing_system_isdefaulted = true
         end
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump)
@@ -3868,13 +3910,7 @@ module HPXMLDefaults
           HPXML::HVACTypeFloorFurnace,
           HPXML::HVACTypeStove,
           HPXML::HVACTypeSpaceHeater].include? heating_system.heating_system_type
-        if not heating_system.heating_efficiency_afue.nil?
-          next if heating_system.heating_efficiency_afue >= 0.89
-        elsif not heating_system.heating_efficiency_percent.nil?
-          next if heating_system.heating_efficiency_percent >= 0.89
-        end
-
-        return true
+        return heating_system.atmospheric_burner
       elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
         return true
       end
@@ -3885,13 +3921,7 @@ module HPXMLDefaults
       next if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
 
-      if not water_heating_system.energy_factor.nil?
-        next if water_heating_system.energy_factor >= 0.63
-      elsif not water_heating_system.uniform_energy_factor.nil?
-        next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
-      end
-
-      return true
+      return water_heating_system.atmospheric_burner
     end
     return false
   end

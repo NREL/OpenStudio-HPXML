@@ -2419,7 +2419,8 @@
     "parent_hpxml": "sample_files/base-hvac-stove-oil-only.xml",
     "heating_system_type": "FloorFurnace",
     "heating_system_fuel": "propane",
-    "heating_system_pilot_light": 600
+    "heating_system_pilot_light": 600,
+    "heating_system_atmospheric_burner": true
   },
   "sample_files/base-hvac-furnace-coal-only.xml": {
     "parent_hpxml": "sample_files/base-hvac-furnace-gas-only.xml",
