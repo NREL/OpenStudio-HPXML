@@ -2134,6 +2134,9 @@
       <sch:assert role='ERROR' test='count(h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1'>Expected 0 or 1 element(s) for xpath: WaterHeaterInsulation/Jacket/JacketRValue</sch:assert>
       <sch:assert role='ERROR' test='count(h:HotWaterTemperature) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotWaterTemperature</sch:assert>
       <sch:assert role='ERROR' test='count(h:UsesDesuperheater) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UsesDesuperheater</sch:assert> <!-- See [Desuperheater] -->
+      <sch:assert role='ERROR' test='count(h:CondensingSystem) &lt;= 1'>Expected 0 or 1 element(s) for xpath: CondensingSystem</sch:assert>
+      <sch:assert role='ERROR' test='count(h:AtmosphericBurner) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AtmosphericBurner</sch:assert>
+      <sch:assert role='ERROR' test='count(h:PowerBurner) &lt;= 1'>Expected 0 or 1 element(s) for xpath: PowerBurner</sch:assert>
       <sch:assert role='ERROR' test='count(h:extension/h:TankModelType) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/TankModelType</sch:assert>
       <sch:assert role='ERROR' test='h:extension/h:TankModelType[text()="mixed" or text()="stratified"] or not(h:extension/h:TankModelType)'>Expected extension/TankModelType to be 'mixed' or 'stratified'</sch:assert>
       <!-- Warnings -->

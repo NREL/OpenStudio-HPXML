@@ -2704,6 +2704,27 @@ module HPXMLDefaults
           water_heating_system.tank_model_type = HPXML::WaterHeaterTankModelTypeMixed
           water_heating_system.tank_model_type_isdefaulted = true
         end
+        # FIXME: Use SealedCombustion too?
+        if water_heating_system.atmospheric_burner.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          if not water_heating_system.energy_factor.nil?
+            water_heating_system.atmospheric_burner = (water_heating_system.energy_factor < 0.63)
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            water_heating_system.atmospheric_burner = (Waterheater.calc_ef_from_uef(water_heating_system) < 0.63)
+          end
+          water_heating_system.atmospheric_burner_isdefaulted = true
+        end
+        if water_heating_system.power_burner.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          water_heating_system.power_burner = (not water_heating_system.atmospheric_burner)
+          water_heating_system.power_burner_isdefaulted = true
+        end
+        if water_heating_system.condensing_system.nil? && water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+          if not water_heating_system.energy_factor.nil?
+            water_heating_system.condensing_system = (water_heating_system.energy_factor >= 0.77 && water_heating_system.power_burner)
+          elsif not water_heating_system.uniform_energy_factor.nil?
+            water_heating_system.condensing_system = (Waterheater.calc_ef_from_uef(water_heating_system) >= 0.77 && water_heating_system.power_burner)
+          end
+          water_heating_system.condensing_system_isdefaulted = true
+        end
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump)
         schedules_file_includes_water_heater_operating_mode = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:WaterHeaterOperatingMode].name))
@@ -3900,13 +3921,7 @@ module HPXMLDefaults
       next if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       next unless HPXML::conditioned_locations_this_unit.include? water_heating_system.location
 
-      if not water_heating_system.energy_factor.nil?
-        next if water_heating_system.energy_factor >= 0.63
-      elsif not water_heating_system.uniform_energy_factor.nil?
-        next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
-      end
-
-      return true
+      return water_heating_system.atmospheric_burner
     end
     return false
   end

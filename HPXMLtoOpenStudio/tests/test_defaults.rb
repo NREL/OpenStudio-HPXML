@@ -2953,11 +2953,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       wh.temperature = 111
       wh.energy_factor = 0.90
       wh.tank_model_type = HPXML::WaterHeaterTankModelTypeStratified
+      wh.atmospheric_burner = true
+      wh.power_burner = true
+      wh.condensing_system = true
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
-                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationConditionedSpace, 111, 0.90, HPXML::WaterHeaterTankModelTypeStratified])
+                                              [true, 15000.0, 40.0, 0.95, HPXML::LocationConditionedSpace, 111, 0.90, HPXML::WaterHeaterTankModelTypeStratified, true, true, true])
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml_bldg.water_heating_systems.each do |wh|
@@ -2968,11 +2971,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       wh.location = nil
       wh.temperature = nil
       wh.tank_model_type = nil
+      wh.atmospheric_burner = nil
+      wh.power_burner = nil
+      wh.condensing_system = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
-                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.9, HPXML::WaterHeaterTankModelTypeMixed])
+                                              [false, 18766.7, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.9, HPXML::WaterHeaterTankModelTypeMixed, nil, nil, nil])
 
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-beds-5.xml')
@@ -2984,11 +2990,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       wh.location = nil
       wh.temperature = nil
       wh.tank_model_type = nil
+      wh.atmospheric_burner = nil
+      wh.power_burner = nil
+      wh.condensing_system = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
-                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.95, HPXML::WaterHeaterTankModelTypeMixed])
+                                              [false, 18766.7, 66.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.95, HPXML::WaterHeaterTankModelTypeMixed, nil, nil, nil])
 
     # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-multiple.xml')
@@ -3002,12 +3011,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       wh.location = nil
       wh.temperature = nil
       wh.tank_model_type = nil
+      wh.atmospheric_burner = nil
+      wh.power_burner = nil
+      wh.condensing_system = nil
     end
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_storage_water_heater_values(default_hpxml_bldg,
-                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.95, HPXML::WaterHeaterTankModelTypeMixed],
-                                              [false, 36000.0, 40.0, 0.757, HPXML::LocationBasementConditioned, 125, 0.59, HPXML::WaterHeaterTankModelTypeMixed])
+                                              [false, 15354.6, 50.0, 0.98, HPXML::LocationBasementConditioned, 125, 0.95, HPXML::WaterHeaterTankModelTypeMixed, nil, nil, nil],
+                                              [false, 36000.0, 40.0, 0.757, HPXML::LocationBasementConditioned, 125, 0.59, HPXML::WaterHeaterTankModelTypeMixed, false, true, false])
 
     # Test inputs not overridden by defaults w/ UEF
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-tank-gas-uef.xml')

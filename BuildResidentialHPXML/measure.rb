@@ -1187,6 +1187,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
+    # FIXME: Change to a more generic argument (heating_system_sub_type?) that allows atmospheric, direct vent, power vent, condensing, etc?
+    # Could apply for water heaters too.
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_atmospheric_burner', false)
     arg.setDisplayName('Heating System: Atmospheric Burner')
     arg.setDescription("Whether the heating system has an atmospheric burner. Applies only to #{HPXML::HVACTypeFurnace}, #{HPXML::HVACTypeWallFurnace}, #{HPXML::HVACTypeFloorFurnace}, #{HPXML::HVACTypeBoiler}, #{HPXML::HVACTypeStove}, and #{HPXML::HVACTypeSpaceHeater} with non-electric fuel type. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-heating-systems'>HPXML Heating Systems</a>) is used.")

@@ -3698,7 +3698,10 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
   ``RecoveryEfficiency``                         double             frac           > 0, <= 1 [#]_        No        See [#]_  Recovery efficiency
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double             F-ft2-hr/Btu   >= 0                  No        0         R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double             F              > 0                   No        125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                          boolean                                                 No        false     Presence of desuperheater [#]_
+  ``CondensingSystem``                           boolean                                                 No        See [#]_  Condensing water heater?
+  ``AtmosphericBurner``                          boolean                                                 No        See [#]_  Presence of atmospheric burner
+  ``PowerBurner``                                boolean                                                 No        See [#]_  Presence of power burner
   ``extension/TankModelType``                    string                            See [#]_              No        mixed     Tank model type
   ``extension/NumberofBedroomsServed``           integer                           > NumberofBedrooms    See [#]_            Number of bedrooms served directly or indirectly
   =============================================  =================  =============  ====================  ========  ========  =============================================
@@ -3732,6 +3735,12 @@ Each conventional storage water heater is entered as a ``/HPXML/Building/Buildin
          
   .. [#] The water heater setpoint can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] Additional desuperheater inputs are described in :ref:`water_heater_desuperheater`.
+  .. [#] If CondensingSystem not provided, defaults to true if the system is non-electric and the EF is greater than or equal to 0.77, otherwise false.
+         Used to inform the fraction of heat lost to the ambient environment vs outside (via the flue).
+  .. [#] If AtmosphericBurner not provided, defaults to true if the system is non-electric and the EF is less than 0.63, otherwise false.
+         Used to inform whether there is a flue or chimney present (see :ref:`flueorchimney`), which can affect the infiltration model, as well as the fraction of heat lost to the ambient environment vs outside (via the flue).
+  .. [#] If PowerBurner not provided, defaults to true if the system is non-electric and the EF is greater than or equal to 0.63, otherwise false.
+         Used to inform the fraction of heat lost to the ambient environment vs outside (via the flue).
   .. [#] TankModelType choices are "mixed" or "stratified".
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
@@ -3756,7 +3765,7 @@ Each instantaneous tankless water heater is entered as a ``/HPXML/Building/Build
   ``FractionDHWLoadServed``                    double   frac          >= 0, <= 1 [#]_             Yes                     Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``  double   frac          < 1                         Yes                     EnergyGuide label rated efficiency
   ``HotWaterTemperature``                      double   F             > 0                         No            125       Water heater setpoint [#]_
-  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                        boolean                                            No            false     Presence of desuperheater [#]_
   ``extension/NumberofBedroomsServed``         integer                > NumberofBedrooms          See [#]_                Number of bedrooms served directly or indirectly
   ===========================================  =======  ============  ==========================  ============  ========  ==========================================================
 
@@ -3800,7 +3809,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_     EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0            R-value of additional tank insulation wrap
   ``HotWaterTemperature``                        double            F              > 0                     No        125          Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater? [#]_
+  ``UsesDesuperheater``                          boolean                                                  No        false        Presence of desuperheater [#]_
   ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_               Number of bedrooms served directly or indirectly
   =============================================  ================  =============  ======================  ========  ===========  =============================================
 

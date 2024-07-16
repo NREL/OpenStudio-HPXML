@@ -1,9 +1,11 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
+- **Breaking change**: Deprecates `HasFlueOrChimneyInConditionedSpace` input.
+  - Allows optional `AtmosphericBurner` inputs for furnaces, boilers, stoves, space heaters, and storage water heaters.
 - Adds inputs for modeling skylight curbs and/or shafts.
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
-- Allows optional `AtmosphericBurner` inputs for furnaces, boilers, stoves, and space heaters.
+- Allows optional `CondensingSystem` and `PowerBurner` inputs for storage water heaters.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - Allows modeling systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
