@@ -2003,6 +2003,9 @@ module Constructions
   # @param ext_vert_depth [TODO] TODO
   # @param concrete_thick_in [TODO] TODO
   # @param soil_k_in [TODO] TODO
+  # @param ext_horiz_r [TODO] TODO
+  # @param ext_horiz_width [TODO] TODO
+  # @param ext_horiz_depth [TODO] TODO
   # @return [TODO] TODO
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
                                        ext_vert_r, ext_vert_depth, concrete_thick_in, soil_k_in, ext_horiz_r, ext_horiz_width, ext_horiz_depth)
