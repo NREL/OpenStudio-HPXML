@@ -2176,6 +2176,8 @@ module HVACSizing
         end
 
         # Calculate the final air flow rate using final sensible capacity at design
+        # hp_cooling_cfm argument not provided to calc_airflow_rate_manual_s
+        # since the function is not being used to calculate a heating airflow
         hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
 
         delta = (hvac_sizings.Cool_Airflow - cool_airflow_prev) / cool_airflow_prev
