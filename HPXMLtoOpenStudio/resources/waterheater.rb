@@ -443,13 +443,13 @@ module Waterheater
 
     obj_name = Constants.ObjectNameSolarHotWater
 
-    if [HPXML::SolarThermalTypeEvacuatedTube].include? solar_thermal_system.collector_type
+    if [HPXML::SolarThermalCollectorTypeEvacuatedTube].include? solar_thermal_system.collector_type
       iam_coeff2 = 0.3023 # IAM coeff1=1 by definition, values based on a system listed by SRCC with values close to the average
       iam_coeff3 = -0.3057
-    elsif [HPXML::SolarThermalTypeSingleGlazing, HPXML::SolarThermalTypeDoubleGlazing].include? solar_thermal_system.collector_type
+    elsif [HPXML::SolarThermalCollectorTypeSingleGlazing, HPXML::SolarThermalCollectorTypeDoubleGlazing].include? solar_thermal_system.collector_type
       iam_coeff2 = 0.1
       iam_coeff3 = 0
-    elsif [HPXML::SolarThermalTypeICS].include? solar_thermal_system.collector_type
+    elsif [HPXML::SolarThermalCollectorTypeICS].include? solar_thermal_system.collector_type
       iam_coeff2 = 0.1
       iam_coeff3 = 0
     end
@@ -567,7 +567,7 @@ module Waterheater
     shading_surface.setName(obj_name + ' shading surface')
     shading_surface.setShadingSurfaceGroup(shading_surface_group)
 
-    if solar_thermal_system.collector_type == HPXML::SolarThermalTypeICS
+    if solar_thermal_system.collector_type == HPXML::SolarThermalCollectorTypeICS
       collector_plate = OpenStudio::Model::SolarCollectorIntegralCollectorStorage.new(model)
       collector_plate.setName(obj_name + ' coll plate')
       collector_plate.setSurface(shading_surface)
@@ -598,8 +598,8 @@ module Waterheater
       collector_performance.setTestFluid('Water')
       collector_performance.setTestFlowRate(UnitConversions.convert(coll_flow, 'cfm', 'm^3/s'))
       collector_performance.setTestCorrelationType('Inlet')
-      collector_performance.setCoefficient1ofEfficiencyEquation(solar_thermal_system.collector_frta)
-      collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(solar_thermal_system.collector_frul, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      collector_performance.setCoefficient1ofEfficiencyEquation(solar_thermal_system.collector_rated_optical_efficiency)
+      collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(solar_thermal_system.collector_rated_thermal_losses, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       collector_performance.setCoefficient2ofIncidentAngleModifier(-iam_coeff2)
       collector_performance.setCoefficient3ofIncidentAngleModifier(iam_coeff3)
 
@@ -625,7 +625,7 @@ module Waterheater
     storage_tank.setName(obj_name + ' storage tank')
     storage_tank.setSourceSideEffectiveness(heat_ex_eff)
     storage_tank.setTankShape('VerticalCylinder')
-    if (solar_thermal_system.collector_type == HPXML::SolarThermalTypeICS) || (fluid_type == Constants.FluidWater) # Use a 60 gal tank dummy tank for direct systems, storage volume for ICS is assumed to be collector volume
+    if (solar_thermal_system.collector_type == HPXML::SolarThermalCollectorTypeICS) || (fluid_type == Constants.FluidWater) # Use a 60 gal tank dummy tank for direct systems, storage volume for ICS is assumed to be collector volume
       tank_volume = UnitConversions.convert(60 * unit_multiplier, 'gal', 'm^3')
     else
       tank_volume = UnitConversions.convert(storage_volume, 'gal', 'm^3')

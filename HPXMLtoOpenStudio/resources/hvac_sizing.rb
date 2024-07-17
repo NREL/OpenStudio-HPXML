@@ -335,7 +335,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Heating design temperature (F)
   def self.get_design_temp_heating(mj, weather, location, hpxml_bldg)
@@ -395,7 +395,7 @@ module HVACSizing
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Double] Cooling design temperature (F)
   def self.get_design_temp_cooling(mj, weather, location, hpxml_bldg)
@@ -542,7 +542,7 @@ module HVACSizing
   # Estimates the fraction of garage under conditioned space from adjacent surfaces.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @return [Double] Garage fraction under conditioned space
   def self.get_garage_frac_under_conditioned(hpxml_bldg, location)
     area_total = 0.0
@@ -2908,7 +2908,7 @@ module HVACSizing
 
   # Returns the geothermal loop g-function response factors.
   #
-  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param bore_config [String] Borefield configuration (HPXML::GeothermalLoopBorefieldConfigurationXXX)
   # @param g_functions_json [JSON] JSON object with g-function data
   # @param geothermal_loop [HPXML::GeothermalLoop] Geothermal loop of interest
   # @param num_bore_holes [Integer] Total number of boreholes
@@ -2973,7 +2973,7 @@ module HVACSizing
   # Returns the geothermal loop g-function logtimes/values for a specific configuration in the JSON file.
   #
   # @param g_functions_json [JSON] JSON object with g-function data
-  # @param bore_config [String] Borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+  # @param bore_config [String] Borefield configuration (HPXML::GeothermalLoopBorefieldConfigurationXXX)
   # @param num_bore_holes [Integer] Total number of boreholes
   # @param b_h_rb [String] The lookup key (B._H._rb) in the g-function data.
   # @return [Array<Array<Double>, Array<Double>>] List of logtimes, list of g-function values
@@ -3680,7 +3680,7 @@ module HVACSizing
   # Calculates UA (U-factor times Area) values for a HPXML location.
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Hash] UA values for adjacency to outdoor air, ground, or conditioned space (Btu/hr-F)
@@ -3772,7 +3772,7 @@ module HVACSizing
   # UA-based heat balance method. (Unvented attics w/ roof insulation are handled as a special case.)
   #
   # @param mj [MJValues] Object with a collection of misc Manual J values
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param setpoint_temp [Double] The conditioned space heating or cooling setpoint temperature (F)
@@ -3843,7 +3843,7 @@ module HVACSizing
   # Retrieves the design temperature for a space that uses scheduled temperatures (e.g., multifamily
   # spaces when modeling an individual dwelling unit).
   #
-  # @param location [String] The HPXML::LocationXXX of interest
+  # @param location [String] The location of interest (HPXML::LocationXXX)
   # @param setpoint_temp [Double] The conditioned space heating or cooling setpoint temperature (F)
   # @param outdoor_design_temp [Double] The outdoor heating or cooling design temperature (F)
   # @param ground_temp [Double] The approximate ground temperature during the heating or cooling season (F)
@@ -5001,7 +5001,7 @@ class HVACSizingValues
                 :GSHP_Bore_Holes,     # [Integer] Ground-source heat pump number of boreholes (#)
                 :GSHP_Bore_Depth,     # [Double] Ground-source heat pump depth of each borehole (ft)
                 :GSHP_G_Functions,    # [Array<Array<Double>, Array<Double>>] Ground-source heat pump G-functions
-                :GSHP_Bore_Config)    # [String] Ground-source heat pump borefield configuration of type HPXML::GeothermalLoopBorefieldConfigurationXXX
+                :GSHP_Bore_Config)    # [String] Ground-source heat pump borefield configuration (HPXML::GeothermalLoopBorefieldConfigurationXXX)
 end
 
 # Object with data needed to write out the detailed output (used for populating an ACCA J1 form).

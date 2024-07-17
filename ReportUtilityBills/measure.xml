@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>61a803bf-6701-4d55-bdd2-92773b0648d3</version_id>
-  <version_modified>2024-07-15T22:55:09Z</version_modified>
+  <version_id>e7a1eb0f-f485-45ad-9448-2e5f6c145c5f</version_id>
+  <version_modified>2024-07-17T17:05:04Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -306,7 +306,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6990D619</checksum>
+      <checksum>0B994914</checksum>
     </file>
     <file>
       <filename>Contains Demand Charges.json</filename>

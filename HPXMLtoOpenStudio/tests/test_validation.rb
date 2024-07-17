@@ -1538,38 +1538,38 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['solar-thermal-system-with-combi-tankless'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-combi-tankless.xml')
         hpxml_bldg.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml_bldg.solar_thermal_systems.size + 1}",
-                                             system_type: HPXML::SolarThermalSystemType,
+                                             system_type: HPXML::SolarThermalSystemTypeHotWater,
                                              collector_area: 40,
-                                             collector_type: HPXML::SolarThermalTypeSingleGlazing,
+                                             collector_type: HPXML::SolarThermalCollectorTypeSingleGlazing,
                                              collector_loop_type: HPXML::SolarThermalLoopTypeIndirect,
                                              collector_azimuth: 180,
                                              collector_tilt: 20,
-                                             collector_frta: 0.77,
-                                             collector_frul: 0.793,
+                                             collector_rated_optical_efficiency: 0.77,
+                                             collector_rated_thermal_losses: 0.793,
                                              water_heating_system_idref: 'WaterHeatingSystem1')
       elsif ['solar-thermal-system-with-desuperheater'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-desuperheater.xml')
         hpxml_bldg.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml_bldg.solar_thermal_systems.size + 1}",
-                                             system_type: HPXML::SolarThermalSystemType,
+                                             system_type: HPXML::SolarThermalSystemTypeHotWater,
                                              collector_area: 40,
-                                             collector_type: HPXML::SolarThermalTypeSingleGlazing,
+                                             collector_type: HPXML::SolarThermalCollectorTypeSingleGlazing,
                                              collector_loop_type: HPXML::SolarThermalLoopTypeIndirect,
                                              collector_azimuth: 180,
                                              collector_tilt: 20,
-                                             collector_frta: 0.77,
-                                             collector_frul: 0.793,
+                                             collector_rated_optical_efficiency: 0.77,
+                                             collector_rated_thermal_losses: 0.793,
                                              water_heating_system_idref: 'WaterHeatingSystem1')
       elsif ['solar-thermal-system-with-dhw-indirect'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-dhw-combi-tankless.xml')
         hpxml_bldg.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml_bldg.solar_thermal_systems.size + 1}",
-                                             system_type: HPXML::SolarThermalSystemType,
+                                             system_type: HPXML::SolarThermalSystemTypeHotWater,
                                              collector_area: 40,
-                                             collector_type: HPXML::SolarThermalTypeSingleGlazing,
+                                             collector_type: HPXML::SolarThermalCollectorTypeSingleGlazing,
                                              collector_loop_type: HPXML::SolarThermalLoopTypeIndirect,
                                              collector_azimuth: 180,
                                              collector_tilt: 20,
-                                             collector_frta: 0.77,
-                                             collector_frul: 0.793,
+                                             collector_rated_optical_efficiency: 0.77,
+                                             collector_rated_thermal_losses: 0.793,
                                              water_heating_system_idref: 'WaterHeatingSystem1')
       elsif ['storm-windows-unexpected-window-ufactor'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')

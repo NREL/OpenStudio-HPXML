@@ -977,7 +977,7 @@ module HotWaterAndAppliances
       pe_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       ref_loop_l = get_default_recirc_loop_length(ref_pipe_l)
-      pe_ratio = hot_water_distribution.recirculation_piping_length / ref_loop_l
+      pe_ratio = hot_water_distribution.recirculation_piping_loop_length / ref_loop_l
     end
     e_waste = oew_fact * (1.0 - ocd_eff) + sew_fact * pe_ratio
     return (e_waste + 128.0) / 160.0

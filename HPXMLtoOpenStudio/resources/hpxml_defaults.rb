@@ -2745,9 +2745,9 @@ module HPXMLDefaults
         hot_water_distribution.standard_piping_length_isdefaulted = true
       end
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
-      if hot_water_distribution.recirculation_piping_length.nil?
-        hot_water_distribution.recirculation_piping_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl))
-        hot_water_distribution.recirculation_piping_length_isdefaulted = true
+      if hot_water_distribution.recirculation_piping_loop_length.nil?
+        hot_water_distribution.recirculation_piping_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl))
+        hot_water_distribution.recirculation_piping_loop_length_isdefaulted = true
       end
       if hot_water_distribution.recirculation_branch_piping_length.nil?
         hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()

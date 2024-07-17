@@ -3134,7 +3134,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test defaults w/ recirculation & conditioned basement
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-recirc-demand.xml')
-    hpxml_bldg.hot_water_distributions[0].recirculation_piping_length = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_piping_loop_length = nil
     hpxml_bldg.hot_water_distributions[0].recirculation_branch_piping_length = nil
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_power = nil
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = nil
@@ -5326,7 +5326,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_recirc_distribution_values(hot_water_distribution, piping_length, branch_piping_length, pump_power, pipe_r_value, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_length, 0.01)
+    assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_loop_length, 0.01)
     assert_in_epsilon(branch_piping_length, hot_water_distribution.recirculation_branch_piping_length, 0.01)
     assert_in_epsilon(pump_power, hot_water_distribution.recirculation_pump_power, 0.01)
     assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)

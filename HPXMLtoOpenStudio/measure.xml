@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5345803d-cd66-42d3-98f5-f0b66dc50886</version_id>
-  <version_modified>2024-07-17T00:30:06Z</version_modified>
+  <version_id>a2d12496-30dc-40a7-9afc-ddfcba4537c0</version_id>
+  <version_modified>2024-07-17T17:05:01Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -339,19 +339,19 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2AA33802</checksum>
+      <checksum>DD6E04DC</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8362729E</checksum>
+      <checksum>68DED9C3</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A6DAC435</checksum>
+      <checksum>1679B23A</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6D2D6F38</checksum>
+      <checksum>4401FE34</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -609,7 +609,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>47411FEE</checksum>
+      <checksum>E3E0625C</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -645,7 +645,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>018D40ED</checksum>
+      <checksum>048DAEB5</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -717,13 +717,13 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>90CBA9D0</checksum>
+      <checksum>7B449D39</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>485EE23B</checksum>
+      <checksum>16B0EA4F</checksum>
     </file>
     <file>
       <filename>test_weather.rb</filename>
