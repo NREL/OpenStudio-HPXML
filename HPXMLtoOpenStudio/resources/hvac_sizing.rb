@@ -1032,11 +1032,9 @@ module HVACSizing
       htg_htm = 0.0
       clg_htm = 0.0
       azimuths.each do |_azimuth|
-        if wall.is_exposed
+        if wall.is_exterior
           # Store exposed wall gross area for infiltration calculation
           space.additional_properties.total_exposed_wall_area += wall.area / azimuths.size
-        end
-        if wall.is_exterior
 
           # Adjust base Cooling Load Temperature Difference (CLTD)
           # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
@@ -1096,13 +1094,11 @@ module HVACSizing
       space = foundation_wall.space
       zone = space.zone
 
-      if foundation_wall.is_exposed
+      if foundation_wall.is_exterior
         # Store exposed wall gross area for infiltration calculation
         ag_frac = (foundation_wall.height - foundation_wall.depth_below_grade) / foundation_wall.height
         space.additional_properties.total_exposed_wall_area += foundation_wall.area * ag_frac
-      end
 
-      if foundation_wall.is_exterior
         u_wall_with_soil = get_foundation_wall_ufactor(foundation_wall, true, mj.ground_conductivity)
         htg_htm = u_wall_with_soil * mj.htd
       else # Partition wall
@@ -1985,7 +1981,7 @@ module HVACSizing
     vent_mech_cfis = hpxml_bldg.ventilation_fans.find { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS && vent_mech.distribution_system_idref == hvac_distribution.id }
     return if vent_mech_cfis.nil?
 
-    vent_cfm = vent_mech_cfis.average_total_unit_flow_rate
+    vent_cfm = vent_mech_cfis.average_unit_flow_rate
 
     heat_load = 1.1 * mj.acf * vent_cfm * mj.htd
     cool_sens_load = 1.1 * mj.acf * vent_cfm * mj.ctd
@@ -3206,7 +3202,7 @@ module HVACSizing
   def self.get_ventilation_data(hpxml_bldg)
     # If CFIS w/ supplemental fan, assume air handler is running the full hour and can provide
     # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
-    vent_fans_mech = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? && f.flow_rate > 0 && f.hours_in_operation > 0 }
+    vent_fans_mech = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan && f.flow_rate > 0 && f.hours_in_operation > 0 }
     if vent_fans_mech.empty?
       return { q_unbal: 0.0, q_bal: 0.0, q_preheat: 0.0, q_precool: 0.0,
                q_recirc: 0.0, bal_sens_eff: 0.0, bal_lat_eff: 0.0 }
@@ -3224,16 +3220,16 @@ module HVACSizing
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
     # Average preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
     q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
     q_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
-    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_total_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
+    q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
 
     # Total CFMS
     q_tot_sup = q_sup_tot + q_bal_tot + q_erv_hrv_tot + q_cfis_tot

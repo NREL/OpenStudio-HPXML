@@ -5210,7 +5210,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def _test_default_mech_vent_values(hpxml_bldg, is_shared_system, hours_in_operation, fan_power, flow_rate,
                                      cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
-    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
@@ -5229,7 +5229,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_mech_vent_suppl_values(hpxml_bldg, is_shared_system, hours_in_operation, fan_power, flow_rate)
-    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     if hours_in_operation.nil?

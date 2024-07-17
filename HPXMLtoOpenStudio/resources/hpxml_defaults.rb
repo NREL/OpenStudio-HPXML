@@ -2536,13 +2536,13 @@ module HPXMLDefaults
         vent_fan.is_shared_system_isdefaulted = true
       end
 
-      if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan?
+      if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
 
       if vent_fan.flow_rate.nil?
-        if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan? }.size > 1
+        if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan }.size > 1
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 

@@ -1169,22 +1169,22 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                                         distribution_system_idref: hpxml_bldg.hvac_distributions[0].id)
       elsif ['cfis-invalid-supplemental-fan'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
-        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
+        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan }
         suppl_fan.fan_type = HPXML::MechVentTypeBalanced
       elsif ['cfis-invalid-supplemental-fan2'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
-        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
+        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan }
         suppl_fan.used_for_whole_building_ventilation = false
         suppl_fan.used_for_garage_ventilation = true
       elsif ['cfis-invalid-supplemental-fan3'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
-        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
+        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan }
         suppl_fan.is_shared_system = true
         suppl_fan.fraction_recirculation = 0.0
         suppl_fan.in_unit_flow_rate = suppl_fan.tested_flow_rate / 2.0
       elsif ['cfis-invalid-supplemental-fan4'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
-        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
+        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan }
         suppl_fan.hours_in_operation = 12.0
       elsif ['dehumidifier-setpoints'].include? error_case
         hpxml, hpxml_bldg = _create_hpxml('base-appliances-dehumidifier-multiple.xml')
@@ -1791,7 +1791,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       # Create HPXML object
       if ['cfis-undersized-supplemental-fan'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
-        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan? }
+        suppl_fan = hpxml_bldg.ventilation_fans.find { |f| f.is_cfis_supplemental_fan }
         suppl_fan.tested_flow_rate = 90.0
       elsif ['duct-lto-cfm25'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-atticroof-conditioned.xml')

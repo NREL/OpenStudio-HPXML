@@ -79,7 +79,7 @@ module Airflow
       next unless vent_fan.hours_in_operation.nil? || vent_fan.hours_in_operation > 0
 
       if vent_fan.used_for_whole_building_ventilation
-        if not vent_fan.is_cfis_supplemental_fan?
+        if not vent_fan.is_cfis_supplemental_fan
           vent_fans_mech << vent_fan
         else
           vent_fans_cfis_suppl << vent_fan
@@ -429,7 +429,7 @@ module Airflow
     nl = get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
     q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
-    if vent_fan.is_balanced?
+    if vent_fan.is_balanced
       is_balanced, frac_imbal = true, 0.0
     else
       is_balanced, frac_imbal = false, 1.0
@@ -1881,8 +1881,8 @@ module Airflow
         # Air handler meets additional runtime requirement
         infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w * #{@cfis_f_damper_extra_open_var[vent_mech.id].name}")
       elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
-        if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_total_unit_flow_rate
-          @runner.registerWarning("CFIS supplemental fan '#{vent_mech.cfis_supplemental_fan.id}' is undersized (#{vent_mech.cfis_supplemental_fan.oa_unit_flow_rate} cfm) compared to the target hourly ventilation rate (#{vent_mech.average_total_unit_flow_rate} cfm).")
+        if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_unit_flow_rate
+          @runner.registerWarning("CFIS supplemental fan '#{vent_mech.cfis_supplemental_fan.id}' is undersized (#{vent_mech.cfis_supplemental_fan.oa_unit_flow_rate} cfm) compared to the target hourly ventilation rate (#{vent_mech.average_unit_flow_rate} cfm).")
         end
         infil_program.addLine("    Set cfis_suppl_Q_oa = #{UnitConversions.convert(vent_mech.cfis_supplemental_fan.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
         if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate > 0
@@ -2033,10 +2033,10 @@ module Airflow
   def self.apply_infiltration_adjustment_to_conditioned(model, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals, vent_mech_sup_tot,
                                                         vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, infil_flow_actuator, schedules_file, unavailable_periods)
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each_with_index do |vent_kitchen, index|
@@ -2351,7 +2351,7 @@ module Airflow
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
     infil_program.addLine('Set Qload = Qfan')
     vent_fans_mech.each do |f|
-      recirc_flow_rate = f.average_total_unit_flow_rate - f.average_oa_unit_flow_rate
+      recirc_flow_rate = f.average_unit_flow_rate - f.average_oa_unit_flow_rate
       next unless recirc_flow_rate > 0
 
       # Subtract recirculation air flow rate from Qfan, only come from supply side as exhaust is not allowed to have recirculation

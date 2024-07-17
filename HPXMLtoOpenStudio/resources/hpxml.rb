@@ -605,7 +605,7 @@ class HPXML < Object
   # Returns the HPXML object converted to an Oga XML Document.
   #
   # @return [Oga::XML::Document] HPXML object as an XML document
-  def to_doc()
+  def to_doc
     hpxml_doc = _create_hpxml_document()
     @header.to_doc(hpxml_doc)
     @buildings.to_doc(hpxml_doc)
@@ -727,18 +727,20 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Used to create _isdefaulted attributes on the fly that correspond to every defined attribute.
     def create_method(name, &block)
       self.class.send(:define_method, name, &block)
     end
 
-    # TODO
+    # Used to create _isdefaulted attributes on the fly that correspond to every defined attribute.
     def create_attr(name)
       create_method("#{name}=".to_sym) { |val| instance_variable_set('@' + name, val) }
       create_method(name.to_sym) { instance_variable_get('@' + name) }
     end
 
-    # TODO
+    # Creates a hash out of the object properties.
+    #
+    # @return [Hash] Map of attribute name => value
     def to_h
       h = {}
       self.class::ATTRS.each do |attribute|
@@ -747,12 +749,14 @@ class HPXML < Object
       return h
     end
 
-    # TODO
+    # Returns how the object is formatted when using .to_s.
     def to_s
       return to_h.to_s
     end
 
-    # Returns true if all attributes are nil
+    # Returns whether all attributes are nil
+    #
+    # @return [Boolean] True if all attributes are nil
     def nil?
       to_h.each do |k, v|
         next if k.to_s.end_with? '_isdefaulted'
@@ -801,7 +805,7 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns how the object is formatted when using .to_s.
     def to_s
       return map { |x| x.to_s }
     end
@@ -1754,7 +1758,7 @@ class HPXML < Object
     # Since we don't have count available, we use area as an approximation.
     #
     # @return [Double] Total fraction of window area that is window area of operable windows
-    def fraction_of_windows_operable()
+    def fraction_of_windows_operable
       window_area_total = @windows.map { |w| w.area }.sum(0.0)
       window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.sum(0.0)
       if window_area_total <= 0
@@ -1767,35 +1771,35 @@ class HPXML < Object
     # Returns all HPXML zones that are conditioned.
     #
     # @return [Array<HPXML::Zone>] Conditioned zones
-    def conditioned_zones()
+    def conditioned_zones
       return zones.select { |z| z.zone_type == ZoneTypeConditioned }
     end
 
     # Returns all HPXML spaces that are conditioned.
     #
     # @return [Array<HPXML::Space>] Conditioned spaces
-    def conditioned_spaces()
+    def conditioned_spaces
       return conditioned_zones.map { |z| z.spaces }.flatten
     end
 
     # Returns all HVAC systems that are labeled as primary systems.
     #
     # @return [Array<HPXML::XXX>] List of primary HVAC systems
-    def primary_hvac_systems()
+    def primary_hvac_systems
       return hvac_systems.select { |h| h.primary_system }
     end
 
     # Returns the total fraction of building's cooling load served by HVAC systems.
     #
     # @return [Double] Total fraction of building's cooling load served
-    def total_fraction_cool_load_served()
+    def total_fraction_cool_load_served
       return @cooling_systems.total_fraction_cool_load_served + @heat_pumps.total_fraction_cool_load_served
     end
 
     # Returns the total fraction of building's heating load served by HVAC systems.
     #
     # @return [Double] Total fraction of building's heating load served
-    def total_fraction_heat_load_served()
+    def total_fraction_heat_load_served
       return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served + @cooling_systems.total_fraction_heat_load_served
     end
 
@@ -1803,7 +1807,7 @@ class HPXML < Object
     # type and the number of conditioned floors (total and above-grade).
     #
     # return [Boolean] True if the building has a walkout basement
-    def has_walkout_basement()
+    def has_walkout_basement
       has_conditioned_basement = has_location(LocationBasementConditioned)
       ncfl = @building_construction.number_of_conditioned_floors
       ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
@@ -1820,7 +1824,7 @@ class HPXML < Object
     # wall in contact with soil.
     #
     # @return [Array<Double, Double>] Above-grade and below-grade thermal boundary wall areas (ft2)
-    def thermal_boundary_wall_areas()
+    def thermal_boundary_wall_areas
       ag_wall_area = 0.0
       bg_wall_area = 0.0
 
@@ -1845,7 +1849,7 @@ class HPXML < Object
     # Estimates the above-grade conditioned volume.
     #
     # @return [Double] Above-grade conditioned volume (ft3)
-    def above_grade_conditioned_volume()
+    def above_grade_conditioned_volume
       ag_wall_area, bg_wall_area = thermal_boundary_wall_areas()
       ag_ratio = ag_wall_area / (ag_wall_area + bg_wall_area)
       return @building_construction.conditioned_building_volume * ag_ratio
@@ -1858,7 +1862,7 @@ class HPXML < Object
     # conditioned space, not including foundation walls.
     #
     # @return [Double] Common wall area (ft2)
-    def common_wall_area()
+    def common_wall_area
       area = 0.0
       (@walls + @rim_joists).each do |wall|
         next unless HPXML::conditioned_locations_this_unit.include? wall.interior_adjacent_to
@@ -1877,7 +1881,7 @@ class HPXML < Object
     # SFA/MF dwelling units per ANSI 301.
     #
     # @return [Array<Double, Double>] Total and exterior compartmentalization areas (ft2)
-    def compartmentalization_boundary_areas()
+    def compartmentalization_boundary_areas
       total_area = 0.0 # Total surface area that bounds the Infiltration Volume
       exterior_area = 0.0 # Same as above excluding surfaces attached to garage, other housing units, or other multifamily spaces (see 301-2019 Addendum B)
 
@@ -1981,7 +1985,7 @@ class HPXML < Object
     # Deletes any adiabatic sub-surfaces since EnergyPlus does not allow it.
     #
     # @return [void]
-    def delete_adiabatic_subsurfaces()
+    def delete_adiabatic_subsurfaces
       @doors.reverse_each do |door|
         next if door.wall.nil?
         next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
@@ -2001,7 +2005,7 @@ class HPXML < Object
     # easy or possible, so additional checking occurs here.
     #
     # @return [Array<String>] List of error messages
-    def check_for_errors()
+    def check_for_errors
       errors = []
 
       errors += HPXML::check_dates('Daylight Saving', @dst_begin_month, @dst_begin_day, @dst_end_month, @dst_end_day)
@@ -2123,12 +2127,13 @@ class HPXML < Object
       return errors
     end
 
-    # TODO
+    # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
+    # This can significantly speed up performance for HPXML files with lots of individual
+    # surfaces (e.g., windows).
+    #
+    # @param surf_types_of_interest [Array<Symbol>] Subset of surface types (e.g., :roofs, :walls, etc.) to collapse
+    # @return [void]
     def collapse_enclosure_surfaces(surf_types_of_interest = nil)
-      # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
-      # This can significantly speed up performance for HPXML files with lots of individual
-      # surfaces (e.g., windows).
-
       surf_types = { roofs: @roofs,
                      walls: @walls,
                      rim_joists: @rim_joists,
@@ -3897,17 +3902,23 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the roof is between conditioned space and outside.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the roof is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the roof is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -4116,16 +4127,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @exterior_adjacent_to == LocationOutside
-        return true
-      end
-
-      return false
-    end
-
-    # TODO
-    def is_exposed
-      return HPXML::is_exposed(self)
+      return @exterior_adjacent_to == LocationOutside
     end
 
     # Returns whether the rim joist is an interior surface (i.e., NOT adjacent to
@@ -4136,22 +4138,32 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the rim joist is determined to be adiabatic.
+    #
+    # @return [Boolean] True if adiabatic
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
-    # TODO
+    # Returns whether the rim joist is between conditioned space and outside/ground/unconditioned space.
+    # Note: The location of insulation is not considered here, so an insulated rim joist of an
+    # unconditioned basement, for example, returns false.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the rim joist is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the rim joist is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -4383,16 +4395,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @exterior_adjacent_to == LocationOutside
-        return true
-      end
-
-      return false
-    end
-
-    # TODO
-    def is_exposed
-      return HPXML::is_exposed(self)
+      return @exterior_adjacent_to == LocationOutside
     end
 
     # Returns whether the wall is an interior surface (i.e., NOT adjacent to
@@ -4403,27 +4406,32 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the wall is determined to be adiabatic.
+    #
+    # @return [Boolean] True if adiabatic
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
-    # TODO
+    # Returns whether the wall is between conditioned space and outside/ground/unconditioned space.
+    # Note: The location of insulation is not considered here, so an insulated wall of a garage,
+    # for example, returns false.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the wall is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
-    def is_conditioned_and_adjacent_to_multifamily_common_space
-      return (HPXML::is_conditioned(self) && (HPXML::multifamily_common_space_locations.include? @exterior_adjacent_to))
-    end
-
-    # TODO
+    # Returns whether the wall is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -4684,12 +4692,18 @@ class HPXML < Object
       return val
     end
 
-    # TODO
+    # Returns all slabs that are adjacent to the same HPXML::LocationXXX as the connected
+    # foundation walls.
+    # FUTURE: Is this just returning slabs with the same interior_adjacent_to as this slab?
+    #
+    # @return [Array<HPXML::Slab>] List of connected slabs
     def connected_slabs
       return @parent_object.slabs.select { |s| s.connected_foundation_walls.include? self }
     end
 
-    # TODO
+    # Estimates the fraction of the foundation wall's length that is along exposed perimeter.
+    #
+    # @return [Double] Exposed fraction
     def exposed_fraction
       # Calculate total slab exposed perimeter
       slab_exposed_length = connected_slabs.select { |s| s.interior_adjacent_to == interior_adjacent_to }.map { |s| s.exposed_perimeter }.sum
@@ -4711,16 +4725,7 @@ class HPXML < Object
     #
     # @return [Boolean] True if an exterior surface
     def is_exterior
-      if @exterior_adjacent_to == LocationGround
-        return true
-      end
-
-      return false
-    end
-
-    # TODO
-    def is_exposed
-      return HPXML::is_exposed(self)
+      return @exterior_adjacent_to == LocationGround
     end
 
     # Returns whether the foundation wall is an interior surface (i.e., NOT adjacent to
@@ -4731,22 +4736,32 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the foundation wall is determined to be adiabatic.
+    #
+    # @return [Boolean] True if adiabatic
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
-    # TODO
+    # Returns whether the foundation wall is between conditioned space and outside/ground/unconditioned space.
+    # Note: The location of insulation is not considered here, so an insulated foundation wall of an
+    # unconditioned basement, for example, returns false.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the foundation wall is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the foundation wall is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -5016,22 +5031,32 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the floor is determined to be adiabatic.
+    #
+    # @return [Boolean] True if adiabatic
     def is_adiabatic
       return HPXML::is_adiabatic(self)
     end
 
-    # TODO
+    # Returns whether the floor is between conditioned space and outside/unconditioned space.
+    # Note: The location of insulation is not considered here, so an insulated floor of a
+    # garage, for example, returns false.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the floor is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the floor is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -5260,24 +5285,34 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the slab is between conditioned space and ground.
+    # Note: The location of insulation is not considered here, so an insulated slab of a
+    # garage, for example, returns false.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(self)
     end
 
-    # TODO
+    # Returns whether the slab is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the slab is adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
 
-    # TODO
+    # Returns all foundation walls that are adjacent to the same HPXML::LocationXXX as the slab.
+    #
+    # @return [Array<HPXML::FoundationWall>] List of connected foundation walls
     def connected_foundation_walls
-      return @parent_object.foundation_walls.select { |fw| interior_adjacent_to == fw.interior_adjacent_to || interior_adjacent_to == fw.exterior_adjacent_to }
+      return @parent_object.foundation_walls.select { |fw| [fw.interior_adjacent_to, fw.exterior_adjacent_to].include? interior_adjacent_to }
     end
 
     # Deletes the current object from the array.
@@ -5450,7 +5485,9 @@ class HPXML < Object
              :attached_to_wall_idref]                 # [String] AttachedToWall/@idref
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the parent wall that includes this skylight.
+    #
+    # @return [HPXML::Wall] Parent wall surface
     def wall
       return if @attached_to_wall_idref.nil?
 
@@ -5478,17 +5515,23 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the window is on a thermal boundary parent surface.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(wall)
     end
 
-    # TODO
+    # Returns whether the window's parent surface is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the window is on a surface adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -5669,7 +5712,9 @@ class HPXML < Object
              :shaft_assembly_r_value]         # [Double] extension/Shaft/AssemblyEffectiveRValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the parent roof that includes this skylight.
+    #
+    # @return [HPXML::Roof] Parent roof surface
     def roof
       return if @attached_to_roof_idref.nil?
 
@@ -5681,7 +5726,9 @@ class HPXML < Object
       fail "Attached roof '#{@attached_to_roof_idref}' not found for skylight '#{@id}'."
     end
 
-    # TODO
+    # Returns the parent floor that includes this skylight.
+    #
+    # @return [HPXML::Floor] Parent floor surface
     def floor
       return if @attached_to_floor_idref.nil?
 
@@ -5709,17 +5756,23 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the skylight is on a thermal boundary parent surface.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(roof)
     end
 
-    # TODO
+    # Returns whether the skylight's parent surface is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the skylight is on a surface adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       if not floor.nil?
         return HPXML::is_conditioned(floor)
@@ -5883,7 +5936,9 @@ class HPXML < Object
              :r_value]                # [Double] RValue (F-ft2-hr/Btu)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the parent wall that includes this door.
+    #
+    # @return [HPXML::Wall] Parent wall surface
     def wall
       return if @attached_to_wall_idref.nil?
 
@@ -5911,17 +5966,23 @@ class HPXML < Object
       return !is_exterior
     end
 
-    # TODO
+    # Returns whether the door is on a thermal boundary parent surface.
+    #
+    # @return [Boolean] True if a thermal boundary surface
     def is_thermal_boundary
       return HPXML::is_thermal_boundary(wall)
     end
 
-    # TODO
+    # Returns whether the door's parent surface is both an exterior surface and a thermal boundary surface.
+    #
+    # @return [Boolean] True if an exterior, thermal boundary surface
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
     end
 
-    # TODO
+    # Returns whether the door is on a surface adjacent to conditioned space.
+    #
+    # @return [Boolean] True if adjacent to conditioned space
     def is_conditioned
       return HPXML::is_conditioned(self)
     end
@@ -6091,7 +6152,9 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns the total fraction of building's heating load served by all heating systems.
+    #
+    # @return [Double] Total fraction of building's heating load served
     def total_fraction_heat_load_served
       map { |htg_sys| htg_sys.fraction_heat_load_served.to_f }.sum(0.0)
     end
@@ -6136,7 +6199,9 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the zone that the heating system serves.
+    #
+    # @return [HPXML::Zone] Zone served
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -6147,7 +6212,9 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for heating system '#{@id}'."
     end
 
-    # TODO
+    # Returns the HVAC distribution system for the heating system.
+    #
+    # @return [HPXML::HVACDistribution] The attached HVAC distribution system
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -6159,7 +6226,9 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
-    # TODO
+    # Returns the cooling system on the same distribution system as the heating system.
+    #
+    # @return [HPXML::XXX] The attached cooling system
     def attached_cooling_system
       return if distribution_system.nil?
 
@@ -6173,7 +6242,10 @@ class HPXML < Object
       return
     end
 
-    # TODO
+    # Returns the water heating system related to the heating system (e.g., for
+    # a combination boiler that provides both water heating and space heating).
+    #
+    # @return [HPXML::WaterHeatingSystem] The related water heating system
     def related_water_heating_system
       @parent_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
@@ -6183,7 +6255,9 @@ class HPXML < Object
       return
     end
 
-    # TODO
+    # Returns the primary heat pump when the heating system serves as a heat pump backup system.
+    #
+    # @return [HPXML::HeatPump] The primary heat pump
     def primary_heat_pump
       # Returns the HP for which this heating system is backup
       @parent_object.heat_pumps.each do |heat_pump|
@@ -6195,7 +6269,9 @@ class HPXML < Object
       return
     end
 
-    # TODO
+    # Returns whether the heating system serves as a heat pump backup system.
+    #
+    # @return [Boolean] True if a heat pump backup system
     def is_heat_pump_backup_system
       return !primary_heat_pump.nil?
     end
@@ -6367,12 +6443,16 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns the total fraction of building's cooling load served by all cooling systems.
+    #
+    # @return [Double] Total fraction of building's cooling load served
     def total_fraction_cool_load_served
       map { |clg_sys| clg_sys.fraction_cool_load_served.to_f }.sum(0.0)
     end
 
-    # TODO
+    # Returns the total fraction of building's heating load served by all cooling systems.
+    #
+    # @return [Double] Total fraction of building's heating load served
     def total_fraction_heat_load_served
       map { |clg_sys| clg_sys.integrated_heating_system_fraction_heat_load_served.to_f }.sum(0.0)
     end
@@ -6425,7 +6505,9 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the zone that the cooling system serves.
+    #
+    # @return [HPXML::Zone] Zone served
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -6436,7 +6518,9 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for cooling system '#{@id}'."
     end
 
-    # TODO
+    # Returns the HVAC distribution system for the cooling system.
+    #
+    # @return [HPXML::HVACDistribution] The attached HVAC distribution system
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -6448,7 +6532,9 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
-    # TODO
+    # Returns the heating system on the same distribution system as the cooling system.
+    #
+    # @return [HPXML::XXX] The attached heating system
     def attached_heating_system
       # by distribution system
       return if distribution_system.nil?
@@ -6461,7 +6547,9 @@ class HPXML < Object
       return
     end
 
-    # TODO
+    # Returns whether the cooling system has integrated heating.
+    #
+    # @return [Boolean] True if it has integrated heating
     def has_integrated_heating
       return false unless [HVACTypePTAC, HVACTypeRoomAirConditioner].include? @cooling_system_type
       return false if @integrated_heating_system_fuel.nil?
@@ -6650,12 +6738,16 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns the total fraction of building's heating load served by all heat pumps.
+    #
+    # @return [Double] Total fraction of building's heating load served
     def total_fraction_heat_load_served
       map { |hp| hp.fraction_heat_load_served.to_f }.sum(0.0)
     end
 
-    # TODO
+    # Returns the total fraction of building's cooling load served by all heat pumps.
+    #
+    # @return [Double] Total fraction of building's cooling load served
     def total_fraction_cool_load_served
       map { |hp| hp.fraction_cool_load_served.to_f }.sum(0.0)
     end
@@ -6728,7 +6820,9 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the zone that the heat pump serves.
+    #
+    # @return [HPXML::Zone] Zone served
     def zone
       return if @attached_to_zone_idref.nil?
 
@@ -6739,7 +6833,9 @@ class HPXML < Object
       fail "Attached zone '#{@attached_to_zone_idref}' not found for heat pump '#{@id}'."
     end
 
-    # TODO
+    # Returns the HVAC distribution system for the heat pump.
+    #
+    # @return [HPXML::HVACDistribution] The attached HVAC distribution system
     def distribution_system
       return if @distribution_system_idref.nil?
 
@@ -6751,7 +6847,9 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
-    # TODO
+    # Returns the geothermal loop for the (ground source) heat pump.
+    #
+    # @return [HPXML::GeothermalLoop] The attached geothermal loop
     def geothermal_loop
       return if @geothermal_loop_idref.nil?
 
@@ -6763,7 +6861,10 @@ class HPXML < Object
       fail "Attached geothermal loop '#{@geothermal_loop_idref}' not found for heat pump '#{@id}'."
     end
 
-    # TODO
+    # Returns whether the heat pump is a dual-fuel heat pump (i.e., an electric
+    # heat pump with fossil fuel backup).
+    #
+    # @return [Boolean] True if it is dual-fuel
     def is_dual_fuel
       if backup_system.nil?
         if @backup_heating_fuel.nil?
@@ -6781,14 +6882,17 @@ class HPXML < Object
       return true
     end
 
-    # TODO
+    # Returns whether the heat pump is the primary heating or cooling system.
+    #
+    # @return [Boolean] True if the primary heating and/or cooling system
     def primary_system
-      return true if @primary_heating_system || @primary_cooling_system
-
-      return false
+      return @primary_heating_system || @primary_cooling_system
     end
 
-    # TODO
+    # Returns the backup heating system for the heat pump, if the heat pump
+    # has a separate (i.e., not integrated) backup system.
+    #
+    # @return [HPXML::HeatingSystem] The backup heating system
     def backup_system
       return if @backup_system_idref.nil?
 
@@ -7068,7 +7172,9 @@ class HPXML < Object
              :bore_config]        # [String] extension/BorefieldConfiguration (HPXML::GeothermalLoopBorefieldConfigurationXXX)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns all heat pumps connect to the geothermal loop.
+    #
+    # @return [Array<HPXML::HeatPump>] List of heat pump objects
     def heat_pump
       list = []
       @parent_object.heat_pumps.each do |heat_pump|
@@ -7391,7 +7497,9 @@ class HPXML < Object
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns all the HVAC systems attached to this HVAC distribution system.
+    #
+    # @return [Array<HPXML::XXX>] The list of HVAC systems
     def hvac_systems
       list = []
       @parent_object.hvac_systems.each do |hvac_system|
@@ -7782,7 +7890,9 @@ class HPXML < Object
              :cfis_vent_mode_airflow_fraction]          # [Double] extension/VentilationOnlyModeAirflowFraction (frac)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the HVAC distribution system for the ventilation fan.
+    #
+    # @return [HPXML::HVACDistribution] The attached HVAC distribution system
     def distribution_system
       return if @distribution_system_idref.nil?
       return unless @fan_type == MechVentTypeCFIS
@@ -7799,7 +7909,10 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
-    # TODO
+    # Returns the (instantaneous) flow rate. Used because there are multiple
+    # HPXML inputs that can describe the flow rate.
+    #
+    # @return [Double] Flow rate (cfm)
     def flow_rate
       [@tested_flow_rate, @delivered_ventilation, @calculated_flow_rate, @rated_flow_rate].each do |fr|
         return fr unless fr.nil?
@@ -7807,8 +7920,13 @@ class HPXML < Object
       return
     end
 
-    # TODO
-    def total_unit_flow_rate
+    # Returns the (instantaneous) flow rate for the dwelling unit. Shared
+    # ventilation systems that serve multiple dwelling units have a separate
+    # flow rate input that describes how much of the total airflow serves
+    # the dwelling unit.
+    #
+    # @return [Double] Flow rate to the dwelling unit (cfm)
+    def unit_flow_rate
       if not @is_shared_system
         return flow_rate
       else
@@ -7816,55 +7934,37 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns the outdoor air-only flow rate for the dwelling unit.
+    # Only differs from unit_flow_rate for shared systems with recirculation.
+    #
+    # @return [Double] Outdoor air flow rate to the dwelling unit (cfm)
     def oa_unit_flow_rate
-      return if total_unit_flow_rate.nil?
+      return if unit_flow_rate.nil?
       if not @is_shared_system
-        return total_unit_flow_rate
+        return unit_flow_rate
       else
         if @fan_type == HPXML::MechVentTypeExhaust && @fraction_recirculation > 0.0
           fail "Exhaust fan '#{@id}' must have the fraction recirculation set to zero."
         else
-          return total_unit_flow_rate * (1 - @fraction_recirculation)
+          return unit_flow_rate * (1 - @fraction_recirculation)
         end
       end
     end
 
-    # TODO
-    def average_oa_unit_flow_rate
-      # Daily-average outdoor air (cfm) associated with the unit
-      return if oa_unit_flow_rate.nil?
-      return if @hours_in_operation.nil?
-
-      return oa_unit_flow_rate * (@hours_in_operation / 24.0)
-    end
-
-    # TODO
-    def average_total_unit_flow_rate
-      # Daily-average total air (cfm) associated with the unit
-      return if total_unit_flow_rate.nil?
-      return if @hours_in_operation.nil?
-
-      return total_unit_flow_rate * (@hours_in_operation / 24.0)
-    end
-
-    # TODO
-    def unit_flow_rate_ratio
-      return 1.0 unless @is_shared_system
-      return if @in_unit_flow_rate.nil?
-
-      if not flow_rate.nil?
-        ratio = @in_unit_flow_rate / flow_rate
-      end
-      return ratio
-    end
-
-    # TODO
+    # Returns the (instantaneous) fan power associated with the dwelling unit.
+    # For shared ventilation systems that serve multiple dwelling units, the
+    # total fan power is apportioned to the dwelling unit using the
+    # flow rate to the dwelling unit divided by the total flow rate.
+    #
+    # @return [Double] Fan power associated with the dwelling unit (W)
     def unit_fan_power
       return if @fan_power.nil?
 
       if @is_shared_system
-        return if unit_flow_rate_ratio.nil?
+        return if @in_unit_flow_rate.nil?
+        return if flow_rate.nil?
+
+        unit_flow_rate_ratio = @in_unit_flow_rate / flow_rate
 
         return @fan_power * unit_flow_rate_ratio
       else
@@ -7872,7 +7972,32 @@ class HPXML < Object
       end
     end
 
-    # TODO
+    # Returns the daily-average flow rate for the dwelling unit.
+    # Only differs from unit_flow_rate for systems that operate < 24 hrs/day.
+    #
+    # @return [Double] Daily-average flow rate to the dwelling unit (cfm)
+    def average_unit_flow_rate
+      return if unit_flow_rate.nil?
+      return if @hours_in_operation.nil?
+
+      return unit_flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    # Returns the daily-average outdoor air flow rate for the dwelling unit.
+    # Only differs from oa_unit_flow_rate for systems that operate < 24 hrs/day.
+    #
+    # @return [Double] Daily-average outdoor air flow rate to the dwelling unit (cfm)
+    def average_oa_unit_flow_rate
+      return if oa_unit_flow_rate.nil?
+      return if @hours_in_operation.nil?
+
+      return oa_unit_flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    # Returns the daily average fan power associated with the dwelling unit.
+    # Only differs from unit_fan_power for systems that operate < 24 hrs/day.
+    #
+    # @return [Double] Daily-average fan power associated with the dwelling unit (W)
     def average_unit_fan_power
       return if unit_fan_power.nil?
       return if @hours_in_operation.nil?
@@ -7880,34 +8005,31 @@ class HPXML < Object
       return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
-    # TODO
-    def includes_supply_air?
-      if [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
-        return true
-      end
-
-      return false
+    # Returns whether the ventilation fan supplies air.
+    #
+    # @return [Boolean] True if it supplies air
+    def includes_supply_air
+      return [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include?(@fan_type)
     end
 
-    # TODO
-    def includes_exhaust_air?
-      if [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
-        return true
-      end
-
-      return false
+    # Returns whether the ventilation fan exhausts air.
+    #
+    # @return [Boolean] True if it exhausts air
+    def includes_exhaust_air
+      return [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include?(@fan_type)
     end
 
-    # TODO
-    def is_balanced?
-      if includes_supply_air? && includes_exhaust_air?
-        return true
-      end
-
-      return false
+    # Returns whether the ventilation fan both supplies and exhausts air, which indicates
+    # it is a balanced system.
+    #
+    # @return [Boolean] True if it is a balanced system
+    def is_balanced
+      return includes_supply_air && includes_exhaust_air
     end
 
-    # TODO
+    # Returns the supplemental fan to this ventilation fan if it's a CFIS system.
+    #
+    # @return [HPXML::VentilationFan] The supplemental fan
     def cfis_supplemental_fan
       return if @cfis_supplemental_fan_idref.nil?
       return unless @fan_type == MechVentTypeCFIS
@@ -7933,8 +8055,10 @@ class HPXML < Object
       fail "CFIS Supplemental Fan '#{@cfis_supplemental_fan_idref}' not found for ventilation fan '#{@id}'."
     end
 
-    # TODO
-    def is_cfis_supplemental_fan?
+    # Returns whether this ventilation fan serves as a supplemental fan to a CFIS system.
+    #
+    # @return [Boolean] True if a CFIS supplemental fan
+    def is_cfis_supplemental_fan
       @parent_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.fan_type == MechVentTypeCFIS
         next unless ventilation_fan.cfis_supplemental_fan_idref == @id
@@ -7958,7 +8082,6 @@ class HPXML < Object
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
       begin; oa_unit_flow_rate; rescue StandardError => e; errors << e.message; end
-      begin; unit_flow_rate_ratio; rescue StandardError => e; errors << e.message; end
       begin; cfis_supplemental_fan; rescue StandardError => e; errors << e.message; end
       return errors
     end
@@ -8123,7 +8246,10 @@ class HPXML < Object
              :number_of_bedrooms_served] # [Integer] extension/NumberofBedroomsServed
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the HVAC system related to this water heating system (e.g., for
+    # a combination boiler that provides both water heating and space heating).
+    #
+    # @return [HPXML::XXX] The HVAC system
     def related_hvac_system
       return if @related_hvac_idref.nil?
 
@@ -8558,7 +8684,9 @@ class HPXML < Object
              :solar_fraction]                     # [Double] SolarFraction (frac)
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the water heater connected to the solar thermal system.
+    #
+    # @return [HPXML::WaterHeatingSystem] The attached water heating system
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -8677,7 +8805,9 @@ class HPXML < Object
              :number_of_bedrooms_served] # [Integer] extension/NumberofBedroomsServed
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the inverter connected to the PV system.
+    #
+    # @return [HPXML::Inverter] The attached inverter object
     def inverter
       return if @inverter_idref.nil?
 
@@ -8786,15 +8916,24 @@ class HPXML < Object
              :inverter_efficiency] # [Double] InverterEfficiency (frac)
     attr_accessor(*ATTRS)
 
-    # TODO
-    def pv_system
+    # Returns all PV systems connected to the inverter.
+    #
+    # @return [HPXML::PVSystem] The list of PV systems
+    def pv_systems
       return if @id.nil?
 
+      list = []
       @parent_object.pv_systems.each do |pv|
         next unless @id == pv.inverter_idref
 
-        return pv
+        list << pv
       end
+
+      if list.size == 0
+        fail "Inverter '#{@id}' found but no PV systems attached to it."
+      end
+
+      return list
     end
 
     # Deletes the current object from the array.
@@ -8809,7 +8948,7 @@ class HPXML < Object
     # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
-      begin; pv_system; rescue StandardError => e; errors << e.message; end
+      begin; pv_systems; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -9083,7 +9222,9 @@ class HPXML < Object
              :monthly_multipliers]               # [String] extension/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the water heating system connected to the clothes washer.
+    #
+    # @return [HPXML::WaterHeatingSystem] The attached water heating system
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -9095,7 +9236,9 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for clothes washer '#{@id}'."
     end
 
-    # TODO
+    # Returns the hot water distribution system connected to the clothes washer.
+    #
+    # @return [HPXML::HotWaterDistribution] The connected hot water distribution system
     def hot_water_distribution
       return if @hot_water_distribution_idref.nil?
 
@@ -9339,7 +9482,9 @@ class HPXML < Object
              :monthly_multipliers]          # [String] extension/MonthlyScheduleMultipliers
     attr_accessor(*ATTRS)
 
-    # TODO
+    # Returns the water heating system connected to the dishwasher.
+    #
+    # @return [HPXML::WaterHeatingSystem] The attached water heating system
     def water_heating_system
       return if @water_heating_system_idref.nil?
 
@@ -9351,7 +9496,9 @@ class HPXML < Object
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for dishwasher '#{@id}'."
     end
 
-    # TODO
+    # Returns the hot water distribution system connected to the dishwasher.
+    #
+    # @return [HPXML::HotWaterDistribution] The connected hot water distribution system
     def hot_water_distribution
       return if @hot_water_distribution_idref.nil?
 
@@ -10729,7 +10876,9 @@ class HPXML < Object
              :capacity,                     # [Double] Capacity (Btu/hr)
              :capacity_fraction_of_nominal, # [Double] CapacityFractionOfNominal (frac)
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
-             :efficiency_cop]               # [Double] Efficiency[Units="COP"]/Value (W/W)
+             :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
+             :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
@@ -10834,7 +10983,9 @@ class HPXML < Object
              :capacity,                     # [Double] Capacity (Btu/hr)
              :capacity_fraction_of_nominal, # [Double] CapacityFractionOfNominal (frac)
              :capacity_description,         # [String] CapacityDescription (HPXML::CapacityDescriptionXXX)
-             :efficiency_cop]               # [Double] Efficiency[Units="COP"]/Value (W/W)
+             :efficiency_cop,               # [Double] Efficiency[Units="COP"]/Value (W/W)
+             :gross_capacity,               # FUTURE: Not in HPXML schema, should move to additional_properties
+             :gross_efficiency_cop]         # FUTURE: Not in HPXML schema, should move to additional_properties
     attr_accessor(*ATTRS)
 
     # Deletes the current object from the array.
@@ -10890,8 +11041,10 @@ class HPXML < Object
     end
   end
 
-  # TODO
-  def _create_hpxml_document()
+  # Returns a new, empty HPXML document
+  #
+  # @return [Oga::XML::Document] The HPXML document
+  def _create_hpxml_document
     doc = XMLHelper.create_doc('1.0', 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
     XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
@@ -10899,7 +11052,7 @@ class HPXML < Object
     return doc
   end
 
-  # The unique set of HPXML fuel types that end up used in the EnergyPlus model.
+  # The unique set of HPXML fossil fuel types that end up used in the EnergyPlus model.
   # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
   #
   # @return [Array<String>] List of fuel types (HPXML::FuelTypeXXX)
@@ -10912,18 +11065,25 @@ class HPXML < Object
             HPXML::FuelTypeWoodPellets]
   end
 
-  # TODO
+  # The unique set of all HPXML fuel types that end up used in the EnergyPlus model.
+  # Some other fuel types (e.g., FuelTypeCoalAnthracite) are collapsed into this list.
+  #
+  # @return [Array<String>] List of fuel types (HPXML::FuelTypeXXX)
   def self.all_fuels
     return [HPXML::FuelTypeElectricity] + fossil_fuels
   end
 
-  # TODO
+  # Returns the set of all location types that are vented.
+  #
+  # @return [Array<String>] List of vented locations (HPXML::LocationXXX)
   def self.vented_locations
     return [HPXML::LocationAtticVented,
             HPXML::LocationCrawlspaceVented]
   end
 
-  # TODO
+  # Returns the set of all location types that are conditioned.
+  #
+  # @return [Array<String>] List of conditioned locations (HPXML::LocationXXX)
   def self.conditioned_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
@@ -10931,69 +11091,73 @@ class HPXML < Object
             HPXML::LocationOtherHousingUnit]
   end
 
-  # TODO
+  # Returns the set of all location types that are multifamily common spaces.
+  #
+  # @return [Array<String>] List of multifamily common space locations (HPXML::LocationXXX)
   def self.multifamily_common_space_locations
     return [HPXML::LocationOtherHeatedSpace,
             HPXML::LocationOtherMultifamilyBufferSpace,
             HPXML::LocationOtherNonFreezingSpace]
   end
 
-  # TODO
+  # Returns the set of all location types that are conditioned and part of the
+  # dwelling unit.
+  #
+  # @return [Array<String>] List of conditioned locations (HPXML::LocationXXX)
   def self.conditioned_locations_this_unit
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
   end
 
-  # TODO
+  # Returns the set of all location types that are conditioned and assumed to
+  # be finished (e.g., have interior finishes like drywall).
+  #
+  # @return [Array<String>] List of conditioned, finished locations (HPXML::LocationXXX)
   def self.conditioned_finished_locations
     return [HPXML::LocationConditionedSpace,
             HPXML::LocationBasementConditioned]
   end
 
-  # TODO
+  # Returns the set of all location types that are conditioned and above-grade.
+  #
+  # @return [Array<String>] List of conditioned, above-grade locations (HPXML::LocationXXX)
   def self.conditioned_below_grade_locations
     return [HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]
   end
 
-  # TODO
+  # Returns whether the surface is adjacent to conditioned space.
+  #
+  # @param surface [HPXML::XXX] HPXML surface of interest
+  # @return [Boolean] True if adjacent to conditioned space
   def self.is_conditioned(surface)
     return conditioned_locations.include?(surface.interior_adjacent_to)
   end
 
-  # TODO
-  def self.is_exposed(surface)
-    if HPXML::is_conditioned(surface) &&
-       (surface.exterior_adjacent_to == LocationOutside ||
-        surface.exterior_adjacent_to == LocationOtherNonFreezingSpace)
-      return true
-    end
-
-    return false
-  end
-
-  # TODO
+  # Returns whether the surface is determined to be adiabatic.
+  #
+  # @param surface [HPXML::XXX] HPXML surface of interest
+  # @return [Boolean] True if adiabatic
   def self.is_adiabatic(surface)
     if surface.exterior_adjacent_to == surface.interior_adjacent_to
       # E.g., wall between unit crawlspace and neighboring unit crawlspace
       return true
     elsif conditioned_locations.include?(surface.interior_adjacent_to) &&
           conditioned_locations.include?(surface.exterior_adjacent_to)
-      # E.g., floor between conditioned space and conditioned basement, or
-      # wall between conditioned space and "other housing unit"
+      # E.g., wall with conditioned space on both sides
       return true
     end
 
     return false
   end
 
-  # Returns true if the surface is between conditioned space and outside/ground/unconditioned space.
+  # Returns whether the surface is between conditioned space and outside/ground/unconditioned space.
   # Note: The location of insulation is not considered here, so an insulated foundation wall of an
   # unconditioned basement, for example, returns false.
   #
   # @param surface [OpenStudio::Model::Surface] the surface of interest
-  # @return [Boolean] true if a thermal boundary surface
+  # @return [Boolean] True if a thermal boundary surface
   def self.is_thermal_boundary(surface)
     interior_conditioned = conditioned_locations.include? surface.interior_adjacent_to
     exterior_conditioned = conditioned_locations.include? surface.exterior_adjacent_to
@@ -11029,18 +11193,32 @@ class HPXML < Object
     end
   end
 
-  # TODO
+  # Gets the ID attribute for the given element.
+  #
+  # @param parent [Oga::XML::Element] The parent HPXML element
+  # @param element_name [String] The name of the child element with the ID attribute
+  # @return [String] The element ID attribute
   def self.get_id(parent, element_name = 'SystemIdentifier')
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
-  # TODO
+  # Gets the IDREF attribute for the given element.
+  #
+  # @param element [Oga::XML::Element] The HPXML element
+  # @return [String] The element IDREF attribute
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
   end
 
-  # TODO
-  def self.check_dates(str, begin_month, begin_day, end_month, end_day)
+  # Checks whether a given date is valid (e.g., Sep 31 is invalid).
+  #
+  # @param use_case [String] Name of the use case to include in the error message
+  # @param begin_month [Integer] Date begin month
+  # @param begin_day [Integer] Date begin day
+  # @param end_month [Integer] Date end month
+  # @param end_day [Integer] Date end day
+  # @return [Array<String>] List of error messages
+  def self.check_dates(use_case, begin_month, begin_day, end_month, end_day)
     errors = []
 
     # Check for valid months
@@ -11048,13 +11226,13 @@ class HPXML < Object
 
     if not begin_month.nil?
       if not valid_months.include? begin_month
-        errors << "#{str} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
+        errors << "#{use_case} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
       end
     end
 
     if not end_month.nil?
       if not valid_months.include? end_month
-        errors << "#{str} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
+        errors << "#{use_case} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
       end
     end
 
@@ -11063,20 +11241,24 @@ class HPXML < Object
     months_days.each do |months, valid_days|
       if (not begin_day.nil?) && (months.include? begin_month)
         if not valid_days.include? begin_day
-          errors << "#{str} Begin Day of Month (#{begin_day}) must be one of: #{valid_days.join(', ')}."
+          errors << "#{use_case} Begin Day of Month (#{begin_day}) must be one of: #{valid_days.join(', ')}."
         end
       end
       next unless (not end_day.nil?) && (months.include? end_month)
 
       if not valid_days.include? end_day
-        errors << "#{str} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
+        errors << "#{use_case} End Day of Month (#{end_day}) must be one of: #{valid_days.join(', ')}."
       end
     end
 
     return errors
   end
 
-  # TODO
+  # Adds this object's design loads to the provided Oga XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The Zone/Space/HVACPlant object
+  # @param hpxml_element [Oga::XML::Element] The Zone/Space/HVACPlant XML element
+  # @return [void]
   def self.design_loads_to_doc(hpxml_object, hpxml_element)
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
@@ -11096,7 +11278,11 @@ class HPXML < Object
     end
   end
 
-  # TODO
+  # Populates the HPXML object's design loads from the XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The Zone/Space/HVACPlant object
+  # @param hpxml_element [Oga::XML::Element] The Zone/Space/HVACPlant XML element
+  # @return [void]
   def self.design_loads_from_doc(hpxml_object, hpxml_element)
     { HDL_ATTRS => 'Heating',
       CDL_SENS_ATTRS => 'CoolingSensible',
