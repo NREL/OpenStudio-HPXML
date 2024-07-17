@@ -2077,12 +2077,6 @@ module HVACSizing
       # calculate A_o using rated conditions
       # Don't use coil ao factor in hvac.rb to calculate design SHR. That ao has specific use case of finding rated SHRs for variable speed equipment.
       a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
-      puts(rated_barometric_pressure_psi, 'rated barometric pressure [psi]')
-      puts(cool_cap_rated, 'rated cooling capacity [kbtu/hr]')
-      puts(cool_cfm_rated, 'rated cooling cfm')
-      puts(hvac_cooling_shr, 'rated SHR')
-      puts(hr_indoor_cooling_rated, 'indoor humidity ratio (rated) [lbm/lbm]')
-      puts(a_o_rated, 'coil Ao factor calculated at rated conditions')
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
       # initial estimate for design airflow rate [cfm]
