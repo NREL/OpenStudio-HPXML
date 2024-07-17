@@ -1707,7 +1707,7 @@ If the skylight has a curb, additional information is entered in ``Skylight``.
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
   Element                                      Type      Units         Constraints  Required  Default   Notes
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
-  ``extension/Curb/Area``                      double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Curb/Area``                      double    ft2           > 0          Yes                 Total area including all sides
   ``extension/Curb/AssemblyEffectiveRValue``   double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
 
@@ -1723,7 +1723,7 @@ If the skylight has a shaft, additional information is entered in ``Skylight``.
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
   Element                                      Type      Units         Constraints  Required  Default   Notes
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
-  ``extension/Shaft/Area``                     double    ft^2          > 0          Yes                 Total area including all sides
+  ``extension/Shaft/Area``                     double    ft2           > 0          Yes                 Total area including all sides
   ``extension/Shaft/AssemblyEffectiveRValue``  double    F-ft2-hr/Btu  > 0          Yes                 Assembly R-value [#]_
   ===========================================  ========  ============  ===========  ========  ========  ========================================================
 
