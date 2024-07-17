@@ -580,7 +580,7 @@ module HVACSizing
       all_zone_loads[zone] = DesignLoadValues.new
       zone.spaces.each do |space|
         all_space_loads[space] = DesignLoadValues.new
-        space.additional_properties.total_exposed_wall_area = 0.0
+        space.additional_properties.total_exposed_wall_area = 0.0 # Wall area in contact with outdoor air
         # Initialize Hourly Aggregate Fenestration Loads (AFL)
         space.additional_properties.afl_hr_windows = [0.0] * 12 # Data saved for peak load
         space.additional_properties.afl_hr_skylights = [0.0] * 12 # Data saved for peak load
@@ -1023,55 +1023,45 @@ module HVACSizing
 
       ashrae_wall_group = get_ashrae_wall_group(wall)
 
-      if wall.azimuth.nil?
-        azimuths = [0.0, 90.0, 180.0, 270.0] # Assume 4 equal surfaces facing every direction
-      else
-        azimuths = [wall.azimuth]
-      end
+      if wall.is_exterior
+        # Store exposed wall gross area for infiltration calculation
+        space.additional_properties.total_exposed_wall_area += wall.area
 
-      htg_htm = 0.0
-      clg_htm = 0.0
-      azimuths.each do |_azimuth|
-        if wall.is_exterior
-          # Store exposed wall gross area for infiltration calculation
-          space.additional_properties.total_exposed_wall_area += wall.area / azimuths.size
-
-          # Adjust base Cooling Load Temperature Difference (CLTD)
-          # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
-          if wall.solar_absorptance <= 0.5
-            color_multiplier = 0.65      # MJ8 Table 4B Notes, pg 348
-          elsif wall.solar_absorptance <= 0.75
-            color_multiplier = 0.83      # MJ8 Appendix 12, pg 519
-          else
-            color_multiplier = 1.0
-          end
-
-          # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
-          # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
-          # determined using linear interpolation). Shaded walls apply to partition walls only.
-          cltd_base_sun = { 'G' => 38.0, 'F-G' => 34.95, 'F' => 31.9, 'E-F' => 29.45, 'E' => 27.0, 'D-E' => 24.5, 'D' => 22.0, 'C-D' => 21.25, 'C' => 20.5, 'B-C' => 19.65, 'B' => 18.8 }
-          # cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
-
-          # Non-directional exterior walls
-          cltd_base = cltd_base_sun
-          cltd = cltd_base[ashrae_wall_group] * color_multiplier
-
-          if mj.ctd >= 10.0
-            # Adjust base CLTD for different CTD or DR
-            cltd += (hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + mj.daily_range_temp_adjust[mj.daily_range_num]
-          else
-            # Handling cases ctd < 10 is based on A12-18 in MJ8
-            cltd_corr = mj.ctd - 20.0 - mj.daily_range_temp_adjust[mj.daily_range_num]
-            cltd = [cltd + cltd_corr, 0.0].max # NOTE: The CLTD_Alt equation in A12-18 part 5 suggests CLTD - CLTD_corr, but A12-19 suggests it should be CLTD + CLTD_corr (where CLTD_corr is negative)
-          end
-
-          clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * cltd
-          htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * mj.htd
-        else # Partition wall
-          adjacent_space = wall.exterior_adjacent_to
-          clg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
-          htg_htm += (1.0 / wall.insulation_assembly_r_value) / azimuths.size * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
+        # Adjust base Cooling Load Temperature Difference (CLTD)
+        # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
+        if wall.solar_absorptance <= 0.5
+          color_multiplier = 0.65      # MJ8 Table 4B Notes, pg 348
+        elsif wall.solar_absorptance <= 0.75
+          color_multiplier = 0.83      # MJ8 Appendix 12, pg 519
+        else
+          color_multiplier = 1.0
         end
+
+        # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
+        # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
+        # determined using linear interpolation). Shaded walls apply to partition walls only.
+        cltd_base_sun = { 'G' => 38.0, 'F-G' => 34.95, 'F' => 31.9, 'E-F' => 29.45, 'E' => 27.0, 'D-E' => 24.5, 'D' => 22.0, 'C-D' => 21.25, 'C' => 20.5, 'B-C' => 19.65, 'B' => 18.8 }
+        # cltd_base_shade = { 'G' => 25.0, 'F-G' => 22.5, 'F' => 20.0, 'E-F' => 18.45, 'E' => 16.9, 'D-E' => 15.45, 'D' => 14.0, 'C-D' => 13.55, 'C' => 13.1, 'B-C' => 12.85, 'B' => 12.6 }
+
+        # Non-directional exterior walls
+        cltd_base = cltd_base_sun
+        cltd = cltd_base[ashrae_wall_group] * color_multiplier
+
+        if mj.ctd >= 10.0
+          # Adjust base CLTD for different CTD or DR
+          cltd += (hpxml_bldg.header.manualj_cooling_design_temp - 95.0) + mj.daily_range_temp_adjust[mj.daily_range_num]
+        else
+          # Handling cases ctd < 10 is based on A12-18 in MJ8
+          cltd_corr = mj.ctd - 20.0 - mj.daily_range_temp_adjust[mj.daily_range_num]
+          cltd = [cltd + cltd_corr, 0.0].max # NOTE: The CLTD_Alt equation in A12-18 part 5 suggests CLTD - CLTD_corr, but A12-19 suggests it should be CLTD + CLTD_corr (where CLTD_corr is negative)
+        end
+
+        clg_htm = (1.0 / wall.insulation_assembly_r_value) * cltd
+        htg_htm = (1.0 / wall.insulation_assembly_r_value) * mj.htd
+      else # Partition wall
+        adjacent_space = wall.exterior_adjacent_to
+        clg_htm = (1.0 / wall.insulation_assembly_r_value) * (mj.cool_design_temps[adjacent_space] - mj.cool_setpoint)
+        htg_htm = (1.0 / wall.insulation_assembly_r_value) * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
       end
       clg_loads = clg_htm * wall.net_area
       htg_loads = htg_htm * wall.net_area
