@@ -514,16 +514,20 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
     # Slab
-    slabs_values = [{ perimeter_r: 0.0, under_r: 0.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering'] },
-                    { perimeter_r: 0.0, under_r: 0.0, gap_r: 5.0, under_span: false, layer_names: ['concrete', 'floor covering', 'interior vertical ins'] },
-                    { perimeter_r: 5.0, under_r: 0.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering', 'exterior vertical ins'] },
-                    { perimeter_r: 20.0, under_r: 0.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering', 'exterior vertical ins'] },
-                    { perimeter_r: 0.0, under_r: 5.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins'] },
-                    { perimeter_r: 0.0, under_r: 20.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins'] },
-                    { perimeter_r: 0.0, under_r: 5.0, gap_r: nil, under_span: true, layer_names: ['slab rigid ins', 'concrete', 'floor covering', 'interior vertical ins'] },
-                    { perimeter_r: 0.0, under_r: 20.0, gap_r: nil, under_span: true, layer_names: ['slab rigid ins', 'concrete', 'floor covering', 'interior vertical ins'] },
-                    { perimeter_r: 5.0, under_r: 5.0, gap_r: nil, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins'] },
-                    { perimeter_r: 20.0, under_r: 20.0, gap_r: 20.0, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins'] }]
+    slabs_values = [{ perimeter_r: 0.0, under_r: 0.0, gap_r: nil, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering'] },
+                    { perimeter_r: 0.0, under_r: 0.0, gap_r: 5.0, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'interior vertical ins'] },
+                    { perimeter_r: 5.0, under_r: 0.0, gap_r: nil, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'exterior vertical ins'] },
+                    { perimeter_r: 5.0, under_r: 0.0, gap_r: nil, under_span: false, exterior_horizontal_r: 5.0, layer_names: ['concrete', 'floor covering', 'exterior vertical ins', 'exterior horizontal ins'] },
+                    { perimeter_r: 20.0, under_r: 0.0, gap_r: nil, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'exterior vertical ins'] },
+                    { perimeter_r: 20.0, under_r: 0.0, gap_r: nil, under_span: false, exterior_horizontal_r: 20.0, layer_names: ['concrete', 'floor covering', 'exterior vertical ins', 'exterior horizontal ins'] },
+                    { perimeter_r: 0.0, under_r: 5.0, gap_r: nil, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins'] },
+                    { perimeter_r: 0.0, under_r: 20.0, gap_r: nil, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins'] },
+                    { perimeter_r: 0.0, under_r: 5.0, gap_r: nil, under_span: true, exterior_horizontal_r: 0.0, layer_names: ['slab rigid ins', 'concrete', 'floor covering', 'interior vertical ins'] },
+                    { perimeter_r: 0.0, under_r: 20.0, gap_r: nil, under_span: true, exterior_horizontal_r: 0.0, layer_names: ['slab rigid ins', 'concrete', 'floor covering', 'interior vertical ins'] },
+                    { perimeter_r: 5.0, under_r: 5.0, gap_r: nil, exterior_horizontal_r: 0.0, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins'] },
+                    { perimeter_r: 5.0, under_r: 5.0, gap_r: nil, exterior_horizontal_r: 5.0, under_span: false, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins', 'exterior horizontal ins'] },
+                    { perimeter_r: 20.0, under_r: 20.0, gap_r: 20.0, under_span: false, exterior_horizontal_r: 0.0, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins'] },
+                    { perimeter_r: 20.0, under_r: 20.0, gap_r: 20.0, under_span: false, exterior_horizontal_r: 20.0, layer_names: ['concrete', 'floor covering', 'interior horizontal ins', 'interior vertical ins', 'exterior vertical ins', 'exterior horizontal ins'] }]
 
     hpxml, hpxml_bldg = _create_hpxml('base-foundation-slab.xml')
     slabs_values.each do |slab_values|
@@ -538,6 +542,7 @@ class HPXMLtoOpenStudioEnclosureTest < Minitest::Test
         hpxml_bldg.slabs[0].under_slab_insulation_spans_entire_slab = nil
       end
       hpxml_bldg.slabs[0].gap_insulation_r_value = slab_values[:gap_r]
+      hpxml_bldg.slabs[0].exterior_horizontal_r_value = slab_values[:exterior_horizontal_r]
 
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
       model, hpxml, hpxml_bldg = _test_measure(args_hash)
