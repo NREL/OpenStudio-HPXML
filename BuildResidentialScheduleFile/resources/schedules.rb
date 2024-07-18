@@ -202,6 +202,8 @@ class ScheduleGenerator
     sleep_schedule = []
     away_schedule = []
     idle_schedule = []
+    away_occupants = []  # Binary representation of the presence of accupant. Each bit represents presence of one occupant
+
 
     # fill in the yearly time_step resolution schedule for plug/lighting and ceiling fan based on weekday/weekend sch
     # States are: 0='sleeping', 1='shower', 2='laundry', 3='cooking', 4='dishwashing', 5='absent', 6='nothingAtHome'
@@ -216,6 +218,7 @@ class ScheduleGenerator
         sleep_schedule << sum_across_occupants(all_simulated_values, 0, index_15).to_f / args[:geometry_num_occupants]
         away_schedule << sum_across_occupants(all_simulated_values, 5, index_15).to_f / args[:geometry_num_occupants]
         idle_schedule << sum_across_occupants(all_simulated_values, 6, index_15).to_f / args[:geometry_num_occupants]
+        away_occupants <<  sum_across_occupants(all_simulated_values, 5, index_15, binary_sum: true)
         active_occupancy_percentage = 1 - (away_schedule[-1] + sleep_schedule[-1])
         @schedules[SchedulesFile::Columns[:PlugLoadsOther].name][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_other_weekday_sch, plugload_other_weekend_sch, plugload_other_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
         @schedules[SchedulesFile::Columns[:PlugLoadsTV].name][day * @steps_in_day + step] = get_value_from_daily_sch(plugload_tv_weekday_sch, plugload_tv_weekend_sch, plugload_tv_monthly_multiplier, month, is_weekday, minute, active_occupancy_percentage)
@@ -613,6 +616,8 @@ class ScheduleGenerator
     @schedules[SchedulesFile::Columns[:Dishwasher].name] = dw_power_sch.map { |power| power / dw_peak_power }
 
     @schedules[SchedulesFile::Columns[:Occupants].name] = away_schedule.map { |i| 1.0 - i }
+    max_num = (2**@num_occupants - 1).to_i
+    @schedules[SchedulesFile::Columns[:PresentOccupants].name] = away_occupants.map { |i| (i ^ (max_num)) }
 
     if @debug
       @schedules[SchedulesFile::Columns[:Sleeping].name] = sleep_schedule
@@ -899,10 +904,14 @@ class ScheduleGenerator
   # @param time_index [TODO] TODO
   # @param max_clip [TODO] TODO
   # @return [TODO] TODO
-  def sum_across_occupants(all_simulated_values, activity_index, time_index, max_clip: nil)
+  def sum_across_occupants(all_simulated_values, activity_index, time_index, max_clip: nil, binary_sum: false)
     sum = 0
+    multiplier = 1
     all_simulated_values.size.times do |i|
-      sum += all_simulated_values[i][time_index, activity_index]
+      sum += all_simulated_values[i][time_index, activity_index] * multiplier
+      if binary_sum
+        multiplier *= 2
+      end
     end
     if (not max_clip.nil?) && (sum > max_clip)
       sum = max_clip
