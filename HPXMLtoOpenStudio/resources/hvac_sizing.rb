@@ -3644,7 +3644,7 @@ module HVACSizing
     return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
-  # Determines the speed (of a multi/variable-speed system) that is running during the design conditions.
+  # Determines the nominal speed (of a multi/variable-speed system).
   #
   # @param hvac_ap [HPXML::AdditionalProperties] AdditionalProperties object for the HVAC system
   # @param is_cooling [Boolean] True if cooling, otherwise heating
