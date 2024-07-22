@@ -4998,7 +4998,6 @@ class HVACSizingValues
                 :Heat_Capacity,       # Nominal heating capacity (Btu/hr)
                 :Heat_Capacity_Supp,  # Nominal heating capacity for the HP backup (Btu/hr)
                 :Cool_Airflow,        # Cooling airflow rate (cfm)
-                :Design_SHR,          # Cooling design SHR (dimensionless)
                 :Heat_Airflow,        # Heating airflow rate (cfm)
                 :GSHP_Loop_Flow,      # Ground-source heat pump water flow rate through the geothermal loop (gal/min)
                 :GSHP_Bore_Holes,     # Ground-source heat pump number of boreholes (#)
