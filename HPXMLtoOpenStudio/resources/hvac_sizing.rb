@@ -2137,19 +2137,19 @@ module HVACSizing
         # calculate design SHR --> design sensible capacity --> use design sensible capacity to RECALCULATE design airflow
         # note: using MJ cooling setpoint as EDB in Psychrometrics.calculateSHR() ignores return duct losses
 
-        hvac_sizings.Design_SHR = Psychrometrics.CalculateSHR(mj.cool_setpoint, mj.p_psi, UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, a_o_rated, hr_indoor_cooling_design)
+        design_shr = Psychrometrics.CalculateSHR(mj.cool_setpoint, mj.p_psi, UnitConversions.convert(cool_cap_design, 'btu/hr', 'kbtu/hr'), hvac_sizings.Cool_Airflow, a_o_rated, hr_indoor_cooling_design)
         # Calculate the coil SHR at the given incoming air state, CFM, total capacity, and coil Ao factor
-        # CFM changes in the iteration based on current value of hvac_sizings.Design_SHR
+        # CFM changes in the iteration based on current value of design_shr
 
         # calculate sensible/latent split at design conditions
-        cool_sens_cap_design = cool_cap_design * hvac_sizings.Design_SHR
+        cool_sens_cap_design = cool_cap_design * design_shr
         cool_lat_cap_design = [hvac_sizings.Cool_Load_Tot - cool_sens_cap_design, 1.0].max
 
         # Adjust Sizing
         if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
           hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
           hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-          cool_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * hvac_sizings.Design_SHR
+          cool_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * design_shr
 
         elsif cool_lat_cap_design < hvac_sizings.Cool_Load_Lat
           # Size by MJ8 Latent Load
@@ -2160,10 +2160,10 @@ module HVACSizing
           # combining (1) and (2) --> Q_design_tot = Q_load_lat/(1-Design_SHR) (3)
 
           # in code, (3) is
-          cool_cap_design = hvac_sizings.Cool_Load_Lat / (1 - hvac_sizings.Design_SHR)
+          cool_cap_design = hvac_sizings.Cool_Load_Lat / (1 - design_shr)
 
           # recalculate sensible design capacity using adjusted design total capacity
-          cool_sens_cap_design = cool_cap_design * hvac_sizings.Design_SHR
+          cool_sens_cap_design = cool_cap_design * design_shr
 
           # Ensure equipment is not being undersized
           cool_sens_cap_design = [cool_sens_cap_design, undersize_limit * hvac_sizings.Cool_Load_Sens].max
@@ -2184,7 +2184,7 @@ module HVACSizing
           hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
           # Determine the final sensible capacity at design using the SHR
-          cool_sens_cap_design = cool_cap_design * hvac_sizings.Design_SHR
+          cool_sens_cap_design = cool_cap_design * design_shr
 
         elsif cool_sens_cap_design < undersize_limit * hvac_sizings.Cool_Load_Sens
           # Size by MJ8 Sensible Load, return to rated conditions, find rated sensible capacity with SHRRated. Limit total
@@ -2193,7 +2193,7 @@ module HVACSizing
           cool_sens_cap_design = undersize_limit * hvac_sizings.Cool_Load_Sens
 
           # Solve for the new total system capacity at design conditions
-          cool_cap_design = cool_sens_cap_design / hvac_sizings.Design_SHR
+          cool_cap_design = cool_sens_cap_design / design_shr
 
           # Limit total capacity to oversize limit
           cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizings.Cool_Load_Tot].min
@@ -2203,13 +2203,13 @@ module HVACSizing
           hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
           # Recalculate the design sensible capacity in case the oversizing limit on total cap has been used
-          cool_sens_cap_design = cool_cap_design * hvac_sizings.Design_SHR
+          cool_sens_cap_design = cool_cap_design * design_shr
 
         else
           hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
           hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
-          cool_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * hvac_sizings.Design_SHR
+          cool_sens_cap_design = hvac_sizings.Cool_Capacity * total_cap_curve_value * design_shr
         end
 
         # Calculate the final air flow rate using final sensible capacity at design
