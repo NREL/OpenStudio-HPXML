@@ -4988,22 +4988,22 @@ end
 
 # Object with sizing values (loads, capacities, airflows, etc.) for a specific HVAC system
 class HVACSizingValues
-  attr_accessor(:Cool_Load_Sens,      # Total sensible cooling load (Btu/hr)
-                :Cool_Load_Lat,       # Total latent cooling load (Btu/hr)
-                :Cool_Load_Tot,       # Total (sensible + latent) cooling load (Btu/hr)
-                :Heat_Load,           # Total heating sensible load (Btu/hr)
-                :Heat_Load_Supp,      # Total heating sensible load for the HP backup (Btu/hr)
-                :Cool_Capacity,       # Nominal total cooling capacity (Btu/hr)
-                :Cool_Capacity_Sens,  # Nominal sensible cooling capacity (Btu/hr)
-                :Heat_Capacity,       # Nominal heating capacity (Btu/hr)
-                :Heat_Capacity_Supp,  # Nominal heating capacity for the HP backup (Btu/hr)
-                :Cool_Airflow,        # Cooling airflow rate (cfm)
-                :Heat_Airflow,        # Heating airflow rate (cfm)
-                :GSHP_Loop_Flow,      # Ground-source heat pump water flow rate through the geothermal loop (gal/min)
-                :GSHP_Bore_Holes,     # Ground-source heat pump number of boreholes (#)
-                :GSHP_Bore_Depth,     # Ground-source heat pump depth of each borehole (ft)
-                :GSHP_G_Functions,    # Ground-source heat pump G-functions
-                :GSHP_Bore_Config)    # Ground-source heat pump borefield configuration (e.g., Rectangular)
+  attr_accessor(:Cool_Load_Sens,      # [Double] Total sensible cooling load (Btu/hr)
+                :Cool_Load_Lat,       # [Double] Total latent cooling load (Btu/hr)
+                :Cool_Load_Tot,       # [Double] Total (sensible + latent) cooling load (Btu/hr)
+                :Heat_Load,           # [Double] Total heating sensible load (Btu/hr)
+                :Heat_Load_Supp,      # [Double] Total heating sensible load for the HP backup (Btu/hr)
+                :Cool_Capacity,       # [Double] Nominal total cooling capacity (Btu/hr)
+                :Cool_Capacity_Sens,  # [Double] Nominal sensible cooling capacity (Btu/hr)
+                :Heat_Capacity,       # [Double] Nominal heating capacity (Btu/hr)
+                :Heat_Capacity_Supp,  # [Double] Nominal heating capacity for the HP backup (Btu/hr)
+                :Cool_Airflow,        # [Double] Cooling airflow rate (cfm)
+                :Heat_Airflow,        # [Double] Heating airflow rate (cfm)
+                :GSHP_Loop_Flow,      # [Double] Ground-source heat pump water flow rate through the geothermal loop (gal/min)
+                :GSHP_Bore_Holes,     # [Integer] Ground-source heat pump number of boreholes (#)
+                :GSHP_Bore_Depth,     # [Double] Ground-source heat pump depth of each borehole (ft)
+                :GSHP_G_Functions,    # [Array<Array<Double>, Array<Double>>] Ground-source heat pump G-functions
+                :GSHP_Bore_Config)    # [String] Ground-source heat pump borefield configuration (HPXML::GeothermalLoopBorefieldConfigurationXXX)
 end
 
 # Object with data needed to write out the detailed output (used for populating an ACCA J1 form).
