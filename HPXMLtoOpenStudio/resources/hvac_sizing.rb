@@ -1441,8 +1441,8 @@ module HVACSizing
 
     # Calculate ventilation airflow rates
     ventilation_data = get_ventilation_data(hpxml_bldg)
+    q_imb = ventilation_data[:q_imb]
     q_oa = ventilation_data[:q_oa]
-    q_exh = ventilation_data[:q_exh]
     q_preheat = ventilation_data[:q_preheat]
     q_precool = ventilation_data[:q_precool]
     q_recirc = ventilation_data[:q_recirc]
@@ -1450,7 +1450,6 @@ module HVACSizing
     oa_lat_eff = ventilation_data[:oa_lat_eff]
 
     # Calculate net infiltration cfm (NCFM; infiltration combined with imbalanced supply ventilation)
-    q_imb = q_exh - q_oa
     if q_imb == 0
       # Neutral pressure, so NCFM = ICFM
       infil_ncfm_heat = icfm_heat
@@ -1484,7 +1483,7 @@ module HVACSizing
     bldg_Cool_Infil_Sens = 1.1 * mj.acf * infil_ncfm_cool * mj.ctd
     bldg_Cool_Infil_Lat = 0.68 * mj.acf * infil_ncfm_cool * mj.cool_design_grains
 
-    # Calculate vent (exhaust) cfm
+    # Calculate vent (supply) cfm
     vent_cfm_heat = q_oa
     vent_cfm_cool = q_oa
 
@@ -3195,7 +3194,7 @@ module HVACSizing
     # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
     vent_fans_mech = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan && f.flow_rate > 0 && f.hours_in_operation > 0 }
     if vent_fans_mech.empty?
-      return { q_oa: 0.0, q_exh: 0.0, q_preheat: 0.0, q_precool: 0.0,
+      return { q_imb: 0.0, q_oa: 0.0, q_preheat: 0.0, q_precool: 0.0,
                q_recirc: 0.0, oa_sens_eff: 0.0, oa_lat_eff: 0.0 }
     end
 
@@ -3211,25 +3210,27 @@ module HVACSizing
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    q_sup_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    q_exh_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    q_bal_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    q_erv_hrv_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    q_cfis_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_sup = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_exh = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_bal = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_erv_hrv = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    q_cfis = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
     # Average preconditioned OA air CFMs (only OA, recirculation will be addressed below for all shared systems)
     q_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.preheating_fraction_load_served }.sum(0.0)
     q_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_unit_flow_rate * vent_mech.precooling_fraction_load_served }.sum(0.0)
     q_recirc = vent_mech_shared.map { |vent_mech| vent_mech.average_unit_flow_rate - vent_mech.average_oa_unit_flow_rate }.sum(0.0)
 
-    # Total OA (supply) and exhaust CFMs
-    q_oa = q_sup_tot + q_bal_tot + q_erv_hrv_tot + q_cfis_tot
-    q_exh = q_exh_tot + q_bal_tot + q_erv_hrv_tot
+    # Total CFMs
+    q_sup_tot = q_sup + q_bal + q_erv_hrv + q_cfis
+    q_exh_tot = q_exh + q_bal + q_erv_hrv
+    q_imb = q_exh_tot - q_sup_tot # Worksheet E; used to determine space pressure effect
+    q_oa = q_sup_tot - q_cfis # Calculate OA CFM that is considered a space load only (e.g., exclude CFIS, which is considered a system load)
 
     # Calculate effectiveness for all ERV/HRV and store results in a hash
     hrv_erv_effectiveness_map = Airflow.calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
 
-    # Calculate cfm weighted average effectiveness for the ventilation (supply) load
+    # Calculate cfm weighted average effectiveness for the OA space load
     oa_lat_eff = 0.0
     oa_sens_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
@@ -3238,7 +3239,7 @@ module HVACSizing
       oa_sens_eff += vent_mech.average_oa_unit_flow_rate / q_oa * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
 
-    return { q_oa: q_oa, q_exh: q_exh, q_preheat: q_preheat, q_precool: q_precool,
+    return { q_imb: q_imb, q_oa: q_oa, q_preheat: q_preheat, q_precool: q_precool,
              q_recirc: q_recirc, oa_sens_eff: oa_sens_eff, oa_lat_eff: oa_lat_eff }
   end
 
