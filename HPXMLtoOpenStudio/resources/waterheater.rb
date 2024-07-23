@@ -2229,7 +2229,7 @@ module Waterheater
       hw_plant_loop.components.each do |c|
         next unless c.to_WaterHeaterStratified.is_initialized
 
-        # if not tank.name.to_s.inclue? "solar" #exclude solar storage from 2 tank systems
+        # if not tank.name.to_s.include? "solar" #exclude solar storage from 2 tank systems
         strat_tank = c.to_WaterHeaterStratified.get
         name = strat_tank.name.to_s
         next unless not name.include? 'solar'
@@ -2264,6 +2264,7 @@ module Waterheater
       unmet_wh_loads_program.addLine('Set ShowerSagTime=0')
       unmet_wh_loads_program.addLine('Set ShowerE=0')
       unmet_wh_loads_program.addLine('EndIf')
+      unmet_wh_loads_program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsProgram)
 
       # ProgramCallingManagers
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)

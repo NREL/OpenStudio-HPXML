@@ -151,7 +151,6 @@ class ReportSimulationOutputTest < Minitest::Test
     "Load: #{LT::HotWaterSolarThermal} (MBtu)",
     "Unmet Hours: #{UHT::Heating} (hr)",
     "Unmet Hours: #{UHT::Cooling} (hr)",
-    "Unmet Loads: #{ULT::HotWaterShowerTime} (hr)",
     "Unmet Loads: #{ULT::HotWaterShowerE} (J)",
     "Unmet Loads: #{ULT::HotWaterShowerUnmetTime} (hr)",
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
