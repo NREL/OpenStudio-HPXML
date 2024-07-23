@@ -5360,56 +5360,63 @@ class HPXML < Object
       XMLHelper.add_element(slab, 'Thickness', @thickness, :float, @thickness_isdefaulted) unless @thickness.nil?
       XMLHelper.add_element(slab, 'ExposedPerimeter', @exposed_perimeter, :float) unless @exposed_perimeter.nil?
       XMLHelper.add_element(slab, 'DepthBelowGrade', @depth_below_grade, :float, @depth_below_grade_isdefaulted) unless @depth_below_grade.nil?
-      insulation = XMLHelper.add_element(slab, 'PerimeterInsulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @perimeter_insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @perimeter_insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'PerimeterInsulation')
-      end
-      layer = XMLHelper.add_element(insulation, 'Layer')
-      if not @perimeter_insulation_material.nil?
-        material = XMLHelper.add_element(layer, 'InsulationMaterial')
-        values = @perimeter_insulation_material.split('/')
-        XMLHelper.add_element(material, values[0], values[1], :string)
-      end
-      XMLHelper.add_element(layer, 'NominalRValue', @perimeter_insulation_r_value, :float) unless @perimeter_insulation_r_value.nil?
-      XMLHelper.add_element(layer, 'InsulationDepth', @perimeter_insulation_depth, :float) unless @perimeter_insulation_depth.nil?
 
-      insulation = XMLHelper.add_element(slab, 'ExteriorHorizontalInsulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @exterior_horizontal_insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @exterior_horizontal_insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'ExteriorHorizontalInsulation')
+      if (not @perimeter_insulation_id.nil?) || (not @perimeter_insulation_r_value.nil?) || (not @perimeter_insulation_depth.nil?)
+        insulation = XMLHelper.add_element(slab, 'PerimeterInsulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @perimeter_insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @perimeter_insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'PerimeterInsulation')
+        end
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        if not @perimeter_insulation_material.nil?
+          material = XMLHelper.add_element(layer, 'InsulationMaterial')
+          values = @perimeter_insulation_material.split('/')
+          XMLHelper.add_element(material, values[0], values[1], :string)
+        end
+        XMLHelper.add_element(layer, 'NominalRValue', @perimeter_insulation_r_value, :float, @perimeter_insulation_r_value_isdefaulted) unless @perimeter_insulation_r_value.nil?
+        XMLHelper.add_element(layer, 'InsulationDepth', @perimeter_insulation_depth, :float, @perimeter_insulation_depth_isdefaulted) unless @perimeter_insulation_depth.nil?
       end
-      layer = XMLHelper.add_element(insulation, 'Layer')
-      if not @exterior_horizontal_insulation_material.nil?
-        material = XMLHelper.add_element(layer, 'InsulationMaterial')
-        values = @exterior_horizontal_insulation_material.split('/')
-        XMLHelper.add_element(material, values[0], values[1], :string)
-      end
-      XMLHelper.add_element(layer, 'NominalRValue', @exterior_horizontal_insulation_r_value, :float) unless @exterior_horizontal_insulation_r_value.nil?
-      XMLHelper.add_element(layer, 'InsulationWidth', @exterior_horizontal_insulation_width, :float) unless @exterior_horizontal_insulation_width.nil?
-      XMLHelper.add_element(layer, 'InsulationDepthBelowGrade', @exterior_horizontal_insulation_depth_below_grade, :float) unless @exterior_horizontal_insulation_depth_below_grade.nil?
 
+      if (not @exterior_horizontal_insulation_id.nil?) || (not @exterior_horizontal_insulation_r_value.nil?) || (not @exterior_horizontal_insulation_width.nil?) || (not @exterior_horizontal_insulation_depth_below_grade.nil?)
+        insulation = XMLHelper.add_element(slab, 'ExteriorHorizontalInsulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @exterior_horizontal_insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @exterior_horizontal_insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'ExteriorHorizontalInsulation')
+        end
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        if not @exterior_horizontal_insulation_material.nil?
+          material = XMLHelper.add_element(layer, 'InsulationMaterial')
+          values = @exterior_horizontal_insulation_material.split('/')
+          XMLHelper.add_element(material, values[0], values[1], :string)
+        end
+        XMLHelper.add_element(layer, 'NominalRValue', @exterior_horizontal_insulation_r_value, :float, @exterior_horizontal_insulation_r_value_isdefaulted) unless @exterior_horizontal_insulation_r_value.nil?
+        XMLHelper.add_element(layer, 'InsulationWidth', @exterior_horizontal_insulation_width, :float, @exterior_horizontal_insulation_width_isdefaulted) unless @exterior_horizontal_insulation_width.nil?
+        XMLHelper.add_element(layer, 'InsulationDepthBelowGrade', @exterior_horizontal_insulation_depth_below_grade, :float, @exterior_horizontal_insulation_depth_below_grade_isdefaulted) unless @exterior_horizontal_insulation_depth_below_grade.nil?
+      end
 
-      insulation = XMLHelper.add_element(slab, 'UnderSlabInsulation')
-      sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
-      if not @under_slab_insulation_id.nil?
-        XMLHelper.add_attribute(sys_id, 'id', @under_slab_insulation_id)
-      else
-        XMLHelper.add_attribute(sys_id, 'id', @id + 'UnderSlabInsulation')
+      if (not @under_slab_insulation_id.nil?) || (not @under_slab_insulation_r_value.nil?) || (not @under_slab_insulation_width.nil?) || (not @under_slab_insulation_spans_entire_slab.nil?)
+        insulation = XMLHelper.add_element(slab, 'UnderSlabInsulation')
+        sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
+        if not @under_slab_insulation_id.nil?
+          XMLHelper.add_attribute(sys_id, 'id', @under_slab_insulation_id)
+        else
+          XMLHelper.add_attribute(sys_id, 'id', @id + 'UnderSlabInsulation')
+        end
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        if not @under_slab_insulation_material.nil?
+          material = XMLHelper.add_element(layer, 'InsulationMaterial')
+          values = @under_slab_insulation_material.split('/')
+          XMLHelper.add_element(material, values[0], values[1], :string)
+        end
+        XMLHelper.add_element(layer, 'NominalRValue', @under_slab_insulation_r_value, :float, @under_slab_insulation_r_value_isdefaulted) unless @under_slab_insulation_r_value.nil?
+        XMLHelper.add_element(layer, 'InsulationWidth', @under_slab_insulation_width, :float, @under_slab_insulation_width_isdefaulted) unless @under_slab_insulation_width.nil?
+        XMLHelper.add_element(layer, 'InsulationSpansEntireSlab', @under_slab_insulation_spans_entire_slab, :boolean, @under_slab_insulation_spans_entire_slab_isdefaulted) unless @under_slab_insulation_spans_entire_slab.nil?
       end
-      layer = XMLHelper.add_element(insulation, 'Layer')
-      if not @under_slab_insulation_material.nil?
-        material = XMLHelper.add_element(layer, 'InsulationMaterial')
-        values = @under_slab_insulation_material.split('/')
-        XMLHelper.add_element(material, values[0], values[1], :string)
-      end
-      XMLHelper.add_element(layer, 'NominalRValue', @under_slab_insulation_r_value, :float) unless @under_slab_insulation_r_value.nil?
-      XMLHelper.add_element(layer, 'InsulationWidth', @under_slab_insulation_width, :float) unless @under_slab_insulation_width.nil?
-      XMLHelper.add_element(layer, 'InsulationSpansEntireSlab', @under_slab_insulation_spans_entire_slab, :boolean) unless @under_slab_insulation_spans_entire_slab.nil?
+
       XMLHelper.add_extension(slab, 'GapInsulationRValue', @gap_insulation_r_value, :float, @gap_insulation_r_value_isdefaulted) unless @gap_insulation_r_value.nil?
       XMLHelper.add_extension(slab, 'CarpetFraction', @carpet_fraction, :float, @carpet_fraction_isdefaulted) unless @carpet_fraction.nil?
       XMLHelper.add_extension(slab, 'CarpetRValue', @carpet_r_value, :float, @carpet_r_value_isdefaulted) unless @carpet_r_value.nil?
