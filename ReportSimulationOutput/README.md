@@ -393,7 +393,7 @@ Determines whether timeseries timestamps use the start-of-period or end-of-perio
 
 **Generate Timeseries Output: Number of Decimal Places**
 
-Allows overriding the default number of decimal places for timeseries output. Does not apply if output format is msgpack, where no rounding is performed because there is no file size penalty to storing full precision.
+Allows overriding the default number of decimal places for timeseries output.
 
 - **Name:** ``timeseries_num_decimal_places``
 - **Type:** ``Integer``
@@ -694,8 +694,6 @@ All possible measure outputs are listed below. Actual outputs depend on measure 
 - ``unmet_hours_heating_hr``
 
 - ``unmet_hours_cooling_hr``
-
-- ``unmet_loads_hot_water_shower_time_hr``
 
 - ``unmet_loads_hot_water_shower_energy_j``
 
