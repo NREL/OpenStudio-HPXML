@@ -901,10 +901,6 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
-            <ExteriorHorizontalInsulation>
-              <SystemIdentifier id='SlabCrawlSpaceExteriorHorizontalInsulation'/>
-              <Layer/>
-            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabCrawlSpaceUnderSlabInsulation'/>
               <Layer>
@@ -926,10 +922,6 @@
                 <InsulationDepth>3.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
-            <ExteriorHorizontalInsulation>
-              <SystemIdentifier id='SlabRecRoomExteriorHorizontalInsulation'/>
-              <Layer/>
-            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabRecRoomUnderSlabInsulation'/>
               <Layer>
@@ -951,10 +943,6 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
-            <ExteriorHorizontalInsulation>
-              <SystemIdentifier id='SlabLaundryExteriorHorizontalInsulation'/>
-              <Layer/>
-            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabLaundryUnderSlabInsulation'/>
               <Layer>
@@ -976,10 +964,6 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
-            <ExteriorHorizontalInsulation>
-              <SystemIdentifier id='SlabWorkshopExteriorHorizontalInsulation'/>
-              <Layer/>
-            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabWorkshopUnderSlabInsulation'/>
               <Layer>
