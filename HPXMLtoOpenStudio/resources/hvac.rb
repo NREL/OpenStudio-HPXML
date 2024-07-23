@@ -1810,10 +1810,10 @@ module HVAC
     return nbeds + 1
   end
 
-  # TODO
+  # Return a 12-element array of 1s and 0s that reflects months for which the average drybulb temperature is greater than 63F.
   #
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [TODO] TODO
+  # @return [Array<Integer>] monthly array of 1s and 0s
   def self.get_default_ceiling_fan_months(weather)
     # Per ANSI/RESNET/ICC 301
     months = [0] * 12
@@ -4294,14 +4294,13 @@ module HVAC
     end
   end
 
-  # TODO
+  # Returns the EnergyPlus sequential load fractions for every day of the year.
   #
   # @param load_fraction [TODO] TODO
   # @param remaining_fraction [TODO] TODO
   # @param availability_days [TODO] TODO
   # @return [TODO] TODO
   def self.calc_sequential_load_fractions(load_fraction, remaining_fraction, availability_days)
-    # Returns the EnergyPlus sequential load fractions for every day of the year
     if remaining_fraction > 0
       sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
     else
