@@ -1029,7 +1029,7 @@ Nominal R-value of the slab exterior horizontal (wing/skirt) insulation. Applies
 
 - **Units:** ``h-ft^2-R/Btu``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1042,7 +1042,7 @@ Width of the slab exterior horizontal (wing/skirt) insulation measured from the 
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -1055,7 +1055,7 @@ Depth of the slab exterior horizontal (wing/skirt) insulation measured from the 
 
 - **Units:** ``ft``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
