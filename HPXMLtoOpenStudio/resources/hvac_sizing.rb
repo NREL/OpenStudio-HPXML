@@ -968,6 +968,7 @@ module HVACSizing
   # @param all_space_loads [Hash] Map of HPXML::Spaces => DesignLoadValues object
   # @return [void]
   def self.process_load_doors(mj, hpxml_bldg, all_zone_loads, all_space_loads)
+    # CLTD values derived from Table 4A Construction 11 table.
     if mj.daily_range_num == 0
       cltd = mj.ctd + 15.0
     elsif mj.daily_range_num == 1
