@@ -510,19 +510,12 @@ class MonthWeekdayWeekendSchedule
     return maxval
   end
 
-  # TODO
+  # If sum != 1, normalize to get correct max val.
   #
-  # @return [TODO] TODO
+  # @return [Double] the calculated schedule adjustment
   def calc_sch_adjust()
-    # if sum != 1, normalize to get correct max val
-    sum_wkdy = 0
-    sum_wknd = 0
-    @weekday_hourly_values.each do |v|
-      sum_wkdy += v
-    end
-    @weekend_hourly_values.each do |v|
-      sum_wknd += v
-    end
+    sum_wkdy = @weekday_hourly_values.sum
+    sum_wknd = @weekend_hourly_values.sum
     if sum_wkdy < sum_wknd
       return 1 / sum_wknd
     end
@@ -2222,7 +2215,7 @@ class SchedulesFile
   #
   # @param col_name [String] the column header of the detailed schedule
   # @param daily_water [Double] daily water use (gal/day)
-  # @return [TODO] TODO (m^3/s)
+  # @return [Double] peak flow used to represent maximum input (m^3/s)
   def calc_peak_flow_from_daily_gpm(col_name:,
                                     daily_water:)
     if @schedules[col_name].nil?
@@ -2329,7 +2322,7 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Convert detailed setpoint schedule values from F to C.
   #
   # @param offset_db [Float] On-off thermostat deadband
   # @return [void]
@@ -2353,7 +2346,7 @@ class SchedulesFile
     end
   end
 
-  # TODO
+  # Create separate charging (positive) and discharging (negative) detailed schedules from the battery schedule.
   #
   # @return [void]
   def create_battery_charging_discharging_schedules
