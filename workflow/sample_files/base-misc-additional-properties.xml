@@ -244,10 +244,6 @@
                 <InsulationDepth>0.0</InsulationDepth>
               </Layer>
             </PerimeterInsulation>
-            <ExteriorHorizontalInsulation>
-              <SystemIdentifier id='Slab1ExteriorHorizontalInsulation'/>
-              <Layer/>
-            </ExteriorHorizontalInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='Slab1UnderSlabInsulation'/>
               <Layer>

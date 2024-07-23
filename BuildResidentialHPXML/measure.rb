@@ -5186,12 +5186,12 @@ module HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            thickness: args[:slab_thickness],
                            exposed_perimeter: exposed_perimeter,
+                           perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
                            perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
                            exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_r],
                            exterior_horizontal_insulation_width: args[:slab_exterior_horizontal_insulation_width],
                            exterior_horizontal_insulation_depth_below_grade: args[:slab_exterior_horizontal_insulation_depth_below_grade],
                            under_slab_insulation_width: under_slab_insulation_width,
-                           perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
                            under_slab_insulation_r_value: args[:slab_under_insulation_r],
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
                            carpet_fraction: args[:slab_carpet_fraction],
@@ -7345,16 +7345,16 @@ module HPXMLFile
         end
       end
       surf.id = "#{surf_name}#{indexes[surf_name]}"
-      if surf.respond_to? :insulation_id
+      if surf.respond_to?(:insulation_id) && (not surf.insulation_id.nil?)
         surf.insulation_id = "#{surf_name}#{indexes[surf_name]}Insulation"
       end
-      if surf.respond_to? :perimeter_insulation_id
+      if surf.respond_to?(:perimeter_insulation_id) && (not surf.perimeter_insulation_id.nil?)
         surf.perimeter_insulation_id = "#{surf_name}#{indexes[surf_name]}PerimeterInsulation"
       end
-      if surf.respond_to? :exterior_horizontal_insulation_id
+      if surf.respond_to?(:exterior_horizontal_insulation_id) && (not surf.exterior_horizontal_insulation_id.nil?)
         surf.exterior_horizontal_insulation_id = "#{surf_name}#{indexes[surf_name]}ExteriorHorizontalInsulation"
       end
-      if surf.respond_to? :under_slab_insulation_id
+      if surf.respond_to?(:under_slab_insulation_id) && (not surf.under_slab_insulation_id.nil?)
         surf.under_slab_insulation_id = "#{surf_name}#{indexes[surf_name]}UnderSlabInsulation"
       end
     end
