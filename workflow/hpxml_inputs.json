@@ -1588,6 +1588,10 @@
     "water_heater_setpoint_temperature": null,
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/water-heater-setpoints.csv"
   },
+  "sample_files/base-dhw-undersized.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "water_heater_heating_capacity": 1000.0
+  },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_num_floors_above_grade": 2,
