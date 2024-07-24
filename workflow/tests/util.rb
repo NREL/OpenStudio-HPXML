@@ -1031,9 +1031,15 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # Check unmet hours
   unmet_hours_htg = results.select { |k, _v| k.include? 'Unmet Hours: Heating' }.values.sum(0.0)
   unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.values.sum(0.0)
+  # Check unmet loads
+  unmet_loads_hw_shw_energy = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Energy' }.values.sum(0.0)
+  unmet_loads_hw_shw_time = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Unmet Time' }.values.sum(0.0)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
+  elsif hpxml_path.include? 'base-dhw-undersized.xml'
+    assert_operator(unmet_loads_hw_shw_energy, :>, 1000) # FIXME
+    assert_operator(unmet_loads_hw_shw_time, :>, 1000) # FIXME
   else
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)
@@ -1154,6 +1160,7 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
         if not (key.include?('Unmet Hours') ||
+                key.include?('Unmet Loads') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather') ||
                 key.include?('HVAC Geothermal Loop: Borehole/Trench Length'))
