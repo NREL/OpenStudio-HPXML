@@ -464,7 +464,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{peak_load.ems_variable}_peakload_outvar,Maximum;").get
     end
 
-    # Unmet Hours (annual only)
+    # Unmet Hours
     @unmet_hours.each do |_key, unmet_hour|
       result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_hour.ems_variable}_annual_outvar,#{unmet_hour.ems_variable},Summed,ZoneTimestep,#{unmet_hours_program.name},hr;").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_hour.ems_variable}_annual_outvar,runperiod;").get
@@ -474,7 +474,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       end
     end
 
-    # Unmet Loads (annual only)
+    # Unmet Loads
     @unmet_loads.each do |key, unmet_load|
       next if unmet_loads_program.nil?
 
