@@ -221,6 +221,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_unmet_loads', false)
+    arg.setDisplayName('Generate Timeseries Output: Unmet Loads')
+    arg.setDescription('Generates timeseries unmet hours for hot water.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_temperatures', false)
     arg.setDisplayName('Generate Timeseries Output: Zone Temperatures')
     arg.setDescription('Generates timeseries temperatures for each thermal zone.')
@@ -470,9 +476,12 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Loads (annual only)
     @unmet_loads.each do |key, unmet_load|
-      units = 'hr'
+      next if unmet_loads_program.nil?
+
       if key == ULT::HotWaterShowerE
         units = 'J'
+      elsif key == ULT::HotWaterShowerUnmetTime
+        units = 'hr'
       end
       result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_load.ems_variable}_annual_outvar,#{unmet_load.ems_variable},Summed,SystemTimestep,#{unmet_loads_program.name},#{units};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_load.ems_variable}_annual_outvar,runperiod;").get

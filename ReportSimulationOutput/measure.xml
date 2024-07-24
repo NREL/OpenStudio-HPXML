@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>e3b37635-df58-4d0f-aac8-0d67ac21dfb6</version_id>
-  <version_modified>2024-07-23T19:22:52Z</version_modified>
+  <version_id>7f579e22-ed2a-4665-8ada-3532334fd1f8</version_id>
+  <version_modified>2024-07-24T03:20:17Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -567,6 +567,25 @@
       <name>include_timeseries_unmet_hours</name>
       <display_name>Generate Timeseries Output: Unmet Hours</display_name>
       <description>Generates timeseries unmet hours for heating and cooling.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_unmet_loads</name>
+      <display_name>Generate Timeseries Output: Unmet Loads</display_name>
+      <description>Generates timeseries unmet hours for hot water.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1945,7 +1964,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>4A7F2FEB</checksum>
+      <checksum>60CEA9C7</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1962,13 +1981,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FE303014</checksum>
+      <checksum>D7364A38</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>19D4C2BB</checksum>
+      <checksum>7387709E</checksum>
     </file>
   </files>
 </measure>

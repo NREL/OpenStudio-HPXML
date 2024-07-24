@@ -334,6 +334,17 @@ Generates timeseries unmet hours for heating and cooling.
 
 <br/>
 
+**Generate Timeseries Output: Unmet Loads**
+
+Generates timeseries unmet hours for hot water.
+
+- **Name:** ``include_timeseries_unmet_loads``
+- **Type:** ``Boolean``
+
+- **Required:** ``false``
+
+<br/>
+
 **Generate Timeseries Output: Zone Temperatures**
 
 Generates timeseries temperatures for each thermal zone.
