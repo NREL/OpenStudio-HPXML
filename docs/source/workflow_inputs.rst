@@ -688,6 +688,7 @@ The column names available in the schedule CSV files are:
   ``hot_water_dishwasher``          frac     Dishwasher hot water use schedule.                                                 Yes
   ``hot_water_clothes_washer``      frac     Clothes washer hot water use schedule.                                             Yes
   ``hot_water_fixtures``            frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
+  ``hot_water_showers``             frac     Showers hot water use schedule. [#]_                                               Yes
   ``hot_water_recirculation_pump``  frac     Hot water recirculation pump schedule.                                             No
   ``general_water_use``             frac     General water use internal gains.                                                  No
   ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                              No
@@ -698,6 +699,7 @@ The column names available in the schedule CSV files are:
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
   ================================  =======  =================================================================================  ===============================
 
+  .. [#] Used only for the calculation of unmet hot water load outputs. See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated unmet hot water loads appear in the output files.
   .. [#] This feature is an advanced research capability. This schedule allows modeling shedding controls for variable speed HVAC systems (instead of setpoint changes) to limit the power of HVAC per `AHRI 1380 <https://www.ahrinet.org/search-standards/ahri-1380-i-p-demand-response-through-variable-capacity-hvac-systems-residential-and-small>`_. 
          While any fraction value can be entered, this is primarily intended to reflect the AHRI capabilities, which has two levels of load shed: "General Curtailment" and "Critical Curtailment". 
          A "General Curtailment" signal prevents the equipment from running at more than 70% of max power and "Critical Curtailment" limits it to 40% of max power until comfort constraints are violated (4F off the setpoint).
