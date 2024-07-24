@@ -16,6 +16,7 @@ __New Features__
 - BuildResidentialScheduleFile measure:
   - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
   - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
+- Adds metrics for unmet hot water loads.
 
 __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
@@ -164,7 +165,6 @@ __New Features__
 - Allows above-grade basements/crawlspaces defined solely with Wall (not FoundationWall) elements.
 - Updates to 2022 EIA energy costs.
 - Added README.md documentation for all OpenStudio measures.
-- Added metrics for unmet hot water loads
 
 __Bugfixes__
 - Fixes battery resilience output to properly incorporate battery losses.
