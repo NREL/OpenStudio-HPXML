@@ -384,8 +384,10 @@ module HotWaterAndAppliances
         end
         if fx_peak_flow.nil?
           fx_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
-          shower_peak_flow = showers_schedule_obj.calc_design_level_from_daily_gpm(shower_gpd)
           dist_water_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(w_gpd)
+        end
+        if shower_peak_flow.nil?
+          shower_peak_flow = showers_schedule_obj.calc_design_level_from_daily_gpm(shower_gpd)
         end
 
         id = water_heating_system.id

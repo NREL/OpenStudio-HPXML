@@ -1590,7 +1590,7 @@
   },
   "sample_files/base-dhw-undersized.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "water_heater_heating_capacity": 1000.0
+    "water_heater_heating_capacity": 1100.0
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
