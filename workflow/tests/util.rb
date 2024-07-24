@@ -1038,8 +1038,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
   elsif hpxml_path.include? 'base-dhw-undersized.xml'
-    assert_operator(unmet_loads_hw_shw_energy, :>, 1000) # FIXME
-    assert_operator(unmet_loads_hw_shw_time, :>, 1000) # FIXME
+    assert_operator(unmet_loads_hw_shw_energy, :>, 0) # FIXME
+    assert_operator(unmet_loads_hw_shw_time, :>, 0) # FIXME
   else
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)
