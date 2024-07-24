@@ -2251,7 +2251,7 @@ module Waterheater
 
       shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       shower_flow_sensor.setName('Shower Volume')
-      shower_flow_sensor.setKeyName('hot_water_showers') # FIXME: use constant name here
+      shower_flow_sensor.setKeyName(Constants.ObjectNameShowers + ' schedule')
 
       # EMS program
       # FIXME: we want one program where the lines are extensible based on number of water heaters?

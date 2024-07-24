@@ -1094,6 +1094,10 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
+    elsif key.include?('Unmet Loads:')
+      # Check that the unmet loads difference is less than 10 J/hrs FIXME
+      abs_delta_tol = 10
+      abs_frac_tol = nil
     elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:')
       # Check that there is no difference
       abs_delta_tol = 0
@@ -1207,7 +1211,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
     'energy' => ['Energy Use', 'Fuel Use', 'End Use'],
     'loads' => ['Load', 'Component Load'],
     'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
-    'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
+    'misc' => ['Unmet Hours', 'Unmet Loads', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
     'bills' => ['Utility Bills'],
   }
 

@@ -346,10 +346,10 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil?
       end
 
-      # Create shower schedule, used only for unmet load calculations
-      # Create separate shower schedule: Only used for calculating unmet loads. Shower hot water usage is part of the fixtures usage.
+      # Create a separate shower schedule (from fixtures) used only for unmet load calculations.
       showers_schedule = nil
       showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
+      showers_obj_name = Constants.ObjectNameShowers
       if not schedules_file.nil?
         showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
       end
@@ -358,7 +358,7 @@ module HotWaterAndAppliances
         showers_weekday_sch = Schedule.ShowersWeekdayFractions # FIXME: should we expose HPXML elements for these? sounds like maybe not.
         showers_weekend_sch = Schedule.ShowersWeekendFractions
         showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
-        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameShowers, showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
+        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
       else
         runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekdayFractions.nil?
         runner.registerWarning("Both '#{showers_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekendFractions.nil?
@@ -374,7 +374,7 @@ module HotWaterAndAppliances
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
       if gpd_frac > 0
 
-        # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads
+        # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads.
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
         shower_gpd = get_showers_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
