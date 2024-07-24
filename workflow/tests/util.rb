@@ -373,7 +373,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Supply Side is storing excess heat the majority of the time.'
     end
     # Unavailability periods
-    if !hpxml_header.unavailable_periods.empty?
+    if !hpxml_header.unavailable_periods.empty? || hpxml_path.include?('base-dhw-undersized')
       next if message.include? 'Target water temperature is greater than the hot water temperature'
       next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
     end
