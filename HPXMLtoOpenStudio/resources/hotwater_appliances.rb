@@ -359,10 +359,6 @@ module HotWaterAndAppliances
         showers_weekend_sch = Schedule.ShowersWeekendFractions
         showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
         showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
-      else
-        runner.registerWarning("Both '#{showers_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekdayFractions.nil?
-        runner.registerWarning("Both '#{showers_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !Schedule.ShowersWeekendFractions.nil?
-        runner.registerWarning("Both '#{showers_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !Schedule.ShowersMonthlyMultipliers.nil?
       end
     end
 
