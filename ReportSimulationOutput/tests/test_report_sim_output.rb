@@ -151,8 +151,8 @@ class ReportSimulationOutputTest < Minitest::Test
     "Load: #{LT::HotWaterSolarThermal} (MBtu)",
     "Unmet Hours: #{UHT::Heating} (hr)",
     "Unmet Hours: #{UHT::Cooling} (hr)",
-    "Unmet Loads: #{ULT::HotWaterShowerE} (J)",
-    "Unmet Loads: #{ULT::HotWaterShowerUnmetTime} (hr)",
+    "Unmet Loads: #{ULT::HotWaterShowerE} (kBtu)",
+    "Unmet Loads: #{ULT::HotWaterShowerTime} (hr)",
     "Peak Electricity: #{PFT::Winter} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Summer} #{TE::Total} (W)",
     "Peak Electricity: #{PFT::Annual} #{TE::Total} (W)",
@@ -338,7 +338,7 @@ class ReportSimulationOutputTest < Minitest::Test
 
   BaseHPXMLTimeseriesColsUnmetLoads = [
     "Unmet Loads: #{ULT::HotWaterShowerE}",
-    "Unmet Loads: #{ULT::HotWaterShowerUnmetTime}",
+    "Unmet Loads: #{ULT::HotWaterShowerTime}",
   ]
 
   BaseHPXMLTimeseriesColsZoneTemps = [
@@ -926,7 +926,7 @@ class ReportSimulationOutputTest < Minitest::Test
     timeseries_cols = timeseries_rows.transpose
     assert_equal(1, _check_for_constant_timeseries_step(timeseries_cols[0]))
     _check_for_nonzero_avg_timeseries_value(timeseries_csv, ["Unmet Loads: #{ULT::HotWaterShowerE}",
-                                                             "Unmet Loads: #{ULT::HotWaterShowerUnmetTime}"])
+                                                             "Unmet Loads: #{ULT::HotWaterShowerTime}"])
   end
 
   def test_timeseries_hourly_zone_temperatures

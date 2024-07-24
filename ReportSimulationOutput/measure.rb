@@ -480,13 +480,13 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
       if key == ULT::HotWaterShowerE
         units = 'J'
-      elsif key == ULT::HotWaterShowerUnmetTime
+      elsif key == ULT::HotWaterShowerTime
         units = 'hr'
       end
       result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_load.ems_variable}_annual_outvar,#{unmet_load.ems_variable},Summed,SystemTimestep,#{unmet_loads_program.name},#{units};").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_load.ems_variable}_annual_outvar,runperiod;").get
       if args[:include_timeseries_unmet_loads]
-        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_load.ems_variable}_timeseries_outvar,#{unmet_load.ems_variable},Summed,SystemTimestep,#{unmet_loads_program.name},hr;").get
+        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_load.ems_variable}_timeseries_outvar,#{unmet_load.ems_variable},Summed,SystemTimestep,#{unmet_loads_program.name},#{units};").get
         result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_load.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
       end
     end
@@ -852,10 +852,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Unmet Loads
-    @unmet_loads.each do |_key, unmet_load|
-      unmet_load.annual_output = get_report_variable_data_annual(['EMS'], ["#{unmet_load.ems_variable}_annual_outvar"], 1.0)
+    @unmet_loads.each do |key, unmet_load|
+      if key == ULT::HotWaterShowerE
+        units = 'J'
+      elsif key == ULT::HotWaterShowerTime
+        units = 'hr'
+      end
+      unmet_load.annual_output = get_report_variable_data_annual(['EMS'], ["#{unmet_load.ems_variable}_annual_outvar"], UnitConversions.convert(1.0, units, unmet_load.annual_units))
       if args[:include_timeseries_unmet_loads]
-        unmet_load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{unmet_load.ems_variable}_timeseries_outvar"], 1.0, 0, args[:timeseries_frequency])
+        unmet_load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{unmet_load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, units, unmet_load.timeseries_units), 0, args[:timeseries_frequency])
       end
     end
 
@@ -2798,16 +2803,19 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Unmet Loads
     @unmet_loads = {}
     @unmet_loads[ULT::HotWaterShowerE] = UnmetLoads.new(ems_variable: 'ShowerE')
-    @unmet_loads[ULT::HotWaterShowerUnmetTime] = UnmetLoads.new(ems_variable: 'ShowerSagTime')
+    @unmet_loads[ULT::HotWaterShowerTime] = UnmetLoads.new(ems_variable: 'ShowerSagTime')
 
     @unmet_loads.each do |load_type, unmet_load|
-      units = 'hr'
       if load_type == ULT::HotWaterShowerE
-        units = 'J'
+        annual_units = 'kBtu'
+        timeseries_units = 'Btu'
+      elsif load_type == ULT::HotWaterShowerTime
+        annual_units = 'hr'
+        timeseries_units = 'hr'
       end
       unmet_load.name = "Unmet Loads: #{load_type}"
-      unmet_load.annual_units = units
-      unmet_load.timeseries_units = units
+      unmet_load.annual_units = annual_units
+      unmet_load.timeseries_units = timeseries_units
     end
 
     # Peak Loads

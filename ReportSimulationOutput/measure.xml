@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>2d67635e-6c92-4152-922d-2e452fa22603</version_id>
-  <version_modified>2024-07-24T15:52:35Z</version_modified>
+  <version_id>dc72f903-0aa4-43bc-bbdd-85d1c4c346b0</version_id>
+  <version_modified>2024-07-24T21:34:35Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -1574,16 +1574,16 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>unmet_loads_hot_water_shower_energy_j</name>
-      <display_name>unmet_loads_hot_water_shower_energy_j</display_name>
-      <short_name>unmet_loads_hot_water_shower_energy_j</short_name>
+      <name>unmet_loads_hot_water_shower_energy_k_btu</name>
+      <display_name>unmet_loads_hot_water_shower_energy_k_btu</display_name>
+      <short_name>unmet_loads_hot_water_shower_energy_k_btu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>unmet_loads_hot_water_shower_unmet_time_hr</name>
-      <display_name>unmet_loads_hot_water_shower_unmet_time_hr</display_name>
-      <short_name>unmet_loads_hot_water_shower_unmet_time_hr</short_name>
+      <name>unmet_loads_hot_water_shower_time_hr</name>
+      <display_name>unmet_loads_hot_water_shower_time_hr</display_name>
+      <short_name>unmet_loads_hot_water_shower_time_hr</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -1964,7 +1964,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>60CEA9C7</checksum>
+      <checksum>97F7F7F2</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1981,13 +1981,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>71D28317</checksum>
+      <checksum>1C7F6D4A</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>7387709E</checksum>
+      <checksum>07AB5817</checksum>
     </file>
   </files>
 </measure>

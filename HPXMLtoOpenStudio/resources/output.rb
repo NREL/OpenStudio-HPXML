@@ -119,7 +119,7 @@ end
 module ULT
   # Unmet Loads Types
   HotWaterShowerE = 'Hot Water Shower Energy'
-  HotWaterShowerUnmetTime = 'Hot Water Shower Unmet Time'
+  HotWaterShowerTime = 'Hot Water Shower Time'
 end
 
 # TODO
