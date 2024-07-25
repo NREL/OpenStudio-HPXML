@@ -1043,7 +1043,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
-  elsif hpxml_path.include?('dhw') && hpxml.path.include?('undersized')
+  elsif hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
     assert_operator(unmet_loads_hw_shw_energy, :>, 0) # FIXME
     assert_operator(unmet_loads_hw_shw_time, :>, 0) # FIXME
   else
