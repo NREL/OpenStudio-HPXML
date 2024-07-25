@@ -373,7 +373,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
       next if message.include? 'Supply Side is storing excess heat the majority of the time.'
     end
     # Unavailability periods
-    if !hpxml_header.unavailable_periods.empty? || hpxml_path.include?('base-dhw-undersized')
+    if !hpxml_header.unavailable_periods.empty?
       next if message.include? 'Target water temperature is greater than the hot water temperature'
       next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
     end
@@ -397,6 +397,12 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     # TODO: Check why this warning occurs
     if hpxml_path.include? 'base-bldgtype-mf-whole-building'
       next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
+    end
+    # Undersized water heaters
+    if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
+      next if message.include? 'Target water temperature is greater than the hot water temperature'
+      next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
+      next if message.include? 'Hot water setpoint should typically be greater than or equal to 110 deg-F'
     end
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
@@ -1037,7 +1043,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
-  elsif hpxml_path.include? 'base-dhw-undersized.xml'
+  elsif hpxml_path.include?('dhw') && hpxml.path.include?('undersized')
     assert_operator(unmet_loads_hw_shw_energy, :>, 0) # FIXME
     assert_operator(unmet_loads_hw_shw_time, :>, 0) # FIXME
   else
