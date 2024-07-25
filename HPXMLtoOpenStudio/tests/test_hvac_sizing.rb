@@ -323,7 +323,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(16608, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
     assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
     assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
-    assert_in_delta(2440, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_in_delta(2440, hpxml_bldg.hvac_plant.hdl_slabs, 1000) # Discrepancy because we take into account basement floor depth below grade (5ft) vs Table 4A assumption of 8ft
     assert_in_delta(5435, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(6944, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_equal(0, hpxml_bldg.hvac_plant.hdl_vent)

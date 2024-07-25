@@ -1850,9 +1850,22 @@ class HPXML < Object
     #
     # @return [Double] Above-grade conditioned volume (ft3)
     def above_grade_conditioned_volume
-      ag_wall_area, bg_wall_area = thermal_boundary_wall_areas()
-      ag_ratio = ag_wall_area / (ag_wall_area + bg_wall_area)
-      return @building_construction.conditioned_building_volume * ag_ratio
+      ag_cond_vol = @building_construction.conditioned_building_volume
+
+      # Subtract below grade conditioned volume
+      HPXML::conditioned_below_grade_locations.each do |location|
+        adj_fnd_walls = @foundation_walls.select { |fw| fw.is_exterior && fw.interior_adjacent_to == location }
+
+        floor_area = @slabs.select { |s| s.interior_adjacent_to == location }.map { |s| s.area }.sum
+        next if floor_area <= 0
+
+        # Calculate weighted-average (by length) below-grade depth
+        avg_depth_bg = adj_fnd_walls.map { |fw| fw.depth_below_grade * (fw.area / fw.height) }.sum(0.0) / adj_fnd_walls.map { |fw| fw.area / fw.height }.sum
+
+        ag_cond_vol -= avg_depth_bg * floor_area
+      end
+
+      return ag_cond_vol
     end
 
     # Calculates common wall area.
@@ -2944,6 +2957,13 @@ class HPXML < Object
       return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
     end
 
+    # Returns all HPXML enclosure sub-surfaces for this zone.
+    #
+    # @return [Array<HPXML::XXX>] List of sub-surface objects
+    def subsurfaces
+      return (windows + skylights + doors)
+    end
+
     # Adds this object to the provided Oga XML element.
     #
     # @param building [Oga::XML::Element] The current Building XML element
@@ -3104,6 +3124,13 @@ class HPXML < Object
     # @return [Array<HPXML::XXX>] List of surface objects
     def surfaces
       return (roofs + rim_joists + walls + foundation_walls + floors + slabs)
+    end
+
+    # Returns all HPXML enclosure sub-surfaces for this space.
+    #
+    # @return [Array<HPXML::XXX>] List of sub-surface objects
+    def subsurfaces
+      return (windows + skylights + doors)
     end
 
     # Adds this object to the provided Oga XML element.
@@ -11131,9 +11158,9 @@ class HPXML < Object
             HPXML::LocationBasementConditioned]
   end
 
-  # Returns the set of all location types that are conditioned and above-grade.
+  # Returns the set of all location types that are conditioned and below-grade.
   #
-  # @return [Array<String>] List of conditioned, above-grade locations (HPXML::LocationXXX)
+  # @return [Array<String>] List of conditioned, below-grade locations (HPXML::LocationXXX)
   def self.conditioned_below_grade_locations
     return [HPXML::LocationBasementConditioned,
             HPXML::LocationCrawlspaceConditioned]

@@ -767,7 +767,7 @@
             <SystemIdentifier id='SlabRecRoom'/>
             <AttachedToSpace idref='recroom'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>336.0</Area>
+            <Area>783.0</Area>
             <ExposedPerimeter>83.0</ExposedPerimeter>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabRecRoomPerimeterInsulation'/>

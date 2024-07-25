@@ -728,7 +728,6 @@ module HVACSizing
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
-
       htg_htm = window_ufactor * mj.htd
       htg_loads = htg_htm * window.area
       all_zone_loads[zone].Heat_Windows += htg_loads
@@ -1111,20 +1110,14 @@ module HVACSizing
     # Below-Grade Wall Area
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
+      next unless foundation_wall.is_exterior # Partition walls handled with above grade walls
       next if foundation_wall.depth_below_grade < 2 # Already handled in above grade walls
 
       space = foundation_wall.space
       zone = space.zone
 
-      if foundation_wall.is_exterior
-        u_wall_with_soil = get_foundation_wall_below_grade_ufactor(foundation_wall, true, mj.ground_conductivity)
-        htg_htm = u_wall_with_soil * mj.htd
-      else # Partition wall
-        fail "Shouldn't hit this"
-        adjacent_space = foundation_wall.exterior_adjacent_to
-        u_wall_without_soil = get_foundation_wall_below_grade_ufactor(foundation_wall, false, mj.ground_conductivity)
-        htg_htm = u_wall_without_soil * (mj.heat_setpoint - mj.heat_design_temps[adjacent_space])
-      end
+      u_wall = get_foundation_wall_below_grade_ufactor(foundation_wall, true, mj.ground_conductivity)
+      htg_htm = u_wall * mj.htd
       htg_loads = htg_htm * foundation_wall.below_grade_area
       all_zone_loads[zone].Heat_Walls += htg_loads
       all_space_loads[space].Heat_Walls += htg_loads
@@ -4801,7 +4794,7 @@ module HVACSizing
     # @param additional_property_type [Symbol] Name of property on obj.additional_properties
     # @return [Hash<Object, Object>] Map of HPXML::XXX object => DetailedOutputValues object
     def self.get_surfaces_with_property(obj, additional_property_type)
-      objs = obj.surfaces.select { |s| s.additional_properties.respond_to?(additional_property_type) }
+      objs = (obj.surfaces + obj.subsurfaces).select { |s| s.additional_properties.respond_to?(additional_property_type) }
       props = {}
       objs.each do |obj|
         props[obj] = obj.additional_properties.send(additional_property_type)

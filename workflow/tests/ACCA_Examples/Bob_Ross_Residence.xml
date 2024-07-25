@@ -463,7 +463,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block solid core</Type>
             <Height>10.0</Height>
-            <Area>218.0</Area>
+            <Area>10.0</Area>
             <Orientation>east</Orientation>
             <DepthBelowGrade>8.0</DepthBelowGrade>
             <Insulation>
@@ -553,9 +553,9 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Type>concrete block solid core</Type>
             <Height>10.0</Height>
-            <Area>52.0</Area>
+            <Area>260.0</Area>
             <Orientation>east</Orientation>
-            <DepthBelowGrade>8.0</DepthBelowGrade>
+            <DepthBelowGrade>0.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWallRecRoomEastPartitionInsulation'/>
               <AssemblyEffectiveRValue>7.3</AssemblyEffectiveRValue>
