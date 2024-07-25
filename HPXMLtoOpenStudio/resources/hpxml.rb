@@ -4672,7 +4672,7 @@ class HPXML < Object
     #
     # @return [Double] Net area (ft2)
     def net_area
-      val = @area
+      val = @area.nil? ? @length * @height : @area
       (@parent_object.windows + @parent_object.doors).each do |subsurface|
         next unless subsurface.attached_to_wall_idref == @id
 
@@ -4687,15 +4687,17 @@ class HPXML < Object
     #
     # @return [Double] Above-grade gross area (ft2)
     def above_grade_area
+      gross_area = @area.nil? ? @length * @height : @area
       ag_frac = (@height - @depth_below_grade) / @height
-      return @area * ag_frac
+      return gross_area * ag_frac
     end
 
     # Calculates the below-grade area.
     #
     # @return [Double] Below-grade area (ft2)
     def below_grade_area
-      return @area - above_grade_area
+      gross_area = @area.nil? ? @length * @height : @area
+      return gross_area - above_grade_area
     end
 
     # Calculates the above-grade net area (net area minus below grade area).
