@@ -3867,9 +3867,6 @@ class HPXML < Object
     #
     # @return [Double] Net area (ft2)
     def net_area
-      return if nil?
-      return if @area.nil?
-
       val = @area
       skylights.each do |skylight|
         val -= skylight.area
@@ -4378,9 +4375,6 @@ class HPXML < Object
     #
     # @return [Double] Net area (ft2)
     def net_area
-      return if nil?
-      return if @area.nil?
-
       val = @area
       (windows + doors).each do |subsurface|
         val -= subsurface.area
@@ -4678,9 +4672,6 @@ class HPXML < Object
     #
     # @return [Double] Net area (ft2)
     def net_area
-      return if nil?
-      return if @area.nil?
-
       val = @area
       (@parent_object.windows + @parent_object.doors).each do |subsurface|
         next unless subsurface.attached_to_wall_idref == @id
@@ -4690,6 +4681,28 @@ class HPXML < Object
       fail "Calculated a negative net surface area for surface '#{@id}'." if val < 0
 
       return val
+    end
+
+    # Calculates the above-grade gross area.
+    #
+    # @return [Double] Above-grade gross area (ft2)
+    def above_grade_area
+      ag_frac = (@height - @depth_below_grade) / @height
+      return @area * ag_frac
+    end
+
+    # Calculates the below-grade area.
+    #
+    # @return [Double] Below-grade area (ft2)
+    def below_grade_area
+      return @area - above_grade_area
+    end
+
+    # Calculates the above-grade net area (net area minus below grade area).
+    #
+    # @return [Double] Above-grade net area (ft2)
+    def above_grade_net_area
+      return net_area - below_grade_area
     end
 
     # Returns all slabs that are adjacent to the same HPXML::LocationXXX as the connected
@@ -4977,9 +4990,6 @@ class HPXML < Object
     #
     # @return [Double] Net area (ft2)
     def net_area
-      return if nil?
-      return if @area.nil?
-
       val = @area
       skylights.each do |skylight|
         val -= skylight.area
