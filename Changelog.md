@@ -16,6 +16,8 @@ __New Features__
 - BuildResidentialScheduleFile measure:
   - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
   - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
+- Output updates:
+  - Adds total water volume outputs.
 
 __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
@@ -26,10 +28,6 @@ __Bugfixes__
 - Fixes zero ventilation design load for "supply only" mechanical ventilation.
 
 ## OpenStudio-HPXML v1.8.1
-
-__New Features__
-- Output updates:
-  - Adds total water volume outputs.
 
 __Bugfixes__
 - Fixes cfm/ton restriction from incorrectly applying to furnace heating airflow rate.
