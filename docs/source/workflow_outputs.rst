@@ -409,6 +409,20 @@ Annual hot water uses are listed below.
 
   All values are gallons of *hot* water (e.g., at water heater setpoint), not *total* water (e.g., at the fixture temperature).
 
+Annual Total Water Uses
+~~~~~~~~~~~~~~~~~~~~~
+
+Annual total water uses are listed below.
+
+  =====================================  ====================
+  Type                                   Notes
+  =====================================  ====================
+  Total Water: Clothes Washer (gal)
+  Total Water: Dishwasher (gal)
+  Total Water: Fixtures (gal)            Showers and faucets.
+  Total Water: Distribution Waste (gal) 
+  =====================================  ====================
+
 Resilience
 ~~~~~~~~~~
 
@@ -629,7 +643,8 @@ Depending on the outputs requested, the file may include:
   Emissions                            Emissions (e.g., CO2) for each scenario defined in the HPXML file.
   Emission Fuels                       Emissions (e.g., CO2) disaggregated by fuel type for each scenario defined in the HPXML file.
   Emission End Uses                    Emissions (e.g., CO2) disaggregated by end use for each scenario defined in the HPXML file.
-  Hot Water Uses                       Water use for each end use type (in gallons).
+  Hot Water Uses                       Water use (hot) for each end use type (in gallons).
+  Total Water Uses                     Water use (total) for each end use type (in gallons).
   Total Loads                          Heating, cooling, and hot water loads (in kBtu).
   Component Loads                      Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
   Unmet Hours                          Heating and cooling unmet hours.
