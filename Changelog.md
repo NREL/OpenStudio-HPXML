@@ -27,6 +27,10 @@ __Bugfixes__
 
 ## OpenStudio-HPXML v1.8.1
 
+__New Features__
+- Output updates:
+  - Adds total water volume outputs.
+
 __Bugfixes__
 - Fixes cfm/ton restriction from incorrectly applying to furnace heating airflow rate.
 
