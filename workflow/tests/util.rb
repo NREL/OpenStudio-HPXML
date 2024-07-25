@@ -254,6 +254,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-zones'
       next if message.include? 'While multiple conditioned zones are specified, the EnergyPlus model will only include a single conditioned thermal zone.'
     end
+    if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
+      next if message.include? 'Hot water setpoint should typically be greater than or equal to 110 deg-F'
+    end
 
     # FUTURE: Revert this eventually
     # https://github.com/NREL/OpenStudio-HPXML/issues/1499
@@ -398,11 +401,9 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if hpxml_path.include? 'base-bldgtype-mf-whole-building'
       next if message.include? 'SHR adjusted to achieve valid outlet air properties and the simulation continues.'
     end
-    # Undersized water heaters
     if hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
       next if message.include? 'Target water temperature is greater than the hot water temperature'
       next if message.include? 'Target water temperature should be less than or equal to the hot water temperature'
-      next if message.include? 'Hot water setpoint should typically be greater than or equal to 110 deg-F'
     end
 
     flunk "Unexpected eplusout.err message found for #{File.basename(hpxml_path)}: #{message}"
