@@ -2219,25 +2219,17 @@ module Waterheater
       # Get the water storage tanks for the outlet temp sensor
       tank = nil
       hw_plant_loop = plantloop_map[water_heating_system.id]
-      hw_plant_loop.components.each do |c|
-        next unless c.to_WaterHeaterMixed.is_initialized
+      hw_plant_loop.components.each do |component|
+        if component.to_WaterHeaterMixed.is_initialized
+          tank = component.to_WaterHeaterMixed.get
+        elsif component.to_WaterHeaterStratified.is_initialized
+          object = component.to_WaterHeaterStratified.get
 
-        tank = c.to_WaterHeaterMixed.get
-        puts('found mixed tank')
-      end
+          object_type = object.additionalProperties.getFeatureAsString('ObjectType')
+          next if object_type == Constants.ObjectNameSolarHotWater # Exclude solar storage from 2 tank systems
 
-      hw_plant_loop.components.each do |c|
-        next unless c.to_WaterHeaterStratified.is_initialized
-
-        # if not tank.name.to_s.include? "solar" #exclude solar storage from 2 tank systems
-        strat_tank = c.to_WaterHeaterStratified.get
-        name = strat_tank.name.to_s
-        next unless not name.include? 'solar'
-
-        puts('found stratified tank')
-        puts("water_heater_startified = #{strat_tank.name}")
-        tank = strat_tank
-        # end
+          tank = object
+        end
       end
 
       # EMS sensors
@@ -2251,7 +2243,7 @@ module Waterheater
 
       shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       shower_flow_sensor.setName('Shower Volume')
-      (model.getScheduleRulesets + model.getScheduleFiles).each do |schedule| # FIXME
+      (model.getScheduleRulesets + model.getScheduleFiles).each do |schedule|
         next if !schedule.name.to_s.include?(Constants.ObjectNameShowers)
 
         shower_flow_sensor.setKeyName(schedule.name.to_s)
