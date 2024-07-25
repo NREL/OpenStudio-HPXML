@@ -1,4 +1,4 @@
-HPXML,Unmet Hours: Heating (hr),Unmet Hours: Cooling (hr),Unmet Loads: Hot Water Shower Energy (J),Unmet Loads: Hot Water Shower Unmet Time (hr),Hot Water: Clothes Washer (gal),Hot Water: Dishwasher (gal),Hot Water: Fixtures (gal),Hot Water: Distribution Waste (gal),Peak Electricity: Winter Total (W),Peak Electricity: Summer Total (W),Peak Electricity: Annual Total (W),Peak Load: Heating: Delivered (kBtu/hr),Peak Load: Cooling: Delivered (kBtu/hr),Resilience: Battery (hr)
+HPXML,Unmet Hours: Heating (hr),Unmet Hours: Cooling (hr),Unmet Loads: Hot Water Shower Energy (kBtu),Unmet Loads: Hot Water Shower Time (hr),Hot Water: Clothes Washer (gal),Hot Water: Dishwasher (gal),Hot Water: Fixtures (gal),Hot Water: Distribution Waste (gal),Peak Electricity: Winter Total (W),Peak Electricity: Summer Total (W),Peak Electricity: Annual Total (W),Peak Load: Heating: Delivered (kBtu/hr),Peak Load: Cooling: Delivered (kBtu/hr),Resilience: Battery (hr)
 base-appliances-coal.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11171.6,2563.5,1987.6,3668.9,3668.9,23.645,19.047,0.0
 base-appliances-dehumidifier-ief-portable.xml,0.0,0.0,0.0,0.0,1354.7,998.0,9789.2,2412.1,1981.8,3026.6,3026.6,9.974,15.465,0.0
 base-appliances-dehumidifier-ief-whole-home.xml,0.0,0.0,0.0,0.0,1354.7,998.0,9789.2,2412.1,1930.5,3026.6,3026.6,9.975,15.465,0.0
@@ -127,7 +127,7 @@ base-dhw-tankless-gas-with-solar-fraction.xml,0.0,0.0,0.0,0.0,474.2,349.3,3909.2
 base-dhw-tankless-gas-with-solar.xml,0.0,0.0,0.0,0.0,1344.7,989.2,9817.5,2252.8,1429.5,3191.7,3191.7,23.856,18.922,0.0
 base-dhw-tankless-gas.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11169.0,2562.9,1429.8,3161.8,3161.8,23.823,18.643,0.0
 base-dhw-tankless-propane.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11169.0,2562.9,1429.8,3161.8,3161.8,23.823,18.643,0.0
-base-dhw-undersized.xml,0.0,0.0,36178.442,2608.0,1354.7,998.0,13584.0,3117.1,1729.2,3471.4,3471.4,23.749,18.734,0.0
+base-dhw-undersized.xml,0.0,0.0,0.034,2608.0,1354.7,998.0,13584.0,3117.1,1729.2,3471.4,3471.4,23.749,18.734,0.0
 base-enclosure-2stories-garage.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11171.6,2524.9,2249.7,5018.3,5018.3,31.367,28.29,0.0
 base-enclosure-2stories-infil-leakiness-description.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11171.6,2410.9,2449.1,5147.9,5147.9,30.747,28.042,0.0
 base-enclosure-2stories.xml,0.0,0.0,0.0,0.0,1354.7,998.0,11171.5,2410.9,2487.5,4873.2,4873.2,34.669,28.474,0.0
