@@ -1033,7 +1033,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.values.sum(0.0)
   # Check unmet loads
   unmet_loads_hw_shw_energy = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Energy' }.values.sum(0.0)
-  unmet_loads_hw_shw_time = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Unmet Time' }.values.sum(0.0)
+  unmet_loads_hw_shw_time = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Time' }.values.sum(0.0)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)

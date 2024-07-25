@@ -330,12 +330,12 @@ Annual Unmet Loads
 
 Annual unmet loads are listed below.
 
-  =============================================  =====
-  Type                                           Notes
-  =============================================  =====
-  Unmet Loads: Hot Water Shower Energy (J)       TODO
-  Unmet Loads: Hot Water Shower Unmet Time (hr)  TODO
-  =============================================  =====
+  ========================================  =====
+  Type                                      Notes
+  ========================================  =====
+  Unmet Loads: Hot Water Shower Energy (J)  TODO
+  Unmet Loads: Hot Water Shower Time (hr)   TODO
+  ========================================  =====
 
 TODO
 
