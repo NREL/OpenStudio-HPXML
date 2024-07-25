@@ -410,7 +410,7 @@ Annual hot water uses are listed below.
   All values are gallons of *hot* water (e.g., at water heater setpoint), not *total* water (e.g., at the fixture temperature).
 
 Annual Total Water Uses
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Annual total water uses are listed below.
 
