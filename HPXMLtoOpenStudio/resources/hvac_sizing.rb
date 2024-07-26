@@ -1370,7 +1370,7 @@ module HVACSizing
         lengths_by_azimuth = {}
         adj_fnd_walls.each do |fnd_wall|
           if fnd_wall.azimuth.nil?
-            azimuths = [0, 90, 180, 270]
+            azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
           else
             azimuths = [fnd_wall.azimuth]
           end
