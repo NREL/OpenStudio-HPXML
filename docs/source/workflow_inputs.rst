@@ -381,7 +381,7 @@ In either case, each residential dwelling unit is entered as a ``/HPXML/Building
 Dwelling Units
 **************
 
-OpenStudio-HPXML was originally developed to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
+OpenStudio-HPXML can model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
 This approach:
 
 - Is required/desired for certain applications (e.g., a Home Energy Score or an Energy Rating Index calculation).
@@ -399,7 +399,7 @@ For these simulations:
 Whole SFA/MF Buildings
 **********************
 
-As of v1.7.0, OpenStudio-HPXML can model whole SFA/MF buildings in a single combined simulation.
+Alternatively, OpenStudio-HPXML can model whole SFA/MF buildings in a single combined simulation.
 
 Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``.
 
@@ -411,9 +411,10 @@ Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``
 
 For these simulations:
 
+- An HPXML file with multiple ``Building`` elements is used, where each ``Building`` represents an individual dwelling unit.
 - Unit multipliers (using the ``NumberofUnits`` element) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
-- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones.
-- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit.
+- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. (This may change in the future.)
+- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. (This may change in the future.)
 - Energy use for the entire building is calculated.
 
 Notes/caveats about this approach:
