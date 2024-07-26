@@ -415,7 +415,7 @@ For these simulations:
 - Unit multipliers (using the ``NumberofUnits`` element) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
 - Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. (This may change in the future.)
 - Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. (This may change in the future.)
-- Energy use for the entire building is calculated.
+- Energy use for the entire building is calculated; you cannot get energy use for individual dwelling units. (This may change in the future.)
 
 Notes/caveats about this approach:
 
