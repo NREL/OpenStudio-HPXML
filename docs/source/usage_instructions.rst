@@ -25,22 +25,24 @@ The OpenStudio measures can also be run from user interfaces (e.g., the OpenStud
 Basic Run
 ~~~~~~~~~
 
-| The simplest and fastest method is to call the OpenStudio CLI with the provided ``workflow/run_simulation.rb`` script. For example:
+| The simplest and fastest method is to call the OpenStudio CLI with the provided run script. For example:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml``
-| This will create a "run" directory with all input/output files. By default it will be found at the same location as the input HPXML file.
+| By default, a "run" directory with all input/output files is created next to input HPXML file.
 
-You can also request generation of timeseries output CSV/JSON/MessagePack files as part of the calculation by providing one or more timeseries flags (``--hourly``, ``--daily``, ``--monthly``, or ``--timestep``).
+| To specify a different output directory:
+| ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml -o my_output_directory``
 
-| For example, to request all possible hourly outputs in CSV format:
+| You can also request generation of various timeseries outputs by providing one or more timeseries flags. For example:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --hourly ALL``
-| Or to request one or more specific monthly output types in JSON format:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --monthly fuels --monthly temperatures --output-format json``
-| Or to request both monthly and hourly outputs (including an EnergyPlus output variable):
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --monthly fuels --hourly temperatures --hourly 'Zone People Occupant Count'``
 
-| You can also add a detailed schedule as part of the simulation by using:
+| You can also add stochastic occupancy schedules as part of the simulation:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --add-stochastic-schedules``
 | This run includes the automatic generation of a CSV file with stochastic occupancy schedules that are used in the EnergyPlus simulation.
+
+| If you have an HPXML with multiple ``Building`` elements (e.g., pre- and post-retrofit configurations), you must specify which building to run:
+| ``openstudio workflow/run_simulation.rb -x multiple_buildings.xml --building-id MyBuildingName``
 
 Run ``openstudio workflow/run_simulation.rb -h`` to see all available commands/arguments.
 
@@ -67,9 +69,9 @@ A template OSW that simply runs the HPXMLtoOpenStudio, ReportSimulationOutput, a
 Outputs
 ~~~~~~~
 
-A variety of high-level annual outputs are conveniently reported in the resulting ``run/results_annual.csv`` (or ``run/results_annual.json`` or ``run/results_annual.msgpack``) file.
+A variety of high-level annual outputs are conveniently reported in the resulting ``run/results_annual.csv`` (or ``.json`` or ``.msgpack``) file.
 
-When timeseries outputs are requested, they will be found in the ``run/results_timeseries.csv`` (or ``run/results_timeseries.json`` or ``run/results_timeseries.msgpack``) file.
+When timeseries outputs are requested, they will be found in the ``run/results_timeseries.csv`` (or ``.json`` or ``.msgpack``) file.
 If multiple timeseries frequencies are requested (e.g., hourly and daily), the timeseries output filenames will include the frequency (e.g., ``run/results_timeseries_daily.csv``).
 
 See :ref:`workflow_outputs` for a description of all available outputs.

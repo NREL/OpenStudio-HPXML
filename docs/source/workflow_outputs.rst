@@ -82,7 +82,7 @@ The ``in.xml`` output file will include autosized HVAC capacities as well as som
 Annual Outputs
 --------------
 
-OpenStudio-HPXML will always generate an annual output file called ``results_annual.csv`` (or ``results_annual.json`` or ``results_annual.msgpack``), located in the run directory.
+OpenStudio-HPXML will always generate an annual output file called ``results_annual.csv`` (or ``.json`` or ``.msgpack``), located in the run directory.
 The file includes the following sections of output:
 
 Annual Energy
@@ -614,7 +614,7 @@ Timeseries Outputs
 ------------------
 
 OpenStudio-HPXML can optionally generate a timeseries output file.
-The timeseries output file is called ``results_timeseries.csv`` (or ``results_timeseries.json`` or ``results_timeseries.msgpack``) and located in the run directory.
+The timeseries output file is called ``results_timeseries.csv`` (or ``.json`` or ``.msgpack``) and located in the run directory.
 If multiple timeseries frequencies are requested (e.g., hourly and daily), the timeseries output filenames will include the frequency (e.g., ``run/results_timeseries_daily.csv``).
 
 Depending on the outputs requested, the file may include:
@@ -654,8 +654,8 @@ Utility Bill Outputs
 --------------------
 
 OpenStudio-HPXML can optionally generate utility bill output files (annual, monthly, or both).
-The annual utility bills output file is called ``results_bills.csv`` (or ``results_bills.json`` or ``results_bills.msgpack``) and located in the run directory.
-The monthly utility bills output file is called ``results_bills_monthly.csv`` (or ``results_bills_monthly.json`` or ``results_bills_monthly.msgpack``) and located in the run directory.
+The annual utility bills output file is called ``results_bills.csv`` (or ``.json`` or ``.msgpack``) and located in the run directory.
+The monthly utility bills output file is called ``results_bills_monthly.csv`` (or ``.json`` or ``.msgpack``) and located in the run directory.
 
 Annual Bills by Fuel Use
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -700,7 +700,7 @@ Monthly results for each utility bill scenario defined in the HPXML file are lis
 Design Load Details Outputs
 ---------------------------
 
-OpenStudio-HPXML provides an additional output file called ``results_design_load_details.csv`` (or ``results_design_load_details.json`` or ``results_design_load_details.msgpack``) that includes details related to the calculation of HVAC design loads for sizing equipment.
+OpenStudio-HPXML provides an additional output file called ``results_design_load_details.csv`` (or ``.json`` or ``.msgpack``) that includes details related to the calculation of HVAC design loads for sizing equipment.
 The file includes values pertaining to ACCA Form J1 (see example on page 2 of `here <https://www.acca.org/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=4165a9b7-f229-421d-b20e-718cc83286df)>`_).
 
 The file is organized into a few different reports described below.

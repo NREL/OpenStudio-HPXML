@@ -406,8 +406,11 @@ Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``
   ==================================  ========  =====  ===========  ========  ========  ========================================================
   Element                             Type      Units  Constraints  Required  Default   Notes
   ==================================  ========  =====  ===========  ========  ========  ========================================================
-  ``WholeSFAorMFBuildingSimulation``  boolean                       No        false     Whether to run an individual dwelling unit or whole building for SFA/MF
+  ``WholeSFAorMFBuildingSimulation``  boolean                       No        false     Whether to run an individual dwelling unit or whole building for SFA/MF [#]_
   ==================================  ========  =====  ===========  ========  ========  ========================================================
+
+  .. [#] When WholeSFAorMFBuildingSimulation is false and the HPXML contains multiple ``Building`` elements, you must tell OpenStudio-HPXML which ``Building`` to run.
+         This is done like so: ``openstudio workflow/run_simulation.rb -x multiple_buildings.xml --building-id MyBuildingName``.
 
 For these simulations:
 
