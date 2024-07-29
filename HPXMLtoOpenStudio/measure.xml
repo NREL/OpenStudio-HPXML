@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d5114868-bdca-4c47-937e-2b8e9d946d6c</version_id>
-  <version_modified>2024-07-23T21:55:28Z</version_modified>
+  <version_id>0d2c6c14-b56b-4d35-9f34-3ddcb28f6982</version_id>
+  <version_modified>2024-07-26T17:25:38Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -369,7 +369,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0673A9B3</checksum>
+      <checksum>FE821A58</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -628,18 +628,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>93120E27</checksum>
-    </file>
-    <file>
-      <filename>results_annual.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>99D358D6</checksum>
-    </file>
-    <file>
-      <filename>results_design_load_details.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>65664C6E</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
