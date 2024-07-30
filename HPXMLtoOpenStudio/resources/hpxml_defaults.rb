@@ -39,6 +39,8 @@ module HPXMLDefaults
 
     add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
+    @default_schedules_csv_data = get_default_schedules_csv_data()
+
     apply_header(hpxml.header, hpxml_bldg, weather)
     apply_building(hpxml_bldg, weather)
     apply_emissions_scenarios(hpxml.header, has_fuel)
@@ -798,15 +800,15 @@ module HPXMLDefaults
     end
     schedules_file_includes_occupants = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:Occupants].name))
     if hpxml_bldg.building_occupancy.weekday_fractions.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.weekday_fractions = Schedule.OccupantsWeekdayFractions
+      hpxml_bldg.building_occupancy.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['WeekdayScheduleFractions']
       hpxml_bldg.building_occupancy.weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.weekend_fractions.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.weekend_fractions = Schedule.OccupantsWeekendFractions
+      hpxml_bldg.building_occupancy.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['WeekendScheduleFractions']
       hpxml_bldg.building_occupancy.weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.monthly_multipliers.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.monthly_multipliers = Schedule.OccupantsMonthlyMultipliers
+      hpxml_bldg.building_occupancy.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['MonthlyScheduleMultipliers']
       hpxml_bldg.building_occupancy.monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_usage_multiplier.nil?
@@ -815,15 +817,15 @@ module HPXMLDefaults
     end
     schedules_file_includes_water = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:GeneralWaterUse].name))
     if hpxml_bldg.building_occupancy.general_water_use_weekday_fractions.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = Schedule.GeneralWaterUseWeekdayFractions
+      hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekdayScheduleFractions']
       hpxml_bldg.building_occupancy.general_water_use_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = Schedule.GeneralWaterUseWeekendFractions
+      hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekendScheduleFractions']
       hpxml_bldg.building_occupancy.general_water_use_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = Schedule.GeneralWaterUseMonthlyMultipliers
+      hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseMonthlyScheduleMultipliers']
       hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers_isdefaulted = true
     end
   end
@@ -3949,5 +3951,29 @@ module HPXMLDefaults
     auto_space.delete if not auto_space.nil?
     auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }
     auto_zone.delete if not auto_zone.nil?
+  end
+
+  # Get the default weekday/weekend schedule fractions and monthly multipliers for each end use.
+  #
+  # @return [Hash] { schedule_name => { element => values, ... }, ... }
+  def self.get_default_schedules_csv_data()
+    default_schedules_csv = File.join(File.dirname(__FILE__), 'data', 'default_schedules.csv')
+    if not File.exist?(default_schedules_csv)
+      fail 'Could not find default_schedules.csv'
+    end
+
+    require 'csv'
+    # default_schedules_csv_data = CSV.open(default_schedules_csv, headers: :first_row).map(&:to_h)
+    default_schedules_csv_data = {}
+    CSV.foreach(default_schedules_csv, headers: true) do |row|
+      schedule_name = row['Schedule Name']
+      element = row['Element']
+      values = row['Values']
+
+      default_schedules_csv_data[schedule_name] = {} if !default_schedules_csv_data.keys.include?(schedule_name)
+      default_schedules_csv_data[schedule_name][element] = values
+    end
+
+    return default_schedules_csv_data
   end
 end

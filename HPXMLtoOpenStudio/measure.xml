@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f942121e-ebd7-4468-b16d-d10846b73d6b</version_id>
-  <version_modified>2024-07-23T22:22:23Z</version_modified>
+  <version_id>2d707ee1-12cf-4e8a-8d3e-4b594d525f8e</version_id>
+  <version_modified>2024-07-30T17:27:36Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -264,6 +264,12 @@
       <checksum>63C6A1E2</checksum>
     </file>
     <file>
+      <filename>data/default_schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B58100B7</checksum>
+    </file>
+    <file>
       <filename>data/g_functions/C_configurations_5m_v1.0.json</filename>
       <filetype>json</filetype>
       <usage_type>resource</usage_type>
@@ -351,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CCAD07C4</checksum>
+      <checksum>CC69C9FD</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -573,7 +579,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>92314938</checksum>
+      <checksum>43A92C2F</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -645,7 +651,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>132CCC8D</checksum>
+      <checksum>46825C0C</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>

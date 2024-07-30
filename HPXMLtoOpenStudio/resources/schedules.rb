@@ -956,27 +956,6 @@ module Schedule
     end
   end
 
-  # Default occupants weekday fractions.
-  #
-  # @return [String] 24 comma-separated weekday fractions
-  def self.OccupantsWeekdayFractions
-    return '0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035'
-  end
-
-  # Default occupants weekend fractions.
-  #
-  # @return [String] 24 comma-separated weekend fractions
-  def self.OccupantsWeekendFractions
-    return '0.035, 0.035, 0.035, 0.035, 0.035, 0.059, 0.082, 0.055, 0.027, 0.014, 0.014, 0.014, 0.014, 0.014, 0.019, 0.027, 0.041, 0.055, 0.068, 0.082, 0.082, 0.070, 0.053, 0.035'
-  end
-
-  # Default occupants monthly multipliers.
-  #
-  # @return [String] 12 comma-separated monthly multipliers
-  def self.OccupantsMonthlyMultipliers
-    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-  end
-
   # Default interior lighting weekday fractions.
   #
   # @return [String] 24 comma-separated weekday fractions
@@ -1149,27 +1128,6 @@ module Schedule
   #
   # @return [String] 12 comma-separated monthly multipliers
   def self.FixturesMonthlyMultipliers
-    return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-  end
-
-  # Default general water use weekday fractions.
-  #
-  # @return [String] 24 comma-separated weekday fractions
-  def self.GeneralWaterUseWeekdayFractions
-    return '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
-  end
-
-  # Default general water use weekend fractions.
-  #
-  # @return [String] 24 comma-separated weekend fractions
-  def self.GeneralWaterUseWeekendFractions
-    return '0.023, 0.021, 0.021, 0.025, 0.027, 0.038, 0.044, 0.039, 0.037, 0.037, 0.034, 0.035, 0.035, 0.035, 0.039, 0.043, 0.051, 0.064, 0.065, 0.072, 0.073, 0.063, 0.045, 0.034'
-  end
-
-  # Default general water use monthly multipliers.
-  #
-  # @return [String] 12 comma-separated monthly multipliers
-  def self.GeneralWaterUseMonthlyMultipliers
     return '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
   end
 
