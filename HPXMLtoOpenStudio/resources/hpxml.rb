@@ -7008,7 +7008,7 @@ class HPXML < Object
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
              :round_trip_efficiency, :usable_capacity_kwh, :usable_capacity_ah,
-             :energy_efficiency, :miles_per_year, :hours_per_week, 
+             :energy_efficiency, :miles_per_year, :hours_per_week,
              :fraction_charged_home, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
@@ -7074,11 +7074,11 @@ class HPXML < Object
       return if vehicle.nil?
 
       @id = HPXML::get_id(vehicle)
-      @miles_per_year = XMLHelper.get_value(vehicle, "MilesDrivenPeryear", :float)
-      @hours_per_week = XMLHelper.get_value(vehicle, "HoursDrivenPerWeek", :float)
+      @miles_per_year = XMLHelper.get_value(vehicle, 'MilesDrivenPeryear', :float)
+      @hours_per_week = XMLHelper.get_value(vehicle, 'HoursDrivenPerWeek', :float)
       @energy_efficiency = XMLHelper.get_value(vehicle, "FuelEconomy[Units='#{UnitsKwhPerMile}']/Value", :float)
-      @vehicle_type = XMLHelper.get_child_name(vehicle, "VehicleType")
-      @type = XMLHelper.get_value(vehicle, "BatteryType", :string)
+      @vehicle_type = XMLHelper.get_child_name(vehicle, 'VehicleType')
+      @type = XMLHelper.get_value(vehicle, 'BatteryType', :string)
       battery_prefix = "VehicleType/#{@vehicle_type}/Battery"
       @nominal_capacity_kwh = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsKwh}']/Value", :float)
       @nominal_capacity_ah = XMLHelper.get_value(vehicle, "#{battery_prefix}/NominalCapacity[Units='#{UnitsAh}']/Value", :float)

@@ -142,12 +142,12 @@ class Battery
       elcds = elcds.select { |elcd| elcd.inverter.is_initialized } # i.e., not generators
       # Use PV ELCD if present
       elcds.each do |elcd_|
-        if elcd_.name.to_s.include? "PVSystem"
-          elcd = elcd_
-          elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
-          elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
-          break
-        end
+        next unless elcd_.name.to_s.include? 'PVSystem'
+
+        elcd = elcd_
+        elcd.setElectricalBussType('DirectCurrentWithInverterACStorage')
+        elcd.setStorageOperationScheme('TrackFacilityElectricDemandStoreExcessOnSite')
+        break
       end
       if elcds.empty?
         elcd = OpenStudio::Model::ElectricLoadCenterDistribution.new(model)
