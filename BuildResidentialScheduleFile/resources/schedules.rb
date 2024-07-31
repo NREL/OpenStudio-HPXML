@@ -92,6 +92,8 @@ class ScheduleGenerator
   # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
+    default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
+
     # initialize a random number generator
     prng = Random.new(@random_seed)
 
@@ -165,14 +167,14 @@ class ScheduleGenerator
       all_simulated_values << Matrix[*simulated_values]
     end
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
-    plugload_other_weekday_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekdayFractions, 24, 'weekday') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-    plugload_other_weekend_sch = Schedule.validate_values(Schedule.PlugLoadsOtherWeekendFractions, 24, 'weekend') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
+    plugload_other_weekday_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekdayScheduleFractions'], 24, 'weekday') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
+    plugload_other_weekend_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekendScheduleFractions'], 24, 'weekend') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
     plugload_other_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsOtherMonthlyMultipliers, 12, 'monthly') # Figure 24 of the 2010 BAHSP
     plugload_tv_weekday_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekdayFractions, 24, 'weekday') # American Time Use Survey
     plugload_tv_weekend_sch = Schedule.validate_values(Constants.PlugLoadsTVWeekendFractions, 24, 'weekend') # American Time Use Survey
     plugload_tv_monthly_multiplier = Schedule.validate_values(Constants.PlugLoadsTVMonthlyMultipliers, 12, 'monthly') # American Time Use Survey
-    ceiling_fan_weekday_sch = Schedule.validate_values(Schedule.CeilingFanWeekdayFractions, 24, 'weekday') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-    ceiling_fan_weekend_sch = Schedule.validate_values(Schedule.CeilingFanWeekendFractions, 24, 'weekend') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
+    ceiling_fan_weekday_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekdayScheduleFractions'], 24, 'weekday') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
+    ceiling_fan_weekend_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekendScheduleFractions'], 24, 'weekend') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
     ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly') # based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019
 
     sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude])
