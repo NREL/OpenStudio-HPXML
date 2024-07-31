@@ -2773,34 +2773,34 @@ module HPXMLDefaults
       recirc_control_type = hot_water_distribution.has_shared_recirculation ? hot_water_distribution.shared_recirculation_control_type : hot_water_distribution.recirculation_control_type
       if [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_without_control"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_without_control"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       elsif [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_demand_controlled"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_demand_controlled"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       elsif [HPXML::DHWRecircControlTypeTemperature].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_temperature_controlled"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_temperature_controlled"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       end
       if hot_water_distribution.recirculation_pump_monthly_multipliers.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
+        hot_water_distribution.recirculation_pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
         hot_water_distribution.recirculation_pump_monthly_multipliers_isdefaulted = true
       end
     end
@@ -2829,15 +2829,15 @@ module HPXMLDefaults
     end
     schedules_file_includes_fixtures = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HotWaterFixtures].name))
     if hpxml_bldg.water_heating.water_fixtures_weekday_fractions.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_weekday_fractions = Schedule.FixturesWeekdayFractions
+      hpxml_bldg.water_heating.water_fixtures_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesWeekdayScheduleFractions']
       hpxml_bldg.water_heating.water_fixtures_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.water_heating.water_fixtures_weekend_fractions.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_weekend_fractions = Schedule.FixturesWeekendFractions
+      hpxml_bldg.water_heating.water_fixtures_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesWeekendScheduleFractions']
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = Schedule.FixturesMonthlyMultipliers
+      hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers_isdefaulted = true
     end
   end
@@ -3027,15 +3027,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_cw = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ClothesWasher].name))
       if clothes_washer.weekday_fractions.nil? && !schedules_file_includes_cw
-        clothes_washer.weekday_fractions = Schedule.ClothesWasherWeekdayFractions
+        clothes_washer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['WeekdayScheduleFractions']
         clothes_washer.weekday_fractions_isdefaulted = true
       end
       if clothes_washer.weekend_fractions.nil? && !schedules_file_includes_cw
-        clothes_washer.weekend_fractions = Schedule.ClothesWasherWeekendFractions
+        clothes_washer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['WeekendScheduleFractions']
         clothes_washer.weekend_fractions_isdefaulted = true
       end
       if clothes_washer.monthly_multipliers.nil? && !schedules_file_includes_cw
-        clothes_washer.monthly_multipliers = Schedule.ClothesWasherMonthlyMultipliers
+        clothes_washer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']
         clothes_washer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -3075,15 +3075,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_cd = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ClothesDryer].name))
       if clothes_dryer.weekday_fractions.nil? && !schedules_file_includes_cd
-        clothes_dryer.weekday_fractions = Schedule.ClothesDryerWeekdayFractions
+        clothes_dryer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['WeekdayScheduleFractions']
         clothes_dryer.weekday_fractions_isdefaulted = true
       end
       if clothes_dryer.weekend_fractions.nil? && !schedules_file_includes_cd
-        clothes_dryer.weekend_fractions = Schedule.ClothesDryerWeekendFractions
+        clothes_dryer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['WeekendScheduleFractions']
         clothes_dryer.weekend_fractions_isdefaulted = true
       end
       if clothes_dryer.monthly_multipliers.nil? && !schedules_file_includes_cd
-        clothes_dryer.monthly_multipliers = Schedule.ClothesDryerMonthlyMultipliers
+        clothes_dryer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']
         clothes_dryer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -3120,15 +3120,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_dw = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:Dishwasher].name))
       if dishwasher.weekday_fractions.nil? && !schedules_file_includes_dw
-        dishwasher.weekday_fractions = Schedule.DishwasherWeekdayFractions
+        dishwasher.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['WeekdayScheduleFractions']
         dishwasher.weekday_fractions_isdefaulted = true
       end
       if dishwasher.weekend_fractions.nil? && !schedules_file_includes_dw
-        dishwasher.weekend_fractions = Schedule.DishwasherWeekendFractions
+        dishwasher.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['WeekendScheduleFractions']
         dishwasher.weekend_fractions_isdefaulted = true
       end
       if dishwasher.monthly_multipliers.nil? && !schedules_file_includes_dw
-        dishwasher.monthly_multipliers = Schedule.DishwasherMonthlyMultipliers
+        dishwasher.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']
         dishwasher.monthly_multipliers_isdefaulted = true
       end
     end
@@ -3154,24 +3154,24 @@ module HPXMLDefaults
         if !schedules_file_includes_extrafridge
           if schedules_includes_fractions_multipliers
             if refrigerator.weekday_fractions.nil?
-              refrigerator.weekday_fractions = Schedule.ExtraRefrigeratorWeekdayFractions
+              refrigerator.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['WeekdayScheduleFractions']
               refrigerator.weekday_fractions_isdefaulted = true
             end
             if refrigerator.weekend_fractions.nil?
-              refrigerator.weekend_fractions = Schedule.ExtraRefrigeratorWeekendFractions
+              refrigerator.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['WeekendScheduleFractions']
               refrigerator.weekend_fractions_isdefaulted = true
             end
             if refrigerator.monthly_multipliers.nil?
-              refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
+              refrigerator.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['MonthlyScheduleMultipliers']
               refrigerator.monthly_multipliers_isdefaulted = true
             end
           else
             if refrigerator.constant_coefficients.nil?
-              refrigerator.constant_coefficients = Schedule.ExtraRefrigeratorConstantCoefficients
+              refrigerator.constant_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['ConstantScheduleCoefficients']
               refrigerator.constant_coefficients_isdefaulted = true
             end
             if refrigerator.temperature_coefficients.nil?
-              refrigerator.temperature_coefficients = Schedule.ExtraRefrigeratorTemperatureCoefficients
+              refrigerator.temperature_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['TemperatureScheduleCoefficients']
               refrigerator.temperature_coefficients_isdefaulted = true
             end
           end
@@ -3190,24 +3190,24 @@ module HPXMLDefaults
         if !schedules_file_includes_fridge
           if schedules_includes_fractions_multipliers
             if refrigerator.weekday_fractions.nil?
-              refrigerator.weekday_fractions = Schedule.RefrigeratorWeekdayFractions
+              refrigerator.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['WeekdayScheduleFractions']
               refrigerator.weekday_fractions_isdefaulted = true
             end
             if refrigerator.weekend_fractions.nil?
-              refrigerator.weekend_fractions = Schedule.RefrigeratorWeekendFractions
+              refrigerator.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['WeekendScheduleFractions']
               refrigerator.weekend_fractions_isdefaulted = true
             end
             if refrigerator.monthly_multipliers.nil?
-              refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
+              refrigerator.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['MonthlyScheduleMultipliers']
               refrigerator.monthly_multipliers_isdefaulted = true
             end
           else
             if refrigerator.constant_coefficients.nil?
-              refrigerator.constant_coefficients = Schedule.RefrigeratorConstantCoefficients
+              refrigerator.constant_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['ConstantScheduleCoefficients']
               refrigerator.constant_coefficients_isdefaulted = true
             end
             if refrigerator.temperature_coefficients.nil?
-              refrigerator.temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients
+              refrigerator.temperature_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['TemperatureScheduleCoefficients']
               refrigerator.temperature_coefficients_isdefaulted = true
             end
           end
@@ -3239,15 +3239,15 @@ module HPXMLDefaults
       next unless !schedules_includes_schedule_coefficients
 
       if freezer.weekday_fractions.nil? && !schedules_file_includes_freezer
-        freezer.weekday_fractions = Schedule.FreezerWeekdayFractions
+        freezer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['WeekdayScheduleFractions']
         freezer.weekday_fractions_isdefaulted = true
       end
       if freezer.weekend_fractions.nil? && !schedules_file_includes_freezer
-        freezer.weekend_fractions = Schedule.FreezerWeekendFractions
+        freezer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['WeekendScheduleFractions']
         freezer.weekend_fractions_isdefaulted = true
       end
       if freezer.monthly_multipliers.nil? && !schedules_file_includes_freezer
-        freezer.monthly_multipliers = Schedule.FreezerMonthlyMultipliers
+        freezer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['MonthlyScheduleMultipliers']
         freezer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -3270,15 +3270,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_range = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CookingRange].name))
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range
-        cooking_range.weekday_fractions = Schedule.CookingRangeWeekdayFractions
+        cooking_range.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['WeekdayScheduleFractions']
         cooking_range.weekday_fractions_isdefaulted = true
       end
       if cooking_range.weekend_fractions.nil? && !schedules_file_includes_range
-        cooking_range.weekend_fractions = Schedule.CookingRangeWeekendFractions
+        cooking_range.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['WeekendScheduleFractions']
         cooking_range.weekend_fractions_isdefaulted = true
       end
       if cooking_range.monthly_multipliers.nil? && !schedules_file_includes_range
-        cooking_range.monthly_multipliers = Schedule.CookingRangeMonthlyMultipliers
+        cooking_range.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']
         cooking_range.monthly_multipliers_isdefaulted = true
       end
     end
@@ -3314,46 +3314,45 @@ module HPXMLDefaults
       hpxml_bldg.lighting.exterior_usage_multiplier = 1.0
       hpxml_bldg.lighting.exterior_usage_multiplier_isdefaulted = true
     end
-    default_lighting_monthly_multipliers = Schedule.LightingMonthlyMultipliers
     schedules_file_includes_lighting_interior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingInterior].name))
     if hpxml_bldg.lighting.interior_weekday_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekday_fractions = Schedule.LightingInteriorWeekdayFractions
+      hpxml_bldg.lighting.interior_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorWeekdayScheduleFractions']
       hpxml_bldg.lighting.interior_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.interior_weekend_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekend_fractions = Schedule.LightingInteriorWeekendFractions
+      hpxml_bldg.lighting.interior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorWeekendScheduleFractions']
       hpxml_bldg.lighting.interior_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.interior_monthly_multipliers.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_monthly_multipliers = default_lighting_monthly_multipliers
+      hpxml_bldg.lighting.interior_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']
       hpxml_bldg.lighting.interior_monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.has_location(HPXML::LocationGarage)
       schedules_file_includes_lighting_garage = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingGarage].name))
       if hpxml_bldg.lighting.garage_weekday_fractions.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_weekday_fractions = Schedule.LightingGarageWeekdayFractions
+        hpxml_bldg.lighting.garage_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageWeekdayScheduleFractions']
         hpxml_bldg.lighting.garage_weekday_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.garage_weekend_fractions.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_weekend_fractions = Schedule.LightingGarageWeekendFractions
+        hpxml_bldg.lighting.garage_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageWeekendScheduleFractions']
         hpxml_bldg.lighting.garage_weekend_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.garage_monthly_multipliers.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_monthly_multipliers = default_lighting_monthly_multipliers
+        hpxml_bldg.lighting.garage_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageMonthlyScheduleMultipliers']
         hpxml_bldg.lighting.garage_monthly_multipliers_isdefaulted = true
       end
     end
     schedules_file_includes_lighting_exterior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingExterior].name))
     if hpxml_bldg.lighting.exterior_weekday_fractions.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_weekday_fractions = Schedule.LightingExteriorWeekdayFractions
+      hpxml_bldg.lighting.exterior_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekdayScheduleFractions']
       hpxml_bldg.lighting.exterior_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_weekend_fractions.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_weekend_fractions = Schedule.LightingExteriorWeekendFractions
+      hpxml_bldg.lighting.exterior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekdayScheduleFractions']
       hpxml_bldg.lighting.exterior_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_monthly_multipliers.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_monthly_multipliers = default_lighting_monthly_multipliers
+      hpxml_bldg.lighting.exterior_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorMonthlyScheduleMultipliers']
       hpxml_bldg.lighting.exterior_monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.lighting.holiday_exists
@@ -3380,11 +3379,11 @@ module HPXMLDefaults
       end
       schedules_file_includes_lighting_holiday_exterior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingExteriorHoliday].name))
       if hpxml_bldg.lighting.holiday_weekday_fractions.nil? && !schedules_file_includes_lighting_holiday_exterior
-        hpxml_bldg.lighting.holiday_weekday_fractions = Schedule.LightingExteriorHolidayWeekdayFractions
+        hpxml_bldg.lighting.holiday_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExteriorHoliday].name]['WeekdayScheduleFractions']
         hpxml_bldg.lighting.holiday_weekday_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.holiday_weekend_fractions.nil? && !schedules_file_includes_lighting_holiday_exterior
-        hpxml_bldg.lighting.holiday_weekend_fractions = Schedule.LightingExteriorHolidayWeekendFractions
+        hpxml_bldg.lighting.holiday_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExteriorHoliday].name]['WeekendScheduleFractions']
         hpxml_bldg.lighting.holiday_weekend_fractions_isdefaulted = true
       end
     end
@@ -3411,11 +3410,11 @@ module HPXMLDefaults
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CeilingFan].name))
     if ceiling_fan.weekday_fractions.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.weekday_fractions = Schedule.CeilingFanWeekdayFractions
+      ceiling_fan.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekdayScheduleFractions']
       ceiling_fan.weekday_fractions_isdefaulted = true
     end
     if ceiling_fan.weekend_fractions.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.weekend_fractions = Schedule.CeilingFanWeekendFractions
+      ceiling_fan.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekendScheduleFractions']
       ceiling_fan.weekend_fractions_isdefaulted = true
     end
     if ceiling_fan.monthly_multipliers.nil? && !schedules_file_includes_ceiling_fan
@@ -3447,15 +3446,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_pool_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PoolPump].name))
         if pool.pump_weekday_fractions.nil? && !schedules_file_includes_pool_pump
-          pool.pump_weekday_fractions = Schedule.PoolPumpWeekdayFractions
+          pool.pump_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['WeekdayScheduleFractions']
           pool.pump_weekday_fractions_isdefaulted = true
         end
         if pool.pump_weekend_fractions.nil? && !schedules_file_includes_pool_pump
-          pool.pump_weekend_fractions = Schedule.PoolPumpWeekendFractions
+          pool.pump_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['WeekendScheduleFractions']
           pool.pump_weekend_fractions_isdefaulted = true
         end
         if pool.pump_monthly_multipliers.nil? && !schedules_file_includes_pool_pump
-          pool.pump_monthly_multipliers = Schedule.PoolPumpMonthlyMultipliers
+          pool.pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['MonthlyScheduleMultipliers']
           pool.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -3475,15 +3474,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_pool_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PoolHeater].name))
       if pool.heater_weekday_fractions.nil? && !schedules_file_includes_pool_heater
-        pool.heater_weekday_fractions = Schedule.PoolHeaterWeekdayFractions
+        pool.heater_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['WeekdayScheduleFractions']
         pool.heater_weekday_fractions_isdefaulted = true
       end
       if pool.heater_weekend_fractions.nil? && !schedules_file_includes_pool_heater
-        pool.heater_weekend_fractions = Schedule.PoolHeaterWeekendFractions
+        pool.heater_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['WeekendScheduleFractions']
         pool.heater_weekend_fractions_isdefaulted = true
       end
       if pool.heater_monthly_multipliers.nil? && !schedules_file_includes_pool_heater
-        pool.heater_monthly_multipliers = Schedule.PoolHeaterMonthlyMultipliers
+        pool.heater_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['MonthlyScheduleMultipliers']
         pool.heater_monthly_multipliers_isdefaulted = true
       end
     end
@@ -3503,15 +3502,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_permanent_spa_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PermanentSpaPump].name))
         if spa.pump_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_weekday_fractions = Schedule.PermanentSpaPumpWeekdayFractions
+          spa.pump_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['WeekdayScheduleFractions']
           spa.pump_weekday_fractions_isdefaulted = true
         end
         if spa.pump_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_weekend_fractions = Schedule.PermanentSpaPumpWeekendFractions
+          spa.pump_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['WeekendScheduleFractions']
           spa.pump_weekend_fractions_isdefaulted = true
         end
         if spa.pump_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_monthly_multipliers = Schedule.PermanentSpaPumpMonthlyMultipliers
+          spa.pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['MonthlyScheduleMultipliers']
           spa.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -3531,15 +3530,15 @@ module HPXMLDefaults
       end
       schedules_file_includes_permanent_spa_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PermanentSpaHeater].name))
       if spa.heater_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_weekday_fractions = Schedule.PermanentSpaHeaterWeekdayFractions
+        spa.heater_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['WeekdayScheduleFractions']
         spa.heater_weekday_fractions_isdefaulted = true
       end
       if spa.heater_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_weekend_fractions = Schedule.PermanentSpaHeaterWeekendFractions
+        spa.heater_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['WeekendScheduleFractions']
         spa.heater_weekend_fractions_isdefaulted = true
       end
       if spa.heater_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_monthly_multipliers = Schedule.PermanentSpaHeaterMonthlyMultipliers
+        spa.heater_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['MonthlyScheduleMultipliers']
         spa.heater_monthly_multipliers_isdefaulted = true
       end
     end
@@ -3570,15 +3569,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_plug_loads_other = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsOther].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.weekday_fractions = Schedule.PlugLoadsOtherWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.weekend_fractions = Schedule.PlugLoadsOtherWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.monthly_multipliers = Schedule.PlugLoadsOtherMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
@@ -3597,15 +3596,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_plug_loads_tv = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsTV].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.weekday_fractions = Schedule.PlugLoadsTVWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.weekend_fractions = Schedule.PlugLoadsTVWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.monthly_multipliers = Schedule.PlugLoadsTVMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
@@ -3624,15 +3623,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_plug_loads_vehicle = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsVehicle].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekday_fractions = Schedule.PlugLoadsVehicleWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekend_fractions = Schedule.PlugLoadsVehicleWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekdayScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.monthly_multipliers = Schedule.PlugLoadsVehicleMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
@@ -3651,15 +3650,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_plug_loads_well_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsWellPump].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.weekday_fractions = Schedule.PlugLoadsWellPumpWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.weekend_fractions = Schedule.PlugLoadsWellPumpWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekdayScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.monthly_multipliers = Schedule.PlugLoadsWellPumpMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       end
@@ -3694,15 +3693,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_grill = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsGrill].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.weekday_fractions = Schedule.FuelLoadsGrillWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.weekend_fractions = Schedule.FuelLoadsGrillWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsGrillMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
@@ -3720,15 +3719,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_lighting = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsLighting].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.weekday_fractions = Schedule.FuelLoadsLightingWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.weekend_fractions = Schedule.FuelLoadsLightingWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsLightingMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
@@ -3746,15 +3745,15 @@ module HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_fireplace = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsFireplace].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.weekday_fractions = Schedule.FuelLoadsFireplaceWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.weekend_fractions = Schedule.FuelLoadsFireplaceWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsFireplaceMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       end
@@ -3963,7 +3962,6 @@ module HPXMLDefaults
     end
 
     require 'csv'
-    # default_schedules_csv_data = CSV.open(default_schedules_csv, headers: :first_row).map(&:to_h)
     default_schedules_csv_data = {}
     CSV.foreach(default_schedules_csv, headers: true) do |row|
       schedule_name = row['Schedule Name']

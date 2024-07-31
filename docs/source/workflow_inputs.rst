@@ -591,11 +591,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   .. [#] If GeneralWaterUseMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used (see table below).
 
 .. csv-table::
-   :file: data/occupants.csv
-   :header-rows: 1
-
-.. csv-table::
-   :file: data/general_water_use.csv
+   :file: data/building_occupancy.csv
    :header-rows: 1
 
 HPXML Building Construction
@@ -4017,6 +4013,10 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
 
   .. [#] If RecirculationPumpMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/recirculation.csv
+   :header-rows: 1
+
 .. _hot_water_dist_recirc_shared:
 
 Recirculation (Shared)
@@ -4079,6 +4079,10 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
 
   .. [#] If RecirculationPumpMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), defaults to: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/recirculation.csv
+   :header-rows: 1
+
 .. note::
 
   The shared recirculation system is required to have a standard in-unit hot water distribution system;
@@ -4139,6 +4143,10 @@ Additional information can be entered in ``/HPXML/Building/BuildingDetails/Syste
 
   .. [#] If WaterFixturesWeekdayScheduleFractions or WaterFixturesWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.012, 0.006, 0.004, 0.005, 0.010, 0.034, 0.078, 0.086, 0.080, 0.067, 0.056, 0.047, 0.040, 0.035, 0.033, 0.031, 0.038, 0.051, 0.060, 0.060, 0.055, 0.048, 0.038, 0.026".
   .. [#] If WaterFixturesMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
+
+.. csv-table::
+   :file: data/water_fixtures.csv
+   :header-rows: 1
 
 Water fixture hot water use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -4397,6 +4405,10 @@ If not entered, the simulation will not include a clothes washer.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.051, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/clothes_washer.csv
+   :header-rows: 1
+
 If IntegratedModifiedEnergyFactor or ModifiedEnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``ClothesWasher``.
 
   ================================  =======  =======  ===========  ============  =======  ====================================
@@ -4447,6 +4459,10 @@ If not entered, the simulation will not include a clothes dryer.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.058, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/clothes_dryer.csv
+   :header-rows: 1
+
 Clothes dryer energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 Addendum A <https://www.resnet.us/wp-content/uploads/ANSI_RESNET_ICC-301-2019-Addendum-A-2019_7.16.20-1.pdf>`_.
 
 HPXML Dishwasher
@@ -4485,6 +4501,10 @@ If not entered, the simulation will not include a dishwasher.
   .. [#] AttachedToWaterHeatingSystem (or AttachedToHotWaterDistribution) only required if IsSharedAppliance is true.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.042, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
+
+.. csv-table::
+   :file: data/dishwasher.csv
+   :header-rows: 1
 
 If the RatedAnnualkWh or EnergyFactor is provided, a complete set of EnergyGuide label information is entered in ``Dishwasher``.
 
@@ -4534,6 +4554,10 @@ If not entered, the simulation will not include a refrigerator.
   .. [#] If ConstantScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "-0.487, -0.340, -0.370, -0.361, -0.515, -0.684, -0.471, -0.159, -0.079, -0.417, -0.411, -0.386, -0.240, -0.314, -0.160, -0.121, -0.469, -0.412, -0.091, 0.077, -0.118, -0.247, -0.445, -0.544".
   .. [#] If TemperatureScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values from Table C.3(2) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.019, 0.016, 0.017, 0.016, 0.018, 0.021, 0.019, 0.015, 0.015, 0.019, 0.018, 0.018, 0.016, 0.017, 0.015, 0.015, 0.020, 0.020, 0.017, 0.014, 0.016, 0.017, 0.019, 0.020". 
 
+.. csv-table::
+   :file: data/refrigerators.csv
+   :header-rows: 1
+
 .. note::
 
   Refrigerator energy use is affected by its ambient temperature when ConstantScheduleCoefficients and TemperatureScheduleCoefficients are used, in which case hourly energy for refrigerators is determined following Equation 4.2-X2 of ANSI/RESNET/ICC 301-2022 Addendum C:
@@ -4569,6 +4593,10 @@ If not entered, the simulation will not include a standalone freezer.
   .. [#] Either schedule fraction inputs (WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers) or schedule coefficient inputs (ConstantScheduleCoefficients/TemperatureScheduleCoefficients) may be used, but not both.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
+
+.. csv-table::
+   :file: data/freezers.csv
+   :header-rows: 1
 
 .. note::
 
@@ -4633,6 +4661,10 @@ If not entered, the simulation will not include a cooking range/oven.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.008, 0.008, 0.008, 0.008, 0.008, 0.015, 0.023, 0.039, 0.046, 0.046, 0.046, 0.054, 0.062, 0.046, 0.039, 0.054, 0.076, 0.134, 0.114, 0.058, 0.039, 0.031, 0.023, 0.015".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/cooking_range.csv
+   :header-rows: 1
+
 If a cooking range is specified, a single oven is also entered as a ``/HPXML/Building/BuildingDetails/Appliances/Oven``.
 
   ====================  =======  ======  ===========  ========  =======  ================
@@ -4685,6 +4717,10 @@ With either lighting specification, additional information can be entered in ``/
   .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
   .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.040, 0.037, 0.037, 0.035, 0.035, 0.039, 0.044, 0.041, 0.031, 0.025, 0.024, 0.024, 0.025, 0.028, 0.030, 0.035, 0.044, 0.056, 0.064, 0.068, 0.070, 0.065, 0.056, 0.047".
   .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "1.19, 1.11, 1.02, 0.93, 0.84, 0.80, 0.82, 0.88, 0.98, 1.07, 1.16, 1.20".
+
+.. csv-table::
+   :file: data/lighting.csv
+   :header-rows: 1
 
 .. _lighting_fractions:
 
@@ -4748,6 +4784,10 @@ If exterior holiday lighting is specified, additional information is entered in 
   .. [#] If Value not provided, defaults to 1.1 for single-family detached and 0.55 for others.
   .. [#] If WeekdayScheduleFractions not provided (and :ref:`schedules_detailed` not used), defaults to: 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019.
 
+.. csv-table::
+   :file: data/holiday_lighting.csv
+   :header-rows: 1
+
 HPXML Ceiling Fans
 ******************
 
@@ -4770,6 +4810,10 @@ If not entered, the simulation will not include a ceiling fan.
   .. [#] If Count not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used: "0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.057, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.024, 0.052, 0.057, 0.057, 0.057, 0.057, 0.057".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), defaults based on monthly average outdoor temperatures per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_
+
+.. csv-table::
+   :file: data/ceiling_fans.csv
+   :header-rows: 1
 
 Ceiling fan energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
 
@@ -4822,6 +4866,10 @@ If not entered, the simulation will not include a pool pump.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
 
+.. csv-table::
+   :file: data/pool_pump.csv
+   :header-rows: 1
+
 Pool Heater
 ~~~~~~~~~~~
 
@@ -4854,6 +4902,10 @@ If not entered, the simulation will not include a pool heater.
          
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154".
+
+.. csv-table::
+   :file: data/pool_heater.csv
+   :header-rows: 1
 
 HPXML Permanent Spas
 ********************
@@ -4896,6 +4948,10 @@ If not entered, the simulation will not include a permanent spa pump.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921".
 
+.. csv-table::
+   :file: data/permanent_spa_pump.csv
+   :header-rows: 1
+
 Permanent Spa Heater
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4928,6 +4984,10 @@ If not entered, the simulation will not include a permanent spa heater.
          
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024".
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used: "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837".
+
+.. csv-table::
+   :file: data/permanent_spa_heater.csv
+   :header-rows: 1
 
 HPXML Misc Loads
 ----------------
@@ -5006,6 +5066,10 @@ If not entered, the simulation will not include that type of plug load.
          
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
 
+.. csv-table::
+   :file: data/plug_loads.csv
+   :header-rows: 1
+
 .. _fuel_loads:
 
 HPXML Fuel Loads
@@ -5055,6 +5119,10 @@ If not entered, the simulation will not include that type of fuel load.
          \- **lighting**: "0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065".
          
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used: "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0".
+
+.. csv-table::
+   :file: data/fuel_loads.csv
+   :header-rows: 1
 
 .. _hpxmllocations:
 
