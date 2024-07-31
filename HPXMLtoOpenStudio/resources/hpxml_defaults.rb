@@ -3348,7 +3348,7 @@ module HPXMLDefaults
       hpxml_bldg.lighting.exterior_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_weekend_fractions.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekdayScheduleFractions']
+      hpxml_bldg.lighting.exterior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekendScheduleFractions']
       hpxml_bldg.lighting.exterior_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_monthly_multipliers.nil? && !schedules_file_includes_lighting_exterior
