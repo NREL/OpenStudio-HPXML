@@ -6,7 +6,7 @@ module Geometry
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @return [TODO] TODO
+  # @return [void]
   def self.tear_down_model(model:,
                            runner:)
     handles = OpenStudio::UUIDVector.new
@@ -655,7 +655,7 @@ module Geometry
 
   # TODO
   #
-  # @param location [TODO] TODO
+  # @param location [String] the general HPXML location
   # @return [TODO] TODO
   def self.get_temperature_scheduled_space_values(location:)
     if location == HPXML::LocationOtherHeatedSpace
