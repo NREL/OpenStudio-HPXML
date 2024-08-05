@@ -1110,7 +1110,6 @@ module HVACSizing
     # Below-Grade Wall Area
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_thermal_boundary
-      next unless foundation_wall.is_exterior # Partition walls handled with above grade walls
       next if foundation_wall.depth_below_grade < 2 # Already handled in above grade walls
 
       space = foundation_wall.space
