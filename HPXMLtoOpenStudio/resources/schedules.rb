@@ -1787,7 +1787,8 @@ module Schedule
       end
     end
 
-    fail "Could not find row='#{schedule_name}' in unavailable_periods.csv"
+    runner.registerWarning("Could not find row='#{schedule_name}' in unavailable_periods.csv; it will not be affected by the '#{col_name}' unavailable period.")
+    return false
   end
 
   # Ensure that the defined schedule value array (or string of numbers) is the correct length.
