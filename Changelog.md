@@ -16,6 +16,7 @@ __New Features__
 - BuildResidentialScheduleFile measure:
   - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
   - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
+- **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
 - Adds metrics for unmet hot water loads.
 
 __Bugfixes__
@@ -24,7 +25,7 @@ __Bugfixes__
 - Fixes utility bill calculations if there is battery storage or a generator.
 - BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
 - Allows negative values for `Building/Site/Elevation`.
-- Fixes zero ventilation design load for "supply only" mechanical ventilation.
+- Misc Manual J design load calculation improvements.
 
 ## OpenStudio-HPXML v1.8.1
 

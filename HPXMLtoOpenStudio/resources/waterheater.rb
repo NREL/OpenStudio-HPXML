@@ -2262,7 +2262,7 @@ module Waterheater
 
       program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
       program.addLine("Set #{shower_sag_time} = 1")
-      program.addLine("Set #{shower_e} = #{shower_e} + ( #{water_heating_system.fraction_dhw_load_served} * #{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 990 * 4183 * (3600 / #{model.getTimestep.numberOfTimestepsPerHour}) * (#{mixed_setpoint_sensor.name} - #{wh_temp_sensor.name}) )") #assume specific heat of 4183 J/kg-K and density of 990 kg/m^3
+      program.addLine("Set #{shower_e} = #{shower_e} + ( #{water_heating_system.fraction_dhw_load_served} * #{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 990 * 4183 * (3600 / #{model.getTimestep.numberOfTimestepsPerHour}) * (#{mixed_setpoint_sensor.name} - #{wh_temp_sensor.name}) )") # assume specific heat of 4183 J/kg-K and density of 990 kg/m^3
       program.addLine('EndIf')
     end
 

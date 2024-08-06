@@ -372,7 +372,7 @@ module HotWaterAndAppliances
 
         # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads.
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
-        shower_gpd = fx_gpd * 0.54 #per standard, 54% of fixture usage is showers (or baths), remaining 46% is sinks.
+        shower_gpd = fx_gpd * 0.54 # per standard, 54% of fixture usage is showers (or baths), remaining 46% is sinks.
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
