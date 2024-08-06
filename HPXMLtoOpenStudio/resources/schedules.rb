@@ -514,8 +514,14 @@ class MonthWeekdayWeekendSchedule
   #
   # @return [Double] the calculated schedule adjustment
   def calc_sch_adjust()
-    sum_wkdy = @weekday_hourly_values.sum
-    sum_wknd = @weekend_hourly_values.sum
+    sum_wkdy = 0
+    sum_wknd = 0
+    @weekday_hourly_values.each do |v|
+      sum_wkdy += v
+    end
+    @weekend_hourly_values.each do |v|
+      sum_wknd += v
+    end
     if sum_wkdy < sum_wknd
       return 1 / sum_wknd
     end
