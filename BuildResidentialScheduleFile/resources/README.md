@@ -89,7 +89,7 @@ Again, `<enduse>` may be:
 * `hot_water_dishwasher`
 * `shower`
 
-### `constants.rb` and `monthly_multipliers.csv`
+### `constants.rb` and `schedules.csv`
 
 These files contain various miscellaneous configurations for the schedule generator.
 Their meanings and sources are defined below.

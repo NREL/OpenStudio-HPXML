@@ -584,10 +584,10 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
 
          \- **single-family attached or apartment unit**: NumberofBedrooms = -0.68 + 1.09 * NumberofResidents
 
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values are used (see table below).
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] Sensible and latent internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.), as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
-  .. [#] If GeneralWaterUseWeekdayScheduleFractions or GeneralWaterUseWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used (see table below).
+  .. [#] If GeneralWaterUseWeekdayScheduleFractions or GeneralWaterUseWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If GeneralWaterUseMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4003,14 +4003,7 @@ An in-unit recirculation hot water distribution system is entered as a ``/HPXML/
   .. [#] BranchPipingLength is the length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
   .. [#] PumpPower default based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
   .. [#] Additional drain water heat recovery inputs are described in :ref:`water_heater_dwhr`.
-  .. [#] If RecirculationPumpWeekdayScheduleFractions or RecirculationPumpWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used:
-         
-         \- **no control**, **timer**: based on Equation 4.2-43a of ANSI/RESNET/ICC 301-2022 Addendum C
-         
-         \- **manual demand control**, **presence sensor demand control**: based on Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-                  
-         \- **temperature**: based on Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-
+  .. [#] If RecirculationPumpWeekdayScheduleFractions or RecirculationPumpWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If RecirculationPumpMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4069,14 +4062,7 @@ A shared recirculation hot water distribution system (serving multiple dwelling 
          
          \- **no control**: The pump runs continuously.
          
-  .. [#] If RecirculationPumpWeekdayScheduleFractions or RecirculationPumpWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used:
-         
-         \- **no control**, **timer**: based on Equation 4.2-43a of ANSI/RESNET/ICC 301-2022 Addendum C
-         
-         \- **manual demand control**, **presence sensor demand control**: based on Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-                  
-         \- **temperature**: based on Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-
+  .. [#] If RecirculationPumpWeekdayScheduleFractions or RecirculationPumpWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If RecirculationPumpMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4141,7 +4127,7 @@ Additional information can be entered in ``/HPXML/Building/BuildingDetails/Syste
   ``extension/WaterFixturesMonthlyScheduleMultipliers``  array                        No        See [#]_  12 comma-separated monthly multipliers
   =====================================================  =======  =====  ===========  ========  ========  ===============================================
 
-  .. [#] If WaterFixturesWeekdayScheduleFractions or WaterFixturesWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WaterFixturesWeekdayScheduleFractions or WaterFixturesWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If WaterFixturesMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4402,7 +4388,7 @@ If not entered, the simulation will not include a clothes washer.
          IMEF may be found using the manufacturer’s data sheet, the `California Energy Commission Appliance Database <https://cacertappliances.energy.ca.gov/Pages/ApplianceSearch.aspx>`_, the `EPA ENERGY STAR website <https://www.energystar.gov/productfinder/>`_, or another reputable source.
   .. [#] AttachedToWaterHeatingSystem must reference a ``WaterHeatingSystem``; AttachedToHotWaterDistribution must reference a ``HotWaterDistribution``.
   .. [#] AttachedToWaterHeatingSystem (or AttachedToHotWaterDistribution) only required if IsSharedAppliance is true.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4456,7 +4442,7 @@ If not entered, the simulation will not include a clothes dryer.
          CEF = EF / 1.15.
          CEF may be found using the manufacturer’s data sheet, the `California Energy Commission Appliance Database <https://cacertappliances.energy.ca.gov/Pages/ApplianceSearch.aspx>`_, the `EPA ENERGY STAR website <https://www.energystar.gov/productfinder/>`_, or another reputable source.
   .. [#] VentedFlowRate default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4499,7 +4485,7 @@ If not entered, the simulation will not include a dishwasher.
          RatedAnnualkWh = 215.0 / EF.
   .. [#] AttachedToWaterHeatingSystem must reference a ``WaterHeatingSystem``; AttachedToHotWaterDistribution must reference a ``HotWaterDistribution``.
   .. [#] AttachedToWaterHeatingSystem (or AttachedToHotWaterDistribution) only required if IsSharedAppliance is true.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4549,10 +4535,10 @@ If not entered, the simulation will not include a refrigerator.
          RatedAnnualkWh = 637.0 + 18.0 * NumberofBedrooms.
   .. [#] If multiple refrigerators are specified, there must be exactly one refrigerator described with PrimaryIndicator=true.
   .. [#] Either schedule fraction inputs (WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers) or schedule coefficient inputs (ConstantScheduleCoefficients/TemperatureScheduleCoefficients) may be used, but not both.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If ConstantScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values (see table below) from Table C.3(2) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If TemperatureScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values (see table below) from Table C.3(2) of ANSI/RESNET/ICC 301-2022 Addendum C are used. 
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) are used.
+  .. [#] If ConstantScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values (see table below) are used.
+  .. [#] If TemperatureScheduleCoefficients not provided (and :ref:`schedules_detailed` or schedule fractions not used), default values (see table below) are used. 
 
 .. csv-table::
    :file: data/refrigerators.csv
@@ -4591,8 +4577,8 @@ If not entered, the simulation will not include a standalone freezer.
   .. [#] If Location not provided, defaults to "garage" if present, otherwise "basement - unconditioned" if present, otherwise "basement - conditioned" if present, otherwise "conditioned space".
   .. [#] RatedAnnualkWh default based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
   .. [#] Either schedule fraction inputs (WeekdayScheduleFractions/WeekendScheduleFractions/MonthlyScheduleMultipliers) or schedule coefficient inputs (ConstantScheduleCoefficients/TemperatureScheduleCoefficients) may be used, but not both.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) from Figure 16 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` or schedule coefficients not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/freezers.csv
@@ -4658,7 +4644,7 @@ If not entered, the simulation will not include a cooking range/oven.
   .. [#] Location choices are "conditioned space", "basement - conditioned", "basement - unconditioned", "garage", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxmllocations` for descriptions.
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "electricity", "wood", or "wood pellets".
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -4711,12 +4697,12 @@ With either lighting specification, additional information can be entered in ``/
   ``extension/ExteriorMonthlyScheduleMultipliers``  array                         No        See [#]_  12 comma-separated exterior monthly multipliers
   ================================================  =======  ======  ===========  ========  ========  ===============================================
 
-  .. [#] If InteriorWeekdayScheduleFractions or InteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If InteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If GarageWeekdayScheduleFractions or GarageWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(3) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
-  .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(4) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If InteriorWeekdayScheduleFractions or InteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If InteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If GarageWeekdayScheduleFractions or GarageWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If GarageMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If ExteriorWeekdayScheduleFractions or ExteriorWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If ExteriorMonthlyScheduleMultipliers not provided (or :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/lighting.csv
@@ -4782,7 +4768,7 @@ If exterior holiday lighting is specified, additional information is entered in 
   ===============================  =======  =======  ===========  ========  =============  ============================================
 
   .. [#] If Value not provided, defaults to 1.1 for single-family detached and 0.55 for others.
-  .. [#] If WeekdayScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/holiday_lighting.csv
@@ -4808,7 +4794,7 @@ If not entered, the simulation will not include a ceiling fan.
   .. [#] If Efficiency and LabelEnergyUse not provided, LabelEnergyUse defaults to 42.6 W based on ANSI/RESNET/ICC 301-2022 Addendum C.
          If both are provided, LabelEnergyUse will be used in the model.
   .. [#] If Count not provided, defaults to NumberofBedrooms + 1 based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), defaults based on monthly average outdoor temperatures per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_
 
 .. csv-table::
@@ -4863,8 +4849,8 @@ If not entered, the simulation will not include a pool pump.
          If "none" is entered, the simulation will not include a pool pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 158.5 / 0.070 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/pool_pump.csv
@@ -4900,8 +4886,8 @@ If not entered, the simulation will not include a pool heater.
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/pool_heater.csv
@@ -4945,8 +4931,8 @@ If not entered, the simulation will not include a permanent spa pump.
          If "none" is entered, the simulation will not include a permanent spa pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 59.5 / 0.059 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/permanent_spa_pump.csv
@@ -4982,8 +4968,8 @@ If not entered, the simulation will not include a permanent spa heater.
          
          If NumberofResidents provided, this value will be adjusted using the :ref:`buildingoccupancy`.
          
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 24 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
+  .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
    :file: data/permanent_spa_heater.csv
@@ -5054,16 +5040,7 @@ If not entered, the simulation will not include that type of plug load.
          
          \- **electric vehicle charging**: 0.0
          
-  .. [#] If WeekdayScheduleFractions or WeekdendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used:
-         
-         \- **other**: based on Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-         
-         \- **TV other**: based on Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-         
-         \- **well pump**: based on Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_
-         
-         \- **electric vehicle charging**: based on engineering judgment
-         
+  .. [#] If WeekdayScheduleFractions or WeekdendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.         
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::
@@ -5110,7 +5087,7 @@ If not entered, the simulation will not include that type of fuel load.
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
   .. [#] The remaining fraction (i.e., 1.0 - FracSensible - FracLatent) must be > 0 and is assumed to be heat gain outside conditioned space and thus lost.
   .. [#] If FracLatent not provided, defaults to 0.1 for fireplace and 0.0 for all other types.
-  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) from Figure 23 of the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.         
+  .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), default values (see table below) are used.
 
 .. csv-table::

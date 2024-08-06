@@ -6,7 +6,7 @@ filename_to_schedule_names = { 'building_occupancy' => ['occupants', 'general_wa
                                'lighting' => ['lighting_interior', 'lighting_exterior', 'lighting_garage'],
                                'holiday_lighting' => ['lighting_exterior_holiday'],
                                'cooking_range' => ['cooking_range'],
-                               'refrigerators' => ['refrigerator'],
+                               'refrigerators' => ['refrigerator', 'extra_refrigerator'],
                                'freezers' => ['freezer'],
                                'dishwasher' => ['dishwasher'],
                                'clothes_washer' => ['clothes_washer'],
@@ -21,15 +21,15 @@ filename_to_schedule_names = { 'building_occupancy' => ['occupants', 'general_wa
                                'water_fixtures' => ['hot_water_fixtures'],
                                'recirculation' => ['hot_water_recirculation_pump_without_control', 'hot_water_recirculation_pump_demand_controlled', 'hot_water_recirculation_pump_temperature_controlled', 'hot_water_recirculation_pump'] }
 
-@default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
+default_schedules_csv_data, default_schedules_data_sources = HPXMLDefaults.get_default_schedules_csv_data()
 
 filename_to_schedule_names.each do |filename, schedule_names|
   CSV.open(File.join(File.dirname(__FILE__), "#{filename}.csv"), 'w') do |csv|
-    csv << ['Schedule Name', 'Element', 'Values']
+    csv << ['Schedule Name', 'Element', 'Values', 'Data Source']
     schedule_names.each do |schedule_name|
-      elements_values = @default_schedules_csv_data[schedule_name]
+      elements_values = default_schedules_csv_data[schedule_name]
       elements_values.each do |element, values|
-        csv << [schedule_name, element, values]
+        csv << [schedule_name, element, values, default_schedules_data_sources[schedule_name][element]]
       end
     end
   end

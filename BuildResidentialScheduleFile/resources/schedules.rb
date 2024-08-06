@@ -92,8 +92,8 @@ class ScheduleGenerator
   # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
-    default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
-    monthly_multipliers_csv_data = get_monthly_multipliers_csv_data()
+    default_schedules_csv_data, _ = HPXMLDefaults.get_default_schedules_csv_data()
+    schedules_csv_data = get_schedules_csv_data()
 
     # initialize a random number generator
     prng = Random.new(@random_seed)
@@ -170,15 +170,15 @@ class ScheduleGenerator
     # shape of all_simulated_values is [2, 35040, 7] i.e. (geometry_num_occupants, period_in_a_year, number_of_states)
     plugload_other_weekday_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekdayScheduleFractions'], 24, 'weekday') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
     plugload_other_weekend_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekendScheduleFractions'], 24, 'weekend') # Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-    plugload_other_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['PlugLoadsOtherMonthlyMultipliers'], 12, 'monthly') # Figure 24 of the 2010 BAHSP
-    plugload_tv_weekday_sch = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVWeekdayFractions'], 24, 'weekday') # American Time Use Survey
-    plugload_tv_weekend_sch = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVWeekendFractions'], 24, 'weekend') # American Time Use Survey
-    plugload_tv_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVMonthlyMultipliers'], 12, 'monthly') # American Time Use Survey
+    plugload_other_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['PlugLoadsOtherMonthlyMultipliers'], 12, 'monthly') # Figure 24 of the 2010 BAHSP
+    plugload_tv_weekday_sch = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVWeekdayFractions'], 24, 'weekday') # American Time Use Survey
+    plugload_tv_weekend_sch = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVWeekendFractions'], 24, 'weekend') # American Time Use Survey
+    plugload_tv_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVMonthlyMultipliers'], 12, 'monthly') # American Time Use Survey
     ceiling_fan_weekday_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekdayScheduleFractions'], 24, 'weekday') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
     ceiling_fan_weekend_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekendScheduleFractions'], 24, 'weekend') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
     ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly') # based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019
 
-    sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude], monthly_multipliers_csv_data)
+    sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude], schedules_csv_data)
     interior_lighting_schedule = []
     num_days_in_months = Constants.NumDaysInMonths(@sim_year)
     for month in 0..11
@@ -461,7 +461,7 @@ class ScheduleGenerator
     step = 0
     last_state = 0
     start_time = Time.new(@sim_year, 1, 1)
-    hot_water_dishwasher_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:Dishwasher].name]['HotWaterDishwasherMonthlyMultiplier'], 12, 'hot_water_dishwasher_monthly_multiplier')
+    hot_water_dishwasher_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['HotWaterDishwasherMonthlyMultiplier'], 12, 'hot_water_dishwasher_monthly_multiplier')
     while step < mkc_steps_in_a_year
       dish_state = sum_across_occupants(all_simulated_values, 4, step, max_clip: 1)
       step_jump = 1
@@ -486,8 +486,8 @@ class ScheduleGenerator
     step = 0
     last_state = 0
     start_time = Time.new(@sim_year, 1, 1)
-    clothes_dryer_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['ClothesDryerMonthlyMultiplier'], 12, 'clothes_dryer_monthly_multiplier')
-    hot_water_clothes_washer_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['HotWaterClothesWasherMonthlyMultiplier'], 12, 'hot_water_clothes_washer_monthly_multiplier')
+    clothes_dryer_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['ClothesDryerMonthlyMultiplier'], 12, 'clothes_dryer_monthly_multiplier')
+    hot_water_clothes_washer_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['HotWaterClothesWasherMonthlyMultiplier'], 12, 'hot_water_clothes_washer_monthly_multiplier')
     while step < mkc_steps_in_a_year
       clothes_state = sum_across_occupants(all_simulated_values, 2, step, max_clip: 1)
       step_jump = 1
@@ -516,7 +516,7 @@ class ScheduleGenerator
     step = 0
     last_state = 0
     start_time = Time.new(@sim_year, 1, 1)
-    cooking_monthly_multiplier = Schedule.validate_values(monthly_multipliers_csv_data[SchedulesFile::Columns[:CookingRange].name]['CookingMonthlyMultiplier'], 12, 'cooking_monthly_multiplier')
+    cooking_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['CookingMonthlyMultiplier'], 12, 'cooking_monthly_multiplier')
     while step < mkc_steps_in_a_year
       cooking_state = sum_across_occupants(all_simulated_values, 3, step, max_clip: 1)
       step_jump = 1
@@ -961,7 +961,7 @@ class ScheduleGenerator
   # @param latitude [TODO] TODO
   # @param longitude [TODO] TODO
   # @return [TODO] TODO
-  def get_building_america_lighting_schedule(time_zone_utc_offset, latitude, longitude, monthly_multipliers_csv_data)
+  def get_building_america_lighting_schedule(time_zone_utc_offset, latitude, longitude, schedules_csv_data)
     # Sunrise and sunset hours
     sunrise_hour = []
     sunset_hour = []
@@ -991,7 +991,7 @@ class ScheduleGenerator
     end
 
     june_kws = [0.060, 0.040, 0.035, 0.025, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.025, 0.030, 0.030, 0.025, 0.020, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0.020, 0.020, 0.020, 0.025, 0.025, 0.030, 0.030, 0.035, 0.045, 0.060, 0.085, 0.125, 0.145, 0.130, 0.105, 0.080]
-    lighting_seasonal_multiplier = monthly_multipliers_csv_data[SchedulesFile::Columns[:LightingInterior].name]['LightingInteriorMonthlyMultipliers'].split(',').map { |v| v.to_f }
+    lighting_seasonal_multiplier = schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['LightingInteriorMonthlyMultipliers'].split(',').map { |v| v.to_f }
     amplConst1 = 0.929707907917098
     sunsetLag1 = 2.45016230615269
     stdDevCons1 = 1.58679810983444
@@ -1071,26 +1071,26 @@ class ScheduleGenerator
     return lighting_sch
   end
 
-  # Get the monthly multipliers for interior lighting, dishwasher, clothes washer/dryer, cooking range, and other/TV plug loads.
+  # Get the weekday/weekend schedule fractions for TV plug loads and monthly multipliers for interior lighting, dishwasher, clothes washer/dryer, cooking range, and other/TV plug loads.
   #
   # @return [Hash] { schedule_name => { element => values, ... }, ... }
-  def get_monthly_multipliers_csv_data()
-    monthly_multipliers_csv = File.join(File.dirname(__FILE__), 'monthly_multipliers.csv')
-    if not File.exist?(monthly_multipliers_csv)
-      fail 'Could not find monthly_multipliers.csv'
+  def get_schedules_csv_data()
+    schedules_csv = File.join(File.dirname(__FILE__), 'schedules.csv')
+    if not File.exist?(schedules_csv)
+      fail 'Could not find schedules.csv'
     end
 
     require 'csv'
-    monthly_multipliers_csv_data = {}
-    CSV.foreach(monthly_multipliers_csv, headers: true) do |row|
+    schedules_csv_data = {}
+    CSV.foreach(schedules_csv, headers: true) do |row|
       schedule_name = row['Schedule Name']
       element = row['Element']
       values = row['Values']
 
-      monthly_multipliers_csv_data[schedule_name] = {} if !monthly_multipliers_csv_data.keys.include?(schedule_name)
-      monthly_multipliers_csv_data[schedule_name][element] = values
+      schedules_csv_data[schedule_name] = {} if !schedules_csv_data.keys.include?(schedule_name)
+      schedules_csv_data[schedule_name][element] = values
     end
 
-    return monthly_multipliers_csv_data
+    return schedules_csv_data
   end
 end

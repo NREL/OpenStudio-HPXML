@@ -39,7 +39,7 @@ module HPXMLDefaults
 
     add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
 
-    @default_schedules_csv_data = get_default_schedules_csv_data()
+    @default_schedules_csv_data, _ = get_default_schedules_csv_data()
 
     apply_header(hpxml.header, hpxml_bldg, weather)
     apply_building(hpxml_bldg, weather)
@@ -3963,15 +3963,20 @@ module HPXMLDefaults
 
     require 'csv'
     default_schedules_csv_data = {}
+    default_schedules_data_sources = {}
     CSV.foreach(default_schedules_csv, headers: true) do |row|
       schedule_name = row['Schedule Name']
       element = row['Element']
       values = row['Values']
+      data_source = row['Data Source']
 
       default_schedules_csv_data[schedule_name] = {} if !default_schedules_csv_data.keys.include?(schedule_name)
       default_schedules_csv_data[schedule_name][element] = values
+
+      default_schedules_data_sources[schedule_name] = {} if !default_schedules_data_sources.keys.include?(schedule_name)
+      default_schedules_data_sources[schedule_name][element] = data_source
     end
 
-    return default_schedules_csv_data
+    return default_schedules_csv_data, default_schedules_data_sources
   end
 end
