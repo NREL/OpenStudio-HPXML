@@ -619,26 +619,28 @@ If multiple timeseries frequencies are requested (e.g., hourly and daily), the t
 
 Depending on the outputs requested, the file may include:
 
-  ===================================  ==================================================================================================================================
-  Type                                 Notes
-  ===================================  ==================================================================================================================================
-  Total Consumptions                   Energy use for building total and net (i.e., subtracts any power produced by PV or generators).
-  Fuel Consumptions                    Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
-  End Use Consumptions                 Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
-  System Use Consumptions              Energy use for each HVAC and water heating system (in kBtu).
-  Emissions                            Emissions (e.g., CO2) for each scenario defined in the HPXML file.
-  Emission Fuels                       Emissions (e.g., CO2) disaggregated by fuel type for each scenario defined in the HPXML file.
-  Emission End Uses                    Emissions (e.g., CO2) disaggregated by end use for each scenario defined in the HPXML file.
-  Hot Water Uses                       Water use for each end use type (in gallons).
-  Total Loads                          Heating, cooling, and hot water loads (in kBtu).
-  Component Loads                      Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
-  Unmet Hours                          Heating and cooling unmet hours.
-  Zone Temperatures                    Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
-  Airflows                             Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
-  Weather                              Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
-  Resilience                           Resilience outputs (currently only average resilience hours for battery storage).
-  EnergyPlus Output Variables          Any user-specified EnergyPlus output variables (e.g., 'Zone People Occupant Count').
-  ===================================  ==================================================================================================================================
+  ===========================  ===================  ==================================================================================================================================
+  Type                         Argument [#]_        Notes
+  ===========================  ===================  ==================================================================================================================================
+  Total Consumptions           ``total``            Energy use for building total and net (i.e., subtracts any power produced by PV or generators).
+  Fuel Consumptions            ``fuels``            Energy use for each fuel type (in kBtu for fossil fuels and kWh for electricity).
+  End Use Consumptions         ``enduses``          Energy use for each end use type (in kBtu for fossil fuels and kWh for electricity).
+  System Use Consumptions      ``systemuses``       Energy use for each HVAC and water heating system (in kBtu).
+  Emissions                    ``emissions``        Emissions (e.g., CO2) for each scenario defined in the HPXML file.
+  Emission Fuels               ``emissionfuels``    Emissions (e.g., CO2) disaggregated by fuel type for each scenario defined in the HPXML file.
+  Emission End Uses            ``emissionenduses``  Emissions (e.g., CO2) disaggregated by end use for each scenario defined in the HPXML file.
+  Hot Water Uses               ``hotwater``         Water use for each end use type (in gallons).
+  Total Loads                  ``loads``            Heating, cooling, and hot water loads (in kBtu).
+  Component Loads              ``componentloads``   Heating and cooling loads (in kBtu) disaggregated by component (e.g., Walls, Windows, Infiltration, Ducts, etc.).
+  Unmet Hours                  ``unmethours``       Heating and cooling unmet hours.
+  Zone Temperatures            ``temperatures``     Zone temperatures (in deg-F) for each space (e.g., conditioned space, attic, garage, basement, crawlspace, etc.) plus heating/cooling setpoints.
+  Airflows                     ``airflows``         Airflow rates (in cfm) for infiltration, mechanical ventilation (including clothes dryer exhaust), natural ventilation, whole house fans.
+  Weather                      ``weather``          Weather file data including outdoor temperatures, relative humidity, wind speed, and solar.
+  Resilience                   ``resilience``       Resilience outputs (currently only average resilience hours for battery storage).
+  EnergyPlus Output Variables                       Any user-specified EnergyPlus output variables (e.g., 'Zone People Occupant Count').
+  ===========================  ===================  ==================================================================================================================================
+
+  .. [#] This is the argument provided to ``run_simulation.rb`` as described in the :ref:`basic_run` usage instructions.
 
 Timeseries outputs can be one of the following frequencies: hourly, daily, monthly, or timestep (i.e., equal to the simulation timestep, which defaults to an hour but can be sub-hourly).
 

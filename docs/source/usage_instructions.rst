@@ -22,6 +22,8 @@ The OpenStudio measures can also be run from user interfaces (e.g., the OpenStud
 
   If the ``openstudio`` command is not found, it's because the executable is not in your PATH. Either add the executable to your PATH or point directly to the executable found in the openstudio-X.X.X/bin directory.
 
+.. _basic_run:
+
 Basic Run
 ~~~~~~~~~
 
@@ -32,7 +34,7 @@ Basic Run
 | To specify a different output directory:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml -o my_output_directory``
 
-| You can also request generation of various timeseries outputs by providing one or more timeseries flags. For example:
+| You can also request generation of various timeseries outputs by providing one or more timeseries flags. Some examples:
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --hourly ALL``
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --monthly fuels --monthly temperatures --output-format json``
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --monthly fuels --hourly temperatures --hourly 'Zone People Occupant Count'``
@@ -43,10 +45,12 @@ Basic Run
 | ``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml --add-stochastic-schedules``
 | This run includes the automatic generation of a CSV file with stochastic occupancy schedules that are used in the EnergyPlus simulation.
 
-| If you have an HPXML with multiple ``Building`` elements (e.g., pre- and post-retrofit configurations), you must specify which building to run:
+| If you have an HPXML with multiple ``Building`` elements that do not describe multiple dwelling units of :ref:`bldg_type_whole_mf_buildings` (e.g., two ``Building`` elements for pre- and post-retrofit configurations), you must specify which building ID to run:
 | ``openstudio workflow/run_simulation.rb -x multiple_buildings.xml --building-id MyBuildingName``
 
 Run ``openstudio workflow/run_simulation.rb -h`` to see all available commands/arguments.
+
+.. _advanced_run:
 
 Advanced Run
 ~~~~~~~~~~~~
@@ -61,8 +65,7 @@ A template OSW that simply runs the HPXMLtoOpenStudio, ReportSimulationOutput, a
 
 | Another example:
 | ``openstudio run -w workflow/template-run-hpxml-with-stochastic-occupancy.osw``
-| ``openstudio run -w workflow/template-run-hpxml-with-stochastic-occupancy-subset.osw``
-| This workflow automatically generates and uses a CSV file with stochastic occupancy schedules (either with all possible columns or a user-specified subset of columns) before running the EnergyPlus simulation.
+| This workflow automatically generates and uses a CSV file with stochastic occupancy schedules before running the EnergyPlus simulation.
 
 | And another example:
 | ``openstudio run -w workflow/template-build-and-run-hpxml-with-stochastic-occupancy.osw``
