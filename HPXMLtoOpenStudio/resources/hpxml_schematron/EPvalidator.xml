@@ -833,7 +833,7 @@
       <sch:report role='WARN' test='number(h:ExposedPerimeter) &gt; 2*number(h:Area)'>Slab exposed perimeter is more than twice the slab area, this may indicate an input error.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &lt; 1 and number(h:Thickness) &gt; 0'>Thickness is less than 1 inch; this may indicate incorrect units.</sch:report>
       <sch:report role='WARN' test='number(h:Thickness) &gt; 12'>Thickness is greater than 12 inches; this may indicate incorrect units.</sch:report>
-      <sch:report role='WARN' test='number(h:ExteriorHorizontalInsulation) &gt; 0 and number(h:PerimeterInsulation)=0'> There is ExteriorHorizontalInsulation but no PerimeterInsulation, this may indicate an input error.</sch:report>
+      <sch:report role='WARN' test='number(h:ExteriorHorizontalInsulation/h:Layer/h:NominalRValue) &gt; 0 and number(h:PerimeterInsulation/h:Layer/h:NominalRValue)=0'> There is ExteriorHorizontalInsulation but no PerimeterInsulation, this may indicate an input error.</sch:report>
     </sch:rule>
   </sch:pattern>
 
