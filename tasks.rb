@@ -284,7 +284,7 @@ def apply_hpxml_modification_hers_hot_water(hpxml)
 end
 
 def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
-  default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
+  default_schedules_csv_data, _ = HPXMLDefaults.get_default_schedules_csv_data()
 
   # Set detailed HPXML values for sample files
   hpxml_file = File.basename(hpxml_path)
