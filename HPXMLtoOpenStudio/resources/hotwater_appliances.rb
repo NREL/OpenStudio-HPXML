@@ -355,7 +355,7 @@ module HotWaterAndAppliances
       end
       if showers_schedule.nil?
         showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
-        showers_weekday_sch = Schedule.ShowersWeekdayFractions # FIXME: should we expose HPXML elements for these? sounds like maybe not.
+        showers_weekday_sch = Schedule.ShowersWeekdayFractions
         showers_weekend_sch = Schedule.ShowersWeekendFractions
         showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
         showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
@@ -372,7 +372,7 @@ module HotWaterAndAppliances
 
         # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads.
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
-        shower_gpd = get_showers_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
+        shower_gpd = fx_gpd * 0.54 #per standard, 54% of fixture usage is showers (or baths), remaining 46% is sinks.
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
@@ -1320,35 +1320,6 @@ module HotWaterAndAppliances
     f_eff = get_fixtures_effectiveness(frac_low_flow_fixtures)
 
     return f_eff * ref_f_gpd * fixtures_usage_multiplier
-  end
-
-  # TODO
-  #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @param daily_mw_fractions [TODO] TODO
-  # @param fixtures_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_showers_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
-    if nbeds < 0.0
-      return 0.0
-    end
-
-    if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
-      # Note that the standard only has a total hot water usage, it does not specify a fraction for showers. Assuming showers are 40% of total HW usage (based on BA Benchmark usage)
-      showers_gpd = 0.4 * (30.0 + 10.0 * nbeds) # Table 4.2.2(1) Service water heating systems
-      # Convert to mixed water gpd
-      avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
-      return showers_gpd / avg_mw_fraction * fixtures_usage_multiplier
-    end
-
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-    ref_shower_gpd = 14.0 + 4.67 * nbeds # Based on BA Benchmark shower usage
-    f_eff = get_fixtures_effectiveness(frac_low_flow_fixtures)
-
-    return f_eff * ref_shower_gpd * fixtures_usage_multiplier
   end
 
   # TODO
