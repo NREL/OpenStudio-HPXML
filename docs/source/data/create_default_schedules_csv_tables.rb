@@ -19,7 +19,7 @@ filename_to_schedule_names = { 'building_occupancy' => ['occupants', 'general_wa
                                'permanent_spa_pump' => ['permanent_spa_pump'],
                                'permanent_spa_heater' => ['permanent_spa_heater'],
                                'water_fixtures' => ['hot_water_fixtures'],
-                               'recirculation' => ['hot_water_recirculation_pump_without_control', 'hot_water_recirculation_pump_demand_controlled', 'hot_water_recirculation_pump_temperature_controlled', 'hot_water_recirculation_pump'] }
+                               'recirculation' => ['hot_water_recirculation_pump_no_control', 'hot_water_recirculation_pump_demand_control', 'hot_water_recirculation_pump_temperature_control', 'hot_water_recirculation_pump'] }
 
 default_schedules_csv_data, default_schedules_data_sources = HPXMLDefaults.get_default_schedules_csv_data()
 

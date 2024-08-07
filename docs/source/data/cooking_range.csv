@@ -1,4 +1,0 @@
-Schedule Name,Element,Values,Data Source
-cooking_range,WeekdayScheduleFractions,"0.008, 0.008, 0.008, 0.008, 0.008, 0.015, 0.023, 0.039, 0.046, 0.046, 0.046, 0.054, 0.062, 0.046, 0.039, 0.054, 0.076, 0.134, 0.114, 0.058, 0.039, 0.031, 0.023, 0.015",Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-cooking_range,WeekendScheduleFractions,"0.008, 0.008, 0.008, 0.008, 0.008, 0.015, 0.023, 0.039, 0.046, 0.046, 0.046, 0.054, 0.062, 0.046, 0.039, 0.054, 0.076, 0.134, 0.114, 0.058, 0.039, 0.031, 0.023, 0.015",Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-cooking_range,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",

@@ -1,4 +1,0 @@
-Schedule Name,Element,Values,Data Source
-clothes_washer,WeekdayScheduleFractions,"0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.051, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017",Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-clothes_washer,WeekendScheduleFractions,"0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.051, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017",Table C.3(1) of ANSI/RESNET/ICC 301-2022 Addendum C
-clothes_washer,MonthlyScheduleMultipliers,"1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0",
