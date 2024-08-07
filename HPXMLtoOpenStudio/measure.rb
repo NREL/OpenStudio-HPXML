@@ -264,7 +264,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [TODO] TODO
   def add_unit_model_to_model(model, hpxml_osm_map)
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
@@ -2424,7 +2424,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml [HPXML] HPXML object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_path [TODO] TODO
   # @param building_id [TODO] TODO
   # @param hpxml_defaults_path [TODO] TODO
@@ -2452,7 +2452,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def add_unmet_hours_output(model, hpxml_osm_map, hpxml)
@@ -2579,7 +2579,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [TODO] TODO
   def add_total_loads_output(model, hpxml_osm_map)
     # Create sensors and gather data
@@ -2697,7 +2697,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param loads_data [TODO] TODO
   # @param season_day_nums [TODO] TODO
   # @return [TODO] TODO
@@ -3142,7 +3142,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # units for output reporting.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio models
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [void]
   def add_total_airflows_output(model, hpxml_osm_map)
     # Retrieve objects
