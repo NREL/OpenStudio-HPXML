@@ -237,6 +237,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       if args[:add_component_loads]
         add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
       end
+      add_total_airflows_output(model, hpxml_osm_map)
       set_output_files(model)
       add_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], hpxml_defaults_path)
       # Uncomment to debug EMS
@@ -263,7 +264,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [TODO] TODO
   def add_unit_model_to_model(model, hpxml_osm_map)
     unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
@@ -2436,7 +2437,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml [HPXML] HPXML object
-  # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_path [TODO] TODO
   # @param building_id [TODO] TODO
   # @param hpxml_defaults_path [TODO] TODO
@@ -2464,7 +2465,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def add_unmet_hours_output(model, hpxml_osm_map, hpxml)
@@ -2591,7 +2592,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [TODO] TODO
   def add_total_loads_output(model, hpxml_osm_map)
     # Create sensors and gather data
@@ -2709,7 +2710,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [TODO] TODO
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param loads_data [TODO] TODO
   # @param season_day_nums [TODO] TODO
   # @return [TODO] TODO
@@ -2742,7 +2743,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    hpxml_osm_map.values.each_with_index do |unit_model, unit|
+    hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit|
       conditioned_zone = unit_model.getThermalZones.find { |z| z.additionalProperties.getFeatureAsString('ObjectType').to_s == HPXML::LocationConditionedSpace }
 
       # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
@@ -3127,7 +3128,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       program.addLine('  EndIf')
       program.addLine('EndIf')
 
-      unit_multiplier = @hpxml_bldg.building_construction.number_of_units
+      unit_multiplier = hpxml_bldg.building_construction.number_of_units
       [:htg, :clg].each do |mode|
         if mode == :htg
           sign = ''
@@ -3141,6 +3142,55 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           program.addLine("Set loads_#{mode}_#{nonsurf_name} = loads_#{mode}_#{nonsurf_name} + (#{sign}hr_#{nonsurf_name} * #{mode}_mode * #{unit_multiplier})")
         end
       end
+    end
+
+    # EMS calling manager
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{program.name} calling manager")
+    program_calling_manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
+    program_calling_manager.addProgram(program)
+  end
+
+  # Creates airflow outputs (for infiltration, ventilation, etc.) that sum across all individual dwelling
+  # units for output reporting.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [void]
+  def add_total_airflows_output(model, hpxml_osm_map)
+    # Retrieve objects
+    infil_vars = []
+    mechvent_vars = []
+    natvent_vars = []
+    whf_vars = []
+    unit_multipliers = []
+    hpxml_osm_map.each do |hpxml_bldg, unit_model|
+      infil_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameInfiltration }
+      mechvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameMechanicalVentilation }
+      natvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameNaturalVentilation }
+      whf_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameWholeHouseFan }
+      unit_multipliers << hpxml_bldg.building_construction.number_of_units
+    end
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName('total airflows program')
+    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameTotalAirflowsProgram)
+    program.addLine('Set total_infil_flow_rate = 0')
+    program.addLine('Set total_mechvent_flow_rate = 0')
+    program.addLine('Set total_natvent_flow_rate = 0')
+    program.addLine('Set total_whf_flow_rate = 0')
+    infil_vars.each_with_index do |infil_var, i|
+      program.addLine("Set total_infil_flow_rate = total_infil_flow_rate + (#{infil_var.name} * #{unit_multipliers[i]})")
+    end
+    mechvent_vars.each_with_index do |mechvent_var, i|
+      program.addLine("Set total_mechvent_flow_rate = total_mechvent_flow_rate + (#{mechvent_var.name} * #{unit_multipliers[i]})")
+    end
+    natvent_vars.each_with_index do |natvent_var, i|
+      program.addLine("Set total_natvent_flow_rate = total_natvent_flow_rate + (#{natvent_var.name} * #{unit_multipliers[i]})")
+    end
+    whf_vars.each_with_index do |whf_var, i|
+      program.addLine("Set total_whf_flow_rate = total_whf_flow_rate + (#{whf_var.name} * #{unit_multipliers[i]})")
     end
 
     # EMS calling manager
