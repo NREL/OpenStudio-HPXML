@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F1B9845C</checksum>
+      <checksum>8973D089</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -207,7 +207,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>79CD24DB</checksum>
+      <checksum>BB4590BC</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -345,19 +345,19 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9CBC641F</checksum>
+      <checksum>1FA5B7FB</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CCAD07C4</checksum>
+      <checksum>E171B6CF</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>48EC92CD</checksum>
+      <checksum>979514BD</checksum>
     </file>
     <file>
       <filename>hpxml_schema/README.md</filename>
@@ -369,7 +369,7 @@
       <filename>hpxml_schematron/EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B74AF2B5</checksum>
+      <checksum>5A3256E0</checksum>
     </file>
     <file>
       <filename>hpxml_schematron/iso-schematron.xsd</filename>
@@ -630,12 +630,6 @@
       <checksum>93120E27</checksum>
     </file>
     <file>
-      <filename>in.schedules.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2B9C5C95</checksum>
-    </file>
-    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -651,13 +645,13 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>132CCC8D</checksum>
+      <checksum>9E37F727</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4D7C8F6E</checksum>
+      <checksum>949DD045</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -723,7 +717,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>CFDFF5FB</checksum>
+      <checksum>48CF3F79</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

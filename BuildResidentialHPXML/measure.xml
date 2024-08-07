@@ -1413,6 +1413,33 @@
       <default_value>0</default_value>
     </argument>
     <argument>
+      <name>slab_exterior_horizontal_insulation_r</name>
+      <display_name>Slab: Exterior Horizontal Insulation Nominal R-value</display_name>
+      <description>Nominal R-value of the slab exterior horizontal (wing/skirt) insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
+      <type>Double</type>
+      <units>h-ft^2-R/Btu</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>slab_exterior_horizontal_insulation_width</name>
+      <display_name>Slab: Exterior Horizontal Insulation Width</display_name>
+      <description>Width of the slab exterior horizontal (wing/skirt) insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
+      <type>Double</type>
+      <units>ft</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>slab_exterior_horizontal_insulation_depth_below_grade</name>
+      <display_name>Slab: Exterior Horizontal Insulation Depth Below Grade</display_name>
+      <description>Depth of the slab exterior horizontal (wing/skirt) insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
+      <type>Double</type>
+      <units>ft</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>slab_under_insulation_r</name>
       <display_name>Slab: Under Slab Insulation Nominal R-value</display_name>
       <description>Nominal R-value of the horizontal under slab insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.</description>
@@ -7418,7 +7445,7 @@
       <filename>test_build_residential_hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4924B90F</checksum>
+      <checksum>B9C333F3</checksum>
     </file>
   </files>
 </measure>
