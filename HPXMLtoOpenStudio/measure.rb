@@ -233,6 +233,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Output
       season_day_nums = add_unmet_hours_output(model, hpxml_osm_map, hpxml)
+      add_unmet_loads_output(model, hpxml_osm_map)
       loads_data = add_total_loads_output(model, hpxml_osm_map)
       if args[:add_component_loads]
         add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
@@ -2576,6 +2577,48 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     program_calling_manager.addProgram(program)
 
     return season_day_nums
+  end
+
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [void]
+  def add_unmet_loads_output(model, hpxml_osm_map)
+    # Retrieve objects
+    shower_e_vars = []
+    shower_sag_time_vars = []
+    unit_multipliers = []
+    hpxml_osm_map.each do |hpxml_bldg, unit_model|
+      shower_e_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetLoadsShowerE }
+      shower_sag_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetLoadsShowerSagTime }
+      unit_multipliers << hpxml_bldg.building_construction.number_of_units
+    end
+
+    # EMS program
+    total_shower_e = 'total_shower_e'
+    total_shower_sag_time = 'total_shower_sag_time'
+    unit_shower_sag_time = 'unit_shower_sag_time'
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName('unmet loads program')
+    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsProgram)
+    program.addLine("Set #{total_shower_e} = 0")
+    program.addLine("Set #{total_shower_sag_time} = 0")
+    shower_e_vars.each_with_index do |shower_e_var, i|
+      program.addLine("Set total_shower_e = total_shower_e + (#{shower_e_var.name} * #{unit_multipliers[i]})")
+    end
+    shower_sag_time_vars.each_with_index do |shower_sag_time_var, _i|
+      program.addLine("Set #{unit_shower_sag_time} = #{shower_sag_time_var.name}")
+      program.addLine("  If #{unit_shower_sag_time} > #{total_shower_sag_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_sag_time} = #{unit_shower_sag_time}")
+      program.addLine('  EndIf')
+    end
+
+    # EMS calling manager
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{program.name} calling manager")
+    manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
+    manager.addProgram(program)
   end
 
   # TODO

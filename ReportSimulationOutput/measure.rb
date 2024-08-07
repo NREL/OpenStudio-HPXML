@@ -2802,8 +2802,8 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     # Unmet Loads
     @unmet_loads = {}
-    @unmet_loads[ULT::HotWaterShowerE] = UnmetLoads.new(ems_variable: 'ShowerE')
-    @unmet_loads[ULT::HotWaterShowerTime] = UnmetLoads.new(ems_variable: 'ShowerSagTime')
+    @unmet_loads[ULT::HotWaterShowerE] = UnmetLoads.new(ems_variable: 'total_shower_e')
+    @unmet_loads[ULT::HotWaterShowerTime] = UnmetLoads.new(ems_variable: 'total_shower_sag_time')
 
     @unmet_loads.each do |load_type, unmet_load|
       if load_type == ULT::HotWaterShowerE

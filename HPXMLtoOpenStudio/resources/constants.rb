@@ -636,6 +636,20 @@ module Constants
   # TODO
   #
   # @return [TODO] TODO
+  def self.ObjectNameUnmetLoadsShowerE
+    return 'unmet loads shower e'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
+  def self.ObjectNameUnmetLoadsShowerSagTime
+    return 'unmet loads shower sag time'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
