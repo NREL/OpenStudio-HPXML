@@ -519,7 +519,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     # Airflow outputs (timeseries only)
     if args[:include_timeseries_airflows]
       @airflows.each do |_airflow_type, airflow|
-        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{airflow.ems_variable}_timeseries_outvar,#{airflow.ems_variable},Summed,ZoneTimestep,#{total_airflows_program.name},m^3/s;").get
+        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{airflow.ems_variable}_timeseries_outvar,#{airflow.ems_variable},Averaged,ZoneTimestep,#{total_airflows_program.name},m^3/s;").get
         result << OpenStudio::IdfObject.load("Output:Variable,*,#{airflow.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
       end
     end
