@@ -2236,6 +2236,7 @@ module Waterheater
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet loads program')
     program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsProgram)
+    program.addLine('If WarmupFlag == 0') # Prevent unmet hours in the first hour because of the warmup period
     program.addLine("Set #{shower_sag_time} = 0")
     program.addLine("Set #{shower_e} = 0")
 
@@ -2268,6 +2269,7 @@ module Waterheater
 
     program.addLine("If (#{shower_sag_time} > 0)")
     program.addLine("Set #{shower_sag_time} = SystemTimeStep")
+    program.addLine('EndIf')
     program.addLine('EndIf')
 
     # EMS calling manager
