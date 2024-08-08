@@ -2599,6 +2599,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [void]
   def add_unmet_loads_output(model, hpxml_osm_map)
+    return if hpxml_osm_map.select { |hpxml_bldg, _unit_model| !hpxml_bldg.water_heating_systems.empty? }.empty?
+
     # Retrieve objects
     shower_e_vars = []
     shower_sag_time_vars = []
