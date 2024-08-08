@@ -238,11 +238,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if !hpxml_header.unavailable_periods.select { |up| up.column_name == 'Power Outage' }.empty?
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.'
       next if message.include? 'It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.'
-
-      if !hpxml_bldg.batteries.empty? && !hpxml_bldg.header.schedules_filepaths.empty?
-        next if message.include? "Could not find row='battery_charging' in unavailable_periods.csv; it will not be affected by the 'Power Outage' unavailable period."
-        next if message.include? "Could not find row='battery_discharging' in unavailable_periods.csv; it will not be affected by the 'Power Outage' unavailable period."
-      end
     end
     if (not hpxml_bldg.hvac_controls.empty?) && (hpxml_bldg.hvac_controls[0].seasons_heating_begin_month != 1)
       next if message.include? 'It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.'
