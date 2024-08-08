@@ -3798,8 +3798,8 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param epw_path [String] Path to the EPW weather file
-  # @param hpxml_path [TODO] TODO
-  # @param existing_hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the created HPXML file
+  # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     if need_weather_based_on_args(args)
@@ -3926,7 +3926,7 @@ module HPXMLFile
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_doc [Oga::XML::Element] Root XML element of the HPXML document
-  # @param hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the created HPXML file
   # @return [Boolean] True if the HPXML is valid
   def self.validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
     # Check for errors in the HPXML object

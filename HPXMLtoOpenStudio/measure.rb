@@ -555,7 +555,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the HPXML file
   # @return [TODO] TODO
   def check_emissions_references(hpxml_header, hpxml_path)
     # Check/update file references
@@ -574,7 +574,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param hpxml_bldg_header [TODO] TODO
-  # @param hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the HPXML file
   # @return [TODO] TODO
   def check_schedule_references(hpxml_bldg_header, hpxml_path)
     # Check/update file references
@@ -2424,7 +2424,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_osm_map [TODO] TODO
-  # @param hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the HPXML file
   # @param building_id [TODO] TODO
   # @param hpxml_defaults_path [TODO] TODO
   # @return [TODO] TODO
