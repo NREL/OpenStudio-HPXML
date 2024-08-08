@@ -608,6 +608,13 @@ module Constants
   # TODO
   #
   # @return [TODO] TODO
+  def self.ObjectNameTotalAirflowsProgram
+    return 'total airflows program'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.ObjectNameTotalLoadsProgram
     return 'total loads program'
   end

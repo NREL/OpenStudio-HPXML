@@ -17,6 +17,7 @@ __New Features__
   - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
   - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
 - **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+- Adds a warning if the sum of supply/return duct leakage to outside values is very high.
 - Adds metrics for unmet hot water loads.
 
 __Bugfixes__
