@@ -116,6 +116,13 @@ module UHT
 end
 
 # TODO
+module ULT
+  # Unmet Loads Types
+  HotWaterShowerE = 'Hot Water Shower Energy'
+  HotWaterShowerTime = 'Hot Water Shower Time'
+end
+
+# TODO
 module RT
   # Resilience Types
   Battery = 'Battery'

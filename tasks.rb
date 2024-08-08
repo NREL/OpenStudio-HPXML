@@ -1994,7 +1994,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.water_heating_systems[0].usage_bin = nil
     elsif ['base-dhw-tankless-electric-outside.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].performance_adjustment = 0.92
-    elsif ['base-dhw-multiple.xml'].include? hpxml_file
+    elsif ['base-dhw-multiple.xml',
+           'base-dhw-multiple-undersized.xml'].include? hpxml_file
       hpxml_bldg.water_heating_systems[0].fraction_dhw_load_served = 0.2
       hpxml_bldg.water_heating_systems.add(id: "WaterHeatingSystem#{hpxml_bldg.water_heating_systems.size + 1}",
                                            fuel_type: HPXML::FuelTypeNaturalGas,
@@ -2039,6 +2040,12 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                            system_type: HPXML::SolarThermalSystemTypeHotWater,
                                            water_heating_system_idref: nil, # Apply to all water heaters
                                            solar_fraction: 0.65)
+    end
+    if ['base-dhw-multiple-undersized.xml'].include? hpxml_file
+      hpxml_bldg.water_heating_systems.each do |water_heating_system|
+        water_heating_system.heating_capacity = 5000 if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
+        water_heating_system.temperature = 100.0 if [HPXML::WaterHeaterTypeHeatPump, HPXML::WaterHeaterTypeTankless].include?(water_heating_system.water_heater_type)
+      end
     end
     if ['base-dhw-low-flow-fixtures.xml'].include? hpxml_file
       hpxml_bldg.water_fixtures[0].count = 2

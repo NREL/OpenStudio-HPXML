@@ -2206,4 +2206,80 @@ module Waterheater
       return HPXML::WaterHeaterUsageBinHigh
     end
   end
+
+  # TODO
+  #
+  # @param model [TODO] TODO
+  # @param water_heating_systems [TODO] TODO
+  # @param plantloop_map [TODO] TODO
+  # @param showers_peak_flows [TODO] TODO
+  # @return [TODO] TODO
+  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flows)
+    return if water_heating_systems.empty?
+
+    # EMS sensors
+    mixed_setpoint_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    mixed_setpoint_sensor.setName('res_shower_mixsp')
+    mixed_setpoint_sensor.setKeyName('mixed water temperature schedule')
+
+    shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    shower_flow_sensor.setName('Shower Volume')
+    (model.getScheduleRulesets + model.getScheduleFiles).each do |schedule|
+      next if !schedule.name.to_s.include?(Constants.ObjectNameShowers)
+
+      shower_flow_sensor.setKeyName(schedule.name.to_s)
+    end
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName('unmet loads program')
+    program.addLine('Set ShowerE = 0') # Init
+    program.addLine('Set ShowerSagTime = 0') # Init
+    program.addLine('If WarmupFlag == 0') # Prevent unmet hours in the first hour because of the warmup period
+
+    water_heating_systems.each do |water_heating_system|
+      # Get the water storage tanks for the outlet temperature sensor
+      tank = nil
+      hw_plant_loop = plantloop_map[water_heating_system.id]
+      hw_plant_loop.components.each do |component|
+        if component.to_WaterHeaterMixed.is_initialized
+          tank = component.to_WaterHeaterMixed.get
+        elsif component.to_WaterHeaterStratified.is_initialized
+          object = component.to_WaterHeaterStratified.get
+
+          object_type = object.additionalProperties.getFeatureAsString('ObjectType')
+          next if object_type == Constants.ObjectNameSolarHotWater # Exclude solar storage from 2 tank systems
+
+          tank = object
+        end
+      end
+
+      wh_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Use Side Outlet Temperature')
+      wh_temp_sensor.setName("#{tank.name} Outlet Temperature")
+      wh_temp_sensor.setKeyName("#{tank.name}")
+
+      program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
+      program.addLine('Set ShowerSagTime = 1')
+      program.addLine("Set ShowerE = ShowerE + ( #{water_heating_system.fraction_dhw_load_served} * #{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 990 * 4183 * (3600 / #{model.getTimestep.numberOfTimestepsPerHour}) * (#{mixed_setpoint_sensor.name} - #{wh_temp_sensor.name}) )") # assume specific heat of 4183 J/kg-K and density of 990 kg/m^3
+      program.addLine('EndIf')
+    end
+
+    program.addLine('If (ShowerSagTime > 0)')
+    program.addLine('Set ShowerSagTime = SystemTimeStep')
+    program.addLine('EndIf')
+    program.addLine('EndIf')
+
+    # EMS calling manager
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{program.name} calling manager")
+    manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
+    manager.addProgram(program)
+
+    shower_e_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerE")
+    shower_sag_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerSagTime")
+    shower_e_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsShowerE)
+    shower_sag_time_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsShowerSagTime)
+    program.addLine("Set #{shower_e_var.name} = ShowerE")
+    program.addLine("Set #{shower_sag_time_var.name} = ShowerSagTime")
+  end
 end

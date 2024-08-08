@@ -345,26 +345,53 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_weekend_fractions.nil?
         runner.registerWarning("Both '#{fixtures_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil?
       end
+
+      # Create a separate shower schedule (from fixtures) used only for unmet load calculations.
+      showers_schedule = nil
+      showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
+      showers_obj_name = Constants.ObjectNameShowers
+      if not schedules_file.nil?
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+      end
+      if showers_schedule.nil?
+        showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
+        showers_weekday_sch = Schedule.ShowersWeekdayFractions
+        showers_weekend_sch = Schedule.ShowersWeekendFractions
+        showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
+        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
+      end
     end
 
+    # create an array of peak flow to return
+    shower_peak_flows = {} # used for unmet wh load calculations
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       non_solar_fraction = 1.0 - Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
 
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
       if gpd_frac > 0
 
+        # For showers, calculate flow rates but don't add a WaterUse:Equipment object. Shower usage is included in fixtures and only used for tracking unmet loads.
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier)
+        shower_gpd = fx_gpd * 0.54 # per standard, 54% of fixture usage is showers (or baths), remaining 46% is sinks.
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution, frac_low_flow_fixtures, fixtures_usage_multiplier)
 
         fx_peak_flow = nil
+        shower_peak_flow = nil
         if not schedules_file.nil?
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, daily_water: fx_gpd)
+          shower_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterShowers].name, daily_water: shower_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, daily_water: w_gpd)
         end
         if fx_peak_flow.nil?
           fx_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(fx_gpd)
           dist_water_peak_flow = fixtures_schedule_obj.calc_design_level_from_daily_gpm(w_gpd)
         end
+        if shower_peak_flow.nil?
+          shower_peak_flow = showers_schedule_obj.calc_design_level_from_daily_gpm(shower_gpd)
+        end
+
+        id = water_heating_system.id
+        shower_peak_flows[id] = shower_peak_flow * gpd_frac * non_solar_fraction
 
         # Fixtures (showers, sinks, baths)
         add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
@@ -488,6 +515,8 @@ module HotWaterAndAppliances
       add_other_equipment(model, Constants.ObjectNameGeneralWaterUseSensible, conditioned_space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
       add_other_equipment(model, Constants.ObjectNameGeneralWaterUseLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)
     end
+
+    return shower_peak_flows
   end
 
   # TODO

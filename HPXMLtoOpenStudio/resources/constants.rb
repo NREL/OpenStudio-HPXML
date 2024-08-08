@@ -594,6 +594,13 @@ module Constants
   # TODO
   #
   # @return [TODO] TODO
+  def self.ObjectNameShowers
+    return 'hot_water_showers'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
   def self.ObjectNameSolarHotWater
     return 'solar hot water'
   end
@@ -624,6 +631,27 @@ module Constants
   # @return [TODO] TODO
   def self.ObjectNameUnmetHoursProgram
     return 'unmet hours program'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
+  def self.ObjectNameUnmetLoadsProgram
+    return 'unmet loads program'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
+  def self.ObjectNameUnmetLoadsShowerE
+    return 'unmet loads shower e'
+  end
+
+  # TODO
+  #
+  # @return [TODO] TODO
+  def self.ObjectNameUnmetLoadsShowerSagTime
+    return 'unmet loads shower sag time'
   end
 
   # TODO
