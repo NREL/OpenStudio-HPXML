@@ -75,7 +75,7 @@ module HVACSizing
       # Calculate HVAC equipment sizes
       hvac_sizings = HVACSizingValues.new
       apply_hvac_loads_to_hvac_sizings(hvac_sizings, hvac_loads)
-      apply_hvac_heat_pump_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
+      apply_hvac_heat_pump_maxload_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
       apply_hvac_equipment_adjustments(mj, runner, hvac_sizings, weather, hvac_heating, hvac_cooling, hvac_system, hpxml_bldg)
       apply_hvac_installation_quality(mj, hvac_sizings, hvac_heating, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
       apply_hvac_autosizing_factors_and_limits(hvac_sizings, hvac_heating, hvac_cooling)
@@ -1747,7 +1747,7 @@ module HVACSizing
     hvac_sizings.Heat_Load_Supp = hvac_loads.Heat_Tot
   end
 
-  # Updates the design loads for a heat pump to comply with the specified heat pump sizing methodology.
+  # Updates the design loads for a heat pump to comply with the MaxLoad heat pump sizing methodology.
   #
   # @param hvac_sizings [HVACSizingValues] Object with sizing values for a given HVAC system
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
@@ -1755,14 +1755,14 @@ module HVACSizing
   # @param frac_zone_cool_load_served [Double] Fraction of zone cooling load served by this HVAC system
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [void]
-  def self.apply_hvac_heat_pump_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
+  def self.apply_hvac_heat_pump_maxload_logic(hvac_sizings, hvac_cooling, frac_zone_heat_load_served, frac_zone_cool_load_served, hpxml_bldg)
     # Only apply logic to a heat pump that provides both heating and cooling
     return unless hvac_cooling.is_a? HPXML::HeatPump
-    return if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA
+    return if hpxml_bldg.header.heat_pump_sizing_methodology != HPXML::HeatPumpSizingMaxLoad
     return if frac_zone_heat_load_served == 0
     return if frac_zone_cool_load_served == 0
 
-    # If HERS/MaxLoad methodology, use at least the larger of heating/cooling loads for heat pump sizing.
+    # If MaxLoad methodology, use at least the larger of heating/cooling loads for heat pump sizing.
     # Note: Heat_Load_Supp should NOT be adjusted; we only want to adjust the HP capacity, not the HP backup heating capacity.
     max_load = [hvac_sizings.Heat_Load, hvac_sizings.Cool_Load_Tot].max
     hvac_sizings.Heat_Load = max_load
@@ -2155,13 +2155,7 @@ module HVACSizing
       d_sens = shr_biquadratic[5]
 
       # Adjust Sizing
-      if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-
-        cool_load_sens_cap_design = hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value
-
-      elsif lat_cap_design < hvac_sizings.Cool_Load_Lat
+      if lat_cap_design < hvac_sizings.Cool_Load_Lat
         # Size by MJ8 Latent load, return to rated conditions
 
         # Solve for the new sensible and total capacity at design conditions:
@@ -2239,18 +2233,13 @@ module HVACSizing
       hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
-      if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      else
-        entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
-        idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
-        odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
-        total_cap_curve_value = odb_adj * idb_adj
+      entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
+      idb_adj = adjust_indoor_condition_var_speed(entering_temp, mj.cool_indoor_wetbulb, :clg)
+      odb_adj = adjust_outdoor_condition_var_speed(entering_temp, hvac_cooling, :clg)
+      total_cap_curve_value = odb_adj * idb_adj
 
-        hvac_sizings.Cool_Capacity = (hvac_sizings.Cool_Load_Tot / total_cap_curve_value)
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      end
+      hvac_sizings.Cool_Capacity = (hvac_sizings.Cool_Load_Tot / total_cap_curve_value)
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
       hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[hvac_cooling_speed])
 
@@ -2262,16 +2251,11 @@ module HVACSizing
       hvac_cooling_speed = get_nominal_speed(hvac_cooling_ap, true)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
-      if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      else
-        entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
-        total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
+      entering_temp = hpxml_bldg.header.manualj_cooling_design_temp
+      total_cap_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, entering_temp, hvac_cooling_ap.cool_cap_ft_spec[hvac_cooling_speed])
 
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      end
+      hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
       hvac_sizings.Cool_Airflow = calc_airflow_rate_user(hvac_sizings.Cool_Capacity, hvac_cooling_ap.cool_rated_cfm_per_ton[0])
 
@@ -2293,28 +2277,23 @@ module HVACSizing
       bypass_factor_curve_value = MathTools.biquadratic(mj.cool_indoor_wetbulb, mj.cool_setpoint, gshp_coil_bf_ft_spec)
       hvac_cooling_shr = hvac_cooling_ap.cool_rated_shrs_gross[hvac_cooling_speed]
 
-      if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      else
-        hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value # Note: cool_cap_design = hvac_sizings.Cool_Load_Tot
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
+      hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value # Note: cool_cap_design = hvac_sizings.Cool_Load_Tot
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
-        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
-                                   (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / cooling_delta_t))
-        cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
+      cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
+                                 (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
+                                 (80.0 - mj.cool_setpoint) / cooling_delta_t))
+      cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
 
-        # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
-        cool_load_sens_cap_design = [cool_load_sens_cap_design, hvac_sizings.Cool_Load_Sens].max
-        cool_load_lat_cap_design = [cool_load_lat_cap_design, hvac_sizings.Cool_Load_Lat].max
-        cool_cap_design = cool_load_sens_cap_design + cool_load_lat_cap_design
+      # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
+      cool_load_sens_cap_design = [cool_load_sens_cap_design, hvac_sizings.Cool_Load_Sens].max
+      cool_load_lat_cap_design = [cool_load_lat_cap_design, hvac_sizings.Cool_Load_Lat].max
+      cool_cap_design = cool_load_sens_cap_design + cool_load_lat_cap_design
 
-        # Limit total capacity via oversizing limit
-        cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizings.Cool_Load_Tot].min
-        hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
-        hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-      end
+      # Limit total capacity via oversizing limit
+      cool_cap_design = [cool_cap_design, oversize_limit * hvac_sizings.Cool_Load_Tot].min
+      hvac_sizings.Cool_Capacity = cool_cap_design / total_cap_curve_value
+      hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
       # Recalculate the air flow rate in case the oversizing limit has been used
       cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
@@ -2388,11 +2367,7 @@ module HVACSizing
            HPXML::HVACTypeHeatPumpRoom].include? heating_type
 
       hvac_heating_speed = get_nominal_speed(hvac_heating_ap, false)
-      if hvac_heating.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
-        hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
-      else
-        process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta, hpxml_bldg)
-      end
+      process_heat_pump_adjustment(mj, runner, hvac_sizings, weather, hvac_heating, total_cap_curve_value, hvac_system, hvac_heating_speed, oversize_limit, oversize_delta, hpxml_bldg)
 
       hvac_sizings.Heat_Capacity_Supp = calculate_heat_pump_backup_load(mj, hvac_heating, hvac_sizings.Heat_Load_Supp, hvac_sizings.Heat_Capacity, hvac_heating_speed, hpxml_bldg)
       if (heating_type == HPXML::HVACTypeHeatPumpAirToAir) || (heating_type == HPXML::HVACTypeHeatPumpMiniSplit && is_ducted)
@@ -2403,10 +2378,7 @@ module HVACSizing
 
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heating_type
 
-      if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS
-        hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
-        hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
-      elsif hvac_sizings.Cool_Capacity > 0
+      if hvac_sizings.Cool_Capacity > 0
         hvac_sizings.Heat_Capacity = hvac_sizings.Heat_Load
         hvac_sizings.Heat_Capacity_Supp = hvac_sizings.Heat_Load_Supp
 
@@ -2478,6 +2450,25 @@ module HVACSizing
 
       fail "Unexpected heating type: #{heating_type}."
 
+    end
+
+    # If HERS sizing methodology, ensure HP capacity is at least equal to larger of
+    # heating and sensible cooling loads.
+    if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS
+      if (not hvac_cooling.nil?) && hvac_cooling.is_a?(HPXML::HeatPump) && (hvac_cooling.fraction_heat_load_served > 0) && (hvac_cooling.fraction_cool_load_served > 0)
+        min_capacity = [hvac_sizings.Heat_Load, hvac_sizings.Cool_Load_Sens].max
+        if hvac_sizings.Cool_Capacity < min_capacity
+          scaling_factor = min_capacity / hvac_sizings.Cool_Capacity
+          hvac_sizings.Cool_Capacity *= scaling_factor
+          hvac_sizings.Cool_Capacity_Sens *= scaling_factor
+          hvac_sizings.Cool_Airflow *= scaling_factor
+        end
+        if hvac_sizings.Heat_Capacity < min_capacity
+          scaling_factor = min_capacity / hvac_sizings.Heat_Capacity
+          hvac_sizings.Heat_Capacity *= scaling_factor
+          hvac_sizings.Heat_Airflow *= scaling_factor
+        end
+      end
     end
   end
 
