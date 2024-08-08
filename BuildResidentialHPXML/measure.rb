@@ -1674,7 +1674,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_2_type', heating_system_2_type_choices, true)
     arg.setDisplayName('Heating System 2: Type')
-    arg.setDescription('The type of the second heating system.')
+    arg.setDescription("The type of the second heating system. If a heat pump is specified and the backup type is '#{HPXML::HeatPumpBackupTypeSeparate}', this heating system represents '#{HPXML::HeatPumpBackupTypeSeparate}' backup heating. A '#{HPXML::HVACTypeFurnace}' as '#{HPXML::HeatPumpBackupTypeSeparate}' backup to a ducted heat pump is not supported.")
     arg.setDefaultValue('none')
     args << arg
 
@@ -3798,8 +3798,8 @@ module HPXMLFile
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param args [Hash] Map of :argument_name => value
   # @param epw_path [String] Path to the EPW weather file
-  # @param hpxml_path [TODO] TODO
-  # @param existing_hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the created HPXML file
+  # @param existing_hpxml_path [String] Path to the existing HPXML file
   # @return [Oga::XML::Element] Root XML element of the updated HPXML document
   def self.create(runner, model, args, epw_path, hpxml_path, existing_hpxml_path)
     if need_weather_based_on_args(args)
@@ -3926,7 +3926,7 @@ module HPXMLFile
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_doc [Oga::XML::Element] Root XML element of the HPXML document
-  # @param hpxml_path [TODO] TODO
+  # @param hpxml_path [String] Path to the created HPXML file
   # @return [Boolean] True if the HPXML is valid
   def self.validate_hpxml(runner, hpxml, hpxml_doc, hpxml_path)
     # Check for errors in the HPXML object

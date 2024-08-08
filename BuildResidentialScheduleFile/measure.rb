@@ -178,8 +178,8 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param doc [Oga::XML::Document] Oga XML Document object
-  # @param hpxml_path [String] path of the input HPXML file
-  # @param hpxml_output_path [String] path of the output HPXML file
+  # @param hpxml_path [String] Path to the HPXML file
+  # @param hpxml_output_path [String] Path to the output HPXML file
   # @param schedules_filepaths [Array<String>] array of SchedulesFilePath strings in the input HPXML file
   # @param args [Hash] Map of :argument_name => value
   def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
