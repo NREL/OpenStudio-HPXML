@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>a3929e73-ad9a-42f3-887e-f66af1ff4563</version_id>
-  <version_modified>2024-08-08T17:49:39Z</version_modified>
+  <version_id>6d78179b-2f3b-4723-8b8f-240f8ed0b33b</version_id>
+  <version_modified>2024-08-12T15:11:14Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -321,7 +321,7 @@
       <filename>data/unavailable_periods.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
-      <checksum>73BFECE2</checksum>
+      <checksum>3C44FFBB</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -393,7 +393,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F3D7066C</checksum>
+      <checksum>9A1C84AA</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -579,7 +579,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>29B1D0F0</checksum>
+      <checksum>6EF387CC</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -681,7 +681,7 @@
       <filename>test_hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>9094E7AB</checksum>
+      <checksum>16805567</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
