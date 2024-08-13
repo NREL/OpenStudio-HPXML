@@ -1,6 +1,7 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
+- Updates to HPXML v4.0-rc5.
 - Adds inputs for modeling skylight curbs and/or shafts.
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
