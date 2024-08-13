@@ -2233,27 +2233,24 @@
 									<xs:group ref="SystemInfo"/>
 									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
 									<xs:element minOccurs="0" name="Model" type="Model"/>
+									<xs:element minOccurs="0" name="ModelTrim" type="Model"/>
 									<xs:element minOccurs="0" name="ModelYear" type="Year"/>
-									<xs:element minOccurs="0" name="VehicleClass" type="VehicleClassType"/>
-									<xs:element minOccurs="0" name="VehicleWeight" type="HPXMLDoubleGreaterThanZero"/>
+									<xs:element minOccurs="0" name="VIN" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="VehicleClass" type="VehicleClassType">
+										<xs:annotation>
+											<xs:documentation>The class as defined by the U.S. Federal Highway Administration.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="VehicleWeight" type="HPXMLDoubleGreaterThanZero">
+										<xs:annotation>
+											<xs:documentation>[lbs] The weight of the vehicle.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="Count" type="IntegerGreaterThanZero">
 										<xs:annotation>
 											<xs:documentation>Number of similar vehicles.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="PrimaryLocation" type="VehicleLocation"/>
-									<xs:element minOccurs="0" name="MilesDrivenPerYear" type="HPXMLDoubleGreaterThanZero"/>
-									<xs:element minOccurs="0" name="HoursDrivenPerWeek" type="HPXMLDoubleGreaterThanOrEqualToZero"/>
-									<xs:element minOccurs="0" name="FuelEconomy">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
-												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
-											</xs:sequence>
-											<xs:attribute name="dataSource" type="DataSource"/>
-										</xs:complexType>
-									</xs:element>
-									<xs:element minOccurs="0" ref="extension"/>
 									<xs:element minOccurs="0" name="VehicleType">
 										<xs:complexType>
 											<xs:choice>
@@ -2264,12 +2261,24 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
-															<xs:element minOccurs="0" name="FractionChargedAtHome" type="Fraction">
+															<xs:element minOccurs="0" name="FractionChargedLocation">
 																<xs:annotation>
-																	<xs:documentation>The fraction of charging energy provided by an at-home charger.</xs:documentation>
+																	<xs:documentation>The percentage of charging energy provided at a certain location.</xs:documentation>
 																</xs:annotation>
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element minOccurs="0" name="Location" type="VehicleChargingLocation"/>
+																		<xs:element minOccurs="0" name="Percentage" type="Fraction">
+																			<xs:annotation>
+																				<xs:documentation>Percentage as a fraction (50% = 0.5)</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																	<xs:attribute name="dataSource" type="DataSource"/>
+																</xs:complexType>
 															</xs:element>
 															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
+															<xs:element ref="extension" minOccurs="0"/>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
@@ -2280,13 +2289,29 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="Battery" type="VehicleBattery"/>
-															<xs:element minOccurs="0" name="FractionChargedAtHome" type="Fraction">
+															<xs:element minOccurs="0" name="FractionChargedLocation">
 																<xs:annotation>
-																	<xs:documentation>The fraction of charging energy provided by an at-home charger.</xs:documentation>
+																	<xs:documentation>The percentage of charging energy provided at a certain location.</xs:documentation>
 																</xs:annotation>
+																<xs:complexType>
+																	<xs:sequence>
+																		<xs:element minOccurs="0" name="Location" type="VehicleChargingLocation"/>
+																		<xs:element minOccurs="0" name="Percentage" type="Fraction">
+																			<xs:annotation>
+																				<xs:documentation>Percentage as a fraction (50% = 0.5)</xs:documentation>
+																			</xs:annotation>
+																		</xs:element>
+																	</xs:sequence>
+																	<xs:attribute name="dataSource" type="DataSource"/>
+																</xs:complexType>
 															</xs:element>
 															<xs:element minOccurs="0" name="ConnectedCharger" type="LocalReference"/>
-															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType">
+																<xs:annotation>
+																	<xs:documentation>Fuel type of the combustion engine</xs:documentation>
+																</xs:annotation>
+															</xs:element>
+															<xs:element ref="extension" minOccurs="0"/>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
@@ -2297,6 +2322,7 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
@@ -2307,6 +2333,7 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
@@ -2314,12 +2341,45 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element minOccurs="0" name="FuelType" type="VehicleFuelType"/>
+															<xs:element ref="extension" minOccurs="0"/>
 														</xs:sequence>
 													</xs:complexType>
 												</xs:element>
 											</xs:choice>
 										</xs:complexType>
 									</xs:element>
+									<xs:element minOccurs="0" name="PrimaryLocation" type="VehicleLocation"/>
+									<xs:element minOccurs="0" name="Mileage" type="HPXMLDoubleGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="MilesDrivenPerYear" type="HPXMLDoubleGreaterThanZero"/>
+									<xs:element minOccurs="0" name="HoursDrivenPerWeek" type="HPXMLDoubleGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="FuelEconomyCombined">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="FuelEconomyCity">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="FuelEconomyHighway">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="Units" type="FuelEconomyUnits"/>
+												<xs:element minOccurs="0" name="Value" type="HPXMLDoubleGreaterThanZero"/>
+											</xs:sequence>
+											<xs:attribute name="dataSource" type="DataSource"/>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
@@ -6301,6 +6361,16 @@
 												in to the energy retrieved from storage.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="GridConnected" type="HPXMLBoolean">
+				<xs:annotation>
+					<xs:documentation>Has the ability to feed electricity back on to the grid.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="BuildingConnected" type="HPXMLBoolean">
+				<xs:annotation>
+					<xs:documentation>Has the ability to feed electricity to the building.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
@@ -10180,6 +10250,19 @@
 			<xs:extension base="VehicleType_simple"/>
 		</xs:simpleContent>
 	</xs:complexType>
+		<xs:simpleType name="VehicleChargingLocation_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Home"/>
+			<xs:enumeration value="Work"/>
+			<xs:enumeration value="Public"/>
+			<xs:enumeration value="Other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VehicleChargingLocation">
+		<xs:simpleContent>
+			<xs:extension base="VehicleChargingLocation_simple"/>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="VehicleLocation_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="garage"/>
@@ -10201,7 +10284,6 @@
 	<xs:simpleType name="VehicleFuelType_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="gasoline"/>
-			<xs:enumeration value="electricity"/>
 			<xs:enumeration value="diesel"/>
 			<xs:enumeration value="biodiesel"/>
 			<xs:enumeration value="ethanol"/>
