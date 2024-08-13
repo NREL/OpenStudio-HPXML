@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
 # TODO
-class HotWaterAndAppliances
+module HotWaterAndAppliances
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hot_water_distribution [TODO] TODO
   # @param solar_thermal_system [TODO] TODO
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param plantloop_map [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
@@ -891,7 +891,7 @@ class HotWaterAndAppliances
   # @param col_name [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
   # @param refrigerator_or_freezer [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
     # Create availability sensor
@@ -951,7 +951,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param water_heating_system [TODO] TODO
   # @param hot_water_distribution [TODO] TODO
@@ -977,7 +977,7 @@ class HotWaterAndAppliances
       pe_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       ref_loop_l = get_default_recirc_loop_length(ref_pipe_l)
-      pe_ratio = hot_water_distribution.recirculation_piping_length / ref_loop_l
+      pe_ratio = hot_water_distribution.recirculation_piping_loop_length / ref_loop_l
     end
     e_waste = oew_fact * (1.0 - ocd_eff) + sew_fact * pe_ratio
     return (e_waste + 128.0) / 160.0
@@ -987,7 +987,7 @@ class HotWaterAndAppliances
   #
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @return [TODO] TODO
   def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
@@ -1035,8 +1035,6 @@ class HotWaterAndAppliances
     pump_kw = pump_horsepower * 0.746 / motor_efficiency
     return UnitConversions.convert(pump_kw, 'kW', 'W')
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
@@ -1168,7 +1166,7 @@ class HotWaterAndAppliances
 
   # TODO
   #
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO
@@ -1313,7 +1311,7 @@ class HotWaterAndAppliances
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param has_uncond_bsmnt [TODO] TODO
   # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
   # @param hot_water_distribution [TODO] TODO
   # @param frac_low_flow_fixtures [TODO] TODO

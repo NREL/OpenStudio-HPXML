@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # TODO
-class TE
+module TE
   # Total Energy
   Total = 'Total'
   Net = 'Net'
 end
 
 # TODO
-class FT
+module FT
   # Fuel Types
   Elec = 'Electricity'
   Gas = 'Natural Gas'
@@ -20,7 +20,7 @@ class FT
 end
 
 # TODO
-class EUT
+module EUT
   # End Use Types
   Heating = 'Heating'
   HeatingFanPump = 'Heating Fans/Pumps'
@@ -64,7 +64,7 @@ class EUT
 end
 
 # TODO
-class HWT
+module HWT
   # Hot Water Types
   ClothesWasher = 'Clothes Washer'
   Dishwasher = 'Dishwasher'
@@ -73,7 +73,7 @@ class HWT
 end
 
 # TODO
-class LT
+module LT
   # Load Types
   Heating = 'Heating: Delivered'
   HeatingHeatPumpBackup = 'Heating: Heat Pump Backup' # Needed for ERI calculation for dual-fuel heat pumps
@@ -85,7 +85,7 @@ class LT
 end
 
 # TODO
-class CLT
+module CLT
   # Component Load Types
   Roofs = 'Roofs'
   Ceilings = 'Ceilings'
@@ -110,27 +110,27 @@ class CLT
 end
 
 # TODO
-class UHT
+module UHT
   # Unmet Hours Types
   Heating = 'Heating'
   Cooling = 'Cooling'
 end
 
 # TODO
-class RT
+module RT
   # Resilience Types
   Battery = 'Battery'
 end
 
 # TODO
-class PLT
+module PLT
   # Peak Load Types
   Heating = 'Heating: Delivered'
   Cooling = 'Cooling: Delivered'
 end
 
 # TODO
-class PFT
+module PFT
   # Peak Fuel Types
   Summer = 'Summer'
   Winter = 'Winter'
@@ -138,7 +138,7 @@ class PFT
 end
 
 # TODO
-class AFT
+module AFT
   # Airflow Types
   Infiltration = 'Infiltration'
   MechanicalVentilation = 'Mechanical Ventilation'
@@ -147,7 +147,7 @@ class AFT
 end
 
 # TODO
-class WT
+module WT
   # Weather Types
   DrybulbTemp = 'Drybulb Temperature'
   WetbulbTemp = 'Wetbulb Temperature'
@@ -158,7 +158,7 @@ class WT
 end
 
 # TODO
-class Outputs
+module Outputs
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit

@@ -19,7 +19,7 @@ def create_hpxmls
   dirs = json_inputs.keys.map { |file_path| File.dirname(file_path) }.uniq
 
   schema_path = File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio', 'resources', 'hpxml_schema', 'HPXML.xsd')
-  schema_validator = XMLValidator.get_schema_validator(schema_path)
+  schema_validator = XMLValidator.get_xml_validator(schema_path)
 
   schedules_regenerated = []
 
@@ -331,7 +331,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
     # --------------------- #
 
     # General logic for all files
-    hpxml_bldg.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
+    hpxml_bldg.site.available_fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
 
     # Logic that can only be applied based on the file name
     if ['base-schedules-simple.xml',
@@ -1421,7 +1421,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       wall = hpxml_bldg.walls.select { |w| w.azimuth == hpxml_bldg.neighbor_buildings[0].azimuth }[0]
       wall.exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
     end
-    if ['base-foundation-vented-crawlspace-above-grade.xml'].include? hpxml_file
+    if ['base-foundation-vented-crawlspace-above-grade2.xml'].include? hpxml_file
       # Convert FoundationWall to Wall to test a foundation with only Wall elements
       fwall = hpxml_bldg.foundation_walls[0]
       hpxml_bldg.walls.add(id: "Wall#{hpxml_bldg.walls.size + 1}",
@@ -2036,7 +2036,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                            related_hvac_idref: 'HeatingSystem1',
                                            temperature: 125.0)
       hpxml_bldg.solar_thermal_systems.add(id: "SolarThermalSystem#{hpxml_bldg.solar_thermal_systems.size + 1}",
-                                           system_type: HPXML::SolarThermalSystemType,
+                                           system_type: HPXML::SolarThermalSystemTypeHotWater,
                                            water_heating_system_idref: nil, # Apply to all water heaters
                                            solar_fraction: 0.65)
     end
@@ -2231,6 +2231,8 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                       used_for_whole_building_ventilation: true)
     elsif ['base-mechvent-cfis-airflow-fraction-zero.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans[0].cfis_vent_mode_airflow_fraction = 0.0
+    elsif ['base-mechvent-cfis-no-additional-runtime.xml'].include? hpxml_file
+      hpxml_bldg.ventilation_fans[0].cfis_addtl_runtime_operating_mode = HPXML::CFISModeNone
     elsif ['base-mechvent-cfis-supplemental-fan-exhaust.xml',
            'base-mechvent-cfis-supplemental-fan-supply.xml'].include? hpxml_file
       hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",

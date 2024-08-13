@@ -231,7 +231,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.state_code = 'CA'
     hpxml_bldg.city = 'CityName'
     hpxml_bldg.time_zone_utc_offset = -8
-    hpxml_bldg.elevation = 1234
+    hpxml_bldg.elevation = -1234
     hpxml_bldg.latitude = 12
     hpxml_bldg.longitude = -34
     hpxml_bldg.header.natvent_days_per_week = 7
@@ -252,10 +252,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.header.manualj_internal_loads_sensible = 1600.0
     hpxml_bldg.header.manualj_internal_loads_latent = 60.0
     hpxml_bldg.header.manualj_num_occupants = 8
+    hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_building_values(default_hpxml_bldg, false, 3, 3, 10, 10, 'CA', 'CityName', -8, 1234, 12, -34, 7, HPXML::HeatPumpSizingMaxLoad, true,
-                                  2, 3, 4, 5, 0.0, 100.0, HPXML::ManualJDailyTempRangeLow, 68.0, 78.0, 0.33, 50.0, 1600.0, 60.0, 8, HPXML::HeatPumpBackupSizingSupplemental)
+    _test_default_building_values(default_hpxml_bldg, false, 3, 3, 10, 10, 'CA', 'CityName', -8, -1234, 12, -34, 7, HPXML::HeatPumpSizingMaxLoad, true,
+                                  2, 3, 4, 5, 0.0, 100.0, HPXML::ManualJDailyTempRangeLow, 68.0, 78.0, 0.33, 50.0, 1600.0, 60.0, 8, HPXML::HeatPumpBackupSizingSupplemental, HPXML::ManualJInfiltrationMethodBlowerDoor)
 
     # Test defaults - DST not in weather file
     hpxml_bldg.dst_enabled = nil
@@ -287,10 +288,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.header.manualj_internal_loads_sensible = nil
     hpxml_bldg.header.manualj_internal_loads_latent = nil
     hpxml_bldg.header.manualj_num_occupants = nil
+    hpxml_bldg.header.manualj_infiltration_method = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', 'Denver Intl Ap', -7, 5413.4, 39.83, -104.65, 3, HPXML::HeatPumpSizingHERS, false,
-                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.8, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency)
+                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.8, 2400.0, 0.0, 4, HPXML::HeatPumpBackupSizingEmergency, HPXML::ManualJInfiltrationMethodBlowerDoor)
 
     # Test defaults - DST in weather file
     hpxml, hpxml_bldg = _create_hpxml('base-location-AMY-2012.xml')
@@ -308,7 +310,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 11, 11, 4, 'CO', 'Boulder', -7, 5300.2, 40.13, -105.22, 3, nil, false,
-                                  5, 1, 9, 30, 10.22, 91.4, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -38.5, 2400.0, 0.0, 4, nil)
+                                  5, 1, 9, 30, 10.22, 91.4, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -38.5, 2400.0, 0.0, 4, nil, HPXML::ManualJInfiltrationMethodBlowerDoor)
 
     # Test defaults - southern hemisphere, invalid state code
     hpxml, hpxml_bldg = _create_hpxml('base-location-capetown-zaf.xml')
@@ -326,7 +328,15 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, '-', 'CAPE TOWN', 2, 137.8, -33.98, 18.6, 3, nil, false,
-                                  12, 1, 4, 30, 41.0, 84.38, HPXML::ManualJDailyTempRangeMedium, 70.0, 75.0, 0.5, 1.6, 2400.0, 0.0, 4, nil)
+                                  12, 1, 4, 30, 41.0, 84.38, HPXML::ManualJDailyTempRangeMedium, 70.0, 75.0, 0.5, 1.6, 2400.0, 0.0, 4, nil, HPXML::ManualJInfiltrationMethodBlowerDoor)
+
+    # Test defaults - leakiness description default to HPXML::ManualJInfiltrationMethodDefaultTable
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-infil-leakiness-description.xml')
+    hpxml_bldg.header.manualj_infiltration_method = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_building_values(default_hpxml_bldg, true, 3, 12, 11, 5, 'CO', 'Denver Intl Ap', -7, 5413.4, 39.83, -104.65, 3, nil, false,
+                                  5, 1, 10, 31, 6.8, 91.76, HPXML::ManualJDailyTempRangeHigh, 70.0, 75.0, 0.45, -28.8, 2400.0, 0.0, 4, nil, HPXML::ManualJInfiltrationMethodDefaultTable)
   end
 
   def test_site
@@ -530,6 +540,127 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     _test_default_infiltration_values(default_hpxml_bldg, 900 * 8, false)
+  end
+
+  def test_infiltration_leakiness_description
+    # Tests from ResDB.Infiltration.Model.v2.xlsx
+
+    def _get_base_building(retain_cond_bsmt: false)
+      hpxml, hpxml_bldg = _create_hpxml('base-enclosure-2stories-infil-leakiness-description.xml')
+      hpxml_bldg.building_construction.conditioned_floor_area = 2000.0
+      hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 2
+      hpxml_bldg.building_construction.average_ceiling_height = 8.0
+      hpxml_bldg.building_construction.year_built = 1975
+      hpxml_bldg.building_construction.conditioned_building_volume = nil
+      hpxml_bldg.rim_joists[0].delete
+      hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessAverage
+      hpxml_bldg.air_infiltration_measurements[0].air_leakage = nil
+      hpxml_bldg.air_infiltration_measurements[0].unit_of_measure = nil
+      hpxml_bldg.air_infiltration_measurements[0].house_pressure = nil
+      hpxml_bldg.air_infiltration_measurements[0].infiltration_volume = nil
+      hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '3B'
+      hpxml_bldg.slabs[0].area = 1000.0
+      hpxml_bldg.floors[0].area = 1000.0
+      if not retain_cond_bsmt
+        hpxml_bldg.foundations[0].foundation_type = HPXML::FoundationTypeSlab
+        hpxml_bldg.foundation_walls.reverse_each do |fw|
+          fw.delete
+        end
+        hpxml_bldg.slabs[0].interior_adjacent_to = HPXML::LocationConditionedSpace
+      end
+      return hpxml, hpxml_bldg
+    end
+
+    # Test Base
+    hpxml, _hpxml_bldg = _get_base_building()
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 9.7)
+
+    # Test Base w/ CFA = 1000 ft2
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.building_construction.conditioned_floor_area = 1000.0
+    hpxml_bldg.slabs[0].area = 500.0
+    hpxml_bldg.floors[0].area = 500.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 1000 * 8, false, 11.8)
+
+    # Test Base w/ 1 story
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade = 1
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 10.2)
+
+    # Test Base w/ 12ft ceiling height
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.building_construction.average_ceiling_height = 12.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 12.0, false, 7.6)
+
+    # Test Base w/ 2013 year built
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.building_construction.year_built = 2013
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 5.3)
+
+    # Test Base w/ 4C IECC zone
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone = '4C'
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 13.1)
+
+    # Test Base w/ conditioned basement foundation
+    hpxml, _hpxml_bldg = _get_base_building(retain_cond_bsmt: true)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8.0, false, 11.2)
+
+    # Test Base w/ ducts in conditioned space
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.hvac_distributions[0].ducts.each do |duct|
+      duct.duct_location = HPXML::LocationConditionedSpace
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 8.0)
+
+    # Test Base w/ tight leakiness
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.air_infiltration_measurements[0].leakiness_description = HPXML::LeakinessTight
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 9.7 * 0.686)
+
+    # Test for ductless == conditioned ducts
+    hpxml, hpxml_bldg = _get_base_building()
+    hpxml_bldg.hvac_distributions[0].ducts.reverse_each do |duct|
+      duct.delete
+    end
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 8.0)
+
+    # Test for 25% ducted + 75% ductless system
+    hpxml_bldg.hvac_distributions[0].ducts.add(id: 'Ducts1',
+                                               duct_type: HPXML::DuctTypeSupply,
+                                               duct_insulation_r_value: 8,
+                                               duct_location: HPXML::LocationAtticUnvented,
+                                               duct_surface_area: 50)
+    hpxml_bldg.hvac_distributions[0].ducts.add(id: 'Ducts2',
+                                               duct_type: HPXML::DuctTypeReturn,
+                                               duct_insulation_r_value: 8,
+                                               duct_location: HPXML::LocationAtticUnvented,
+                                               duct_surface_area: 50)
+    hpxml_bldg.heating_systems[0].fraction_heat_load_served = 0.25 # 25% ducts in attic
+    hpxml_bldg.cooling_systems[0].fraction_cool_load_served = 0.25
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_infiltration_values(default_hpxml_bldg, 2000 * 8, false, 8.0 + (9.7 - 8.0) * 0.25)
   end
 
   def test_infiltration_compartmentaliztion_test_adjustment
@@ -3003,7 +3134,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     # Test defaults w/ recirculation & conditioned basement
     hpxml, hpxml_bldg = _create_hpxml('base-dhw-recirc-demand.xml')
-    hpxml_bldg.hot_water_distributions[0].recirculation_piping_length = nil
+    hpxml_bldg.hot_water_distributions[0].recirculation_piping_loop_length = nil
     hpxml_bldg.hot_water_distributions[0].recirculation_branch_piping_length = nil
     hpxml_bldg.hot_water_distributions[0].recirculation_pump_power = nil
     hpxml_bldg.hot_water_distributions[0].pipe_r_value = nil
@@ -4240,7 +4371,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
                                     shading_summer_begin_month, shading_summer_begin_day, shading_summer_end_month, shading_summer_end_day,
                                     manualj_heating_design_temp, manualj_cooling_design_temp, manualj_daily_temp_range, manualj_heating_setpoint, manualj_cooling_setpoint,
                                     manualj_humidity_setpoint, manualj_humidity_difference, manualj_internal_loads_sensible, manualj_internal_loads_latent, manualj_num_occupants,
-                                    heat_pump_backup_sizing_methodology)
+                                    heat_pump_backup_sizing_methodology, manualj_infiltration_method)
     assert_equal(dst_enabled, hpxml_bldg.dst_enabled)
     assert_equal(dst_begin_month, hpxml_bldg.dst_begin_month)
     assert_equal(dst_begin_day, hpxml_bldg.dst_begin_day)
@@ -4286,6 +4417,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(manualj_internal_loads_sensible, hpxml_bldg.header.manualj_internal_loads_sensible)
     assert_equal(manualj_internal_loads_latent, hpxml_bldg.header.manualj_internal_loads_latent)
     assert_equal(manualj_num_occupants, hpxml_bldg.header.manualj_num_occupants)
+    assert_equal(manualj_infiltration_method, hpxml_bldg.header.manualj_infiltration_method)
   end
 
   def _test_default_site_values(hpxml_bldg, site_type, shielding_of_home, ground_conductivity, ground_diffusivity, soil_type, moisture_type)
@@ -4343,9 +4475,14 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(n_units, hpxml_bldg.building_construction.number_of_units)
   end
 
-  def _test_default_infiltration_values(hpxml_bldg, volume, has_flue_or_chimney_in_conditioned_space)
+  def _test_default_infiltration_values(hpxml_bldg, volume, has_flue_or_chimney_in_conditioned_space, ach50 = nil)
     assert_equal(volume, hpxml_bldg.air_infiltration_measurements[0].infiltration_volume)
     assert_equal(has_flue_or_chimney_in_conditioned_space, hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space)
+    if not ach50.nil?
+      assert_in_epsilon(ach50, hpxml_bldg.air_infiltration_measurements[0].air_leakage, 0.01)
+      assert_equal(HPXML::UnitsACH, hpxml_bldg.air_infiltration_measurements[0].unit_of_measure)
+      assert_equal(50, hpxml_bldg.air_infiltration_measurements[0].house_pressure)
+    end
   end
 
   def _test_default_infiltration_compartmentalization_test_values(air_infiltration_measurement, a_ext)
@@ -5073,7 +5210,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def _test_default_mech_vent_values(hpxml_bldg, is_shared_system, hours_in_operation, fan_power, flow_rate,
                                      cfis_vent_mode_airflow_fraction = nil, cfis_addtl_runtime_operating_mode = nil)
-    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan? }
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
@@ -5092,7 +5229,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_mech_vent_suppl_values(hpxml_bldg, is_shared_system, hours_in_operation, fan_power, flow_rate)
-    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan? }
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.is_cfis_supplemental_fan }
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     if hours_in_operation.nil?
@@ -5189,7 +5326,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_recirc_distribution_values(hot_water_distribution, piping_length, branch_piping_length, pump_power, pipe_r_value, weekday_sch, weekend_sch, monthly_mults)
-    assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_length, 0.01)
+    assert_in_epsilon(piping_length, hot_water_distribution.recirculation_piping_loop_length, 0.01)
     assert_in_epsilon(branch_piping_length, hot_water_distribution.recirculation_branch_piping_length, 0.01)
     assert_in_epsilon(pump_power, hot_water_distribution.recirculation_pump_power, 0.01)
     assert_equal(pipe_r_value, hot_water_distribution.pipe_r_value)

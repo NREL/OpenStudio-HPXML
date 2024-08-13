@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # TODO
-class Battery
+module Battery
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param pv_systems [TODO] TODO

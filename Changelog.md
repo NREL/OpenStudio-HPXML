@@ -1,17 +1,32 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
+- Updates to HPXML v4.0-rc5.
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
+- Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
+  - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
   - Adds optional inputs and outputs for blower fan heat and piping load.
-  - Miscellaneous improvements.
+  - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which infiltration method to use for design load calculations.
+  - Updates heat pump HERS sizing methodology to better prevent unmet hours in warmer climates.
+  - Misc Manual J design load calculation improvements.
 - Advanced research features:
+  - Optional input `SimulationControl/AdvancedResearchFeatures/OnOffThermostatDeadbandTemperature` to model on/off thermostat deadband with start-up degradation for single and two speed AC/ASHP systems and time-based realistic staging for two speed AC/ASHP systems.
+  - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
+- BuildResidentialScheduleFile measure:
+  - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
+  - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
+- **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+- Adds a warning if the sum of supply/return duct leakage to outside values is very high.
 
 __Bugfixes__
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
 - Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
 - Fixes utility bill calculations if there is battery storage or a generator.
+- BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
+- Allows negative values for `Building/Site/Elevation`.
 
 ## OpenStudio-HPXML v1.8.1
 

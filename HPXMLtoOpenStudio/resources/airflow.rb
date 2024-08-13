@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
 # TODO
-class Airflow
+module Airflow
   # Constants
   InfilPressureExponent = 0.65
 
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param weather [WeatherProcess] Weather object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
   # @param duct_systems [TODO] TODO
   # @param airloop_map [TODO] TODO
@@ -21,7 +21,7 @@ class Airflow
   # @param frac_windows_operable [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param hvac_availability_sensor [TODO] TODO
   # @return [TODO] TODO
   def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa,
@@ -79,7 +79,7 @@ class Airflow
       next unless vent_fan.hours_in_operation.nil? || vent_fan.hours_in_operation > 0
 
       if vent_fan.used_for_whole_building_ventilation
-        if not vent_fan.is_cfis_supplemental_fan?
+        if not vent_fan.is_cfis_supplemental_fan
           vent_fans_mech << vent_fan
         else
           vent_fans_cfis_suppl << vent_fan
@@ -209,32 +209,47 @@ class Airflow
     end
   end
 
-  # TODO
+  # Returns the single infiltration measurement object of interest, from all possible infiltration measurements
+  # in the HPXML file, that has the sufficient inputs. For EnergyPlus, we return a measurement with a quantitative
+  # value (e.g., ACH50) if available, otherwise fallback to the qualitative input. For Manual J design loads, the
+  # returned measurement is controlled by the manualj_infiltration_method argument.
   #
-  # @param infil_measurements [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_infiltration_measurement_of_interest(infil_measurements)
-    # Returns the infiltration measurement that has the minimum information needed for simulation
-    infil_measurements.each do |measurement|
-      if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
-        return measurement
-      elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
-        return measurement
-      elsif !measurement.effective_leakage_area.nil?
-        return measurement
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param manualj_infiltration_method [String] Type of infiltration to retrieve for Manual J calculations
+  # @return measurement [HPXML::AirInfiltrationMeasurement] Air infiltration measurement of interest
+  def self.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: nil)
+    if manualj_infiltration_method.nil? || (manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor)
+      hpxml_bldg.air_infiltration_measurements.each do |measurement|
+        # Returns the infiltration measurement that has the minimum information needed for simulation
+        if measurement.air_leakage
+          if [HPXML::UnitsACH, HPXML::UnitsCFM].include?(measurement.unit_of_measure) && !measurement.house_pressure.nil?
+            return measurement
+          elsif [HPXML::UnitsACHNatural, HPXML::UnitsCFMNatural].include? measurement.unit_of_measure
+            return measurement
+          end
+        elsif measurement.effective_leakage_area
+          return measurement
+        end
       end
     end
-    fail 'Unexpected error.'
+
+    if manualj_infiltration_method.nil? || (manualj_infiltration_method == HPXML::ManualJInfiltrationMethodDefaultTable)
+      hpxml_bldg.air_infiltration_measurements.each do |measurement|
+        return measurement if measurement.leakiness_description
+      end
+    end
+
+    fail 'Could not find air infiltration measurement.'
   end
 
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
-  # @param weather [WeatherProcess] Weather object
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-    measurement = get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    measurement = get_infiltration_measurement_of_interest(hpxml_bldg)
 
     infil_volume = measurement.infiltration_volume
     infil_height = measurement.infiltration_height
@@ -277,12 +292,132 @@ class Airflow
     return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
   end
 
+  # Calculate ACH50 for annual energy simulation when only leakiness description is provided.
+  #
+  # Uses a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into account IECC zone,
+  # cfa, year built, foundation type, duct location, etc. The leakiness description is then used to further adjust
+  # the default (average) infiltration rate.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl_ag [Double] Number of conditioned floors above grade
+  # @param year_built [Integer] Year the dwelling unit is built
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param iecc_cz [String] IECC climate zone
+  # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
+  # @param duct_loc_fracs [Hash] Map of duct location => area fraction
+  # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
+  # @param air_sealed [Boolean] True if the dwelling unit was professionally air sealed (intended to be used by Home Energy Score)
+  # @return [Double] Calculated ACH50 value
+  def self.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
+                                                 fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)
+    # Constants
+    c_floor_area = -0.002078
+    c_height = 0.06375
+    # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
+    leakage_multiplier_map = { HPXML::LeakinessVeryTight => 0.355,
+                               HPXML::LeakinessTight => 0.686,
+                               HPXML::LeakinessAverage => 1.0,
+                               HPXML::LeakinessLeaky => 1.549,
+                               HPXML::LeakinessVeryLeaky => 2.085 }
+    leakage_multiplier = leakiness_description.nil? ? 1.0 : leakage_multiplier_map[leakiness_description]
+    c_sealed = is_sealed ? -0.288 : 0.0
+
+    # Vintage
+    c_vintage = nil
+    if year_built < 1960
+      c_vintage = -0.2498
+    elsif year_built <= 1969
+      c_vintage = -0.4327
+    elsif year_built <= 1979
+      c_vintage = -0.4521
+    elsif year_built <= 1989
+      c_vintage = -0.6536
+    elsif year_built <= 1999
+      c_vintage = -0.9152
+    elsif year_built >= 2000
+      c_vintage = -1.058
+    else
+      fail "Unexpected vintage: #{year_built}"
+    end
+
+    # Climate zone
+    c_iecc = nil
+    if (iecc_cz == '1A') || (iecc_cz == '2A')
+      c_iecc = 0.4727
+    elsif iecc_cz == '3A'
+      c_iecc = 0.2529
+    elsif iecc_cz == '4A'
+      c_iecc = 0.3261
+    elsif iecc_cz == '5A'
+      c_iecc = 0.1118
+    elsif (iecc_cz == '6A') || (iecc_cz == '7')
+      c_iecc = 0.0
+    elsif (iecc_cz == '2B') || (iecc_cz == '3B')
+      c_iecc = -0.03755
+    elsif (iecc_cz == '4B') || (iecc_cz == '5B')
+      c_iecc = -0.008774
+    elsif iecc_cz == '6B'
+      c_iecc = 0.01944
+    elsif iecc_cz == '3C'
+      c_iecc = 0.04827
+    elsif iecc_cz == '4C'
+      c_iecc = 0.2584
+    elsif iecc_cz == '8'
+      c_iecc = -0.5119
+    else
+      fail "Unexpected IECC climate zone: #{c_iecc}"
+    end
+
+    # Foundation type (weight by area)
+    c_foundation = 0.0
+    fnd_type_fracs.each do |foundation_type, area_fraction|
+      case foundation_type
+      when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
+        c_foundation -= 0.036992 * area_fraction
+      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeCrawlspaceConditioned
+        c_foundation += 0.108713 * area_fraction
+      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
+        c_foundation += 0.180352 * area_fraction
+      else
+        fail "Unexpected foundation type: #{foundation_type}"
+      end
+    end
+
+    c_duct = 0.0
+    duct_loc_fracs.each do |duct_location, area_fraction|
+      if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
+        c_duct -= 0.12381 * area_fraction
+      elsif [HPXML::LocationAtticUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationGarage, HPXML::LocationCrawlspaceUnvented].include? duct_location
+        c_duct += 0.07126 * area_fraction
+      elsif HPXML::vented_locations.include? duct_location
+        c_duct += 0.18072 * area_fraction
+      else
+        fail "Unexpected duct location: #{duct_location}"
+      end
+    end
+
+    floor_area_m2 = UnitConversions.convert(cfa, 'ft^2', 'm^2')
+    height_m = UnitConversions.convert(ncfl_ag * avg_ceiling_height, 'ft', 'm') + 0.5
+
+    # Normalized leakage
+    nl = Math.exp(floor_area_m2 * c_floor_area + height_m * c_height +
+                  c_sealed + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
+
+    # Specific Leakage Area
+    sla = nl / (1000.0 * ncfl_ag**0.3)
+
+    ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
+
+    return ach50
+  end
+
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param vent_fan [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
@@ -294,7 +429,7 @@ class Airflow
     nl = get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
     q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
     q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
-    if vent_fan.is_balanced?
+    if vent_fan.is_balanced
       is_balanced, frac_imbal = true, 0.0
     else
       is_balanced, frac_imbal = false, 1.0
@@ -302,8 +437,6 @@ class Airflow
     q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, infil_values[:a_ext], bldg_type, eri_version, vent_fan.hours_in_operation)
     return q_fan
   end
-
-  # FIXME: The following class methods are meant to be private.
 
   # TODO
   #
@@ -434,9 +567,9 @@ class Airflow
   # @param open_window_area [TODO] TODO
   # @param nv_clg_ssn_sensor [TODO] TODO
   # @param natvent_days_per_week [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_natural_ventilation_and_whole_house_fan(model, site, vent_fans_whf, open_window_area, nv_clg_ssn_sensor, natvent_days_per_week,
                                                          infil_volume, infil_height, unavailable_periods)
@@ -562,8 +695,8 @@ class Airflow
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
     vent_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
-    vent_program.addLine("Set #{nv_flow_actuator.name} = 0") # Init
-    vent_program.addLine("Set #{whf_flow_actuator.name} = 0") # Init
+    vent_program.addLine('Set Qnv = 0') # Init
+    vent_program.addLine('Set Qwhf = 0') # Init
     vent_program.addLine("Set #{cond_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil? # Init
     vent_program.addLine("Set #{whf_elec_actuator.name} = 0") # Init
     infil_constraints = 'If ((Wout < MaxHR) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0))'
@@ -582,7 +715,7 @@ class Airflow
     vent_program.addLine('  Set Adj = (@Min Adj 1)')
     vent_program.addLine('  Set Adj = (@Max Adj 0)')
     vent_program.addLine('  If (WHF_Flow > 0)') # If available, prioritize whole house fan
-    vent_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
+    vent_program.addLine('    Set Qwhf = WHF_Flow*Adj')
     vent_program.addLine("    Set #{cond_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
     vent_program.addLine('    Set WHF_W = 0')
     vent_fans_whf.each do |vent_whf|
@@ -598,33 +731,24 @@ class Airflow
     vent_program.addLine("    Set Vwind = #{@vwind_sensor.name}")
     vent_program.addLine('    Set SGNV = NVArea*Adj*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)')
     vent_program.addLine("    Set MaxNV = #{UnitConversions.convert(max_flow_rate, 'cfm', 'm^3/s')}")
-    vent_program.addLine("    Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
+    vent_program.addLine('    Set Qnv = (@Min SGNV MaxNV)')
     vent_program.addLine('  EndIf')
     vent_program.addLine('EndIf')
+    vent_program.addLine("Set #{nv_flow_actuator.name} = Qnv")
+    vent_program.addLine("Set #{whf_flow_actuator.name} = Qwhf")
 
     manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     manager.setName("#{vent_program.name} calling manager")
     manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     manager.addProgram(vent_program)
 
-    create_timeseries_flowrate_ems_output_var(model, nv_flow_actuator.name.to_s, vent_program)
-    create_timeseries_flowrate_ems_output_var(model, whf_flow_actuator.name.to_s, vent_program)
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param ems_var_name [TODO] TODO
-  # @param ems_program [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_timeseries_flowrate_ems_output_var(model, ems_var_name, ems_program)
-    # This is only used to report timeseries flow rates when requested
-    ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ems_var_name)
-    ems_output_var.setName("#{ems_var_name}_timeseries_outvar")
-    ems_output_var.setTypeOfDataInVariable('Averaged')
-    ems_output_var.setUpdateFrequency('ZoneTimestep')
-    ems_output_var.setEMSProgramOrSubroutineName(ems_program)
-    ems_output_var.setUnits('m^/s')
+    # EMS global variables for output reporting
+    q_nv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{vent_program.name}_Qnv")
+    q_whf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{vent_program.name}_Qwhf")
+    q_nv_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameNaturalVentilation)
+    q_whf_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameWholeHouseFan)
+    vent_program.addLine("Set #{q_nv_var.name} = Qnv")
+    vent_program.addLine("Set #{q_whf_var.name} = Qwhf")
   end
 
   # TODO
@@ -632,7 +756,7 @@ class Airflow
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param num_days_per_week [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week, unavailable_periods = [])
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
@@ -744,7 +868,7 @@ class Airflow
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vent_fans_mech [TODO] TODO
   # @param airloop_map [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.initialize_cfis(model, vent_fans_mech, airloop_map, unavailable_periods)
     # Get AirLoop associated with CFIS
@@ -1207,14 +1331,14 @@ class Airflow
       # Supply conduction
       duct_subroutine.addLine("  Set supply_ua = #{UnitConversions.convert(ua_values[HPXML::DuctTypeSupply], 'Btu/(hr*F)', 'W/K').round(3)}")
       duct_subroutine.addLine('  Set eTm = 0-((Fan_RTF/(AH_MFR*air_cp))*supply_ua)')
-      duct_subroutine.addLine('  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))') # deg-C
+      duct_subroutine.addLine('  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))') # C
       duct_subroutine.addLine('  Set SupCondToCond = AH_MFR*air_cp*(t_sup-AH_Tout)') # W
       duct_subroutine.addLine('  Set SupCondToDZ = 0-SupCondToCond') # W
 
       # Return conduction
       duct_subroutine.addLine("  Set return_ua = #{UnitConversions.convert(ua_values[HPXML::DuctTypeReturn], 'Btu/(hr*F)', 'W/K').round(3)}")
       duct_subroutine.addLine('  Set eTm = 0-((Fan_RTF/(AH_MFR*air_cp))*return_ua)')
-      duct_subroutine.addLine('  Set t_ret = DZ_T+((RA_T-DZ_T)*(@Exp eTm))') # deg-C
+      duct_subroutine.addLine('  Set t_ret = DZ_T+((RA_T-DZ_T)*(@Exp eTm))') # C
       duct_subroutine.addLine('  Set RetCondToRP = AH_MFR*air_cp*(t_ret-RA_T)') # W
       duct_subroutine.addLine('  Set RetCondToDZ = 0-RetCondToRP') # W
 
@@ -1450,7 +1574,7 @@ class Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param vented_crawl [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
@@ -1480,7 +1604,7 @@ class Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param site [TODO] TODO
   # @param vented_attic [TODO] TODO
   # @param duct_lk_imbals [TODO] TODO
@@ -1536,7 +1660,7 @@ class Airflow
   # @param vent_object [TODO] TODO
   # @param obj_type_name [TODO] TODO
   # @param index [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_local_ventilation(model, vent_object, obj_type_name, index, unavailable_periods)
     daily_sch = [0.0] * 24
@@ -1576,7 +1700,7 @@ class Airflow
   # @param vented_dryer [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param index [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_dryer_exhaust(model, vented_dryer, schedules_file, index, unavailable_periods)
     obj_name = "#{Constants.ObjectNameClothesDryer} exhaust #{index}"
@@ -1730,60 +1854,57 @@ class Airflow
       infil_program.addLine("  Set #{@cfis_t_sum_open_var[vent_mech.id].name} = 0") # New hour, time on summation re-initializes to 0
       infil_program.addLine('EndIf')
 
-      cfis_open_time = [vent_mech.hours_in_operation / 24.0 * 60.0, 59.999].min # Minimum open time in minutes
-      infil_program.addLine("Set cfis_t_min_hr_open = #{cfis_open_time}") # minutes per hour the CFIS damper is open
+      infil_program.addLine("Set cfis_t_min_hr_open = #{[vent_mech.hours_in_operation / 24.0 * 60.0, 59.999].min}") # # Minimum CFIS damper open time in minutes
       infil_program.addLine("Set cfis_Q_duct_oa = #{UnitConversions.convert(vent_mech.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
       infil_program.addLine('Set cfis_f_damper_open = 0') # fraction of the timestep the CFIS damper is open
       infil_program.addLine("Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = 0") # additional runtime fraction to meet min/hr
+      infil_program.addLine("Set cfis_has_additional_runtime = #{vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeNone ? 0 : 1}")
 
       infil_program.addLine("If #{@cfis_t_sum_open_var[vent_mech.id].name} < cfis_t_min_hr_open")
-      infil_program.addLine("  Set cfis_t_fan_on = 60 - (cfis_t_min_hr_open - #{@cfis_t_sum_open_var[vent_mech.id].name})") # minute at which the blower needs to turn on to meet the ventilation requirements
-      # Evaluate condition of whether supply fan has to run to achieve target minutes per hour of operation
-      infil_program.addLine('  If (Minute+0.00001) >= cfis_t_fan_on')
-      # Consider fan rtf read in current calling point (results of previous time step) + cfis_t_fan_on based on min/hr requirement and previous EMS results.
-      infil_program.addLine('    Set cfis_fan_runtime = @Max (@ABS(Minute - cfis_t_fan_on)) (fan_rtf_hvac * ZoneTimeStep * 60)')
-      # If fan_rtf_hvac, make sure it's not exceeding ventilation requirements
-      infil_program.addLine("    Set cfis_fan_runtime = @Min cfis_fan_runtime (cfis_t_min_hr_open - #{@cfis_t_sum_open_var[vent_mech.id].name})")
-      infil_program.addLine('    Set cfis_f_damper_open = cfis_fan_runtime/(60.0*ZoneTimeStep)') # calculates the portion of the current timestep the CFIS damper needs to be open
-      infil_program.addLine("    Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name}+cfis_fan_runtime")
-      infil_program.addLine("    Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = @Max (cfis_f_damper_open-fan_rtf_hvac) 0.0")
+      infil_program.addLine("  Set cfis_t_fan_on = 60 - (cfis_t_min_hr_open - #{@cfis_t_sum_open_var[vent_mech.id].name})") # Minute of the hour at which the blower needs to turn on to meet the ventilation requirements
+      infil_program.addLine('  If ((Minute+0.00001) >= cfis_t_fan_on) && (cfis_has_additional_runtime == 1)') # Evaluate condition of whether supply fan has to run to achieve target minutes per hour of operation
+      infil_program.addLine('    Set cfis_fan_runtime = @Max (@ABS(Minute - cfis_t_fan_on)) (fan_rtf_hvac * ZoneTimeStep * 60)') # Consider fan rtf read in current calling point (results of previous time step) + cfis_t_fan_on based on min/hr requirement and previous EMS results.
+      infil_program.addLine("    Set cfis_fan_runtime = @Min cfis_fan_runtime (cfis_t_min_hr_open - #{@cfis_t_sum_open_var[vent_mech.id].name})") # If fan_rtf_hvac, make sure it's not exceeding ventilation requirements
+      infil_program.addLine('    Set cfis_f_damper_open = cfis_fan_runtime / (60.0 * ZoneTimeStep)') # calculates the portion of the current timestep the CFIS damper needs to be open
+      infil_program.addLine("    Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name} + cfis_fan_runtime")
+      infil_program.addLine("    Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = @Max (cfis_f_damper_open - fan_rtf_hvac) 0.0")
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler
         # Air handler meets additional runtime requirement
-        infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w*#{@cfis_f_damper_extra_open_var[vent_mech.id].name}")
+        infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name} + cfis_fan_w * #{@cfis_f_damper_extra_open_var[vent_mech.id].name}")
       elsif vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
-        if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_total_unit_flow_rate
-          @runner.registerWarning("CFIS supplemental fan '#{vent_mech.cfis_supplemental_fan.id}' is undersized (#{vent_mech.cfis_supplemental_fan.oa_unit_flow_rate} cfm) compared to the target hourly ventilation rate (#{vent_mech.average_total_unit_flow_rate} cfm).")
+        if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate < vent_mech.average_unit_flow_rate
+          @runner.registerWarning("CFIS supplemental fan '#{vent_mech.cfis_supplemental_fan.id}' is undersized (#{vent_mech.cfis_supplemental_fan.oa_unit_flow_rate} cfm) compared to the target hourly ventilation rate (#{vent_mech.average_unit_flow_rate} cfm).")
         end
         infil_program.addLine("    Set cfis_suppl_Q_oa = #{UnitConversions.convert(vent_mech.cfis_supplemental_fan.oa_unit_flow_rate, 'cfm', 'm^3/s')}")
-        infil_program.addLine("    Set cfis_suppl_f = #{@cfis_f_damper_extra_open_var[vent_mech.id].name} / (cfis_suppl_Q_oa / cfis_Q_duct_oa)") # Calculate desired runtime for supplemental fan to provide remaining ventilation requirement
-        infil_program.addLine('    Set cfis_suppl_f = @Min cfis_suppl_f 1.0') # Ensure desired runtime does not exceed 100% (if the supplemental fan is undersized)
+        if vent_mech.cfis_supplemental_fan.oa_unit_flow_rate > 0
+          infil_program.addLine("    Set cfis_suppl_f = #{@cfis_f_damper_extra_open_var[vent_mech.id].name} / (cfis_suppl_Q_oa / cfis_Q_duct_oa)") # Calculate desired runtime for supplemental fan to provide remaining ventilation requirement
+          infil_program.addLine('    Set cfis_suppl_f = @Min cfis_suppl_f 1.0') # Ensure desired runtime does not exceed 100% (if the supplemental fan is undersized)
+        else
+          infil_program.addLine('    Set cfis_suppl_f = 0.0')
+        end
         infil_program.addLine("    Set cfis_suppl_fan_w = #{vent_mech.cfis_supplemental_fan.unit_fan_power}") # W
-        infil_program.addLine("    Set #{cfis_suppl_fan_actuator.name} = #{cfis_suppl_fan_actuator.name} + cfis_suppl_fan_w*cfis_suppl_f")
+        infil_program.addLine("    Set #{cfis_suppl_fan_actuator.name} = #{cfis_suppl_fan_actuator.name} + cfis_suppl_fan_w * cfis_suppl_f")
         if vent_mech.cfis_supplemental_fan.fan_type == HPXML::MechVentTypeSupply
           infil_program.addLine('    Set QWHV_cfis_suppl_sup = QWHV_cfis_suppl_sup + cfis_suppl_f * cfis_suppl_Q_oa')
         elsif vent_mech.cfis_supplemental_fan.fan_type == HPXML::MechVentTypeExhaust
           infil_program.addLine('    Set QWHV_cfis_suppl_exh = QWHV_cfis_suppl_exh + cfis_suppl_f * cfis_suppl_Q_oa')
         end
       end
-      infil_program.addLine('  Else')
-      # No need to turn on blower for extra ventilation
-      infil_program.addLine('    Set cfis_fan_runtime = fan_rtf_hvac*ZoneTimeStep*60')
-      infil_program.addLine("    If (#{@cfis_t_sum_open_var[vent_mech.id].name}+cfis_fan_runtime) > cfis_t_min_hr_open")
-      # Damper is only open for a portion of this time step to achieve target minutes per hour
-      infil_program.addLine("      Set cfis_fan_runtime = cfis_t_min_hr_open-#{@cfis_t_sum_open_var[vent_mech.id].name}")
-      infil_program.addLine('      Set cfis_f_damper_open = cfis_fan_runtime/(ZoneTimeStep*60)')
+      infil_program.addLine('  Else') # No need to turn on blower for extra ventilation
+      infil_program.addLine('    Set cfis_fan_runtime = fan_rtf_hvac * ZoneTimeStep * 60')
+      infil_program.addLine("    If (#{@cfis_t_sum_open_var[vent_mech.id].name} + cfis_fan_runtime) > cfis_t_min_hr_open") # Damper is only open for a portion of this time step to achieve target minutes per hour
+      infil_program.addLine("      Set cfis_fan_runtime = cfis_t_min_hr_open - #{@cfis_t_sum_open_var[vent_mech.id].name}")
+      infil_program.addLine('      Set cfis_f_damper_open = cfis_fan_runtime / (ZoneTimeStep * 60)')
       infil_program.addLine("      Set #{@cfis_t_sum_open_var[vent_mech.id].name} = cfis_t_min_hr_open")
-      infil_program.addLine('    Else')
-      # Damper is open and using call for heat/cool to supply fresh air
-      infil_program.addLine('      Set cfis_fan_runtime = fan_rtf_hvac*ZoneTimeStep*60')
+      infil_program.addLine('    Else') # Damper is open and using call for heat/cool to supply fresh air
+      infil_program.addLine('      Set cfis_fan_runtime = fan_rtf_hvac * ZoneTimeStep * 60')
       infil_program.addLine('      Set cfis_f_damper_open = fan_rtf_hvac')
-      infil_program.addLine("      Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name}+cfis_fan_runtime")
+      infil_program.addLine("      Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name} + cfis_fan_runtime")
       infil_program.addLine('    EndIf')
       infil_program.addLine('  EndIf')
 
       if vent_mech.cfis_addtl_runtime_operating_mode == HPXML::CFISModeSupplementalFan
-        infil_program.addLine("  Set cfis_f_damper_open = @Max (cfis_f_damper_open-#{@cfis_f_damper_extra_open_var[vent_mech.id].name}) 0.0")
-      else
+        infil_program.addLine("  Set cfis_f_damper_open = @Max (cfis_f_damper_open - #{@cfis_f_damper_extra_open_var[vent_mech.id].name}) 0.0")
       end
       infil_program.addLine('  Set QWHV_cfis_sup = QWHV_cfis_sup + cfis_f_damper_open * cfis_Q_duct_oa')
 
@@ -1799,7 +1920,7 @@ class Airflow
   # @param exh_fans [TODO] TODO
   # @param bal_fans [TODO] TODO
   # @param erv_hrv_fans [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.add_ee_for_vent_fan_power(model, obj_name, sup_fans = [], exh_fans = [], bal_fans = [], erv_hrv_fans = [], unavailable_periods = [])
     # Calculate fan heat fraction
@@ -1898,15 +2019,16 @@ class Airflow
   # @param vent_mech_erv_hrv_tot [TODO] TODO
   # @param infil_flow_actuator [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_infiltration_adjustment_to_conditioned(model, infil_program, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals, vent_mech_sup_tot,
                                                         vent_mech_exh_tot, vent_mech_bal_tot, vent_mech_erv_hrv_tot, infil_flow_actuator, schedules_file, unavailable_periods)
+
     # Average in-unit CFMs (include recirculation from in unit CFMs for shared systems)
-    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
-    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_total_unit_flow_rate }.sum(0.0)
+    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each_with_index do |vent_kitchen, index|
@@ -1990,12 +2112,17 @@ class Airflow
       infil_program.addLine('Set Qtot = (((Qimb^2) + (Qinf^2)) ^ 0.5) + Qbal')
     end
 
-    # Mechanical ventilation only
-    create_timeseries_flowrate_ems_output_var(model, 'Qfan', infil_program)
-
     # Natural infiltration and duct leakage imbalance induced infiltration
-    infil_program.addLine("Set #{infil_flow_actuator.name} = Qtot - Qfan")
-    create_timeseries_flowrate_ems_output_var(model, infil_flow_actuator.name.to_s, infil_program)
+    infil_program.addLine('Set Qinf_adj = Qtot - Qfan')
+    infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
+
+    # EMS global variables for output reporting
+    q_inf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{infil_program.name}_Qinf")
+    q_fan_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{infil_program.name}_Qfan")
+    q_inf_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameInfiltration)
+    q_fan_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameMechanicalVentilation)
+    infil_program.addLine("Set #{q_inf_var.name} = Qinf_adj")
+    infil_program.addLine("Set #{q_fan_var.name} = Qfan")
   end
 
   # TODO
@@ -2141,9 +2268,9 @@ class Airflow
   # @param vent_fans_mech [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param vent_fans_kitchen [TODO] TODO
   # @param vent_fans_bath [TODO] TODO
   # @param vented_dryers [TODO] TODO
@@ -2151,7 +2278,7 @@ class Airflow
   # @param clg_ssn_sensor [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
   # @return [TODO] TODO
@@ -2221,7 +2348,7 @@ class Airflow
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
     infil_program.addLine('Set Qload = Qfan')
     vent_fans_mech.each do |f|
-      recirc_flow_rate = f.average_total_unit_flow_rate - f.average_oa_unit_flow_rate
+      recirc_flow_rate = f.average_unit_flow_rate - f.average_oa_unit_flow_rate
       next unless recirc_flow_rate > 0
 
       # Subtract recirculation air flow rate from Qfan, only come from supply side as exhaust is not allowed to have recirculation
@@ -2241,7 +2368,7 @@ class Airflow
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param site [TODO] TODO
   # @param vent_fans_mech [TODO] TODO
   # @param vent_fans_kitchen [TODO] TODO
@@ -2251,14 +2378,14 @@ class Airflow
   # @param has_flue_chimney_in_cond_space [TODO] TODO
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param vented_attic [TODO] TODO
   # @param vented_crawl [TODO] TODO
   # @param clg_ssn_sensor [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param vent_fans_cfis_suppl [TODO] TODO
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_and_ventilation_fans(model, weather, site, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, vented_dryers, duct_lk_imbals,
@@ -2285,10 +2412,10 @@ class Airflow
   # @param conditioned_ach50 [TODO] TODO
   # @param conditioned_const_ach [TODO] TODO
   # @param infil_program [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param has_flue_chimney_in_cond_space [TODO] TODO
-  # @param infil_volume [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param elevation [Double] Elevation of the building site (ft)
   # @return [TODO] TODO
   def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume, infil_height, elevation)
@@ -2303,7 +2430,7 @@ class Airflow
 
       n_i = InfilPressureExponent
       conditioned_sla = get_infiltration_SLA_from_ACH50(conditioned_ach50, n_i, @cfa, infil_volume) # Calculate SLA
-      a_o = conditioned_sla * @cfa # Effective Leakage Area (ft^2)
+      a_o = conditioned_sla * @cfa # Effective Leakage Area (ft2)
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       inf_conv_factor = 776.25 # [ft/min]/[inH2O^(1/2)*ft^(3/2)/lbm^(1/2)]
@@ -2422,7 +2549,7 @@ class Airflow
   # TODO
   #
   # @param sla [TODO] TODO
-  # @param infil_height [TODO] TODO
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @return [TODO] TODO
   def self.get_infiltration_NL_from_SLA(sla, infil_height)
     # Returns infiltration normalized leakage given SLA.
@@ -2432,8 +2559,8 @@ class Airflow
   # TODO
   #
   # @param sla [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     # Returns the infiltration annual average ACH given a SLA.
@@ -2447,9 +2574,9 @@ class Airflow
   # TODO
   #
   # @param ach [TODO] TODO
-  # @param infil_height [TODO] TODO
-  # @param avg_ceiling_height [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
+  # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @return [TODO] TODO
   def self.get_infiltration_SLA_from_ACH(ach, infil_height, avg_ceiling_height, weather)
     # Returns the infiltration SLA given an annual average ACH.
@@ -2483,8 +2610,8 @@ class Airflow
   # TODO
   #
   # @param nl [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.get_infiltration_Qinf_from_NL(nl, weather, cfa)
     # Returns the effective annual average infiltration rate in cfm
@@ -2572,7 +2699,7 @@ class Airflow
   # TODO
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.get_mech_vent_qtot_cfm(nbeds, cfa)
     # Returns Qtot cfm per ASHRAE 62.2-2019
@@ -2634,8 +2761,6 @@ end
 
 # TODO
 class Duct
-  # TODO
-  #
   # @param side [TODO] TODO
   # @param loc_space [TODO] TODO
   # @param loc_schedule [TODO] TODO
@@ -2645,7 +2770,6 @@ class Duct
   # @param area [TODO] TODO
   # @param effective_rvalue [TODO] TODO
   # @param buried_level [TODO] TODO
-  # @return [TODO] TODO
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space

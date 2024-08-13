@@ -3,24 +3,21 @@
 require 'csv'
 require 'matrix'
 
-# TODO
+# Collection of methods related to the generation of stochastic occupancy schedules.
 class ScheduleGenerator
-  # TODO
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @param state [TODO] TODO
-  # @param minutes_per_step [TODO] TODO
-  # @param steps_in_day [TODO] TODO
-  # @param mkc_ts_per_day [TODO] TODO
-  # @param mkc_ts_per_hour [TODO] TODO
-  # @param total_days_in_year [TODO] TODO
-  # @param sim_year [TODO] TODO
-  # @param sim_start_day [TODO] TODO
-  # @param debug [TODO] TODO
-  # @param append_output [TODO] TODO
-  # @param column_names [TODO] TODO
-  # @param random_seed [TODO] TODO
-  # @return [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param state [String] State code from the HPXML file
+  # @param column_names [Array<String>] list of the schedule column names to generate
+  # @param random_seed [Integer] the seed for the random number generator
+  # @param minutes_per_step [Integer] the simulation timestep (minutes)
+  # @param steps_in_day [Integer] the number of steps in a 24-hour day
+  # @param mkc_ts_per_day [Integer] Markov chain timesteps per day
+  # @param mkc_ts_per_hour [Integer] Markov chain timesteps per hour
+  # @param total_days_in_year [Integer] number of days in the calendar year
+  # @param sim_year [Integer] the calendar year
+  # @param sim_start_day [DateTime] the DateTime object corresponding to Jan 1 of the calendar year
+  # @param debug [Boolean] If true, writes extra column(s) (e.g., sleeping) for informational purposes.
+  # @param append_output [Boolean] If true and the output CSV file already exists, appends columns to the file rather than overwriting it. The existing output CSV file must have the same number of rows (i.e., timeseries frequency) as the new columns being appended.
   def initialize(runner:,
                  state:,
                  column_names: nil,
@@ -50,25 +47,20 @@ class ScheduleGenerator
     @append_output = append_output
   end
 
-  # TODO
+  attr_accessor(:schedules)
+
+  # Get the subset of schedule column names that the stochastic schedule generator supports.
   #
-  # @return [TODO] TODO
+  # @return [Array<String>] list of all schedule column names whose schedules can be stochastically generated
   def self.export_columns
     return SchedulesFile::Columns.values.select { |c| c.can_be_stochastic }.map { |c| c.name }
   end
 
-  # TODO
+  # The top-level method for initializing the schedules hash just before calling the main stochastic schedules method.
   #
-  # @return [TODO] TODO
-  def schedules
-    return @schedules
-  end
-
-  # TODO
-  #
-  # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
-  # @return [TODO] TODO
+  # @param args [Hash] Map of :argument_name => value
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Boolean] true if successful
   def create(args:,
              weather:)
     @schedules = {}
@@ -93,11 +85,11 @@ class ScheduleGenerator
     return true
   end
 
-  # TODO
+  # The main method for creating stochastic schedules.
   #
-  # @param args [TODO] TODO
-  # @param weather [WeatherProcess] Weather object
-  # @return [TODO] TODO
+  # @param args [Hash] Map of :argument_name => value
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
     # initialize a random number generator
@@ -262,7 +254,7 @@ class ScheduleGenerator
     cluster_per_day = (total_clusters / @total_days_in_year).to_i
     sink_flow_rate_mean = Constants.SinkFlowRateMean
     sink_flow_rate_std = Constants.SinkFlowRateStd
-    sink_flow_rate = gaussian_rand(prng, sink_flow_rate_mean, sink_flow_rate_std, 0.1)
+    sink_flow_rate = gaussian_rand(prng, sink_flow_rate_mean, sink_flow_rate_std)
     @total_days_in_year.times do |day|
       for _n in 1..cluster_per_day
         todays_probable_steps = sink_activity_probable_mins[day * @mkc_ts_per_day..((day + 1) * @mkc_ts_per_day - 1)]
@@ -315,8 +307,8 @@ class ScheduleGenerator
     m = 0
     shower_activity_sch = [0] * mins_in_year
     bath_activity_sch = [0] * mins_in_year
-    bath_flow_rate = gaussian_rand(prng, bath_flow_rate_mean, bath_flow_rate_std, 0.1)
-    shower_flow_rate = gaussian_rand(prng, shower_flow_rate_mean, shower_flow_rate_std, 0.1)
+    bath_flow_rate = gaussian_rand(prng, bath_flow_rate_mean, bath_flow_rate_std)
+    shower_flow_rate = gaussian_rand(prng, shower_flow_rate_mean, shower_flow_rate_std)
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     step = 0
     while step < mkc_steps_in_a_year
@@ -327,7 +319,7 @@ class ScheduleGenerator
         r = prng.rand
         if r <= bath_ratio
           # fill in bath for this time
-          duration = gaussian_rand(prng, bath_duration_mean, bath_duration_std, 0.1)
+          duration = gaussian_rand(prng, bath_duration_mean, bath_duration_std)
           int_duration = duration.ceil
           # since we are rounding duration to integer minute, we compensate by scaling flow rate
           flow_rate = bath_flow_rate * duration / int_duration
@@ -379,7 +371,7 @@ class ScheduleGenerator
     dw_minutes_between_event_gap = Constants.HotWaterDishwasherMinutesBetweenEventGap
     dw_activity_sch = [0] * mins_in_year
     m = 0
-    dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std, 0)
+    dw_flow_rate = gaussian_rand(prng, dw_flow_rate_mean, dw_flow_rate_std)
 
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     # Fill in dw_water draw schedule
@@ -419,7 +411,7 @@ class ScheduleGenerator
     cw_activity_sch = [0] * mins_in_year # this is the clothes_washer water draw schedule
     cw_load_size_probability = Schedule.validate_values(Constants.HotWaterClothesWasherLoadSizeProbability, 4, 'hot_water_clothes_washer_load_size_probability')
     m = 0
-    cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std, 0)
+    cw_flow_rate = gaussian_rand(prng, cw_flow_rate_mean, cw_flow_rate_std)
     # States are: 'sleeping','shower','laundry','cooking', 'dishwashing', 'absent', 'nothingAtHome'
     step = 0
     # Fill in clothes washer water draw schedule based on markov-chain state 2 (laundry)
@@ -875,7 +867,7 @@ class ScheduleGenerator
   # @param min [TODO] TODO
   # @param max [TODO] TODO
   # @return [TODO] TODO
-  def gaussian_rand(prng, mean, std, min = nil, max = nil)
+  def gaussian_rand(prng, mean, std, min = 0.1, max = nil)
     t = 2 * Math::PI * prng.rand
     r = Math.sqrt(-2 * Math.log(1 - prng.rand))
     scale = std * r

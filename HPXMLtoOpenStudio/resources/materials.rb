@@ -2,17 +2,14 @@
 
 # TODO
 class Material
-  # TODO
-  #
-  # @param name [TODO] Material name
-  # @param thick_in [TODO] Thickness [in]
-  # @param mat_base [TODO] Material object that defines k, rho, and cp. Can be overridden with values for those arguments.
-  # @param k_in [TODO] Conductivity [Btu-in/h-ft^2-F]
-  # @param rho [TODO] Density [lb/ft^3]
-  # @param cp [TODO] Specific heat [Btu/lb*F]
+  # @param name [String] Material name
+  # @param thick_in [Double] Thickness (in)
+  # @param mat_base [TODO] Base material object that defines k, rho, and can be overridden with values for those arguments
+  # @param k_in [TODO] Conductivity (Btu-in/h-ft2-F)
+  # @param rho [TODO] Density (lb/ft3)
+  # @param cp [TODO] Specific heat (Btu/lb-F)
   # @param tAbs [TODO] thermal absorptance (emittance); 0.9 is EnergyPlus default
   # @param sAbs [TODO] solar absorptance; 0.7 is EnergyPlus default
-  # @return [TODO] TODO
   def initialize(name: nil, thick_in: nil, mat_base: nil, k_in: nil, rho: nil, cp: nil, tAbs: 0.9, sAbs: 0.7)
     @name = name
 
@@ -22,7 +19,7 @@ class Material
     end
 
     if not mat_base.nil?
-      @k_in = mat_base.k_in # Btu-in/h-ft^2-F
+      @k_in = mat_base.k_in # Btu-in/h-ft2-F
       if not mat_base.k_in.nil?
         @k = UnitConversions.convert(mat_base.k_in, 'in', 'ft') # Btu/h-ft-F
       else
@@ -39,11 +36,11 @@ class Material
 
     # Override the base material if both are included
     if not k_in.nil?
-      @k_in = k_in # Btu-in/h-ft^2-F
+      @k_in = k_in # Btu-in/h-ft2-F
       @k = UnitConversions.convert(k_in, 'in', 'ft') # Btu/h-ft-F
     end
     if not rho.nil?
-      @rho = rho # lb/ft^3
+      @rho = rho # lb/ft3
     end
     if not cp.nil?
       @cp = cp # Btu/lb*F
@@ -54,12 +51,12 @@ class Material
 
     # Calculate R-value
     if not rvalue.nil?
-      @rvalue = rvalue # h-ft^2-F/Btu
+      @rvalue = rvalue # h-ft2-F/Btu
     elsif (not @thick_in.nil?) && (not @k_in.nil?)
       if @k_in > 0
-        @rvalue = @thick_in / @k_in # h-ft^2-F/Btu
+        @rvalue = @thick_in / @k_in # h-ft2-F/Btu
       else
-        @rvalue = @thick_in / 10000000.0 # h-ft^2-F/Btu
+        @rvalue = @thick_in / 10000000.0 # h-ft2-F/Btu
       end
     end
   end
@@ -228,11 +225,6 @@ class Material
   # @param roof_pitch [TODO] TODO
   # @return [TODO] TODO
   def self.AirFilmRoof(roof_pitch)
-    # Use weighted average between enhanced and reduced convection based on degree days.
-    # hdd_frac = hdd65f / (hdd65f + cdd65f)
-    # cdd_frac = cdd65f / (hdd65f + cdd65f)
-    # return self.AirFilmSlopeEnhanced(roof_pitch).rvalue * hdd_frac + self.AirFilmSlopeReduced(roof_pitch).rvalue * cdd_frac # hr-ft-F/Btu
-    # Simplification to not depend on weather
     rvalue = (self.AirFilmSlopeEnhanced(roof_pitch).rvalue + self.AirFilmSlopeReduced(roof_pitch).rvalue) / 2.0 # hr-ft-F/Btu
     return self.AirFilm(rvalue)
   end
@@ -242,11 +234,6 @@ class Material
   # @param roof_pitch [TODO] TODO
   # @return [TODO] TODO
   def self.AirFilmRoofRadiantBarrier(roof_pitch)
-    # Use weighted average between enhanced and reduced convection based on degree days.
-    # hdd_frac = hdd65f / (hdd65f + cdd65f)
-    # cdd_frac = cdd65f / (hdd65f + cdd65f)
-    # return self.AirFilmSlopeEnhancedReflective(roof_pitch).rvalue * hdd_frac + self.AirFilmSlopeReducedReflective(roof_pitch).rvalue * cdd_frac # hr-ft-F/Btu
-    # Simplification to not depend on weather
     rvalue = (self.AirFilmSlopeEnhancedReflective(roof_pitch).rvalue + self.AirFilmSlopeReducedReflective(roof_pitch).rvalue) / 2.0 # hr-ft-F/Btu
     return self.AirFilm(rvalue)
   end
@@ -474,12 +461,9 @@ end
 
 # TODO
 class BaseMaterial
-  # TODO
-  #
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
   # @param k_in [TODO] TODO
-  # @return [TODO] TODO
   def initialize(rho:, cp:, k_in: nil)
     @rho = rho
     @cp = cp
@@ -628,12 +612,9 @@ end
 
 # TODO
 class GlazingMaterial
-  # TODO
-  #
   # @param name [TODO] TODO
   # @param ufactor [TODO] TODO
   # @param shgc [TODO] TODO
-  # @return [TODO] TODO
   def initialize(name:, ufactor:, shgc:)
     @name = name
     @ufactor = ufactor
@@ -645,14 +626,11 @@ end
 
 # TODO
 class Liquid
-  # TODO
-  #
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
   # @param k [TODO] TODO
   # @param h_fg [TODO] TODO
   # @param t_frz [TODO] TODO
-  # @return [TODO] TODO
   def initialize(rho: nil, cp: nil, k: nil, h_fg: nil, t_frz: nil)
     @rho = rho          # Density (lb/ft3)
     @cp = cp            # Specific Heat (Btu/lbm-R)
@@ -682,13 +660,10 @@ end
 
 # TODO
 class Gas
-  # TODO
-  #
   # @param rho [TODO] TODO
   # @param cp [TODO] TODO
   # @param k [TODO] TODO
   # @param m [TODO] TODO
-  # @return [TODO] TODO
   def initialize(rho: nil, cp: nil, k: nil, m: nil)
     @rho = rho # Density (lb/ft3)
     @cp = cp   # Specific Heat (Btu/lbm-R)

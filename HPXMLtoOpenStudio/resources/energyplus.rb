@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO
-class EPlus
+module EPlus
   # Constants
   EMSActuatorElectricEquipmentPower = 'ElectricEquipment', 'Electricity Rate'
   EMSActuatorOtherEquipmentPower = 'OtherEquipment', 'Power Level'
@@ -9,6 +9,7 @@ class EPlus
   EMSActuatorPumpPressureRise = 'Pump', 'Pump Pressure Rise'
   EMSActuatorFanPressureRise = 'Fan', 'Fan Pressure Rise'
   EMSActuatorFanTotalEfficiency = 'Fan', 'Fan Total Efficiency'
+  EMSActuatorCurveResult = 'Curve', 'Curve Result'
   EMSActuatorUnitarySystemCoilSpeedLevel = 'Coil Speed Control', 'Unitary System DX Coil Speed Value'
   EMSActuatorScheduleConstantValue = 'Schedule:Constant', 'Schedule Value'
   EMSActuatorScheduleYearValue = 'Schedule:Year', 'Schedule Value'

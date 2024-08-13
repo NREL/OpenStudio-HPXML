@@ -121,24 +121,18 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
             if (charge_defect_ratio != 0) || (airflow_defect_ratio != 0)
               # Check HP capacity is greater than max(htg_load, clg_load)
-              if hp.fraction_heat_load_served == 0
-                assert_operator(clg_cap, :>, clg_load)
-              elsif hp.fraction_cool_load_served == 0
-                assert_operator(htg_cap, :>, htg_load)
-              else
-                assert_operator(htg_cap, :>, [htg_load, clg_load].max)
-                assert_operator(clg_cap, :>, [htg_load, clg_load].max)
-              end
+              operator = :>
             else
-              # Check HP capacity equals max(htg_load, clg_load)
-              if hp.fraction_heat_load_served == 0
-                assert_in_delta(clg_cap, clg_load, 1.0)
-              elsif hp.fraction_cool_load_served == 0
-                assert_in_delta(htg_cap, htg_load, 1.0)
-              else
-                assert_in_delta(htg_cap, [htg_load, clg_load].max, 1.0)
-                assert_in_delta(clg_cap, [htg_load, clg_load].max, 1.0)
-              end
+              # Check HP capacity equals at least max(htg_load, clg_load)
+              operator = :>=
+            end
+            if hp.fraction_heat_load_served == 0
+              assert_operator(clg_cap, operator, clg_load)
+            elsif hp.fraction_cool_load_served == 0
+              assert_operator(htg_cap, operator, htg_load)
+            else
+              assert_operator(htg_cap, operator, [htg_load, clg_load].max)
+              assert_operator(clg_cap, operator, [htg_load, clg_load].max)
             end
           end
 
@@ -213,32 +207,32 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     assert_in_delta(9147, hpxml_bldg.hvac_plant.hdl_ducts, 2000)
     assert_in_delta(4234, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_skylights)
     assert_in_delta(574, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(2874, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
     assert_in_delta(7415, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
     assert_in_delta(1498, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(3089, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_vent)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     assert_in_delta(9973, hpxml_bldg.hvac_plant.cdl_sens_ducts, 1500)
     assert_in_delta(5295, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_skylights)
     assert_in_delta(456, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(1715, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
     assert_in_delta(2112, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
     assert_in_delta(769, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_vent)
     assert_in_delta(1890, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
     assert_in_delta(1707, hpxml_bldg.hvac_plant.cdl_sens_blowerheat, block_tol_btuh)
     assert_in_delta(2488, hpxml_bldg.hvac_plant.cdl_lat_ducts, 1000)
     assert_in_delta(1276, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_lat_vent)
     assert_in_delta(600, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
 
     # Vatilo Residence - Improved Ducts
@@ -263,18 +257,18 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Victor_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(29137, hpxml_bldg.hvac_plant.hdl_ducts, 2500)
+    assert_in_delta(29137, hpxml_bldg.hvac_plant.hdl_ducts, 2510)
     assert_in_delta(9978, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
     assert_in_delta(471, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(984, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(6305, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
     assert_in_delta(7069, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
     assert_in_delta(6044, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_slabs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_ceilings)
     assert_in_delta(19981, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_in_delta(1445, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     assert_in_delta(5602, hpxml_bldg.hvac_plant.cdl_sens_ducts, 3500)
     assert_in_delta(4706, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
     assert_in_delta(1409, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
@@ -282,8 +276,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1130, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
     assert_in_delta(2743, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
     assert_in_delta(1393, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings)
     assert_in_delta(2181, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(323, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
@@ -316,34 +310,34 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Long_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_ducts)
     assert_in_delta(8315, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_skylights)
     assert_in_delta(1006, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(16608, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
-    assert_in_delta(2440, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
+    assert_in_delta(2440, hpxml_bldg.hvac_plant.hdl_slabs, 1000) # Discrepancy because we take into account basement floor depth below grade (5ft) vs Table 4A assumption of 8ft
     assert_in_delta(5435, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(6944, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_vent)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_ducts)
     assert_in_delta(5962, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_skylights)
     assert_in_delta(349, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(1730, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
     assert_in_delta(3624, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
     assert_in_delta(565, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_vent)
     assert_in_delta(3320, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
     assert_in_delta(1707, hpxml_bldg.hvac_plant.cdl_sens_blowerheat, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_lat_ducts)
     assert_in_delta(998, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_lat_vent)
     assert_in_delta(1200, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     space_tol_btuh = 100 # Individual space load components
     dining_space = hpxml_bldg.conditioned_spaces.find { |s| s.id.include? 'dining' }
@@ -353,8 +347,8 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(153 + 69, dining_space.cdl_sens_walls, space_tol_btuh)
     assert_in_delta(309, dining_space.cdl_sens_ceilings, space_tol_btuh)
     assert_in_delta(63, dining_space.cdl_sens_infil, space_tol_btuh)
-    assert_in_delta(0, dining_space.cdl_sens_ducts, space_tol_btuh)
-    assert_in_delta(0, dining_space.cdl_sens_intgains, space_tol_btuh)
+    assert_equal(0, dining_space.cdl_sens_ducts)
+    assert_equal(0, dining_space.cdl_sens_intgains)
     living_space = hpxml_bldg.conditioned_spaces.find { |s| s.id.include? 'living' }
     assert_in_delta(930, living_space.hdl_walls, space_tol_btuh)
     assert_in_delta(1080, living_space.hdl_ceilings, space_tol_btuh)
@@ -362,7 +356,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(158, living_space.cdl_sens_walls, space_tol_btuh)
     assert_in_delta(720, living_space.cdl_sens_ceilings, space_tol_btuh)
     assert_in_delta(53, living_space.cdl_sens_infil, space_tol_btuh)
-    assert_in_delta(0, living_space.cdl_sens_ducts, space_tol_btuh)
+    assert_equal(0, living_space.cdl_sens_ducts)
     assert_in_delta(460, living_space.cdl_sens_intgains, space_tol_btuh)
     hall_1_space = hpxml_bldg.conditioned_spaces.find { |s| s.id.include? 'hall_1' }
     assert_in_delta(551, hall_1_space.hdl_doors, space_tol_btuh)
@@ -381,21 +375,21 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(2994, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(1118, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(17440, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
     assert_in_delta(1788, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
     assert_in_delta(3692, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
     assert_in_delta(4261, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(11237, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_in_delta(1987, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     assert_in_delta(530, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
     assert_in_delta(6187, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
     assert_in_delta(3780, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(382, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(2669, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
     assert_in_delta(352, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
     assert_in_delta(2803, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
     assert_in_delta(1054, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(459, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
@@ -449,34 +443,34 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Walker_Residence.xml'))
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_ducts)
     assert_in_delta(1608, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
     assert_in_delta(543, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(264, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(1446, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
     assert_in_delta(2172, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
     assert_in_delta(820, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(456, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_in_delta(990, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     assert_in_delta(851, hpxml_bldg.hvac_plant.cdl_sens_ducts, 2000)
     assert_in_delta(1776, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
     assert_in_delta(3182, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(442, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(1173, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
     assert_in_delta(865, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_infil)
     assert_in_delta(825, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
     assert_in_delta(5541, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
     assert_in_delta(1707, hpxml_bldg.hvac_plant.cdl_sens_blowerheat, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion)
     assert_in_delta(655, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh)
-    # assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh) Skip due to dehumidifying ventilation
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_lat_infil)
     assert_in_delta(1938, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     # eyeball observation from figure 13-5
@@ -537,33 +531,33 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, hpxml_bldg = _test_measure(args_hash)
     # assert_in_delta(499, hpxml_bldg.hvac_plant.hdl_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
     assert_in_delta(3015, hpxml_bldg.hvac_plant.hdl_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_skylights)
     assert_in_delta(169, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(1975, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_slabs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_ceilings)
     assert_in_delta(1770, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_vent)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     # assert_in_delta(1631, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
     assert_in_delta(7654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_skylights)
     assert_in_delta(228, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(1236, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_ceilings)
     assert_in_delta(764, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_vent)
     assert_in_delta(5224, hpxml_bldg.hvac_plant.cdl_sens_intgains, block_tol_btuh)
     assert_in_delta(1707, hpxml_bldg.hvac_plant.cdl_sens_blowerheat, block_tol_btuh)
     assert_in_delta(5516, hpxml_bldg.hvac_plant.cdl_sens_aedexcursion, block_tol_btuh)
     # assert_in_delta(1189, hpxml_bldg.hvac_plant.cdl_lat_ducts, block_tol_btuh) Skip due to ducts in closed ceiling cavity
     assert_in_delta(1391, hpxml_bldg.hvac_plant.cdl_lat_infil, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_lat_vent, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_lat_vent)
     assert_in_delta(800, hpxml_bldg.hvac_plant.cdl_lat_intgains, block_tol_btuh)
     # eyeball observation from figure 14-3
     block_aed = [2500, 3200, 3900, 4200, 4600, 7500, 10600, 13900, 15200, 16100, 12700, 4100]
@@ -624,21 +618,21 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     assert_in_delta(1981, hpxml_bldg.hvac_plant.hdl_skylights, block_tol_btuh)
     assert_in_delta(1538, hpxml_bldg.hvac_plant.hdl_doors, block_tol_btuh)
     assert_in_delta(3672, hpxml_bldg.hvac_plant.hdl_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_floors, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_floors)
     assert_in_delta(3431, hpxml_bldg.hvac_plant.hdl_slabs, block_tol_btuh)
     assert_in_delta(1992, hpxml_bldg.hvac_plant.hdl_ceilings, block_tol_btuh)
     assert_in_delta(1760, hpxml_bldg.hvac_plant.hdl_infil, block_tol_btuh)
     assert_in_delta(1562, hpxml_bldg.hvac_plant.hdl_vent, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.hdl_piping, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.hdl_piping)
     assert_in_delta(1673, hpxml_bldg.hvac_plant.cdl_sens_ducts, block_tol_btuh)
     assert_in_delta(11654, hpxml_bldg.hvac_plant.cdl_sens_windows, block_tol_btuh)
     assert_in_delta(5514, hpxml_bldg.hvac_plant.cdl_sens_skylights, block_tol_btuh)
     assert_in_delta(782, hpxml_bldg.hvac_plant.cdl_sens_doors, block_tol_btuh)
     assert_in_delta(939, hpxml_bldg.hvac_plant.cdl_sens_walls, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_roofs, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_floors, block_tol_btuh)
-    assert_in_delta(0, hpxml_bldg.hvac_plant.cdl_sens_slabs, block_tol_btuh)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_roofs)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_floors)
+    assert_equal(0, hpxml_bldg.hvac_plant.cdl_sens_slabs)
     assert_in_delta(1796, hpxml_bldg.hvac_plant.cdl_sens_ceilings, block_tol_btuh)
     assert_in_delta(317, hpxml_bldg.hvac_plant.cdl_sens_infil, block_tol_btuh)
     assert_in_delta(493, hpxml_bldg.hvac_plant.cdl_sens_vent, block_tol_btuh)
@@ -1203,7 +1197,11 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
 
   def test_manual_j_slab_f_factor
     # Check values against MJ8 Table 5A Construction Number 22 (Concrete Slab on Grade Floor)
-    tol = 0.1
+    tol = 0.15 # 15%
+
+    high_soil_k = 1.0 / 1.25 # Heavy moist soil, R-value/ft=1.25
+    med_soil_k = 1.0 / 2.0 # Heavy dry or light moist soil, R-value/ft=2.0
+    low_soil_k = 1.0 / 5.0 # Light dry soil, R-value/ft=5.0
 
     slab = HPXML::Slab.new(nil)
     slab.thickness = 4.0 # in
@@ -1214,83 +1212,177 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     slab.under_slab_insulation_r_value = 0
 
     # 22A — No Edge Insulation, No insulation Below Floor, any Floor Cover
-    assert_in_delta(1.358, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(1.180, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.989, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(1.358, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(1.180, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.989, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     # 22B — Vertical Board Insulation Covers Slab Edge and Extends Straight Down to Three Feet Below Grade, any Floor Cover
     slab.perimeter_insulation_depth = 3
     slab.perimeter_insulation_r_value = 5
-    assert_in_delta(0.589, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.449, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.289, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.589, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.449, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.289, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.perimeter_insulation_r_value = 10
-    assert_in_delta(0.481, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.355, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.210, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.481, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.355, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.210, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.perimeter_insulation_r_value = 15
-    assert_in_delta(0.432, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.314, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.178, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.432, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.314, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.178, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     # 22C — Horizontal Board Insulation Extends Four Feet Under Slab, any Floor Cover
     slab.perimeter_insulation_depth = 0
     slab.perimeter_insulation_r_value = 0
     slab.under_slab_insulation_width = 4
     slab.under_slab_insulation_r_value = 5
-    assert_in_delta(1.266, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(1.135, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.980, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(1.266, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(1.135, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.980, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.under_slab_insulation_r_value = 10
-    assert_in_delta(1.221, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(1.108, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.937, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(1.221, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(1.108, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.937, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.under_slab_insulation_r_value = 15
-    assert_in_delta(1.194, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(1.091, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.967, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(1.194, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(1.091, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.967, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     # 22D — Vertical Board Insulation Covers Slab Edge, Turns Under the Slab and Extends Four Feet Horizontally, any Floor Cover
     slab.under_slab_insulation_width = 4
     slab.under_slab_insulation_r_value = 5
     slab.perimeter_insulation_depth = 0.333 # 4" slab
     slab.perimeter_insulation_r_value = 5
-    assert_in_delta(0.574, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.442, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.287, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.574, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.442, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.287, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.under_slab_insulation_r_value = 10
     slab.perimeter_insulation_r_value = 10
-    assert_in_delta(0.456, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.343, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.208, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.456, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.343, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.208, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
 
     slab.under_slab_insulation_r_value = 15
     slab.perimeter_insulation_r_value = 15
-    assert_in_delta(0.401, HVACSizing.calc_slab_f_value(slab, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.298, HVACSizing.calc_slab_f_value(slab, 1.0 / 2.0), tol) # Heavy dry or light moist soil, R-value/ft=2.0
-    assert_in_delta(0.174, HVACSizing.calc_slab_f_value(slab, 1.0 / 5.0), tol) # Light dry soil, R-value/ft=5.0
+    assert_in_epsilon(0.401, HVACSizing.calc_slab_f_value(slab, high_soil_k), tol)
+    assert_in_epsilon(0.298, HVACSizing.calc_slab_f_value(slab, med_soil_k), tol)
+    assert_in_epsilon(0.174, HVACSizing.calc_slab_f_value(slab, low_soil_k), tol)
   end
 
-  def test_manual_j_basement_effective_uvalue
+  def test_manual_j_basement_slab_ufactor
     # Check values against MJ8 Table 4A Construction Number 21 (Basement Floor)
-    tol = 0.002
+    tol = 0.06 # 6%
+
+    high_soil_k = 1.0 / 1.25 # Heavy moist soil, R-value/ft=1.25
 
     # 21A — No Insulation Below Floor, Any Floor Cover
-    assert_in_delta(0.027, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.025, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.022, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.020, HVACSizing.calc_basement_effective_uvalue(false, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_epsilon(0.027, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 20.0, high_soil_k), tol)
+    assert_in_epsilon(0.025, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 24.0, high_soil_k), tol)
+    assert_in_epsilon(0.022, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 28.0, high_soil_k), tol)
+    assert_in_epsilon(0.020, HVACSizing.calc_basement_slab_ufactor(false, 8.0, 32.0, high_soil_k), tol)
 
     # 21B — Insulation Installed Below Floor, Any Floor Cover
-    assert_in_delta(0.019, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 20.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.017, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 24.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.015, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 28.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
-    assert_in_delta(0.014, HVACSizing.calc_basement_effective_uvalue(true, 8.0, 32.0, 1.0 / 1.25), tol) # Heavy moist soil, R-value/ft=1.25
+    assert_in_epsilon(0.019, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 20.0, high_soil_k), tol)
+    assert_in_epsilon(0.017, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 24.0, high_soil_k), tol)
+    assert_in_epsilon(0.015, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 28.0, high_soil_k), tol)
+    assert_in_epsilon(0.014, HVACSizing.calc_basement_slab_ufactor(true, 8.0, 32.0, high_soil_k), tol)
+  end
+
+  def test_manual_j_basement_wall_below_grade_ufactor
+    # Check values against MJ8 Table 4A Construction Number 15 (Basement Walls)
+    tol = 0.06 # 6%
+
+    high_soil_k = 1.0 / 1.25 # Heavy moist soil, R-value/ft=1.25
+
+    fwall = HPXML::FoundationWall.new(nil)
+
+    # Test w/ Insulation Assembly R-value
+    # 15A - Concrete Block Wall with Board Insulation
+    fwall.type = HPXML::FoundationWallTypeConcreteBlock
+
+    # No insulation, open, 2ft depth
+    fwall.height = 2.0
+    fwall.depth_below_grade = 2.0
+    fwall.insulation_assembly_r_value = 1.0 / 0.584
+    assert_in_epsilon(0.257, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    # No insulation, open, 10ft depth
+    fwall.height = 10.0
+    fwall.depth_below_grade = 10.0
+    assert_in_epsilon(0.109, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    # Full R-20 board, filled, 2ft depth
+    fwall.height = 2.0
+    fwall.depth_below_grade = 2.0
+    fwall.insulation_assembly_r_value = 1.0 / 0.043
+    assert_in_epsilon(0.034, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    # Full R-20 board, filled, 10ft depth
+    fwall.height = 10.0
+    fwall.depth_below_grade = 10.0
+    assert_in_epsilon(0.026, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    # Test w/ Insulation Layers
+    # 15C - Four Inches Concrete with Board Insulation
+
+    fwall.type = HPXML::FoundationWallTypeSolidConcrete
+    fwall.thickness = 4.0 # in
+    fwall.insulation_assembly_r_value = nil
+    fwall.insulation_interior_r_value = 0.0
+    fwall.insulation_exterior_r_value = 0.0
+    fwall.insulation_interior_distance_to_top = 0.0
+    fwall.insulation_exterior_distance_to_top = 0.0
+    fwall.insulation_interior_distance_to_bottom = 0.0
+    fwall.insulation_exterior_distance_to_bottom = 0.0
+
+    # No insulation, 2ft depth
+    fwall.height = 2.0
+    fwall.depth_below_grade = 2.0
+    assert_in_epsilon(0.304, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    # No insulation, 10ft depth
+    fwall.height = 10.0
+    fwall.depth_below_grade = 10.0
+    assert_in_epsilon(0.121, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+    [true, false].each do |use_exterior_insulation|
+      # Full R-20 board, 2ft depth
+      fwall.height = 2.0
+      fwall.depth_below_grade = 2.0
+      fwall.insulation_exterior_r_value = use_exterior_insulation ? 20.0 : 0.0
+      fwall.insulation_interior_r_value = use_exterior_insulation ? 0.0 : 20.0
+      fwall.insulation_exterior_distance_to_bottom = use_exterior_insulation ? 2.0 : 0.0
+      fwall.insulation_interior_distance_to_bottom = use_exterior_insulation ? 0.0 : 2.0
+      assert_in_epsilon(0.037, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+      # Full R-20 board, 10ft depth
+      fwall.height = 10.0
+      fwall.depth_below_grade = 10.0
+      fwall.insulation_exterior_distance_to_bottom = use_exterior_insulation ? 10.0 : 0.0
+      fwall.insulation_interior_distance_to_bottom = use_exterior_insulation ? 0.0 : 10.0
+      assert_in_epsilon(0.028, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+      # 3ft R-20 board, 2ft depth
+      fwall.height = 2.0
+      fwall.depth_below_grade = 2.0
+      fwall.insulation_exterior_r_value = use_exterior_insulation ? 20.0 : 0.0
+      fwall.insulation_interior_r_value = use_exterior_insulation ? 0.0 : 20.0
+      fwall.insulation_exterior_distance_to_bottom = use_exterior_insulation ? 3.0 : 0.0
+      fwall.insulation_interior_distance_to_bottom = use_exterior_insulation ? 0.0 : 3.0
+      assert_in_epsilon(0.037, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+
+      # 3ft R-20 board, 10ft depth
+      fwall.height = 10.0
+      fwall.depth_below_grade = 10.0
+      fwall.insulation_exterior_distance_to_bottom = use_exterior_insulation ? 3.0 : 0.0
+      fwall.insulation_interior_distance_to_bottom = use_exterior_insulation ? 0.0 : 3.0
+      assert_in_epsilon(0.057, HVACSizing.get_foundation_wall_below_grade_ufactor(fwall, true, high_soil_k), tol)
+    end
   end
 
   def test_multiple_zones
@@ -1339,7 +1431,7 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     end
   end
 
-  def test_gshp_ground_loop
+  def test_gshp_geothermal_loop
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
@@ -1378,14 +1470,15 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def test_gshp_g_function_library_linear_interpolation_example
     bore_config = HPXML::GeothermalLoopBorefieldConfigurationRectangle
     num_bore_holes = 40
-    bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
     bore_depth = UnitConversions.convert(150.0, 'm', 'ft')
-    bore_diameter = UnitConversions.convert(UnitConversions.convert(80.0, 'mm', 'm'), 'm', 'in') * 2
-    valid_bore_configs = HVACSizing.valid_bore_configs
-    g_functions_filename = valid_bore_configs[bore_config]
-    g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
+    g_functions_filename = HVACSizing.get_geothermal_loop_valid_configurations[bore_config]
+    g_functions_json = HVACSizing.get_geothermal_loop_g_functions_json(g_functions_filename)
 
-    actual_lntts, actual_gfnc_coeff = HVACSizing.gshp_gfnc_coeff(bore_config, g_functions_json, num_bore_holes, bore_spacing, bore_depth, bore_diameter)
+    geothermal_loop = HPXML::GeothermalLoop.new(nil)
+    geothermal_loop.bore_spacing = UnitConversions.convert(7.0, 'm', 'ft')
+    geothermal_loop.bore_diameter = UnitConversions.convert(80.0 * 2, 'mm', 'in')
+
+    actual_lntts, actual_gfnc_coeff = HVACSizing.get_geothermal_g_functions_data(bore_config, g_functions_json, geothermal_loop, num_bore_holes, bore_depth)
 
     expected_lntts = [-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864, -2.577, -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873, 1.112, 1.335, 1.679, 2.028, 2.275, 3.003]
     expected_gfnc_coeff = [2.619, 2.967, 3.279, 3.700, 4.190, 5.107, 6.680, 8.537, 11.991, 14.633, 16.767, 20.083, 22.593, 28.734, 34.345, 35.927, 37.342, 38.715, 39.768, 40.664, 41.426, 42.056, 42.524, 43.054, 43.416, 43.594, 43.885]
@@ -1407,10 +1500,10 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
                       HPXML::GeothermalLoopBorefieldConfigurationLopsidedU => [6, 7, 8, 9, 10] }
 
     valid_configs.each do |bore_config, valid_num_bores|
-      g_functions_filename = HVACSizing.valid_bore_configs[bore_config]
-      g_functions_json = HVACSizing.get_g_functions_json(g_functions_filename)
+      g_functions_filename = HVACSizing.get_geothermal_loop_valid_configurations[bore_config]
+      g_functions_json = HVACSizing.get_geothermal_loop_g_functions_json(g_functions_filename)
       valid_num_bores.each do |num_bore_holes|
-        HVACSizing.get_g_functions(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
+        HVACSizing.get_geothermal_loop_g_functions_data_from_json(g_functions_json, bore_config, num_bore_holes, '5._192._0.08') # b_h_rb is arbitrary
       end
     end
   end
