@@ -1305,7 +1305,6 @@
               <SystemIdentifier id='VentilationFan1'/>
               <FanType>balanced</FanType>
               <RatedFlowRate>50.0</RatedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
             </VentilationFan>
           </VentilationFans>

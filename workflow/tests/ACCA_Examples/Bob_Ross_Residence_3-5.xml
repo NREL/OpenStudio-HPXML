@@ -860,11 +860,6 @@
               <SystemIdentifier id='WindowPrimaryBedroomNorthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6.25</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallPrimaryBedroomNorth'/>
           </Window>
           <Window>
@@ -881,11 +876,6 @@
               <SystemIdentifier id='WindowPrimaryBathroomNorthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.5</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallPrimaryBathroomNorth'/>
           </Window>
           <Window>
@@ -902,11 +892,6 @@
               <SystemIdentifier id='FrenchDoorFamilyRoomNorthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>3.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>10.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallFamilyRoomNorth'/>
           </Window>
           <Window>
@@ -923,11 +908,6 @@
               <SystemIdentifier id='WindowFamilyRoomEastInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallFamilyRoomEast'/>
           </Window>
           <Window>
@@ -944,11 +924,6 @@
               <SystemIdentifier id='WindowKitchenSouthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.5</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallKitchenSouth'/>
           </Window>
           <Window>
@@ -965,11 +940,6 @@
               <SystemIdentifier id='WindowBathroom1SouthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.5</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallBathroom1South'/>
           </Window>
           <Window>
@@ -986,11 +956,6 @@
               <SystemIdentifier id='WindowBedroom1WestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6.25</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallBedroom1West'/>
           </Window>
           <Window>
@@ -1007,11 +972,6 @@
               <SystemIdentifier id='WindowPrimaryBedroomWestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6.25</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='WallPrimaryBedroomWest'/>
           </Window>
           <Window>
@@ -1028,11 +988,6 @@
               <SystemIdentifier id='WindowBedroom2NorthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallBedroom2North'/>
           </Window>
           <Window>
@@ -1049,11 +1004,6 @@
               <SystemIdentifier id='WindowCraftNorthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallCraftNorth'/>
           </Window>
           <Window>
@@ -1070,11 +1020,6 @@
               <SystemIdentifier id='WindowRecRoomSouthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>3.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallRecRoomSouth'/>
           </Window>
           <Window>
@@ -1091,11 +1036,6 @@
               <SystemIdentifier id='WindowBedroom3SouthInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallBedroom3South'/>
           </Window>
           <Window>
@@ -1112,11 +1052,6 @@
               <SystemIdentifier id='WindowBedroom3WestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallBedroom3West'/>
           </Window>
           <Window>
@@ -1133,11 +1068,6 @@
               <SystemIdentifier id='WindowBathroom2WestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallBathroom2West'/>
           </Window>
           <Window>
@@ -1154,11 +1084,6 @@
               <SystemIdentifier id='WindowBedroom2WestInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='FoundationWallBedroom2West'/>
           </Window>
         </Windows>
