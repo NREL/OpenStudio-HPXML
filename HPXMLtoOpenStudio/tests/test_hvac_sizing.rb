@@ -6,6 +6,7 @@ require 'openstudio/measure/ShowRunnerOutput'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
+require 'json'
 
 class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def setup
@@ -20,7 +21,9 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
   def teardown
     File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
     File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_annual.json')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.json')
     File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.json')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.json')
   end
 
   def test_hvac_configurations
@@ -684,6 +687,244 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     bedroom_1_space.cdl_sens_aed_curve.split(', ').map { |s| s.to_f }.each_with_index do |aed_curve_value, i|
       assert_in_delta(bedroom_1_aed[i], aed_curve_value, [bedroom_1_aed[i] * space_tol_frac, block_tol_btuh].max)
     end
+  end
+
+  def test_manual_j_bob_ross
+    # Base run
+    puts 'Testing Bob Ross Residence...'
+    args_hash = { 'output_format' => 'json' }
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence.xml'))
+    _model, _hpxml, base_hpxml_bldg = _test_measure(args_hash)
+    puts "  Total heating = #{base_hpxml_bldg.hvac_plant.hdl_total}"
+    puts "  Total sensible cooling = #{base_hpxml_bldg.hvac_plant.cdl_sens_total}"
+    puts "  Total latent cooling = #{base_hpxml_bldg.hvac_plant.cdl_lat_total}"
+
+    # Sensitivity Runs
+
+    design_load_details_path = File.absolute_path(File.join(File.dirname(__FILE__), 'results_design_load_details.json'))
+
+    puts 'Testing Bob Ross Residence - 3.1...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-1.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    windows_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
+    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
+    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
+    puts "  Window and glass door loss = #{windows_heat_btuh}"
+    puts "  Window and glass door gain = #{windows_cool_btuh}"
+    puts "  Skylight loss = #{skylights_heat_btuh}"
+    puts "  Skylight gain = #{skylights_cool_btuh}"
+    puts "  AED curve = #{aed_values}"
+
+    puts 'Testing Bob Ross Residence - 3.2...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-2.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
+    puts "  Total window and glass door gain = #{windows_cool_btuh}"
+    puts "  AED curve = #{aed_values}"
+
+    puts 'Testing Bob Ross Residence - 3.3...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-3.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
+    puts "  Total window and glass door gain = #{windows_cool_btuh}"
+    puts "  AED curve = #{aed_values}"
+
+    puts 'Testing Bob Ross Residence - 3.4...'
+    # FIXME: Need to handle sunscreens
+    puts "  Total window and glass door gain = #{}"
+    puts "  AED curve = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.5...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-5.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
+    puts "  Total window and glass door gain = #{windows_cool_btuh}"
+    puts "  AED curve = #{aed_values}"
+
+    puts 'Testing Bob Ross Residence - 3.6...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-6.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
+    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    puts "  Total heat loss (both skylights) = #{skylights_heat_btuh}"
+    puts "  Total sensible gain (both skylights) = #{skylights_cool_btuh}"
+
+    puts 'Testing Bob Ross Residence - 3.7...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-7.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
+    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
+    puts "  Total heat loss (both skylights) = #{skylights_heat_btuh}"
+    puts "  Total sensible gain (both skylights) = #{skylights_cool_btuh}"
+
+    puts 'Testing Bob Ross Residence - 3.8...'
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.9...'
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.10...'
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.11...'
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.12...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-12.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    infil_heat_btuh = Float(json_bldg['Infiltration']['Heating (Btuh)'])
+    infil_cool_sens_btuh = Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])
+    infil_cool_lat_btuh = Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])
+    puts "  Total infiltration loss = #{infil_heat_btuh}"
+    puts "  Total sensible infiltration gain = #{infil_cool_sens_btuh}"
+    puts "  Total latent infiltration gain = #{infil_cool_lat_btuh}"
+
+    puts 'Testing Bob Ross Residence - 3.13...'
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-13.xml'))
+    _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
+    json = JSON.parse(File.read(design_load_details_path))
+    json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
+    infil_heat_btuh = Float(json_bldg['Infiltration']['Heating (Btuh)'])
+    infil_cool_sens_btuh = Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])
+    infil_cool_lat_btuh = Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])
+    puts "  Total infiltration heat loss = #{infil_heat_btuh}"
+    puts "  Total sensible infiltration gain = #{infil_cool_sens_btuh}"
+    puts "  Total latent infiltration gain = #{infil_cool_lat_btuh}"
+
+    puts 'Testing Bob Ross Residence - 3.14...'
+    puts "  Table 4 Construction # = #{}"
+    puts "  Table 7 Duct Table # = #{}"
+    puts "  Total ceiling heat loss = #{}"
+    puts "  Total ceiling sensible gain = #{}"
+    puts "  Net duct heat loss factor = #{}"
+    puts "  Net duct sensible gain factor = #{}"
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+    puts "  Total heat loss for entire house = #{}"
+    puts "  Total sensible gain for entire house = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.15...'
+    puts "  Table 4 Construction Number = #{}"
+    puts "  Wall U-Value = #{}"
+    puts "  CLTD for wall exposed to outdoor air = #{}"
+    puts "  Heat loss for all above grade exposed wall = #{}"
+    puts "  Sensible gain for all above grade exposed wall = #{}"
+    puts "  Garage partition wall CLTD = #{}"
+    puts "  Heat loss for partition wall = #{}"
+    puts "  Sensible gain for partition wall = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.16...'
+    puts "  Table 4 Construction Number = #{}"
+    puts "  Total floor heat loss = #{}"
+    puts "  MJ8 Line 14 subtotal heat loss = #{}"
+    puts "  Duct Heat Loss value = #{}"
+    puts "  Duct Heat Gain value = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.17...'
+    puts "  Outdoor air Cfm for ventilation = #{}"
+    puts "  Total infiltration heat loss = #{}"
+    puts "  Total sensible infiltration gain = #{}"
+    puts "  Total latent infiltration gain = #{}"
+    puts "  Total ventilation heat loss = #{}"
+    puts "  Total sensible ventilation gain = #{}"
+    puts "  Total latent ventilation gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.18...'
+    puts "  Outdoor air Cfm for ventilation = #{}"
+    puts "  Total infiltration heat loss = #{}"
+    puts "  Total sensible infiltration gain = #{}"
+    puts "  Total latent infiltration gain = #{}"
+    puts "  Total ventilation heat loss = #{}"
+    puts "  Total sensible ventilation gain = #{}"
+    puts "  Total latent ventilation gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.19...'
+    puts "  Exhaust air Cfm for ventilation = #{}"
+    puts "  Makeup air Cfm to the conditioned space = #{}"
+    puts "  Total infiltration heat loss = #{}"
+    puts "  Total sensible infiltration gain = #{}"
+    puts "  Total latent infiltration gain = #{}"
+    puts "  Total ventilation heat loss = #{}"
+    puts "  Total sensible ventilation gain = #{}"
+    puts "  Total latent ventilation gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.20...'
+    puts "  Makeup air Cfm to the conditioned space = #{}"
+    puts "  Total infiltration heat loss = #{}"
+    puts "  Total sensible infiltration gain = #{}"
+    puts "  Total latent infiltration gain = #{}"
+    puts "  Total ventilation heat loss = #{}"
+    puts "  Total sensible ventilation gain = #{}"
+    puts "  Total latent ventilation gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.21...'
+    puts "  Exhaust air Cfm for ventilation = #{}"
+    puts "  Makeup air Cfm to the conditioned space = #{}"
+    puts "  Total infiltration heat loss = #{}"
+    puts "  Total sensible infiltration gain = #{}"
+    puts "  Total latent infiltration gain = #{}"
+    puts "  Total ventilation heat loss = #{}"
+    puts "  Total sensible ventilation gain = #{}"
+    puts "  Total latent ventilation gain = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.22...'
+    puts "  Total floor area heated and cooled = #{}"
+    puts "  Above grade volume = #{}"
+    puts "  CLTD for above grade basement wall = #{}"
+    puts "  Basement above grade wall, heat loss = #{}"
+    puts "  Basement above grade wall, heat gain = #{}"
+    puts "  Basement below grade wall, heat loss = #{}"
+    puts "  Basement floor heat loss = #{}"
+    puts "  Infiltration heat loss, total envelope = #{}"
+    puts "  Sensible infiltration gain = #{}"
+    puts "  Latent infiltration gain = #{}"
+    puts "  Duct heat loss = #{}"
+    puts "  Sensible duct gain = #{}"
+    puts "  Latent duct gain = #{}"
+    puts "  Total heat loss for entire house = #{}"
+    puts "  Total sensible gain for entire house = #{}"
+    puts "  Total latent gain for entire house = #{}"
+
+    puts 'Testing Bob Ross Residence - 3.23...'
+    puts "  Total heat loss for conditioned space floor = #{}"
+    puts "  Total heat gain for conditioned space floor floor = #{}"
+    puts "  Duct table number for duct loads = #{}"
+    puts "  Duct heat loss factor = #{}"
+    puts "  Duct sensible gain factor = #{}"
+    puts "  Total duct loss = #{}"
+    puts "  Total sensible duct gain = #{}"
+    puts "  Total latent duct gain = #{}"
+    puts "  Total heat loss for entire house = #{}"
+    puts "  Total sensible gain for entire house = #{}"
+    puts "  Total latent gain for entire house = #{}"
   end
 
   def test_heat_pump_separate_backup_systems
