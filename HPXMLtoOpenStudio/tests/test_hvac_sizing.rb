@@ -708,36 +708,27 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    windows_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
-    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
-    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
-    puts "  Window and glass door loss = #{windows_heat_btuh}"
-    puts "  Window and glass door gain = #{windows_cool_btuh}"
-    puts "  Skylight loss = #{skylights_heat_btuh}"
-    puts "  Skylight gain = #{skylights_cool_btuh}"
-    puts "  AED curve = #{aed_values}"
+    puts "  Window and glass door loss = #{json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Window and glass door gain = #{json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  Skylight loss = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Skylight gain = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  AED curve = #{json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values}"
 
     puts 'Testing Bob Ross Residence - 3.2...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-2.xml'))
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
-    puts "  Total window and glass door gain = #{windows_cool_btuh}"
-    puts "  AED curve = #{aed_values}"
+    puts "  Total window and glass door gain = #{json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  AED curve = #{json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values}"
 
     puts 'Testing Bob Ross Residence - 3.3...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-3.xml'))
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
-    puts "  Total window and glass door gain = #{windows_cool_btuh}"
-    puts "  AED curve = #{aed_values}"
+    puts "  Total window and glass door gain = #{json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  AED curve = #{json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values}"
 
     puts 'Testing Bob Ross Residence - 3.4...'
     # FIXME: Need to handle sunscreens
@@ -749,30 +740,24 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    windows_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    aed_values = json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values
-    puts "  Total window and glass door gain = #{windows_cool_btuh}"
-    puts "  AED curve = #{aed_values}"
+    puts "  Total window and glass door gain = #{json_bldg.select { |k, _v| k.start_with?('Windows') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  AED curve = #{json['Report: MyBuilding: AED Curve']['MyBuilding: BobRossResidenceConditioned'].values}"
 
     puts 'Testing Bob Ross Residence - 3.6...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-6.xml'))
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
-    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    puts "  Total heat loss (both skylights) = #{skylights_heat_btuh}"
-    puts "  Total sensible gain (both skylights) = #{skylights_cool_btuh}"
+    puts "  Total heat loss (both skylights) = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Total sensible gain (both skylights) = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
 
     puts 'Testing Bob Ross Residence - 3.7...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-7.xml'))
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    skylights_heat_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum
-    skylights_cool_btuh = json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum
-    puts "  Total heat loss (both skylights) = #{skylights_heat_btuh}"
-    puts "  Total sensible gain (both skylights) = #{skylights_cool_btuh}"
+    puts "  Total heat loss (both skylights) = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Total sensible gain (both skylights) = #{json_bldg.select { |k, _v| k.start_with?('Skylights') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
 
     puts 'Testing Bob Ross Residence - 3.8...'
     puts "  Duct heat loss = #{}"
@@ -799,24 +784,18 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    infil_heat_btuh = Float(json_bldg['Infiltration']['Heating (Btuh)'])
-    infil_cool_sens_btuh = Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])
-    infil_cool_lat_btuh = Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])
-    puts "  Total infiltration loss = #{infil_heat_btuh}"
-    puts "  Total sensible infiltration gain = #{infil_cool_sens_btuh}"
-    puts "  Total latent infiltration gain = #{infil_cool_lat_btuh}"
+    puts "  Total infiltration loss = #{Float(json_bldg['Infiltration']['Heating (Btuh)'])}"
+    puts "  Total sensible infiltration gain = #{Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])}"
+    puts "  Total latent infiltration gain = #{Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])}"
 
     puts 'Testing Bob Ross Residence - 3.13...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-13.xml'))
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    infil_heat_btuh = Float(json_bldg['Infiltration']['Heating (Btuh)'])
-    infil_cool_sens_btuh = Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])
-    infil_cool_lat_btuh = Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])
-    puts "  Total infiltration heat loss = #{infil_heat_btuh}"
-    puts "  Total sensible infiltration gain = #{infil_cool_sens_btuh}"
-    puts "  Total latent infiltration gain = #{infil_cool_lat_btuh}"
+    puts "  Total infiltration heat loss = #{Float(json_bldg['Infiltration']['Heating (Btuh)'])}"
+    puts "  Total sensible infiltration gain = #{Float(json_bldg['Infiltration']['Cooling Sensible (Btuh)'])}"
+    puts "  Total latent infiltration gain = #{Float(json_bldg['Infiltration']['Cooling Latent (Btuh)'])}"
 
     puts 'Testing Bob Ross Residence - 3.14...'
     puts "  Table 4 Construction # = #{}"
@@ -849,7 +828,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Duct Heat Gain value = #{}"
 
     puts 'Testing Bob Ross Residence - 3.17...'
-    puts "  Outdoor air Cfm for ventilation = #{}"
     puts "  Total infiltration heat loss = #{}"
     puts "  Total sensible infiltration gain = #{}"
     puts "  Total latent infiltration gain = #{}"
@@ -858,7 +836,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Total latent ventilation gain = #{}"
 
     puts 'Testing Bob Ross Residence - 3.18...'
-    puts "  Outdoor air Cfm for ventilation = #{}"
     puts "  Total infiltration heat loss = #{}"
     puts "  Total sensible infiltration gain = #{}"
     puts "  Total latent infiltration gain = #{}"
@@ -867,8 +844,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Total latent ventilation gain = #{}"
 
     puts 'Testing Bob Ross Residence - 3.19...'
-    puts "  Exhaust air Cfm for ventilation = #{}"
-    puts "  Makeup air Cfm to the conditioned space = #{}"
     puts "  Total infiltration heat loss = #{}"
     puts "  Total sensible infiltration gain = #{}"
     puts "  Total latent infiltration gain = #{}"
@@ -877,7 +852,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Total latent ventilation gain = #{}"
 
     puts 'Testing Bob Ross Residence - 3.20...'
-    puts "  Makeup air Cfm to the conditioned space = #{}"
     puts "  Total infiltration heat loss = #{}"
     puts "  Total sensible infiltration gain = #{}"
     puts "  Total latent infiltration gain = #{}"
@@ -886,8 +860,6 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     puts "  Total latent ventilation gain = #{}"
 
     puts 'Testing Bob Ross Residence - 3.21...'
-    puts "  Exhaust air Cfm for ventilation = #{}"
-    puts "  Makeup air Cfm to the conditioned space = #{}"
     puts "  Total infiltration heat loss = #{}"
     puts "  Total sensible infiltration gain = #{}"
     puts "  Total latent infiltration gain = #{}"
