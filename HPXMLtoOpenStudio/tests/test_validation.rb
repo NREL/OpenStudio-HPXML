@@ -1009,7 +1009,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
 
       elsif ['slab-wing-insulation-present-with-no-perimeter-insulation'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base-foundation-slab-exterior-horizontal-insulation.xml')
-        hpxml_bldg.slabs[0].slab_perimeter_insulation_r = 0
+        hpxml_bldg.slabs[0].perimeter_insulation_r_value = 0
 
       elsif ['slab-large-exposed-perimeter'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
