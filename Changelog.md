@@ -3,7 +3,7 @@
 __New Features__
 - Updates to HPXML v4.0-rc5.
 - Adds inputs for modeling skylight curbs and/or shafts.
-- Adds exterior horizontal insulation to a slab or basement foundation. 
+- Adds exterior horizontal insulation to a slab or basement foundation.
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
