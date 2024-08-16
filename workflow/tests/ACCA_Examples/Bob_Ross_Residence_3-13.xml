@@ -565,7 +565,7 @@
         </FoundationWalls>
         <Floors>
           <Floor>
-            <SystemIdentifier id='CeilintPrimaryBedroom'/>
+            <SystemIdentifier id='CeilingPrimaryBedroom'/>
             <AttachedToSpace idref='primary_bedroom'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
@@ -574,7 +574,7 @@
             </FloorType>
             <Area>440.0</Area>
             <Insulation>
-              <SystemIdentifier id='CeilintPrimaryBedroomInsulation'/>
+              <SystemIdentifier id='CeilingPrimaryBedroomInsulation'/>
               <AssemblyEffectiveRValue>31.25</AssemblyEffectiveRValue>
             </Insulation>
           </Floor>
