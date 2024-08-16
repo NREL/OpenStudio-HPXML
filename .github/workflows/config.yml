@@ -61,7 +61,6 @@ jobs:
       - name: Build documentation
         run: |
           cd docs
-          ruby source/data/create_default_schedules_csv_tables.rb
           make html SPHINXOPTS="-W --keep-going -n"
 
       - name: Check documentation

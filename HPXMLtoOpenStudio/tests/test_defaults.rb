@@ -23,7 +23,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     @args_hash['debug'] = true
     @args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
 
-    @default_schedules_csv_data, _ = HPXMLDefaults.get_default_schedules_csv_data()
+    @default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
   end
 
   def teardown

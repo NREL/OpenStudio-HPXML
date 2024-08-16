@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b55e3982-324b-4db4-b1fa-bfb28277493e</version_id>
-  <version_modified>2024-08-13T18:00:21Z</version_modified>
+  <version_id>bee776f7-bbff-4bd5-bc86-0000eec811b0</version_id>
+  <version_modified>2024-08-16T19:24:19Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -357,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A667F3E1</checksum>
+      <checksum>66732099</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -651,7 +651,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1A0AA426</checksum>
+      <checksum>621257C3</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
@@ -711,7 +711,7 @@
       <filename>test_schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>C058372B</checksum>
+      <checksum>08E3AAFF</checksum>
     </file>
     <file>
       <filename>test_simcontrols.rb</filename>
@@ -723,7 +723,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>60426CC8</checksum>
+      <checksum>51E564BC</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>

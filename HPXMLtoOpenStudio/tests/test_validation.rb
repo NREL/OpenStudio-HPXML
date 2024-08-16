@@ -23,7 +23,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
     @tmp_output_path = File.join(@sample_files_path, 'tmp_output')
     FileUtils.mkdir_p(@tmp_output_path)
 
-    @default_schedules_csv_data, _ = HPXMLDefaults.get_default_schedules_csv_data()
+    @default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
   end
 
   def teardown

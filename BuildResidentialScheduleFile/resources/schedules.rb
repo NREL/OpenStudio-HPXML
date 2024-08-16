@@ -92,7 +92,7 @@ class ScheduleGenerator
   # @return [Boolean] true if successful
   def create_stochastic_schedules(args:,
                                   weather:)
-    default_schedules_csv_data, _ = HPXMLDefaults.get_default_schedules_csv_data()
+    default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
     schedules_csv_data = get_schedules_csv_data()
 
     # initialize a random number generator
