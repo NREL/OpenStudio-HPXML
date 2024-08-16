@@ -9,7 +9,7 @@ module Location
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.apply(model, weather, hpxml_header, hpxml_bldg)
     apply_year(model, hpxml_header, weather)
     apply_site(model, hpxml_bldg)
@@ -21,7 +21,7 @@ module Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.apply_site(model, hpxml_bldg)
     # Note: None of these affect the model; see https://github.com/NREL/EnergyPlus/issues/10579.
     site = model.getSite
@@ -37,7 +37,7 @@ module Location
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [void]
+  # @return [nil]
   def self.apply_year(model, hpxml_header, weather)
     if Date.leap?(hpxml_header.sim_calendar_year)
       n_hours = weather.header.NumRecords
@@ -54,7 +54,7 @@ module Location
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.apply_dst(model, hpxml_bldg)
     return unless hpxml_bldg.dst_enabled
 
@@ -72,7 +72,7 @@ module Location
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.apply_ground_temps(model, weather, hpxml_bldg)
     # Shallow ground temperatures only currently used for ducts located under slab
     sgts = model.getSiteGroundTemperatureShallow

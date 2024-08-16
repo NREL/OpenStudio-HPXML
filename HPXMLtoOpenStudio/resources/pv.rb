@@ -10,7 +10,7 @@ module PV
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param pv_system [HPXML::PVSystem] Object that defines a single solar electric photovoltaic (PV) system
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @return [void]
+  # @return [nil]
   def self.apply(model, nbeds, pv_system, unit_multiplier)
     obj_name = pv_system.id
 

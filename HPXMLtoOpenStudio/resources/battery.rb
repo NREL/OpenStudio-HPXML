@@ -15,7 +15,7 @@ module Battery
   # @param battery [HPXML::Battery] Object that defines a single home battery
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @return [nil or void] nil if unscheduled battery w/out PV; battery is not modeled
+  # @return [nil] for unscheduled battery w/out PV; in this case battery is not modeled
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier)
     charging_schedule = nil
     discharging_schedule = nil

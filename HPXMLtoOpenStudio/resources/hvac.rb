@@ -3416,7 +3416,7 @@ module HVAC
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] HPXML Cooling System or HPXML Heat Pump object
-  # @return [void]
+  # @return [nil]
   def self.apply_supp_coil_EMS_for_ddb_thermostat(model, htg_supp_coil, control_zone, htg_coil, is_onoff_thermostat_ddb, cooling_system)
     return if htg_supp_coil.nil?
     return unless cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -3509,7 +3509,7 @@ module HVAC
   # @param is_cooling [Boolean] True if apply to cooling system
   # @param cap_fff_curve [OpenStudio::Model::CurveQuadratic] OpenStudio CurveQuadratic object for heat pump capacity function of air flow rates
   # @param eir_fff_curve [OpenStudio::Model::CurveQuadratic] OpenStudio CurveQuadratic object for heat pump eir function of air flow rates
-  # @return [void]
+  # @return [nil]
   def self.apply_capacity_degradation_EMS(model, system_ap, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
     # Note: Currently only available in 1 min time step
     if is_cooling
@@ -3624,7 +3624,7 @@ module HVAC
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param is_onoff_thermostat_ddb [Boolean] Whether to apply on off thermostat deadband
   # @param cooling_system [HPXML::CoolingSystem or HPXML::HeatPump] HPXML Cooling System or HPXML Heat Pump object
-  # @return [void]
+  # @return [nil]
   def self.apply_two_speed_realistic_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, is_onoff_thermostat_ddb, cooling_system)
     # Note: Currently only available in 1 min time step
     return unless is_onoff_thermostat_ddb
@@ -3754,7 +3754,7 @@ module HVAC
   # @param clg_coil [OpenStudio::Model::CoilCoolingDXMultiSpeed] OpenStudio MultiStage Cooling Coil object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio MultiStage Heating Coil object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [void]
+  # @return [nil]
   def self.apply_max_power_EMS(model, runner, air_loop_unitary, control_zone, heating_system, cooling_system, htg_supp_coil, clg_coil, htg_coil, schedules_file)
     return if schedules_file.nil?
     return if clg_coil.nil? && htg_coil.nil?
@@ -4010,7 +4010,7 @@ module HVAC
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
-  # @return [void]
+  # @return [nil]
   def self.add_backup_staging_EMS(model, unitary_system, htg_supp_coil, control_zone, htg_coil)
     return unless htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
 

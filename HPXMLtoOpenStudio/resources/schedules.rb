@@ -780,7 +780,7 @@ module Schedule
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param schedule [OpenStudio::Model::ScheduleInterval or OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object
   # @param schedule_type_limits_name [String] data type for the values contained in the schedule
-  # @return [void]
+  # @return [nil]
   def self.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
     return if schedule_type_limits_name.nil?
 
@@ -807,7 +807,7 @@ module Schedule
   # Apply true for all weekday days of an OpenStudio ScheduleRule object.
   #
   # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
-  # @return [void]
+  # @return [nil]
   def self.set_weekday_rule(rule)
     rule.setApplyMonday(true)
     rule.setApplyTuesday(true)
@@ -819,7 +819,7 @@ module Schedule
   # Apply true for all weekend days of an OpenStudio ScheduleRule object.
   #
   # @param rule [OpenStudio::Model::ScheduleRule] an OpenStudio ScheduleRule object
-  # @return [void]
+  # @return [nil]
   def self.set_weekend_rule(rule)
     rule.setApplySaturday(true)
     rule.setApplySunday(true)
@@ -841,7 +841,7 @@ module Schedule
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param year [Integer] the calendar year
-  # @return [void]
+  # @return [nil]
   def self.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
     return if unavailable_periods.nil?
 
@@ -950,7 +950,7 @@ module Schedule
   # @param begin_hour [Integer] hour of the day that the unavailable period begins
   # @param end_hour [Integer] hour of the day that the unavailable period ends
   # @param value [Double] the value to set on the day schedule that means unavailable
-  # @return [void]
+  # @return [nil]
   def self.set_unavailable_period_values(out, day_schedule, begin_hour, end_hour, value)
     for h in 0..23
       time = OpenStudio::Time.new(0, h + 1, 0, 0)
@@ -1357,7 +1357,7 @@ class SchedulesFile
   # Assemble schedules from all detailed schedule CSVs into a hash.
   #
   # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
-  # @return [void]
+  # @return [nil]
   def import(schedules_paths)
     num_hrs_in_year = Constants.NumHoursInYear(@year)
     @schedules = {}
@@ -1642,7 +1642,7 @@ class SchedulesFile
   #
   # @param col_name [String] the column header of the detailed schedule
   # @param periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [void]
+  # @return [nil]
   def create_column_values_from_periods(col_name, periods)
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
     num_days_in_year = Constants.NumDaysInYear(@year)
@@ -1674,7 +1674,7 @@ class SchedulesFile
 
   # Expand schedules with fewer elements such that all the schedules have the same number of elements.
   #
-  # @return [void]
+  # @return [nil]
   def expand_schedules
     max_size = @schedules.map { |_k, v| v.size }.uniq.max
     @schedules.each do |col, values|
@@ -1688,7 +1688,7 @@ class SchedulesFile
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [void]
+  # @return [nil]
   def set_unavailable_periods(runner, unavailable_periods)
     if @unavailable_periods_csv_data.nil?
       @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
@@ -1730,7 +1730,7 @@ class SchedulesFile
   # Convert detailed setpoint schedule values from F to C.
   #
   # @param offset_db [Float] On-off thermostat deadband
-  # @return [void]
+  # @return [nil]
   def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
     return if @tmp_schedules.keys.none? { |k| setpoint_col_names.include?(k) }
@@ -1753,7 +1753,7 @@ class SchedulesFile
 
   # Create separate charging (positive) and discharging (negative) detailed schedules from the battery schedule.
   #
-  # @return [void]
+  # @return [nil]
   def create_battery_charging_discharging_schedules
     battery_col_name = Columns[:Battery].name
     return if !@schedules.keys.include?(battery_col_name)

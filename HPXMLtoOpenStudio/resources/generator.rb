@@ -10,7 +10,7 @@ module Generator
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param generator [HPXML::Generator] Object that defines a single generator that provides on-site power
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @return [void]
+  # @return [nil]
   def self.apply(model, nbeds, generator, unit_multiplier)
     obj_name = generator.id
 
