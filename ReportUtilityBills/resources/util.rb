@@ -127,7 +127,7 @@ module CalculateUtilityBill
   # @param fuels [Hash] Fuel type, is_production => Fuel object
   # @param rate [UtilityRate] UtilityRate object
   # @param bill [UtilityBill] UtilityBill object
-  # @return [void]
+  # @return [nil]
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     production_fuel_time_series = fuels[[FT::Elec, true]].timeseries

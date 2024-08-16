@@ -6,7 +6,7 @@ module Geometry
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @return [TODO] TODO
+  # @return [nil]
   def self.tear_down_model(model:,
                            runner:)
     handles = OpenStudio::UUIDVector.new
@@ -346,7 +346,7 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [Double] the total height of the dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.explode_surfaces(model:,
                             hpxml_bldg:,
                             walls_top:)
@@ -495,7 +495,7 @@ module Geometry
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [void]
+  # @return [nil]
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
@@ -655,7 +655,7 @@ module Geometry
 
   # TODO
   #
-  # @param location [TODO] TODO
+  # @param location [String] the general HPXML location
   # @return [TODO] TODO
   def self.get_temperature_scheduled_space_values(location:)
     if location == HPXML::LocationOtherHeatedSpace
