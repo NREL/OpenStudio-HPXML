@@ -1713,6 +1713,8 @@ module HVACSizing
   # Returns the ACCA Manual S sizing allowances for a given type of HVAC equipment.
   # These sizing allowances are used in the logic that determines how to convert heating/cooling
   # design loads into corresponding equipment capacities.
+  # New ACCA Manual S specifies different size limits depending on the sizing condition (Standard, Dry, Variable Speed, etc.) 
+
   #
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [Array<Double, Double, Double>] Oversize fraction (frac), oversize delta (Btu/hr), undersize fraction (frac)
