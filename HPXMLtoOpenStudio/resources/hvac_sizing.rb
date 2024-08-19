@@ -1711,26 +1711,35 @@ module HVACSizing
   end
 
   # Returns the ACCA Manual S sizing allowances for a given type of HVAC equipment.
-  # These sizing allowances are used in the logic that determines how to convert heating/cooling
-  # design loads into corresponding equipment capacities.
+  # These sizing allowances are used in the logic that determines how to convert heating/cooling 
+  # design loads into corresponding equipment capacities. 
+  # New ACCA Manual S specifies different size limits depending on the sizing condition (Standard, Dry, Variable Speed, etc.)  
+
   # 
-  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
-  # @return [Array<Double, Double, Double>] Oversize fraction (frac), oversize delta (Btu/hr), undersize fraction (frac)
-  def self.get_hvac_size_limits(hvac_cooling)
-    oversize_limit = 1.15
-    oversize_delta = 15000.0
-    undersize_limit = 0.9
+  # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system 
+  # @param sizing_condition [String] The sizing condition of the current HPXML HVAC system  
+  # @return [Array<Double, Double, Double>] Oversize limit (frac), oversize delta (Btu/hr), undersize limit (frac) 
 
-    if not hvac_cooling.nil?
-      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
-        oversize_limit = 1.2
-      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-        oversize_limit = 1.3
-      end
-    end
+  def self.get_hvac_size_limits(hvac_cooling, hvac_sizing_methodology, hvac_size_cooling_cap, sizing_condition, climate_j_shr) 
 
-    return oversize_limit, oversize_delta, undersize_limit
-  end
+    if not hvac_cooling.nil? 
+      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage &&  
+
+      #Table N.2.3.1 ACCA Man. S 2023 
+
+      oversize_limit = 1.15 
+      oversize_delta = 15000.0 
+      undersize_limit = 0.9
+
+    if not hvac_cooling.nil? 
+      if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage 
+        oversize_limit = 1.2 
+      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed 
+        oversize_limit = 1.3 
+      end 
+    end 
+    return oversize_factor, oversize_delta, undersize_factor 
+  end 
 
   # Transfers the design load totals from the HVAC loads object to the HVAC sizings object.
   #
@@ -3168,8 +3177,10 @@ module HVACSizing
   # @return [Double] Heat pump backup load (Btu/hr)
   def self.calculate_heat_pump_backup_load(mj, hvac_heating, heating_load, hp_nominal_heating_capacity, hvac_heating_speed, hpxml_bldg)
     if hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingEmergency
-      # Size backup to meet full design load in case heat pump fails
-      return heating_load
+      # Size backup to meet 85% of design load in case heat pump fails 
+      # New ACCA Man S (2024)--> emergency heating load is 85% of heating load 
+      # See Table N1.16.3.2 Electric Resistance Emergency Heat 
+      return 0.85*heating_load
     elsif hpxml_bldg.header.heat_pump_backup_sizing_methodology == HPXML::HeatPumpBackupSizingSupplemental
       if not hvac_heating.backup_heating_switchover_temp.nil?
         min_compressor_temp = hvac_heating.backup_heating_switchover_temp
