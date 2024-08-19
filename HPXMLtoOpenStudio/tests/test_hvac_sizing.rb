@@ -817,8 +817,10 @@ class HPXMLtoOpenStudioHVACSizingTest < Minitest::Test
     _model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
     json = JSON.parse(File.read(design_load_details_path))
     json_bldg = json['Report: MyBuilding: BobRossResidenceConditioned: Loads']
-    puts "  Heat loss for all above grade exposed wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('Partition') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
-    puts "  Sensible gain for all above grade exposed wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('Partition') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  Heat loss for all above grade exposed wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('FoundationWall') && !k.include?('Partition') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Sensible gain for all above grade exposed wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('FoundationWall') && !k.include?('Partition') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
+    puts "  Heat loss for partition wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('FoundationWall') && k.include?('Partition') }.map { |_k, v| Float(v['Heating (Btuh)']) }.sum}"
+    puts "  Sensible gain for partition wall = #{json_bldg.select { |k, _v| k.start_with?('Above Grade Walls') && !k.include?('FoundationWall') && k.include?('Partition') }.map { |_k, v| Float(v['Cooling Sensible (Btuh)']) }.sum}"
 
     puts 'Testing Bob Ross Residence - 3.16...'
     args_hash['hpxml_path'] = File.absolute_path(File.join(@test_files_path, 'ACCA_Examples', 'Bob_Ross_Residence_3-16.xml'))

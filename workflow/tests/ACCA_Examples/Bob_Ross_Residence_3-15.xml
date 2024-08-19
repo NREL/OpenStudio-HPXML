@@ -341,13 +341,13 @@
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
-              <SteelFrame/>
+              <ConcreteMasonryUnit/>
             </WallType>
             <Area>140.0</Area>
             <Orientation>east</Orientation>
             <Insulation>
               <SystemIdentifier id='WallFamilyRoomPartitionEastInsulation'/>
-              <AssemblyEffectiveRValue>8.7</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>14.29</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -356,13 +356,13 @@
             <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <WallType>
-              <SteelFrame/>
+              <ConcreteMasonryUnit/>
             </WallType>
             <Area>120.0</Area>
             <Orientation>east</Orientation>
             <Insulation>
               <SystemIdentifier id='WallKitchenPartitionEastInsulation'/>
-              <AssemblyEffectiveRValue>8.7</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>14.29</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
