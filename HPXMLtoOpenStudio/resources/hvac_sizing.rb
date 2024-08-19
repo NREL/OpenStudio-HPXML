@@ -2333,7 +2333,7 @@ module HVACSizing
         hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value # Note: cool_cap_design = hvac_sizings.Cool_Load_Tot
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
-        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
+        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                    (80.0 - mj.cool_setpoint) / cooling_delta_t))
         cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
@@ -2350,7 +2350,7 @@ module HVACSizing
       end
 
       # Recalculate the air flow rate in case the oversizing limit has been used
-      cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
+      cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                  (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                  (80.0 - mj.cool_setpoint) / cooling_delta_t))
       hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
@@ -2453,7 +2453,7 @@ module HVACSizing
         hvac_sizings.Heat_Capacity = hvac_sizings.Cool_Capacity
 
         hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
-        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value /
+        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
                                    (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
                                    (80.0 - mj.cool_setpoint) / cooling_delta_t))
         hvac_sizings.Cool_Airflow = calc_airflow_rate_manual_s(mj, cool_load_sens_cap_design, cooling_delta_t, dx_capacity: hvac_sizings.Cool_Capacity)
