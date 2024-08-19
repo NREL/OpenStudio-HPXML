@@ -1919,7 +1919,7 @@ module Geometry
   # @param space [OpenStudio::Model::Space] the foundation space adjacent to the rim joist
   # @param rim_joist_height [Double] height of the rim joists (ft)
   # @param z [Double] z coordinate of the bottom of the rim joists
-  # @return [void]
+  # @return [nil]
   def self.add_rim_joist(model:,
                          polygon:,
                          space:,
@@ -1963,7 +1963,7 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param footprint_polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [void]
+  # @return [nil]
   def self.assign_indexes(model:,
                           footprint_polygon:,
                           space:)
@@ -2010,7 +2010,7 @@ module Geometry
   # We can't deterministically assign indexes to these surfaces.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [void]
+  # @return [nil]
   def self.assign_remaining_surface_indexes(model:)
     model.getSurfaces.each do |surface|
       next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
@@ -2273,7 +2273,7 @@ module Geometry
   # @param win_num [Integer] The window number for the current surface
   # @param facade [String] front, back, left, or right
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [void]
+  # @return [nil]
   def self.add_window_to_wall(surface:,
                               win_width:,
                               win_height:,
@@ -2535,7 +2535,7 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param foundation_type [String] HPXML location for foundation type
   # @param foundation_height [Double] height of the foundation (m)
-  # @return [void]
+  # @return [nil]
   def self.apply_ambient_foundation_shift(model:,
                                           foundation_type:,
                                           foundation_height:)
