@@ -358,7 +358,7 @@ module Geometry
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
       next unless [EPlus::SurfaceTypeWall, EPlus::SurfaceTypeRoofCeiling].include? surface.surfaceType
-      next unless [EPlus::BoundaryConditionOutdoors, EPlus::BoundaryConditionFoundation, EPlus::BoundaryConditionAdiabatic].include? surface.outsideBoundaryCondition
+      next unless [EPlus::BoundaryConditionOutdoors, EPlus::BoundaryConditionFoundation, EPlus::BoundaryConditionAdiabatic, EPlus::BoundaryConditionCoefficients].include? surface.outsideBoundaryCondition
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface

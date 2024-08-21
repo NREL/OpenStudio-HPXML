@@ -839,7 +839,7 @@ module Airflow
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param frac_lat [TODO] TODO
   # @param frac_lost [TODO] TODO
-  # @param hpxml_fuel_type [TODO] TODO
+  # @param hpxml_fuel_type [String] HPXML fuel type (HPXML::FuelTypeXXX)
   # @param end_use [TODO] TODO
   # @return [TODO] TODO
   def self.create_other_equipment_object_and_actuator(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil)

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to the EnergyPlus simulation.
 module EPlus
   # Constants
   BoundaryConditionAdiabatic = 'Adiabatic'
+  BoundaryConditionCoefficients = 'OtherSideCoefficients'
   BoundaryConditionFoundation = 'Foundation'
   BoundaryConditionGround = 'Ground'
   BoundaryConditionOutdoors = 'Outdoors'
@@ -46,10 +47,11 @@ module EPlus
   SurfaceWindExposureNo = 'NoWind'
   SurfaceWindExposureYes = 'WindExposed'
 
-  # TODO
+  # Returns the fuel type used in the EnergyPlus simulation that the HPXML fuel type
+  # maps to.
   #
-  # @param hpxml_fuel [TODO] TODO
-  # @return [TODO] TODO
+  # @param hpxml_fuel [String] HPXML fuel type (HPXML::FuelTypeXXX)
+  # @return [String] EnergyPlus fuel type (EPlus::FuelTypeXXX)
   def self.fuel_type(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
     if [HPXML::FuelTypeElectricity].include? hpxml_fuel
