@@ -157,7 +157,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       eri_version = hpxml.header.eri_calculation_version # Hidden feature
       eri_version = 'latest' if eri_version.nil?
-      eri_version = Constants.ERIVersions[-1] if eri_version == 'latest'
+      eri_version = Constants::ERIVersions[-1] if eri_version == 'latest'
 
       # Process weather once upfront
       epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
@@ -2125,13 +2125,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Misc
     @hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        obj_name = Constants.ObjectNameMiscPlugLoads
+        obj_name = Constants::ObjectTypeMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        obj_name = Constants.ObjectNameMiscTelevision
+        obj_name = Constants::ObjectTypeMiscTelevision
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
-        obj_name = Constants.ObjectNameMiscElectricVehicleCharging
+        obj_name = Constants::ObjectTypeMiscElectricVehicleCharging
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        obj_name = Constants.ObjectNameMiscWellPump
+        obj_name = Constants::ObjectTypeMiscWellPump
       end
       if obj_name.nil?
         runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
@@ -2153,11 +2153,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Misc
     @hpxml_bldg.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
-        obj_name = Constants.ObjectNameMiscGrill
+        obj_name = Constants::ObjectTypeMiscGrill
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
-        obj_name = Constants.ObjectNameMiscLighting
+        obj_name = Constants::ObjectTypeMiscLighting
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
-        obj_name = Constants.ObjectNameMiscFireplace
+        obj_name = Constants::ObjectTypeMiscFireplace
       end
       if obj_name.nil?
         runner.registerWarning("Unexpected fuel load type '#{fuel_load.fuel_load_type}'. The fuel load will not be modeled.")
@@ -2280,12 +2280,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Create HVAC availability sensor
     hvac_availability_sensor = nil
     if not @hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, Constants.ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
+      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
 
       hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       hvac_availability_sensor.setName('hvac availability s')
       hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
-      hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants.ObjectNameHVACAvailabilitySensor)
+      hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
     end
 
     Airflow.apply(model, runner, weather, spaces, @hpxml_header, @hpxml_bldg, @cfa,
@@ -2516,14 +2516,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       sim_year = @hpxml_header.sim_calendar_year
       season_day_nums[unit] = {
-        htg_start: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
-        htg_end: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
-        clg_start: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
-        clg_end: Schedule.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
+        htg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_begin_month, hvac_control.seasons_heating_begin_day),
+        htg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_heating_end_month, hvac_control.seasons_heating_end_day),
+        clg_start: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_begin_month, hvac_control.seasons_cooling_begin_day),
+        clg_end: Calendar.get_day_num_from_month_day(sim_year, hvac_control.seasons_cooling_end_month, hvac_control.seasons_cooling_end_day)
       }
     end
 
-    hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameHVACAvailabilitySensor }
+    hvac_availability_sensor = model.getEnergyManagementSystemSensors.find { |s| s.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeHVACAvailabilitySensor }
 
     # EMS program
     clg_hrs = 'clg_unmet_hours'
@@ -2532,7 +2532,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unit_htg_hrs = 'unit_htg_unmet_hours'
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet hours program')
-    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetHoursProgram)
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetHoursProgram)
     program.addLine("Set #{htg_hrs} = 0")
     program.addLine("Set #{clg_hrs} = 0")
     for unit in 0..hpxml_osm_map.size - 1
@@ -2664,7 +2664,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('total loads program')
-    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameTotalLoadsProgram)
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeTotalLoadsProgram)
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
     for unit in 0..hpxml_osm_map.size - 1
@@ -2731,7 +2731,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('component loads program')
-    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameComponentLoadsProgram)
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeComponentLoadsProgram)
 
     # Initialize
     [:htg, :clg].each do |mode|
@@ -2867,11 +2867,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           airflow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
           airflow_sensor.setName(name)
           airflow_sensor.setKeyName(i.name.to_s)
-          if object_type == Constants.ObjectNameInfiltration
+          if object_type == Constants::ObjectTypeInfiltration
             infil_sensors << airflow_sensor
-          elsif object_type == Constants.ObjectNameNaturalVentilation
+          elsif object_type == Constants::ObjectTypeNaturalVentilation
             natvent_sensors << airflow_sensor
-          elsif object_type == Constants.ObjectNameWholeHouseFan
+          elsif object_type == Constants::ObjectTypeWholeHouseFan
             whf_sensors << airflow_sensor
           end
         end
@@ -2880,7 +2880,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       # EMS Sensors: Mechanical Ventilation
       mechvents_sensors = []
       unit_model.getElectricEquipments.sort.each do |o|
-        next unless o.endUseSubcategory == Constants.ObjectNameMechanicalVentilation
+        next unless o.endUseSubcategory == Constants::ObjectTypeMechanicalVentilation
 
         objects_already_processed << o
         { 'Electric Equipment Convective Heating Energy' => 'mv_conv',
@@ -2892,7 +2892,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
       unit_model.getOtherEquipments.sort.each do |o|
-        next unless o.endUseSubcategory == Constants.ObjectNameMechanicalVentilationHouseFan
+        next unless o.endUseSubcategory == Constants::ObjectTypeMechanicalVentilationHouseFan
 
         objects_already_processed << o
         { 'Other Equipment Convective Heating Energy' => 'mv_conv',
@@ -2910,7 +2910,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       ducts_mix_loss_sensor = nil
       conditioned_zone.zoneMixing.each do |zone_mix|
         object_type = zone_mix.additionalProperties.getFeatureAsString('ObjectType').to_s
-        next unless object_type == Constants.ObjectNameDuctLoad
+        next unless object_type == Constants::ObjectTypeDuctLoad
 
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
         ducts_mix_gain_sensor.setName('duct_mix_gain')
@@ -2922,7 +2922,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       unit_model.getOtherEquipments.sort.each do |o|
         next if objects_already_processed.include? o
-        next unless o.endUseSubcategory == Constants.ObjectNameDuctLoad
+        next unless o.endUseSubcategory == Constants::ObjectTypeDuctLoad
 
         objects_already_processed << o
         { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
@@ -3165,17 +3165,17 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     whf_vars = []
     unit_multipliers = []
     hpxml_osm_map.each do |hpxml_bldg, unit_model|
-      infil_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameInfiltration }
-      mechvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameMechanicalVentilation }
-      natvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameNaturalVentilation }
-      whf_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameWholeHouseFan }
+      infil_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeInfiltration }
+      mechvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeMechanicalVentilation }
+      natvent_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeNaturalVentilation }
+      whf_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeWholeHouseFan }
       unit_multipliers << hpxml_bldg.building_construction.number_of_units
     end
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('total airflows program')
-    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameTotalAirflowsProgram)
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeTotalAirflowsProgram)
     program.addLine('Set total_infil_flow_rate = 0')
     program.addLine('Set total_mechvent_flow_rate = 0')
     program.addLine('Set total_natvent_flow_rate = 0')
@@ -3529,8 +3529,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     clg_end_month = hvac_control.seasons_cooling_end_month
     clg_end_day = hvac_control.seasons_cooling_end_day
 
-    @heating_days = Schedule.get_daily_season(@hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = Schedule.get_daily_season(@hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+    @heating_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
 
     if (htg_start_month != 1) || (htg_start_day != 1) || (htg_end_month != 12) || (htg_end_day != 31) || (clg_start_month != 1) || (clg_start_day != 1) || (clg_end_month != 12) || (clg_end_day != 31)
       runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.')

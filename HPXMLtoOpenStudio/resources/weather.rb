@@ -157,9 +157,9 @@ class WeatherFile
     data.MonthlyAvgDailyLowDrybulbs = []
 
     if daily_high_dbs.size == 365 # standard year
-      month_num_days = Constants.NumDaysInMonths(1999)
+      month_num_days = Calendar.num_days_in_months(1999)
     elsif daily_high_dbs.size == 366 # leap year
-      month_num_days = Constants.NumDaysInMonths(2000)
+      month_num_days = Calendar.num_days_in_months(2000)
     else
       fail "Unexpected number of days: #{daily_high_dbs.size}."
     end
@@ -376,7 +376,7 @@ class WeatherFile
 
     # Minimize distance to Station
     v1 = Vector[header.Latitude, header.Longitude]
-    dist = 1 / Constants.small
+    dist = 1 / Constants::Small
     temperatures_amplitudes = nil
     CSV.foreach(deep_ground_temperatures) do |row|
       v2 = Vector[row[3].to_f, row[4].to_f]

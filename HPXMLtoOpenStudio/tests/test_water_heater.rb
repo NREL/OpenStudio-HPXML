@@ -531,7 +531,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -604,7 +604,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -677,7 +677,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'PropyleneGlycol')
+      assert_equal(plant_loop.fluidType, EPlus::FluidPropyleneGlycol)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -750,7 +750,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -818,7 +818,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }

@@ -902,8 +902,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['utility_bill_wood_pellets_fixed_charges'] = '16, 17'
       args['utility_bill_wood_pellets_marginal_rates'] = '18, 19'
     elsif ['extra-seasons-building-america.xml'].include? hpxml_file
-      args['hvac_control_heating_season_period'] = HPXML::BuildingAmerica
-      args['hvac_control_cooling_season_period'] = HPXML::BuildingAmerica
+      args['hvac_control_heating_season_period'] = Constants::BuildingAmerica
+      args['hvac_control_cooling_season_period'] = Constants::BuildingAmerica
     elsif ['extra-ducts-crawlspace.xml'].include? hpxml_file
       args['geometry_foundation_type'] = HPXML::FoundationTypeCrawlspaceUnvented
       args['geometry_foundation_height'] = 4

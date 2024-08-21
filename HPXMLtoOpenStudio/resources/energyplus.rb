@@ -18,6 +18,8 @@ module EPlus
   EMSActuatorZoneMixingFlowRate = 'ZoneMixing', 'Air Exchange Flow Rate'
   EMSIntVarFanMFR = 'Fan Maximum Mass Flow Rate'
   EMSIntVarPumpMFR = 'Pump Maximum Mass Flow Rate'
+  FluidWater = 'Water'
+  FluidPropyleneGlycol = 'PropyleneGlycol'
   FuelTypeElectricity = 'Electricity'
   FuelTypeNaturalGas = 'NaturalGas'
   FuelTypeOil = 'FuelOilNo2'
@@ -25,6 +27,9 @@ module EPlus
   FuelTypeWoodCord = 'OtherFuel1'
   FuelTypeWoodPellets = 'OtherFuel2'
   FuelTypeCoal = 'Coal'
+  ScheduleTypeLimitsFraction = 'Fractional'
+  ScheduleTypeLimitsOnOff = 'OnOff'
+  ScheduleTypeLimitsTemperature = 'Temperature'
 
   # TODO
   #

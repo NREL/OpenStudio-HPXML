@@ -390,7 +390,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
       # Convert from EnergyPlus default (end-of-timestep) to start-of-timestep convention
       if args[:monthly_timestamp_convention] == 'start'
-        ts_offset = Constants.NumDaysInMonths(year)[month - 1] * 60 * 60 * 24 # seconds
+        ts_offset = Calendar.num_days_in_months(year)[month - 1] * 60 * 60 * 24 # seconds
       end
 
       ts = Time.utc(year, month, day, hour, minute)

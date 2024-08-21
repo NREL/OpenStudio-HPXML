@@ -1557,8 +1557,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     year = model.getYearDescription.assumedYear
 
     # Check heating season
-    start_day_num = Schedule.get_day_num_from_month_day(year, seasons_heating_begin_month, seasons_heating_begin_day)
-    end_day_num = Schedule.get_day_num_from_month_day(year, seasons_heating_end_month, seasons_heating_end_day)
+    start_day_num = Calendar.get_day_num_from_month_day(year, seasons_heating_begin_month, seasons_heating_begin_day)
+    end_day_num = Calendar.get_day_num_from_month_day(year, seasons_heating_end_month, seasons_heating_end_day)
     start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
     end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     heating_days = zone.sequentialHeatingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get
@@ -1575,8 +1575,8 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     assert_includes(end_dates, end_date)
 
     # Check cooling season
-    start_day_num = Schedule.get_day_num_from_month_day(year, seasons_cooling_begin_month, seasons_cooling_begin_day)
-    end_day_num = Schedule.get_day_num_from_month_day(year, seasons_cooling_end_month, seasons_cooling_end_day)
+    start_day_num = Calendar.get_day_num_from_month_day(year, seasons_cooling_begin_month, seasons_cooling_begin_day)
+    end_day_num = Calendar.get_day_num_from_month_day(year, seasons_cooling_end_month, seasons_cooling_end_day)
     start_date = OpenStudio::Date::fromDayOfYear(start_day_num, year)
     end_date = OpenStudio::Date::fromDayOfYear(end_day_num, year)
     cooling_days = zone.sequentialCoolingFractionSchedule(zone.airLoopHVACTerminals[0]).get.to_ScheduleRuleset.get

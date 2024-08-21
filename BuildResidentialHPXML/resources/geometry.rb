@@ -1256,7 +1256,7 @@ module Geometry
     door_offset = 0.5 # ft
 
     # Get all exterior walls prioritized by front, then back, then left, then right
-    facades = [Constants.FacadeFront, Constants.FacadeBack]
+    facades = [Constants::FacadeFront, Constants::FacadeBack]
     avail_walls = []
     facades.each do |_facade|
       sorted_spaces = model.getSpaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
@@ -1265,7 +1265,7 @@ module Geometry
 
         sorted_surfaces = space.surfaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
         sorted_surfaces.each do |surface|
-          next unless get_facade_for_surface(surface: surface) == Constants.FacadeFront
+          next unless get_facade_for_surface(surface: surface) == Constants::FacadeFront
           next unless (surface.outsideBoundaryCondition.downcase == 'outdoors') || (surface.outsideBoundaryCondition.downcase == 'adiabatic')
           next if (90 - surface.tilt * 180 / Math::PI).abs > 0.01 # Not a vertical wall
 
@@ -1326,20 +1326,20 @@ module Geometry
 
       # Convert to 3D geometry; assign to surface
       door_polygon = OpenStudio::Point3dVector.new
-      if facade == Constants.FacadeFront
+      if facade == Constants::FacadeFront
         multx = 1
         multy = 0
-      elsif facade == Constants.FacadeBack
+      elsif facade == Constants::FacadeBack
         multx = -1
         multy = 0
-      elsif facade == Constants.FacadeLeft
+      elsif facade == Constants::FacadeLeft
         multx = 0
         multy = -1
-      elsif facade == Constants.FacadeRight
+      elsif facade == Constants::FacadeRight
         multx = 0
         multy = 1
       end
-      if (facade == Constants.FacadeBack) || (facade == Constants.FacadeLeft)
+      if (facade == Constants::FacadeBack) || (facade == Constants::FacadeLeft)
         leftx = get_surface_x_values(surfaceArray: [min_story_avail_wall]).max
         lefty = get_surface_y_values(surfaceArray: [min_story_avail_wall]).max
       else
@@ -1405,31 +1405,31 @@ module Geometry
                                         skylight_area_left:,
                                         skylight_area_right:,
                                         **)
-    facades = [Constants.FacadeBack, Constants.FacadeRight, Constants.FacadeFront, Constants.FacadeLeft]
+    facades = [Constants::FacadeBack, Constants::FacadeRight, Constants::FacadeFront, Constants::FacadeLeft]
 
     wwrs = {}
-    wwrs[Constants.FacadeBack] = window_back_wwr
-    wwrs[Constants.FacadeRight] = window_right_wwr
-    wwrs[Constants.FacadeFront] = window_front_wwr
-    wwrs[Constants.FacadeLeft] = window_left_wwr
+    wwrs[Constants::FacadeBack] = window_back_wwr
+    wwrs[Constants::FacadeRight] = window_right_wwr
+    wwrs[Constants::FacadeFront] = window_front_wwr
+    wwrs[Constants::FacadeLeft] = window_left_wwr
     window_areas = {}
-    window_areas[Constants.FacadeBack] = window_area_back
-    window_areas[Constants.FacadeRight] = window_area_right
-    window_areas[Constants.FacadeFront] = window_area_front
-    window_areas[Constants.FacadeLeft] = window_area_left
+    window_areas[Constants::FacadeBack] = window_area_back
+    window_areas[Constants::FacadeRight] = window_area_right
+    window_areas[Constants::FacadeFront] = window_area_front
+    window_areas[Constants::FacadeLeft] = window_area_left
 
     skylight_areas = {}
-    skylight_areas[Constants.FacadeBack] = skylight_area_back
-    skylight_areas[Constants.FacadeRight] = skylight_area_right
-    skylight_areas[Constants.FacadeFront] = skylight_area_front
-    skylight_areas[Constants.FacadeLeft] = skylight_area_left
+    skylight_areas[Constants::FacadeBack] = skylight_area_back
+    skylight_areas[Constants::FacadeRight] = skylight_area_right
+    skylight_areas[Constants::FacadeFront] = skylight_area_front
+    skylight_areas[Constants::FacadeLeft] = skylight_area_left
     skylight_areas['none'] = 0
 
     # Store surfaces that should get windows by facade
-    wall_surfaces = { Constants.FacadeFront => [], Constants.FacadeBack => [],
-                      Constants.FacadeLeft => [], Constants.FacadeRight => [] }
-    roof_surfaces = { Constants.FacadeFront => [], Constants.FacadeBack => [],
-                      Constants.FacadeLeft => [], Constants.FacadeRight => [],
+    wall_surfaces = { Constants::FacadeFront => [], Constants::FacadeBack => [],
+                      Constants::FacadeLeft => [], Constants::FacadeRight => [] }
+    roof_surfaces = { Constants::FacadeFront => [], Constants::FacadeBack => [],
+                      Constants::FacadeLeft => [], Constants::FacadeRight => [],
                       'none' => [] }
 
     sorted_spaces = model.getSpaces.sort_by { |s| s.additionalProperties.getFeatureAsInteger('Index').get }
@@ -1602,19 +1602,19 @@ module Geometry
         leftx = skylight_bottom_left.x
         lefty = skylight_bottom_left.y
         bottomz = skylight_bottom_left.z
-        if (facade == Constants.FacadeFront) || (facade == 'none')
+        if (facade == Constants::FacadeFront) || (facade == 'none')
           skylight_top_left = OpenStudio::Point3d.new(leftx, lefty + Math.cos(surface.tilt) * skylight_length, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_top_right = OpenStudio::Point3d.new(leftx + skylight_width, lefty + Math.cos(surface.tilt) * skylight_length, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_bottom_right = OpenStudio::Point3d.new(leftx + skylight_width, lefty, bottomz)
-        elsif facade == Constants.FacadeBack
+        elsif facade == Constants::FacadeBack
           skylight_top_left = OpenStudio::Point3d.new(leftx, lefty - Math.cos(surface.tilt) * skylight_length, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_top_right = OpenStudio::Point3d.new(leftx - skylight_width, lefty - Math.cos(surface.tilt) * skylight_length, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_bottom_right = OpenStudio::Point3d.new(leftx - skylight_width, lefty, bottomz)
-        elsif facade == Constants.FacadeLeft
+        elsif facade == Constants::FacadeLeft
           skylight_top_left = OpenStudio::Point3d.new(leftx + Math.cos(surface.tilt) * skylight_length, lefty, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_top_right = OpenStudio::Point3d.new(leftx + Math.cos(surface.tilt) * skylight_length, lefty - skylight_width, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_bottom_right = OpenStudio::Point3d.new(leftx, lefty - skylight_width, bottomz)
-        elsif facade == Constants.FacadeRight
+        elsif facade == Constants::FacadeRight
           skylight_top_left = OpenStudio::Point3d.new(leftx - Math.cos(surface.tilt) * skylight_length, lefty, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_top_right = OpenStudio::Point3d.new(leftx - Math.cos(surface.tilt) * skylight_length, lefty + skylight_width, bottomz + Math.sin(surface.tilt) * skylight_length)
           skylight_bottom_right = OpenStudio::Point3d.new(leftx, lefty + skylight_width, bottomz)
@@ -1773,23 +1773,23 @@ module Geometry
     facade = nil
     if n.z.abs < tol
       if (n.x.abs < tol) && ((n.y + 1).abs < tol)
-        facade = Constants.FacadeFront
+        facade = Constants::FacadeFront
       elsif ((n.x - 1).abs < tol) && (n.y.abs < tol)
-        facade = Constants.FacadeRight
+        facade = Constants::FacadeRight
       elsif (n.x.abs < tol) && ((n.y - 1).abs < tol)
-        facade = Constants.FacadeBack
+        facade = Constants::FacadeBack
       elsif ((n.x + 1).abs < tol) && (n.y.abs < tol)
-        facade = Constants.FacadeLeft
+        facade = Constants::FacadeLeft
       end
     else
       if (n.x.abs < tol) && (n.y < 0)
-        facade = Constants.FacadeFront
+        facade = Constants::FacadeFront
       elsif (n.x > 0) && (n.y.abs < tol)
-        facade = Constants.FacadeRight
+        facade = Constants::FacadeRight
       elsif (n.x.abs < tol) && (n.y > 0)
-        facade = Constants.FacadeBack
+        facade = Constants::FacadeBack
       elsif (n.x < 0) && (n.y.abs < tol)
-        facade = Constants.FacadeLeft
+        facade = Constants::FacadeLeft
       end
     end
     return facade
@@ -1802,13 +1802,13 @@ module Geometry
   # @return [Double] the absolute azimuth based on relative azimuth of the facade and building orientation
   def self.get_azimuth_from_facade(facade:,
                                    orientation:)
-    if facade == Constants.FacadeFront
+    if facade == Constants::FacadeFront
       return get_abs_azimuth(relative_azimuth: 0, building_orientation: orientation)
-    elsif facade == Constants.FacadeBack
+    elsif facade == Constants::FacadeBack
       return get_abs_azimuth(relative_azimuth: 180, building_orientation: orientation)
-    elsif facade == Constants.FacadeLeft
+    elsif facade == Constants::FacadeLeft
       return get_abs_azimuth(relative_azimuth: 90, building_orientation: orientation)
-    elsif facade == Constants.FacadeRight
+    elsif facade == Constants::FacadeRight
       return get_abs_azimuth(relative_azimuth: 270, building_orientation: orientation)
     else
       fail 'Unexpected facade.'
@@ -1990,7 +1990,7 @@ module Geometry
             x = polygon_point.x - surface_point.x
             y = polygon_point.y - surface_point.y
             z = polygon_point.z - surface_point.z
-            num_points_matched += 1 if x.abs < Constants.small && y.abs < Constants.small && z.abs < Constants.small
+            num_points_matched += 1 if x.abs < Constants::Small && y.abs < Constants::Small && z.abs < Constants::Small
           end
         end
         next if num_points_matched < 2 # match at least 2 points of the footprint_polygon and you've found the correct wall surface
@@ -2290,20 +2290,20 @@ module Geometry
 
     # Convert to 3D geometry; assign to surface
     window_polygon = OpenStudio::Point3dVector.new
-    if facade == Constants.FacadeFront
+    if facade == Constants::FacadeFront
       multx = 1
       multy = 0
-    elsif facade == Constants.FacadeBack
+    elsif facade == Constants::FacadeBack
       multx = -1
       multy = 0
-    elsif facade == Constants.FacadeLeft
+    elsif facade == Constants::FacadeLeft
       multx = 0
       multy = -1
-    elsif facade == Constants.FacadeRight
+    elsif facade == Constants::FacadeRight
       multx = 0
       multy = 1
     end
-    if (facade == Constants.FacadeBack) || (facade == Constants.FacadeLeft)
+    if (facade == Constants::FacadeBack) || (facade == Constants::FacadeLeft)
       leftx = get_surface_x_values(surfaceArray: [surface]).max
       lefty = get_surface_y_values(surfaceArray: [surface]).max
     else

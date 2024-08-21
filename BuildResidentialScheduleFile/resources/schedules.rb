@@ -176,11 +176,11 @@ class ScheduleGenerator
     plugload_tv_monthly_multiplier = Schedule.validate_values(schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['PlugLoadsTVMonthlyMultipliers'], 12, 'monthly') # American Time Use Survey
     ceiling_fan_weekday_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekdayScheduleFractions'], 24, 'weekday') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
     ceiling_fan_weekend_sch = Schedule.validate_values(default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekendScheduleFractions'], 24, 'weekend') # Table C.3(5) of ANSI/RESNET/ICC 301-2022 Addendum C
-    ceiling_fan_monthly_multiplier = Schedule.validate_values(Schedule.CeilingFanMonthlyMultipliers(weather: weather), 12, 'monthly') # based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019
+    ceiling_fan_monthly_multiplier = Schedule.validate_values(HVAC.get_default_ceiling_fan_months(weather).join(', '), 12, 'monthly') # based on monthly average outdoor temperatures per ANSI/RESNET/ICC 301-2019
 
     sch = get_building_america_lighting_schedule(args[:time_zone_utc_offset], args[:latitude], args[:longitude], schedules_csv_data)
     interior_lighting_schedule = []
-    num_days_in_months = Constants.NumDaysInMonths(@sim_year)
+    num_days_in_months = Calendar.num_days_in_months(@sim_year)
     for month in 0..11
       interior_lighting_schedule << sch[month] * num_days_in_months[month]
     end
@@ -1000,7 +1000,7 @@ class ScheduleGenerator
     stdDevCons2 = 2.36567663279954
 
     monthly_kwh_per_day = []
-    days_m = Constants.NumDaysInMonths(1999) # Intentionally excluding leap year designation
+    days_m = Calendar.num_days_in_months(1999) # Intentionally excluding leap year designation
     wtd_avg_monthly_kwh_per_day = 0
     for monthNum in 1..12
       month = monthNum - 1

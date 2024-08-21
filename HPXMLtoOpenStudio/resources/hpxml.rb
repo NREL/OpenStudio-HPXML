@@ -72,7 +72,6 @@ class HPXML < Object
   BatteryTypeLithiumIon = 'Li-ion'
   BatteryLifetimeModelNone = 'None'
   BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
-  BuildingAmerica = 'BuildingAmerica'
   CapacityDescriptionMinimum = 'minimum'
   CapacityDescriptionMaximum = 'maximum'
   CertificationEnergyStar = 'Energy Star'

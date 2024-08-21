@@ -402,7 +402,7 @@ module Geometry
 
     # Explode neighbors
     model.getShadingSurfaceGroups.each do |shading_group|
-      next unless shading_group.name.to_s == Constants.ObjectNameNeighbors
+      next unless shading_group.name.to_s == Constants::ObjectTypeNeighbors
 
       shading_group.shadingSurfaces.each do |shading_surface|
         azimuth = shading_surface.additionalProperties.getFeatureAsInteger('Azimuth').get
@@ -517,7 +517,7 @@ module Geometry
       weekend_sch = hpxml_bldg.building_occupancy.weekend_fractions.split(',').map(&:to_f)
       weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
       monthly_sch = hpxml_bldg.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants::ObjectTypeOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
       people_sch = people_sch.schedule
     else
       runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.weekday_fractions.nil?
@@ -528,14 +528,14 @@ module Geometry
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
     activity_sch.setValue(activity_per_person)
-    activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
+    activity_sch.setName(Constants::ObjectTypeOccupants + ' activity schedule')
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
     occ = OpenStudio::Model::People.new(occ_def)
-    occ.setName(Constants.ObjectNameOccupants)
+    occ.setName(Constants::ObjectTypeOccupants)
     occ.setSpace(space)
-    occ_def.setName(Constants.ObjectNameOccupants)
+    occ_def.setName(Constants::ObjectTypeOccupants)
     occ_def.setNumberofPeople(num_occ)
     occ_def.setFractionRadiant(occ_rad)
     occ_def.setSensibleHeatFraction(occ_sens)
@@ -614,7 +614,7 @@ module Geometry
 
     unless shading_surfaces.empty?
       shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
-      shading_surface_group.setName(Constants.ObjectNameNeighbors)
+      shading_surface_group.setName(Constants::ObjectTypeNeighbors)
       shading_surfaces.each do |shading_surface|
         shading_surface.setShadingSurfaceGroup(shading_surface_group)
       end

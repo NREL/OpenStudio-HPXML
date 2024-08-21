@@ -195,7 +195,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_iecc_zone_choices = OpenStudio::StringVector.new
-    Constants.IECCZones.each do |iz|
+    Constants::IECCZones.each do |iz|
       site_iecc_zone_choices << iz
     end
 
@@ -210,7 +210,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     site_state_code_choices = OpenStudio::StringVector.new
-    Constants.StateCodesMap.keys.each do |sc|
+    Constants::StateCodesMap.keys.each do |sc|
       site_state_code_choices << sc
     end
 
@@ -1741,12 +1741,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_season_period', false)
     arg.setDisplayName('HVAC Control: Heating Season Period')
-    arg.setDescription("Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{HPXML::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
+    arg.setDescription("Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_season_period', false)
     arg.setDisplayName('HVAC Control: Cooling Season Period')
-    arg.setDescription("Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{HPXML::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
+    arg.setDescription("Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
@@ -3887,7 +3887,7 @@ module HPXMLFile
         return false
       end
 
-      eri_version = Constants.ERIVersions[-1]
+      eri_version = Constants::ERIVersions[-1]
       HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
@@ -3909,8 +3909,8 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [Boolean] True if we need to process the weather file
   def self.need_weather_based_on_args(args)
-    if (args[:hvac_control_heating_season_period].to_s == HPXML::BuildingAmerica) ||
-       (args[:hvac_control_cooling_season_period].to_s == HPXML::BuildingAmerica) ||
+    if (args[:hvac_control_heating_season_period].to_s == Constants::BuildingAmerica) ||
+       (args[:hvac_control_cooling_season_period].to_s == Constants::BuildingAmerica) ||
        (args[:solar_thermal_system_type] != 'none' && args[:solar_thermal_collector_tilt].start_with?('latitude')) ||
        (args[:pv_system_present] && args[:pv_system_array_tilt].start_with?('latitude')) ||
        (args[:pv_system_2_present] && args[:pv_system_2_array_tilt].start_with?('latitude')) ||
@@ -4073,7 +4073,7 @@ module HPXMLFile
     if not args[:schedules_vacancy_periods].nil?
       schedules_vacancy_periods = args[:schedules_vacancy_periods].split(',').map(&:strip)
       schedules_vacancy_periods.each do |schedules_vacancy_period|
-        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(schedules_vacancy_period)
+        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Calendar.parse_date_time_range(schedules_vacancy_period)
 
         if not unavailable_period_exists(hpxml, 'Vacancy', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
           hpxml.header.unavailable_periods.add(column_name: 'Vacancy', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: HPXML::ScheduleUnavailable)
@@ -4092,7 +4092,7 @@ module HPXMLFile
       schedules_power_outage_periods = schedules_power_outage_periods.zip(natvent_availabilities)
       schedules_power_outage_periods.each do |schedules_power_outage_period|
         outage_period, natvent_availability = schedules_power_outage_period
-        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Schedule.parse_date_time_range(outage_period)
+        begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Calendar.parse_date_time_range(outage_period)
 
         if not unavailable_period_exists(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
           hpxml.header.unavailable_periods.add(column_name: 'Power Outage', begin_month: begin_month, begin_day: begin_day, begin_hour: begin_hour, end_month: end_month, end_day: end_day, end_hour: end_hour, natvent_availability: natvent_availability)
@@ -4121,7 +4121,7 @@ module HPXMLFile
     end
 
     if not args[:simulation_control_run_period].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:simulation_control_run_period])
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:simulation_control_run_period])
       if (!hpxml.header.sim_begin_month.nil? && (hpxml.header.sim_begin_month != begin_month)) ||
          (!hpxml.header.sim_begin_day.nil? && (hpxml.header.sim_begin_day != begin_day)) ||
          (!hpxml.header.sim_end_month.nil? && (hpxml.header.sim_end_month != end_month)) ||
@@ -4483,7 +4483,7 @@ module HPXMLFile
   # @return [HPXML::Building] HPXML Building object representing an individual dwelling unit
   def self.add_building(hpxml, args)
     if not args[:simulation_control_daylight_saving_period].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:simulation_control_daylight_saving_period])
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:simulation_control_daylight_saving_period])
       dst_begin_month = begin_month
       dst_begin_day = begin_day
       dst_end_month = end_month
@@ -4574,10 +4574,10 @@ module HPXMLFile
   # @param args [Hash] Map of :argument_name => value
   # @return [nil]
   def self.set_neighbor_buildings(hpxml_bldg, args)
-    nbr_map = { Constants.FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
-                Constants.FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
-                Constants.FacadeLeft => [args[:neighbor_left_distance], args[:neighbor_left_height]],
-                Constants.FacadeRight => [args[:neighbor_right_distance], args[:neighbor_right_height]] }
+    nbr_map = { Constants::FacadeFront => [args[:neighbor_front_distance], args[:neighbor_front_height]],
+                Constants::FacadeBack => [args[:neighbor_back_distance], args[:neighbor_back_height]],
+                Constants::FacadeLeft => [args[:neighbor_left_distance], args[:neighbor_left_height]],
+                Constants::FacadeRight => [args[:neighbor_right_distance], args[:neighbor_right_height]] }
 
     nbr_map.each do |facade, data|
       distance, neighbor_height = data
@@ -4662,7 +4662,7 @@ module HPXMLFile
     hpxml_bldg.header.natvent_days_per_week = args[:window_natvent_availability]
 
     if not args[:window_shading_summer_season].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:window_shading_summer_season])
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:window_shading_summer_season])
       hpxml_bldg.header.shading_summer_begin_month = begin_month
       hpxml_bldg.header.shading_summer_begin_day = begin_day
       hpxml_bldg.header.shading_summer_end_month = end_month
@@ -5210,19 +5210,19 @@ module HPXMLFile
       sub_surface_height = Geometry.get_surface_height(surface: sub_surface)
       sub_surface_facade = Geometry.get_facade_for_surface(surface: sub_surface)
 
-      if (sub_surface_facade == Constants.FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
+      if (sub_surface_facade == Constants::FacadeFront) && ((args[:overhangs_front_depth] > 0) || args[:overhangs_front_distance_to_top_of_window] > 0)
         overhangs_depth = args[:overhangs_front_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_front_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants.FacadeBack) && ((args[:overhangs_back_depth] > 0) || args[:overhangs_back_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeBack) && ((args[:overhangs_back_depth] > 0) || args[:overhangs_back_distance_to_top_of_window] > 0)
         overhangs_depth = args[:overhangs_back_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_back_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants.FacadeLeft) && ((args[:overhangs_left_depth] > 0) || args[:overhangs_left_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeLeft) && ((args[:overhangs_left_depth] > 0) || args[:overhangs_left_distance_to_top_of_window] > 0)
         overhangs_depth = args[:overhangs_left_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_left_distance_to_bottom_of_window]
-      elsif (sub_surface_facade == Constants.FacadeRight) && ((args[:overhangs_right_depth] > 0) || args[:overhangs_right_distance_to_top_of_window] > 0)
+      elsif (sub_surface_facade == Constants::FacadeRight) && ((args[:overhangs_right_depth] > 0) || args[:overhangs_right_distance_to_top_of_window] > 0)
         overhangs_depth = args[:overhangs_right_depth]
         overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
         overhangs_distance_to_bottom_of_window = args[:overhangs_right_distance_to_bottom_of_window]
@@ -6216,12 +6216,12 @@ module HPXMLFile
 
       if not args[:hvac_control_heating_season_period].nil?
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period]
-        if hvac_control_heating_season_period == HPXML::BuildingAmerica
+        if hvac_control_heating_season_period == Constants::BuildingAmerica
           heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
-          begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
+          begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
-          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_heating_season_period)
+          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(hvac_control_heating_season_period)
         end
         seasons_heating_begin_month = begin_month
         seasons_heating_begin_day = begin_day
@@ -6245,12 +6245,12 @@ module HPXMLFile
 
       if not args[:hvac_control_cooling_season_period].nil?
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period]
-        if hvac_control_cooling_season_period == HPXML::BuildingAmerica
+        if hvac_control_cooling_season_period == Constants::BuildingAmerica
           _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
-          begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
+          begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
-          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(hvac_control_cooling_season_period)
+          begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(hvac_control_cooling_season_period)
         end
         seasons_cooling_begin_month = begin_month
         seasons_cooling_begin_day = begin_day
@@ -6822,7 +6822,7 @@ module HPXMLFile
     hpxml_bldg.lighting.holiday_kwh_per_day = args[:holiday_lighting_daily_kwh]
 
     if not args[:holiday_lighting_period].nil?
-      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Schedule.parse_date_time_range(args[:holiday_lighting_period])
+      begin_month, begin_day, _begin_hour, end_month, end_day, _end_hour = Calendar.parse_date_time_range(args[:holiday_lighting_period])
       hpxml_bldg.lighting.holiday_period_begin_month = begin_month
       hpxml_bldg.lighting.holiday_period_begin_day = begin_day
       hpxml_bldg.lighting.holiday_period_end_month = end_month

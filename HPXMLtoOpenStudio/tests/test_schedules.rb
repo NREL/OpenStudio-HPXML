@@ -45,7 +45,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_month_hrs.each do |unavailable_month, unavailable_hrs|
       total_unavailable_hrs += unavailable_hrs * mults[unavailable_month]
     end
-    return 1.0 - (total_unavailable_hrs / Constants.NumHoursInYear(@year))
+    return 1.0 - (total_unavailable_hrs / Calendar.num_hours_in_year(@year))
   end
 
   def test_default_schedules
@@ -64,18 +64,18 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(schedule_files, model.getScheduleFiles.size)
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
 
-    assert_in_epsilon(4451, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), @tol)
-    assert_in_epsilon(2764, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
-    assert_in_epsilon(4342, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
-    assert_in_epsilon(2724, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'), @tol)
-    assert_in_epsilon(3288, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'), @tol)
-    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher + ' schedule'), @tol)
-    assert_in_epsilon(4502, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer + ' schedule'), @tol)
-    assert_in_epsilon(7157, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), @tol)
-    assert_in_epsilon(2765, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), @tol)
-    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures + ' schedule'), @tol)
-    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameGeneralWaterUse + ' schedule'), @tol)
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(4451, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
+    assert_in_epsilon(2764, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'), @tol)
+    assert_in_epsilon(4342, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(2724, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'), @tol)
+    assert_in_epsilon(3288, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeDishwasher + ' schedule'), @tol)
+    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesWasher + ' schedule'), @tol)
+    assert_in_epsilon(4502, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesDryer + ' schedule'), @tol)
+    assert_in_epsilon(7157, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscPlugLoads + ' schedule'), @tol)
+    assert_in_epsilon(2765, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscTelevision + ' schedule'), @tol)
+    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeFixtures + ' schedule'), @tol)
+    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeGeneralWaterUse + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
   end
 
   def test_simple_schedules
@@ -94,20 +94,20 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(schedule_files, model.getScheduleFiles.size)
     assert_equal(model.getSchedules.size, schedule_constants + schedule_rulesets + schedule_fixed_intervals + schedule_files)
 
-    assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), @tol)
-    assert_in_epsilon(3049, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
-    assert_in_epsilon(2895, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
-    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator + ' schedule'), @tol)
-    assert_in_epsilon(2441, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'), @tol)
-    assert_in_epsilon(3285, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'), @tol)
-    assert_in_epsilon(4248, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher + ' schedule'), @tol)
-    assert_in_epsilon(4502, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer + ' schedule'), @tol)
-    assert_in_epsilon(6880, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), @tol)
-    assert_in_epsilon(3373, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), @tol)
-    assert_in_epsilon(4204, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures + ' schedule'), @tol)
-    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameHotWaterRecircPump + ' schedule'), @tol)
-    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameGeneralWaterUse + ' schedule'), @tol)
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
+    assert_in_epsilon(3049, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'), @tol)
+    assert_in_epsilon(2895, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeRefrigerator + ' schedule'), @tol)
+    assert_in_epsilon(2441, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'), @tol)
+    assert_in_epsilon(3285, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeDishwasher + ' schedule'), @tol)
+    assert_in_epsilon(4248, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesWasher + ' schedule'), @tol)
+    assert_in_epsilon(4502, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesDryer + ' schedule'), @tol)
+    assert_in_epsilon(6880, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscPlugLoads + ' schedule'), @tol)
+    assert_in_epsilon(3373, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscTelevision + ' schedule'), @tol)
+    assert_in_epsilon(4204, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeFixtures + ' schedule'), @tol)
+    assert_in_epsilon(4244, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeHotWaterRecircPump + ' schedule'), @tol)
+    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeGeneralWaterUse + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
   end
 
   def test_simple_vacancy_schedules
@@ -117,20 +117,20 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     unavailable_month_hrs = { 0 => 31.0 * 24.0, 11 => 31.0 * 24.0 }
 
-    assert_in_epsilon(6020 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), @tol)
-    assert_in_epsilon(3049 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
-    assert_in_epsilon(2895 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
-    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator + ' schedule'), @tol)
-    assert_in_epsilon(2441 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'), @tol)
-    assert_in_epsilon(3285 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'), @tol)
-    assert_in_epsilon(4248 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher + ' schedule'), @tol)
-    assert_in_epsilon(4502 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer + ' schedule'), @tol)
-    assert_in_epsilon(6880 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), @tol)
-    assert_in_epsilon(3373 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), @tol)
-    assert_in_epsilon(4204 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures + ' schedule'), @tol)
-    assert_in_epsilon(4244 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameHotWaterRecircPump + ' schedule'), @tol)
-    assert_in_epsilon(5000 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameGeneralWaterUse + ' schedule'), @tol)
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(6020 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
+    assert_in_epsilon(3049 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'), @tol)
+    assert_in_epsilon(2895 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeRefrigerator + ' schedule'), @tol)
+    assert_in_epsilon(2441 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'), @tol)
+    assert_in_epsilon(3285 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeDishwasher + ' schedule'), @tol)
+    assert_in_epsilon(4248 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesWasher + ' schedule'), @tol)
+    assert_in_epsilon(4502 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesDryer + ' schedule'), @tol)
+    assert_in_epsilon(6880 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscPlugLoads + ' schedule'), @tol)
+    assert_in_epsilon(3373 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscTelevision + ' schedule'), @tol)
+    assert_in_epsilon(4204 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeFixtures + ' schedule'), @tol)
+    assert_in_epsilon(4244 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeHotWaterRecircPump + ' schedule'), @tol)
+    assert_in_epsilon(5000 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeGeneralWaterUse + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
   end
 
   def test_simple_vacancy_year_round_schedules
@@ -145,20 +145,20 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     args_hash['hpxml_path'] = @tmp_hpxml_path
     model, _hpxml, _hpxml_bldg = _test_measure(args_hash)
 
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'))
-    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator + ' schedule'), @tol)
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameHotWaterRecircPump + ' schedule'))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameGeneralWaterUse + ' schedule'))
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'))
+    assert_in_epsilon(6673, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeRefrigerator + ' schedule'), @tol)
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeDishwasher + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesWasher + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesDryer + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscPlugLoads + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscTelevision + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeFixtures + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeHotWaterRecircPump + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeGeneralWaterUse + ' schedule'))
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
   end
 
   def test_simple_power_outage_schedules
@@ -168,20 +168,20 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
 
     unavailable_month_hrs = { 6 => 31.0 * 24.0 - 15.0 }
 
-    assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameOccupants + ' schedule'), @tol)
-    assert_in_epsilon(3049 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingInterior + ' schedule'), @tol)
-    assert_in_epsilon(2895 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
-    assert_in_epsilon(6673 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameRefrigerator + ' schedule'), @tol)
-    assert_in_epsilon(2441 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameCookingRange + ' schedule'), @tol)
-    assert_in_epsilon(3285 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameDishwasher + ' schedule'), @tol)
-    assert_in_epsilon(4248 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesWasher + ' schedule'), @tol)
-    assert_in_epsilon(4502 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameClothesDryer + ' schedule'), @tol)
-    assert_in_epsilon(6880 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscPlugLoads + ' schedule'), @tol)
-    assert_in_epsilon(3373 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMiscTelevision + ' schedule'), @tol)
-    assert_in_epsilon(4204 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameFixtures + ' schedule'), @tol)
-    assert_in_epsilon(4244 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameHotWaterRecircPump + ' schedule'), @tol)
-    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameGeneralWaterUse + ' schedule'), @tol)
-    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(6020, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeOccupants + ' schedule'), @tol)
+    assert_in_epsilon(3049 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingInterior + ' schedule'), @tol)
+    assert_in_epsilon(2895 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(6673 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeRefrigerator + ' schedule'), @tol)
+    assert_in_epsilon(2441 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeCookingRange + ' schedule'), @tol)
+    assert_in_epsilon(3285 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeDishwasher + ' schedule'), @tol)
+    assert_in_epsilon(4248 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesWasher + ' schedule'), @tol)
+    assert_in_epsilon(4502 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeClothesDryer + ' schedule'), @tol)
+    assert_in_epsilon(6880 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscPlugLoads + ' schedule'), @tol)
+    assert_in_epsilon(3373 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMiscTelevision + ' schedule'), @tol)
+    assert_in_epsilon(4204 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeFixtures + ' schedule'), @tol)
+    assert_in_epsilon(4244 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeHotWaterRecircPump + ' schedule'), @tol)
+    assert_in_epsilon(5000, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeGeneralWaterUse + ' schedule'), @tol)
+    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
   end
 
   def test_stochastic_schedules
@@ -213,7 +213,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:LightingGarage].name))
     assert_in_epsilon(2086, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:LightingExterior].name))
-    assert_in_epsilon(4342, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(4342, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:LightingExteriorHoliday].name))
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:Refrigerator].name))
     assert(schedule_file_names.include?(SchedulesFile::Columns[:CookingRange].name))
@@ -237,7 +237,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert(schedule_file_names.include?(SchedulesFile::Columns[:HotWaterFixtures].name))
     assert_in_epsilon(887, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:GeneralWaterUse].name))
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!schedule_file_names.include?(SchedulesFile::Columns[:Sleeping].name))
     assert(!schedule_file_names.include?('Vacancy'))
     assert(!schedule_file_names.include?('Power Outage'))
@@ -267,7 +267,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(6689 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(534 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(213 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(134 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, schedules: sf.tmp_schedules), @tol)
@@ -278,7 +278,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(273 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
     assert_in_epsilon(unavailable_month_hrs.values.sum, sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), 0.001)
   end
@@ -325,7 +325,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(6689 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(534 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(213 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(134 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, schedules: sf.tmp_schedules), @tol)
@@ -336,7 +336,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(273 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
     assert_in_epsilon(unavailable_month_hrs.values.sum, sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), 0.001)
   end
@@ -369,7 +369,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules))
-    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'))
+    assert_equal(0, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, schedules: sf.tmp_schedules))
@@ -380,9 +380,9 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules))
     assert_equal(0, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules))
-    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760, get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
-    assert_in_epsilon(Constants.NumHoursInYear(@year), sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), @tol)
+    assert_in_epsilon(Calendar.num_hours_in_year(@year), sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), @tol)
   end
 
   def test_stochastic_power_outage_schedules
@@ -409,7 +409,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(534 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(213 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(134 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, schedules: sf.tmp_schedules), @tol)
@@ -420,7 +420,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(273 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
     assert_in_epsilon(unavailable_month_hrs.values.sum, sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), 0.001)
   end
@@ -469,7 +469,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(6689, sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Occupants].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingInterior].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(2086 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:LightingGarage].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameLightingExterior + ' schedule'), @tol)
+    assert_in_epsilon(4342 * get_available_hrs_ratio(unavailable_month_hrs, @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeLightingExterior + ' schedule'), @tol)
     assert_in_epsilon(534 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:CookingRange].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(213 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:Dishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(134 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:ClothesWasher].name, schedules: sf.tmp_schedules), @tol)
@@ -480,7 +480,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     assert_in_epsilon(273 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterDishwasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(346 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterClothesWasher].name, schedules: sf.tmp_schedules), @tol)
     assert_in_epsilon(887 - sf.period_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, period: unavailable_period), sf.annual_equivalent_full_load_hrs(col_name: SchedulesFile::Columns[:HotWaterFixtures].name, schedules: sf.tmp_schedules), @tol)
-    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants.ObjectNameMechanicalVentilationHouseFan + ' schedule'), @tol)
+    assert_in_epsilon(8760 * get_available_hrs_ratio(unavailable_month_hrs), get_annual_equivalent_full_load_hrs(model, Constants::ObjectTypeMechanicalVentilationHouseFan + ' schedule'), @tol)
     assert(!sf.schedules.keys.include?(SchedulesFile::Columns[:Sleeping].name))
     assert_in_epsilon(unavailable_month_hrs.values.sum, sf.annual_equivalent_full_load_hrs(col_name: column_name, schedules: sf.tmp_schedules), 0.001)
   end
@@ -496,7 +496,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 31
     end_hour = 24
 
-    sch_name = Constants.ObjectNameLightingInterior + ' schedule'
+    sch_name = Constants::ObjectTypeLightingInterior + ' schedule'
 
     # hours not specified
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
@@ -615,7 +615,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_hour = 24
     natvent_availability = HPXML::ScheduleRegular
 
-    sch_name = "#{Constants.ObjectNameNaturalVentilation} schedule"
+    sch_name = "#{Constants::ObjectTypeNaturalVentilation} schedule"
 
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear
@@ -680,7 +680,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     end_day = 30
     end_hour = 24
 
-    sch_name = Constants.ObjectNameLightingInterior + ' schedule'
+    sch_name = Constants::ObjectTypeLightingInterior + ' schedule'
 
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
     year = model.getYearDescription.assumedYear

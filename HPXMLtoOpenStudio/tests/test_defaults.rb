@@ -444,7 +444,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_occupancy_values(default_hpxml_bldg, @default_schedules_csv_data[Constants.ObjectNameOccupants]['WeekdayScheduleFractions'], @default_schedules_csv_data[Constants.ObjectNameOccupants]['WeekendScheduleFractions'], @default_schedules_csv_data[Constants.ObjectNameOccupants]['MonthlyScheduleMultipliers'],
+    _test_default_occupancy_values(default_hpxml_bldg, @default_schedules_csv_data[Constants::ObjectTypeOccupants]['WeekdayScheduleFractions'], @default_schedules_csv_data[Constants::ObjectTypeOccupants]['WeekendScheduleFractions'], @default_schedules_csv_data[Constants::ObjectTypeOccupants]['MonthlyScheduleMultipliers'],
                                    @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekdayScheduleFractions'], @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekendScheduleFractions'], @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseMonthlyScheduleMultipliers'], 1.0)
   end
 
