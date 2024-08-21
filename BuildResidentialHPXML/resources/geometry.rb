@@ -1147,10 +1147,10 @@ module Geometry
 
         surfaces = space.surfaces
         surfaces.each do |surface|
-          next unless surface.surfaceType.downcase == 'wall'
+          next if surface.surfaceType.downcase != 'wall' # skip if not a wall surface
 
           os_facade = get_facade_for_surface(surface: surface)
-          if adb_facades.include?(os_facade) && (os_facade != 'RoofCeiling') && (os_facade != 'Floor')
+          if adb_facades.include?(os_facade)
             surface.setOutsideBoundaryCondition('Adiabatic')
           elsif get_surface_z_values(surfaceArray: [surface]).min < 0
             surface.setOutsideBoundaryCondition('Foundation') if foundation_type != HPXML::FoundationTypeAmbient
