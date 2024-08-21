@@ -54,7 +54,9 @@ module EPlus
   # @return [String] EnergyPlus fuel type (EPlus::FuelTypeXXX)
   def self.fuel_type(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
-    if [HPXML::FuelTypeElectricity].include? hpxml_fuel
+    if hpxml_fuel.nil?
+      return FuelTypeNone
+    elsif [HPXML::FuelTypeElectricity].include? hpxml_fuel
       return FuelTypeElectricity
     elsif [HPXML::FuelTypeNaturalGas].include? hpxml_fuel
       return FuelTypeNaturalGas

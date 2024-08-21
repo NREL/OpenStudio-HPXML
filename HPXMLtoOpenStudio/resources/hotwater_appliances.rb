@@ -1082,11 +1082,7 @@ module HotWaterAndAppliances
     oe = OpenStudio::Model::OtherEquipment.new(oe_def)
     oe.setName(obj_name)
     oe.setEndUseSubcategory(obj_name)
-    if fuel_type.nil?
-      oe.setFuelType(EPlus::FuelTypeNone)
-    else
-      oe.setFuelType(EPlus.fuel_type(fuel_type))
-    end
+    oe.setFuelType(EPlus.fuel_type(fuel_type))
     oe.setSpace(space)
     oe_def.setName(obj_name)
     oe_def.setDesignLevel(design_level_w)

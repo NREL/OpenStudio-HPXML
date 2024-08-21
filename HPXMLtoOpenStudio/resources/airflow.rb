@@ -847,11 +847,7 @@ module Airflow
     other_equip_def.setName("#{name} equip")
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
     other_equip.setName(other_equip_def.name.to_s)
-    if hpxml_fuel_type.nil?
-      other_equip.setFuelType(EPlus::FuelTypeNone)
-    else
-      other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
-    end
+    other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
     if not end_use.nil?
       other_equip.setEndUseSubcategory(end_use)
     end
