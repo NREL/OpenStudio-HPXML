@@ -1083,7 +1083,7 @@ module HotWaterAndAppliances
     oe.setName(obj_name)
     oe.setEndUseSubcategory(obj_name)
     if fuel_type.nil?
-      oe.setFuelType('None')
+      oe.setFuelType(EPlus::FuelTypeNone)
     else
       oe.setFuelType(EPlus.fuel_type(fuel_type))
     end

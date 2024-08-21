@@ -3,6 +3,11 @@
 # TODO
 module EPlus
   # Constants
+  BoundaryConditionAdiabatic = 'Adiabatic'
+  BoundaryConditionFoundation = 'Foundation'
+  BoundaryConditionGround = 'Ground'
+  BoundaryConditionOutdoors = 'Outdoors'
+  BoundaryConditionSurface = 'Surface'
   EMSActuatorElectricEquipmentPower = 'ElectricEquipment', 'Electricity Rate'
   EMSActuatorOtherEquipmentPower = 'OtherEquipment', 'Power Level'
   EMSActuatorPumpMassFlowRate = 'Pump', 'Pump Mass Flow Rate'
@@ -18,18 +23,28 @@ module EPlus
   EMSActuatorZoneMixingFlowRate = 'ZoneMixing', 'Air Exchange Flow Rate'
   EMSIntVarFanMFR = 'Fan Maximum Mass Flow Rate'
   EMSIntVarPumpMFR = 'Pump Maximum Mass Flow Rate'
-  FluidWater = 'Water'
   FluidPropyleneGlycol = 'PropyleneGlycol'
+  FluidWater = 'Water'
+  FuelTypeCoal = 'Coal'
   FuelTypeElectricity = 'Electricity'
   FuelTypeNaturalGas = 'NaturalGas'
+  FuelTypeNone = 'None'
   FuelTypeOil = 'FuelOilNo2'
   FuelTypePropane = 'Propane'
   FuelTypeWoodCord = 'OtherFuel1'
   FuelTypeWoodPellets = 'OtherFuel2'
-  FuelTypeCoal = 'Coal'
   ScheduleTypeLimitsFraction = 'Fractional'
   ScheduleTypeLimitsOnOff = 'OnOff'
   ScheduleTypeLimitsTemperature = 'Temperature'
+  SubSurfaceTypeDoor = 'Door'
+  SubSurfaceTypeWindow = 'FixedWindow'
+  SurfaceSunExposureNo = 'NoSun'
+  SurfaceSunExposureYes = 'SunExposed'
+  SurfaceTypeFloor = 'Floor'
+  SurfaceTypeRoofCeiling = 'RoofCeiling'
+  SurfaceTypeWall = 'Wall'
+  SurfaceWindExposureNo = 'NoWind'
+  SurfaceWindExposureYes = 'WindExposed'
 
   # TODO
   #

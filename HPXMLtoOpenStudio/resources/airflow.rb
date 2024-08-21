@@ -820,9 +820,9 @@ module Airflow
       end
 
       surface.setConstruction(@adiabatic_const)
-      surface.setOutsideBoundaryCondition('Adiabatic')
-      surface.setSunExposure('NoSun')
-      surface.setWindExposure('NoWind')
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
+      surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+      surface.setWindExposure(EPlus::SurfaceWindExposureNo)
       surface_property_convection_coefficients = OpenStudio::Model::SurfacePropertyConvectionCoefficients.new(surface)
       surface_property_convection_coefficients.setConvectionCoefficient1Location('Inside')
       surface_property_convection_coefficients.setConvectionCoefficient1Type('Value')
@@ -848,7 +848,7 @@ module Airflow
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
     other_equip.setName(other_equip_def.name.to_s)
     if hpxml_fuel_type.nil?
-      other_equip.setFuelType('None')
+      other_equip.setFuelType(EPlus::FuelTypeNone)
     else
       other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
     end

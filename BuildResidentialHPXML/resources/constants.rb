@@ -7,4 +7,12 @@ module Constants
   FacadeBack = 'back'
   FacadeLeft = 'left'
   FacadeRight = 'right'
+  FacadeNone = 'none'
+  LocationInterior = 'interior'
+  LocationExterior = 'exterior'
+  None = 'none'
+  PositionRight = 'Right'
+  PositionLeft = 'Left'
+  RoofTypeGable = 'gable'
+  RoofTypeHip = 'hip'
 end

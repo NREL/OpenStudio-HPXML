@@ -726,8 +726,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         else
           surface.setName(roof.id)
         end
-        surface.setSurfaceType('RoofCeiling')
-        surface.setOutsideBoundaryCondition('Outdoors')
+        surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
+        surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
         set_surface_interior(model, spaces, surface, roof)
       end
 
@@ -842,12 +842,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         else
           surface.setName(wall.id)
         end
-        surface.setSurfaceType('Wall')
+        surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, wall)
         set_surface_exterior(model, spaces, surface, wall)
         if wall.is_interior
-          surface.setSunExposure('NoSun')
-          surface.setWindExposure('NoWind')
+          surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+          surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
       end
 
@@ -918,12 +918,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         else
           surface.setName(rim_joist.id)
         end
-        surface.setSurfaceType('Wall')
+        surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, rim_joist)
         set_surface_exterior(model, spaces, surface, rim_joist)
         if rim_joist.is_interior
-          surface.setSunExposure('NoSun')
-          surface.setWindExposure('NoWind')
+          surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+          surface.setWindExposure(EPlus::SurfaceWindExposureNo)
         end
       end
 
@@ -992,14 +992,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       set_surface_exterior(model, spaces, surface, floor)
       surface.setName(floor.id)
       if floor.is_interior
-        surface.setSunExposure('NoSun')
-        surface.setWindExposure('NoWind')
+        surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+        surface.setWindExposure(EPlus::SurfaceWindExposureNo)
       elsif floor.is_floor
-        surface.setSunExposure('NoSun')
+        surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         if floor.exterior_adjacent_to == HPXML::LocationManufacturedHomeUnderBelly
           foundation = @hpxml_bldg.foundations.find { |x| x.to_location == floor.exterior_adjacent_to }
           if foundation.belly_wing_skirt_present
-            surface.setWindExposure('NoWind')
+            surface.setWindExposure(EPlus::SurfaceWindExposureNo)
           end
         end
       end
@@ -1025,7 +1025,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           # Raised floor
           inside_film = Material.AirFilmFloorASHRAE140
           outside_film = Material.AirFilmFloorZeroWindASHRAE140
-          surface.setWindExposure('NoWind')
+          surface.setWindExposure(EPlus::SurfaceWindExposureNo)
           mat_int_finish_or_covering = Material.CoveringBare(1.0)
         else
           inside_film = Material.AirFilmFloorReduced
@@ -1128,11 +1128,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
         surface.setName(fnd_wall.id)
-        surface.setSurfaceType('Wall')
+        surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, fnd_wall)
         set_surface_exterior(model, spaces, surface, fnd_wall)
-        surface.setSunExposure('NoSun')
-        surface.setWindExposure('NoWind')
+        surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+        surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
         # Apply construction
 
@@ -1208,7 +1208,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     surface.additionalProperties.setFeature('Tilt', 90.0)
     surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
     surface.setName(foundation_wall.id)
-    surface.setSurfaceType('Wall')
+    surface.setSurfaceType(EPlus::SurfaceTypeWall)
     set_surface_interior(model, spaces, surface, foundation_wall)
     set_surface_exterior(model, spaces, surface, foundation_wall)
 
@@ -1285,12 +1285,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     vertices = Geometry.create_floor_vertices(length: slab_length, width: slab_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     surface = OpenStudio::Model::Surface.new(vertices, model)
     surface.setName(slab.id)
-    surface.setSurfaceType('Floor')
-    surface.setOutsideBoundaryCondition('Foundation')
+    surface.setSurfaceType(EPlus::SurfaceTypeFloor)
+    surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionFoundation)
     surface.additionalProperties.setFeature('SurfaceType', 'Slab')
     set_surface_interior(model, spaces, surface, slab)
-    surface.setSunExposure('NoSun')
-    surface.setWindExposure('NoWind')
+    surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+    surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
     slab_perim_r = slab.perimeter_insulation_r_value
     slab_perim_depth = slab.perimeter_insulation_depth
@@ -1396,12 +1396,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     vertices = Geometry.create_floor_vertices(length: floor_length, width: floor_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     floor_surface = OpenStudio::Model::Surface.new(vertices, model)
 
-    floor_surface.setSunExposure('NoSun')
-    floor_surface.setWindExposure('NoWind')
+    floor_surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+    floor_surface.setWindExposure(EPlus::SurfaceWindExposureNo)
     floor_surface.setName('inferred conditioned floor')
-    floor_surface.setSurfaceType('Floor')
+    floor_surface.setSurfaceType(EPlus::SurfaceTypeFloor)
     floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
-    floor_surface.setOutsideBoundaryCondition('Adiabatic')
+    floor_surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
     floor_surface.additionalProperties.setFeature('Tilt', 0.0)
 
@@ -1409,12 +1409,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     vertices = Geometry.create_ceiling_vertices(length: floor_length, width: floor_width, z_origin: z_origin, default_azimuths: @default_azimuths)
     ceiling_surface = OpenStudio::Model::Surface.new(vertices, model)
 
-    ceiling_surface.setSunExposure('NoSun')
-    ceiling_surface.setWindExposure('NoWind')
+    ceiling_surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+    ceiling_surface.setWindExposure(EPlus::SurfaceWindExposureNo)
     ceiling_surface.setName('inferred conditioned ceiling')
-    ceiling_surface.setSurfaceType('RoofCeiling')
+    ceiling_surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
     ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
-    ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
+    ceiling_surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
     ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
 
@@ -1487,14 +1487,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'Window')
         surface.setName("surface #{window.id}")
-        surface.setSurfaceType('Wall')
+        surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, window.wall)
 
         vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
-        sub_surface.setSubSurfaceType('FixedWindow')
+        sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeWindow)
 
         set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
@@ -1523,14 +1523,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'Door')
         surface.setName("surface #{window.id}")
-        surface.setSurfaceType('Wall')
+        surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, window.wall)
 
         vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
-        sub_surface.setSubSurfaceType('Door')
+        sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeDoor)
 
         set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
@@ -1596,9 +1596,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('Tilt', tilt)
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
-      surface.setSurfaceType('RoofCeiling')
+      surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
-      surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors) # cannot be adiabatic because subsurfaces won't be created
 
       vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
@@ -1629,11 +1629,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('Tilt', 90.0)
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id} shaft")
-      surface.setSurfaceType('Wall')
+      surface.setSurfaceType(EPlus::SurfaceTypeWall)
       set_surface_interior(model, spaces, surface, skylight.floor)
       set_surface_exterior(model, spaces, surface, skylight.floor)
-      surface.setSunExposure('NoSun')
-      surface.setWindExposure('NoWind')
+      surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+      surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
       # Apply construction
       shaft_assembly_r_value = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
@@ -1669,14 +1669,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('Tilt', 90.0)
       surface.additionalProperties.setFeature('SurfaceType', 'Door')
       surface.setName("surface #{door.id}")
-      surface.setSurfaceType('Wall')
+      surface.setSurfaceType(EPlus::SurfaceTypeWall)
       set_surface_interior(model, spaces, surface, door.wall)
 
       vertices = Geometry.create_wall_vertices(length: door_length, height: door_height, z_origin: z_origin, azimuth: door.azimuth)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
       sub_surface.setName(door.id)
       sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('Door')
+      sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeDoor)
 
       set_subsurface_exterior(surface, spaces, model, door.wall)
       surfaces << surface
@@ -3264,11 +3264,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
     if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
-      surface.setOutsideBoundaryCondition('Outdoors')
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
     elsif exterior_adjacent_to == HPXML::LocationGround
-      surface.setOutsideBoundaryCondition('Foundation')
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionFoundation)
     elsif is_adiabatic
-      surface.setOutsideBoundaryCondition('Adiabatic')
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
@@ -3305,8 +3305,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       otherside_coeffs.setConstantTemperatureSchedule(sch)
     end
     surface.setSurfacePropertyOtherSideCoefficients(otherside_coeffs)
-    surface.setSunExposure('NoSun')
-    surface.setWindExposure('NoWind')
+    surface.setSunExposure(EPlus::SurfaceSunExposureNo)
+    surface.setWindExposure(EPlus::SurfaceWindExposureNo)
   end
 
   # TODO
@@ -3487,7 +3487,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Subsurface on foundation wall, set it to be adjacent to outdoors
     if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
-      surface.setOutsideBoundaryCondition('Outdoors')
+      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
     else
       set_surface_exterior(model, spaces, surface, hpxml_surface)
     end
