@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Annual constant schedule.
+# Annual constant schedule object.
 class ScheduleConstant
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -27,9 +27,9 @@ class ScheduleConstant
   # @return [OpenStudio::Model::ScheduleConstant or OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with constant schedule
   def create_schedule(model, sch_name, val, year, schedule_type_limits_name, unavailable_periods)
     if unavailable_periods.empty?
-      if val == 1.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
+      if val == 1.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == EPlus::ScheduleTypeLimitsOnOff)
         schedule = model.alwaysOnDiscreteSchedule
-      elsif val == 0.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff)
+      elsif val == 0.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == EPlus::ScheduleTypeLimitsOnOff)
         schedule = model.alwaysOffDiscreteSchedule
       else
         schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -56,7 +56,7 @@ class ScheduleConstant
   end
 end
 
-# Annual schedule defined by 12 24-hour values for weekdays and weekends.
+# Annual schedule object defined by 12 24-hour values for weekdays and weekends.
 class HourlyByMonthSchedule
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -133,8 +133,8 @@ class HourlyByMonthSchedule
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [OpenStudio::Model::Ruleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, schedule_type_limits_name, unavailable_periods)
-    day_startm = Schedule.day_start_months(year)
-    day_endm = Schedule.day_end_months(year)
+    day_startm = Calendar.day_start_months(year)
+    day_endm = Calendar.day_end_months(year)
 
     time = []
     for h in 1..24
@@ -231,7 +231,7 @@ class HourlyByMonthSchedule
   end
 end
 
-# Annual schedule defined by 365 24-hour values for weekdays and weekends.
+# Annual schedule object defined by 365 24-hour values for weekdays and weekends.
 class HourlyByDaySchedule
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -242,7 +242,7 @@ class HourlyByDaySchedule
   def initialize(model, sch_name, weekday_day_by_hour_values, weekend_day_by_hour_values,
                  schedule_type_limits_name = nil, normalize_values = true, unavailable_periods: nil)
     year = model.getYearDescription.assumedYear
-    num_days = Constants.NumDaysInYear(year)
+    num_days = Calendar.num_days_in_year(year)
     @weekday_day_by_hour_values = validate_values(weekday_day_by_hour_values, num_days, 24)
     @weekend_day_by_hour_values = validate_values(weekend_day_by_hour_values, num_days, 24)
     if normalize_values
@@ -404,7 +404,7 @@ class HourlyByDaySchedule
   end
 end
 
-# Annual schedule defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values.
+# Annual schedule object defined by 24 weekday hourly values, 24 weekend hourly values, and 12 monthly values.
 class MonthWeekdayWeekendSchedule
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param sch_name [String] name that is assigned to the OpenStudio Schedule object
@@ -543,12 +543,12 @@ class MonthWeekdayWeekendSchedule
   # @return [OpenStudio::Model::ScheduleRuleset] the OpenStudio Schedule object with rules
   def create_schedule(model, sch_name, year, begin_month, begin_day, end_month, end_day,
                       schedule_type_limits_name, unavailable_periods)
-    month_num_days = Constants.NumDaysInMonths(year)
+    month_num_days = Calendar.num_days_in_months(year)
     month_num_days[end_month - 1] = end_day
 
-    day_startm = Schedule.day_start_months(year)
+    day_startm = Calendar.day_start_months(year)
     day_startm[begin_month - 1] += begin_day - 1
-    day_endm = [Schedule.day_start_months(year), month_num_days].transpose.map { |i| i.sum - 1 }
+    day_endm = [Calendar.day_start_months(year), month_num_days].transpose.map { |i| i.sum - 1 }
 
     time = []
     for h in 1..24
@@ -691,7 +691,7 @@ module Schedule
     end
 
     if schedule.to_ScheduleConstant.is_initialized
-      annual_flh = schedule.to_ScheduleConstant.get.value * Constants.NumHoursInYear(modelYear)
+      annual_flh = schedule.to_ScheduleConstant.get.value * Calendar.num_hours_in_year(modelYear)
       return annual_flh
     end
 
@@ -788,15 +788,15 @@ module Schedule
     if schedule_type_limits.nil?
       schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
       schedule_type_limits.setName(schedule_type_limits_name)
-      if schedule_type_limits_name == Constants.ScheduleTypeLimitsFraction
+      if schedule_type_limits_name == EPlus::ScheduleTypeLimitsFraction
         schedule_type_limits.setLowerLimitValue(0)
         schedule_type_limits.setUpperLimitValue(1)
         schedule_type_limits.setNumericType('Continuous')
-      elsif schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff
+      elsif schedule_type_limits_name == EPlus::ScheduleTypeLimitsOnOff
         schedule_type_limits.setLowerLimitValue(0)
         schedule_type_limits.setUpperLimitValue(1)
         schedule_type_limits.setNumericType('Discrete')
-      elsif schedule_type_limits_name == Constants.ScheduleTypeLimitsTemperature
+      elsif schedule_type_limits_name == EPlus::ScheduleTypeLimitsTemperature
         schedule_type_limits.setNumericType('Continuous')
       end
     end
@@ -851,11 +851,11 @@ module Schedule
       # FUTURE: Assign an object type to the schedules and use that to determine what
       # kind of schedule each is, rather than looking at object names. That would
       # be more robust. See https://github.com/NREL/OpenStudio-HPXML/issues/1450.
-      if sch_name.include? Constants.ObjectNameWaterHeaterSetpoint
+      if sch_name.include? Constants::ObjectTypeWaterHeaterSetpoint
         # Water heater setpoint
         # Temperature of tank < 2C indicates of possibility of freeze.
         value = 2.0
-      elsif sch_name.include? Constants.ObjectNameNaturalVentilation
+      elsif sch_name.include? Constants::ObjectTypeNaturalVentilation
         if period.natvent_availability == HPXML::ScheduleRegular
           next # don't change the natural ventilation availability schedule
         elsif period.natvent_availability == HPXML::ScheduleAvailable
@@ -867,8 +867,8 @@ module Schedule
         value = 0.0
       end
 
-      day_s = Schedule.get_day_num_from_month_day(year, period.begin_month, period.begin_day)
-      day_e = Schedule.get_day_num_from_month_day(year, period.end_month, period.end_day)
+      day_s = Calendar.get_day_num_from_month_day(year, period.begin_month, period.begin_day)
+      day_e = Calendar.get_day_num_from_month_day(year, period.end_month, period.end_day)
 
       date_s = OpenStudio::Date::fromDayOfYear(day_s, year)
       date_e = OpenStudio::Date::fromDayOfYear(day_e, year)
@@ -962,85 +962,6 @@ module Schedule
     end
   end
 
-  # Default ceiling fan monthly multipliers.
-  #
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [String] 12 comma-separated monthly multipliers
-  def self.CeilingFanMonthlyMultipliers(weather:)
-    return HVAC.get_default_ceiling_fan_months(weather).join(', ')
-  end
-
-  # Returns a value between 1 and 365 (or 366 for a leap year).
-  # Returns e.g. 32 for month=2 and day=1 (Feb 1).
-  #
-  # @param year [Integer] the calendar year
-  # @param month [Integer] the month of the year
-  # @param day [Integer] the day of the month
-  # @return [Integer] the day number of the year
-  def self.get_day_num_from_month_day(year, month, day)
-    month_num_days = Constants.NumDaysInMonths(year)
-    day_num = day
-    for m in 0..month - 2
-      day_num += month_num_days[m]
-    end
-    return day_num
-  end
-
-  # Returns an array of 365 (or 366 for a leap year) values of 0s and 1s that define a daily season.
-  #
-  # @param year [Integer] the calendar year
-  # @param start_month [Integer] the start month of the year
-  # @param start_day [Integer] the start day of the start month
-  # @param end_month [Integer] the end month of the year
-  # @param end_day [Integer] the end day of the end month
-  # @return [Array<Integer>] 1s ranging from start month/day to end month/day, and 0s outside of this range
-  def self.get_daily_season(year, start_month, start_day, end_month, end_day)
-    start_day_num = get_day_num_from_month_day(year, start_month, start_day)
-    end_day_num = get_day_num_from_month_day(year, end_month, end_day)
-
-    season = Array.new(Constants.NumDaysInYear(year), 0)
-    if end_day_num >= start_day_num
-      season.fill(1, start_day_num - 1, end_day_num - start_day_num + 1) # Fill between start/end days
-    else # Wrap around year
-      season.fill(1, start_day_num - 1) # Fill between start day and end of year
-      season.fill(1, 0, end_day_num) # Fill between start of year and end day
-    end
-    return season
-  end
-
-  # Convert a 12-element monthly array of 1s and 0s to a 365-element (or 366-element for a leap year) daily array of 1s and 0s.
-  #
-  # @param year [Integer] the calendar year
-  # @param months [Array<Integer>] monthly array of 1s and 0s
-  # @return [Array<Integer>] daily array of 1s and 0s
-  def self.months_to_days(year, months)
-    month_num_days = Constants.NumDaysInMonths(year)
-    days = []
-    for m in 0..11
-      days.concat([months[m]] * month_num_days[m])
-    end
-
-    return days
-  end
-
-  # Returns a 12-element array of day numbers of the year corresponding to the first days of each month.
-  #
-  # @param year [Integer] the calendar year
-  # @return [Array<Integer>] day number of the year for the first day of each month
-  def self.day_start_months(year)
-    month_num_days = Constants.NumDaysInMonths(year)
-    return month_num_days.each_with_index.map { |_n, i| get_day_num_from_month_day(year, i + 1, 1) }
-  end
-
-  # Returns a 12-element array of day numbers of the year corresponding to the last days of each month.
-  #
-  # @param year [Integer] the calendar year
-  # @return [Array<Integer>] day number of the year for the last day of each month
-  def self.day_end_months(year)
-    month_num_days = Constants.NumDaysInMonths(year)
-    return month_num_days.each_with_index.map { |n, i| get_day_num_from_month_day(year, i + 1, n) }
-  end
-
   # Create an OpenStudio Schedule object based on a 365-element (or 366 for a leap year) daily season array.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1070,67 +991,6 @@ module Schedule
       start_value = value
     end
     return s
-  end
-
-  # Return begin month/day/hour and end month/day/hour integers based on a string datetime range.
-  #
-  # @param date_time_range [String] a date like 'Jan 1 - Dec 31' (optionally can enter hour like 'Dec 15 2 - Jan 15 20')
-  # @return [Array<Integer, Integer, Integer or nil, Integer, Integer, Integer or nil>] begin/end month/day/hour
-  def self.parse_date_time_range(date_time_range)
-    begin_end_dates = date_time_range.split('-').map { |v| v.strip }
-    if begin_end_dates.size != 2
-      fail "Invalid date format specified for '#{date_time_range}'."
-    end
-
-    begin_values = begin_end_dates[0].split(' ').map { |v| v.strip }
-    end_values = begin_end_dates[1].split(' ').map { |v| v.strip }
-
-    if !(begin_values.size == 2 || begin_values.size == 3) || !(end_values.size == 2 || end_values.size == 3)
-      fail "Invalid date format specified for '#{date_time_range}'."
-    end
-
-    require 'date'
-    begin_month = Date::ABBR_MONTHNAMES.index(begin_values[0].capitalize)
-    end_month = Date::ABBR_MONTHNAMES.index(end_values[0].capitalize)
-    begin_day = begin_values[1].to_i
-    end_day = end_values[1].to_i
-    if begin_values.size == 3
-      begin_hour = begin_values[2].to_i
-    end
-    if end_values.size == 3
-      end_hour = end_values[2].to_i
-    end
-    if begin_month.nil? || end_month.nil? || begin_day == 0 || end_day == 0
-      fail "Invalid date format specified for '#{date_time_range}'."
-    end
-
-    return begin_month, begin_day, begin_hour, end_month, end_day, end_hour
-  end
-
-  # Return begin month/day and end month/day based on a provided monthly availability array.
-  #
-  # @param months [Array<Integer>] monthly array of 1s and 0s
-  # @param year [Integer] the calendar year
-  # @return [Array<Integer, Integer, Integer, Integer>] begin month/day and end month/day
-  def self.get_begin_and_end_dates_from_monthly_array(months, year)
-    num_days_in_month = Constants.NumDaysInMonths(year)
-
-    if months.uniq.size == 1 && months[0] == 1 # Year-round
-      return 1, 1, 12, num_days_in_month[11]
-    elsif months.uniq.size == 1 && months[0] == 0 # Never
-      return
-    elsif months[0] == 1 && months[11] == 1 # Wrap around year
-      begin_month = 12 - months.reverse.index(0) + 1
-      end_month = months.index(0)
-    else
-      begin_month = months.index(1) + 1
-      end_month = 12 - months.reverse.index(1)
-    end
-
-    begin_day = 1
-    end_day = num_days_in_month[end_month - 1]
-
-    return begin_month, begin_day, end_month, end_day
   end
 
   # Return a array of maps that reflect the contents of the unavailable_periods.csv file.
@@ -1196,6 +1056,15 @@ module Schedule
   # @return [Array<Double>] a num_values-element array of numbers
   def self.validate_values(values, num_values, sch_name)
     err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
+
+    # Check whether string is a valid float.
+    #
+    # @param str [String] string representation of a possible float
+    # @return [Boolean] true if valid float
+    def self.valid_float?(str)
+      !!Float(str) rescue false
+    end
+
     if values.is_a?(Array)
       if values.length != num_values
         fail err_msg
@@ -1227,17 +1096,9 @@ module Schedule
     end
     return floats
   end
-
-  # Check whether string is a valid float.
-  #
-  # @param str [String] string representation of a possible float
-  # @return [Boolean] true if valid float
-  def self.valid_float?(str)
-    !!Float(str) rescue false
-  end
 end
 
-# Wrapper for detailed schedule CSVs.
+# Object that contains information for detailed schedule CSVs.
 class SchedulesFile
   # Struct for storing schedule CSV column information.
   class Column
@@ -1359,7 +1220,7 @@ class SchedulesFile
   # @param schedules_paths [Array<String>] array of file paths pointing to detailed schedule CSVs
   # @return [nil]
   def import(schedules_paths)
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
+    num_hrs_in_year = Calendar.num_hours_in_year(@year)
     @schedules = {}
     schedules_paths.each do |schedules_path|
       columns = CSV.read(schedules_path).transpose
@@ -1465,7 +1326,7 @@ class SchedulesFile
     end
 
     col_index = get_col_index(col_name: col_name)
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
+    num_hrs_in_year = Calendar.num_hours_in_year(@year)
     schedule_length = @schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
@@ -1517,19 +1378,19 @@ class SchedulesFile
       return
     end
 
-    num_hrs_in_year = Constants.NumHoursInYear(@year)
+    num_hrs_in_year = Calendar.num_hours_in_year(@year)
     schedule_length = schedules[col_name].length
     min_per_item = 60.0 / (schedule_length / num_hrs_in_year)
 
     equiv_full_load_hrs = 0.0
     if not period.nil?
       n_steps = schedules[schedules.keys[0]].length
-      num_days_in_year = Constants.NumDaysInYear(@year)
+      num_days_in_year = Calendar.num_days_in_year(@year)
       steps_in_day = n_steps / num_days_in_year
       steps_in_hour = steps_in_day / 24
 
-      begin_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
-      end_day_num = Schedule.get_day_num_from_month_day(@year, period.end_month, period.end_day)
+      begin_day_num = Calendar.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
+      end_day_num = Calendar.get_day_num_from_month_day(@year, period.end_month, period.end_day)
 
       begin_hour = 0
       end_hour = 24
@@ -1609,7 +1470,7 @@ class SchedulesFile
     full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     return 0 if full_load_hrs == 0
 
-    num_days_in_year = Constants.NumDaysInYear(@year)
+    num_days_in_year = Calendar.num_days_in_year(@year)
     daily_full_load_hrs = full_load_hrs / num_days_in_year
     design_level = UnitConversions.convert(daily_kwh / daily_full_load_hrs, 'kW', 'W')
 
@@ -1630,7 +1491,7 @@ class SchedulesFile
     ann_equiv_full_load_hrs = annual_equivalent_full_load_hrs(col_name: col_name)
     return 0 if ann_equiv_full_load_hrs == 0
 
-    num_days_in_year = Constants.NumDaysInYear(@year)
+    num_days_in_year = Calendar.num_days_in_year(@year)
     daily_full_load_hrs = ann_equiv_full_load_hrs / num_days_in_year
     peak_flow = daily_water / daily_full_load_hrs # gallons_per_hour
     peak_flow /= 60 # convert to gallons per minute
@@ -1645,7 +1506,7 @@ class SchedulesFile
   # @return [nil]
   def create_column_values_from_periods(col_name, periods)
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
-    num_days_in_year = Constants.NumDaysInYear(@year)
+    num_days_in_year = Calendar.num_days_in_year(@year)
     steps_in_day = n_steps / num_days_in_year
     steps_in_hour = steps_in_day / 24
 
@@ -1654,8 +1515,8 @@ class SchedulesFile
     end
 
     periods.each do |period|
-      begin_day_num = Schedule.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
-      end_day_num = Schedule.get_day_num_from_month_day(@year, period.end_month, period.end_day)
+      begin_day_num = Calendar.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
+      end_day_num = Calendar.get_day_num_from_month_day(@year, period.end_month, period.end_day)
 
       begin_hour = 0
       end_hour = 24

@@ -150,12 +150,12 @@ module HPXMLDefaults
   def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
     bldg_idx = hpxml.buildings.index(hpxml_bldg)
     if hpxml_bldg.conditioned_zones.empty?
-      hpxml_bldg.zones.add(id: "#{Constants.AutomaticallyAdded}Zone#{bldg_idx + 1}",
+      hpxml_bldg.zones.add(id: "#{Constants::AutomaticallyAdded}Zone#{bldg_idx + 1}",
                            zone_type: HPXML::ZoneTypeConditioned)
       hpxml_bldg.hvac_systems.each do |hvac_system|
         hvac_system.attached_to_zone_idref = hpxml_bldg.zones[-1].id
       end
-      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants.AutomaticallyAdded}Space#{bldg_idx + 1}",
+      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants::AutomaticallyAdded}Space#{bldg_idx + 1}",
                                       floor_area: cfa)
       hpxml_bldg.surfaces.each do |surface|
         next unless HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
@@ -384,7 +384,7 @@ module HPXMLDefaults
       if not weather.nil?
         # Default based on Building America seasons
         _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
-        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
+        begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
         if not begin_month.nil? # Check if no summer
           hpxml_bldg.header.shading_summer_begin_month = begin_month
           hpxml_bldg.header.shading_summer_begin_day = begin_day
@@ -3418,7 +3418,7 @@ module HPXMLDefaults
       ceiling_fan.weekend_fractions_isdefaulted = true
     end
     if ceiling_fan.monthly_multipliers.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.monthly_multipliers = Schedule.CeilingFanMonthlyMultipliers(weather: weather)
+      ceiling_fan.monthly_multipliers = HVAC.get_default_ceiling_fan_months(weather).join(', ')
       ceiling_fan.monthly_multipliers_isdefaulted = true
     end
   end
@@ -3946,9 +3946,9 @@ module HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.cleanup_zones_spaces(hpxml_bldg)
-    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants::AutomaticallyAdded }
     auto_space.delete if not auto_space.nil?
-    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants.AutomaticallyAdded }
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants::AutomaticallyAdded }
     auto_zone.delete if not auto_zone.nil?
   end
 
