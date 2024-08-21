@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9745a9eb-eb1d-46d0-9fa6-ae1e0539dc5b</version_id>
-  <version_modified>2024-08-16T21:02:18Z</version_modified>
+  <version_id>fb3b36e4-8a02-482b-a9aa-38e2a786806d</version_id>
+  <version_modified>2024-08-21T18:55:47Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>E4088E63</checksum>
+      <checksum>EA01360F</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -339,13 +339,13 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BCD7DC91</checksum>
+      <checksum>792F5D7C</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DD6E04DC</checksum>
+      <checksum>66CA9ADE</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>76B79520</checksum>
+      <checksum>8612507E</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2B371672</checksum>
+      <checksum>0AA28826</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -579,7 +579,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6CAB9329</checksum>
+      <checksum>DBB82EE7</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -669,7 +669,7 @@
       <filename>test_hotwater_appliance.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>E3A99BA1</checksum>
+      <checksum>9F96C198</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
