@@ -1147,10 +1147,10 @@ module Geometry
 
         surfaces = space.surfaces
         surfaces.each do |surface|
-          next unless surface.surfaceType.downcase == 'wall'
+          next if surface.surfaceType.downcase != 'wall' # skip if not a wall surface
 
           os_facade = get_facade_for_surface(surface: surface)
-          if adb_facades.include?(os_facade) && (os_facade != 'RoofCeiling') && (os_facade != 'Floor')
+          if adb_facades.include?(os_facade)
             surface.setOutsideBoundaryCondition('Adiabatic')
           elsif get_surface_z_values(surfaceArray: [surface]).min < 0
             surface.setOutsideBoundaryCondition('Foundation') if foundation_type != HPXML::FoundationTypeAmbient
@@ -1546,116 +1546,6 @@ module Geometry
       wall_surfaces[facade].each do |surface|
         surface_window_area[surface] += surface_avail_area[surface] / facade_avail_area[facade] * target_facade_areas[facade]
       end
-
-      # If window area for a surface is less than the minimum window area,
-      # set the window area to zero and proportionally redistribute to the
-      # other surfaces on that facade and unit.
-
-      # Check wall surface areas (by unit/space)
-      model.getBuildingUnits.each do |unit|
-        wall_surfaces[facade].each_with_index do |surface, surface_num|
-          next if surface_window_area[surface] == 0
-          next unless unit.spaces.include? surface.space.get # surface belongs to this unit
-          next unless surface_window_area[surface] < min_single_window_area
-
-          # Future surfaces are those that have not yet been compared to min_single_window_area
-          future_surfaces_area = 0
-          wall_surfaces[facade].each_with_index do |future_surface, future_surface_num|
-            next if future_surface_num <= surface_num
-            next unless unit.spaces.include? future_surface.space.get
-
-            future_surfaces_area += surface_avail_area[future_surface]
-          end
-          next if future_surfaces_area == 0
-
-          removed_window_area = surface_window_area[surface]
-          surface_window_area[surface] = 0
-
-          wall_surfaces[facade].each_with_index do |future_surface, future_surface_num|
-            next if future_surface_num <= surface_num
-            next unless unit.spaces.include? future_surface.space.get
-
-            surface_window_area[future_surface] += removed_window_area * surface_avail_area[future_surface] / future_surfaces_area
-          end
-        end
-      end
-    end
-
-    # Calculate facade areas for each unit
-    unit_facade_areas = {}
-    unit_wall_surfaces = {}
-    model.getBuildingUnits.each do |unit|
-      unit_facade_areas[unit] = {}
-      unit_wall_surfaces[unit] = {}
-      facades.each do |facade|
-        unit_facade_areas[unit][facade] = 0
-        unit_wall_surfaces[unit][facade] = []
-        wall_surfaces[facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get
-
-          unit_facade_areas[unit][facade] += surface_window_area[surface]
-          unit_wall_surfaces[unit][facade] << surface
-        end
-      end
-    end
-
-    # if the sum of the window areas on the facade are < minimum, move to different facade
-    facades.each do |facade|
-      model.getBuildingUnits.each do |unit|
-        next if unit_facade_areas[unit][facade] == 0
-        next unless unit_facade_areas[unit][facade] < min_single_window_area
-
-        new_facade = unit_facade_areas[unit].max_by { |_k, v| v }[0] # move to facade with largest window area
-        next if new_facade == facade # can't move to same facade
-        next if unit_facade_areas[unit][new_facade] <= unit_facade_areas[unit][facade] # only move to facade with >= window area
-
-        area_moved = unit_facade_areas[unit][facade]
-        unit_facade_areas[unit][facade] = 0
-        wall_surfaces[facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get # surface is in this unit
-
-          surface_window_area[surface] = 0
-        end
-
-        unit_facade_areas[unit][new_facade] += area_moved
-        sum_window_area = 0
-        wall_surfaces[new_facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get # surface is in this unit
-
-          sum_window_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-        end
-
-        wall_surfaces[new_facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get # surface is in this unit
-
-          split_window_area = area_moved * UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2') / sum_window_area
-          surface_window_area[surface] += split_window_area
-        end
-
-        runner.registerWarning("The #{facade} facade window area (#{area_moved.round(2)} ft2) is less than the minimum window area allowed (#{min_single_window_area.round(2)} ft2), and has been added to the #{new_facade} facade.")
-      end
-    end
-
-    facades.each do |facade|
-      model.getBuildingUnits.each do |unit|
-        # Because the above process is calculated based on the order of surfaces, it's possible
-        # that we have less area for this facade than we should. If so, redistribute proportionally
-        # to all surfaces that have window area.
-        sum_window_area = 0
-        wall_surfaces[facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get
-
-          sum_window_area += surface_window_area[surface]
-        end
-        next if sum_window_area == 0
-        next if unit_facade_areas[unit][facade] < sum_window_area # for cases where window area was added from different facade
-
-        wall_surfaces[facade].each do |surface|
-          next unless unit.spaces.include? surface.space.get
-
-          surface_window_area[surface] += surface_window_area[surface] / sum_window_area * (unit_facade_areas[unit][facade] - sum_window_area)
-        end
-      end
     end
 
     tot_win_area = 0
@@ -2029,7 +1919,7 @@ module Geometry
   # @param space [OpenStudio::Model::Space] the foundation space adjacent to the rim joist
   # @param rim_joist_height [Double] height of the rim joists (ft)
   # @param z [Double] z coordinate of the bottom of the rim joists
-  # @return [void]
+  # @return [nil]
   def self.add_rim_joist(model:,
                          polygon:,
                          space:,
@@ -2073,7 +1963,7 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param footprint_polygon [OpenStudio::Point3dVector] an OpenStudio::Point3dVector object
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @return [void]
+  # @return [nil]
   def self.assign_indexes(model:,
                           footprint_polygon:,
                           space:)
@@ -2120,7 +2010,7 @@ module Geometry
   # We can't deterministically assign indexes to these surfaces.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [void]
+  # @return [nil]
   def self.assign_remaining_surface_indexes(model:)
     model.getSurfaces.each do |surface|
       next if surface.additionalProperties.getFeatureAsInteger('Index').is_initialized
@@ -2383,7 +2273,7 @@ module Geometry
   # @param win_num [Integer] The window number for the current surface
   # @param facade [String] front, back, left, or right
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [void]
+  # @return [nil]
   def self.add_window_to_wall(surface:,
                               win_width:,
                               win_height:,
@@ -2645,7 +2535,7 @@ module Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param foundation_type [String] HPXML location for foundation type
   # @param foundation_height [Double] height of the foundation (m)
-  # @return [void]
+  # @return [nil]
   def self.apply_ambient_foundation_shift(model:,
                                           foundation_type:,
                                           foundation_height:)
