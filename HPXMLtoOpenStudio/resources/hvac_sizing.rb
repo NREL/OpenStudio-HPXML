@@ -2188,7 +2188,7 @@ module HVACSizing
 
         # calculate sensible/latent split at design conditions
         cool_sens_cap_design = cool_cap_design * design_shr
-        cool_lat_cap_design = [hvac_sizings.Cool_Load_Tot - cool_sens_cap_design, 1.0].max
+        cool_lat_cap_design = [cool_cap_design - cool_sens_cap_design, 1.0].max
 
         # Adjust Sizing
         if hvac_cooling.is_a?(HPXML::HeatPump) && (hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingHERS)
