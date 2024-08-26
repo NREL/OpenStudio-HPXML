@@ -2133,11 +2133,12 @@ module HVACSizing
       # initialize for iteration
       delta = 1
 
-      for _iter in 0..50
-        break if delta.abs <= 0.001
+      for _iter in 0..100 # more iterations. base.xml converges with 3 iterations, but that may not be the case for all sample files
+        runner.registerInfo("current iteration in design airflow calculation for central cooling equipment with an air distribution system is #{_iter}")
+        runner.registerInfo("current normalized difference in design airflow between consecutive iterations is #{delta}")
+        break if delta.abs <= 0.0001 # stricter tolerance for convergence
 
         # delta.abs is the normalized difference in design airflow between consecutive iterations
-        # may need to change tolerance (delta.abs) or number of iterations as necessary
 
         cool_airflow_prev = hvac_sizings.Cool_Airflow
 
