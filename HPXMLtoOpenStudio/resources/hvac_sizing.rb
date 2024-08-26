@@ -1684,7 +1684,7 @@ module HVACSizing
   # Returns the ACCA Manual S sizing allowances for a given type of HVAC equipment.
   # These sizing allowances are used in the logic that determines how to convert heating/cooling
   # design loads into corresponding equipment capacities.
-  # 
+  #
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system
   # @return [Array<Double, Double, Double>] Oversize fraction (frac), oversize delta (Btu/hr), undersize fraction (frac)
   def self.get_hvac_size_limits(hvac_cooling)
@@ -2135,12 +2135,10 @@ module HVACSizing
       # initialize for iteration
       delta = 1
 
-      for _iter in 0..100 # more iterations. base.xml converges with 3 iterations, but that may not be the case for all sample files
-        runner.registerInfo("current iteration in design airflow calculation for central cooling equipment with an air distribution system is #{_iter}")
-        runner.registerInfo("current normalized difference in design airflow between consecutive iterations is #{delta}")
-        break if delta.abs <= 0.0001 # stricter tolerance for convergence
-
-        # delta.abs is the normalized difference in design airflow between consecutive iterations
+      for iter in 1..100 # added more iterations. base.xml converges with 3 iterations, but that may not be the case for all HPXML files
+        runner.registerInfo("current iteration in design airflow calculation for central cooling equipment with an air distribution system is #{iter}")
+        runner.registerInfo("current normalized difference in design airflow between consecutive iterations is #{delta.abs}")
+        break if delta.abs <= 0.001
 
         cool_airflow_prev = hvac_sizings.Cool_Airflow
 
@@ -2279,10 +2277,10 @@ module HVACSizing
       hvac_sizings.Cool_Capacity = hvac_sizings.Cool_Load_Tot / total_cap_curve_value # Note: cool_cap_design = hvac_sizings.Cool_Load_Tot
       hvac_sizings.Cool_Capacity_Sens = hvac_sizings.Cool_Capacity * hvac_cooling_shr
 
-        cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
-                                   (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
-                                   (80.0 - mj.cool_setpoint) / cooling_delta_t))
-        cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
+      cool_load_sens_cap_design = (hvac_sizings.Cool_Capacity_Sens * sensible_cap_curve_value / \
+                                 (1.0 + (1.0 - gshp_coil_bf * bypass_factor_curve_value) *
+                                 (80.0 - mj.cool_setpoint) / cooling_delta_t))
+      cool_load_lat_cap_design = hvac_sizings.Cool_Load_Tot - cool_load_sens_cap_design
 
       # Adjust Sizing so that coil sensible at design >= CoolingLoad_Sens, and coil latent at design >= CoolingLoad_Lat, and equipment SHRRated is maintained.
       cool_load_sens_cap_design = [cool_load_sens_cap_design, hvac_sizings.Cool_Load_Sens].max
