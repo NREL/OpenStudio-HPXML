@@ -2120,6 +2120,8 @@ module HVACSizing
 
       # calculate A_o using rated conditions
       # Don't use coil ao factor in hvac.rb to calculate design SHR. That ao has specific use case of finding rated SHRs for variable speed equipment.
+      # a_o_rated is used to calculate an initial estimate of the design SHR (split between EQUIPMENT sensible and latent capacity).
+      # This sensible/latent capacity split is adjusted to meet sensible/latent loads with the application of the undersize limit (sensible capacity) and oversize limit (total capacity).
       a_o_rated = Psychrometrics.CoilAoFactor(HVAC::AirSourceCoolRatedIDB, rated_barometric_pressure_psi, UnitConversions.convert(cool_cap_rated, 'btu/hr', 'kbtu/hr'), cool_cfm_rated, hvac_cooling_shr, hr_indoor_cooling_rated)
       cool_cap_design = hvac_sizings.Cool_Load_Tot
 
