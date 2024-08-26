@@ -530,7 +530,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
 
   # Fill each UtilityRate object based on simple or detailed utility rate information.
   #
-  # @param hpxml_path [String] path of the input HPXML file
+  # @param hpxml_path [String] Path to the HPXML file
   # @param fuels [Hash] Fuel type, is_production => Fuel object
   # @param utility_rates [Hash] Fuel Type => UtilityRate object
   # @param bill_scenario [HPXML::UtilityBillScenario] HPXML Utility Bill Scenario object
@@ -693,7 +693,7 @@ class ReportUtilityBills < OpenStudio::Measure::ReportingMeasure
       end
 
       bill.annual_total = bill.annual_fixed_charge + bill.annual_energy_charge + bill.annual_production_credit
-      bill.monthly_total = [bill.monthly_fixed_charge, bill.monthly_energy_charge, bill.monthly_production_credit].transpose.map { |x| x.reduce(:+) }
+      bill.monthly_total = [bill.monthly_fixed_charge, bill.monthly_energy_charge, bill.monthly_production_credit].transpose.map { |x| x.sum }
     end
   end
 
