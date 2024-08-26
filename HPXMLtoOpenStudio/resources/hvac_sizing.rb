@@ -90,7 +90,7 @@ module HVACSizing
     bldg_loads = aggregate_zone_loads_to_bldg(all_zone_loads)
 
     # Remove any automatically created spaces from output files
-    auto_space = all_space_loads.keys.find { |space| space.id.start_with? Constants.AutomaticallyAdded }
+    auto_space = all_space_loads.keys.find { |space| space.id.start_with? Constants::AutomaticallyAdded }
     all_space_loads.delete(auto_space) if not auto_space.nil?
 
     # Assign design loads to HPXML objects for output
@@ -100,7 +100,7 @@ module HVACSizing
 
       # HPXML Zones
       all_zone_loads.each do |zone, zone_loads|
-        next if zone.id.start_with? Constants.AutomaticallyAdded
+        next if zone.id.start_with? Constants::AutomaticallyAdded
 
         assign_to_hpxml_obj(zone, zone_loads)
       end
@@ -2690,7 +2690,7 @@ module HVACSizing
     if not hvac_cooling.nil?
       cooling_autosizing_limit = hvac_cooling.cooling_autosizing_limit
       if cooling_autosizing_limit.nil?
-        cooling_autosizing_limit = 1 / Constants.small
+        cooling_autosizing_limit = 1 / Constants::Small
       end
 
       cooling_autosizing_factor = [hvac_cooling.cooling_autosizing_factor, cooling_autosizing_limit / hvac_sizings.Cool_Capacity].min
@@ -2702,7 +2702,7 @@ module HVACSizing
     if not hvac_heating.nil?
       heating_autosizing_limit = hvac_heating.heating_autosizing_limit
       if heating_autosizing_limit.nil?
-        heating_autosizing_limit = 1 / Constants.small
+        heating_autosizing_limit = 1 / Constants::Small
       end
 
       heating_autosizing_factor = [hvac_heating.heating_autosizing_factor, heating_autosizing_limit / hvac_sizings.Heat_Capacity].min
@@ -2713,7 +2713,7 @@ module HVACSizing
     if (hvac_cooling.is_a? HPXML::HeatPump) && (hvac_cooling.backup_type == HPXML::HeatPumpBackupTypeIntegrated)
       backup_heating_autosizing_limit = hvac_cooling.backup_heating_autosizing_limit
       if backup_heating_autosizing_limit.nil?
-        backup_heating_autosizing_limit = 1 / Constants.small
+        backup_heating_autosizing_limit = 1 / Constants::Small
       end
 
       backup_heating_autosizing_factor = [hvac_cooling.backup_heating_autosizing_factor, backup_heating_autosizing_limit / hvac_sizings.Heat_Capacity_Supp].min
@@ -4767,7 +4767,7 @@ module HVACSizing
     end
 
     # Note: Every report name must have the HPXML BuildingID in it in case we are running a whole MF building with multiple Building elements.
-    if hpxml_bldg.conditioned_zones[0].id.start_with?(Constants.AutomaticallyAdded)
+    if hpxml_bldg.conditioned_zones[0].id.start_with?(Constants::AutomaticallyAdded)
       zone_col_names = ["#{hpxml_bldg.building_id}"] # Leave out name of automatically added zone
     else
       zone_col_names = all_zone_loads.keys.map { |zone| "#{hpxml_bldg.building_id}: #{zone.id}" }

@@ -184,8 +184,8 @@ module Geometry
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'roofceiling'
-      next if (surface.outsideBoundaryCondition.downcase != 'outdoors') && (surface.outsideBoundaryCondition.downcase != 'adiabatic')
+      next if surface.surfaceType != EPlus::SurfaceTypeRoofCeiling
+      next if (surface.outsideBoundaryCondition != EPlus::BoundaryConditionOutdoors) && (surface.outsideBoundaryCondition != EPlus::BoundaryConditionAdiabatic)
 
       tilts << surface.tilt
     end
@@ -357,8 +357,8 @@ module Geometry
     surfaces = []
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
-      next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation', 'adiabatic', 'othersidecoefficients'].include? surface.outsideBoundaryCondition.downcase
+      next unless [EPlus::SurfaceTypeWall, EPlus::SurfaceTypeRoofCeiling].include? surface.surfaceType
+      next unless [EPlus::BoundaryConditionOutdoors, EPlus::BoundaryConditionFoundation, EPlus::BoundaryConditionAdiabatic, EPlus::BoundaryConditionCoefficients].include? surface.outsideBoundaryCondition
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -402,7 +402,7 @@ module Geometry
 
     # Explode neighbors
     model.getShadingSurfaceGroups.each do |shading_group|
-      next unless shading_group.name.to_s == Constants.ObjectNameNeighbors
+      next unless shading_group.name.to_s == Constants::ObjectTypeNeighbors
 
       shading_group.shadingSurfaces.each do |shading_surface|
         azimuth = shading_surface.additionalProperties.getFeatureAsInteger('Azimuth').get
@@ -438,7 +438,7 @@ module Geometry
       overhang_surfaces = []
       shading_surfaces = []
       surface.subSurfaces.each do |subsurface|
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
+        next unless subsurface.subSurfaceType == EPlus::SubSurfaceTypeWindow
 
         subsurface.shadingSurfaceGroups.each do |overhang_group|
           overhang_group.shadingSurfaces.each do |overhang|
@@ -450,7 +450,7 @@ module Geometry
       # Push out horizontally
       distance = explode_distance
 
-      if surface.surfaceType.downcase == 'roofceiling'
+      if surface.surfaceType == EPlus::SurfaceTypeRoofCeiling
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
         tilt = surface.additionalProperties.getFeatureAsDouble('Tilt').get
         width = surface.additionalProperties.getFeatureAsDouble('Width').get
@@ -519,7 +519,7 @@ module Geometry
       weekend_sch = hpxml_bldg.building_occupancy.weekend_fractions.split(',').map(&:to_f)
       weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
       monthly_sch = hpxml_bldg.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants::ObjectTypeOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
       people_sch = people_sch.schedule
     else
       runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.weekday_fractions.nil?
@@ -530,14 +530,14 @@ module Geometry
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
     activity_sch.setValue(activity_per_person)
-    activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
+    activity_sch.setName(Constants::ObjectTypeOccupants + ' activity schedule')
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
     occ = OpenStudio::Model::People.new(occ_def)
-    occ.setName(Constants.ObjectNameOccupants)
+    occ.setName(Constants::ObjectTypeOccupants)
     occ.setSpace(space)
-    occ_def.setName(Constants.ObjectNameOccupants)
+    occ_def.setName(Constants::ObjectTypeOccupants)
     occ_def.setNumberofPeople(num_occ)
     occ_def.setFractionRadiant(occ_rad)
     occ_def.setSensibleHeatFraction(occ_sens)
@@ -616,7 +616,7 @@ module Geometry
 
     unless shading_surfaces.empty?
       shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
-      shading_surface_group.setName(Constants.ObjectNameNeighbors)
+      shading_surface_group.setName(Constants::ObjectTypeNeighbors)
       shading_surfaces.each do |shading_surface|
         shading_surface.setShadingSurfaceGroup(shading_surface_group)
       end
