@@ -4329,6 +4329,10 @@ module HVACSizing
           end
         end
 
+        if slab.exterior_horizontal_insulation_width > 0
+          r_ins += slab.exterior_horizontal_insulation_r_value
+        end
+
         # Air Films = Indoor Finish + Indoor Air Film + Exposed Air Film (Figure A12-6 pg. 517)
         r_air_film = 0.05 + 0.92 + 0.17
 

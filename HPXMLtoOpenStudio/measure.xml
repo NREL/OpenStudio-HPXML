@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7321ba66-676f-4f45-9829-5507f160b9be</version_id>
-  <version_modified>2024-08-21T22:48:41Z</version_modified>
+  <version_id>7a7eacdc-ca83-4a12-af3e-9f1976a6d99d</version_id>
+  <version_modified>2024-08-27T19:12:10Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>38982B5D</checksum>
+      <checksum>CA5BC337</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -213,7 +213,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7C326501</checksum>
+      <checksum>1AEF514B</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -357,13 +357,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>84AE64ED</checksum>
+      <checksum>D96E2996</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9F57A47A</checksum>
+      <checksum>F91D94C6</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -399,7 +399,7 @@
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>35FCD771</checksum>
+      <checksum>8433294D</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -642,6 +642,18 @@
       <checksum>93120E27</checksum>
     </file>
     <file>
+      <filename>results_annual.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>656341D9</checksum>
+    </file>
+    <file>
+      <filename>results_design_load_details.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B2F544C7</checksum>
+    </file>
+    <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -657,13 +669,13 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>029FF7CE</checksum>
+      <checksum>B9A34BA0</checksum>
     </file>
     <file>
       <filename>test_enclosure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>45F2A863</checksum>
+      <checksum>D4340A44</checksum>
     </file>
     <file>
       <filename>test_generator.rb</filename>
@@ -729,7 +741,7 @@
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>6EDC8C3A</checksum>
+      <checksum>502A31E3</checksum>
     </file>
     <file>
       <filename>test_water_heater.rb</filename>
