@@ -4331,7 +4331,7 @@ module HVACSizing
           if radius <= slab.perimeter_insulation_depth
             r_ins += slab.perimeter_insulation_r_value
           end
-          if slab.exterior_horizontal_insulation_r_value.to_f != nil && slab.exterior_horizontal_insulation_r_value.to_f > 0
+          if slab.exterior_horizontal_insulation_r_value.to_f > 0
             if radius >= slab.exterior_horizontal_insulation_depth_below_grade.to_f
               hypotenuse = Math.sqrt(slab.exterior_horizontal_insulation_depth_below_grade**2 + slab.exterior_horizontal_insulation_width**2)
               if radius <= hypotenuse
