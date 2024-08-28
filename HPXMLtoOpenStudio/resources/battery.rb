@@ -166,7 +166,7 @@ module Battery
 
     loss_adj_object_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     loss_adj_object = OpenStudio::Model::OtherEquipment.new(loss_adj_object_def)
-    obj_name = Constants.ObjectNameBatteryLossesAdjustment
+    obj_name = Constants::ObjectTypeBatteryLossesAdjustment
     loss_adj_object.setName(obj_name)
     loss_adj_object.setEndUseSubcategory(obj_name)
     loss_adj_object.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
@@ -177,7 +177,7 @@ module Battery
     loss_adj_object_def.setFractionLatent(0)
     loss_adj_object_def.setFractionLost(frac_lost)
     loss_adj_object.setSchedule(model.alwaysOnDiscreteSchedule)
-    loss_adj_object.additionalProperties.setFeature('ObjectType', Constants.ObjectNameBatteryLossesAdjustment)
+    loss_adj_object.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryLossesAdjustment)
 
     battery_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(loss_adj_object, *EPlus::EMSActuatorOtherEquipmentPower, loss_adj_object.space.get)
     battery_adj_actuator.setName('battery loss_adj_act')
