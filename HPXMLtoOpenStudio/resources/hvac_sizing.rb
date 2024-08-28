@@ -4320,20 +4320,20 @@ module HVACSizing
           r_concrete = Material.Concrete(slab.thickness).rvalue
           r_gravel = [slab_r_gravel_per_inch * (12.0 - slab.thickness), 0].max
           if slab.under_slab_insulation_spans_entire_slab
-            r_ins += slab.under_slab_insulation_r_value
+            r_ins += slab.under_slab_insulation_r_value.to_f
           end
-          if radius <= slab.under_slab_insulation_width && radius <= slab.perimeter_insulation_depth
-            r_ins += slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
+          if radius <= slab.under_slab_insulation_width.to_f && radius <= slab.perimeter_insulation_depth.to_f
+            r_ins += slab.under_slab_insulation_r_value.to_f + slab.perimeter_insulation_r_value.to_f
           end
-          if radius <= slab.under_slab_insulation_width
-            r_ins += slab.under_slab_insulation_r_value
+          if radius <= slab.under_slab_insulation_width.to_f
+            r_ins += slab.under_slab_insulation_r_value.to_f
           end
-          if radius <= slab.perimeter_insulation_depth
-            r_ins += slab.perimeter_insulation_r_value
+          if radius <= slab.perimeter_insulation_depth.to_f
+            r_ins += slab.perimeter_insulation_r_value.to_f
           end
           if slab.exterior_horizontal_insulation_r_value.to_f > 0
             if radius >= slab.exterior_horizontal_insulation_depth_below_grade.to_f
-              hypotenuse = Math.sqrt(slab.exterior_horizontal_insulation_depth_below_grade**2 + slab.exterior_horizontal_insulation_width**2)
+              hypotenuse = Math.sqrt(slab.exterior_horizontal_insulation_depth_below_grade.to_f**2 + slab.exterior_horizontal_insulation_width.to_f**2)
               if radius <= hypotenuse
                 r_ins += slab.exterior_horizontal_insulation_r_value.to_f
               end
