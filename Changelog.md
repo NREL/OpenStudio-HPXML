@@ -1,7 +1,7 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
-- Updates to HPXML v4.0 final release.
+- Updates to OpenStudio 3.9/EnergyPlus 24.2/HPXML v4.0 final release.
 - Adds inputs for modeling skylight curbs and/or shafts.
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Updates hot water end uses for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
