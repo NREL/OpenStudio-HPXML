@@ -1298,6 +1298,7 @@
               <RatedFlowRate>150.0</RatedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution1'/>
             </VentilationFan>
           </VentilationFans>

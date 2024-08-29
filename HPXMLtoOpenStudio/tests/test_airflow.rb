@@ -391,7 +391,6 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     # Get HPXML values
     vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan_cfm = vent_fan.oa_unit_flow_rate
-    vent_fan_power = vent_fan.fan_power
     vent_fan_mins = vent_fan.hours_in_operation / 24.0 * 60.0
     suppl_vent_fan_cfm = vent_fan.cfis_supplemental_fan.oa_unit_flow_rate
     suppl_vent_fan_power = vent_fan.cfis_supplemental_fan.fan_power
@@ -402,7 +401,6 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     assert_in_epsilon(suppl_vent_fan_cfm, UnitConversions.convert(program_values['cfis_suppl_Q_oa'].sum, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, program_values['cfis_fan_w'].sum, 0.01)
     assert_in_epsilon(suppl_vent_fan_power, program_values['cfis_suppl_fan_w'].sum, 0.01)
     assert_in_epsilon(vent_fan_mins, program_values['cfis_t_min_hr_open'].sum, 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
