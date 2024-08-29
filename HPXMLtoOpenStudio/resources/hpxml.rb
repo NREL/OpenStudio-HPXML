@@ -8113,6 +8113,11 @@ class HPXML < Object
     #
     # @return [nil]
     def delete
+      if is_cfis_supplemental_fan
+        @parent_object.ventilation_fans.each do |vent_fan|
+          vent_fan.cfis_supplemental_fan_idref = nil if vent_fan.cfis_supplemental_fan_idref == @id
+        end
+      end
       @parent_object.ventilation_fans.delete(self)
     end
 

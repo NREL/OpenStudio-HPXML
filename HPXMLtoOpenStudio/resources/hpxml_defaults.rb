@@ -2579,20 +2579,20 @@ module HPXMLDefaults
         vent_fan.rated_flow_rate_isdefaulted = true
       end
 
-      if vent_fan.fan_power.nil?
-        # FIXME: CFIS W/cfm should apply to total air handler cfm in ventilation only mode, not just outdoor air cfm
+      if vent_fan.fan_power.nil? && vent_fan.fan_type != HPXML::MechVentTypeCFIS
+        # FIXME: CFIS fan power (for mode == HPXML::CFISModeAirHandler) needs to be applied after total air handler cfm is determined
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan, eri_version)).round(1)
         vent_fan.fan_power_isdefaulted = true
       end
       next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
 
-      if vent_fan.cfis_vent_mode_airflow_fraction.nil?
-        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
-        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
-      end
       if vent_fan.cfis_addtl_runtime_operating_mode.nil?
         vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeAirHandler
         vent_fan.cfis_addtl_runtime_operating_mode_isdefaulted = true
+      end
+      if vent_fan.cfis_vent_mode_airflow_fraction.nil? && (vent_fan.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler)
+        vent_fan.cfis_vent_mode_airflow_fraction = 1.0
+        vent_fan.cfis_vent_mode_airflow_fraction_isdefaulted = true
       end
     end
 

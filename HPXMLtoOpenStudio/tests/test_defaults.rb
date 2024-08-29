@@ -2811,23 +2811,36 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test inputs not overridden by defaults w/ CFIS
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis.xml')
     vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
-    vent_fan.is_shared_system = false
     vent_fan.hours_in_operation = 12.0
     vent_fan.fan_power = 12.5
     vent_fan.rated_flow_rate = 222.0
     vent_fan.cfis_vent_mode_airflow_fraction = 0.5
-    vent_fan.cfis_addtl_runtime_operating_mode = HPXML::CFISModeSupplementalFan
-    hpxml_bldg.ventilation_fans.add(id: "VentilationFan#{hpxml_bldg.ventilation_fans.size + 1}",
-                                    tested_flow_rate: 79.0,
-                                    fan_power: 9.0,
-                                    fan_type: HPXML::MechVentTypeExhaust,
-                                    is_shared_system: false,
-                                    used_for_whole_building_ventilation: true)
-    suppl_vent_fan = hpxml_bldg.ventilation_fans[-1]
-    vent_fan.cfis_supplemental_fan_idref = suppl_vent_fan.id
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 12.0, 12.5, 222.0, 0.5, HPXML::CFISModeSupplementalFan)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 12.0, 12.5, 222.0, 0.5, HPXML::CFISModeAirHandler)
+
+    # Test defaults w/ CFIS
+    vent_fan.is_shared_system = nil
+    vent_fan.hours_in_operation = nil
+    vent_fan.fan_power = nil
+    vent_fan.rated_flow_rate = nil
+    vent_fan.cfis_vent_mode_airflow_fraction = nil
+    vent_fan.cfis_addtl_runtime_operating_mode = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, nil, 305.4, 1.0, HPXML::CFISModeAirHandler)
+
+    # Test inputs not overridden by defaults w/ CFIS & supplemental fan
+    hpxml, hpxml_bldg = _create_hpxml('base-mechvent-cfis-supplemental-fan-exhaust.xml')
+    vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation && f.fan_type == HPXML::MechVentTypeCFIS }
+    vent_fan.hours_in_operation = 12.0
+    vent_fan.rated_flow_rate = 222.0
+    suppl_vent_fan = vent_fan.cfis_supplemental_fan
+    suppl_vent_fan.tested_flow_rate = 79.0
+    suppl_vent_fan.fan_power = 9.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 12.0, nil, 222.0, nil, HPXML::CFISModeSupplementalFan)
     _test_default_mech_vent_suppl_values(default_hpxml_bldg, false, nil, 9.0, 79.0)
 
     # Test defaults w/ CFIS supplemental fan
@@ -2847,7 +2860,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     vent_fan.cfis_addtl_runtime_operating_mode = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, 177.1, 305.4, 1.0, HPXML::CFISModeAirHandler)
+    _test_default_mech_vent_values(default_hpxml_bldg, false, 8.0, nil, 305.4, 1.0, HPXML::CFISModeAirHandler)
 
     # Test inputs not overridden by defaults w/ ERV
     hpxml, hpxml_bldg = _create_hpxml('base-mechvent-erv.xml')
@@ -5221,7 +5234,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     assert_equal(is_shared_system, vent_fan.is_shared_system)
     assert_equal(hours_in_operation, vent_fan.hours_in_operation)
-    assert_in_delta(fan_power, vent_fan.fan_power, 0.1)
+    if fan_power.nil?
+      assert_nil(vent_fan.fan_power)
+    else
+      assert_in_delta(fan_power, vent_fan.fan_power, 0.1)
+    end
     assert_in_delta(flow_rate, vent_fan.rated_flow_rate.to_f + vent_fan.calculated_flow_rate.to_f + vent_fan.tested_flow_rate.to_f + vent_fan.delivered_ventilation.to_f, 0.1)
     if cfis_vent_mode_airflow_fraction.nil?
       assert_nil(vent_fan.cfis_vent_mode_airflow_fraction)
