@@ -801,7 +801,7 @@ The distance between the unit and the neighboring building to the right (not inc
 
 **Neighbor: Front Height**
 
-The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_front_height``
 - **Type:** ``Double``
@@ -814,7 +814,7 @@ The height of the neighboring building to the front. If not provided, the OS-HPX
 
 **Neighbor: Back Height**
 
-The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_back_height``
 - **Type:** ``Double``
@@ -827,7 +827,7 @@ The height of the neighboring building to the back. If not provided, the OS-HPXM
 
 **Neighbor: Left Height**
 
-The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_left_height``
 - **Type:** ``Double``
@@ -840,7 +840,7 @@ The height of the neighboring building to the left. If not provided, the OS-HPXM
 
 **Neighbor: Right Height**
 
-The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_right_height``
 - **Type:** ``Double``
@@ -2777,7 +2777,7 @@ Pipe diameter of the geothermal loop. Only applies to ground-to-air heat pump ty
 
 **Heating System 2: Type**
 
-The type of the second heating system.
+The type of the second heating system. If a heat pump is specified and the backup type is 'separate', this heating system represents 'separate' backup heating. For ducted heat pumps where the backup heating system is a 'Furnace', the backup would typically be characterized as 'integrated' in that the furnace and heat pump share the same distribution system and blower fan; a 'Furnace' as 'separate' backup to a ducted heat pump is not supported.
 
 - **Name:** ``heating_system_2_type``
 - **Type:** ``Choice``

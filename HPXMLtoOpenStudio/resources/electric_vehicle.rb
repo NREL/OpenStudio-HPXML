@@ -78,7 +78,7 @@ class ElectricVehicle
       # Define equipment object to offset discharge power so that it is excluded from charging energy and electricity meter
       ev_discharge_offset_obj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       ev_discharge_offset_obj = OpenStudio::Model::OtherEquipment.new(ev_discharge_offset_obj_def)
-      obj_name = Constants.ObjectNameEVBatteryDischargeOffset
+      obj_name = Constants.ObjectTypeEVBatteryDischargeOffset
       ev_discharge_offset_obj.setName(obj_name)
       ev_discharge_offset_obj.setEndUseSubcategory(obj_name)
       ev_discharge_offset_obj.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
