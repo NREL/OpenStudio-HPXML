@@ -626,7 +626,7 @@ module Geometry
   # TODO
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param location [TODO] TODO
+  # @param location [String] the location of interest (HPXML::LocationXXX)
   # @return [TODO] TODO
   def self.calculate_zone_volume(hpxml_bldg:,
                                  location:)
@@ -771,5 +771,51 @@ module Geometry
                                               width:)
     min_surface_area = 0.005 # m^2
     return 0.5 * (((length + width)**2 + 4.0 * min_surface_area)**0.5 - length - width)
+  end
+
+  # Shift units so they aren't right on top and shade each other.
+  #
+  # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param unit_number [Integer] index number corresponding to an HPXML Building object
+  # @return [nil]
+  def self.shift_unit(unit_model, unit_number)
+    y_shift = 200.0 * unit_number # meters
+
+    # shift the unit so it's not right on top of the previous one
+    unit_model.getSpaces.sort.each do |space|
+      space.setYOrigin(y_shift)
+    end
+
+    # shift shading surfaces
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = 1
+    m[1, 1] = 1
+    m[2, 2] = 1
+    m[3, 3] = 1
+    m[1, 3] = y_shift
+    t = OpenStudio::Transformation.new(m)
+
+    unit_model.getShadingSurfaceGroups.each do |shading_surface_group|
+      next if shading_surface_group.space.is_initialized # already got shifted
+
+      shading_surface_group.shadingSurfaces.each do |shading_surface|
+        shading_surface.setVertices(t * shading_surface.vertices)
+      end
+    end
+  end
+
+  # For a provided HPXML Location, create an OpenStudio Space and Thermal Zone if the provided spaces hash doesn't already contain the OpenStudio Space.
+  # Otherwise, return the already-created OpenStudio Space for the provided HPXML Location.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param location [String] the location of interest (HPXML::LocationXXX)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [OpenStudio::Model::Space] the OpenStudio::Model::Space object corresponding to HPXML::LocationXXX
+  def self.create_or_get_space(model, spaces, location, hpxml_bldg)
+    if spaces[location].nil?
+      create_space_and_zone(model: model, spaces: spaces, location: location, zone_multiplier: hpxml_bldg.building_construction.number_of_units)
+    end
+    return spaces[location]
   end
 end

@@ -325,7 +325,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
-      shift_geometry(unit_model, unit_number)
+      Geometry.shift_unit(unit_model, unit_number)
       prefix_all_unit_model_objects(unit_model, unit_number)
 
       # Handle remaining (non-unique) objects now
@@ -340,45 +340,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     model.addObjects(unit_model_objects, true)
   end
 
-  # TODO
-  #
-  # @param unit_model [TODO] TODO
-  # @param unit_number [TODO] TODO
-  # @return [TODO] TODO
-  def shift_geometry(unit_model, unit_number)
-    # Shift units so they aren't right on top and shade each other
-    y_shift = 200.0 * unit_number # meters
-
-    # shift the unit so it's not right on top of the previous one
-    unit_model.getSpaces.sort.each do |space|
-      space.setYOrigin(y_shift)
-    end
-
-    # shift shading surfaces
-    m = OpenStudio::Matrix.new(4, 4, 0)
-    m[0, 0] = 1
-    m[1, 1] = 1
-    m[2, 2] = 1
-    m[3, 3] = 1
-    m[1, 3] = y_shift
-    t = OpenStudio::Transformation.new(m)
-
-    unit_model.getShadingSurfaceGroups.each do |shading_surface_group|
-      next if shading_surface_group.space.is_initialized # already got shifted
-
-      shading_surface_group.shadingSurfaces.each do |shading_surface|
-        shading_surface.setVertices(t * shading_surface.vertices)
-      end
-    end
-  end
-
-  # TODO
+  # Prefix all objects with name using unit number.
   #
   # @param unit_model [TODO] TODO
   # @param unit_number [TODO] TODO
   # @return [TODO] TODO
   def prefix_all_unit_model_objects(unit_model, unit_number)
-    # Prefix all objects with name using unit number
     # FUTURE: Create objects with unique names up front so we don't have to do this
 
     # EMS objects
@@ -504,7 +471,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Conditioned space/zone
     spaces = {}
-    create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)
+    Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)
     set_foundation_and_walls_top()
     set_heating_and_cooling_seasons(runner)
     add_setpoints(runner, model, weather, spaces)
@@ -553,13 +520,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_building_unit(model, unit_num)
   end
 
-  # TODO
+  # Check/update emissions file references.
   #
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_path [String] Path to the HPXML file
   # @return [TODO] TODO
   def check_emissions_references(hpxml_header, hpxml_path)
-    # Check/update file references
     hpxml_header.emissions_scenarios.each do |scenario|
       if hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
         fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
@@ -572,13 +538,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Check/update schedule file references.
   #
   # @param hpxml_bldg_header [TODO] TODO
   # @param hpxml_path [String] Path to the HPXML file
   # @return [TODO] TODO
   def check_schedule_references(hpxml_bldg_header, hpxml_path)
-    # Check/update file references
     hpxml_bldg_header.schedules_filepaths = hpxml_bldg_header.schedules_filepaths.collect { |sfp|
       FilePath.check_path(sfp,
                           File.dirname(hpxml_path),
@@ -670,19 +635,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     Geometry.apply_occupants(model, runner, @hpxml_bldg, num_occ, spaces[HPXML::LocationConditionedSpace],
                              @schedules_file, @hpxml_header.unavailable_periods)
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param location [TODO] TODO
-  # @return [TODO] TODO
-  def create_or_get_space(model, spaces, location)
-    if spaces[location].nil?
-      Geometry.create_space_and_zone(model: model, spaces: spaces, location: location, zone_multiplier: @hpxml_bldg.building_construction.number_of_units)
-    end
-    return spaces[location]
   end
 
   # Adds any HPXML Roofs to the OpenStudio model.
@@ -1358,16 +1310,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return kiva_foundation
   end
 
-  # TODO
+  # Check if we need to add floors between conditioned spaces (e.g., between first
+  # and second story or conditioned basement ceiling).
+  # This ensures that the E+ reported Conditioned Floor Area is correct.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def add_conditioned_floor_area(model, spaces)
-    # Check if we need to add floors between conditioned spaces (e.g., between first
-    # and second story or conditioned basement ceiling).
-    # This ensures that the E+ reported Conditioned Floor Area is correct.
-
     sum_cfa = 0.0
     @hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
@@ -1400,7 +1350,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     floor_surface.setWindExposure(EPlus::SurfaceWindExposureNo)
     floor_surface.setName('inferred conditioned floor')
     floor_surface.setSurfaceType(EPlus::SurfaceTypeFloor)
-    floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
+    floor_surface.setSpace(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg))
     floor_surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
     floor_surface.additionalProperties.setFeature('Tilt', 0.0)
@@ -1413,7 +1363,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     ceiling_surface.setWindExposure(EPlus::SurfaceWindExposureNo)
     ceiling_surface.setName('inferred conditioned ceiling')
     ceiling_surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
-    ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
+    ceiling_surface.setSpace(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg))
     ceiling_surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
     ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
@@ -1597,7 +1547,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
+      surface.setSpace(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg))
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors) # cannot be adiabatic because subsurfaces won't be created
 
       vertices = Geometry.create_roof_vertices(length: length, width: width, z_origin: z_origin, azimuth: skylight.azimuth, tilt: tilt)
@@ -1695,16 +1645,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  # TODO
+  # Arbitrary construction for heat capacitance.
+  # Only applies to surfaces where outside boundary conditioned is
+  # adiabatic or surface net area is near zero.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param surfaces [TODO] TODO
   # @param type [TODO] TODO
   # @return [TODO] TODO
   def apply_adiabatic_construction(model, surfaces, type)
-    # Arbitrary construction for heat capacitance.
-    # Only applies to surfaces where outside boundary conditioned is
-    # adiabatic or surface net area is near zero.
     return if surfaces.empty?
 
     if type == 'wall'
@@ -2433,7 +2382,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Store some data for use in reporting measure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml [HPXML] HPXML object
@@ -2443,7 +2392,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_defaults_path [TODO] TODO
   # @return [TODO] TODO
   def add_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, hpxml_defaults_path)
-    # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hpxml_defaults_path', hpxml_defaults_path)
@@ -2462,17 +2410,15 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     additionalProperties.setFeature('is_southern_hemisphere', hpxml_osm_map.keys[0].latitude < 0)
   end
 
-  # TODO
+  # We do our own unmet hours calculation via EMS so that we can incorporate,
+  # e.g., heating/cooling seasons into the logic. The calculation layers on top
+  # of the built-in EnergyPlus unmet hours output.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml [HPXML] HPXML object
   # @return [TODO] TODO
   def add_unmet_hours_output(model, hpxml_osm_map, hpxml)
-    # We do our own unmet hours calculation via EMS so that we can incorporate,
-    # e.g., heating/cooling seasons into the logic. The calculation layers on top
-    # of the built-in EnergyPlus unmet hours output.
-
     # Create sensors and gather data
     htg_sensors, clg_sensors = {}, {}
     zone_air_temp_sensors, htg_spt_sensors, clg_spt_sensors = {}, {}, {}
@@ -3247,9 +3193,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def set_surface_interior(model, spaces, surface, hpxml_surface)
     interior_adjacent_to = hpxml_surface.interior_adjacent_to
     if HPXML::conditioned_below_grade_locations.include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace))
+      surface.setSpace(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg))
     else
-      surface.setSpace(create_or_get_space(model, spaces, interior_adjacent_to))
+      surface.setSpace(Geometry.create_or_get_space(model, spaces, interior_adjacent_to, @hpxml_bldg))
     end
   end
 
@@ -3273,10 +3219,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationConditionedSpace)).get
+      adjacent_surface = surface.createAdjacentSurface(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)).get
       adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     else
-      adjacent_surface = surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
+      adjacent_surface = surface.createAdjacentSurface(Geometry.create_or_get_space(model, spaces, exterior_adjacent_to, @hpxml_bldg)).get
       adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
     end
   end
@@ -3309,16 +3255,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     surface.setWindExposure(EPlus::SurfaceWindExposureNo)
   end
 
-  # TODO
+  # Create outside boundary schedules to be actuated by EMS,
+  # can be shared by any surface, duct adjacent to / located in those spaces.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param location [TODO] TODO
+  # @param location [String] the location of interest (HPXML::LocationXXX)
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def get_space_temperature_schedule(model, location, spaces)
-    # Create outside boundary schedules to be actuated by EMS,
-    # can be shared by any surface, duct adjacent to / located in those spaces
-
     # return if already exists
     model.getScheduleConstants.each do |sch|
       next unless sch.name.to_s == location
@@ -3427,7 +3371,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters, ducts, and refrigerators).
   #
-  # @param location [TODO] TODO
+  # @param location [String] the location of interest (HPXML::LocationXXX)
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
@@ -3457,7 +3401,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
   #
-  # @param location [TODO] TODO
+  # @param location [String] the location of interest (HPXML::LocationXXX)
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def get_space_from_location(location, spaces)
@@ -3474,7 +3418,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     return spaces[location]
   end
 
-  # TODO
+  # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
+  # The parent surface is entirely comprised of the subsurface.
   #
   # @param surface [TODO] TODO
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
@@ -3482,9 +3427,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_surface [TODO] TODO
   # @return [nil]
   def set_subsurface_exterior(surface, spaces, model, hpxml_surface)
-    # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
-    # The parent surface is entirely comprised of the subsurface.
-
     # Subsurface on foundation wall, set it to be adjacent to outdoors
     if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)

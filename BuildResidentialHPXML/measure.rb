@@ -6033,7 +6033,7 @@ module HPXMLFile
 
   # Get the specific HPXML foundation or attic location based on general HPXML location and specific HPXML foundation or attic type.
   #
-  # @param location [String] the general HPXML location (crawlspace or attic)
+  # @param location [String] the location of interest (HPXML::LocationCrawlspace or HPXML::LocationAttic)
   # @param foundation_type [String] the specific HPXML foundation type (unvented crawlspace, vented crawlspace, conditioned crawlspace)
   # @param attic_type [String] the specific HPXML attic type (unvented attic, vented attic, conditioned attic)
   # @return [nil]
