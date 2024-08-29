@@ -2553,6 +2553,7 @@ module HPXMLDefaults
       end
 
       if vent_fan.fan_power.nil?
+        # FIXME: CFIS W/cfm should apply to total air handler cfm in ventilation only mode, not just outdoor air cfm
         vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan, eri_version)).round(1)
         vent_fan.fan_power_isdefaulted = true
       end

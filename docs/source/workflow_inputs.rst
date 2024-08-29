@@ -3527,7 +3527,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
   ``CFISControls/SupplementalFan``                                                               idref              See [#]_                       See [#]_                   The supplemental fan providing additional ventilation
   ``RatedFlowRate`` or ``TestedFlowRate`` or ``CalculatedFlowRate`` or ``DeliveredVentilation``  double    cfm      >= 0                           No        See [#]_         Flow rate [#]_
   ``HoursInOperation``                                                                           double    hrs/day  >= 0, <= 24                    false     8                Hours per day of operation [#]_
-  ``FanPower``                                                                                   double    W        >= 0                           No        See [#]_         Fan power
+  ``FanPower``                                                                                   double    W        >= 0                           No [#]_   See [#]_         Blower fan power during ventilation only mode
   ``AttachedToHVACDistributionSystem``                                                           idref              See [#]_                       Yes                        ID of attached distribution system
   ``extension/VentilationOnlyModeAirflowFraction``                                               double    frac     >= 0, <= 1                     No        1.0              Blower airflow rate fraction during ventilation only mode [#]_
   =============================================================================================  ========  =======  =============================  ========  ===============  =========================================
@@ -3554,6 +3554,7 @@ Each central fan integrated supply (CFIS) system is entered as a ``/HPXML/Buildi
          
   .. [#] The flow rate should equal the amount of outdoor air provided to the distribution system, not the total airflow through the distribution system.
   .. [#] HoursInOperation is combined with the flow rate to form the hourly target ventilation rate (e.g., inputs of 90 cfm and 8 hrs/day produce an hourly target ventilation rate of 30 cfm).
+  .. [#] FanPower only applies when AdditionalRuntimeOperatingMode="air handler fan", in which it determines the blower fan power during ventilation only mode.
   .. [#] If FanPower not provided, defaults to 0.58 W/cfm based on ANSI/RESNET/ICC 301-2022 Addendum C.
   .. [#] HVACDistribution type cannot be :ref:`hvac_distribution_hydronic`.
   .. [#] VentilationOnlyModeAirflowFraction only applies when AdditionalRuntimeOperatingMode="air handler fan".
