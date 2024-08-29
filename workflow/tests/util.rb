@@ -296,8 +296,8 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     next if message.include?('WetBulb not converged after') && message.include?('iterations(PsyTwbFnTdbWPb)')
     next if message.include? 'Inside surface heat balance did not converge with Max Temp Difference'
     next if message.include? 'Inside surface heat balance convergence problem continues'
-    next if message.include?('Glycol: Temperature') && message.include?('out of range (too low) for fluid')
-    next if message.include?('Glycol: Temperature') && message.include?('out of range (too high) for fluid')
+    next if message.include?('Glycol') && message.include?('Temperature') && message.include?('out of range (too low) for fluid')
+    next if message.include?('Glycol') && message.include?('Temperature') && message.include?('out of range (too high) for fluid')
     next if message.include? 'Plant loop exceeding upper temperature limit'
     next if message.include? 'Plant loop falling below lower temperature limit'
     next if message.include?('Foundation:Kiva') && message.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
