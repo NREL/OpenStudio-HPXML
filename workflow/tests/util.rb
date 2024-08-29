@@ -50,16 +50,13 @@ def _run_xml(xml, worker_num, apply_unit_multiplier = false, annual_results_1x =
         # FUTURE: Batteries currently don't work with whole SFA/MF buildings
         # https://github.com/NREL/OpenStudio-HPXML/issues/1499
         return
-<<<<<<< HEAD
       elsif hpxml_bldg.vehicles.size > 0
         # Same as battery issue above
         return
-=======
       elsif hpxml.header.hvac_onoff_thermostat_deadband
         # On off thermostat not supported with unit multiplier yet
       elsif hpxml.header.heat_pump_backup_heating_capacity_increment
         # multi-staging backup coil not supported with unit multiplier yet
->>>>>>> origin/master
       else
         hpxml_bldg.building_construction.number_of_units *= 5
       end
