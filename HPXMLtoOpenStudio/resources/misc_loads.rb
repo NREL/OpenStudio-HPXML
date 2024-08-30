@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
 # TODO
-class MiscLoads
+module MiscLoads
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param plug_load [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
   # @param conditioned_space [TODO] TODO
   # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_plug(model, runner, plug_load, obj_name, conditioned_space, apply_ashrae140_assumptions, schedules_file, unavailable_periods)
     kwh = 0
@@ -38,7 +38,7 @@ class MiscLoads
     end
     if sch.nil?
       col_unavailable_periods = Schedule.get_unavailable_periods(runner, col_name, unavailable_periods)
-      sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
+      sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', plug_load.weekday_fractions, plug_load.weekend_fractions, plug_load.monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
       space_design_level = sch.calc_design_level_from_daily_kwh(kwh / 365.0)
       sch = sch.schedule
     else
@@ -74,12 +74,12 @@ class MiscLoads
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param fuel_load [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_fuel(model, runner, fuel_load, obj_name, conditioned_space, schedules_file, unavailable_periods)
     therm = 0
@@ -104,7 +104,7 @@ class MiscLoads
     end
     if sch.nil?
       col_unavailable_periods = Schedule.get_unavailable_periods(runner, col_name, unavailable_periods)
-      sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
+      sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', fuel_load.weekday_fractions, fuel_load.weekend_fractions, fuel_load.monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
       space_design_level = sch.calc_design_level_from_daily_therm(therm / 365.0)
       sch = sch.schedule
     else
@@ -133,12 +133,12 @@ class MiscLoads
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_pool_or_permanent_spa_heater(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)
     return if pool_or_spa.heater_type == HPXML::TypeNone
@@ -156,10 +156,10 @@ class MiscLoads
     # Create schedule
     heater_sch = nil
     if pool_or_spa.is_a? HPXML::Pool
-      obj_name = Constants.ObjectNameMiscPoolHeater
+      obj_name = Constants::ObjectTypeMiscPoolHeater
       col_name = 'pool_heater'
     else
-      obj_name = Constants.ObjectNameMiscPermanentSpaHeater
+      obj_name = Constants::ObjectTypeMiscPermanentSpaHeater
       col_name = 'permanent_spa_heater'
     end
     if not schedules_file.nil?
@@ -167,7 +167,7 @@ class MiscLoads
     end
     if heater_sch.nil?
       col_unavailable_periods = Schedule.get_unavailable_periods(runner, col_name, unavailable_periods)
-      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_spa.heater_weekday_fractions, pool_or_spa.heater_weekend_fractions, pool_or_spa.heater_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
+      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_spa.heater_weekday_fractions, pool_or_spa.heater_weekend_fractions, pool_or_spa.heater_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
     else
       runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !pool_or_spa.heater_weekday_fractions.nil?
       runner.registerWarning("Both '#{col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !pool_or_spa.heater_weekend_fractions.nil?
@@ -222,12 +222,12 @@ class MiscLoads
 
   # TODO
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param pool_or_spa [TODO] TODO
   # @param conditioned_space [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.apply_pool_or_permanent_spa_pump(runner, model, pool_or_spa, conditioned_space, schedules_file, unavailable_periods)
     pump_kwh = 0
@@ -240,10 +240,10 @@ class MiscLoads
     # Create schedule
     pump_sch = nil
     if pool_or_spa.is_a? HPXML::Pool
-      obj_name = Constants.ObjectNameMiscPoolPump
+      obj_name = Constants::ObjectTypeMiscPoolPump
       col_name = 'pool_pump'
     else
-      obj_name = Constants.ObjectNameMiscPermanentSpaPump
+      obj_name = Constants::ObjectTypeMiscPermanentSpaPump
       col_name = 'permanent_spa_pump'
     end
     if not schedules_file.nil?
@@ -251,7 +251,7 @@ class MiscLoads
     end
     if pump_sch.nil?
       col_unavailable_periods = Schedule.get_unavailable_periods(runner, col_name, unavailable_periods)
-      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_spa.pump_weekday_fractions, pool_or_spa.pump_weekend_fractions, pool_or_spa.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
+      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_spa.pump_weekday_fractions, pool_or_spa.pump_weekend_fractions, pool_or_spa.pump_monthly_multipliers, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: col_unavailable_periods)
     else
       runner.registerWarning("Both '#{col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !pool_or_spa.pump_weekday_fractions.nil?
       runner.registerWarning("Both '#{col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !pool_or_spa.pump_weekend_fractions.nil?
@@ -279,11 +279,9 @@ class MiscLoads
     mel.setSchedule(pump_sch)
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa
@@ -295,7 +293,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_televisions_default_values(cfa, nbeds)
@@ -308,7 +306,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_pool_pump_default_values(cfa, nbeds)
@@ -317,7 +315,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
@@ -339,7 +337,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_permanent_spa_pump_default_values(cfa, nbeds)
@@ -348,7 +346,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param type [TODO] TODO
   # @return [TODO] TODO
@@ -381,7 +379,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_well_pump_default_values(cfa, nbeds)
@@ -390,7 +388,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_grill_default_values(cfa, nbeds)
@@ -399,7 +397,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_lighting_default_values(cfa, nbeds)
@@ -408,7 +406,7 @@ class MiscLoads
 
   # TODO
   #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft^2)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [TODO] TODO
   def self.get_gas_fireplace_default_values(cfa, nbeds)

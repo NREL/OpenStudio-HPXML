@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# The Geometry class provides methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
-class Geometry
+# Collection of methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
+module Geometry
   # Tear down the existing model if it exists.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
-  # @return [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @return [nil]
   def self.tear_down_model(model:,
                            runner:)
     handles = OpenStudio::UUIDVector.new
@@ -34,7 +34,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of x-coordinates in ft
+  # @return [Array<Double>] array of x-coordinates (ft)
   def self.get_surface_x_values(surfaceArray:)
     xValueArray = []
     surfaceArray.each do |surface|
@@ -50,7 +50,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of y-coordinates in ft
+  # @return [Array<Double>] array of y-coordinates (ft)
   def self.get_surface_y_values(surfaceArray:)
     yValueArray = []
     surfaceArray.each do |surface|
@@ -66,7 +66,7 @@ class Geometry
   # This was intended for spaces.
   #
   # @param surfaceArray [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Array<Double>] array of z-coordinates in ft
+  # @return [Array<Double>] array of z-coordinates (ft)
   def self.get_surface_z_values(surfaceArray:)
     # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
     zValueArray = []
@@ -80,10 +80,10 @@ class Geometry
 
   # Get the default number of occupants.
   #
-  # @param nbeds [Integer] the number of bedrooms
-  # @return [Double] the number of occupants, which is equal to the number of bedrooms
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Number of occupants in the dwelling unit
   def self.get_occupancy_default_num(nbeds:)
-    return Float(nbeds)
+    return Float(nbeds) # Per ANSI 301 for an asset calculation
   end
 
   # Create space and zone based on contents of spaces and value of location.
@@ -180,12 +180,12 @@ class Geometry
   # For an array of roof surfaces, get the maximum tilt.
   #
   # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @return [Double] the maximum of surface tilts in degrees
+  # @return [Double] the maximum of surface tilts (degrees)
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'roofceiling'
-      next if (surface.outsideBoundaryCondition.downcase != 'outdoors') && (surface.outsideBoundaryCondition.downcase != 'adiabatic')
+      next if surface.surfaceType != EPlus::SurfaceTypeRoofCeiling
+      next if (surface.outsideBoundaryCondition != EPlus::BoundaryConditionOutdoors) && (surface.outsideBoundaryCondition != EPlus::BoundaryConditionAdiabatic)
 
       tilts << surface.tilt
     end
@@ -194,12 +194,12 @@ class Geometry
 
   # Create vertices for a vertical plane based on length, height, z origin, azimuth, presence of a buffer, and any subsurface area.
   #
-  # @param length [Double] length of the wall in ft
-  # @param height [Double] height of the wall in ft
-  # @param z_origin [Double] The z-coordinate for which the length and height are relative, in ft
-  # @param azimuth [Double] azimuth in degrees
+  # @param length [Double] length of the wall (ft)
+  # @param height [Double] height of the wall (ft)
+  # @param z_origin [Double] The z-coordinate for which the length and height are relative (ft)
+  # @param azimuth [Double] azimuth (degrees)
   # @param add_buffer [Boolean] whether to use a buffer on each side of a subsurface
-  # @param subsurface_area [Double] the area of a subsurface within the parent surface, in ft^2
+  # @param subsurface_area [Double] the area of a subsurface within the parent surface (ft2)
   # @return [OpenStudio::Point3dVector] an array of points
   def self.create_wall_vertices(length:,
                                 height:,
@@ -346,7 +346,7 @@ class Geometry
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [Double] the total height of the dwelling unit
-  # @return [void]
+  # @return [nil]
   def self.explode_surfaces(model:,
                             hpxml_bldg:,
                             walls_top:)
@@ -357,8 +357,8 @@ class Geometry
     surfaces = []
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
-      next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation', 'adiabatic', 'othersidecoefficients'].include? surface.outsideBoundaryCondition.downcase
+      next unless [EPlus::SurfaceTypeWall, EPlus::SurfaceTypeRoofCeiling].include? surface.surfaceType
+      next unless [EPlus::BoundaryConditionOutdoors, EPlus::BoundaryConditionFoundation, EPlus::BoundaryConditionAdiabatic, EPlus::BoundaryConditionCoefficients].include? surface.outsideBoundaryCondition
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
@@ -402,7 +402,7 @@ class Geometry
 
     # Explode neighbors
     model.getShadingSurfaceGroups.each do |shading_group|
-      next unless shading_group.name.to_s == Constants.ObjectNameNeighbors
+      next unless shading_group.name.to_s == Constants::ObjectTypeNeighbors
 
       shading_group.shadingSurfaces.each do |shading_surface|
         azimuth = shading_surface.additionalProperties.getFeatureAsInteger('Azimuth').get
@@ -438,7 +438,7 @@ class Geometry
       overhang_surfaces = []
       shading_surfaces = []
       surface.subSurfaces.each do |subsurface|
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
+        next unless subsurface.subSurfaceType == EPlus::SubSurfaceTypeWindow
 
         subsurface.shadingSurfaceGroups.each do |overhang_group|
           overhang_group.shadingSurfaces.each do |overhang|
@@ -450,7 +450,7 @@ class Geometry
       # Push out horizontally
       distance = explode_distance
 
-      if surface.surfaceType.downcase == 'roofceiling'
+      if surface.surfaceType == EPlus::SurfaceTypeRoofCeiling
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
         tilt = surface.additionalProperties.getFeatureAsDouble('Tilt').get
         width = surface.additionalProperties.getFeatureAsDouble('Width').get
@@ -489,14 +489,16 @@ class Geometry
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param num_occ [TODO] TODO
+  # @param num_occ [Double] Number of occupants in the dwelling unit
   # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
+  # @return [nil]
   def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
+    return if num_occ <= 0
+
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
@@ -517,7 +519,7 @@ class Geometry
       weekend_sch = hpxml_bldg.building_occupancy.weekend_fractions.split(',').map(&:to_f)
       weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
       monthly_sch = hpxml_bldg.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
+      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants::ObjectTypeOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
       people_sch = people_sch.schedule
     else
       runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.weekday_fractions.nil?
@@ -528,14 +530,14 @@ class Geometry
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
     activity_sch.setValue(activity_per_person)
-    activity_sch.setName(Constants.ObjectNameOccupants + ' activity schedule')
+    activity_sch.setName(Constants::ObjectTypeOccupants + ' activity schedule')
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
     occ = OpenStudio::Model::People.new(occ_def)
-    occ.setName(Constants.ObjectNameOccupants)
+    occ.setName(Constants::ObjectTypeOccupants)
     occ.setSpace(space)
-    occ_def.setName(Constants.ObjectNameOccupants)
+    occ_def.setName(Constants::ObjectTypeOccupants)
     occ_def.setNumberofPeople(num_occ)
     occ_def.setFractionRadiant(occ_rad)
     occ_def.setSensibleHeatFraction(occ_sens)
@@ -558,12 +560,10 @@ class Geometry
     return z_origins.min
   end
 
-  # FIXME: The following class methods are meant to be private.
-
   # Get the surface transformation using the translation matrix defined by an offset multiplied by 3D translation vector (x, y, z).
   # Applying the affine transformation will shift a set of vertices.
   #
-  # @param offset [Double] the magnitude of the vector in ft
+  # @param offset [Double] the magnitude of the vector (ft)
   # @param x [Double] the x-coordinate of the translation vector
   # @param y [Double] the y-coordinate of the translation vector
   # @param z [Double] the z-coordinate of the translation vector
@@ -616,7 +616,7 @@ class Geometry
 
     unless shading_surfaces.empty?
       shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
-      shading_surface_group.setName(Constants.ObjectNameNeighbors)
+      shading_surface_group.setName(Constants::ObjectTypeNeighbors)
       shading_surfaces.each do |shading_surface|
         shading_surface.setShadingSurfaceGroup(shading_surface_group)
       end
@@ -657,7 +657,7 @@ class Geometry
 
   # TODO
   #
-  # @param location [TODO] TODO
+  # @param location [String] the general HPXML location
   # @return [TODO] TODO
   def self.get_temperature_scheduled_space_values(location:)
     if location == HPXML::LocationOtherHeatedSpace
@@ -668,14 +668,14 @@ class Geometry
                ground_weight: 0.0,
                f_regain: 0.0 }
     elsif location == HPXML::LocationOtherMultifamilyBufferSpace
-      # Average of indoor/outdoor temperatures with minimum of 50 deg-F
+      # Average of indoor/outdoor temperatures with minimum of 50 F
       return { temp_min: 50,
                indoor_weight: 0.5,
                outdoor_weight: 0.5,
                ground_weight: 0.0,
                f_regain: 0.0 }
     elsif location == HPXML::LocationOtherNonFreezingSpace
-      # Floating with outdoor air temperature with minimum of 40 deg-F
+      # Floating with outdoor air temperature with minimum of 40 F
       return { temp_min: 40,
                indoor_weight: 0.0,
                outdoor_weight: 1.0,
@@ -764,9 +764,9 @@ class Geometry
   # needs relative to the subsurface in order to prevent E+ warnings
   # about "Very small surface area".
   #
-  # @param length [Double] length of the subsurface in m
-  # @param width [Double] width of the subsurface in m
-  # @return [Double] minimum needed buffer distance in m
+  # @param length [Double] length of the subsurface (m)
+  # @param width [Double] width of the subsurface (m)
+  # @return [Double] minimum needed buffer distance (m)
   def self.calculate_subsurface_parent_buffer(length:,
                                               width:)
     min_surface_area = 0.005 # m^2

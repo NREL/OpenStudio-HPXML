@@ -13,13 +13,18 @@ require_relative '../resources/util.rb'
 require_relative '../resources/location.rb'
 
 class HPXMLtoOpenStudioWeatherTest < Minitest::Test
+  def teardown
+    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+  end
+
   def weather_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'weather')
   end
 
   def test_denver
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
+    weather = WeatherFile.new(epw_path: File.join(weather_dir, 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'), runner: runner)
 
     # Check data
     assert_in_delta(51.6, weather.data.AnnualAvgDrybulb, 0.1)
@@ -60,7 +65,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
 
   def test_honolulu
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'), runner: runner)
+    weather = WeatherFile.new(epw_path: File.join(weather_dir, 'USA_HI_Honolulu.Intl.AP.911820_TMY3.epw'), runner: runner)
 
     # Check data
     assert_in_delta(76.8, weather.data.AnnualAvgDrybulb, 0.1)
@@ -101,7 +106,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
 
   def test_cape_town
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'ZAF_Cape.Town.688160_IWEC.epw'), runner: runner)
+    weather = WeatherFile.new(epw_path: File.join(weather_dir, 'ZAF_Cape.Town.688160_IWEC.epw'), runner: runner)
 
     # Check data
     assert_in_delta(61.7, weather.data.AnnualAvgDrybulb, 0.1)
@@ -142,7 +147,7 @@ class HPXMLtoOpenStudioWeatherTest < Minitest::Test
 
   def test_boulder_amy_with_leap_day
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    weather = WeatherProcess.new(epw_path: File.join(weather_dir, 'US_CO_Boulder_AMY_2012.epw'), runner: runner)
+    weather = WeatherFile.new(epw_path: File.join(weather_dir, 'US_CO_Boulder_AMY_2012.epw'), runner: runner)
 
     # Check data
     assert_in_delta(49.4, weather.data.AnnualAvgDrybulb, 0.1)
