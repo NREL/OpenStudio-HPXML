@@ -65,7 +65,6 @@ module Constants
   ObjectTypeMiscPlugLoads = 'misc plug loads'
   ObjectTypeMiscTelevision = 'misc tv'
   ObjectTypeMiscElectricVehicleCharging = 'misc electric vehicle charging'
-
   ObjectTypeMiscWellPump = 'misc well pump'
   ObjectTypeNaturalVentilation = 'natural vent'
   ObjectTypeNeighbors = 'neighbors'

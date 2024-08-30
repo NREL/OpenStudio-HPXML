@@ -1004,7 +1004,10 @@
     "ev_present": true,
     "ev_battery_capacity": 100,
     "ev_battery_usable_capacity": 80,
-    "ev_battery_discharge_power": 6000
+    "ev_battery_discharge_power": 6000,
+    "ev_miles_per_year": 10000,
+    "ev_hours_per_week": 14,
+    "ev_energy_efficiency": 0.32
   },
   "sample_files/base-battery-ev.xml": {
     "parent_hpxml": "sample_files/base-battery-ev-no-charger.xml",

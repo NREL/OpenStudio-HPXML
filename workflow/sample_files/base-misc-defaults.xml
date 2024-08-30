@@ -377,11 +377,18 @@
           </Battery>
         </Batteries>
         <Vehicles>
-          <ElectricVehicle>
+          <Vehicle>
             <SystemIdentifier id='ElectricVehicle1'/>
-            <BatteryType>Li-ion</BatteryType>
-            <ElectricVehicleCharger idref='EVCharger1'/>
-          </ElectricVehicle>
+            <VehicleType>
+              <BEV>
+                <Battery/>
+                <FractionChargedLocation>
+                  <Location>Home</Location>
+                </FractionChargedLocation>
+                <ConnectedCharger idref='EVCharger1'/>
+              </BEV>
+            </VehicleType>
+          </Vehicle>
         </Vehicles>
         <ElectricVehicleChargers>
           <ElectricVehicleCharger>

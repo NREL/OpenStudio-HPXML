@@ -113,6 +113,7 @@ class HPXML < Object
   ElectricResistanceDistributionRadiantCeiling = 'radiant ceiling'
   ElectricResistanceDistributionRadiantFloor = 'radiant floor'
   ElectricResistanceDistributionBaseboard = 'baseboard'
+  ElectricVehicleChargingLocation = 'Home'
   ExteriorShadingTypeAwnings = 'awnings'
   ExteriorShadingTypeBuilding = 'building'
   ExteriorShadingTypeDeciduousTree = 'deciduous tree'
@@ -9144,7 +9145,7 @@ class HPXML < Object
 
       # Battery-Electric Vehicle
       fraction_charged_location = XMLHelper.add_element(electric_vehicle, 'FractionChargedLocation')
-      XMLHelper.add_element(fraction_charged_location, 'Location', "Home", :string)
+      XMLHelper.add_element(fraction_charged_location, 'Location', HPXML::ElectricVehicleChargingLocation, :string)
       XMLHelper.add_element(fraction_charged_location, 'Percentage', @fraction_charged_home, :float, @fraction_charged_home_isdefaulted) unless @fraction_charged_home.nil?
       if not @ev_charger_idref.nil?
         charger = XMLHelper.add_element(electric_vehicle, 'ConnectedCharger')

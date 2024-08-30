@@ -23,7 +23,7 @@ class ElectricVehicle
       end
 
       # Calculate effective discharge power
-      hrs_driven_year = electric_vehicle.hours_per_week / 7 * 365 # hrs/year
+      hrs_driven_year = electric_vehicle.hours_per_week / 7 * UnitConversions.convert(1, 'yr', 'day') # hrs/year
       ev_annl_energy = electric_vehicle.energy_efficiency * electric_vehicle.miles_per_year # kWh/year
       eff_discharge_power = UnitConversions.convert(ev_annl_energy / hrs_driven_year, 'kw', 'w') # W
 
@@ -78,7 +78,7 @@ class ElectricVehicle
       # Define equipment object to offset discharge power so that it is excluded from charging energy and electricity meter
       ev_discharge_offset_obj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       ev_discharge_offset_obj = OpenStudio::Model::OtherEquipment.new(ev_discharge_offset_obj_def)
-      obj_name = Constants.ObjectTypeEVBatteryDischargeOffset
+      obj_name = Constants::ObjectTypeEVBatteryDischargeOffset
       ev_discharge_offset_obj.setName(obj_name)
       ev_discharge_offset_obj.setEndUseSubcategory(obj_name)
       ev_discharge_offset_obj.setFuelType(EPlus.fuel_type(HPXML::FuelTypeElectricity))
