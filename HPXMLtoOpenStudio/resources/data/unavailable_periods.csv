@@ -36,4 +36,4 @@ whole_house_fan,0,1
 battery_charging,0,1
 battery_discharging,0,1
 ev_battery_charging,0,1
-ev_battery_discharging,0,1
+ev_battery_discharging,0,0

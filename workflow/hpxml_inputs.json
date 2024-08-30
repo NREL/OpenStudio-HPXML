@@ -1001,6 +1001,20 @@
     "parent_hpxml": "sample_files/base-battery.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
+  "sample_files/base-pv-battery-and-ev.xml": {
+    "parent_hpxml": "sample_files/base-pv-battery.xml",
+    "ev_present": true,
+    "ev_battery_capacity": 100,
+    "ev_battery_usable_capacity": 80,
+    "ev_battery_discharge_power": 6000,
+    "ev_miles_per_year": 10000,
+    "ev_hours_per_week": 14,
+    "ev_energy_efficiency": 0.32,
+    "ev_charger_present": true,
+    "ev_charger_power": 7200,
+    "ev_charger_location": "outside",
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery-ev.csv"
+  },
   "sample_files/base-battery-ev-no-charger.xml": {
     "parent_hpxml": "sample_files/base-enclosure-garage.xml",
     "ev_present": true,
@@ -3381,7 +3395,7 @@
     "misc_plug_loads_other_frac_latent": null
   },
   "sample_files/base-misc-emissions.xml": {
-    "parent_hpxml": "sample_files/base-pv-battery.xml",
+    "parent_hpxml": "sample_files/base-pv-battery-and-ev.xml",
     "emissions_scenario_names": "Cambium Hourly MidCase LRMER RMPA, Cambium Hourly LowRECosts LRMER RMPA, Cambium Annual MidCase AER National, eGRID RMPA, eGRID RMPA",
     "emissions_types": "CO2e, CO2e, CO2e, SO2, NOx",
     "emissions_electricity_units": "kg/MWh, kg/MWh, kg/MWh, lb/MWh, lb/MWh",

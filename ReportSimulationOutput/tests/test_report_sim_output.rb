@@ -583,7 +583,8 @@ class ReportSimulationOutputTest < Minitest::Test
 
   def pv_battery_timeseries_cols
     return ["End Use: #{FT::Elec}: #{EUT::PV}",
-            "End Use: #{FT::Elec}: #{EUT::Battery}"]
+            "End Use: #{FT::Elec}: #{EUT::Battery}",
+            "End Use: #{FT::Elec}: #{EUT::EVBattery}"]
   end
 
   def test_annual_only

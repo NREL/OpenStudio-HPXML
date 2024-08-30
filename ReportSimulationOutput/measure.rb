@@ -1035,6 +1035,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       batteries = []
       @hpxml_bldgs.each do |hpxml_bldg|
         hpxml_bldg.batteries.each do |battery|
+          next if battery.id.to_s.include? 'ElectricVehicle'
           batteries << battery
         end
       end
