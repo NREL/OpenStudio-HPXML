@@ -486,7 +486,7 @@ module Geometry
     end
   end
 
-  # TODO
+  # Create an OpenStudio People object using number of occupants and people/activity schedules.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -775,7 +775,7 @@ module Geometry
 
   # Shift units so they aren't right on top and shade each other.
   #
-  # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object (corresponding to one of multiple dwelling units)
   # @param unit_number [Integer] index number corresponding to an HPXML Building object
   # @return [nil]
   def self.shift_unit(unit_model, unit_number)

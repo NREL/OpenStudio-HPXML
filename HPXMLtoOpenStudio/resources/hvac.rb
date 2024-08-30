@@ -785,7 +785,7 @@ module HVAC
   # @param sequential_heat_load_fracs [TODO] TODO
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [nil]
   def self.apply_electric_baseboard(model, heating_system,
                                     sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
 
@@ -2362,7 +2362,7 @@ module HVAC
   # @param airflow_cfm [TODO] TODO
   # @param heating_system [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::AirLoopHVAC] OpenStudio Air Loop HVAC object
   def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, airflow_cfm, heating_system, hvac_unavailable_periods)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
