@@ -2,8 +2,9 @@
 
 # Collection of methods for adding battery-related OpenStudio objects.
 module Battery
-  # Apply a home battery to the model using OpenStudio ElectricLoadCenterStorageLiIonNMCBattery, ElectricLoadCenterDistribution, ElectricLoadCenterStorageConverter, OtherEquipment, and EMS objects.
+  # Apply a home or EV battery to the model using OpenStudio ElectricLoadCenterStorageLiIonNMCBattery, ElectricLoadCenterDistribution, ElectricLoadCenterStorageConverter, OtherEquipment, and EMS objects.
   # Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.
+  # EV battery is not associated with a PV system and requires a charging/discharging schedule, otherwise it will not be modeled.
   # The system may be shared, in which case nominal/usable capacity (kWh) and usable fraction are apportioned to the dwelling unit by total number of bedrooms served.
   # A battery may share an ElectricLoadCenterDistribution object with PV; electric buss type and storage operation scheme are therefore changed.
   # Round trip efficiency is (temporarily) applied as an EMS program b/c E+ input is not hooked up.
@@ -15,6 +16,8 @@ module Battery
   # @param battery [HPXML::Battery] Object that defines a single home battery
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param is_ev [Boolean] Whether the battery is in an electric vehicle
+  # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines an EV charger connected to the battery, if applicable
   # @return [nil] for unscheduled battery w/out PV; in this case battery is not modeled
   def self.apply(runner, model, nbeds, pv_systems, battery, schedules_file, unit_multiplier, is_ev: false, ev_charger: nil)
     charging_schedule = nil

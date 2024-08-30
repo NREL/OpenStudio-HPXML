@@ -6811,6 +6811,18 @@ module HPXMLFile
                              number_of_bedrooms_served: number_of_bedrooms_served)
   end
 
+  # Set the electric vehicle properties, including:
+  # - rated power output
+  # - nominal and usable capacity
+  # - driving efficiency
+  # - miles driven per year
+  # - hours driven per week
+  # - fraction charged at home
+  # - EV charger connection
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
   def self.set_electric_vehicle(hpxml_bldg, args)
     if args[:ev_present] != true
       return

@@ -9028,11 +9028,19 @@ class HPXML < Object
     end
   end
 
+  # Array of HPXML::ElectricVehicleCharger objects
   class ElectricVehicleChargers < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
     def add(**kwargs)
       self << ElectricVehicleCharger.new(@parent_object, **kwargs)
     end
 
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
     def from_doc(building)
       return if building.nil?
 
@@ -9042,19 +9050,30 @@ class HPXML < Object
     end
   end
 
+  # Object for /HPXML/Building/BuildingDetails/Systems/ElectricVehicleChargers/ElectricVehicleCharger.
   class ElectricVehicleCharger < BaseElement
     ATTRS = [:id, :location, :charging_power]
     attr_accessor(*ATTRS)
 
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
     def delete
       @parent_object.ev_chargers.delete(self)
     end
 
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
       return errors
     end
 
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
     def to_doc(building)
       return if nil?
 
@@ -9066,6 +9085,10 @@ class HPXML < Object
       XMLHelper.add_element(charger, 'ChargingPower', @charging_power, :float, @charging_power_isdefaulted) unless @charging_power.nil?
     end
 
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param battery [Oga::XML::Element] The current Battery XML element
+    # @return [nil]
     def from_doc(charger)
       return if charger.nil?
 
@@ -9075,11 +9098,19 @@ class HPXML < Object
     end
   end
 
+  # Array of HPXML::Vehicle objects.
   class Vehicles < BaseArrayElement
+    # Adds a new object, with the specified keyword arguments, to the array.
+    #
+    # @return [nil]
     def add(**kwargs)
       self << Vehicle.new(@parent_object, **kwargs)
     end
 
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
     def from_doc(building)
       return if building.nil?
 
@@ -9089,6 +9120,7 @@ class HPXML < Object
     end
   end
 
+  # Object for /HPXML/Building/BuildingDetails/Systems/Vehicles/Vehicle.
   class Vehicle < BaseElement
     ATTRS = [:id, :type, :lifetime_model, :rated_power_output, :location,
              :nominal_capacity_kwh, :nominal_capacity_ah, :nominal_voltage,
@@ -9097,15 +9129,25 @@ class HPXML < Object
              :fraction_charged_home, :ev_charger_idref]
     attr_accessor(*ATTRS)
 
+    # Deletes the current object from the array.
+    #
+    # @return [nil]
     def delete
       @parent_object.vehicles.delete(self)
     end
 
+    # Additional error-checking beyond what's checked in Schema/Schematron validators.
+    #
+    # @return [Array<String>] List of error messages
     def check_for_errors
       errors = []
       return errors
     end
 
+    # Adds this object to the provided Oga XML element.
+    #
+    # @param building [Oga::XML::Element] The current Building XML element
+    # @return [nil]
     def to_doc(building)
       return if nil?
 
@@ -9162,6 +9204,10 @@ class HPXML < Object
       end
     end
 
+    # Populates the HPXML object(s) from the XML document.
+    #
+    # @param battery [Oga::XML::Element] The current Battery XML element
+    # @return [nil]
     def from_doc(vehicle)
       return if vehicle.nil?
 
@@ -9185,6 +9231,7 @@ class HPXML < Object
     end
   end
 
+  # Array of HPXML::Battery objects.
   class Batteries < BaseArrayElement
     # Adds a new object, with the specified keyword arguments, to the array.
     #

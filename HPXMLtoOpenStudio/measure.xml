@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5d3a6498-66cd-4e18-b457-56e84904b02c</version_id>
-  <version_modified>2024-08-30T00:49:52Z</version_modified>
+  <version_id>4a95ca78-69cc-417f-a30c-25da7ec7a1ee</version_id>
+  <version_modified>2024-08-30T14:33:57Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>00F8A661</checksum>
+      <checksum>EE95A395</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -195,7 +195,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E86DBE07</checksum>
+      <checksum>7B2B834D</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -333,7 +333,7 @@
       <filename>electric_vehicle.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C2F4F0FB</checksum>
+      <checksum>958C5AA8</checksum>
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -363,13 +363,13 @@
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6724AB80</checksum>
+      <checksum>B88961D2</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>258ECEDB</checksum>
+      <checksum>5E0C0612</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -597,7 +597,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>0BEB80CC</checksum>
+      <checksum>2DA43E7A</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

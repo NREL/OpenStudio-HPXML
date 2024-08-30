@@ -2419,6 +2419,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param surface [TODO] TODO
+  # @param hpxml_surface [TODO] TODO
+  # @return [nil]
   def add_electric_vehicles(runner, model, spaces)
     @hpxml_bldg.vehicles.each do |vehicle|
       next unless vehicle.id.include?('ElectricVehicle')

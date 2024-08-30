@@ -2,7 +2,22 @@
 
 require_relative 'battery'
 
+# Collection of methods for adding electric vehicle-related OpenStudio objects, built on the Battery class
 class ElectricVehicle
+  # Apply an electric vehicle to the model using the HPXMLtoOpenStudio/resources/battery.rb Battery class, which assigns OpenStudio ElectricLoadCenterStorageLiIonNMCBattery, ElectricLoadCenterDistribution, OtherEquipment, and EMS objects.
+  # Custom adjustments for EV operation are made with an EMS object within this class and in the Battery class.
+  # An EMS program models the effect of ambient temperature on the effective power output.
+  # An EMS program writes a 'discharge offset' variable to omit this from aggregate home electricity outputs.
+  # If no charging/discharging schedule is provided, then the electric vehicle is not modeled.
+  # Bi-directional charging is not currently implemented
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param electric_vehicle [HPXML::Vehicle] Object that defines a single electric vehicle
+  # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines a single electric vehicle charger connected to the electric vehicle
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @return [nil]
   def self.apply(runner, model, electric_vehicle, ev_charger, schedules_file, unit_multiplier)
     if ev_charger.nil?
       runner.registerWarning('Electric vehicle specified with no charger provided; battery will not be modeled.')
@@ -95,7 +110,6 @@ class ElectricVehicle
       ev_discharge_offset_obj_def.setFractionLatent(0)
       ev_discharge_offset_obj_def.setFractionLost(1)
       ev_discharge_offset_obj.setSchedule(model.alwaysOnDiscreteSchedule)
-      ev_discharge_offset_act = nil
       ev_discharge_offset_act = OpenStudio::Model::EnergyManagementSystemActuator.new(ev_discharge_offset_obj, *EPlus::EMSActuatorOtherEquipmentPower, offset_space)
       ev_discharge_offset_act.setName('ev_discharge_offset_act')
       ev_discharge_program.addLine("Set #{ev_discharge_offset_act.name} = #{discharge_power_act.name}")
@@ -107,6 +121,9 @@ class ElectricVehicle
     end
   end
 
+  # Get default lifetime model, miles/year, hours/week, nominal capacity/voltage, round trip efficiency, fraction charged at home, and usable fraction for an electric vehicle and its battery.
+  #
+  # @return [Hash] map of battery properties to default values
   def self.get_ev_battery_default_values
     return { lifetime_model: HPXML::BatteryLifetimeModelNone,
              miles_per_year: 5000,
@@ -118,6 +135,10 @@ class ElectricVehicle
              usable_fraction: 0.8 } # Fraction of usable capacity to nominal capacity
   end
 
+  # Get default location, charging power, and charging level for an electric vehicle charger. The default location is the garage if one is present.
+  #
+  # @param has_garage [Boolean] whether the HPXML Building object has a garage
+  # @return [Hash] map of electric vehicle charger properties to default values
   def self.get_ev_charger_default_values(has_garage = false)
     if has_garage
       location = HPXML::LocationGarage

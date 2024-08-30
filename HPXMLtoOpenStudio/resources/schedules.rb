@@ -1636,8 +1636,14 @@ class SchedulesFile
     end
   end
 
+  # Splits a single column from the @schedules object into two columns, one populated with the positive values and zeros, and one with the negative values and zeros, then deletes the original column.
+  #
+  # @param column [String] Column name in the @schedules object
+  # @param positive_col [String] Name of new positive column in the @schedules object
+  # @param negative_col [String] Name of new negative column in the @schedules object
+  #
+  # @return [nil]
   def split_signed_column(column, positive_col, negative_col)
-    # Takes a single column and writes two new columns, one with positive values, one with negative values
     @schedules[positive_col] = Array.new(@schedules[column].size, 0)
     @schedules[negative_col] = Array.new(@schedules[column].size, 0)
     @schedules[column].each_with_index do |_ts, i|

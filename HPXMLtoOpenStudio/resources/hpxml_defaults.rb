@@ -2947,6 +2947,12 @@ module HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Vehicle objects
+  # If an EV charger is found, apply_ev_charger is run to set its default values
+  # Default values for the battery are first applied with the apply_battery method, then electric vehicle-specific fields are populated such as miles/year, hours/week, and fraction charged at home.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_vehicles(hpxml_bldg)
     hpxml_bldg.vehicles.each do |vehicle|
       next unless vehicle.id.include?('ElectricVehicle')
@@ -2977,12 +2983,17 @@ module HPXMLDefaults
       end
       next if ev_charger.nil?
 
-      default_values = ElectricVehicle.get_ev_charger_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
-      apply_ev_charger(ev_charger, default_values)
+      apply_ev_charger(hpxml_bldg, ev_charger)
     end
   end
 
-  def self.apply_ev_charger(ev_charger, default_values)
+  # Assigns default values for omitted optional inputs in the HPXML::ElectricVehicleCharger objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param ev_charger [HPXML::ElectricVehicleCharger] Object that defines a single electric vehicle charger
+  # @return [nil]
+  def self.apply_ev_charger(hpxml_bldg, ev_charger)
+    default_values = ElectricVehicle.get_ev_charger_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
     if ev_charger.location.nil?
       ev_charger.location = default_values[:location]
       ev_charger.location_isdefaulted = true
@@ -2994,6 +3005,7 @@ module HPXMLDefaults
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::Battery objects
+  # This method assigns fields specific to home battery systems, and calls a general method (apply_battery) that defaults values for any battery system.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
@@ -3014,6 +3026,11 @@ module HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Battery or HPXML::Vehicle objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param default_values [Hash] map of home battery or vehicle battery properties to default values
+  # @return [nil]
   def self.apply_battery(battery, default_values)
     # if battery.lifetime_model.nil?
     #   battery.lifetime_model = default_values[:lifetime_model]
