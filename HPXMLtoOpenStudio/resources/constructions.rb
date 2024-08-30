@@ -2036,11 +2036,11 @@ module Constructions
     end
 
     # Exterior horizontal insulation
-    if (ext_horiz_r > 0) && (ext_horiz_depth > 0) && (ext_horiz_width > 0)
+    if (ext_horiz_r > 0) && (ext_horiz_width > 0)
       ext_horiz_mat = create_insulation_material(model, 'exterior horizontal ins', ext_horiz_r)
       foundation.setExteriorHorizontalInsulationMaterial(ext_horiz_mat)
       foundation.setExteriorHorizontalInsulationDepth(UnitConversions.convert(ext_horiz_depth, 'ft', 'm'))
-      foundation.setExteriorHorizontalInsulationWidth(ext_horiz_width)
+      foundation.setExteriorHorizontalInsulationWidth(UnitConversions.convert(ext_horiz_width, 'ft', 'm'))
     end
 
     foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, 'in', 'm'))

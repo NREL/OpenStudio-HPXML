@@ -1464,7 +1464,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   ``PerimeterInsulation/Layer/NominalRValue``                         double    F-ft2-hr/Btu  >= 0         Yes                  R-value of vertical insulation (see figure below)
   ``PerimeterInsulation/Layer/InsulationDepth``                       double    ft            >= 0         Yes                  Depth from top of slab to bottom of vertical insulation
   ``ExteriorHorizontalInsulation/SystemIdentifier``                   id                                   See [#]_             Unique identifier
-  ``ExteriorHorizontalInsulation/Layer/NominalRValue``                double    F-ft2-hr/Btu  >= 0         No         0         R-value of exterior horizontal insulation (see figure below)
+  ``ExteriorHorizontalInsulation/Layer/NominalRValue``                double    F-ft2-hr/Btu  >= 0         No         0         R-value of exterior horizontal insulation (see figure below) [#]_
   ``ExteriorHorizontalInsulation/Layer/InsulationWidth``              double    ft            >= 0         No         0         Width of exterior horizontal insulation from slab edge outward 
   ``ExteriorHorizontalInsulation/Layer/InsulationDepthBelowGrade``    double    ft            >= 0         No         0         Depth from grade to the top of exterior horizontal insulation
   ``UnderSlabInsulation/SystemIdentifier``                            id                                   Yes                  Unique identifier
@@ -1487,6 +1487,7 @@ Each space type that borders the ground (i.e., basement, crawlspace, garage, and
   .. [#] If DepthBelowGrade not provided, defaults to zero for foundation types without walls.
          For foundation types with walls, DepthBelowGrade is ignored as the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` value(s).
   .. [#] SystemIdentifier only required if ExteriorHorizontalInsulation is provided.
+  .. [#] Exterior horizontal insulation (sometimes called wing or skirt insulation) is typically used `in colder regions with frost-susceptible soils to prevent the slab from heaving <https://framebuildingnews.com/below-grade-insulation-part-1/>`_.
   .. [#] InsulationWidth only required if InsulationSpansEntireSlab=true is not provided.
   .. [#] InsulationSpansEntireSlab=true only required if InsulationWidth is not provided.
   .. [#] If GapInsulationRValue not provided, defaults to 5.0 if there is under slab (horizontal) insulation, otherwise 0.0.
