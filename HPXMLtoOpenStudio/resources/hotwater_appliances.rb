@@ -17,11 +17,10 @@ module HotWaterAndAppliances
   # @param plantloop_map [TODO] TODO
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @param apply_ashrae140_assumptions [TODO] TODO
   # @return [TODO] TODO
   def self.apply(model, runner, hpxml_header, hpxml_bldg, weather, spaces, hot_water_distribution,
                  solar_thermal_system, eri_version, schedules_file, plantloop_map,
-                 unavailable_periods, unit_multiplier, apply_ashrae140_assumptions)
+                 unavailable_periods, unit_multiplier)
 
     @runner = runner
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
@@ -29,7 +28,6 @@ module HotWaterAndAppliances
     has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
     has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
     fixtures_usage_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier
-    general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
@@ -457,38 +455,6 @@ module HotWaterAndAppliances
         water_dw_schedule = dw_schedule_obj.schedule
       end
       add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
-    end
-
-    if not apply_ashrae140_assumptions
-      # General water use internal gains
-      # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
-      water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier)
-
-      # Create schedule
-      water_schedule = nil
-      water_col_name = SchedulesFile::Columns[:GeneralWaterUse].name
-      water_obj_name = Constants::ObjectTypeGeneralWaterUse
-      if not schedules_file.nil?
-        water_design_level_sens = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::Columns[:GeneralWaterUse].name, daily_kwh: UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
-        water_design_level_lat = schedules_file.calc_design_level_from_daily_kwh(col_name: SchedulesFile::Columns[:GeneralWaterUse].name, daily_kwh: UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
-        water_schedule = schedules_file.create_schedule_file(model, col_name: water_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
-      end
-      if water_schedule.nil?
-        water_unavailable_periods = Schedule.get_unavailable_periods(runner, water_col_name, unavailable_periods)
-        water_weekday_sch = hpxml_bldg.building_occupancy.general_water_use_weekday_fractions
-        water_weekend_sch = hpxml_bldg.building_occupancy.general_water_use_weekend_fractions
-        water_monthly_sch = hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers
-        water_schedule_obj = MonthWeekdayWeekendSchedule.new(model, water_obj_name + ' schedule', water_weekday_sch, water_weekend_sch, water_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: water_unavailable_periods)
-        water_design_level_sens = water_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
-        water_design_level_lat = water_schedule_obj.calc_design_level_from_daily_kwh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
-        water_schedule = water_schedule_obj.schedule
-      else
-        runner.registerWarning("Both '#{water_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekday_fractions.nil?
-        runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil?
-        runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
-      end
-      add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseSensible, conditioned_space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
-      add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseLatent, conditioned_space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)
     end
   end
 
@@ -1307,18 +1273,6 @@ module HotWaterAndAppliances
       avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
       return hw_gpd / avg_mw_fraction * fixtures_usage_multiplier
     end
-  end
-
-  # TODO
-  #
-  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
-  # @param general_water_use_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier = 1.0)
-    # Table 4.2.2(3). Internal Gains for Reference Homes
-    sens_gains = (-1227.0 - 409.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
-    lat_gains = (1245.0 + 415.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
-    return sens_gains * 365.0, lat_gains * 365.0
   end
 
   # TODO

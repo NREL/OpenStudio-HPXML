@@ -108,7 +108,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    Geometry.tear_down_model(model: model, runner: runner)
+    Model.tear_down(model: model, runner: runner)
 
     Version.check_openstudio_version()
 
@@ -228,7 +228,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Merge unit models into final model
       if hpxml.buildings.size > 1
-        add_unit_model_to_model(model, hpxml_osm_map)
+        Model.add_unit_model(model, hpxml_osm_map)
       end
 
       # Output
@@ -238,7 +238,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         add_component_loads_output(model, hpxml_osm_map, loads_data, season_day_nums)
       end
       add_total_airflows_output(model, hpxml_osm_map)
-      set_output_files(model)
+      add_output_files(model)
       add_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], hpxml_defaults_path)
       # Uncomment to debug EMS
       # add_ems_debug_output(model)
@@ -259,179 +259,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     return true
-  end
-
-  # When there are multiple dwelling units, merge all unit models into a single model.
-  # First deal with unique objects; look for differences in values across unit models.
-  # Then make all unit models "unique" by shifting geometry and prefixing object names.
-  # Then bulk add all modified objects to the main OpenStudio Model object.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
-  # @return [nil]
-  def add_unit_model_to_model(model, hpxml_osm_map)
-    unique_objects = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
-                       'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
-                       'OS:OutputControl:Files' => 'OutputControlFiles',
-                       'OS:Output:Diagnostics' => 'OutputDiagnostics',
-                       'OS:Output:JSON' => 'OutputJSON',
-                       'OS:PerformancePrecisionTradeoffs' => 'PerformancePrecisionTradeoffs',
-                       'OS:RunPeriod' => 'RunPeriod',
-                       'OS:RunPeriodControl:DaylightSavingTime' => 'RunPeriodControlDaylightSavingTime',
-                       'OS:ShadowCalculation' => 'ShadowCalculation',
-                       'OS:SimulationControl' => 'SimulationControl',
-                       'OS:Site' => 'Site',
-                       'OS:Site:GroundTemperature:Deep' => 'SiteGroundTemperatureDeep',
-                       'OS:Site:GroundTemperature:Shallow' => 'SiteGroundTemperatureShallow',
-                       'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
-                       'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
-                       'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
-                       'OS:Timestep' => 'Timestep' }
-
-    # Handle unique objects first: Grab one from the first model we find the
-    # object on (may not be the first unit).
-    unit_model_objects = []
-    unique_handles_to_skip = []
-    uuid_regex = /\{(.*?)\}/
-    unique_objects.each do |idd_obj, osm_class|
-      first_model_object_by_type = nil
-      hpxml_osm_map.values.each do |unit_model|
-        next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
-
-        model_object = unit_model.send("get#{osm_class}")
-
-        if first_model_object_by_type.nil?
-          # Retain object for model
-          unit_model_objects << model_object
-          first_model_object_by_type = model_object
-          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-            unit_model_objects << unit_model.getObjectsByName(model_object.temperatureSchedule.get.name.to_s)[0]
-          end
-        else
-          # Throw error if different values between this model_object and first_model_object_by_type
-          if model_object.to_s.gsub(uuid_regex, '') != first_model_object_by_type.to_s.gsub(uuid_regex, '')
-            fail "Unique object (#{idd_obj}) has different values across dwelling units."
-          end
-
-          if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-            if model_object.temperatureSchedule.get.to_s.gsub(uuid_regex, '') != first_model_object_by_type.temperatureSchedule.get.to_s.gsub(uuid_regex, '')
-              fail "Unique object (#{idd_obj}) has different values across dwelling units."
-            end
-          end
-        end
-
-        unique_handles_to_skip << model_object.handle.to_s
-        if idd_obj == 'OS:Site:WaterMainsTemperature' # Handle referenced child object too
-          unique_handles_to_skip << model_object.temperatureSchedule.get.handle.to_s
-        end
-      end
-    end
-
-    hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
-      Geometry.shift_unit(unit_model, unit_number)
-      prefix_all_unit_model_objects(unit_model, unit_number)
-
-      # Handle remaining (non-unique) objects now
-      unit_model.objects.each do |obj|
-        next if unit_number > 0 && obj.to_Building.is_initialized
-        next if unique_handles_to_skip.include? obj.handle.to_s
-
-        unit_model_objects << obj
-      end
-    end
-
-    model.addObjects(unit_model_objects, true)
-  end
-
-  # Prefix all objects with name using unit number.
-  #
-  # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object (corresponding to one of multiple dwelling units)
-  # @param unit_number [Integer] index number corresponding to an HPXML Building object
-  # @return [nil]
-  def prefix_all_unit_model_objects(unit_model, unit_number)
-    # FUTURE: Create objects with unique names up front so we don't have to do this
-
-    # EMS objects
-    ems_map = {}
-
-    unit_model.getEnergyManagementSystemSensors.each do |sensor|
-      ems_map[sensor.name.to_s] = make_variable_name(sensor.name, unit_number)
-      sensor.setKeyName(make_variable_name(sensor.keyName, unit_number)) unless sensor.keyName.empty? || sensor.keyName.downcase == 'environment'
-    end
-
-    unit_model.getEnergyManagementSystemActuators.each do |actuator|
-      ems_map[actuator.name.to_s] = make_variable_name(actuator.name, unit_number)
-    end
-
-    unit_model.getEnergyManagementSystemInternalVariables.each do |internal_variable|
-      ems_map[internal_variable.name.to_s] = make_variable_name(internal_variable.name, unit_number)
-      internal_variable.setInternalDataIndexKeyName(make_variable_name(internal_variable.internalDataIndexKeyName, unit_number)) unless internal_variable.internalDataIndexKeyName.empty?
-    end
-
-    unit_model.getEnergyManagementSystemGlobalVariables.each do |global_variable|
-      ems_map[global_variable.name.to_s] = make_variable_name(global_variable.name, unit_number)
-    end
-
-    unit_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
-      next if output_variable.emsVariableObject.is_initialized
-
-      new_ems_variable_name = make_variable_name(output_variable.emsVariableName, unit_number)
-      ems_map[output_variable.emsVariableName.to_s] = new_ems_variable_name
-      output_variable.setEMSVariableName(new_ems_variable_name)
-    end
-
-    unit_model.getEnergyManagementSystemSubroutines.each do |subroutine|
-      ems_map[subroutine.name.to_s] = make_variable_name(subroutine.name, unit_number)
-    end
-
-    # variables in program lines don't get updated automatically
-    lhs_characters = [' ', ',', '(', ')', '+', '-', '*', '/', ';']
-    rhs_characters = [''] + lhs_characters
-    (unit_model.getEnergyManagementSystemPrograms + unit_model.getEnergyManagementSystemSubroutines).each do |program|
-      new_lines = []
-      program.lines.each do |line|
-        ems_map.each do |old_name, new_name|
-          next unless line.include?(old_name)
-
-          # old_name between at least 1 character, with the exception of '' on left and ' ' on right
-          lhs_characters.each do |lhs|
-            next unless line.include?("#{lhs}#{old_name}")
-
-            rhs_characters.each do |rhs|
-              next unless line.include?("#{lhs}#{old_name}#{rhs}")
-              next if lhs == '' && ['', ' '].include?(rhs)
-
-              line.gsub!("#{lhs}#{old_name}#{rhs}", "#{lhs}#{new_name}#{rhs}")
-            end
-          end
-        end
-        new_lines << line
-      end
-      program.setLines(new_lines)
-    end
-
-    # All model objects
-    unit_model.objects.each do |model_object|
-      next if model_object.name.nil?
-
-      if unit_number == 0
-        # OpenStudio is unhappy if these schedules are renamed
-        next if model_object.name.to_s == unit_model.alwaysOnContinuousSchedule.name.to_s
-        next if model_object.name.to_s == unit_model.alwaysOnDiscreteSchedule.name.to_s
-        next if model_object.name.to_s == unit_model.alwaysOffDiscreteSchedule.name.to_s
-      end
-
-      model_object.setName(make_variable_name(model_object.name, unit_number))
-    end
-  end
-
-  # Create a new OpenStudio object name by prefixing the old with "unit" plus the unit number.
-  #
-  # @param obj_name [String] the OpenStudio object name
-  # @param unit_number [Integer] index number corresponding to an HPXML Building object
-  # @return [String] the new OpenStudio object name with unique unit prefix
-  def make_variable_name(obj_name, unit_number)
-    return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 
   # Creates a full OpenStudio model that represents the given HPXML individual dwelling by
@@ -483,6 +310,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Conditioned space/zone
     add_conditioned_space(model, spaces)
     add_setpoints(runner, model, weather, spaces)
+    add_internal_gains(runner, model, spaces)
 
     # Geometry/Envelope
     add_roofs(runner, model, spaces)
@@ -495,7 +323,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_skylights(model, spaces)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
-    add_num_occupants(model, runner, spaces)
     add_geometry_other(model, spaces)
 
     # HVAC
@@ -646,7 +473,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [nil]
-  def add_num_occupants(model, runner, spaces)
+  def add_internal_gains(runner, model, spaces)
     # Occupants
     if @hpxml_bldg.building_occupancy.number_of_residents.nil? # Asset calculation
       num_occ = Geometry.get_occupancy_default_num(nbeds: @nbeds)
@@ -654,8 +481,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       num_occ = @hpxml_bldg.building_occupancy.number_of_residents
     end
 
-    Geometry.apply_occupants(model, runner, @hpxml_bldg, num_occ, spaces[HPXML::LocationConditionedSpace],
-                             @schedules_file, @hpxml_header.unavailable_periods)
+    InternalGains.apply(model, runner, @hpxml_bldg, num_occ, spaces[HPXML::LocationConditionedSpace],
+                        @schedules_file, @hpxml_header.unavailable_periods, @apply_ashrae140_assumptions)
   end
 
   # Adds any HPXML Roofs to the OpenStudio model.
@@ -1670,7 +1497,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Constructions.apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
-  # TODO
+  # Adds other geometry properties like space/zone volumes and re-positioned surface coordinates.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
@@ -1763,8 +1590,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Hot water fixtures and appliances
     HotWaterAndAppliances.apply(model, runner, @hpxml_header, @hpxml_bldg, weather, spaces, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @schedules_file, plantloop_map,
-                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units,
-                                @apply_ashrae140_assumptions)
+                                @hpxml_header.unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
@@ -1794,7 +1620,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      HVAC.check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       # Calculate cooling sequential load fractions
       sequential_cool_load_fracs = HVAC.calc_sequential_load_fractions(cooling_system.fraction_cool_load_served.to_f, @remaining_cool_load_frac, @cooling_days)
@@ -1850,7 +1676,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       cooling_system = hvac_system[:cooling]
       heating_system = hvac_system[:heating]
 
-      check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
+      HVAC.check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
       if (heating_system.heating_system_type == HPXML::HVACTypeFurnace) && (not cooling_system.nil?)
         next # Already processed combined AC+furnace
@@ -1923,7 +1749,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       heat_pump = hvac_system[:cooling]
 
-      check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
+      HVAC.check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
       # Calculate heating sequential load fractions
       sequential_heat_load_fracs = HVAC.calc_sequential_load_fractions(heat_pump.fraction_heat_load_served, @remaining_heat_load_frac, @heating_days)
@@ -2058,29 +1884,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     HVAC.apply_dehumidifiers(runner, model, @hpxml_bldg.dehumidifiers, spaces[HPXML::LocationConditionedSpace], @hpxml_header.unavailable_periods,
                              @hpxml_bldg.building_construction.number_of_units)
-  end
-
-  # Check provided HVAC system and distribution types against what is allowed.
-  #
-  # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
-  # @param system_type [String] the HVAC system type of interest
-  # @return [nil]
-  def check_distribution_system(hvac_distribution, system_type)
-    return if hvac_distribution.nil?
-
-    hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
-
-    if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
-    end
   end
 
   # Adds any HPXML Plug Loads to the OpenStudio model.
@@ -2302,7 +2105,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Store the HPXML Building object unit number for use in reporting measure.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param unit_number [Integer] index number corresponding to an HPXML Building object
@@ -3086,7 +2889,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [nil]
-  def set_output_files(model)
+  def add_output_files(model)
     oj = model.getOutputJSON
     oj.setOptionType('TimeSeriesAndTabular')
     oj.setOutputJSON(@debug)

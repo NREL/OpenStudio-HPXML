@@ -2,23 +2,6 @@
 
 # Collection of methods to get, add, assign, create, etc. geometry-related OpenStudio objects.
 module Geometry
-  # Tear down the existing model if it exists.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @return [nil]
-  def self.tear_down_model(model:,
-                           runner:)
-    handles = OpenStudio::UUIDVector.new
-    model.objects.each do |obj|
-      handles << obj.handle
-    end
-    if !handles.empty?
-      runner.registerWarning('The model contains existing objects and is being reset.')
-      model.removeObjects(handles)
-    end
-  end
-
   # Get the largest z difference for a surface.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
@@ -302,12 +285,13 @@ module Geometry
     return transformation * vertices
   end
 
-  # TODO
+  # Set calculated zone volumes for HPXML locations on OpenStudio Thermal Zone and Space objects.
+  # TODO why? for reporting?
   #
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param apply_ashrae140_assumptions [TODO] TODO
-  # @return [TODO] TODO
+  # @param apply_ashrae140_assumptions [Boolean] TODO
+  # @return [nil]
   def self.set_zone_volumes(spaces:,
                             hpxml_bldg:,
                             apply_ashrae140_assumptions:)
@@ -486,66 +470,35 @@ module Geometry
     end
   end
 
-  # Create an OpenStudio People object using number of occupants and people/activity schedules.
+  # Shift units so they aren't right on top and shade each other.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param num_occ [Double] Number of occupants in the dwelling unit
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
+  # @param unit_number [Integer] index number corresponding to an HPXML Building object
   # @return [nil]
-  def self.apply_occupants(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
-    return if num_occ <= 0
+  def self.shift_surfaces(model, unit_number)
+    y_shift = 200.0 * unit_number # meters
 
-    occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
-    activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
-
-    # Hard-coded convective, radiative, latent, and lost fractions
-    occ_sens = sens_frac
-    occ_rad = 0.558 * occ_sens
-
-    # Create schedule
-    people_sch = nil
-    people_col_name = SchedulesFile::Columns[:Occupants].name
-    if not schedules_file.nil?
-      people_sch = schedules_file.create_schedule_file(model, col_name: people_col_name)
-    end
-    if people_sch.nil?
-      people_unavailable_periods = Schedule.get_unavailable_periods(runner, people_col_name, unavailable_periods)
-      weekday_sch = hpxml_bldg.building_occupancy.weekday_fractions.split(',').map(&:to_f)
-      weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
-      weekend_sch = hpxml_bldg.building_occupancy.weekend_fractions.split(',').map(&:to_f)
-      weekend_sch = weekend_sch.map { |v| v / weekend_sch.max }.join(',')
-      monthly_sch = hpxml_bldg.building_occupancy.monthly_multipliers
-      people_sch = MonthWeekdayWeekendSchedule.new(model, Constants::ObjectTypeOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: people_unavailable_periods)
-      people_sch = people_sch.schedule
-    else
-      runner.registerWarning("Both '#{people_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.weekday_fractions.nil?
-      runner.registerWarning("Both '#{people_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.weekend_fractions.nil?
-      runner.registerWarning("Both '#{people_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.monthly_multipliers.nil?
+    # shift the unit so it's not right on top of the previous one
+    model.getSpaces.sort.each do |space|
+      space.setYOrigin(y_shift)
     end
 
-    # Create schedule
-    activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    activity_sch.setValue(activity_per_person)
-    activity_sch.setName(Constants::ObjectTypeOccupants + ' activity schedule')
+    # shift shading surfaces
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = 1
+    m[1, 1] = 1
+    m[2, 2] = 1
+    m[3, 3] = 1
+    m[1, 3] = y_shift
+    t = OpenStudio::Transformation.new(m)
 
-    # Add people definition for the occ
-    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-    occ = OpenStudio::Model::People.new(occ_def)
-    occ.setName(Constants::ObjectTypeOccupants)
-    occ.setSpace(space)
-    occ_def.setName(Constants::ObjectTypeOccupants)
-    occ_def.setNumberofPeople(num_occ)
-    occ_def.setFractionRadiant(occ_rad)
-    occ_def.setSensibleHeatFraction(occ_sens)
-    occ_def.setMeanRadiantTemperatureCalculationType('ZoneAveraged')
-    occ_def.setCarbonDioxideGenerationRate(0)
-    occ_def.setEnableASHRAE55ComfortWarnings(false)
-    occ.setActivityLevelSchedule(activity_sch)
-    occ.setNumberofPeopleSchedule(people_sch)
+    model.getShadingSurfaceGroups.each do |shading_surface_group|
+      next if shading_surface_group.space.is_initialized # already got shifted
+
+      shading_surface_group.shadingSurfaces.each do |shading_surface|
+        shading_surface.setVertices(t * shading_surface.vertices)
+      end
+    end
   end
 
   # TODO
@@ -594,7 +547,7 @@ module Geometry
   # @param length [TODO] TODO
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param walls_top [TODO] TODO
-  # @return [TODO] TODO
+  # @return [nil]
   def self.add_neighbor_shading(model:,
                                 length:,
                                 hpxml_bldg:,
@@ -627,7 +580,7 @@ module Geometry
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param location [String] the location of interest (HPXML::LocationXXX)
-  # @return [TODO] TODO
+  # @return [Double] TODO
   def self.calculate_zone_volume(hpxml_bldg:,
                                  location:)
     if [HPXML::LocationBasementUnconditioned,
@@ -998,20 +951,6 @@ module Geometry
     return yrange
   end
 
-  # Table 4.2.2(3). Internal Gains for Reference Homes
-  #
-  # @return [Array<Double, Double, Double, Double>] TODO
-  def self.get_occupancy_default_values()
-    hrs_per_day = 16.5 # hrs/day
-    sens_gains = 3716.0 # Btu/person/day
-    lat_gains = 2884.0 # Btu/person/day
-    tot_gains = sens_gains + lat_gains
-    heat_gain = tot_gains / hrs_per_day # Btu/person/hr
-    sens_frac = sens_gains / tot_gains
-    lat_frac = lat_gains / tot_gains
-    return heat_gain, hrs_per_day, sens_frac, lat_frac
-  end
-
   # Calculates the minimum buffer distance that the parent surface
   # needs relative to the subsurface in order to prevent E+ warnings
   # about "Very small surface area".
@@ -1023,37 +962,6 @@ module Geometry
                                               width:)
     min_surface_area = 0.005 # m^2
     return 0.5 * (((length + width)**2 + 4.0 * min_surface_area)**0.5 - length - width)
-  end
-
-  # Shift units so they aren't right on top and shade each other.
-  #
-  # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object (corresponding to one of multiple dwelling units)
-  # @param unit_number [Integer] index number corresponding to an HPXML Building object
-  # @return [nil]
-  def self.shift_unit(unit_model, unit_number)
-    y_shift = 200.0 * unit_number # meters
-
-    # shift the unit so it's not right on top of the previous one
-    unit_model.getSpaces.sort.each do |space|
-      space.setYOrigin(y_shift)
-    end
-
-    # shift shading surfaces
-    m = OpenStudio::Matrix.new(4, 4, 0)
-    m[0, 0] = 1
-    m[1, 1] = 1
-    m[2, 2] = 1
-    m[3, 3] = 1
-    m[1, 3] = y_shift
-    t = OpenStudio::Transformation.new(m)
-
-    unit_model.getShadingSurfaceGroups.each do |shading_surface_group|
-      next if shading_surface_group.space.is_initialized # already got shifted
-
-      shading_surface_group.shadingSurfaces.each do |shading_surface|
-        shading_surface.setVertices(t * shading_surface.vertices)
-      end
-    end
   end
 
   # For a provided HPXML Location, create an OpenStudio Space and Thermal Zone if the provided spaces hash doesn't already contain the OpenStudio Space.
