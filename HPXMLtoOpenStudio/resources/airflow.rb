@@ -2755,6 +2755,91 @@ module Airflow
 
     return [q_fan, 0.0].max
   end
+
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return [Array<Duct>] list of initialized Duct class objects from the airflow resource file
+  def self.create_ducts(model, hvac_distribution, spaces)
+    air_ducts = []
+
+    # Duct leakage (supply/return => [value, units])
+    leakage_to_outside = { HPXML::DuctTypeSupply => [0.0, nil],
+                           HPXML::DuctTypeReturn => [0.0, nil] }
+    hvac_distribution.duct_leakage_measurements.each do |duct_leakage_measurement|
+      next unless [HPXML::UnitsCFM25, HPXML::UnitsCFM50, HPXML::UnitsPercent].include?(duct_leakage_measurement.duct_leakage_units) && (duct_leakage_measurement.duct_leakage_total_or_to_outside == 'to outside')
+      next if duct_leakage_measurement.duct_type.nil?
+
+      leakage_to_outside[duct_leakage_measurement.duct_type] = [duct_leakage_measurement.duct_leakage_value, duct_leakage_measurement.duct_leakage_units]
+    end
+
+    # Duct location, R-value, Area
+    total_unconditioned_duct_area = { HPXML::DuctTypeSupply => 0.0,
+                                      HPXML::DuctTypeReturn => 0.0 }
+    hvac_distribution.ducts.each do |ducts|
+      next if HPXML::conditioned_locations_this_unit.include? ducts.duct_location
+      next if ducts.duct_type.nil?
+
+      # Calculate total duct area in unconditioned spaces
+      total_unconditioned_duct_area[ducts.duct_type] += ducts.duct_surface_area * ducts.duct_surface_area_multiplier
+    end
+
+    # Create duct objects
+    hvac_distribution.ducts.each do |ducts|
+      next if HPXML::conditioned_locations_this_unit.include? ducts.duct_location
+      next if ducts.duct_type.nil?
+      next if total_unconditioned_duct_area[ducts.duct_type] <= 0
+
+      duct_loc_space, duct_loc_schedule = Geometry.get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
+
+      # Apportion leakage to individual ducts by surface area
+      duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area * ducts.duct_surface_area_multiplier / total_unconditioned_duct_area[ducts.duct_type]
+      duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
+
+      duct_leakage_frac = nil
+      if duct_leakage_units == HPXML::UnitsCFM25
+        duct_leakage_cfm25 = duct_leakage_value
+      elsif duct_leakage_units == HPXML::UnitsCFM50
+        duct_leakage_cfm50 = duct_leakage_value
+      elsif duct_leakage_units == HPXML::UnitsPercent
+        duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
+      end
+
+      air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50,
+                            ducts.duct_surface_area * ducts.duct_surface_area_multiplier, ducts.duct_effective_r_value, ducts.duct_buried_insulation_level)
+    end
+
+    # If all ducts are in conditioned space, model leakage as going to outside
+    [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_side|
+      next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
+
+      duct_area = 0.0
+      duct_effective_r_value = 99 # arbitrary
+      duct_loc_space = nil # outside
+      duct_loc_schedule = nil # outside
+      duct_leakage_value = leakage_to_outside[duct_side][0]
+      duct_leakage_units = leakage_to_outside[duct_side][1]
+
+      if duct_leakage_units == HPXML::UnitsCFM25
+        duct_leakage_cfm25 = duct_leakage_value
+      elsif duct_leakage_units == HPXML::UnitsCFM50
+        duct_leakage_cfm50 = duct_leakage_value
+      elsif duct_leakage_units == HPXML::UnitsPercent
+        duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
+      end
+
+      air_ducts << Duct.new(duct_side, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm25, duct_leakage_cfm50, duct_area,
+                            duct_effective_r_value, HPXML::DuctBuriedInsulationNone)
+    end
+
+    return air_ducts
+  end
 end
 
 # TODO
