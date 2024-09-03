@@ -2610,8 +2610,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     shower_sag_time_vars = []
     unit_multipliers = []
     hpxml_osm_map.each do |hpxml_bldg, unit_model|
-      shower_e_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetLoadsShowerE }
-      shower_sag_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants.ObjectNameUnmetLoadsShowerSagTime }
+      shower_e_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerE }
+      shower_sag_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerSagTime }
       unit_multipliers << hpxml_bldg.building_construction.number_of_units
     end
 
@@ -2621,7 +2621,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unit_shower_sag_time = 'unit_shower_sag_time'
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet loads program')
-    program.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsProgram)
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsProgram)
     program.addLine("Set #{total_shower_e} = 0")
     program.addLine("Set #{total_shower_sag_time} = 0")
     shower_e_vars.each_with_index do |shower_e_var, i|

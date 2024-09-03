@@ -35,6 +35,8 @@ module HotWaterAndAppliances
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
     n_occ = hpxml_bldg.building_occupancy.number_of_residents
 
+    @default_schedules_csv_data = HPXMLDefaults.get_default_schedules_csv_data()
+
     # Get appliances, etc.
     if not hpxml_bldg.clothes_washers.empty?
       clothes_washer = hpxml_bldg.clothes_washers[0]
@@ -351,16 +353,16 @@ module HotWaterAndAppliances
       # Create a separate shower schedule (from fixtures) used only for unmet load calculations.
       showers_schedule = nil
       showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
-      showers_obj_name = Constants.ObjectNameShowers
+      showers_obj_name = Constants::ObjectTypeShowers
       if not schedules_file.nil?
-        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: Constants.ScheduleTypeLimitsFraction)
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: EPlus.ScheduleTypeLimitsFraction)
       end
       if showers_schedule.nil?
         showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
-        showers_weekday_sch = Schedule.ShowersWeekdayFractions
-        showers_weekend_sch = Schedule.ShowersWeekendFractions
-        showers_monthly_sch = Schedule.ShowersMonthlyMultipliers
-        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, Constants.ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
+        showers_weekday_sch = @default_schedules_csv_data[showers_col_name]['ShowersWeekdayScheduleFractions']
+        showers_weekend_sch = @default_schedules_csv_data[showers_col_name]['ShowersWeekendScheduleFractions']
+        showers_monthly_sch = @default_schedules_csv_data[showers_col_name]['ShowersMonthlyScheduleMultipliers']
+        showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
       end
     end
 

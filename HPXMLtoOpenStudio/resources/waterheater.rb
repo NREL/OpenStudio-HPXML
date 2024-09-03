@@ -2225,7 +2225,7 @@ module Waterheater
     shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     shower_flow_sensor.setName('Shower Volume')
     (model.getScheduleRulesets + model.getScheduleFiles).each do |schedule|
-      next if !schedule.name.to_s.include?(Constants.ObjectNameShowers)
+      next if !schedule.name.to_s.include?(Constants::ObjectTypeShowers)
 
       shower_flow_sensor.setKeyName(schedule.name.to_s)
     end
@@ -2248,7 +2248,7 @@ module Waterheater
           object = component.to_WaterHeaterStratified.get
 
           object_type = object.additionalProperties.getFeatureAsString('ObjectType')
-          next if object_type == Constants.ObjectNameSolarHotWater # Exclude solar storage from 2 tank systems
+          next if object_type == Constants::ObjectTypeSolarHotWater # Exclude solar storage from 2 tank systems
 
           tank = object
         end
@@ -2277,8 +2277,8 @@ module Waterheater
 
     shower_e_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerE")
     shower_sag_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerSagTime")
-    shower_e_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsShowerE)
-    shower_sag_time_var.additionalProperties.setFeature('ObjectType', Constants.ObjectNameUnmetLoadsShowerSagTime)
+    shower_e_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerE)
+    shower_sag_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerSagTime)
     program.addLine("Set #{shower_e_var.name} = ShowerE")
     program.addLine("Set #{shower_sag_time_var.name} = ShowerSagTime")
   end
