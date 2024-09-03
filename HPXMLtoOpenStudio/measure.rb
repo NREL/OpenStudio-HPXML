@@ -482,6 +482,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Conditioned space/zone
     add_spaces(model, spaces)
+    add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
     add_roofs(runner, model, spaces)
@@ -498,7 +499,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_geometry_other(model, spaces)
 
     # HVAC
-    add_setpoints(runner, model, weather, spaces)
     add_ideal_system(model, spaces, weather)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
     add_heating_system(runner, model, weather, spaces, airloop_map)
