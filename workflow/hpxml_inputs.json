@@ -34,9 +34,10 @@
     "foundation_wall_insulation_distance_to_bottom": 0,
     "rim_joist_assembly_r": 5.01,
     "slab_perimeter_insulation_r": 0,
-    "slab_perimeter_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
     "slab_under_insulation_r": 0,
-    "slab_under_width": 0,
+    "slab_under_insulation_width": 0,
     "slab_thickness": 4,
     "slab_carpet_fraction": 0,
     "slab_carpet_r": 0,
@@ -279,7 +280,7 @@
   "tests/ASHRAE_Standard_140/L304XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L302XC.xml",
     "slab_perimeter_insulation_r": 5.4,
-    "slab_perimeter_depth": 2.5
+    "slab_perimeter_insulation_depth": 2.5
   },
   "tests/ASHRAE_Standard_140/L322XC.xml": {
     "parent_hpxml": "tests/ASHRAE_Standard_140/L100AC.xml",
@@ -639,9 +640,10 @@
     "foundation_wall_insulation_distance_to_bottom": 8,
     "rim_joist_assembly_r": 23,
     "slab_perimeter_insulation_r": 0,
-    "slab_perimeter_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
     "slab_under_insulation_r": 0,
-    "slab_under_width": 0,
+    "slab_under_insulation_width": 0,
     "slab_thickness": 4,
     "slab_carpet_fraction": 0,
     "slab_carpet_r": 0,
@@ -999,6 +1001,10 @@
     "parent_hpxml": "sample_files/base-battery.xml",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/battery.csv"
   },
+  "sample_files/base-battery-scheduled-power-outage.xml": {
+    "parent_hpxml": "sample_files/base-battery-scheduled.xml",
+    "schedules_power_outage_periods": "Jul 1 5 - Jul 31 14"
+  },
   "sample_files/base-bldgtype-sfa-unit.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "geometry_unit_type": "single-family attached",
@@ -1050,6 +1056,7 @@
     "geometry_building_num_units": 6,
     "geometry_foundation_type": "AboveApartment",
     "geometry_attic_type": "BelowApartment",
+    "geometry_unit_height_above_grade": 10,
     "window_front_wwr": 0.18,
     "window_back_wwr": 0.18,
     "window_left_wwr": 0.18,
@@ -1101,6 +1108,11 @@
     "air_leakage_value": null,
     "air_leakage_units": null,
     "air_leakage_type": null
+  },
+  "sample_files/base-bldgtype-mf-unit-neighbor-shading.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "neighbor_right_distance": 15,
+    "combine_like_surfaces": false
   },
   "sample_files/base-bldgtype-mf-unit-residents-1.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1813,12 +1825,12 @@
   "sample_files/base-foundation-conditioned-basement-slab-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "slab_under_insulation_r": 10,
-    "slab_under_width": 4
+    "slab_under_insulation_width": 4
   },
   "sample_files/base-foundation-conditioned-basement-slab-insulation-full.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "slab_under_insulation_r": 10,
-    "slab_under_width": 999
+    "slab_under_insulation_width": 999
   },
   "sample_files/base-foundation-conditioned-basement-wall-insulation.xml": {
     "parent_hpxml": "sample_files/base.xml",
@@ -1847,12 +1859,19 @@
     "geometry_foundation_height": 0,
     "geometry_foundation_height_above_grade": 0,
     "slab_under_insulation_r": 5,
-    "slab_under_width": 999,
+    "slab_under_insulation_width": 999,
     "slab_carpet_fraction": 1,
     "slab_carpet_r": 2.5,
     "ducts_supply_location": "under slab",
     "ducts_return_location": "under slab",
     "misc_plug_loads_other_annual_kwh": 1228.5
+  },
+  "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
+    "parent_hpxml": "sample_files/base-foundation-slab.xml",
+    "slab_perimeter_insulation_r": 5.4,
+    "slab_exterior_horizontal_insulation_r": 5.4,
+    "slab_exterior_horizontal_insulation_width": 2.5,
+    "slab_exterior_horizontal_insulation_depth_below_grade": 1
   },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"
@@ -1917,6 +1936,10 @@
     "misc_plug_loads_other_annual_kwh": 1228.5
   },
   "sample_files/base-foundation-vented-crawlspace-above-grade.xml": {
+    "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
+    "geometry_foundation_height_above_grade": 4
+  },
+  "sample_files/base-foundation-vented-crawlspace-above-grade2.xml": {
     "parent_hpxml": "sample_files/base-foundation-vented-crawlspace.xml",
     "geometry_foundation_height_above_grade": 4
   },
@@ -3417,11 +3440,6 @@
     "neighbor_front_distance": 15,
     "neighbor_back_distance": 10,
     "neighbor_front_height": 12
-  },
-  "sample_files/base-misc-neighbor-shading-bldgtype-multifamily.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "neighbor_right_distance": 15,
-    "combine_like_surfaces": false
   },
   "sample_files/base-misc-shielding-of-home.xml": {
     "parent_hpxml": "sample_files/base.xml",

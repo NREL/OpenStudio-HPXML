@@ -891,7 +891,7 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   assert_equal(hpxml_bldg.total_fraction_cool_load_served > 0, clg_energy > 0)
 
   # Mechanical Ventilation
-  whole_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && !vent_mech.is_cfis_supplemental_fan? }
+  whole_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && !vent_mech.is_cfis_supplemental_fan }
   local_vent_fans = hpxml_bldg.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation }
   fan_cfis_with_addl_runtime = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS && vent_mech.cfis_addtl_runtime_operating_mode != HPXML::CFISModeNone }
   fan_sup = whole_vent_fans.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
@@ -923,11 +923,11 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   end
 
   # Appliances
-  tabular_map = { HPXML::ClothesWasher => Constants.ObjectNameClothesWasher,
-                  HPXML::ClothesDryer => Constants.ObjectNameClothesDryer,
-                  HPXML::Refrigerator => Constants.ObjectNameRefrigerator,
-                  HPXML::Dishwasher => Constants.ObjectNameDishwasher,
-                  HPXML::CookingRange => Constants.ObjectNameCookingRange }
+  tabular_map = { HPXML::ClothesWasher => Constants::ObjectTypeClothesWasher,
+                  HPXML::ClothesDryer => Constants::ObjectTypeClothesDryer,
+                  HPXML::Refrigerator => Constants::ObjectTypeRefrigerator,
+                  HPXML::Dishwasher => Constants::ObjectTypeDishwasher,
+                  HPXML::CookingRange => Constants::ObjectTypeCookingRange }
 
   (hpxml_bldg.clothes_washers + hpxml_bldg.clothes_dryers + hpxml_bldg.refrigerators + hpxml_bldg.dishwashers + hpxml_bldg.cooking_ranges).each do |appliance|
     next unless hpxml_bldg.water_heating_systems.size > 0
@@ -1158,9 +1158,9 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
         end
 
         abs_val_delta = (val_1x - val_10x).abs
-        avg_val = [val_1x, val_10x].sum / 2.0
-        if avg_val > 0
-          abs_val_frac = abs_val_delta / avg_val
+        abs_avg_val = ([val_1x, val_10x].sum / 2.0).abs
+        if abs_avg_val > 0
+          abs_val_frac = abs_val_delta / abs_avg_val
         end
 
         # FUTURE: Address these

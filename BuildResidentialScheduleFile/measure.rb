@@ -88,7 +88,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # Define what happens when the measure is run.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param user_arguments [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
   # @return [Boolean] true if successful
   def run(model, runner, user_arguments)
@@ -176,10 +176,10 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # Write out the HPXML file with the output CSV path containing occupancy schedules.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param doc [Oga::XML::Document] Oga XML Document object
-  # @param hpxml_path [String] path of the input HPXML file
-  # @param hpxml_output_path [String] path of the output HPXML file
+  # @param hpxml_path [String] Path to the HPXML file
+  # @param hpxml_output_path [String] Path to the output HPXML file
   # @param schedules_filepaths [Array<String>] array of SchedulesFilePath strings in the input HPXML file
   # @param args [Hash] Map of :argument_name => value
   def write_modified_hpxml(runner, doc, hpxml_path, hpxml_output_path, schedules_filepaths, args)
@@ -192,7 +192,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
 
   # Create and export the occupancy schedules.
   #
-  # @param runner [OpenStudio::Measure::OSRunner] OpenStudio Runner object
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param weather [WeatherFile] Weather object containing EPW information
@@ -250,7 +250,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
     calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
     args[:sim_year] = calendar_year
     args[:sim_start_day] = DateTime.new(args[:sim_year], 1, 1)
-    args[:total_days_in_year] = Constants.NumDaysInYear(calendar_year)
+    args[:total_days_in_year] = Calendar.num_days_in_year(calendar_year)
   end
 
   # Get generator inputs that are required for the stochastic schedule generator.
@@ -260,7 +260,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
   # @param args [Hash] Map of :argument_name => value
   def get_generator_inputs(hpxml_bldg, weather, args)
     state_code = HPXMLDefaults.get_default_state_code(hpxml_bldg.state_code, weather)
-    if Constants.StateCodesMap.keys.include?(state_code)
+    if Constants::StateCodesMap.keys.include?(state_code)
       args[:state] = state_code
     else
       # Unhandled state code, fallback to CO

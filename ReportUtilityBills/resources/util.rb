@@ -3,7 +3,7 @@
 # Object that stores collections of EnergyPlus meter names, units, and timeseries data.
 class Fuel
   # @param meters [Array<String>] array of EnergyPlus meter names
-  # @param units [String] fuel units of type HPXML::FuelTypeXXX
+  # @param units [String] fuel units (HPXML::FuelTypeXXX)
   def initialize(meters: [], units:)
     @meters = meters
     @timeseries = []
@@ -127,7 +127,7 @@ module CalculateUtilityBill
   # @param fuels [Hash] Fuel type, is_production => Fuel object
   # @param rate [UtilityRate] UtilityRate object
   # @param bill [UtilityBill] UtilityBill object
-  # @return [void]
+  # @return [nil]
   def self.detailed_electric(header, fuels, rate, bill)
     fuel_time_series = fuels[[FT::Elec, false]].timeseries
     production_fuel_time_series = fuels[[FT::Elec, true]].timeseries
@@ -310,7 +310,7 @@ module CalculateUtilityBill
 
       next unless hour_day == 23 # last hour of the day
 
-      if Schedule.day_end_months(year).include?(today.yday)
+      if Calendar.day_end_months(year).include?(today.yday)
         if not rate.fixedmonthlycharge.nil?
           # If the run period doesn't span the entire month, prorate the fixed charges
           prorate_fraction = calculate_monthly_prorate(header, month + 1)
@@ -483,12 +483,12 @@ module CalculateUtilityBill
       if month == end_month
         day_end = end_day
       else
-        day_end = Constants.NumDaysInMonths(year)[month - 1]
+        day_end = Calendar.num_days_in_months(year)[month - 1]
       end
       num_days_in_month = day_end - day_begin + 1
     end
 
-    return num_days_in_month.to_f / Constants.NumDaysInMonths(year)[month - 1]
+    return num_days_in_month.to_f / Calendar.num_days_in_months(year)[month - 1]
   end
 end
 
