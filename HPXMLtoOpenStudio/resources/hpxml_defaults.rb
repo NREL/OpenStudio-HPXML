@@ -884,11 +884,20 @@ module HPXMLDefaults
       hpxml_bldg.building_construction.number_of_units_isdefaulted = true
     end
     if hpxml_bldg.building_construction.unit_height_above_grade.nil?
-      # Check if all floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
       floors = hpxml_bldg.floors.select { |floor| floor.is_floor && floor.is_thermal_boundary }
       exterior_floors = floors.select { |floor| floor.is_exterior }
       if floors.size > 0 && floors.size == exterior_floors.size && hpxml_bldg.slabs.size == 0 && !hpxml_header.apply_ashrae140_assumptions
+        # All floors are exterior (adjacent to ambient/bellywing) and there are no slab floors
         hpxml_bldg.building_construction.unit_height_above_grade = 2.0
+      elsif hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
+        # Homes w/ conditioned basement will have a negative value
+        cond_bsmt_fnd_walls = hpxml_bldg.foundation_walls.select { |fw| fw.is_exterior && fw.interior_adjacent_to == HPXML::LocationBasementConditioned }
+        if cond_bsmt_fnd_walls.any?
+          max_depth_bg = cond_bsmt_fnd_walls.map { |fw| fw.depth_below_grade }.max
+          hpxml_bldg.building_construction.unit_height_above_grade = -1 * max_depth_bg
+        else
+          hpxml_bldg.building_construction.unit_height_above_grade = 0.0
+        end
       else
         hpxml_bldg.building_construction.unit_height_above_grade = 0.0
       end

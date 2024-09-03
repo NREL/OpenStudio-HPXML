@@ -611,7 +611,7 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
   =======================================  ========  =========  =================================  ========  ========  =======================================================================
   ``YearBuilt``                            integer              > 0                                See [#]_            Year built of the dwelling unit
   ``ResidentialFacilityType``              string               See [#]_                           Yes                 Type of dwelling unit
-  ``UnitHeightAboveGrade``                 double    ft         >= 0                               No        See [#]_  Height of the unit's lowest conditioned floor above grade [#]_
+  ``UnitHeightAboveGrade``                 double    ft                                            No        See [#]_  Height of the unit's lowest conditioned floor above grade [#]_
   ``NumberofUnits``                        integer              >= 1                               No        1         Unit multiplier [#]_
   ``NumberofConditionedFloors``            double               > 0                                Yes                 Number of conditioned floors (including a conditioned basement; excluding a conditioned crawlspace)
   ``NumberofConditionedFloorsAboveGrade``  double               > 0, <= NumberofConditionedFloors  Yes                 Number of conditioned floors above grade (including a walkout basement)
@@ -624,9 +624,9 @@ Building construction is entered in ``/HPXML/Building/BuildingDetails/BuildingSu
 
   .. [#] YearBuilt is required when :ref:`infil_leakiness_description` is the only air leakage type specified.
   .. [#] ResidentialFacilityType choices are "single-family detached", "single-family attached", "apartment unit", or "manufactured home".
-  .. [#] If UnitHeightAboveGrade not provided, defaults to 2 ft if all HPXML Floors have ExteriorAdjacentTo with "outside"/"manufactured home underbelly", otherwise 0 ft.
+  .. [#] If UnitHeightAboveGrade not provided, defaults to 2 ft if all HPXML Floors have ExteriorAdjacentTo with "outside"/"manufactured home underbelly", the maximum foundation wall depth below grade (negative) if there's a conditioned basement, and otherwise 0 ft.
   .. [#] UnitHeightAboveGrade is useful to characterize the height of apartment units above ground level or homes on pier and beam foundations.
-         It is used along with :ref:`air_infiltration` to calculate the wind speed for the infiltration model.
+         When greater than zero, it is used along with :ref:`air_infiltration` to calculate the wind speed for the infiltration model.
   .. [#] NumberofUnits defines the number of similar dwelling units represented by the HPXML ``Building`` element.
          EnergyPlus simulation results will be multiplied by this value.
          For example, when modeling :ref:`bldg_type_whole_mf_buildings`, this allows modeling *unique* dwelling units, rather than *all* dwelling units, to reduce simulation runtime.

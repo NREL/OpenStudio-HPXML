@@ -2479,7 +2479,7 @@ module Airflow
       infil_program.addLine("Set s_m = #{site_ap.ashrae_terrain_thickness}")
       infil_program.addLine("Set s_s = #{site_ap.ashrae_site_terrain_thickness}")
       infil_program.addLine("Set z_m = #{UnitConversions.convert(site_ap.height, 'ft', 'm')}")
-      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height + unit_height_above_grade, 'ft', 'm')}")
+      infil_program.addLine("Set z_s = #{UnitConversions.convert(infil_height + [unit_height_above_grade, 0].max, 'ft', 'm')}")
       infil_program.addLine('Set f_t = (((s_m/z_m)^p_m)*((z_s/s_s)^p_s))')
       infil_program.addLine("Set Tdiff = #{@tin_sensor.name}-#{@tout_sensor.name}")
       infil_program.addLine('Set dT = @Abs Tdiff')
