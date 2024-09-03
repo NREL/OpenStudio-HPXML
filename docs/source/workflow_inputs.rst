@@ -594,6 +594,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] Sensible and latent internal gains from general water use (floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.), as defined by `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+         If NumberofResidents provided, this will be adjusted using the above equations from RECS.
   .. [#] If GeneralWaterUseWeekdayScheduleFractions or GeneralWaterUseWeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If GeneralWaterUseMonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
@@ -4667,6 +4668,7 @@ If a cooking range is specified, a single oven is also entered as a ``/HPXML/Bui
   ====================  =======  ======  ===========  ========  =======  ================
 
 Cooking range/oven energy use is calculated per the Energy Rating Rated Home in `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNET3012019P1>`_.
+If NumberofResidents provided, this will be adjusted using the equations from RECS in :ref:`building_occupancy`.
 
 HPXML Lighting & Ceiling Fans
 -----------------------------
@@ -4842,7 +4844,7 @@ If not entered, the simulation will not include a pool pump.
   .. [#] Type choices are "single speed", "multi speed", "variable speed", "variable flow", "other", "unknown", or "none".
          If "none" is entered, the simulation will not include a pool pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 158.5 / 0.070 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
-         If NumberofResidents provided, this value will be adjusted using the :ref:`building_occupancy`.
+         If NumberofResidents provided, this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
@@ -4874,7 +4876,7 @@ If not entered, the simulation will not include a pool heater.
          
          \- **heat pump [kWh/year]**: (electric resistance [kWh/year]) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
-         If NumberofResidents provided, this value will be adjusted using the :ref:`building_occupancy`.
+         If NumberofResidents provided, this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
          
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
@@ -4916,7 +4918,7 @@ If not entered, the simulation will not include a permanent spa pump.
   .. [#] Type choices are "single speed", "multi speed", "variable speed", "variable flow", "other", "unknown", or "none".
          If "none" is entered, the simulation will not include a permanent spa pump.
   .. [#] If Value not provided, defaults based on the `2010 BAHSP <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_: 59.5 / 0.059 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920).
-         If NumberofResidents provided, this value will be adjusted using the :ref:`building_occupancy`.
+         If NumberofResidents provided, this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
 
@@ -4948,7 +4950,7 @@ If not entered, the simulation will not include a permanent spa heater.
          
          \- **heat pump [kWh/year]** = (electric resistance) / 5.0 (based on an average COP of 5 from `Energy Saver <https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters>`_)
          
-         If NumberofResidents provided, this value will be adjusted using the :ref:`building_occupancy`.
+         If NumberofResidents provided, this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
          
   .. [#] If WeekdayScheduleFractions or WeekendScheduleFractions not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
   .. [#] If MonthlyScheduleMultipliers not provided (and :ref:`schedules_detailed` not used), then :ref:`schedules_default` are used.
@@ -5013,7 +5015,7 @@ If not entered, the simulation will not include that type of plug load.
 
          \- **TV other** (manufactured home): 99.9 + 129.6 * NumberofResidents + 0.21 * ConditionedFloorArea (based on `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_)
 
-         \- **well pump**: Same as above, but this value will be adjusted using the :ref:`buildingoccupancy`.
+         \- **well pump**: Same as above, but this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
 
          \- **electric vehicle charging**: Same as above
 
@@ -5075,7 +5077,7 @@ If not entered, the simulation will not include that type of fuel load.
          
          \- **lighting**: 0.22 / 0.012 * (0.5 + 0.25 * NumberofBedrooms / 3 + 0.25 * ConditionedFloorArea / 1920)
          
-         If NumberofResidents provided, this value will be adjusted using the :ref:`building_occupancy`.
+         If NumberofResidents provided, this value will be adjusted using the equations from RECS in :ref:`building_occupancy`.
          
   .. [#] FuelType choices are "natural gas", "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "diesel", "propane", "kerosene", "coal", "coke", "bituminous coal", "anthracite coal", "wood", or "wood pellets".
   .. [#] If FracSensible not provided, defaults to 0.5 for fireplace and 0.0 for all other types.
