@@ -355,7 +355,7 @@ module HotWaterAndAppliances
       showers_col_name = SchedulesFile::Columns[:HotWaterShowers].name
       showers_obj_name = Constants::ObjectTypeShowers
       if not schedules_file.nil?
-        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: EPlus.ScheduleTypeLimitsFraction)
+        showers_schedule = schedules_file.create_schedule_file(model, col_name: showers_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
       end
       if showers_schedule.nil?
         showers_unavailable_periods = Schedule.get_unavailable_periods(runner, showers_col_name, unavailable_periods)
