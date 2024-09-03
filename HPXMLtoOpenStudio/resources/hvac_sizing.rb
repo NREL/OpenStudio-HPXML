@@ -1722,34 +1722,28 @@ module HVACSizing
   # @param hvac_cooling [HPXML::CoolingSystem or HPXML::HeatPump] The cooling portion of the current HPXML HVAC system 
   # @param hvac_sizings
   # @param hpxml_bldg 
-  # @return TODO figure out appropriate variable type  
+  # @return [Array<Double, Double, Double, Double>] total clg oversize limit (frac), 
+  # total clg undersize limit (frac), sens. clg undersize limit (frac), lat. clg undersize limit (frac)
 
   def self.get_hvac_size_limits(hvac_cooling, hvac_sizings, hpxml_bldg)
 
     load_shr = hvac_sizings.Cool_Load_Sens / hvac_sizings.Cool_Load_Tot
-    # calculate Climate JSHR to determine standard vs dry sizing condition
+    # calculate Climate JSHR to determine standard vs dry sizing condition (new ACCA)
 
     if hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA2023
       if not hvac_cooling.nil?
-        if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage || hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
           if load_shr < 0.95
           # larger latent load
           # Section N.2.3.1 ACCA Man. S 2023, Standard Sizing Condition
+            total_clg_undersize_limit = 0.90
+            sens_clg_undersize_limit = 0.90
+            lat_clg_undersize_limit = 1.00
             if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage && hvac_sizings.Cool_Load_Tot <= 24000 # BTU/hr
               total_clg_oversize_limit = 1.20
-              total_clg_undersize_limit = 0.90
-              sens_clg_undersize_limit = 0.90
-              lat_clg_undersize_limit = 1.00
             elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage && hvac_sizings.Cool_Load_Tot > 24000 # BTU/hr
               total_clg_oversize_limit = 1.15
-              total_clg_undersize_limit = 0.90
-              sens_clg_undersize_limit = 0.90
-              lat_clg_undersize_limit = 1.00
             elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
               total_clg_oversize_limit = 1.25
-              total_clg_undersize_limit = 0.90
-              sens_clg_undersize_limit = 0.90
-              lat_clg_undersize_limit = 1.00
             end
           elsif load_shr >= 0.95 # Section N.2.3.2 ACCA Man. S 2023, Dry Sizing Condition
             if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeSingleStage
@@ -1766,23 +1760,31 @@ module HVACSizing
               sens_clg_undersize_limit = 0.90
               lat_clg_undersize_limit = 1.00
             elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
-              total_clg_oversize_limit = 1.15 # minimum compressor speed!
+              total_clg_oversize_limit = 1.15 # minimum compressor speed! TODO: incorporate minimum speed logic elsewhere
+              total_clg_undersize_limit = 0.90 # total clg undersize limit for dry climate, 2-stage compressor is as specified in ACCA 2014
+              # ACCA 2023 Table N2.3.2 does not specify total cooling undersize limit.
               sens_clg_undersize_limit = 0.90
               lat_clg_undersize_limit = 1.00
 
+    elsif hpxml_bldg.header.heat_pump_sizing_methodology == HPXML::HeatPumpSizingACCA
+  # Reference "Overview of Size Limits for Residential HVAC Equipment" from Man. S 2014
+    total_clg_oversize_limit = 1.15
+    oversize_delta = 15000.0 #TODO get rid of oversize delta by "baking" into total_clg_oversize_limit for cold winter w/ JSHR > 0.95
+    total_clg_undersize_limit = 0.90
+    sens_clg_undersize_limit = 0.90
+    lat_clg_undersize_limit = 1.00
+    
 
-      oversize_limit = 1.15 
-      oversize_delta = 15000.0 
-      undersize_limit = 0.9
-
-    if not hvac_cooling.nil? 
+    if not hvac_cooling.nil?
       if hvac_cooling.compressor_type == HPXML::HVACCompressorTypeTwoStage
-        oversize_limit = 1.2 
-      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed 
-        oversize_limit = 1.3 
-      end 
-    end 
-    return oversize_factor, oversize_delta, undersize_factor 
+        total_clg_oversize_limit = 1.2
+      elsif hvac_cooling.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
+        total_clg_oversize_limit = 1.3
+      end
+    end
+    
+    return total_clg_oversize_limit, total_clg_undersize_limit, sens_clg_undersize_limit, lat_clg_undersize_limit 
+  
   end 
 
   # Transfers the design load totals from the HVAC loads object to the HVAC sizings object.
@@ -2161,7 +2163,7 @@ module HVACSizing
       hvac_cooling_ap = hvac_cooling.additional_properties
       is_ducted = !hvac_cooling.distribution_system.nil?
       cooling_delta_t = mj.cool_setpoint - hvac_cooling_ap.leaving_air_temp
-      oversize_limit, oversize_delta, undersize_limit = get_hvac_size_limits(hvac_cooling)
+      tot_clg_oversize_limit, tot_clg_undersize_limit, sens_clg_undersize_limit, lat_clg_undersize_limit = get_hvac_size_limits(hvac_cooling)
     end
 
     if hvac_sizings.Cool_Load_Tot <= 0
@@ -2284,7 +2286,7 @@ module HVACSizing
           # Determine the final sensible capacity at design using the SHR
           cool_sens_cap_design = cool_cap_design * design_shr
 
-        elsif cool_sens_cap_design < undersize_limit * hvac_sizings.Cool_Load_Sens
+        elsif cool_sens_cap_design < sens_undersize_limit * hvac_sizings.Cool_Load_Sens
           # Size by MJ8 Sensible Load, return to rated conditions, find rated sensible capacity with SHRRated. Limit total
           # capacity to oversizing limit.
 
