@@ -481,7 +481,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_location(model, weather)
 
     # Conditioned space/zone
-    add_spaces(model, spaces)
+    add_conditioned_space(model, spaces)
     add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
@@ -639,10 +639,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Location.apply(model, weather, @hpxml_header, @hpxml_bldg)
   end
 
-  # TODO
+  # Adds a conditioned space and zone to the OpenStudio model.
   #
   # @return [nil]
-  def add_spaces(model, spaces)
+  def add_conditioned_space(model, spaces)
     Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)
   end
 
@@ -707,7 +707,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
         surface.setSurfaceType(EPlus::SurfaceTypeRoofCeiling)
         surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
-        set_surface_interior(model, spaces, surface, roof)
+        Geometry.set_surface_interior(model, spaces, surface, roof, @hpxml_bldg)
       end
 
       next if surfaces.empty?
@@ -822,8 +822,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           surface.setName(wall.id)
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
-        set_surface_interior(model, spaces, surface, wall)
-        set_surface_exterior(model, spaces, surface, wall)
+        Geometry.set_surface_interior(model, spaces, surface, wall, @hpxml_bldg)
+        Geometry.set_surface_exterior(model, spaces, surface, wall, @hpxml_bldg)
         if wall.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
@@ -898,8 +898,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           surface.setName(rim_joist.id)
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
-        set_surface_interior(model, spaces, surface, rim_joist)
-        set_surface_exterior(model, spaces, surface, rim_joist)
+        Geometry.set_surface_interior(model, spaces, surface, rim_joist, @hpxml_bldg)
+        Geometry.set_surface_exterior(model, spaces, surface, rim_joist, @hpxml_bldg)
         if rim_joist.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
@@ -967,8 +967,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
-      set_surface_interior(model, spaces, surface, floor)
-      set_surface_exterior(model, spaces, surface, floor)
+      Geometry.set_surface_interior(model, spaces, surface, floor, @hpxml_bldg)
+      Geometry.set_surface_exterior(model, spaces, surface, floor, @hpxml_bldg)
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
@@ -1108,8 +1108,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
         surface.setName(fnd_wall.id)
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
-        set_surface_interior(model, spaces, surface, fnd_wall)
-        set_surface_exterior(model, spaces, surface, fnd_wall)
+        Geometry.set_surface_interior(model, spaces, surface, fnd_wall, @hpxml_bldg)
+        Geometry.set_surface_exterior(model, spaces, surface, fnd_wall, @hpxml_bldg)
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
@@ -1188,8 +1188,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
     surface.setName(foundation_wall.id)
     surface.setSurfaceType(EPlus::SurfaceTypeWall)
-    set_surface_interior(model, spaces, surface, foundation_wall)
-    set_surface_exterior(model, spaces, surface, foundation_wall)
+    Geometry.set_surface_interior(model, spaces, surface, foundation_wall, @hpxml_bldg)
+    Geometry.set_surface_exterior(model, spaces, surface, foundation_wall, @hpxml_bldg)
 
     assembly_r = foundation_wall.insulation_assembly_r_value
     mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
@@ -1267,7 +1267,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     surface.setSurfaceType(EPlus::SurfaceTypeFloor)
     surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionFoundation)
     surface.additionalProperties.setFeature('SurfaceType', 'Slab')
-    set_surface_interior(model, spaces, surface, slab)
+    Geometry.set_surface_interior(model, spaces, surface, slab, @hpxml_bldg)
     surface.setSunExposure(EPlus::SurfaceSunExposureNo)
     surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
@@ -1400,7 +1400,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     ceiling_surface.additionalProperties.setFeature('Tilt', 0.0)
 
     # Apply Construction
-    apply_adiabatic_construction(model, [floor_surface, ceiling_surface], 'floor')
+    Constructions.apply_adiabatic_construction(model, [floor_surface, ceiling_surface], 'floor')
   end
 
   # Calls construction methods for applying partition walls and furniture to the OpenStudio model.
@@ -1469,7 +1469,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('SurfaceType', 'Window')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
-        set_surface_interior(model, spaces, surface, window.wall)
+        Geometry.set_surface_interior(model, spaces, surface, window.wall, @hpxml_bldg)
 
         vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
@@ -1477,7 +1477,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeWindow)
 
-        set_subsurface_exterior(surface, spaces, model, window.wall)
+        Geometry.set_subsurface_exterior(surface, spaces, model, window.wall, @hpxml_bldg)
         surfaces << surface
 
         if not overhang_depth.nil?
@@ -1505,7 +1505,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         surface.additionalProperties.setFeature('SurfaceType', 'Door')
         surface.setName("surface #{window.id}")
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
-        set_surface_interior(model, spaces, surface, window.wall)
+        Geometry.set_surface_interior(model, spaces, surface, window.wall, @hpxml_bldg)
 
         vertices = Geometry.create_wall_vertices(length: window_length, height: window_height, z_origin: z_origin, azimuth: window.azimuth)
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
@@ -1513,7 +1513,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeDoor)
 
-        set_subsurface_exterior(surface, spaces, model, window.wall)
+        Geometry.set_subsurface_exterior(surface, spaces, model, window.wall, @hpxml_bldg)
         surfaces << surface
 
         # Apply construction
@@ -1523,7 +1523,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    apply_adiabatic_construction(model, surfaces, 'wall')
+    Constructions.apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
   # Adds any HPXML Skylights to the OpenStudio model.
@@ -1611,8 +1611,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id} shaft")
       surface.setSurfaceType(EPlus::SurfaceTypeWall)
-      set_surface_interior(model, spaces, surface, skylight.floor)
-      set_surface_exterior(model, spaces, surface, skylight.floor)
+      Geometry.set_surface_interior(model, spaces, surface, skylight.floor, @hpxml_bldg)
+      Geometry.set_surface_exterior(model, spaces, surface, skylight.floor, @hpxml_bldg)
       surface.setSunExposure(EPlus::SurfaceSunExposureNo)
       surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
@@ -1626,7 +1626,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setConstruction(shaft_const)
     end
 
-    apply_adiabatic_construction(model, surfaces, 'roof')
+    Constructions.apply_adiabatic_construction(model, surfaces, 'roof')
   end
 
   # Adds any HPXML Doors to the OpenStudio model.
@@ -1651,7 +1651,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.additionalProperties.setFeature('SurfaceType', 'Door')
       surface.setName("surface #{door.id}")
       surface.setSurfaceType(EPlus::SurfaceTypeWall)
-      set_surface_interior(model, spaces, surface, door.wall)
+      Geometry.set_surface_interior(model, spaces, surface, door.wall, @hpxml_bldg)
 
       vertices = Geometry.create_wall_vertices(length: door_length, height: door_height, z_origin: z_origin, azimuth: door.azimuth)
       sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
@@ -1659,7 +1659,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType(EPlus::SubSurfaceTypeDoor)
 
-      set_subsurface_exterior(surface, spaces, model, door.wall)
+      Geometry.set_subsurface_exterior(surface, spaces, model, door.wall, @hpxml_bldg)
       surfaces << surface
 
       # Apply construction
@@ -1673,7 +1673,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       Constructions.apply_door(model, [sub_surface], 'Door', ufactor, inside_film, outside_film)
     end
 
-    apply_adiabatic_construction(model, surfaces, 'wall')
+    Constructions.apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
   # TODO
@@ -1684,36 +1684,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_geometry_other(model, spaces)
     Geometry.set_zone_volumes(spaces: spaces, hpxml_bldg: @hpxml_bldg, apply_ashrae140_assumptions: @apply_ashrae140_assumptions)
     Geometry.explode_surfaces(model: model, hpxml_bldg: @hpxml_bldg, walls_top: @walls_top)
-  end
-
-  # Arbitrary construction for heat capacitance.
-  # Only applies to surfaces where outside boundary conditioned is
-  # adiabatic or surface net area is near zero.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
-  # @param type [String] floor, wall, or roof
-  # @return [nil]
-  def apply_adiabatic_construction(model, surfaces, type)
-    return if surfaces.empty?
-
-    if type == 'wall'
-      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
-      mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
-      Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
-                                         0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish, false,
-                                         Material.AirFilmVertical, Material.AirFilmVertical, nil)
-    elsif type == 'floor'
-      Constructions.apply_wood_frame_floor_ceiling(model, surfaces, 'AdiabaticFloorConstruction', false,
-                                                   0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare, false,
-                                                   Material.AirFilmFloorReduced, Material.AirFilmFloorReduced, nil)
-    elsif type == 'roof'
-      Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
-                                           0, 1, 7.25, 0.07, 7.25, 0.75, 99,
-                                           Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles),
-                                           false, Material.AirFilmOutside,
-                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
-    end
   end
 
   # First assign OpenStudio Space object for appliances based on HPXML Location.
@@ -1737,26 +1707,26 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_hot_water_and_appliances(runner, model, weather, spaces)
     # Assign spaces
     @hpxml_bldg.clothes_washers.each do |clothes_washer|
-      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, spaces)
+      clothes_washer.additional_properties.space = Geometry.get_space_from_location(clothes_washer.location, spaces)
     end
     @hpxml_bldg.clothes_dryers.each do |clothes_dryer|
-      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, spaces)
+      clothes_dryer.additional_properties.space = Geometry.get_space_from_location(clothes_dryer.location, spaces)
     end
     @hpxml_bldg.dishwashers.each do |dishwasher|
-      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, spaces)
+      dishwasher.additional_properties.space = Geometry.get_space_from_location(dishwasher.location, spaces)
     end
     @hpxml_bldg.refrigerators.each do |refrigerator|
-      loc_space, loc_schedule = get_space_or_schedule_from_location(refrigerator.location, model, spaces)
+      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
       refrigerator.additional_properties.loc_space = loc_space
       refrigerator.additional_properties.loc_schedule = loc_schedule
     end
     @hpxml_bldg.freezers.each do |freezer|
-      loc_space, loc_schedule = get_space_or_schedule_from_location(freezer.location, model, spaces)
+      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(freezer.location, model, spaces)
       freezer.additional_properties.loc_space = loc_space
       freezer.additional_properties.loc_schedule = loc_schedule
     end
     @hpxml_bldg.cooking_ranges.each do |cooking_range|
-      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, spaces)
+      cooking_range.additional_properties.space = Geometry.get_space_from_location(cooking_range.location, spaces)
     end
 
     # Distribution
@@ -1777,7 +1747,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     has_cond_bsmnt = @hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
     plantloop_map = {}
     @hpxml_bldg.water_heating_systems.each do |water_heating_system|
-      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
+      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
 
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, has_cond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
@@ -1803,7 +1773,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                 @apply_ashrae140_assumptions)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
+      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
       Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map, unit_multiplier)
     end
 
@@ -2335,7 +2305,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
+      duct_loc_space, duct_loc_schedule = Geometry.get_space_or_schedule_from_location(ducts.duct_location, model, spaces)
 
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area * ducts.duct_surface_area_multiplier / total_unconditioned_duct_area[ducts.duct_type]
@@ -2418,7 +2388,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def add_batteries(runner, model, spaces)
     @hpxml_bldg.batteries.each do |battery|
       # Assign space
-      battery.additional_properties.space = get_space_from_location(battery.location, spaces)
+      battery.additional_properties.space = Geometry.get_space_from_location(battery.location, spaces)
       Battery.apply(runner, model, @nbeds, @hpxml_bldg.pv_systems, battery, @schedules_file, @hpxml_bldg.building_construction.number_of_units)
     end
   end
@@ -3238,258 +3208,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     oems.setActuatorAvailabilityDictionaryReporting('Verbose')
     oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
     oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
-  # @return [nil]
-  def set_surface_interior(model, spaces, surface, hpxml_surface)
-    interior_adjacent_to = hpxml_surface.interior_adjacent_to
-    if HPXML::conditioned_below_grade_locations.include? interior_adjacent_to
-      surface.setSpace(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg))
-    else
-      surface.setSpace(Geometry.create_or_get_space(model, spaces, interior_adjacent_to, @hpxml_bldg))
-    end
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
-  # @return [nil]
-  def set_surface_exterior(model, spaces, surface, hpxml_surface)
-    exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
-    is_adiabatic = hpxml_surface.is_adiabatic
-    if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
-      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
-    elsif exterior_adjacent_to == HPXML::LocationGround
-      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionFoundation)
-    elsif is_adiabatic
-      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionAdiabatic)
-    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
-           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? exterior_adjacent_to
-      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    elsif HPXML::conditioned_below_grade_locations.include? exterior_adjacent_to
-      adjacent_surface = surface.createAdjacentSurface(Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)).get
-      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
-    else
-      adjacent_surface = surface.createAdjacentSurface(Geometry.create_or_get_space(model, spaces, exterior_adjacent_to, @hpxml_bldg)).get
-      adjacent_surface.additionalProperties.setFeature('SurfaceType', surface.additionalProperties.getFeatureAsString('SurfaceType').get)
-    end
-  end
-
-  # TODO
-  #
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param exterior_adjacent_to [String] Exterior adjacent to location (HPXML::LocationXXX)
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [nil]
-  def set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    otherside_coeffs = nil
-    model.getSurfacePropertyOtherSideCoefficientss.each do |c|
-      next unless c.name.to_s == exterior_adjacent_to
-
-      otherside_coeffs = c
-    end
-    if otherside_coeffs.nil?
-      # Create E+ other side coefficient object
-      otherside_coeffs = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_coeffs.setName(exterior_adjacent_to)
-      otherside_coeffs.setCombinedConvectiveRadiativeFilmCoefficient(UnitConversions.convert(1.0 / Material.AirFilmVertical.rvalue, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
-      # Schedule of space temperature, can be shared with water heater/ducts
-      sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
-      otherside_coeffs.setConstantTemperatureSchedule(sch)
-    end
-    surface.setSurfacePropertyOtherSideCoefficients(otherside_coeffs)
-    surface.setSunExposure(EPlus::SurfaceSunExposureNo)
-    surface.setWindExposure(EPlus::SurfaceWindExposureNo)
-  end
-
-  # Create outside boundary schedules to be actuated by EMS,
-  # can be shared by any surface, duct adjacent to / located in those spaces.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param location [String] the location of interest (HPXML::LocationXXX)
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [OpenStudio::Model::ScheduleConstant] OpenStudio ScheduleConstant object
-  def get_space_temperature_schedule(model, location, spaces)
-    # return if already exists
-    model.getScheduleConstants.each do |sch|
-      next unless sch.name.to_s == location
-
-      return sch
-    end
-
-    sch = OpenStudio::Model::ScheduleConstant.new(model)
-    sch.setName(location)
-    sch.additionalProperties.setFeature('ObjectType', location)
-
-    space_values = Geometry.get_temperature_scheduled_space_values(location: location)
-
-    htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
-    if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
-      default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f # F
-    else
-      fail 'Unexpected heating setpoints.'
-    end
-
-    clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
-    if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
-      default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f # F
-    else
-      fail 'Unexpected cooling setpoints.'
-    end
-
-    if location == HPXML::LocationOtherHeatedSpace
-      if spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
-        # Create a sensor to get dynamic heating setpoint
-        htg_sch = spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-        sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        sensor_htg_spt.setName('htg_spt')
-        sensor_htg_spt.setKeyName(htg_sch.name.to_s)
-        space_values[:temp_min] = sensor_htg_spt.name.to_s
-      else
-        # No HVAC system; use the defaulted heating setpoint.
-        space_values[:temp_min] = default_htg_sp # F
-      end
-    end
-
-    # Schedule type limits compatible
-    schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
-    schedule_type_limits.setUnitType('Temperature')
-    sch.setScheduleTypeLimits(schedule_type_limits)
-
-    # Sensors
-    if space_values[:indoor_weight] > 0
-      if not spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
-        # No HVAC system; use the average of defaulted heating/cooling setpoints.
-        sensor_ia = UnitConversions.convert((default_htg_sp + default_clg_sp) / 2.0, 'F', 'C')
-      else
-        sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-        sensor_ia.setName('cond_zone_temp')
-        sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
-        sensor_ia = sensor_ia.name
-      end
-    end
-
-    if space_values[:outdoor_weight] > 0
-      sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-      sensor_oa.setName('oa_temp')
-    end
-
-    if space_values[:ground_weight] > 0
-      sensor_gnd = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Surface Ground Temperature')
-      sensor_gnd.setName('ground_temp')
-    end
-
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, *EPlus::EMSActuatorScheduleConstantValue)
-    actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
-
-    # EMS to actuate schedule
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{location.gsub('-', '_')} Temperature Program")
-    program.addLine("Set #{actuator.name} = 0.0")
-    if not sensor_ia.nil?
-      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia} * #{space_values[:indoor_weight]})")
-    end
-    if not sensor_oa.nil?
-      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_oa.name} * #{space_values[:outdoor_weight]})")
-    end
-    if not sensor_gnd.nil?
-      program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_gnd.name} * #{space_values[:ground_weight]})")
-    end
-    if not space_values[:temp_min].nil?
-      if space_values[:temp_min].is_a? String
-        min_temp_c = space_values[:temp_min]
-      else
-        min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
-      end
-      program.addLine("If #{actuator.name} < #{min_temp_c}")
-      program.addLine("Set #{actuator.name} = #{min_temp_c}")
-      program.addLine('EndIf')
-    end
-
-    program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_cm.setName("#{program.name} calling manager")
-    program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
-    program_cm.addProgram(program)
-
-    return sch
-  end
-
-  # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
-  # Should be called when the object's energy use is sensitive to ambient temperature
-  # (e.g., water heaters, ducts, and refrigerators).
-  #
-  # @param location [String] the location of interest (HPXML::LocationXXX)
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [OpenStudio::Model::Space or OpenStudio::Model::ScheduleConstant] OpenStudio Space or Schedule object
-  def get_space_or_schedule_from_location(location, model, spaces)
-    return if [HPXML::LocationOtherExterior,
-               HPXML::LocationOutside,
-               HPXML::LocationRoofDeck].include? location
-
-    sch = nil
-    space = nil
-    if [HPXML::LocationOtherHeatedSpace,
-        HPXML::LocationOtherHousingUnit,
-        HPXML::LocationOtherMultifamilyBufferSpace,
-        HPXML::LocationOtherNonFreezingSpace,
-        HPXML::LocationExteriorWall,
-        HPXML::LocationUnderSlab].include? location
-      # if located in spaces where we don't model a thermal zone, create and return temperature schedule
-      sch = get_space_temperature_schedule(model, location, spaces)
-    else
-      space = get_space_from_location(location, spaces)
-    end
-
-    return space, sch
-  end
-
-  # Returns an OS:Space, or nil if a MF space or outside
-  # Should be called when the object's energy use is NOT sensitive to ambient temperature
-  # (e.g., appliances).
-  #
-  # @param location [String] the location of interest (HPXML::LocationXXX)
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [OpenStudio::Model::Space] OpenStudio Space object
-  def get_space_from_location(location, spaces)
-    return if [HPXML::LocationOutside,
-               HPXML::LocationOtherHeatedSpace,
-               HPXML::LocationOtherHousingUnit,
-               HPXML::LocationOtherMultifamilyBufferSpace,
-               HPXML::LocationOtherNonFreezingSpace].include? location
-
-    if HPXML::conditioned_locations.include? location
-      location = HPXML::LocationConditionedSpace
-    end
-
-    return spaces[location]
-  end
-
-  # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
-  # The parent surface is entirely comprised of the subsurface.
-  #
-  # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
-  # @return [nil]
-  def set_subsurface_exterior(surface, spaces, model, hpxml_surface)
-    # Subsurface on foundation wall, set it to be adjacent to outdoors
-    if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
-      surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
-    else
-      set_surface_exterior(model, spaces, surface, hpxml_surface)
-    end
   end
 end
 

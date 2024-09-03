@@ -2712,6 +2712,36 @@ module Constructions
     check_surface_assembly_rvalue(runner, surface, inside_film, outside_film, assembly_r, match)
   end
 
+  # Arbitrary construction for heat capacitance.
+  # Only applies to surfaces where outside boundary conditioned is
+  # adiabatic or surface net area is near zero.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param surfaces [Array<OpenStudio::Model::Surface>] array of OpenStudio::Model::Surface objects
+  # @param type [String] floor, wall, or roof
+  # @return [nil]
+  def self.apply_adiabatic_construction(model, surfaces, type)
+    return if surfaces.empty?
+
+    if type == 'wall'
+      mat_int_finish = Material.InteriorFinishMaterial(HPXML::InteriorFinishGypsumBoard, 0.5)
+      mat_ext_finish = Material.ExteriorFinishMaterial(HPXML::SidingTypeWood)
+      apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
+                           0, 1, 3.5, true, 0.1, mat_int_finish, 0, 99, mat_ext_finish, false,
+                           Material.AirFilmVertical, Material.AirFilmVertical, nil)
+    elsif type == 'floor'
+      apply_wood_frame_floor_ceiling(model, surfaces, 'AdiabaticFloorConstruction', false,
+                                     0, 1, 0.07, 5.5, 0.75, 99, Material.CoveringBare, false,
+                                     Material.AirFilmFloorReduced, Material.AirFilmFloorReduced, nil)
+    elsif type == 'roof'
+      apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
+                             0, 1, 7.25, 0.07, 7.25, 0.75, 99,
+                             Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles),
+                             false, Material.AirFilmOutside,
+                             Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
+    end
+  end
+
   # TODO
   #
   # @param assembly_r [TODO] TODO

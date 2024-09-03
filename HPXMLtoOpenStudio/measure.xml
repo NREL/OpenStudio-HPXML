@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b3002480-328b-49af-bb30-ebcf37ca8737</version_id>
-  <version_modified>2024-09-03T20:33:51Z</version_modified>
+  <version_id>38d82c1e-8b24-47f6-a30e-18cba2e6cd1d</version_id>
+  <version_modified>2024-09-03T21:24:46Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>41FF93B9</checksum>
+      <checksum>EFF8B910</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -213,7 +213,7 @@
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F2B9F3E6</checksum>
+      <checksum>DE13291A</checksum>
     </file>
     <file>
       <filename>data/Xing_okstate_0664D_13659_Table_A-3.csv</filename>
@@ -345,7 +345,7 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C8582762</checksum>
+      <checksum>08E9B56C</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
