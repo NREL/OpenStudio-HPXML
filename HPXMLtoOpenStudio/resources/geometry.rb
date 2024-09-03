@@ -255,7 +255,7 @@ module Geometry
   #
   # @param length [TODO] TODO
   # @param width [TODO] TODO
-  # @param z_origin [TODO] TODO
+  # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
   # @param default_azimuths [TODO] TODO
   # @return [TODO] TODO
   def self.create_ceiling_vertices(length:,
@@ -269,7 +269,7 @@ module Geometry
   #
   # @param length [TODO] TODO
   # @param width [TODO] TODO
-  # @param z_origin [TODO] TODO
+  # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
   # @param default_azimuths [TODO] TODO
   # @return [TODO] TODO
   def self.create_floor_vertices(length:,

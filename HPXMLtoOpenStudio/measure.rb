@@ -451,6 +451,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, debug, schedules_file, eri_version, unit_num)
     @hpxml_header = hpxml.header
     @hpxml_bldg = hpxml_bldg
+    @epw_path = epw_path
     @debug = debug
     @schedules_file = schedules_file
     @eri_version = eri_version
@@ -467,17 +468,20 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     model.setStrictnessLevel('None'.to_StrictnessLevel)
 
     # Init
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, OpenStudio::EpwFile.new(epw_path))
-    set_inits_and_globals()
-    Location.apply(model, weather, @hpxml_header, @hpxml_bldg)
+    set_inits_and_globals(model)
+    set_foundation_and_walls_top()
+    set_hvac_seasons(runner)
+    set_unavailable_periods(runner)
+
+    spaces = {} # Map of HPXML locations => OpenStudio Space objects
+    airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
+
+    # Sim controls/location
     add_simulation_params(model)
+    add_location(model, weather)
 
     # Conditioned space/zone
-    spaces = {}
-    Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)
-    set_foundation_and_walls_top()
-    set_heating_and_cooling_seasons(runner)
-    add_setpoints(runner, model, weather, spaces)
+    add_spaces(model, spaces)
 
     # Geometry/Envelope
     add_roofs(runner, model, spaces)
@@ -490,13 +494,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_skylights(model, spaces)
     add_conditioned_floor_area(model, spaces)
     add_thermal_mass(model, spaces)
-    Geometry.set_zone_volumes(spaces: spaces, hpxml_bldg: @hpxml_bldg, apply_ashrae140_assumptions: @apply_ashrae140_assumptions)
-    Geometry.explode_surfaces(model: model, hpxml_bldg: @hpxml_bldg, walls_top: @walls_top)
     add_num_occupants(model, runner, spaces)
+    add_geometry_other(model, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, @hpxml_header.unavailable_periods)
-    airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
+    add_setpoints(runner, model, weather, spaces)
     add_ideal_system(model, spaces, weather)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
     add_heating_system(runner, model, weather, spaces, airloop_map)
@@ -527,8 +529,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # Globalize select HPXML Building properties, e.g., conditioned floor area, number of conditioned floors, number of bedrooms, etc.
   # Perform other leading operations like applying unit multipliers, collapsing like HPXML surfaces, etc.
   #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [nil]
-  def set_inits_and_globals()
+  def set_inits_and_globals(model)
+    # Weather file
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, OpenStudio::EpwFile.new(@epw_path))
+
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -564,7 +570,59 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # Call the SimControls module for applying high-level simulation controls and settings.
+  # TODO
+  #
+  # @return [nil]
+  def set_foundation_and_walls_top()
+    @foundation_top = 0
+    @hpxml_bldg.floors.each do |floor|
+      # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
+      if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
+        @foundation_top = 2.0
+      end
+    end
+    @hpxml_bldg.foundation_walls.each do |foundation_wall|
+      top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
+      @foundation_top = top if top > @foundation_top
+    end
+    @walls_top = @foundation_top + @hpxml_bldg.building_construction.average_ceiling_height * @ncfl_ag
+  end
+
+  # Set 365 (or 366 for a leap year) heating/cooling day arrays based on heating/cooling season begin/end month/day, respectively.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @return [nil]
+  def set_hvac_seasons(runner)
+    return if @hpxml_bldg.hvac_controls.size == 0
+
+    hvac_control = @hpxml_bldg.hvac_controls[0]
+
+    htg_start_month = hvac_control.seasons_heating_begin_month
+    htg_start_day = hvac_control.seasons_heating_begin_day
+    htg_end_month = hvac_control.seasons_heating_end_month
+    htg_end_day = hvac_control.seasons_heating_end_day
+    clg_start_month = hvac_control.seasons_cooling_begin_month
+    clg_start_day = hvac_control.seasons_cooling_begin_day
+    clg_end_month = hvac_control.seasons_cooling_end_month
+    clg_end_day = hvac_control.seasons_cooling_end_day
+
+    @heating_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
+    @cooling_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
+
+    if (htg_start_month != 1) || (htg_start_day != 1) || (htg_end_month != 12) || (htg_end_day != 31) || (clg_start_month != 1) || (clg_start_day != 1) || (clg_end_month != 12) || (clg_end_day != 31)
+      runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.')
+    end
+  end
+
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @return [nil]
+  def set_unavailable_periods(runner)
+    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, @hpxml_header.unavailable_periods)
+  end
+
+  # Adds HPXML Simulation Control to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [nil]
@@ -572,7 +630,23 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     SimControls.apply(model, @hpxml_header)
   end
 
-  # Call the apply_occupants method for creating an OpenStudio People object.
+  # Adds HPXML Building Site to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [nil]
+  def add_location(model, weather)
+    Location.apply(model, weather, @hpxml_header, @hpxml_bldg)
+  end
+
+  # TODO
+  #
+  # @return [nil]
+  def add_spaces(model, spaces)
+    Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, @hpxml_bldg)
+  end
+
+  # Adds HPXML Building Occupancy to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -1079,10 +1153,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param foundation_wall [HPXML::FoundationWall] Object for /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall
+  # @param foundation_wall [HPXML::FoundationWall] HPXML Foundation Wall object
   # @param exposed_length [Double] TODO
   # @param fnd_wall_length [Double] TODO
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   def add_foundation_wall(runner, model, spaces, foundation_wall, exposed_length, fnd_wall_length)
     exposed_fraction = exposed_length / fnd_wall_length
     net_exposed_area = foundation_wall.net_area * exposed_fraction
@@ -1169,10 +1243,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param slab [HPXML::Slab] Object for /HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab
-  # @param z_origin [TODO] TODO
+  # @param slab [HPXML::Slab] HPXML Slab object
+  # @param z_origin [Double] The z-coordinate for which the slab is relative (ft)
   # @param exposed_length [Double] TODO
-  # @param kiva_foundation [Double] TODO
+  # @param kiva_foundation [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   # @return [nil]
   def add_foundation_slab(model, weather, spaces, slab, z_origin, exposed_length, kiva_foundation)
     exposed_fraction = exposed_length / slab.exposed_perimeter
@@ -1602,6 +1676,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     apply_adiabatic_construction(model, surfaces, 'wall')
   end
 
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @return [nil]
+  def add_geometry_other(model, spaces)
+    Geometry.set_zone_volumes(spaces: spaces, hpxml_bldg: @hpxml_bldg, apply_ashrae140_assumptions: @apply_ashrae140_assumptions)
+    Geometry.explode_surfaces(model: model, hpxml_bldg: @hpxml_bldg, walls_top: @walls_top)
+  end
+
   # Arbitrary construction for heat capacitance.
   # Only applies to surfaces where outside boundary conditioned is
   # adiabatic or surface net area is near zero.
@@ -1728,7 +1812,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   # Adds any HPXML Cooling Systems to the OpenStudio model.
-  # TODO
+  # TODO for adding more description (e.g., around sequential load fractions)
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1784,7 +1868,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   # Adds any HPXML Heating Systems to the OpenStudio model.
-  # TODO
+  # TODO for adding more description (e.g., around sequential load fractions)
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1858,7 +1942,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   # Adds any HPXML Heat Pumps to the OpenStudio model.
-  # TODO
+  # TODO for adding more description (e.g., around sequential load fractions)
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1968,7 +2052,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   # Adds an HPXML HVAC Control to the OpenStudio model.
-  # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -2013,10 +2096,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                              @hpxml_bldg.building_construction.number_of_units)
   end
 
-  # TODO
+  # Check provided HVAC system and distribution types against what is allowed.
   #
-  # @param hvac_distribution [TODO] TODO
-  # @param system_type [TODO] TODO
+  # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
+  # @param system_type [String] the HVAC system type of interest
   # @return [nil]
   def check_distribution_system(hvac_distribution, system_type)
     return if hvac_distribution.nil?
@@ -2120,7 +2203,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
   end
 
-  # TODO
+  # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
+  # TODO for adding more description (e.g., around checks and warnings)
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -2218,9 +2302,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hvac_distribution [TODO] TODO
+  # @param hvac_distribution [HPXML::HVACDistribution] HPXML HVAC Distribution object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [TODO] TODO
+  # @return [Array<Duct>] list of initialized Duct class objects from the airflow resource file
   def create_ducts(model, hvac_distribution, spaces)
     air_ducts = []
 
@@ -2360,7 +2444,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml [HPXML] HPXML object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_path [String] Path to the HPXML file
-  # @param building_id [TODO] TODO
+  # @param building_id [String] HPXML Building ID
   # @param hpxml_defaults_path [TODO] TODO
   # @return [nil]
   def add_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, hpxml_defaults_path)
@@ -3203,7 +3287,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # TODO
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @param exterior_adjacent_to [TODO] TODO
+  # @param exterior_adjacent_to [String] Exterior adjacent to location (HPXML::LocationXXX)
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [nil]
@@ -3347,7 +3431,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param location [String] the location of interest (HPXML::LocationXXX)
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @return [TODO] TODO
+  # @return [OpenStudio::Model::Space or OpenStudio::Model::ScheduleConstant] OpenStudio Space or Schedule object
   def get_space_or_schedule_from_location(location, model, spaces)
     return if [HPXML::LocationOtherExterior,
                HPXML::LocationOutside,
@@ -3405,50 +3489,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
     else
       set_surface_exterior(model, spaces, surface, hpxml_surface)
-    end
-  end
-
-  # TODO
-  #
-  # @return [nil]
-  def set_foundation_and_walls_top()
-    @foundation_top = 0
-    @hpxml_bldg.floors.each do |floor|
-      # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
-      if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
-        @foundation_top = 2.0
-      end
-    end
-    @hpxml_bldg.foundation_walls.each do |foundation_wall|
-      top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
-      @foundation_top = top if top > @foundation_top
-    end
-    @walls_top = @foundation_top + @hpxml_bldg.building_construction.average_ceiling_height * @ncfl_ag
-  end
-
-  # Set 365 (or 366 for a leap year) heating/cooling day arrays based on heating/cooling season begin/end month/day, respectively.
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @return [nil]
-  def set_heating_and_cooling_seasons(runner)
-    return if @hpxml_bldg.hvac_controls.size == 0
-
-    hvac_control = @hpxml_bldg.hvac_controls[0]
-
-    htg_start_month = hvac_control.seasons_heating_begin_month
-    htg_start_day = hvac_control.seasons_heating_begin_day
-    htg_end_month = hvac_control.seasons_heating_end_month
-    htg_end_day = hvac_control.seasons_heating_end_day
-    clg_start_month = hvac_control.seasons_cooling_begin_month
-    clg_start_day = hvac_control.seasons_cooling_begin_day
-    clg_end_month = hvac_control.seasons_cooling_end_month
-    clg_end_day = hvac_control.seasons_cooling_end_day
-
-    @heating_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
-    @cooling_days = Calendar.get_daily_season(@hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
-
-    if (htg_start_month != 1) || (htg_start_day != 1) || (htg_end_month != 12) || (htg_end_day != 31) || (clg_start_month != 1) || (clg_start_day != 1) || (clg_end_month != 12) || (clg_end_day != 31)
-      runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus outside of an HVAC season.')
     end
   end
 end
