@@ -3501,7 +3501,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    Geometry.tear_down_model(model: model, runner: runner)
+    Model.tear_down(model: model, runner: runner)
 
     Version.check_openstudio_version()
 
