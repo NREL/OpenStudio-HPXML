@@ -585,7 +585,7 @@ Building occupancy is entered in ``/HPXML/Building/BuildingDetails/BuildingSumma
   =======================================================  ========  =====  ===========  ========  ========  ========================
 
   .. [#] If NumberofResidents not provided, an *asset* calculation is performed assuming standard occupancy, in which occupant-driven end uses (e.g., plug loads, appliances, hot water) are calculated based on NumberofBedrooms.
-         If NumberofResidents is provided, an *operational* calculation is instead performed, in which *some* occupant-driven end uses, as described throughout the documentation, are adjusted using the following relationship from `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/csv/recs2020_public_v7.csv>`_:
+         If NumberofResidents is provided, an *operational* calculation is instead performed, in which *some* occupant-driven end uses, as described throughout the documentation, are adjusted using the following relationship from `RECS 2020 <https://www.eia.gov/consumption/residential/data/2020/>`_:
 
          \- **manufactured home**: NumberofBedrooms = -1.26 + 1.61 * NumberofResidents
 
