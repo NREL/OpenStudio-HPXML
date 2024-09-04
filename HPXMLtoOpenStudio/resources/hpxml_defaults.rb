@@ -81,7 +81,7 @@ module HPXMLDefaults
     apply_lighting(hpxml_bldg, schedules_file)
     apply_ceiling_fans(hpxml_bldg, nbeds, weather, schedules_file)
     apply_pools_and_permanent_spas(hpxml_bldg, cfa, schedules_file)
-    apply_plug_loads(hpxml_bldg, cfa, schedules_file)
+    apply_plug_loads(hpxml_bldg, cfa, nbeds, schedules_file)
     apply_fuel_loads(hpxml_bldg, cfa, schedules_file)
     apply_pv_systems(hpxml_bldg)
     apply_generators(hpxml_bldg)
@@ -3608,13 +3608,16 @@ module HPXMLDefaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_plug_loads(hpxml_bldg, cfa, schedules_file)
+  def self.apply_plug_loads(hpxml_bldg, cfa, nbeds, schedules_file)
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
+    num_occ = hpxml_bldg.building_occupancy.number_of_residents
+    unit_type = hpxml_bldg.building_construction.residential_facility_type
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa, num_occ, unit_type)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3641,7 +3644,7 @@ module HPXMLDefaults
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds_eq)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds, num_occ, unit_type)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true

@@ -6,7 +6,8 @@ __New Features__
 - Allows modeling exterior horizontal insulation for a slab-on-grade foundation (or basement/crawlspace floor).
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
-- Updates hot water end uses for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
+- Updates hot water usage for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
+- Updates misc/tv plug load usage for operational calculations (i.e., when `NumberofResidents` provided) based on RECS 2020 data.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
