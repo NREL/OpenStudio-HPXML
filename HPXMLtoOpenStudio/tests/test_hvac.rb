@@ -519,7 +519,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
   def test_air_to_air_heat_pump_multistage_backup_system
     ['base-hvac-air-to-air-heat-pump-1-speed-research-features.xml',
-     'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml',
      'base-hvac-air-to-air-heat-pump-var-speed-research-features.xml'].each do |hpxml_path|
       args_hash = {}
       args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_path))
@@ -809,7 +808,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
 
     # Onoff thermostat with detailed setpoints
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-research-features-detailed-setpoints.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-room-ac-only-research-features.xml'))
     model, hpxml, _hpxml_bldg = _test_measure(args_hash)
 
     # Check cooling coil
@@ -825,37 +824,6 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Check EMS
     assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
     _check_onoff_thermostat_EMS(model, clg_coil, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-  end
-
-  def test_air_to_air_heat_pump_2_speed_onoff_thermostat
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-hvac-air-to-air-heat-pump-2-speed-research-features.xml'))
-    model, hpxml, _hpxml_bldg = _test_measure(args_hash)
-
-    # Check cooling coil
-    assert_equal(1, model.getCoilCoolingDXMultiSpeeds.size)
-    clg_coil = model.getCoilCoolingDXMultiSpeeds[0]
-
-    # Check heating coil
-    assert_equal(1, model.getCoilHeatingDXMultiSpeeds.size)
-    htg_coil = model.getCoilHeatingDXMultiSpeeds[0]
-
-    # Check supp heating coil
-    assert_equal(1, model.getCoilHeatingElectricMultiStages.size)
-
-    # E+ thermostat
-    onoff_thermostat_deadband = hpxml.header.hvac_onoff_thermostat_deadband
-    assert_equal(1, model.getThermostatSetpointDualSetpoints.size)
-    thermostat_setpoint = model.getThermostatSetpointDualSetpoints[0]
-    assert_in_epsilon(UnitConversions.convert(onoff_thermostat_deadband, 'deltaF', 'deltaC'), thermostat_setpoint.temperatureDifferenceBetweenCutoutAndSetpoint)
-
-    # Check EMS
-    assert_equal(1, model.getAirLoopHVACUnitarySystems.size)
-    _check_onoff_thermostat_EMS(model, htg_coil, 0.741, 0.379, -0.120, 2.154, -1.737, 0.584)
-    _check_onoff_thermostat_EMS(model, clg_coil, 0.655, 0.512, -0.167, 1.639, -0.999, 0.360)
-    # realistic staging EMS is hard to check values
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{model.getAirLoopHVACUnitarySystems[0].name} realistic cycling", true)
-    assert(!program_values.empty?) # Check EMS program
   end
 
   def test_heat_pump_advanced_defrost
