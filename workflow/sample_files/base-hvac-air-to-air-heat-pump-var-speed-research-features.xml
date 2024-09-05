@@ -10,6 +10,9 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
+        <AdvancedResearchFeatures>
+          <DefrostModelType>advanced</DefrostModelType>
+        </AdvancedResearchFeatures>
       </SimulationControl>
       <UtilityBillScenarios>
         <UtilityBillScenario>
@@ -23,7 +26,7 @@
     <Site>
       <SiteID id='SiteID'/>
       <Address>
-        <StateCode>MN</StateCode>
+        <StateCode>CO</StateCode>
       </Address>
     </Site>
     <ProjectStatus>
