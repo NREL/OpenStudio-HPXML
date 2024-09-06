@@ -4815,11 +4815,15 @@ module HVAC
     power_design = fan_watts_per_cfm * design_airflow_1x
     p_dot_blower = power_design * defrost_power_fraction
     # Based on manufacturer data for ~70 systems ranging from 1.5 to 5 tons with varying efficiency levels
-    p_dot_odu_fan = 44.348 * UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'ton') + 62.452
-    rated_clg_cop = heat_pump.additional_properties.cool_rated_cops[-1]
+    if nominal_cooling_capacity_1x > 18000.0 # > 1.5 tons
+      p_dot_odu_fan = 44.348 * UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'ton') + 62.452
+    else # < 1.5 tons, scale fan power to avoid negative p_dot_defrost
+      p_dot_odu_fan = 128.974 * (nominal_cooling_capacity_1x / 18000.0)
+    end
     q_dot_defrost = UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'W') * capacity_defrost_multiplier
-    cop_defrost = rated_clg_cop * cop_defrost_multiplier
+    cop_defrost = heat_pump.additional_properties.cool_rated_cops[-1] * cop_defrost_multiplier
     p_dot_defrost = (q_dot_defrost / cop_defrost - p_dot_odu_fan + p_dot_blower) * unit_multiplier # p_dot_defrost is used in coil object, which needs to be scaled up for unit multiplier
+
     return q_dot_defrost, p_dot_defrost
   end
 
