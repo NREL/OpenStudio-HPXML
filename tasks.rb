@@ -67,6 +67,7 @@ def create_hpxmls
         measures['BuildResidentialHPXML'][0]['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
         measures['BuildResidentialHPXML'][0]['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
         measures['BuildResidentialHPXML'][0]['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
+        measures['BuildResidentialHPXML'][0]['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
       # Re-generate stochastic schedule CSV?
@@ -507,6 +508,9 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
           if bg_surface.is_a? HPXML::Slab
             new_bg_surface.perimeter_insulation_id = "#{bg_surface.perimeter_insulation_id}#{bg_space.id}"
             new_bg_surface.under_slab_insulation_id = "#{bg_surface.under_slab_insulation_id}#{bg_space.id}"
+            if not new_bg_surface.exterior_horizontal_insulation_id.nil?
+              new_bg_surface.exterior_horizontal_insulation_id = "#{bg_surface.exterior_horizontal_insulation_id}#{bg_space.id}"
+            end
           else
             new_bg_surface.insulation_id = "#{bg_space.id}#{bg_surface.insulation_id}"
           end

@@ -360,6 +360,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(8.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_unit_height_above_grade', false)
+    arg.setDisplayName('Geometry: Unit Height Above Grade')
+    arg.setUnits('ft')
+    arg.setDescription("Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-construction'>HPXML Building Construction</a>) is used.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_garage_width', true)
     arg.setDisplayName('Geometry: Garage Width')
     arg.setUnits('ft')
@@ -632,6 +638,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('ft')
     arg.setDescription('Depth from grade to bottom of vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_r', false)
+    arg.setDisplayName('Slab: Exterior Horizontal Insulation Nominal R-value')
+    arg.setUnits('h-ft^2-R/Btu')
+    arg.setDescription('Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_width', false)
+    arg.setDisplayName('Slab: Exterior Horizontal Insulation Width')
+    arg.setUnits('ft')
+    arg.setDescription('Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_exterior_horizontal_insulation_depth_below_grade', false)
+    arg.setDisplayName('Slab: Exterior Horizontal Insulation Depth Below Grade')
+    arg.setUnits('ft')
+    arg.setDescription('Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('slab_under_insulation_r', true)
@@ -4636,6 +4660,7 @@ module HPXMLFile
     hpxml_bldg.building_construction.number_of_units_in_building = args[:geometry_building_num_units]
     hpxml_bldg.building_construction.year_built = args[:year_built]
     hpxml_bldg.building_construction.number_of_units = args[:unit_multiplier]
+    hpxml_bldg.building_construction.unit_height_above_grade = args[:geometry_unit_height_above_grade]
   end
 
   # Set building header properties, including:
@@ -5163,9 +5188,12 @@ module HPXMLFile
                            area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2'),
                            thickness: args[:slab_thickness],
                            exposed_perimeter: exposed_perimeter,
-                           perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
-                           under_slab_insulation_width: under_slab_insulation_width,
                            perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
+                           perimeter_insulation_depth: args[:slab_perimeter_insulation_depth],
+                           exterior_horizontal_insulation_r_value: args[:slab_exterior_horizontal_insulation_r],
+                           exterior_horizontal_insulation_width: args[:slab_exterior_horizontal_insulation_width],
+                           exterior_horizontal_insulation_depth_below_grade: args[:slab_exterior_horizontal_insulation_depth_below_grade],
+                           under_slab_insulation_width: under_slab_insulation_width,
                            under_slab_insulation_r_value: args[:slab_under_insulation_r],
                            under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
                            carpet_fraction: args[:slab_carpet_fraction],
@@ -7319,13 +7347,16 @@ module HPXMLFile
         end
       end
       surf.id = "#{surf_name}#{indexes[surf_name]}"
-      if surf.respond_to? :insulation_id
+      if surf.respond_to?(:insulation_id) && (not surf.insulation_id.nil?)
         surf.insulation_id = "#{surf_name}#{indexes[surf_name]}Insulation"
       end
-      if surf.respond_to? :perimeter_insulation_id
+      if surf.respond_to?(:perimeter_insulation_id) && (not surf.perimeter_insulation_id.nil?)
         surf.perimeter_insulation_id = "#{surf_name}#{indexes[surf_name]}PerimeterInsulation"
       end
-      if surf.respond_to? :under_slab_insulation_id
+      if surf.respond_to?(:exterior_horizontal_insulation_id) && (not surf.exterior_horizontal_insulation_id.nil?)
+        surf.exterior_horizontal_insulation_id = "#{surf_name}#{indexes[surf_name]}ExteriorHorizontalInsulation"
+      end
+      if surf.respond_to?(:under_slab_insulation_id) && (not surf.under_slab_insulation_id.nil?)
         surf.under_slab_insulation_id = "#{surf_name}#{indexes[surf_name]}UnderSlabInsulation"
       end
     end

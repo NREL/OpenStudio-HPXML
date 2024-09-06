@@ -178,7 +178,7 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                             'invalid-id2' => ["Element 'SystemIdentifier': The attribute 'id' is required but missing."],
                             'invalid-input-parameters' => ["Element 'Transaction': [facet 'enumeration'] The value 'modify' is not an element of the set {'create', 'update'}.",
                                                            "Element 'SiteType': [facet 'enumeration'] The value 'mountain' is not an element of the set {'rural', 'suburban', 'urban'}.",
-                                                           "Element 'Year': [facet 'enumeration'] The value '2020' is not an element of the set {'2021', '2018', '2015', '2012', '2009', '2006', '2003'}.",
+                                                           "Element 'Year': [facet 'enumeration'] The value '2020' is not an element of the set {'2024', '2021', '2018', '2015', '2012', '2009', '2006', '2003'}.",
                                                            "Element 'Azimuth': [facet 'maxExclusive'] The value '365' must be less than '360'.",
                                                            "Element 'RadiantBarrierGrade': [facet 'maxInclusive'] The value '4' is greater than the maximum value allowed ('3').",
                                                            "Element 'EnergyFactor': [facet 'maxInclusive'] The value '5.1' is greater than the maximum value allowed ('5')."],
@@ -860,8 +860,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
                               'plug-load-type-tv-crt' => ["Plug load type 'TV CRT' is not currently handled, the plug load will not be modeled."],
                               'plug-load-type-tv-plasma' => ["Plug load type 'TV plasma' is not currently handled, the plug load will not be modeled."],
                               'portable-spa' => ['Portable spa is not currently handled, the portable spa will not be modeled.'],
-                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
+                              'slab-ext-horiz-insul-without-perim-insul' => ['There is ExteriorHorizontalInsulation but no PerimeterInsulation, this may indicate an input error.'],
                               'slab-large-exposed-perimeter' => ['Slab exposed perimeter is more than twice the slab area, this may indicate an input error.'],
+                              'slab-zero-exposed-perimeter' => ['Slab has zero exposed perimeter, this may indicate an input error.'],
                               'unit-multiplier' => ['NumberofUnits is greater than 1, indicating that the HPXML Building represents multiple dwelling units; simulation outputs will reflect this unit multiplier.'],
                               'wrong-units' => ['Thickness is greater than 12 inches; this may indicate incorrect units.',
                                                 'Thickness is less than 1 inch; this may indicate incorrect units.',
@@ -1009,6 +1010,9 @@ class HPXMLtoOpenStudioValidationTest < Minitest::Test
       elsif ['slab-zero-exposed-perimeter'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.slabs[0].exposed_perimeter = 0
+      elsif ['slab-ext-horiz-insul-without-perim-insul'].include? warning_case
+        hpxml, hpxml_bldg = _create_hpxml('base-foundation-slab-exterior-horizontal-insulation.xml')
+        hpxml_bldg.slabs[0].perimeter_insulation_r_value = 0
       elsif ['slab-large-exposed-perimeter'].include? warning_case
         hpxml, hpxml_bldg = _create_hpxml('base.xml')
         hpxml_bldg.slabs[0].exposed_perimeter = hpxml_bldg.slabs[0].area * 2 + 1

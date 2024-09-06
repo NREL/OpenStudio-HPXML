@@ -1390,9 +1390,14 @@ module HVACSizing
         slab_is_insulated = false
         if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
-        elsif slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
+        end
+        if slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
           slab_is_insulated = true
-        elsif slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
+        end
+        if slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
+          slab_is_insulated = true
+        end
+        if slab.exterior_horizontal_insulation_width > 0 && slab.exterior_horizontal_insulation_r_value > 0
           slab_is_insulated = true
         end
 
@@ -1427,8 +1432,7 @@ module HVACSizing
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: hpxml_bldg.header.manualj_infiltration_method)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
       infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-      sla = infil_values[:sla] * infil_values[:a_ext]
-      ela = sla * cfa
+      ela = infil_values[:sla] * cfa * infil_values[:a_ext] # Account for exterior exposure
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
       shielding_class = hpxml_bldg.header.manualj_infiltration_shielding_class
@@ -1440,6 +1444,18 @@ module HVACSizing
       ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
       windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
       windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml_bldg.building_construction.residential_facility_type
+        if hpxml_bldg.building_construction.unit_height_above_grade > 0
+          # Scale default wind speed for height (a_exponent from Figure A15-1)
+          a_exponent = { HPXML::ShieldingNormal => 0.22,
+                         HPXML::ShieldingExposed => 0.14,
+                         HPXML::ShieldingWellShielded => 0.33 }[hpxml_bldg.site.shielding_of_home]
+          estimated_story = (hpxml_bldg.building_construction.unit_height_above_grade + infil_values[:height]) / infil_values[:height]
+          windspeed_cooling_mph *= estimated_story**a_exponent
+          windspeed_heating_mph *= estimated_story**a_exponent
+        end
+      end
 
       # Calculate infiltration airflow rates
       icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
@@ -4290,31 +4306,36 @@ module HVACSizing
       u_effective = []
       for radius in 0..path_radius
         spl = [Math::PI * radius - 1, 0].max # soil path length (SPL)
-
+        r_ins = 0.0
         # Concrete, gravel, and insulation
         if radius == 0
           r_concrete = 0.0
           r_gravel = 0.0 # No gravel on edge
           if slab.perimeter_insulation_depth > 0
             r_ins = slab.perimeter_insulation_r_value # Insulation on edge
-          else
-            r_ins = 0.0
           end
         else
           r_concrete = Material.Concrete(slab.thickness).rvalue
           r_gravel = [slab_r_gravel_per_inch * (12.0 - slab.thickness), 0].max
           if slab.under_slab_insulation_spans_entire_slab
-            r_ins = slab.under_slab_insulation_r_value
-          elsif radius <= slab.under_slab_insulation_width && radius <= slab.perimeter_insulation_depth
-            r_ins = slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
+            r_ins += slab.under_slab_insulation_r_value
           elsif radius <= slab.under_slab_insulation_width
-            r_ins = slab.under_slab_insulation_r_value
-          elsif radius <= slab.perimeter_insulation_depth
-            r_ins = slab.perimeter_insulation_r_value
-          else
-            r_ins = 0.0
+            r_ins += slab.under_slab_insulation_r_value
+          end
+          if radius <= slab.perimeter_insulation_depth
+            r_ins += slab.perimeter_insulation_r_value
+          end
+          if slab.exterior_horizontal_insulation_r_value > 0
+            if radius >= slab.exterior_horizontal_insulation_depth_below_grade
+              hypotenuse = Math.sqrt(slab.exterior_horizontal_insulation_depth_below_grade**2 + slab.exterior_horizontal_insulation_width**2)
+              if radius <= hypotenuse
+                r_ins += slab.exterior_horizontal_insulation_r_value
+              end
+            end
           end
         end
+
+
 
         # Air Films = Indoor Finish + Indoor Air Film + Exposed Air Film (Figure A12-6 pg. 517)
         r_air_film = 0.05 + 0.92 + 0.17

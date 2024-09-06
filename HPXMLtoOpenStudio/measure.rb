@@ -1321,10 +1321,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
     soil_k_in = UnitConversions.convert(@hpxml_bldg.site.ground_conductivity, 'ft', 'in')
 
+    ext_horiz_r = slab.exterior_horizontal_insulation_r_value
+    ext_horiz_width = slab.exterior_horizontal_insulation_width
+    ext_horiz_depth = slab.exterior_horizontal_insulation_depth_below_grade
+
     Constructions.apply_foundation_slab(model, surface, "#{slab.id} construction",
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
-                                        exposed_length, mat_carpet, soil_k_in, kiva_foundation)
+                                        exposed_length, mat_carpet, soil_k_in, kiva_foundation, ext_horiz_r, ext_horiz_width, ext_horiz_depth)
 
     kiva_foundation = surface.adjacentFoundation.get
 
@@ -3497,13 +3501,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   #
   # @return [nil]
   def set_foundation_and_walls_top()
-    @foundation_top = 0
-    @hpxml_bldg.floors.each do |floor|
-      # Keeping the floor at ground level for ASHRAE 140 tests yields the expected results
-      if floor.is_floor && floor.is_exterior && !@apply_ashrae140_assumptions
-        @foundation_top = 2.0
-      end
-    end
+    @foundation_top = [@hpxml_bldg.building_construction.unit_height_above_grade, 0].max
     @hpxml_bldg.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
       @foundation_top = top if top > @foundation_top
