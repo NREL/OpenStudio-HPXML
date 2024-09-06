@@ -1,36 +1,60 @@
 # frozen_string_literal: true
 
-class HPXMLDefaults
-  # Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
-  # child object where custom information can be attached to the object without
-  # being written to the HPXML file. This will allow the custom information to
-  # be used by subsequent calculations/logic.
-
-  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, epw_file: nil, schedules_file: nil, convert_shared_systems: true)
+# Collection of methods related to defaulting optional inputs in the HPXML
+# that were not provided.
+#
+# Note: Each HPXML object (e.g., HPXML::Wall) has an additional_properties
+# child object that can be used to store custom information on the object without
+# being written to the HPXML file. This allows the custom information to
+# be used by downstream calculations/logic.
+module HPXMLDefaults
+  # Assigns default values to the HPXML Building object for optional HPXML inputs
+  # that are not provided.
+  #
+  # When a default value is assigned to an HPXML object property (like wall.azimuth),
+  # the corresponding foo_isdefaulted (e.g., wall.azimuth_isdefaulted) should be set
+  # to true so that the in.xml that is exported includes 'dataSource="software"'
+  # attributes for all defaulted values. This allows the user to easily observe which
+  # values were defaulted and what default values were used.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
+  # @param output_format [String] Detailed HVAC sizing output file format ('csv', 'json', or 'msgpack')
+  # @return [nil]
+  def self.apply(runner, hpxml, hpxml_bldg, eri_version, weather, schedules_file: nil, convert_shared_systems: true,
+                 design_load_details_output_file_path: nil, output_format: 'csv')
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
-    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
-    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
 
     # Check for presence of fuels once
-    has_fuel = hpxml_bldg.has_fuels(Constants.FossilFuels, hpxml.to_doc)
+    has_fuel = hpxml_bldg.has_fuels(hpxml.to_doc)
 
-    apply_header(hpxml.header, epw_file)
-    apply_building(hpxml_bldg, epw_file)
+    add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+
+    @default_schedules_csv_data = get_default_schedules_csv_data()
+
+    apply_header(hpxml.header, hpxml_bldg, weather)
+    apply_building(hpxml_bldg, weather)
     apply_emissions_scenarios(hpxml.header, has_fuel)
     apply_utility_bill_scenarios(runner, hpxml.header, hpxml_bldg, has_fuel)
     apply_building_header(hpxml.header, hpxml_bldg, weather)
-    apply_building_header_sizing(hpxml_bldg, weather, nbeds)
+    apply_building_header_sizing(runner, hpxml_bldg, weather, nbeds)
     apply_site(hpxml_bldg)
     apply_neighbor_buildings(hpxml_bldg)
     apply_building_occupancy(hpxml_bldg, schedules_file)
     apply_building_construction(hpxml_bldg, cfa, nbeds)
-    apply_climate_and_risk_zones(hpxml_bldg, epw_file)
+    apply_zone_spaces(hpxml_bldg)
+    apply_climate_and_risk_zones(hpxml_bldg, weather)
     apply_attics(hpxml_bldg)
     apply_foundations(hpxml_bldg)
-    apply_infiltration(hpxml_bldg)
     apply_roofs(hpxml_bldg)
     apply_rim_joists(hpxml_bldg)
     apply_walls(hpxml_bldg)
@@ -45,11 +69,12 @@ class HPXMLDefaults
     apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
+    apply_infiltration(hpxml_bldg)
     apply_hvac_location(hpxml_bldg)
     apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
     apply_water_heaters(hpxml_bldg, nbeds, eri_version, schedules_file)
     apply_flue_or_chimney(hpxml_bldg)
-    apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, has_uncond_bsmnt, has_cond_bsmnt, schedules_file)
+    apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, schedules_file)
     apply_water_fixtures(hpxml_bldg, schedules_file)
     apply_solar_thermal_systems(hpxml_bldg)
     apply_appliances(hpxml_bldg, nbeds, eri_version, schedules_file)
@@ -63,15 +88,27 @@ class HPXMLDefaults
     apply_batteries(hpxml_bldg)
 
     # Do HVAC sizing after all other defaults have been applied
-    apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
+    apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
 
-    # default detailed performance has to be after sizing to have autosized capacity information
+    # Default detailed performance has to be after sizing to have autosized capacity information
     apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
+
+    cleanup_zones_spaces(hpxml_bldg)
   end
 
+  # Returns a list of four azimuths (facing each direction). Determined based
+  # on the primary azimuth, as defined by the azimuth with the largest surface
+  # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+  # surfaces that may not have an azimuth defined (e.g., walls).
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Array<Double>] Azimuths for the four sides of the home
   def self.get_default_azimuths(hpxml_bldg)
-    def self.sanitize_azimuth(azimuth)
-      # Ensure 0 <= orientation < 360
+    # Ensures 0 <= azimuth < 360
+    #
+    # @param azimuth [Double] Azimuth to unspin
+    # @return [Double] Resulting azimuth
+    def self.unspin_azimuth(azimuth)
       while azimuth < 0
         azimuth += 360
       end
@@ -81,13 +118,10 @@ class HPXMLDefaults
       return azimuth
     end
 
-    # Returns a list of four azimuths (facing each direction). Determined based
-    # on the primary azimuth, as defined by the azimuth with the largest surface
-    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
-    # surfaces that may not have an azimuth defined (e.g., walls).
     azimuth_areas = {}
-    (hpxml_bldg.roofs + hpxml_bldg.rim_joists + hpxml_bldg.walls + hpxml_bldg.foundation_walls +
-     hpxml_bldg.windows + hpxml_bldg.skylights + hpxml_bldg.doors).each do |surface|
+    (hpxml_bldg.surfaces + hpxml_bldg.subsurfaces).each do |surface|
+      next unless surface.respond_to?(:azimuth)
+
       az = surface.azimuth
       next if az.nil?
 
@@ -100,14 +134,45 @@ class HPXMLDefaults
       primary_azimuth = azimuth_areas.max_by { |_k, v| v }[0]
     end
     return [primary_azimuth,
-            sanitize_azimuth(primary_azimuth + 90),
-            sanitize_azimuth(primary_azimuth + 180),
-            sanitize_azimuth(primary_azimuth + 270)].sort
+            unspin_azimuth(primary_azimuth + 90),
+            unspin_azimuth(primary_azimuth + 180),
+            unspin_azimuth(primary_azimuth + 270)].sort
   end
 
-  private
+  # Automatically adds a single conditioned zone/space to the HPXML Building if not provided.
+  # Simplifies the HVAC autosizing code so that it can operate on zones/spaces whether the HPXML
+  # file includes them or not.
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @return [nil]
+  def self.add_zones_spaces_if_needed(hpxml, hpxml_bldg, cfa)
+    bldg_idx = hpxml.buildings.index(hpxml_bldg)
+    if hpxml_bldg.conditioned_zones.empty?
+      hpxml_bldg.zones.add(id: "#{Constants::AutomaticallyAdded}Zone#{bldg_idx + 1}",
+                           zone_type: HPXML::ZoneTypeConditioned)
+      hpxml_bldg.hvac_systems.each do |hvac_system|
+        hvac_system.attached_to_zone_idref = hpxml_bldg.zones[-1].id
+      end
+      hpxml_bldg.zones[-1].spaces.add(id: "#{Constants::AutomaticallyAdded}Space#{bldg_idx + 1}",
+                                      floor_area: cfa)
+      hpxml_bldg.surfaces.each do |surface|
+        next unless HPXML::conditioned_locations_this_unit.include? surface.interior_adjacent_to
+        next if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
 
-  def self.apply_header(hpxml_header, epw_file)
+        surface.attached_to_space_idref = hpxml_bldg.zones[-1].spaces[-1].id
+      end
+    end
+  end
+
+  # Assigns default values for omitted optional inputs in the HPXML::Header object
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [nil]
+  def self.apply_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_header.timestep.nil?
       hpxml_header.timestep = 60
       hpxml_header.timestep_isdefaulted = true
@@ -130,7 +195,7 @@ class HPXMLDefaults
       hpxml_header.sim_end_day_isdefaulted = true
     end
 
-    sim_calendar_year = Location.get_sim_calendar_year(hpxml_header.sim_calendar_year, epw_file)
+    sim_calendar_year = Location.get_sim_calendar_year(hpxml_header.sim_calendar_year, weather)
     if not hpxml_header.sim_calendar_year.nil?
       if hpxml_header.sim_calendar_year != sim_calendar_year
         hpxml_header.sim_calendar_year = sim_calendar_year
@@ -142,8 +207,13 @@ class HPXMLDefaults
     end
 
     if hpxml_header.temperature_capacitance_multiplier.nil?
-      hpxml_header.temperature_capacitance_multiplier = 1.0
+      hpxml_header.temperature_capacitance_multiplier = 7.0
       hpxml_header.temperature_capacitance_multiplier_isdefaulted = true
+    end
+
+    if hpxml_header.defrost_model_type.nil? && (hpxml_bldg.heat_pumps.any? { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit, HPXML::HVACTypeHeatPumpRoom, HPXML::HVACTypeHeatPumpPTHP].include? hp.heat_pump_type })
+      hpxml_header.defrost_model_type = HPXML::AdvancedResearchDefrostModelTypeStandard
+      hpxml_header.defrost_model_type_isdefaulted = true
     end
 
     hpxml_header.unavailable_periods.each do |unavailable_period|
@@ -162,7 +232,15 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building_header_sizing(hpxml_bldg, weather, nbeds)
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
+  # specific to HVAC equipment sizing
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [nil]
+  def self.apply_building_header_sizing(runner, hpxml_bldg, weather, nbeds)
     if hpxml_bldg.header.manualj_heating_design_temp.nil?
       hpxml_bldg.header.manualj_heating_design_temp = weather.design.HeatingDrybulb.round(2)
       hpxml_bldg.header.manualj_heating_design_temp_isdefaulted = true
@@ -179,19 +257,19 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_heating_setpoint.nil?
-      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_heating_setpoint = 70.0 # F, per Manual J
       hpxml_bldg.header.manualj_heating_setpoint_isdefaulted = true
     end
 
     if hpxml_bldg.header.manualj_cooling_setpoint.nil?
-      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # deg-F, per Manual J
+      hpxml_bldg.header.manualj_cooling_setpoint = 75.0 # F, per Manual J
       hpxml_bldg.header.manualj_cooling_setpoint_isdefaulted = true
     end
 
     if hpxml_bldg.header.manualj_humidity_setpoint.nil?
       hpxml_bldg.header.manualj_humidity_setpoint = 0.5 # 50%
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      p_psi = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, p_psi)
       if HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling) < 0
         # Dry summer climate per Manual J 18-1 Design Grains
         hpxml_bldg.header.manualj_humidity_setpoint = 0.45 # 45%
@@ -200,32 +278,87 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.header.manualj_humidity_difference.nil?
-      p_atm = UnitConversions.convert(Psychrometrics.Pstd_fZ(hpxml_bldg.elevation), 'psi', 'atm')
-      hr_indoor_cooling = HVACSizing.calculate_indoor_hr(hpxml_bldg.header.manualj_humidity_setpoint, hpxml_bldg.header.manualj_cooling_setpoint, p_atm)
+      p_psi = Psychrometrics.Pstd_fZ(hpxml_bldg.elevation)
+      hr_indoor_cooling = Psychrometrics.w_fT_R_P(hpxml_bldg.header.manualj_cooling_setpoint, hpxml_bldg.header.manualj_humidity_setpoint, p_psi)
       hpxml_bldg.header.manualj_humidity_difference = HVACSizing.calculate_design_grains(weather.design.CoolingHumidityRatio, hr_indoor_cooling).round(1)
       hpxml_bldg.header.manualj_humidity_difference_isdefaulted = true
     end
 
+    sum_space_manualj_internal_loads_sensible = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_sensible.to_f }.sum.round)
     if hpxml_bldg.header.manualj_internal_loads_sensible.nil?
-      if hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
+      if sum_space_manualj_internal_loads_sensible > 0
+        hpxml_bldg.header.manualj_internal_loads_sensible = sum_space_manualj_internal_loads_sensible
+      elsif hpxml_bldg.refrigerators.size + hpxml_bldg.freezers.size <= 1
         hpxml_bldg.header.manualj_internal_loads_sensible = 2400.0 # Btuh, per Manual J
       else
         hpxml_bldg.header.manualj_internal_loads_sensible = 3600.0 # Btuh, per Manual J
       end
       hpxml_bldg.header.manualj_internal_loads_sensible_isdefaulted = true
     end
-
-    if hpxml_bldg.header.manualj_internal_loads_latent.nil?
-      hpxml_bldg.header.manualj_internal_loads_latent = 0.0 # Btuh
-      hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    if sum_space_manualj_internal_loads_sensible == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_sensible = (hpxml_bldg.header.manualj_internal_loads_sensible * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_sensible_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_internal_loads_sensible - sum_space_manualj_internal_loads_sensible).abs > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsSensible (#{hpxml_bldg.header.manualj_internal_loads_sensible}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_sensible}).")
     end
 
+    sum_space_manualj_internal_loads_latent = Float(hpxml_bldg.conditioned_spaces.map { |space| space.manualj_internal_loads_latent.to_f }.sum.round)
+    if hpxml_bldg.header.manualj_internal_loads_latent.nil?
+      hpxml_bldg.header.manualj_internal_loads_latent = sum_space_manualj_internal_loads_latent # Btuh
+      hpxml_bldg.header.manualj_internal_loads_latent_isdefaulted = true
+    end
+    if sum_space_manualj_internal_loads_latent == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_internal_loads_latent = (hpxml_bldg.header.manualj_internal_loads_latent * space.floor_area / total_floor_area).round
+        space.manualj_internal_loads_latent_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_internal_loads_latent - sum_space_manualj_internal_loads_latent).abs > 50 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/InternalLoadsLatent (#{hpxml_bldg.header.manualj_internal_loads_latent}) does not match sum of conditioned spaces (#{sum_space_manualj_internal_loads_latent}).")
+    end
+
+    sum_space_manualj_num_occupants = hpxml_bldg.conditioned_spaces.map { |space| space.manualj_num_occupants.to_f }.sum.round
     if hpxml_bldg.header.manualj_num_occupants.nil?
-      hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      if sum_space_manualj_num_occupants > 0
+        hpxml_bldg.header.manualj_num_occupants = sum_space_manualj_num_occupants
+      else
+        hpxml_bldg.header.manualj_num_occupants = nbeds + 1 # Per Manual J
+      end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
+    end
+    if sum_space_manualj_num_occupants == 0
+      # Area weighted assignment
+      total_floor_area = hpxml_bldg.conditioned_spaces.map { |space| space.floor_area }.sum
+      hpxml_bldg.conditioned_spaces.each do |space|
+        space.manualj_num_occupants = (hpxml_bldg.header.manualj_num_occupants * space.floor_area / total_floor_area).round(2)
+        space.manualj_num_occupants_isdefaulted = true
+      end
+    elsif (hpxml_bldg.header.manualj_num_occupants - sum_space_manualj_num_occupants).abs >= 1 # Tolerance for rounding
+      runner.registerWarning("ManualJInputs/NumberofOccupants (#{hpxml_bldg.header.manualj_num_occupants}) does not match sum of conditioned spaces (#{sum_space_manualj_num_occupants}).")
+    end
+
+    if hpxml_bldg.header.manualj_infiltration_method.nil?
+      infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
+      if (not infil_measurement.air_leakage.nil?) || (not infil_measurement.effective_leakage_area.nil?)
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodBlowerDoor
+      else
+        hpxml_bldg.header.manualj_infiltration_method = HPXML::ManualJInfiltrationMethodDefaultTable
+      end
+      hpxml_bldg.header.manualj_infiltration_method_isdefaulted = true
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingHeader object
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [nil]
   def self.apply_building_header(hpxml_header, hpxml_bldg, weather)
     if hpxml_bldg.header.natvent_days_per_week.nil?
       hpxml_bldg.header.natvent_days_per_week = 3
@@ -251,7 +384,7 @@ class HPXMLDefaults
       if not weather.nil?
         # Default based on Building America seasons
         _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
-        begin_month, begin_day, end_month, end_day = Schedule.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
+        begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
         if not begin_month.nil? # Check if no summer
           hpxml_bldg.header.shading_summer_begin_month = begin_month
           hpxml_bldg.header.shading_summer_begin_day = begin_day
@@ -266,6 +399,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::EmissionsScenarios objects
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param has_fuel [Hash] Map of HPXML fuel type => boolean of whether fuel type is used
+  # @return [nil]
   def self.apply_emissions_scenarios(hpxml_header, has_fuel)
     hpxml_header.emissions_scenarios.each do |scenario|
       # Electricity
@@ -342,6 +480,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::UtilityBillScenarios objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param has_fuel [Hash] Map of HPXML fuel type => boolean of whether fuel type is used
+  # @return [nil]
   def self.apply_utility_bill_scenarios(runner, hpxml_header, hpxml_bldg, has_fuel)
     hpxml_header.utility_bill_scenarios.each do |scenario|
       if scenario.elec_tariff_filepath.nil?
@@ -394,7 +539,7 @@ class HPXMLDefaults
           scenario.coal_fixed_charge_isdefaulted = true
         end
         if scenario.coal_marginal_rate.nil?
-          scenario.coal_marginal_rate = 0.015
+          scenario.coal_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeCoal, nil)
           scenario.coal_marginal_rate_isdefaulted = true
         end
       end
@@ -405,7 +550,7 @@ class HPXMLDefaults
           scenario.wood_fixed_charge_isdefaulted = true
         end
         if scenario.wood_marginal_rate.nil?
-          scenario.wood_marginal_rate = 0.015
+          scenario.wood_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeWoodCord, nil)
           scenario.wood_marginal_rate_isdefaulted = true
         end
       end
@@ -416,7 +561,7 @@ class HPXMLDefaults
           scenario.wood_pellets_fixed_charge_isdefaulted = true
         end
         if scenario.wood_pellets_marginal_rate.nil?
-          scenario.wood_pellets_marginal_rate = 0.015
+          scenario.wood_pellets_marginal_rate, _ = UtilityBills.get_rates_from_eia_data(runner, hpxml_bldg.state_code, HPXML::FuelTypeWoodPellets, nil)
           scenario.wood_pellets_marginal_rate_isdefaulted = true
         end
       end
@@ -453,7 +598,12 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_building(hpxml_bldg, epw_file)
+  # Assigns default values for omitted optional inputs in the HPXML::Building object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [nil]
+  def self.apply_building(hpxml_bldg, weather)
     if hpxml_bldg.site.soil_type.nil? && hpxml_bldg.site.ground_conductivity.nil? && hpxml_bldg.site.ground_diffusivity.nil?
       hpxml_bldg.site.soil_type = HPXML::SiteSoilTypeUnknown
       hpxml_bldg.site.soil_type_isdefaulted = true
@@ -512,7 +662,7 @@ class HPXMLDefaults
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
       elsif hpxml_bldg.site.soil_type == HPXML::SiteSoilTypeUnknown
-        hpxml_bldg.site.ground_conductivity = 1.0
+        hpxml_bldg.site.ground_conductivity = 1.0 # ANSI/RESNET/ICC 301-2022 Addendum C
         hpxml_bldg.site.ground_diffusivity = 0.0208
         hpxml_bldg.site.ground_conductivity_isdefaulted = true
         hpxml_bldg.site.ground_diffusivity_isdefaulted = true
@@ -533,29 +683,29 @@ class HPXMLDefaults
       hpxml_bldg.dst_enabled_isdefaulted = true
     end
 
-    if not epw_file.nil?
+    if not weather.nil?
 
       if hpxml_bldg.state_code.nil?
-        hpxml_bldg.state_code = get_default_state_code(hpxml_bldg.state_code, epw_file)
+        hpxml_bldg.state_code = get_default_state_code(hpxml_bldg.state_code, weather)
         hpxml_bldg.state_code_isdefaulted = true
       end
 
       if hpxml_bldg.city.nil?
-        hpxml_bldg.city = epw_file.city
+        hpxml_bldg.city = weather.header.City
         hpxml_bldg.city_isdefaulted = true
       end
 
       if hpxml_bldg.time_zone_utc_offset.nil?
-        hpxml_bldg.time_zone_utc_offset = get_default_time_zone(hpxml_bldg.time_zone_utc_offset, epw_file)
+        hpxml_bldg.time_zone_utc_offset = get_default_time_zone(hpxml_bldg.time_zone_utc_offset, weather)
         hpxml_bldg.time_zone_utc_offset_isdefaulted = true
       end
 
       if hpxml_bldg.dst_enabled
         if hpxml_bldg.dst_begin_month.nil? || hpxml_bldg.dst_begin_day.nil? || hpxml_bldg.dst_end_month.nil? || hpxml_bldg.dst_end_day.nil?
-          if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
+          if (not weather.header.DSTStartDate.nil?) && (not weather.header.DSTEndDate.nil?)
             # Use weather file DST dates if available
-            dst_start_date = epw_file.daylightSavingStartDate.get
-            dst_end_date = epw_file.daylightSavingEndDate.get
+            dst_start_date = weather.header.DSTStartDate
+            dst_end_date = weather.header.DSTEndDate
             hpxml_bldg.dst_begin_month = dst_start_date.monthOfYear.value
             hpxml_bldg.dst_begin_day = dst_start_date.dayOfMonth
             hpxml_bldg.dst_end_month = dst_end_date.monthOfYear.value
@@ -575,22 +725,26 @@ class HPXMLDefaults
       end
 
       if hpxml_bldg.elevation.nil?
-        hpxml_bldg.elevation = UnitConversions.convert(epw_file.elevation, 'm', 'ft').round(1)
+        hpxml_bldg.elevation = weather.header.Elevation.round(1)
         hpxml_bldg.elevation_isdefaulted = true
       end
 
       if hpxml_bldg.latitude.nil?
-        hpxml_bldg.latitude = get_default_latitude(hpxml_bldg.latitude, epw_file)
+        hpxml_bldg.latitude = get_default_latitude(hpxml_bldg.latitude, weather)
         hpxml_bldg.latitude_isdefaulted = true
       end
 
       if hpxml_bldg.longitude.nil?
-        hpxml_bldg.longitude = get_default_longitude(hpxml_bldg.longitude, epw_file)
+        hpxml_bldg.longitude = get_default_longitude(hpxml_bldg.longitude, weather)
         hpxml_bldg.longitude_isdefaulted = true
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Site object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_site(hpxml_bldg)
     if hpxml_bldg.site.site_type.nil?
       hpxml_bldg.site.site_type = HPXML::SiteTypeSuburban
@@ -598,7 +752,13 @@ class HPXMLDefaults
     end
 
     if hpxml_bldg.site.shielding_of_home.nil?
-      hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include?(hpxml_bldg.building_construction.residential_facility_type)
+        # Shielding Class 5 is ACCA MJ8 default for Table 5B/5E for townhouses and condos
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
+      else
+        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET 301 default
+        hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
+      end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
     end
 
@@ -606,10 +766,12 @@ class HPXMLDefaults
       hpxml_bldg.site.ground_conductivity = 1.0 # Btu/hr-ft-F
       hpxml_bldg.site.ground_conductivity_isdefaulted = true
     end
-
-    hpxml_bldg.site.additional_properties.aim2_shelter_coeff = Airflow.get_aim2_shelter_coefficient(hpxml_bldg.site.shielding_of_home)
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::NeighborBuildings objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_neighbor_buildings(hpxml_bldg)
     hpxml_bldg.neighbor_buildings.each do |neighbor_building|
       if neighbor_building.azimuth.nil?
@@ -623,25 +785,30 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingOccupancy object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_building_occupancy(hpxml_bldg, schedules_file)
-    if hpxml_bldg.building_occupancy.number_of_residents.nil?
-      hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms = hpxml_bldg.building_construction.number_of_bedrooms
-    else
-      # Set adjusted number of bedrooms for operational calculation; this is an adjustment on
+    if not hpxml_bldg.building_occupancy.number_of_residents.nil?
+      # Set equivalent number of bedrooms for operational calculation; this is an adjustment on
       # ANSI 301 or Building America equations, which are based on number of bedrooms.
-      hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms = get_nbeds_adjusted_for_operational_calculation(hpxml_bldg)
+      hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms = get_equivalent_nbeds_for_operational_calculation(hpxml_bldg)
+    else
+      hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms = hpxml_bldg.building_construction.number_of_bedrooms
     end
     schedules_file_includes_occupants = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:Occupants].name))
     if hpxml_bldg.building_occupancy.weekday_fractions.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.weekday_fractions = Schedule.OccupantsWeekdayFractions
+      hpxml_bldg.building_occupancy.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['WeekdayScheduleFractions']
       hpxml_bldg.building_occupancy.weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.weekend_fractions.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.weekend_fractions = Schedule.OccupantsWeekendFractions
+      hpxml_bldg.building_occupancy.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['WeekendScheduleFractions']
       hpxml_bldg.building_occupancy.weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.monthly_multipliers.nil? && !schedules_file_includes_occupants
-      hpxml_bldg.building_occupancy.monthly_multipliers = Schedule.OccupantsMonthlyMultipliers
+      hpxml_bldg.building_occupancy.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Occupants].name]['MonthlyScheduleMultipliers']
       hpxml_bldg.building_occupancy.monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_usage_multiplier.nil?
@@ -650,19 +817,25 @@ class HPXMLDefaults
     end
     schedules_file_includes_water = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:GeneralWaterUse].name))
     if hpxml_bldg.building_occupancy.general_water_use_weekday_fractions.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = Schedule.GeneralWaterUseWeekdayFractions
+      hpxml_bldg.building_occupancy.general_water_use_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekdayScheduleFractions']
       hpxml_bldg.building_occupancy.general_water_use_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = Schedule.GeneralWaterUseWeekendFractions
+      hpxml_bldg.building_occupancy.general_water_use_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseWeekendScheduleFractions']
       hpxml_bldg.building_occupancy.general_water_use_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil? && !schedules_file_includes_water
-      hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = Schedule.GeneralWaterUseMonthlyMultipliers
+      hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:GeneralWaterUse].name]['GeneralWaterUseMonthlyScheduleMultipliers']
       hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers_isdefaulted = true
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::BuildingConstruction object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [nil]
   def self.apply_building_construction(hpxml_bldg, cfa, nbeds)
     cond_crawl_volume = hpxml_bldg.inferred_conditioned_crawlspace_volume()
     if hpxml_bldg.building_construction.average_ceiling_height.nil?
@@ -684,9 +857,27 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_climate_and_risk_zones(hpxml_bldg, epw_file)
-    if (not epw_file.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
-      zone = Location.get_climate_zone_iecc(epw_file.wmoNumber)
+  # Assigns default values for omitted optional inputs in the HPXML::Zones and HPXML::Spaces objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.apply_zone_spaces(hpxml_bldg)
+    hpxml_bldg.conditioned_spaces.each do |space|
+      if space.fenestration_load_procedure.nil?
+        space.fenestration_load_procedure = HPXML::SpaceFenestrationLoadProcedureStandard
+        space.fenestration_load_procedure_isdefaulted = true
+      end
+    end
+  end
+
+  # Assigns default values for omitted optional inputs in the HPXML::ClimateandRiskZones object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [nil]
+  def self.apply_climate_and_risk_zones(hpxml_bldg, weather)
+    if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
+      zone = Location.get_climate_zone_iecc(weather.header.WMONumber)
       if not zone.nil?
         hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: zone,
                                                                  year: 2006,
@@ -696,42 +887,90 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Attic objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_attics(hpxml_bldg)
-    hpxml_bldg.attics.each do |attic|
-      next unless attic.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationAtticUnvented)
+      unvented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeUnvented }
+      if unvented_attics.empty?
+        hpxml_bldg.attics.add(id: 'UnventedAttic',
+                              attic_type: HPXML::AtticTypeUnvented)
+        unvented_attics << hpxml_bldg.attics[-1]
+      end
+      unvented_attics.each do |unvented_attic|
+        next unless unvented_attic.within_infiltration_volume.nil?
 
-      if [HPXML::AtticTypeUnvented].include? attic.attic_type
-        attic.within_infiltration_volume = false
-        attic.within_infiltration_volume_isdefaulted = true
+        unvented_attic.within_infiltration_volume = false
+        unvented_attic.within_infiltration_volume_isdefaulted = true
+      end
+      if unvented_attics.map { |a| a.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented attics must have the same WithinInfiltrationVolume.'
       end
     end
 
-    return unless hpxml_bldg.has_location(HPXML::LocationAtticVented)
+    if hpxml_bldg.has_location(HPXML::LocationAtticVented)
+      vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
+      if vented_attics.empty?
+        hpxml_bldg.attics.add(id: 'VentedAttic',
+                              attic_type: HPXML::AtticTypeVented)
+        vented_attics << hpxml_bldg.attics[-1]
+      end
+      vented_attics.each do |vented_attic|
+        next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
 
-    vented_attics = hpxml_bldg.attics.select { |a| a.attic_type == HPXML::AtticTypeVented }
-    if vented_attics.empty?
-      hpxml_bldg.attics.add(id: 'VentedAttic',
-                            attic_type: HPXML::AtticTypeVented)
-      vented_attics << hpxml_bldg.attics[-1]
-    end
-    vented_attics.each do |vented_attic|
-      next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
-
-      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
-      vented_attic.vented_attic_sla_isdefaulted = true
-      break # EPvalidator.xml only allows a single ventilation rate
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic.vented_attic_sla_isdefaulted = true
+      end
+      if vented_attics.map { |a| a.vented_attic_sla }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
+      if vented_attics.map { |a| a.vented_attic_ach }.uniq.size != 1
+        fail 'All vented attics must have the same VentilationRate.'
+      end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Foundation objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_foundations(hpxml_bldg)
-    hpxml_bldg.foundations.each do |foundation|
-      next unless foundation.within_infiltration_volume.nil?
+    if hpxml_bldg.has_location(HPXML::LocationCrawlspaceUnvented)
+      unvented_crawls = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeCrawlspaceUnvented }
+      if unvented_crawls.empty?
+        hpxml_bldg.foundations.add(id: 'UnventedCrawlspace',
+                                   foundation_type: HPXML::FoundationTypeCrawlspaceUnvented)
+        unvented_crawls << hpxml_bldg.foundations[-1]
+      end
+      unvented_crawls.each do |unvented_crawl|
+        next unless unvented_crawl.within_infiltration_volume.nil?
 
-      next unless [HPXML::FoundationTypeBasementUnconditioned,
-                   HPXML::FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+        unvented_crawl.within_infiltration_volume = false
+        unvented_crawl.within_infiltration_volume_isdefaulted = true
+      end
+      if unvented_crawls.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unvented crawlspaces must have the same WithinInfiltrationVolume.'
+      end
+    end
 
-      foundation.within_infiltration_volume = false
-      foundation.within_infiltration_volume_isdefaulted = true
+    if hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+      uncond_bsmts = hpxml_bldg.foundations.select { |f| f.foundation_type == HPXML::FoundationTypeBasementUnconditioned }
+      if uncond_bsmts.empty?
+        hpxml_bldg.foundations.add(id: 'UnconditionedBasement',
+                                   foundation_type: HPXML::FoundationTypeBasementUnconditioned)
+        uncond_bsmts << hpxml_bldg.foundations[-1]
+      end
+      uncond_bsmts.each do |uncond_bsmt|
+        next unless uncond_bsmt.within_infiltration_volume.nil?
+
+        uncond_bsmt.within_infiltration_volume = false
+        uncond_bsmt.within_infiltration_volume_isdefaulted = true
+      end
+      if uncond_bsmts.map { |f| f.within_infiltration_volume }.uniq.size != 1
+        fail 'All unconditioned basements must have the same WithinInfiltrationVolume.'
+      end
     end
 
     if hpxml_bldg.has_location(HPXML::LocationCrawlspaceVented)
@@ -746,7 +985,9 @@ class HPXMLDefaults
 
         vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
         vented_crawl.vented_crawlspace_sla_isdefaulted = true
-        break # EPvalidator.xml only allows a single ventilation rate
+      end
+      if vented_crawls.map { |f| f.vented_crawlspace_sla }.uniq.size != 1
+        fail 'All vented crawlspaces must have the same VentilationRate.'
       end
     end
 
@@ -760,15 +1001,23 @@ class HPXMLDefaults
       belly_and_wing_foundations.each do |foundation|
         next unless foundation.belly_wing_skirt_present.nil?
 
-        foundation.belly_wing_skirt_present_isdefaulted = true
         foundation.belly_wing_skirt_present = true
-        break
+        foundation.belly_wing_skirt_present_isdefaulted = true
+      end
+      if belly_and_wing_foundations.map { |f| f.belly_wing_skirt_present }.uniq.size != 1
+        fail 'All belly-and-wing foundations must have the same SkirtPresent.'
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::AirInfiltrationMeasurement object
+  #
+  # Note: This needs to be called after we have applied defaults for ducts.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_infiltration(hpxml_bldg)
-    infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg.air_infiltration_measurements)
+    infil_measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg)
     if infil_measurement.infiltration_volume.nil?
       infil_measurement.infiltration_volume = hpxml_bldg.building_construction.conditioned_building_volume
       infil_measurement.infiltration_volume_isdefaulted = true
@@ -776,6 +1025,75 @@ class HPXMLDefaults
     if infil_measurement.infiltration_height.nil?
       infil_measurement.infiltration_height = hpxml_bldg.inferred_infiltration_height(infil_measurement.infiltration_volume)
       infil_measurement.infiltration_height_isdefaulted = true
+    end
+    if (not infil_measurement.leakiness_description.nil?) && infil_measurement.air_leakage.nil? && infil_measurement.effective_leakage_area.nil?
+      cfa = hpxml_bldg.building_construction.conditioned_floor_area
+      ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+      year_built = hpxml_bldg.building_construction.year_built
+      avg_ceiling_height = hpxml_bldg.building_construction.average_ceiling_height
+      infil_volume = infil_measurement.infiltration_volume
+      iecc_cz = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
+
+      # Duct location fractions
+      duct_loc_fracs = {}
+      hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+        next if hvac_distribution.ducts.empty?
+
+        # HVAC fraction
+        htg_fraction = 0.0
+        clg_fraction = 0.0
+        hvac_distribution.hvac_systems.each do |hvac_system|
+          if hvac_system.respond_to? :fraction_heat_load_served
+            htg_fraction += hvac_system.fraction_heat_load_served
+          end
+          if hvac_system.respond_to? :fraction_cool_load_served
+            clg_fraction += hvac_system.fraction_cool_load_served
+          end
+        end
+        hvac_frac = (htg_fraction + clg_fraction) / 2.0
+
+        supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
+        return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
+        total_supply_fraction = supply_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
+        total_return_fraction = return_ducts.map { |d| d.duct_fraction_area }.sum / hvac_distribution.ducts.map { |d| d.duct_fraction_area }.sum
+        hvac_distribution.ducts.each do |duct|
+          supply_or_return_fraction = (duct.duct_type == HPXML::DuctTypeSupply) ? total_supply_fraction : total_return_fraction
+          duct_loc_fracs[duct.duct_location] = 0.0 if duct_loc_fracs[duct.duct_location].nil?
+          duct_loc_fracs[duct.duct_location] += duct.duct_fraction_area * supply_or_return_fraction * hvac_frac
+        end
+      end
+      sum_duct_hvac_frac = duct_loc_fracs.empty? ? 0.0 : duct_loc_fracs.values.sum
+      if sum_duct_hvac_frac > 1.0001 # Using 1.0001 to allow small tolerance on sum
+        fail "Unexpected sum of duct fractions: #{sum_duct_hvac_frac}."
+      elsif sum_duct_hvac_frac < 1.0 # i.e., there is at least one ductless system
+        # Add 1.0 - sum_duct_hvac_frac as ducts in conditioned space.
+        # This will ensure ductless systems have same result as ducts in conditioned space.
+        duct_loc_fracs[HPXML::LocationConditionedSpace] = 0.0 if duct_loc_fracs[HPXML::LocationConditionedSpace].nil?
+        duct_loc_fracs[HPXML::LocationConditionedSpace] += 1.0 - sum_duct_hvac_frac
+      end
+
+      # Foundation type fractions
+      fnd_type_fracs = {}
+      hpxml_bldg.foundations.each do |foundation|
+        fnd_type_fracs[foundation.foundation_type] = 0.0 if fnd_type_fracs[foundation.foundation_type].nil?
+        area = (hpxml_bldg.floors + hpxml_bldg.slabs).select { |surface| surface.interior_adjacent_to == foundation.to_location }.map { |surface| surface.area }.sum
+        fnd_type_fracs[foundation.foundation_type] += area
+      end
+      sum_fnd_area = fnd_type_fracs.values.sum(0.0)
+      fnd_type_fracs.keys.each do |foundation_type|
+        # Convert to fractions that sum to 1
+        fnd_type_fracs[foundation_type] /= sum_fnd_area unless sum_fnd_area == 0.0
+      end
+
+      ach50 = Airflow.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
+      infil_measurement.house_pressure = 50
+      infil_measurement.house_pressure_isdefaulted = true
+      infil_measurement.unit_of_measure = HPXML::UnitsACH
+      infil_measurement.unit_of_measure_isdefaulted = true
+      infil_measurement.air_leakage = ach50
+      infil_measurement.air_leakage_isdefaulted = true
+      infil_measurement.infiltration_type = HPXML::InfiltrationTypeUnitTotal
+      infil_measurement.infiltration_type_isdefaulted = true
     end
     if infil_measurement.a_ext.nil?
       if (infil_measurement.infiltration_type == HPXML::InfiltrationTypeUnitTotal) &&
@@ -787,6 +1105,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Roof objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_roofs(hpxml_bldg)
     hpxml_bldg.roofs.each do |roof|
       if roof.azimuth.nil?
@@ -843,6 +1165,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::RimJoist objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_rim_joists(hpxml_bldg)
     hpxml_bldg.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
@@ -878,6 +1204,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Wall objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_walls(hpxml_bldg)
     hpxml_bldg.walls.each do |wall|
       if wall.azimuth.nil?
@@ -937,6 +1267,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FoundationWall objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_foundation_walls(hpxml_bldg)
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       if foundation_wall.type.nil?
@@ -992,6 +1326,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Floor objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_floors(runner, hpxml_bldg)
     hpxml_bldg.floors.each do |floor|
       if floor.floor_or_ceiling.nil?
@@ -1046,6 +1385,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Slab objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_slabs(hpxml_bldg)
     hpxml_bldg.slabs.each do |slab|
       if slab.thickness.nil?
@@ -1079,6 +1422,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Window objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [nil]
   def self.apply_windows(hpxml_bldg, eri_version)
     hpxml_bldg.windows.each do |window|
       if window.ufactor.nil? || window.shgc.nil?
@@ -1155,6 +1503,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Skylight objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_skylights(hpxml_bldg)
     hpxml_bldg.skylights.each do |skylight|
       if skylight.azimuth.nil?
@@ -1226,6 +1578,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Door objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_doors(hpxml_bldg)
     hpxml_bldg.doors.each do |door|
       if door.azimuth.nil?
@@ -1249,6 +1605,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PartitionWallMass object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_partition_wall_mass(hpxml_bldg)
     if hpxml_bldg.partition_wall_mass.area_fraction.nil?
       hpxml_bldg.partition_wall_mass.area_fraction = 1.0
@@ -1264,6 +1624,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FurnitureMass object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_furniture_mass(hpxml_bldg)
     if hpxml_bldg.furniture_mass.area_fraction.nil?
       hpxml_bldg.furniture_mass.area_fraction = 0.4
@@ -1275,6 +1639,15 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HeatingSystem,
+  # HPXML::CoolingSystem, and HPXML::HeatPump objects
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml [HPXML] HPXML object
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param convert_shared_systems [Boolean] Whether to convert shared systems to equivalent in-unit systems per ANSI 301
+  # @return [nil]
   def self.apply_hvac(runner, hpxml, hpxml_bldg, weather, convert_shared_systems)
     if convert_shared_systems
       HVAC.apply_shared_systems(hpxml_bldg)
@@ -1397,13 +1770,13 @@ class HPXMLDefaults
 
       if (not hp_backup_fuel.nil?) && (hp_backup_fuel != HPXML::FuelTypeElectricity)
         # Fuel backup
-        heat_pump.compressor_lockout_temp = 25.0 # deg-F
+        heat_pump.compressor_lockout_temp = 25.0 # F
       else
         # Electric backup or no backup
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-          heat_pump.compressor_lockout_temp = -20.0 # deg-F
+          heat_pump.compressor_lockout_temp = -20.0 # F
         else
-          heat_pump.compressor_lockout_temp = 0.0 # deg-F
+          heat_pump.compressor_lockout_temp = 0.0 # F
         end
       end
       heat_pump.compressor_lockout_temp_isdefaulted = true
@@ -1422,9 +1795,9 @@ class HPXMLDefaults
       end
 
       if hp_backup_fuel == HPXML::FuelTypeElectricity
-        heat_pump.backup_heating_lockout_temp = 40.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 40.0 # F
       else
-        heat_pump.backup_heating_lockout_temp = 50.0 # deg-F
+        heat_pump.backup_heating_lockout_temp = 50.0 # F
       end
       heat_pump.backup_heating_lockout_temp_isdefaulted = true
     end
@@ -1691,7 +2064,7 @@ class HPXMLDefaults
         end
         # Note: We use HP cooling curve so that a central AC behaves the same.
         HVAC.set_fan_power_rated(cooling_system, use_eer)
-        HVAC.set_cool_curves_central_air_source(runner, cooling_system, use_eer)
+        HVAC.set_cool_curves_central_air_source(cooling_system, use_eer)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
         clg_ap.effectiveness = 0.72 # Assumption from HEScore
@@ -1719,7 +2092,7 @@ class HPXMLDefaults
         end
         HVAC.set_fan_power_rated(heat_pump, use_eer_cop)
         HVAC.set_heat_pump_temperatures(heat_pump, runner)
-        HVAC.set_cool_curves_central_air_source(runner, heat_pump, use_eer_cop)
+        HVAC.set_cool_curves_central_air_source(heat_pump, use_eer_cop)
         HVAC.set_heat_curves_central_air_source(heat_pump, use_eer_cop)
 
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
@@ -1783,7 +2156,7 @@ class HPXMLDefaults
 
         if heat_pump.geothermal_loop.shank_spacing.nil?
           hp_ap = heat_pump.additional_properties
-          heat_pump.geothermal_loop.shank_spacing = hp_ap.u_tube_spacing + hp_ap.pipe_od # Distance from center of pipe to center of pipe
+          heat_pump.geothermal_loop.shank_spacing = (hp_ap.u_tube_spacing + hp_ap.pipe_od).round(2) # Distance from center of pipe to center of pipe
           heat_pump.geothermal_loop.shank_spacing_isdefaulted = true
         end
       elsif [HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
@@ -1793,6 +2166,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::CoolingPerformanceDataPoint
+  # and HPXML::HeatingPerformanceDataPoint objects.
+  # Currently these objects are only used for variable-speed air source systems.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_detailed_performance_data_for_var_speed_systems(hpxml_bldg)
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |hvac_system|
       is_hp = hvac_system.is_a? HPXML::HeatPump
@@ -1858,6 +2237,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HVACControl object
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [nil]
   def self.apply_hvac_control(hpxml_bldg, schedules_file, eri_version)
     hpxml_bldg.hvac_controls.each do |hvac_control|
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HeatingSetpoint].name))
@@ -1920,6 +2305,12 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HVACDistribution objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @return [nil]
   def self.apply_hvac_distribution(hpxml_bldg, ncfl, ncfl_ag)
     hpxml_bldg.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
@@ -1966,7 +2357,6 @@ class HPXMLDefaults
             end
           end
         end
-
       elsif hvac_distribution.ducts[0].duct_surface_area.nil?
         # Default duct surface area(s)
         [supply_ducts, return_ducts].each do |ducts|
@@ -1977,10 +2367,9 @@ class HPXMLDefaults
           end
         end
       end
-
-      # Calculate FractionDuctArea from DuctSurfaceArea
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
+      # Calculate FractionDuctArea from DuctSurfaceArea
       total_supply_area = supply_ducts.map { |d| d.duct_surface_area }.sum
       total_return_area = return_ducts.map { |d| d.duct_surface_area }.sum
       (supply_ducts + return_ducts).each do |duct|
@@ -2047,10 +2436,33 @@ class HPXMLDefaults
         ducts.duct_effective_r_value_isdefaulted = true
       end
     end
+
+    # Manual J inputs
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+        # Blower fan heat
+        if hvac_distribution.manualj_blower_fan_heat_btuh.nil?
+          hvac_distribution.manualj_blower_fan_heat_btuh = 0.0
+          hvac_distribution.manualj_blower_fan_heat_btuh_isdefaulted = true
+        end
+      elsif hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+        # Hot water piping
+        if hvac_distribution.manualj_hot_water_piping_btuh.nil?
+          hvac_distribution.manualj_hot_water_piping_btuh = 0.0
+          hvac_distribution.manualj_hot_water_piping_btuh_isdefaulted = true
+        end
+      end
+    end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::HeatingSystem,
+  # HPXML::CoolingSystem, and HPXML::HeatPump objects related to HVAC location.
+  #
+  # Note: This needs to be called after we have applied defaults for ducts.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_hvac_location(hpxml_bldg)
-    # This needs to come after we have applied defaults for ducts
     hpxml_bldg.hvac_systems.each do |hvac_system|
       next unless hvac_system.location.nil?
 
@@ -2108,6 +2520,14 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::VentilationFan objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [nil]
   def self.apply_ventilation_fans(hpxml_bldg, weather, cfa, nbeds, eri_version)
     # Default mech vent systems
     hpxml_bldg.ventilation_fans.each do |vent_fan|
@@ -2118,13 +2538,13 @@ class HPXMLDefaults
         vent_fan.is_shared_system_isdefaulted = true
       end
 
-      if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan?
+      if vent_fan.hours_in_operation.nil? && !vent_fan.is_cfis_supplemental_fan
         vent_fan.hours_in_operation = (vent_fan.fan_type == HPXML::MechVentTypeCFIS) ? 8.0 : 24.0
         vent_fan.hours_in_operation_isdefaulted = true
       end
 
       if vent_fan.flow_rate.nil?
-        if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan? }.size > 1
+        if hpxml_bldg.ventilation_fans.select { |vf| vf.used_for_whole_building_ventilation && !vf.is_cfis_supplemental_fan }.size > 1
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
@@ -2215,6 +2635,13 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::WaterHeatingSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_water_heaters(hpxml_bldg, nbeds, eri_version, schedules_file)
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       if water_heating_system.is_shared_system.nil?
@@ -2281,18 +2708,33 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::AirInfiltration object
+  # specific to the presence of a flue/chimney.
+  #
+  # Note: This needs to be called after we have applied defaults for HVAC/DHW systems.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_flue_or_chimney(hpxml_bldg)
-    # This needs to come after we have applied defaults for HVAC/DHW systems
     if hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space.nil?
       hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space = get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
       hpxml_bldg.air_infiltration.has_flue_or_chimney_in_conditioned_space_isdefaulted = true
     end
   end
 
-  def self.apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, has_uncond_bsmnt, has_cond_bsmnt, schedules_file)
+  # Assigns default values for omitted optional inputs in the HPXML::HotWaterDistribution objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
+  def self.apply_hot_water_distribution(hpxml_bldg, cfa, ncfl, schedules_file)
     return if hpxml_bldg.hot_water_distributions.size == 0
 
     hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
+    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
+    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
 
     if hot_water_distribution.pipe_r_value.nil?
       hot_water_distribution.pipe_r_value = 0.0
@@ -2305,9 +2747,9 @@ class HPXMLDefaults
         hot_water_distribution.standard_piping_length_isdefaulted = true
       end
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
-      if hot_water_distribution.recirculation_piping_length.nil?
-        hot_water_distribution.recirculation_piping_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl))
-        hot_water_distribution.recirculation_piping_length_isdefaulted = true
+      if hot_water_distribution.recirculation_piping_loop_length.nil?
+        hot_water_distribution.recirculation_piping_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl))
+        hot_water_distribution.recirculation_piping_loop_length_isdefaulted = true
       end
       if hot_water_distribution.recirculation_branch_piping_length.nil?
         hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()
@@ -2331,39 +2773,44 @@ class HPXMLDefaults
       recirc_control_type = hot_water_distribution.has_shared_recirculation ? hot_water_distribution.shared_recirculation_control_type : hot_water_distribution.recirculation_control_type
       if [HPXML::DHWRecircControlTypeNone, HPXML::DHWRecircControlTypeTimer].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpWithoutControlWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpWithoutControlWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_no_control"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       elsif [HPXML::DHWRecircControlTypeSensor, HPXML::DHWRecircControlTypeManual].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpDemandControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_demand_control"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpDemandControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_demand_control"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       elsif [HPXML::DHWRecircControlTypeTemperature].include?(recirc_control_type)
         if hot_water_distribution.recirculation_pump_weekday_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekday_fractions = Schedule.RecirculationPumpTemperatureControlledWeekdayFractions
+          hot_water_distribution.recirculation_pump_weekday_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_temperature_control"]['RecirculationPumpWeekdayScheduleFractions']
           hot_water_distribution.recirculation_pump_weekday_fractions_isdefaulted = true
         end
         if hot_water_distribution.recirculation_pump_weekend_fractions.nil? && !schedules_file_includes_recirculation_pump
-          hot_water_distribution.recirculation_pump_weekend_fractions = Schedule.RecirculationPumpTemperatureControlledWeekendFractions
+          hot_water_distribution.recirculation_pump_weekend_fractions = @default_schedules_csv_data["#{SchedulesFile::Columns[:HotWaterRecirculationPump].name}_temperature_control"]['RecirculationPumpWeekendScheduleFractions']
           hot_water_distribution.recirculation_pump_weekend_fractions_isdefaulted = true
         end
       end
       if hot_water_distribution.recirculation_pump_monthly_multipliers.nil? && !schedules_file_includes_recirculation_pump
-        hot_water_distribution.recirculation_pump_monthly_multipliers = Schedule.RecirculationPumpMonthlyMultipliers
+        hot_water_distribution.recirculation_pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterRecirculationPump].name]['RecirculationPumpMonthlyScheduleMultipliers']
         hot_water_distribution.recirculation_pump_monthly_multipliers_isdefaulted = true
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::WaterFixture objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_water_fixtures(hpxml_bldg, schedules_file)
     return if hpxml_bldg.hot_water_distributions.size == 0
 
@@ -2382,19 +2829,23 @@ class HPXMLDefaults
     end
     schedules_file_includes_fixtures = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HotWaterFixtures].name))
     if hpxml_bldg.water_heating.water_fixtures_weekday_fractions.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_weekday_fractions = Schedule.FixturesWeekdayFractions
+      hpxml_bldg.water_heating.water_fixtures_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesWeekdayScheduleFractions']
       hpxml_bldg.water_heating.water_fixtures_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.water_heating.water_fixtures_weekend_fractions.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_weekend_fractions = Schedule.FixturesWeekendFractions
+      hpxml_bldg.water_heating.water_fixtures_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesWeekendScheduleFractions']
       hpxml_bldg.water_heating.water_fixtures_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.water_heating.water_fixtures_monthly_multipliers.nil? && !schedules_file_includes_fixtures
-      hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = Schedule.FixturesMonthlyMultipliers
+      hpxml_bldg.water_heating.water_fixtures_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:HotWaterFixtures].name]['WaterFixturesMonthlyScheduleMultipliers']
       hpxml_bldg.water_heating.water_fixtures_monthly_multipliers_isdefaulted = true
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::SolarThermalSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_solar_thermal_systems(hpxml_bldg)
     hpxml_bldg.solar_thermal_systems.each do |solar_thermal_system|
       if solar_thermal_system.collector_azimuth.nil?
@@ -2412,6 +2863,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PVSystem objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_pv_systems(hpxml_bldg)
     hpxml_bldg.pv_systems.each do |pv_system|
       if pv_system.array_azimuth.nil?
@@ -2451,6 +2906,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Generator objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_generators(hpxml_bldg)
     hpxml_bldg.generators.each do |generator|
       if generator.is_shared_system.nil?
@@ -2460,6 +2919,10 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Battery objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
   def self.apply_batteries(hpxml_bldg)
     default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
     hpxml_bldg.batteries.each do |battery|
@@ -2521,6 +2984,14 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::ClothesWasher, HPXML::ClothesDryer,
+  # HPXML::Dishwasher, HPXML::Refrigerator, HPXML::Freezer, HPXML::CookingRange, and HPXML::Oven objects.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_appliances(hpxml_bldg, nbeds, eri_version, schedules_file)
     # Default clothes washer
     if hpxml_bldg.clothes_washers.size > 0
@@ -2556,15 +3027,15 @@ class HPXMLDefaults
       end
       schedules_file_includes_cw = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ClothesWasher].name))
       if clothes_washer.weekday_fractions.nil? && !schedules_file_includes_cw
-        clothes_washer.weekday_fractions = Schedule.ClothesWasherWeekdayFractions
+        clothes_washer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['WeekdayScheduleFractions']
         clothes_washer.weekday_fractions_isdefaulted = true
       end
       if clothes_washer.weekend_fractions.nil? && !schedules_file_includes_cw
-        clothes_washer.weekend_fractions = Schedule.ClothesWasherWeekendFractions
+        clothes_washer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['WeekendScheduleFractions']
         clothes_washer.weekend_fractions_isdefaulted = true
       end
       if clothes_washer.monthly_multipliers.nil? && !schedules_file_includes_cw
-        clothes_washer.monthly_multipliers = Schedule.ClothesWasherMonthlyMultipliers
+        clothes_washer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesWasher].name]['MonthlyScheduleMultipliers']
         clothes_washer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -2604,15 +3075,15 @@ class HPXMLDefaults
       end
       schedules_file_includes_cd = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:ClothesDryer].name))
       if clothes_dryer.weekday_fractions.nil? && !schedules_file_includes_cd
-        clothes_dryer.weekday_fractions = Schedule.ClothesDryerWeekdayFractions
+        clothes_dryer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['WeekdayScheduleFractions']
         clothes_dryer.weekday_fractions_isdefaulted = true
       end
       if clothes_dryer.weekend_fractions.nil? && !schedules_file_includes_cd
-        clothes_dryer.weekend_fractions = Schedule.ClothesDryerWeekendFractions
+        clothes_dryer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['WeekendScheduleFractions']
         clothes_dryer.weekend_fractions_isdefaulted = true
       end
       if clothes_dryer.monthly_multipliers.nil? && !schedules_file_includes_cd
-        clothes_dryer.monthly_multipliers = Schedule.ClothesDryerMonthlyMultipliers
+        clothes_dryer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ClothesDryer].name]['MonthlyScheduleMultipliers']
         clothes_dryer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -2649,15 +3120,15 @@ class HPXMLDefaults
       end
       schedules_file_includes_dw = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:Dishwasher].name))
       if dishwasher.weekday_fractions.nil? && !schedules_file_includes_dw
-        dishwasher.weekday_fractions = Schedule.DishwasherWeekdayFractions
+        dishwasher.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['WeekdayScheduleFractions']
         dishwasher.weekday_fractions_isdefaulted = true
       end
       if dishwasher.weekend_fractions.nil? && !schedules_file_includes_dw
-        dishwasher.weekend_fractions = Schedule.DishwasherWeekendFractions
+        dishwasher.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['WeekendScheduleFractions']
         dishwasher.weekend_fractions_isdefaulted = true
       end
       if dishwasher.monthly_multipliers.nil? && !schedules_file_includes_dw
-        dishwasher.monthly_multipliers = Schedule.DishwasherMonthlyMultipliers
+        dishwasher.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Dishwasher].name]['MonthlyScheduleMultipliers']
         dishwasher.monthly_multipliers_isdefaulted = true
       end
     end
@@ -2683,24 +3154,24 @@ class HPXMLDefaults
         if !schedules_file_includes_extrafridge
           if schedules_includes_fractions_multipliers
             if refrigerator.weekday_fractions.nil?
-              refrigerator.weekday_fractions = Schedule.ExtraRefrigeratorWeekdayFractions
+              refrigerator.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['WeekdayScheduleFractions']
               refrigerator.weekday_fractions_isdefaulted = true
             end
             if refrigerator.weekend_fractions.nil?
-              refrigerator.weekend_fractions = Schedule.ExtraRefrigeratorWeekendFractions
+              refrigerator.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['WeekendScheduleFractions']
               refrigerator.weekend_fractions_isdefaulted = true
             end
             if refrigerator.monthly_multipliers.nil?
-              refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
+              refrigerator.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['MonthlyScheduleMultipliers']
               refrigerator.monthly_multipliers_isdefaulted = true
             end
           else
             if refrigerator.constant_coefficients.nil?
-              refrigerator.constant_coefficients = Schedule.ExtraRefrigeratorConstantCoefficients
+              refrigerator.constant_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['ConstantScheduleCoefficients']
               refrigerator.constant_coefficients_isdefaulted = true
             end
             if refrigerator.temperature_coefficients.nil?
-              refrigerator.temperature_coefficients = Schedule.ExtraRefrigeratorTemperatureCoefficients
+              refrigerator.temperature_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:ExtraRefrigerator].name]['TemperatureScheduleCoefficients']
               refrigerator.temperature_coefficients_isdefaulted = true
             end
           end
@@ -2719,24 +3190,24 @@ class HPXMLDefaults
         if !schedules_file_includes_fridge
           if schedules_includes_fractions_multipliers
             if refrigerator.weekday_fractions.nil?
-              refrigerator.weekday_fractions = Schedule.RefrigeratorWeekdayFractions
+              refrigerator.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['WeekdayScheduleFractions']
               refrigerator.weekday_fractions_isdefaulted = true
             end
             if refrigerator.weekend_fractions.nil?
-              refrigerator.weekend_fractions = Schedule.RefrigeratorWeekendFractions
+              refrigerator.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['WeekendScheduleFractions']
               refrigerator.weekend_fractions_isdefaulted = true
             end
             if refrigerator.monthly_multipliers.nil?
-              refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
+              refrigerator.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['MonthlyScheduleMultipliers']
               refrigerator.monthly_multipliers_isdefaulted = true
             end
           else
             if refrigerator.constant_coefficients.nil?
-              refrigerator.constant_coefficients = Schedule.RefrigeratorConstantCoefficients
+              refrigerator.constant_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['ConstantScheduleCoefficients']
               refrigerator.constant_coefficients_isdefaulted = true
             end
             if refrigerator.temperature_coefficients.nil?
-              refrigerator.temperature_coefficients = Schedule.RefrigeratorTemperatureCoefficients
+              refrigerator.temperature_coefficients = @default_schedules_csv_data[SchedulesFile::Columns[:Refrigerator].name]['TemperatureScheduleCoefficients']
               refrigerator.temperature_coefficients_isdefaulted = true
             end
           end
@@ -2768,15 +3239,15 @@ class HPXMLDefaults
       next unless !schedules_includes_schedule_coefficients
 
       if freezer.weekday_fractions.nil? && !schedules_file_includes_freezer
-        freezer.weekday_fractions = Schedule.FreezerWeekdayFractions
+        freezer.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['WeekdayScheduleFractions']
         freezer.weekday_fractions_isdefaulted = true
       end
       if freezer.weekend_fractions.nil? && !schedules_file_includes_freezer
-        freezer.weekend_fractions = Schedule.FreezerWeekendFractions
+        freezer.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['WeekendScheduleFractions']
         freezer.weekend_fractions_isdefaulted = true
       end
       if freezer.monthly_multipliers.nil? && !schedules_file_includes_freezer
-        freezer.monthly_multipliers = Schedule.FreezerMonthlyMultipliers
+        freezer.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:Freezer].name]['MonthlyScheduleMultipliers']
         freezer.monthly_multipliers_isdefaulted = true
       end
     end
@@ -2799,15 +3270,15 @@ class HPXMLDefaults
       end
       schedules_file_includes_range = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CookingRange].name))
       if cooking_range.weekday_fractions.nil? && !schedules_file_includes_range
-        cooking_range.weekday_fractions = Schedule.CookingRangeWeekdayFractions
+        cooking_range.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['WeekdayScheduleFractions']
         cooking_range.weekday_fractions_isdefaulted = true
       end
       if cooking_range.weekend_fractions.nil? && !schedules_file_includes_range
-        cooking_range.weekend_fractions = Schedule.CookingRangeWeekendFractions
+        cooking_range.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['WeekendScheduleFractions']
         cooking_range.weekend_fractions_isdefaulted = true
       end
       if cooking_range.monthly_multipliers.nil? && !schedules_file_includes_range
-        cooking_range.monthly_multipliers = Schedule.CookingRangeMonthlyMultipliers
+        cooking_range.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:CookingRange].name]['MonthlyScheduleMultipliers']
         cooking_range.monthly_multipliers_isdefaulted = true
       end
     end
@@ -2823,6 +3294,11 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Lighting and HPXML::LightingGroup objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_lighting(hpxml_bldg, schedules_file)
     return if hpxml_bldg.lighting_groups.empty?
 
@@ -2838,46 +3314,45 @@ class HPXMLDefaults
       hpxml_bldg.lighting.exterior_usage_multiplier = 1.0
       hpxml_bldg.lighting.exterior_usage_multiplier_isdefaulted = true
     end
-    default_lighting_monthly_multipliers = Schedule.LightingMonthlyMultipliers
     schedules_file_includes_lighting_interior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingInterior].name))
     if hpxml_bldg.lighting.interior_weekday_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekday_fractions = Schedule.LightingInteriorWeekdayFractions
+      hpxml_bldg.lighting.interior_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorWeekdayScheduleFractions']
       hpxml_bldg.lighting.interior_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.interior_weekend_fractions.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_weekend_fractions = Schedule.LightingInteriorWeekendFractions
+      hpxml_bldg.lighting.interior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorWeekendScheduleFractions']
       hpxml_bldg.lighting.interior_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.interior_monthly_multipliers.nil? && !schedules_file_includes_lighting_interior
-      hpxml_bldg.lighting.interior_monthly_multipliers = default_lighting_monthly_multipliers
+      hpxml_bldg.lighting.interior_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingInterior].name]['InteriorMonthlyScheduleMultipliers']
       hpxml_bldg.lighting.interior_monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.has_location(HPXML::LocationGarage)
       schedules_file_includes_lighting_garage = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingGarage].name))
       if hpxml_bldg.lighting.garage_weekday_fractions.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_weekday_fractions = Schedule.LightingGarageWeekdayFractions
+        hpxml_bldg.lighting.garage_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageWeekdayScheduleFractions']
         hpxml_bldg.lighting.garage_weekday_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.garage_weekend_fractions.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_weekend_fractions = Schedule.LightingGarageWeekendFractions
+        hpxml_bldg.lighting.garage_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageWeekendScheduleFractions']
         hpxml_bldg.lighting.garage_weekend_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.garage_monthly_multipliers.nil? && !schedules_file_includes_lighting_garage
-        hpxml_bldg.lighting.garage_monthly_multipliers = default_lighting_monthly_multipliers
+        hpxml_bldg.lighting.garage_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingGarage].name]['GarageMonthlyScheduleMultipliers']
         hpxml_bldg.lighting.garage_monthly_multipliers_isdefaulted = true
       end
     end
     schedules_file_includes_lighting_exterior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingExterior].name))
     if hpxml_bldg.lighting.exterior_weekday_fractions.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_weekday_fractions = Schedule.LightingExteriorWeekdayFractions
+      hpxml_bldg.lighting.exterior_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekdayScheduleFractions']
       hpxml_bldg.lighting.exterior_weekday_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_weekend_fractions.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_weekend_fractions = Schedule.LightingExteriorWeekendFractions
+      hpxml_bldg.lighting.exterior_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorWeekendScheduleFractions']
       hpxml_bldg.lighting.exterior_weekend_fractions_isdefaulted = true
     end
     if hpxml_bldg.lighting.exterior_monthly_multipliers.nil? && !schedules_file_includes_lighting_exterior
-      hpxml_bldg.lighting.exterior_monthly_multipliers = default_lighting_monthly_multipliers
+      hpxml_bldg.lighting.exterior_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExterior].name]['ExteriorMonthlyScheduleMultipliers']
       hpxml_bldg.lighting.exterior_monthly_multipliers_isdefaulted = true
     end
     if hpxml_bldg.lighting.holiday_exists
@@ -2904,16 +3379,23 @@ class HPXMLDefaults
       end
       schedules_file_includes_lighting_holiday_exterior = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:LightingExteriorHoliday].name))
       if hpxml_bldg.lighting.holiday_weekday_fractions.nil? && !schedules_file_includes_lighting_holiday_exterior
-        hpxml_bldg.lighting.holiday_weekday_fractions = Schedule.LightingExteriorHolidayWeekdayFractions
+        hpxml_bldg.lighting.holiday_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExteriorHoliday].name]['WeekdayScheduleFractions']
         hpxml_bldg.lighting.holiday_weekday_fractions_isdefaulted = true
       end
       if hpxml_bldg.lighting.holiday_weekend_fractions.nil? && !schedules_file_includes_lighting_holiday_exterior
-        hpxml_bldg.lighting.holiday_weekend_fractions = Schedule.LightingExteriorHolidayWeekendFractions
+        hpxml_bldg.lighting.holiday_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:LightingExteriorHoliday].name]['WeekendScheduleFractions']
         hpxml_bldg.lighting.holiday_weekend_fractions_isdefaulted = true
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::CeilingFan objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_ceiling_fans(hpxml_bldg, nbeds, weather, schedules_file)
     return if hpxml_bldg.ceiling_fans.size == 0
 
@@ -2928,28 +3410,34 @@ class HPXMLDefaults
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CeilingFan].name))
     if ceiling_fan.weekday_fractions.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.weekday_fractions = Schedule.CeilingFanWeekdayFractions
+      ceiling_fan.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekdayScheduleFractions']
       ceiling_fan.weekday_fractions_isdefaulted = true
     end
     if ceiling_fan.weekend_fractions.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.weekend_fractions = Schedule.CeilingFanWeekendFractions
+      ceiling_fan.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:CeilingFan].name]['WeekendScheduleFractions']
       ceiling_fan.weekend_fractions_isdefaulted = true
     end
     if ceiling_fan.monthly_multipliers.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.monthly_multipliers = Schedule.CeilingFanMonthlyMultipliers(weather: weather)
+      ceiling_fan.monthly_multipliers = HVAC.get_default_ceiling_fan_months(weather).join(', ')
       ceiling_fan.monthly_multipliers_isdefaulted = true
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::Pool and HPXML::PermanentSpa objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_pools_and_permanent_spas(hpxml_bldg, cfa, schedules_file)
-    nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
+    nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
     hpxml_bldg.pools.each do |pool|
       next if pool.type == HPXML::TypeNone
 
       if pool.pump_type != HPXML::TypeNone
         # Pump
         if pool.pump_kwh_per_year.nil?
-          pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
+          pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds_eq)
           pool.pump_kwh_per_year_isdefaulted = true
         end
         if pool.pump_usage_multiplier.nil?
@@ -2958,15 +3446,15 @@ class HPXMLDefaults
         end
         schedules_file_includes_pool_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PoolPump].name))
         if pool.pump_weekday_fractions.nil? && !schedules_file_includes_pool_pump
-          pool.pump_weekday_fractions = Schedule.PoolPumpWeekdayFractions
+          pool.pump_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['WeekdayScheduleFractions']
           pool.pump_weekday_fractions_isdefaulted = true
         end
         if pool.pump_weekend_fractions.nil? && !schedules_file_includes_pool_pump
-          pool.pump_weekend_fractions = Schedule.PoolPumpWeekendFractions
+          pool.pump_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['WeekendScheduleFractions']
           pool.pump_weekend_fractions_isdefaulted = true
         end
         if pool.pump_monthly_multipliers.nil? && !schedules_file_includes_pool_pump
-          pool.pump_monthly_multipliers = Schedule.PoolPumpMonthlyMultipliers
+          pool.pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PoolPump].name]['MonthlyScheduleMultipliers']
           pool.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -2975,7 +3463,7 @@ class HPXMLDefaults
 
       # Heater
       if pool.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds_eq, pool.heater_type)
         pool.heater_load_units = default_heater_load_units
         pool.heater_load_value = default_heater_load_value
         pool.heater_load_value_isdefaulted = true
@@ -2986,15 +3474,15 @@ class HPXMLDefaults
       end
       schedules_file_includes_pool_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PoolHeater].name))
       if pool.heater_weekday_fractions.nil? && !schedules_file_includes_pool_heater
-        pool.heater_weekday_fractions = Schedule.PoolHeaterWeekdayFractions
+        pool.heater_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['WeekdayScheduleFractions']
         pool.heater_weekday_fractions_isdefaulted = true
       end
       if pool.heater_weekend_fractions.nil? && !schedules_file_includes_pool_heater
-        pool.heater_weekend_fractions = Schedule.PoolHeaterWeekendFractions
+        pool.heater_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['WeekendScheduleFractions']
         pool.heater_weekend_fractions_isdefaulted = true
       end
       if pool.heater_monthly_multipliers.nil? && !schedules_file_includes_pool_heater
-        pool.heater_monthly_multipliers = Schedule.PoolHeaterMonthlyMultipliers
+        pool.heater_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PoolHeater].name]['MonthlyScheduleMultipliers']
         pool.heater_monthly_multipliers_isdefaulted = true
       end
     end
@@ -3005,7 +3493,7 @@ class HPXMLDefaults
       if spa.pump_type != HPXML::TypeNone
         # Pump
         if spa.pump_kwh_per_year.nil?
-          spa.pump_kwh_per_year = MiscLoads.get_permanent_spa_pump_default_values(cfa, nbeds)
+          spa.pump_kwh_per_year = MiscLoads.get_permanent_spa_pump_default_values(cfa, nbeds_eq)
           spa.pump_kwh_per_year_isdefaulted = true
         end
         if spa.pump_usage_multiplier.nil?
@@ -3014,15 +3502,15 @@ class HPXMLDefaults
         end
         schedules_file_includes_permanent_spa_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PermanentSpaPump].name))
         if spa.pump_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_weekday_fractions = Schedule.PermanentSpaPumpWeekdayFractions
+          spa.pump_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['WeekdayScheduleFractions']
           spa.pump_weekday_fractions_isdefaulted = true
         end
         if spa.pump_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_weekend_fractions = Schedule.PermanentSpaPumpWeekendFractions
+          spa.pump_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['WeekendScheduleFractions']
           spa.pump_weekend_fractions_isdefaulted = true
         end
         if spa.pump_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_pump
-          spa.pump_monthly_multipliers = Schedule.PermanentSpaPumpMonthlyMultipliers
+          spa.pump_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaPump].name]['MonthlyScheduleMultipliers']
           spa.pump_monthly_multipliers_isdefaulted = true
         end
       end
@@ -3031,7 +3519,7 @@ class HPXMLDefaults
 
       # Heater
       if spa.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_permanent_spa_heater_default_values(cfa, nbeds, spa.heater_type)
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_permanent_spa_heater_default_values(cfa, nbeds_eq, spa.heater_type)
         spa.heater_load_units = default_heater_load_units
         spa.heater_load_value = default_heater_load_value
         spa.heater_load_value_isdefaulted = true
@@ -3042,22 +3530,28 @@ class HPXMLDefaults
       end
       schedules_file_includes_permanent_spa_heater = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PermanentSpaHeater].name))
       if spa.heater_weekday_fractions.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_weekday_fractions = Schedule.PermanentSpaHeaterWeekdayFractions
+        spa.heater_weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['WeekdayScheduleFractions']
         spa.heater_weekday_fractions_isdefaulted = true
       end
       if spa.heater_weekend_fractions.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_weekend_fractions = Schedule.PermanentSpaHeaterWeekendFractions
+        spa.heater_weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['WeekendScheduleFractions']
         spa.heater_weekend_fractions_isdefaulted = true
       end
       if spa.heater_monthly_multipliers.nil? && !schedules_file_includes_permanent_spa_heater
-        spa.heater_monthly_multipliers = Schedule.PermanentSpaHeaterMonthlyMultipliers
+        spa.heater_monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PermanentSpaHeater].name]['MonthlyScheduleMultipliers']
         spa.heater_monthly_multipliers_isdefaulted = true
       end
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::PlugLoad objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_plug_loads(hpxml_bldg, cfa, schedules_file)
-    nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
+    nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa)
@@ -3075,19 +3569,19 @@ class HPXMLDefaults
         end
         schedules_file_includes_plug_loads_other = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsOther].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.weekday_fractions = Schedule.PlugLoadsOtherWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.weekend_fractions = Schedule.PlugLoadsOtherWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_other
-          plug_load.monthly_multipliers = Schedule.PlugLoadsOtherMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsOther].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds_eq)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3102,15 +3596,15 @@ class HPXMLDefaults
         end
         schedules_file_includes_plug_loads_tv = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsTV].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.weekday_fractions = Schedule.PlugLoadsTVWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.weekend_fractions = Schedule.PlugLoadsTVWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['WeekendScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_tv
-          plug_load.monthly_multipliers = Schedule.PlugLoadsTVMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsTV].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
@@ -3129,19 +3623,19 @@ class HPXMLDefaults
         end
         schedules_file_includes_plug_loads_vehicle = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsVehicle].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekday_fractions = Schedule.PlugLoadsVehicleWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.weekend_fractions = Schedule.PlugLoadsVehicleWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['WeekdayScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_vehicle
-          plug_load.monthly_multipliers = Schedule.PlugLoadsVehicleMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsVehicle].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds)
+        default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds_eq)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3156,15 +3650,15 @@ class HPXMLDefaults
         end
         schedules_file_includes_plug_loads_well_pump = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:PlugLoadsWellPump].name))
         if plug_load.weekday_fractions.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.weekday_fractions = Schedule.PlugLoadsWellPumpWeekdayFractions
+          plug_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekdayScheduleFractions']
           plug_load.weekday_fractions_isdefaulted = true
         end
         if plug_load.weekend_fractions.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.weekend_fractions = Schedule.PlugLoadsWellPumpWeekendFractions
+          plug_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['WeekdayScheduleFractions']
           plug_load.weekend_fractions_isdefaulted = true
         end
         if plug_load.monthly_multipliers.nil? && !schedules_file_includes_plug_loads_well_pump
-          plug_load.monthly_multipliers = Schedule.PlugLoadsWellPumpMonthlyMultipliers
+          plug_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:PlugLoadsWellPump].name]['MonthlyScheduleMultipliers']
           plug_load.monthly_multipliers_isdefaulted = true
         end
       end
@@ -3175,12 +3669,18 @@ class HPXMLDefaults
     end
   end
 
+  # Assigns default values for omitted optional inputs in the HPXML::FuelLoad objects
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
+  # @return [nil]
   def self.apply_fuel_loads(hpxml_bldg, cfa, schedules_file)
-    nbeds = hpxml_bldg.building_construction.additional_properties.adjusted_number_of_bedrooms
+    nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
     hpxml_bldg.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds)
+          fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -3193,20 +3693,20 @@ class HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_grill = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsGrill].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.weekday_fractions = Schedule.FuelLoadsGrillWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.weekend_fractions = Schedule.FuelLoadsGrillWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_grill
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsGrillMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsGrill].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds)
+          fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -3219,20 +3719,20 @@ class HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_lighting = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsLighting].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.weekday_fractions = Schedule.FuelLoadsLightingWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.weekend_fractions = Schedule.FuelLoadsLightingWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_lighting
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsLightingMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsLighting].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds)
+          fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -3245,15 +3745,15 @@ class HPXMLDefaults
         end
         schedules_file_includes_fuel_loads_fireplace = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:FuelLoadsFireplace].name))
         if fuel_load.weekday_fractions.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.weekday_fractions = Schedule.FuelLoadsFireplaceWeekdayFractions
+          fuel_load.weekday_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['WeekdayScheduleFractions']
           fuel_load.weekday_fractions_isdefaulted = true
         end
         if fuel_load.weekend_fractions.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.weekend_fractions = Schedule.FuelLoadsFireplaceWeekendFractions
+          fuel_load.weekend_fractions = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['WeekendScheduleFractions']
           fuel_load.weekend_fractions_isdefaulted = true
         end
         if fuel_load.monthly_multipliers.nil? && !schedules_file_includes_fuel_loads_fireplace
-          fuel_load.monthly_multipliers = Schedule.FuelLoadsFireplaceMonthlyMultipliers
+          fuel_load.monthly_multipliers = @default_schedules_csv_data[SchedulesFile::Columns[:FuelLoadsFireplace].name]['MonthlyScheduleMultipliers']
           fuel_load.monthly_multipliers_isdefaulted = true
         end
       end
@@ -3264,12 +3764,23 @@ class HPXMLDefaults
     end
   end
 
-  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, cfa)
-    # Calculate building design loads and equipment capacities/airflows
+  # Assigns default capacities/airflows for autosized HPXML HVAC equipment.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
+  # @param design_load_details_output_file_path [String] Detailed HVAC sizing output file path
+  # @return [nil]
+  def self.apply_hvac_sizing(runner, hpxml_bldg, weather, output_format, design_load_details_output_file_path)
     hvac_systems = HVAC.get_hpxml_hvac_systems(hpxml_bldg)
-    HVACSizing.calculate(runner, weather, hpxml_bldg, cfa, hvac_systems)
+    HVACSizing.calculate(runner, weather, hpxml_bldg, hvac_systems, output_format: output_format, output_file_path: design_load_details_output_file_path)
   end
 
+  # Converts an HPXML orientation to an HPXML azimuth.
+  #
+  # @param orientation [String] HPXML orientation enumeration
+  # @return [Integer] Azimuth (degrees)
   def self.get_azimuth_from_orientation(orientation)
     return if orientation.nil?
 
@@ -3294,6 +3805,10 @@ class HPXMLDefaults
     fail "Unexpected orientation: #{orientation}."
   end
 
+  # Converts an HPXML azimuth to a closest HPXML orientation.
+  #
+  # @param azimuth [Integer] (degrees)
+  # @return [String] HPXML orientation enumeration
   def self.get_orientation_from_azimuth(azimuth)
     return if azimuth.nil?
 
@@ -3316,7 +3831,16 @@ class HPXMLDefaults
     end
   end
 
-  def self.get_nbeds_adjusted_for_operational_calculation(hpxml_bldg)
+  # Gets the equivalent number of bedrooms for an operational calculation (i.e., when number
+  # of occupants are provided in the HPXML); this is an adjustment to the ANSI 301 or Building
+  # America equations, which are based on number of bedrooms.
+  #
+  # This is used to adjust occupancy-driven end uses from asset calculations (based on number
+  # of bedrooms) to operational calculations (based on number of occupants).
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Double] Equivalent number of bedrooms
+  def self.get_equivalent_nbeds_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
     unit_type = hpxml_bldg.building_construction.residential_facility_type
     if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
@@ -3328,6 +3852,11 @@ class HPXMLDefaults
     end
   end
 
+  # Gets the default assumption for whether there's a flue/chimney in conditioned space.
+  # Determined by whether we find any systems indicating this is likely the case.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Boolean] Default value for presence of flue/chimney in conditioned space
   def self.get_default_flue_or_chimney_in_conditioned_space(hpxml_bldg)
     # Check for atmospheric heating system in conditioned space
     hpxml_bldg.heating_systems.each do |heating_system|
@@ -3368,27 +3897,81 @@ class HPXMLDefaults
     return false
   end
 
-  def self.get_default_latitude(latitude, epw_file)
+  # Gets the default latitude from the HPXML file or, as backup, weather file.
+  #
+  # @param latitude [Double] Latitude from the HPXML file (degrees)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Double] Default value for latitude (degrees)
+  def self.get_default_latitude(latitude, weather)
     return latitude unless latitude.nil?
 
-    return epw_file.latitude
+    return weather.header.Latitude
   end
 
-  def self.get_default_longitude(longitude, epw_file)
+  # Gets the default longitude from the HPXML file or, as backup, weather file.
+  #
+  # @param longitude [Double] Longitude from the HPXML file (degrees)
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Double] Default value for longitude (degrees)
+  def self.get_default_longitude(longitude, weather)
     return longitude unless longitude.nil?
 
-    return epw_file.longitude
+    return weather.header.Longitude
   end
 
-  def self.get_default_time_zone(time_zone, epw_file)
+  # Gets the default time zone from the HPXML file or, as backup, weather file.
+  #
+  # @param time_zone [Double] Time zone (UTC offset) from the HPXML file
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Double] Default value for time zone (UTC offset)
+  def self.get_default_time_zone(time_zone, weather)
     return time_zone unless time_zone.nil?
 
-    return epw_file.timeZone
+    return weather.header.TimeZone
   end
 
-  def self.get_default_state_code(state_code, epw_file)
+  # Gets the default state code from the HPXML file or, as backup, weather file.
+  #
+  # @param state_code [String] State code from the HPXML file
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [String] Uppercase state code
+  def self.get_default_state_code(state_code, weather)
     return state_code unless state_code.nil?
 
-    return epw_file.stateProvinceRegion.upcase
+    return weather.header.StateProvinceRegion.upcase
+  end
+
+  # Removes any zones/spaces that were automatically created in the add_zones_spaces_if_needed method.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.cleanup_zones_spaces(hpxml_bldg)
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants::AutomaticallyAdded }
+    auto_space.delete if not auto_space.nil?
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants::AutomaticallyAdded }
+    auto_zone.delete if not auto_zone.nil?
+  end
+
+  # Get the default weekday/weekend schedule fractions and monthly multipliers for each end use.
+  #
+  # @return [Hash] { schedule_name => { element => values, ... }, ... }
+  def self.get_default_schedules_csv_data()
+    default_schedules_csv = File.join(File.dirname(__FILE__), 'data', 'default_schedules.csv')
+    if not File.exist?(default_schedules_csv)
+      fail 'Could not find default_schedules.csv'
+    end
+
+    require 'csv'
+    default_schedules_csv_data = {}
+    CSV.foreach(default_schedules_csv, headers: true) do |row|
+      schedule_name = row['Schedule Name']
+      element = row['Element']
+      values = row['Values']
+
+      default_schedules_csv_data[schedule_name] = {} if !default_schedules_csv_data.keys.include?(schedule_name)
+      default_schedules_csv_data[schedule_name][element] = values
+    end
+
+    return default_schedules_csv_data
   end
 end
