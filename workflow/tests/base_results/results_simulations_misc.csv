@@ -193,6 +193,7 @@ base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml,143.0,0.0,1354.7
 base-hvac-air-to-air-heat-pump-1-speed-research-features.xml,128.667,0.0,1354.7,998.0,11924.7,2736.4,20130.4,9707.8,20130.4,61.55,33.665,0.0
 base-hvac-air-to-air-heat-pump-1-speed-seer2-hspf2.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7092.4,3680.9,7092.4,24.683,16.2,0.0
 base-hvac-air-to-air-heat-pump-1-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7092.4,3686.8,7092.4,24.683,16.2,0.0
+base-hvac-air-to-air-heat-pump-2-speed-research-features.xml,0.0,0.0,1354.7,998.0,11924.7,2736.4,19281.2,8135.7,19281.2,56.584,28.32,0.0
 base-hvac-air-to-air-heat-pump-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7067.1,3208.0,7067.1,24.675,17.153,0.0
 base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4175.1,2921.5,4175.1,22.454,15.609,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3203.8,2926.5,3203.8,22.934,17.734,0.0
@@ -208,7 +209,7 @@ base-hvac-air-to-air-heat-pump-var-speed-detailed-performance-other-temperatures
 base-hvac-air-to-air-heat-pump-var-speed-detailed-performance.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5193.0,3838.4,5193.0,24.671,18.025,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-10-mins.xml,164.167,0.0,1354.7,998.0,11171.7,2563.6,15873.3,4519.8,15873.3,61.922,18.014,0.0
 base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml,29.0,0.0,1354.7,998.0,11171.6,2563.5,5368.2,3149.4,5368.2,26.988,19.449,0.0
-base-hvac-air-to-air-heat-pump-var-speed-research-features.xml,888.417,0.0,1354.7,998.0,11924.7,2736.4,19421.6,7031.9,19421.6,59.533,12.943,0.0
+base-hvac-air-to-air-heat-pump-var-speed-research-features.xml,158.0,0.0,1354.7,998.0,11171.6,2563.5,7758.5,2802.4,7758.5,27.266,18.049,0.0
 base-hvac-air-to-air-heat-pump-var-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5876.1,3140.0,5876.1,24.733,18.05,0.0
 base-hvac-autosize-sizing-controls.xml,0.0,0.0,1910.5,1245.6,22082.2,3602.7,2465.6,3560.8,3560.8,17.378,14.875,0.0
 base-hvac-autosize.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,2062.2,3796.6,3796.6,23.99,18.454,0.0

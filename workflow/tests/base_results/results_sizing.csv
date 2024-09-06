@@ -38,6 +38,12 @@ denver-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backup
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backup-supplemental.xml,31131.0,31131.0,19379.0,970.0,1038.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-MaxLoad-backup-emergency.xml,65875.0,65875.0,31131.0,2053.0,2196.0
 denver-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-MaxLoad-backup-supplemental.xml,65875.0,65875.0,0.0,2053.0,2196.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-ACCA-backup-emergency.xml,26346.0,26346.0,31131.0,821.0,878.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-ACCA-backup-supplemental.xml,26346.0,26346.0,18616.0,821.0,878.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-HERS-backup-emergency.xml,31131.0,31131.0,31131.0,970.0,1038.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-HERS-backup-supplemental.xml,31131.0,31131.0,18616.0,970.0,1038.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-MaxLoad-backup-emergency.xml,65534.0,65534.0,31131.0,2043.0,2184.0
+denver-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-MaxLoad-backup-supplemental.xml,65534.0,65534.0,0.0,2043.0,2184.0
 denver-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-ACCA-backup-emergency.xml,26346.0,26346.0,31131.0,821.0,878.0
 denver-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-ACCA-backup-supplemental.xml,26346.0,26346.0,18616.0,821.0,878.0
 denver-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-HERS-backup-emergency.xml,31131.0,31131.0,31131.0,970.0,1038.0
@@ -390,6 +396,12 @@ houston-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backu
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-HERS-backup-supplemental.xml,29879.0,29879.0,0.0,778.0,996.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-MaxLoad-backup-emergency.xml,30956.0,30956.0,19975.0,806.0,1032.0
 houston-hvac-autosize-air-to-air-heat-pump-1-speed-sizing-methodology-MaxLoad-backup-supplemental.xml,30956.0,30956.0,0.0,806.0,1032.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-ACCA-backup-emergency.xml,29486.0,29486.0,19975.0,768.0,983.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-ACCA-backup-supplemental.xml,29486.0,29486.0,0.0,768.0,983.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-HERS-backup-emergency.xml,29486.0,29486.0,19975.0,768.0,983.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-HERS-backup-supplemental.xml,29486.0,29486.0,0.0,768.0,983.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-MaxLoad-backup-emergency.xml,30865.0,30865.0,19975.0,804.0,1029.0
+houston-hvac-autosize-air-to-air-heat-pump-2-speed-research-features-sizing-methodology-MaxLoad-backup-supplemental.xml,30865.0,30865.0,0.0,804.0,1029.0
 houston-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-ACCA-backup-emergency.xml,29486.0,29486.0,19975.0,768.0,983.0
 houston-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-ACCA-backup-supplemental.xml,29486.0,29486.0,0.0,768.0,983.0
 houston-hvac-autosize-air-to-air-heat-pump-2-speed-sizing-methodology-HERS-backup-emergency.xml,29486.0,29486.0,19975.0,768.0,983.0
