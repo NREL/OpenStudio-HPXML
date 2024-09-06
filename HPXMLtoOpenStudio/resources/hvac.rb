@@ -4783,14 +4783,14 @@ module HVAC
     program_calling_manager.addProgram(fault_program)
   end
 
-  # TODO
+  # Calculate delivered cooling q_dot and compressor power p_dot during defrost
   #
-  # @param heat_pump [TODO] TODO
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @param design_airflow [TODO] TODO
-  # @param max_heating_airflow [TODO] TODO
-  # @param fan_watts_per_cfm [TODO] TODO
-  # @return [TODO] TODO
+  # @param design_airflow [Float] Heat pump design air flow rate
+  # @param max_heating_airflow [Float] Maximum heat pump heating air flow rate
+  # @param fan_watts_per_cfm [Float] Heat pump watts per cfm
+  # @return [Array<Float, Float>] Calculated delivered cooling q_dot and compressor power p_dot
   def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
     # Calculate q_dot and p_dot
     # q_dot is used for EMS program to account for introduced cooling load and supp coil power consumption by actuating other equipment objects
@@ -4827,16 +4827,16 @@ module HVAC
     return q_dot_defrost, p_dot_defrost
   end
 
-  # TODO
+  # Create EMS program and Other equipment objects to account for delivered cooling and supplemental heating energy during defrost
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param htg_coil [TODO] TODO
+  # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
   # @param air_loop_unitary [OpenStudio::Model::AirLoopHVACUnitarySystem] Air loop for the HVAC system
-  # @param conditioned_space [TODO] TODO
-  # @param htg_supp_coil [TODO] TODO
-  # @param heat_pump [TODO] TODO
-  # @param q_dot_defrost [TODO] TODO
-  # @return [TODO] TODO
+  # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
+  # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
+  # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
+  # @param q_dot_defrost [Float] Calculated delivered cooling q_dot
+  # @return [nil]
   def self.apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, heat_pump, q_dot_defrost)
     if htg_supp_coil.nil?
       backup_system = heat_pump.backup_system
