@@ -401,7 +401,6 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     # Get HPXML values
     vent_fan = hpxml_bldg.ventilation_fans.find { |f| f.used_for_whole_building_ventilation }
     vent_fan_cfm = vent_fan.oa_unit_flow_rate
-    vent_fan_power = vent_fan.fan_power
     vent_fan_mins = vent_fan.hours_in_operation / 24.0 * 60.0
     suppl_vent_fan_cfm = vent_fan.cfis_supplemental_fan.oa_unit_flow_rate
     suppl_vent_fan_power = vent_fan.cfis_supplemental_fan.fan_power
@@ -412,7 +411,6 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     assert_in_epsilon(suppl_vent_fan_cfm, UnitConversions.convert(program_values['cfis_suppl_Q_oa'].sum, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, program_values['cfis_fan_w'].sum, 0.01)
     assert_in_epsilon(suppl_vent_fan_power, program_values['cfis_suppl_fan_w'].sum, 0.01)
     assert_in_epsilon(vent_fan_mins, program_values['cfis_t_min_hr_open'].sum, 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
@@ -498,7 +496,7 @@ class HPXMLtoOpenStudioAirflowTest < Minitest::Test
     vent_fan_power_ervhrv = vent_fan_ervhrv.map { |f| f.average_unit_fan_power }.sum(0.0)
     vent_fan_cfis = whole_fans.select { |f| f.fan_type == HPXML::MechVentTypeCFIS }
     vent_fan_cfm_cfis = vent_fan_cfis.map { |f| f.oa_unit_flow_rate }.sum(0.0)
-    vent_fan_power_cfis = vent_fan_cfis.map { |f| f.fan_power }.sum(0.0)
+    vent_fan_power_cfis = vent_fan_cfis.select { |f| f.cfis_addtl_runtime_operating_mode == HPXML::CFISModeAirHandler }.map { |f| f.fan_power }.sum(0.0)
     vent_fan_mins_cfis = vent_fan_cfis.map { |f| f.hours_in_operation / 24.0 * 60.0 }.sum(0.0)
 
     # total mech vent fan power excluding cfis
