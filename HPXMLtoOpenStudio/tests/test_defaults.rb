@@ -1059,7 +1059,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
   def test_windows
     # Test inputs not overridden by defaults
-    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-windows-shading.xml')
+    hpxml, hpxml_bldg = _create_hpxml('base-enclosure-windows-shading-factors.xml')
     hpxml_bldg.windows.each do |window|
       window.fraction_operable = 0.5
       window.exterior_shading_factor_summer = 0.44
