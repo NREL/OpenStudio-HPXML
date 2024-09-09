@@ -1563,7 +1563,7 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
   
-         \- **external overhangs** or **awnings**: 0.0 (unless ``Overhangs`` are specified, in which case shading is explicitly modeled)
+         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`overhangs` are specified, in which case shading is explicitly modeled)
          
          \- **solar screens**: 0.7
          
