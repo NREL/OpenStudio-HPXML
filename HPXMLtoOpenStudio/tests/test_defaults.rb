@@ -1098,7 +1098,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].frame_type = HPXML::WindowFrameTypeAluminum
     hpxml_bldg.windows[0].glass_layers = HPXML::WindowLayersSinglePane
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    default_hpxml, default_hpxml_bldg = _test_measure()
+    _default_hpxml, default_hpxml_bldg = _test_measure()
 
     assert_equal(false, default_hpxml_bldg.windows[0].thermal_break)
     assert_equal(HPXML::WindowGlassTypeClear, default_hpxml_bldg.windows[0].glass_type)
@@ -1111,7 +1111,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].frame_type = HPXML::WindowFrameTypeMetal
     hpxml_bldg.windows[0].glass_layers = HPXML::WindowLayersDoublePane
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    default_hpxml, default_hpxml_bldg = _test_measure()
+    _default_hpxml, default_hpxml_bldg = _test_measure()
 
     assert_equal(true, default_hpxml_bldg.windows[0].thermal_break)
     assert_equal(HPXML::WindowGlassTypeClear, default_hpxml_bldg.windows[0].glass_type)
@@ -1125,7 +1125,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].glass_layers = HPXML::WindowLayersTriplePane
     hpxml_bldg.windows[0].glass_type = HPXML::WindowGlassTypeLowE
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-    default_hpxml, default_hpxml_bldg = _test_measure()
+    _default_hpxml, default_hpxml_bldg = _test_measure()
 
     assert_nil(default_hpxml_bldg.windows[0].thermal_break)
     assert_equal(HPXML::WindowGlassTypeLowE, default_hpxml_bldg.windows[0].glass_type)
@@ -1164,11 +1164,59 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
       hpxml_bldg.windows[0].glass_type = glass_type
       hpxml_bldg.windows[0].gas_fill = gas_fill
       XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
-      default_hpxml, default_hpxml_bldg = _test_measure()
+      _default_hpxml, default_hpxml_bldg = _test_measure()
 
       assert_equal(ufactor, default_hpxml_bldg.windows[0].ufactor)
       assert_equal(shgc, default_hpxml_bldg.windows[0].shgc)
     end
+  end
+
+  def test_windows_shading_types
+    # Test defaults w/ deciduous tree shading
+    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.windows[0].exterior_shading_factor_summer = nil
+    hpxml_bldg.windows[0].exterior_shading_factor_winter = nil
+    hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(0.1, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.25, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ overhangs not explicitly defined
+    hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeExternalOverhangs
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(0.0, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.0, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ overhangs explicitly defined
+    hpxml_bldg.windows[0].overhangs_depth = 2.0
+    hpxml_bldg.windows[0].overhangs_distance_to_top_of_window = 1.0
+    hpxml_bldg.windows[0].overhangs_distance_to_bottom_of_window = 4.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_nil(default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_nil(default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ neighbor buildings not explicitly defined
+    hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeBuilding
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(0.75, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.25, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ neighbor buildings explicitly defined
+    hpxml_bldg.neighbor_buildings.add(azimuth: 0,
+                                      distance: 10)
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_nil(default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_nil(default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
   end
 
   def test_skylights

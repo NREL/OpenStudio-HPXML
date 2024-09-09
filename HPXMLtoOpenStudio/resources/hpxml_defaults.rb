@@ -1548,12 +1548,17 @@ module HPXMLDefaults
         window.interior_shading_factor_winter = default_shade_winter
         window.interior_shading_factor_winter_isdefaulted = true
       end
-      if window.exterior_shading_factor_summer.nil?
-        window.exterior_shading_factor_summer = 1.0
+      if window.exterior_shading_type.nil?
+        window.exterior_shading_type = HPXML::ExteriorShadingTypeNone
+        window.exterior_shading_type_isdefaulted = true
+      end
+      default_ext_sf_summer, default_ext_sf_winter = get_default_window_exterior_shading_factors(window, hpxml_bldg)
+      if window.exterior_shading_factor_summer.nil? && (not default_ext_sf_summer.nil?)
+        window.exterior_shading_factor_summer = default_ext_sf_summer
         window.exterior_shading_factor_summer_isdefaulted = true
       end
-      if window.exterior_shading_factor_winter.nil?
-        window.exterior_shading_factor_winter = 1.0
+      if window.exterior_shading_factor_winter.nil? && (not default_ext_sf_winter.nil?)
+        window.exterior_shading_factor_winter = default_ext_sf_winter
         window.exterior_shading_factor_winter_isdefaulted = true
       end
       if window.fraction_operable.nil?
@@ -3965,6 +3970,49 @@ module HPXMLDefaults
       return true
     end
     return false
+  end
+
+  # Gets the default summer/winter exterior shading factors for the window.
+  #
+  # @param window [HPXML::Window] The window of interest
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Array<Double, Double>] The summer and winter shading factors
+  def self.get_default_window_exterior_shading_factors(window, hpxml_bldg)
+    ext_sf_summer, ext_sf_winter = nil, nil
+    if [HPXML::ExteriorShadingTypeExternalOverhangs,
+        HPXML::ExteriorShadingTypeAwnings].include? window.exterior_shading_type
+      if window.overhangs_depth.to_f > 0
+        # Explicitly modeling the overhangs, so don't double count the shading effect
+        ext_sf_summer = nil
+        ext_sf_winter = nil
+      else
+        ext_sf_summer = 0.0
+        ext_sf_winter = 0.0
+      end
+    elsif [HPXML::ExteriorShadingTypeBuilding].include? window.exterior_shading_type
+      if hpxml_bldg.neighbor_buildings.size > 0
+        # Explicitly modeling neighboring building, so don't double count the shading effect
+        ext_sf_summer = nil
+        ext_sf_winter = nil
+      else
+        ext_sf_summer = 0.75
+        ext_sf_winter = 0.25
+      end
+    else
+      ext_sf_summer = { HPXML::ExteriorShadingTypeDeciduousTree => 0.1,
+                        HPXML::ExteriorShadingTypeEvergreenTree => 0.1,
+                        HPXML::ExteriorShadingTypeNone => 1.0,
+                        HPXML::ExteriorShadingTypeOther => 0.5,
+                        HPXML::ExteriorShadingTypeSolarFilm => 0.3,
+                        HPXML::ExteriorShadingTypeSolarScreens => 0.7 }[window.exterior_shading_type]
+      ext_sf_winter = { HPXML::ExteriorShadingTypeDeciduousTree => 0.25,
+                        HPXML::ExteriorShadingTypeEvergreenTree => 0.1,
+                        HPXML::ExteriorShadingTypeNone => 1.0,
+                        HPXML::ExteriorShadingTypeOther => 0.5,
+                        HPXML::ExteriorShadingTypeSolarFilm => 0.3,
+                        HPXML::ExteriorShadingTypeSolarScreens => 0.7 }[window.exterior_shading_type]
+    end
+    return ext_sf_summer, ext_sf_winter
   end
 
   # Gets the default latitude from the HPXML file or, as backup, weather file.

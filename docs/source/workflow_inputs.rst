@@ -1526,10 +1526,11 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
   ``Azimuth`` or ``Orientation``                integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
   ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description
   ``SHGC`` and/or ``GlassLayers``               double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
-  ``ExteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
-  ``ExteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        [#]_       Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        [#]_       Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``ExteriorShading/Type``                      string                               See [#]_                  No        none       Exterior shading type
+  ``ExteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``ExteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
   ``StormWindow/GlassType``                     string                               See [#]_                  No                   Type of storm window glass
   ``Overhangs``                                 element                                                        No        <none>     Presence of overhangs (including roof eaves)
   ``FractionOperable``                          double             frac              >= 0, <= 1                No        0.67       Operable fraction [#]_
@@ -1540,7 +1541,44 @@ Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails
          The ratio of total area to primary flat exposure is typically around 1.15 for bay windows and 2.0 for garden windows.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
+  .. [#] ExteriorShading/Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
+  .. [#] If ExteriorShading/SummerShadingCoefficient not provided, defaults as follows:
+  
+         \- **external overhangs** or **awnings**: 0.0 (unless ``Overhangs`` are specified, in which case shading is explicitly modeled)
+         
+         \- **solar screens**: 0.7
+         
+         \- **solar film**: 0.3
+         
+         \- **deciduous tree**: 0.1
+         
+         \- **evergreen tree**: 0.1
+         
+         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         
+         \- **other**: 0.5
+         
+         \- **none**: 1.0
+  
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+  .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
+  
+         \- **external overhangs** or **awnings**: 0.0 (unless ``Overhangs`` are specified, in which case shading is explicitly modeled)
+         
+         \- **solar screens**: 0.7
+         
+         \- **solar film**: 0.3
+         
+         \- **deciduous tree**: 0.25
+         
+         \- **evergreen tree**: 0.1
+         
+         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         
+         \- **other**: 0.5
+         
+         \- **none**: 1.0
+
   .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
   
          Interior shading coefficient = 0.92 - (0.21 * SHGC)

@@ -2302,8 +2302,12 @@ module Constructions
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml_header, hpxml_bldg)
-    sf_summer = window_or_skylight.interior_shading_factor_summer * window_or_skylight.exterior_shading_factor_summer
-    sf_winter = window_or_skylight.interior_shading_factor_winter * window_or_skylight.exterior_shading_factor_winter
+    isf_summer = window_or_skylight.interior_shading_factor_summer
+    isf_winter = window_or_skylight.interior_shading_factor_winter
+    esf_summer = window_or_skylight.exterior_shading_factor_summer.nil? ? 1.0 : window_or_skylight.exterior_shading_factor_summer
+    esf_winter = window_or_skylight.exterior_shading_factor_winter.nil? ? 1.0 : window_or_skylight.exterior_shading_factor_winter
+    sf_summer = isf_summer * esf_summer
+    sf_winter = isf_winter * esf_winter
     if (sf_summer < 1.0) || (sf_winter < 1.0)
       # Apply shading
 

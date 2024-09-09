@@ -720,7 +720,7 @@ module HVACSizing
       zone = space.zone
 
       window_isc = window.interior_shading_factor_summer
-      window_esc = window.exterior_shading_factor_summer
+      window_esc = window.exterior_shading_factor_summer.nil? ? 1.0 : window.exterior_shading_factor_summer
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -768,8 +768,6 @@ module HVACSizing
         htm_n *= window_esc
 
         if window.exterior_shading_type == HPXML::ExteriorShadingTypeSolarScreens
-          # FUTURE: For now, ACCA is okay with us bypassing our inputs to manually test this.
-          # Bob Ross 3-4: Sunscreen on south/west windows
           sunscreen_sc = 0.25
           clg_htm = (htm_d - htm_n) * sunscreen_sc + htm_n
         elsif window.overhangs_depth.to_f > 0
@@ -833,7 +831,7 @@ module HVACSizing
       zone = space.zone
 
       skylight_isc = skylight.interior_shading_factor_summer
-      skylight_esc = skylight.exterior_shading_factor_summer
+      skylight_esc = skylight.exterior_shading_factor_summer.nil? ? 1.0 : skylight.exterior_shading_factor_summer
       cnt45 = (get_mj_azimuth(skylight.azimuth) / 45.0).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 

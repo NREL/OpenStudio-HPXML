@@ -5676,7 +5676,7 @@ class HPXML < Object
         else
           XMLHelper.add_attribute(sys_id, 'id', @exterior_shading_id)
         end
-        XMLHelper.add_element(exterior_shading, 'Type', @exterior_shading_type, :string) unless @exterior_shading_type.nil?
+        XMLHelper.add_element(exterior_shading, 'Type', @exterior_shading_type, :string, @exterior_shading_type_isdefaulted) unless @exterior_shading_type.nil?
         XMLHelper.add_element(exterior_shading, 'SummerShadingCoefficient', @exterior_shading_factor_summer, :float, @exterior_shading_factor_summer_isdefaulted) unless @exterior_shading_factor_summer.nil?
         XMLHelper.add_element(exterior_shading, 'WinterShadingCoefficient', @exterior_shading_factor_winter, :float, @exterior_shading_factor_winter_isdefaulted) unless @exterior_shading_factor_winter.nil?
       end
@@ -5688,7 +5688,7 @@ class HPXML < Object
         else
           XMLHelper.add_attribute(sys_id, 'id', @interior_shading_id)
         end
-        XMLHelper.add_element(interior_shading, 'Type', @interior_shading_type, :string) unless @interior_shading_type.nil?
+        XMLHelper.add_element(interior_shading, 'Type', @interior_shading_type, :string, @interior_shading_type_isdefaulted) unless @interior_shading_type.nil?
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end

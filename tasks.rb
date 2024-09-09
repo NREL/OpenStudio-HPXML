@@ -912,7 +912,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[3].ufactor = nil
       hpxml_bldg.windows[3].shgc = nil
       hpxml_bldg.windows[3].glass_layers = HPXML::WindowLayersGlassBlock
-    elsif ['base-enclosure-windows-shading.xml'].include? hpxml_file
+    elsif ['base-enclosure-windows-shading-factors.xml'].include? hpxml_file
       hpxml_bldg.windows[1].exterior_shading_factor_summer = 0.5
       hpxml_bldg.windows[1].exterior_shading_factor_winter = 0.5
       hpxml_bldg.windows[1].interior_shading_factor_summer = 0.5
@@ -925,6 +925,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[3].exterior_shading_factor_winter = 1.0
       hpxml_bldg.windows[3].interior_shading_factor_summer = 0.0
       hpxml_bldg.windows[3].interior_shading_factor_winter = 1.0
+    elsif ['base-enclosure-windows-shading-types.xml'].include? hpxml_file
+      hpxml_bldg.windows.each do |window|
+        window.interior_shading_factor_summer = nil
+        window.interior_shading_factor_winter = nil
+      end
+      hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
+      hpxml_bldg.windows[1].exterior_shading_type = HPXML::ExteriorShadingTypeSolarScreens
+      hpxml_bldg.windows[2].exterior_shading_type = HPXML::ExteriorShadingTypeExternalOverhangs
+      hpxml_bldg.windows[2].overhangs_depth = 2.0
+      hpxml_bldg.windows[2].overhangs_distance_to_top_of_window = 1.0
+      hpxml_bldg.windows[2].overhangs_distance_to_bottom_of_window = 4.0
+      hpxml_bldg.windows[3].exterior_shading_type = HPXML::ExteriorShadingTypeBuilding
     elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
       hpxml_bldg.partition_wall_mass.area_fraction = 0.8
       hpxml_bldg.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard

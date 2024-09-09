@@ -1773,7 +1773,10 @@
   "sample_files/base-enclosure-windows-physical-properties.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
-  "sample_files/base-enclosure-windows-shading.xml": {
+  "sample_files/base-enclosure-windows-shading-factors.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
+  "sample_files/base-enclosure-windows-shading-types.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
   "sample_files/base-enclosure-windows-shading-seasons.xml": {
