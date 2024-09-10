@@ -2302,16 +2302,35 @@ module Constructions
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
   def self.apply_window_skylight_shading(model, window_or_skylight, sub_surface, shading_schedules, hpxml_header, hpxml_bldg)
-    # Interior/exterior shading factors
+    # Interior shading factors
     isf_summer = window_or_skylight.interior_shading_factor_summer
     isf_winter = window_or_skylight.interior_shading_factor_winter
+
+    # Exterior shading factors
     esf_summer = window_or_skylight.exterior_shading_factor_summer.nil? ? 1.0 : window_or_skylight.exterior_shading_factor_summer
     esf_winter = window_or_skylight.exterior_shading_factor_winter.nil? ? 1.0 : window_or_skylight.exterior_shading_factor_winter
+    if window_or_skylight.is_a? HPXML::Window
+      # These inputs currently only pertain to windows (not skylights)
+      if [HPXML::ExteriorShadingTypeExternalOverhangs,
+          HPXML::ExteriorShadingTypeAwnings].include? window_or_skylight.exterior_shading_type
+        if window_or_skylight.overhangs_depth.to_f > 0
+          # Explicitly modeling the overhangs, so don't double count the shading effect
+          esf_summer = 1.0
+          esf_winter = 1.0
+        end
+      elsif [HPXML::ExteriorShadingTypeBuilding].include? window_or_skylight.exterior_shading_type
+        if hpxml_bldg.neighbor_buildings.size > 0
+          # Explicitly modeling neighboring building, so don't double count the shading effect
+          esf_summer = 1.0
+          esf_winter = 1.0
+        end
+      end
+    end
 
     # Insect screen factors
     is_summer = 1.0
     is_winter = 1.0
-    if (not window_or_skylight.insect_screen_present.nil?) && window_or_skylight.insect_screen_present
+    if window_or_skylight.respond_to?(:insect_screen_present) && window_or_skylight.insect_screen_present
       # Values based on "Measurement of the Solar Heat Gain Coefficient and U Value of Windows
       # with Insect Screens" (1999) by Brunger, Dubrous, and Harrison
       is_int_reduction = 0.15 # 15%
@@ -2325,7 +2344,7 @@ module Constructions
       end
     end
 
-    # Total factors
+    # Total combined factors
     sf_summer = isf_summer * esf_summer * is_summer
     sf_winter = isf_winter * esf_winter * is_winter
 

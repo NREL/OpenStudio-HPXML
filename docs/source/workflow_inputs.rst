@@ -1518,74 +1518,30 @@ HPXML Windows
 
 Each window or glass door area is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Windows/Window``.
 
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
-  Element                                       Type               Units             Constraints               Required  Default    Notes
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
-  ``SystemIdentifier``                          id                                                             Yes                  Unique identifier
-  ``Area``                                      double             ft2               > 0                       Yes                  Total area [#]_
-  ``Azimuth`` or ``Orientation``                integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
-  ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description [#]_
-  ``SHGC`` and/or ``GlassLayers``               double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
-  ``ExteriorShading/Type``                      string                               See [#]_                  No        none       Exterior shading type
-  ``ExteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
-  ``ExteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
-  ``InsectScreen``                              element                                                        No        <none>     Presence of insect screen [#]_
-  ``StormWindow``                               element                                                        No        <none>     Presence of storm window [#]_
-  ``Overhangs``                                 element                                                        No        <none>     Presence of overhangs (including roof eaves) [#]_
-  ``FractionOperable``                          double             frac              >= 0, <= 1                No        0.67       Operable fraction [#]_
-  ``AttachedToWall``                            idref                                See [#]_                  Yes                  ID of attached wall
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
+  Element                             Type               Units             Constraints               Required  Default    Notes
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
+  ``SystemIdentifier``                id                                                             Yes                  Unique identifier
+  ``Area``                            double             ft2               > 0                       Yes                  Total area [#]_
+  ``Azimuth`` or ``Orientation``      integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
+  ``UFactor`` and/or ``GlassLayers``  double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description [#]_
+  ``SHGC`` and/or ``GlassLayers``     double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
+  ``ExteriorShading``                 element                                                        No        <none>     Presence of exterior shading [#]_
+  ``InteriorShading``                 element                                                        No        <present>  Presence of interior shading [#]_
+  ``InsectScreen``                    element                                                        No        <none>     Presence of insect screen [#]_
+  ``StormWindow``                     element                                                        No        <none>     Presence of storm window [#]_
+  ``Overhangs``                       element                                                        No        <none>     Presence of overhangs (including roof eaves) [#]_
+  ``FractionOperable``                double             frac              >= 0, <= 1                No        0.67       Operable fraction [#]_
+  ``AttachedToWall``                  idref                                See [#]_                  Yes                  ID of attached wall
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
 
   .. [#] For bay or garden windows, this should represent the *total* area, not just the primary flat exposure.
          The ratio of total area to primary flat exposure is typically around 1.15 for bay windows and 2.0 for garden windows.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north".
   .. [#] GlassLayers choices are "single-pane", "double-pane", "triple-pane", or "glass block".
   .. [#] If GlassLayers is provided, additional inputs are described in :ref:`window_lookup`.
-  .. [#] ExteriorShading/Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
-  .. [#] If ExteriorShading/SummerShadingCoefficient not provided, defaults as follows:
-  
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
-         
-         \- **solar screens**: 0.7
-         
-         \- **solar film**: 0.3
-         
-         \- **deciduous tree**: 0.1
-         
-         \- **evergreen tree**: 0.1
-         
-         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
-         
-         \- **other**: 0.5
-         
-         \- **none**: 1.0
-  
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
-  
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
-         
-         \- **solar screens**: 0.7
-         
-         \- **solar film**: 0.3
-         
-         \- **deciduous tree**: 0.25
-         
-         \- **evergreen tree**: 0.1
-         
-         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
-         
-         \- **other**: 0.5
-         
-         \- **none**: 1.0
-
-  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
-  
-         Interior shading coefficient = 0.92 - (0.21 * SHGC)
-         
-  .. [#] InteriorShading/WinterShadingCoefficient default value is the same as InteriorShading/SummerShadingCoefficient default value.
+  .. [#] If ExteriorShading is provided, additional inputs are described in :ref:`window_exterior_shading`.
+  .. [#] If InteriorShading is provided, additional inputs are described in :ref:`window_interior_shading`.
   .. [#] If InsectScreen is provided, additional inputs are described in :ref:`window_insect_screen`.
   .. [#] If StormWindow is provided, additional inputs are described in :ref:`window_storm`.
   .. [#] If Overhangs is provided, additional inputs are described in :ref:`window_overhangs`.
@@ -1648,6 +1604,80 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 
   OpenStudio-HPXML will return an error if the combination of window properties is not in the above table.
 
+.. _window_exterior_shading:
+
+HPXML Exterior Shading
+~~~~~~~~~~~~~~~~~~~~~~
+
+If exterior shading is present, additional information is entered in ``ExteriorShading``.
+
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  Element                       Type    Units  Constraints  Required  Default    Notes
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  ``Type``                      string         See [#]_     No        none       Exterior shading type
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+
+  .. [#] ExteriorShading/Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
+  .. [#] If ExteriorShading/SummerShadingCoefficient not provided, defaults as follows:
+  
+         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
+         
+         \- **solar screens**: 0.7
+         
+         \- **solar film**: 0.3
+         
+         \- **deciduous tree**: 0.1
+         
+         \- **evergreen tree**: 0.1
+         
+         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         
+         \- **other**: 0.5
+         
+         \- **none**: 1.0
+  
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+  .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
+  
+         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
+         
+         \- **solar screens**: 0.7
+         
+         \- **solar film**: 0.3
+         
+         \- **deciduous tree**: 0.25
+         
+         \- **evergreen tree**: 0.1
+         
+         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         
+         \- **other**: 0.5
+         
+         \- **none**: 1.0
+
+.. _window_interior_shading:
+
+HPXML Interior Shading
+~~~~~~~~~~~~~~~~~~~~~~
+
+If interior shading is present, additional information is entered in ``InteriorShading``.
+
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  Element                       Type    Units  Constraints  Required  Default    Notes
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+
+  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
+  
+         Interior shading coefficient = 0.92 - (0.21 * SHGC)
+         
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+  .. [#] InteriorShading/WinterShadingCoefficient default value is the same as InteriorShading/SummerShadingCoefficient default value.
+
 .. _window_insect_screen:
 
 HPXML Insect Screen
@@ -1659,12 +1689,13 @@ If an insect screen is specified, additional information is entered in ``InsectS
   Element                       Type      Units   Constraints  Required  Default   Notes
   ============================  ========  ======  ===========  ========  ========  ========================================================
   ``Location``                  string            See [#]_     No        exterior  Whether the screen is on the interior or exterior of the glass
-  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  How much of the window area is covered by the screen in the summer
+  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  How much of the window area is covered by the screen in the summer [#]_
   ``WinterFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  How much of the window area is covered by the screen in the winter
   ============================  ========  ======  ===========  ========  ========  ========================================================
 
   .. [#] Location choices are "interior" or "exterior".
   .. [#] If SummerFractionCovered not provided, defaults to the same value as FractionOperable.
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] If WinterFractionCovered not provided, defaults to the same value as FractionOperable.
 
 .. _window_storm:
@@ -1727,31 +1758,30 @@ HPXML Skylights
 
 Each skylight is entered as a ``/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight``.
 
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
-  Element                                       Type               Units             Constraints               Required  Default    Notes
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
-  ``SystemIdentifier``                          id                                                             Yes                  Unique identifier
-  ``Area``                                      double             ft2               > 0                       Yes                  Total area [#]_
-  ``Azimuth`` or ``Orientation``                integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
-  ``UFactor`` and/or ``GlassLayers``            double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description [#]_
-  ``SHGC`` and/or ``GlassLayers``               double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
-  ``ExteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
-  ``ExteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/SummerShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``InteriorShading/WinterShadingCoefficient``  double             frac              >= 0, <= 1                No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
-  ``StormWindow``                               element                                                        No        <none>     Presence of storm window [#]_
-  ``AttachedToRoof``                            idref                                See [#]_                  Yes                  ID of attached roof
-  ``AttachedToFloor``                           idref                                See [#]_                  See [#]_             ID of attached attic floor
-  ``extension/Curb``                            element                                                        No        <none>     Presence of curb (skylight wall above the roof deck) [#]_
-  ``extension/Shaft``                           element                                                        No        <none>     Presence of shaft (skylight wall below the roof deck) [#]_
-  ============================================  =================  ================  ========================  ========  =========  =============================================================
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
+  Element                             Type               Units             Constraints               Required  Default    Notes
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
+  ``SystemIdentifier``                id                                                             Yes                  Unique identifier
+  ``Area``                            double             ft2               > 0                       Yes                  Total area [#]_
+  ``Azimuth`` or ``Orientation``      integer or string  deg or direction  >= 0, <= 359 or See [#]_  Yes                  Direction (clockwise from North)
+  ``UFactor`` and/or ``GlassLayers``  double or string   Btu/F-ft2-hr      > 0 or See [#]_           Yes                  Full-assembly NFRC U-factor or glass layers description [#]_
+  ``SHGC`` and/or ``GlassLayers``     double or string                     > 0, < 1                  Yes                  Full-assembly NFRC solar heat gain coefficient or glass layers description
+  ``ExteriorShading``                 element                                                        No        <none>     Presence of exterior shading [#]_
+  ``InteriorShading``                 element                                                        No        <none>     Presence of interior shading [#]_
+  ``StormWindow``                     element                                                        No        <none>     Presence of storm window [#]_
+  ``AttachedToRoof``                  idref                                See [#]_                  Yes                  ID of attached roof
+  ``AttachedToFloor``                 idref                                See [#]_                  See [#]_             ID of attached attic floor
+  ``extension/Curb``                  element                                                        No        <none>     Presence of curb (skylight wall above the roof deck) [#]_
+  ``extension/Shaft``                 element                                                        No        <none>     Presence of shaft (skylight wall below the roof deck) [#]_
+  ==================================  =================  ================  ========================  ========  =========  =============================================================
 
   .. [#] For dome skylights, this should represent the *total* area, not just the primary flat exposure.
          The ratio of total area to primary flat exposure is typically around 1.25 for dome skylights.
   .. [#] Orientation choices are "northeast", "east", "southeast", "south", "southwest", "west", "northwest", or "north"
   .. [#] GlassLayers choices are "single-pane", "double-pane", or "triple-pane".
   .. [#] If GlassLayers is provided, additional inputs are described in :ref:`skylight_lookup`.
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+  .. [#] If ExteriorShading is provided, additional inputs are described in :ref:`skylight_exterior_shading`.
+  .. [#] If InteriorShading is provided, additional inputs are described in :ref:`skylight_interior_shading`.
   .. [#] If StormWindow is provided, additional inputs are described in :ref:`skylight_storm`.
   .. [#] AttachedToRoof must reference a ``Roof``.
   .. [#] AttachedToFloor must reference a ``Floor``.
@@ -1811,6 +1841,38 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 .. warning::
 
   OpenStudio-HPXML will return an error if the combination of skylight properties is not in the above table.
+
+.. _skylight_exterior_shading:
+
+HPXML Exterior Shading
+~~~~~~~~~~~~~~~~~~~~~~
+
+If exterior shading is present, additional information is entered in ``ExteriorShading``.
+
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  Element                       Type    Units  Constraints  Required  Default    Notes
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+
+.. _skylight_interior_shading:
+
+HPXML Interior Shading
+~~~~~~~~~~~~~~~~~~~~~~
+
+If interior shading is present, additional information is entered in ``InteriorShading``.
+
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  Element                       Type    Units  Constraints  Required  Default    Notes
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Interior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
+  ============================  ======  =====  ===========  ========  =========  =============================================================
+
+  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
 
 .. _skylight_storm:
 
