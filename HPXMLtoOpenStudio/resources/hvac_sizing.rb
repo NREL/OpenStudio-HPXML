@@ -720,7 +720,6 @@ module HVACSizing
       zone = space.zone
 
       window_isc = window.interior_shading_factor_summer
-      window_esc = window.exterior_shading_factor_summer.nil? ? 1.0 : window.exterior_shading_factor_summer
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -757,6 +756,15 @@ module HVACSizing
         if not hr.nil?
           # Calculate hourly CTD adjusted value for mid-summer
           ctd_adj += hta[mj.daily_range_num][hr]
+        end
+
+        window_esc = 1.0
+        if window.insect_screen_present
+          if window.insect_screen_location == HPXML::LocationInterior
+            window_esc = 1.0 - 0.1 * window.insect_screen_summer_fraction_covered
+          elsif window.insect_screen_location == HPXML::LocationExterior
+            window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
+          end
         end
 
         # Hourly Heat Transfer Multiplier for the given window Direction
@@ -831,7 +839,6 @@ module HVACSizing
       zone = space.zone
 
       skylight_isc = skylight.interior_shading_factor_summer
-      skylight_esc = skylight.exterior_shading_factor_summer.nil? ? 1.0 : skylight.exterior_shading_factor_summer
       cnt45 = (get_mj_azimuth(skylight.azimuth) / 45.0).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(roof.pitch / 12.0), 'rad', 'deg')
 
@@ -890,7 +897,6 @@ module HVACSizing
 
         # Hourly Heat Transfer Multiplier for the given skylight Direction
         clg_htm = (sol_h + sol_v) * (skylight_shgc * skylight_isc / 0.87) + u_eff_skylight * (ctd_adj + 15.0)
-        clg_htm *= skylight_esc
 
         # Block/space loads
         clg_loads = clg_htm * skylight.area

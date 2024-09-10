@@ -1565,6 +1565,20 @@ module HPXMLDefaults
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
         window.fraction_operable_isdefaulted = true
       end
+      next unless window.insect_screen_present
+
+      if window.insect_screen_location.nil?
+        window.insect_screen_location = HPXML::LocationExterior
+        window.insect_screen_location_isdefaulted = true
+      end
+      if window.insect_screen_summer_fraction_covered.nil?
+        window.insect_screen_summer_fraction_covered = window.fraction_operable
+        window.insect_screen_summer_fraction_covered_isdefaulted = true
+      end
+      if window.insect_screen_winter_fraction_covered.nil?
+        window.insect_screen_winter_fraction_covered = window.fraction_operable
+        window.insect_screen_winter_fraction_covered_isdefaulted = true
+      end
     end
   end
 

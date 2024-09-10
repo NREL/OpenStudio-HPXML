@@ -164,14 +164,15 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window1ExteriorShading'/>
-              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window1InsectScreen'/>
+              <Location>interior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
@@ -180,10 +181,6 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window2ExteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
@@ -196,14 +193,15 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window3ExteriorShading'/>
-              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window3InsectScreen'/>
+              <Location>interior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
@@ -212,14 +210,15 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window4ExteriorShading'/>
-              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window4InsectScreen'/>
+              <Location>interior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.0</Depth>
               <DistanceToTopOfWindow>5.0</DistanceToTopOfWindow>
@@ -233,14 +232,15 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window5ExteriorShading'/>
-              <SummerShadingCoefficient>0.9</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window5InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window5InsectScreen'/>
+              <Location>interior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.0</Depth>
               <DistanceToTopOfWindow>8.0</DistanceToTopOfWindow>
@@ -254,10 +254,6 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window6ExteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window6InteriorShading'/>
               <SummerShadingCoefficient>0.6</SummerShadingCoefficient>

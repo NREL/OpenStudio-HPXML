@@ -890,6 +890,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.skylights[1].interior_shading_factor_summer = 0.5
         hpxml_bldg.skylights[1].interior_shading_factor_winter = 1.0
       end
+    elsif ['base-enclosure-windows-insect-screens.xml'].include? hpxml_file
+      hpxml_bldg.windows[0].insect_screen_present = true
+      hpxml_bldg.windows[0].insect_screen_location = HPXML::LocationInterior
+      hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = 1.0
+      hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = 0.0
+      hpxml_bldg.windows[1].insect_screen_present = true
+      hpxml_bldg.windows[1].insect_screen_location = HPXML::LocationExterior
+      hpxml_bldg.windows[1].insect_screen_summer_fraction_covered = 1.0
+      hpxml_bldg.windows[1].insect_screen_winter_fraction_covered = 1.0
+      hpxml_bldg.windows[2].insect_screen_present = true
+      hpxml_bldg.windows[2].insect_screen_location = HPXML::LocationExterior
+      hpxml_bldg.windows[3].insect_screen_present = true
     elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
       hpxml_bldg.windows[0].ufactor = nil
       hpxml_bldg.windows[0].shgc = nil

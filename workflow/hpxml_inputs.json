@@ -1759,6 +1759,9 @@
   "sample_files/base-enclosure-walltypes.xml": {
     "parent_hpxml": "sample_files/base.xml"
   },
+  "sample_files/base-enclosure-windows-insect-screens.xml": {
+    "parent_hpxml": "sample_files/base.xml"
+  },
   "sample_files/base-enclosure-windows-natural-ventilation-availability.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "window_natvent_availability": 7
