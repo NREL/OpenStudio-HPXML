@@ -1622,7 +1622,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   .. [#] ExteriorShading/Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
   .. [#] If ExteriorShading/SummerShadingCoefficient not provided, defaults as follows:
   
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
+         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
          
          \- **solar screens**: 0.7
          
@@ -1632,7 +1632,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **evergreen tree**: 0.1
          
-         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
          \- **other**: 0.5
          
@@ -1641,7 +1641,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
   
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case shading is explicitly modeled)
+         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
          
          \- **solar screens**: 0.7
          
@@ -1651,7 +1651,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **evergreen tree**: 0.1
          
-         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case shading is explicitly modeled)
+         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
          \- **other**: 0.5
          
