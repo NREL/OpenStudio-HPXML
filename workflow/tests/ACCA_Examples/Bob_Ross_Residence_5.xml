@@ -852,14 +852,15 @@
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowPrimaryBedroomEastExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBedroomEastInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowPrimaryBedroomEastInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -873,14 +874,15 @@
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowPrimaryBathroomEastExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBathroomEastInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowPrimaryBathroomEastInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -894,10 +896,6 @@
             <Orientation>east</Orientation>
             <UFactor>0.6</UFactor>
             <SHGC>0.39</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='FrenchDoorFamilyRoomEastExteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='FrenchDoorFamilyRoomEastInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
@@ -915,10 +913,6 @@
             <Orientation>south</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowFamilyRoomSouthExteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowFamilyRoomSouthInteriorShading'/>
               <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
@@ -936,14 +930,15 @@
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowKitchenWestExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenWestInteriorShading'/>
               <SummerShadingCoefficient>0.73</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowKitchenWestInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>3.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -957,14 +952,15 @@
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBathroom1WestExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom1WestInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBathroom1WestInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -978,14 +974,15 @@
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBedroom1NorthExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1NorthInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBedroom1NorthInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -999,14 +996,15 @@
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowPrimaryBedroomNorthExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBedroomNorthInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowPrimaryBedroomNorthInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
@@ -1020,14 +1018,15 @@
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBedroom2EastExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2EastInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBedroom2EastInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1041,14 +1040,15 @@
             <Orientation>east</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowCraftEastExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowCraftEastInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowCraftEastInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1062,14 +1062,15 @@
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowRecRoomWestExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowRecRoomWestInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowRecRoomWestInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>3.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1083,14 +1084,15 @@
             <Orientation>west</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBedroom3WestExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3WestInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBedroom3WestInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1104,14 +1106,15 @@
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBedroom3NorthExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3NorthInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBedroom3NorthInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1125,14 +1128,15 @@
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBathroom2NorthExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom2NorthInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBathroom2NorthInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
@@ -1146,14 +1150,15 @@
             <Orientation>north</Orientation>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='WindowBedroom2NorthExteriorShading'/>
-              <SummerShadingCoefficient>0.8</SummerShadingCoefficient>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2NorthInteriorShading'/>
               <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='WindowBedroom2NorthInsectScreen'/>
+              <Location>exterior</Location>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
+            </InsectScreen>
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>10.0</DistanceToTopOfWindow>
