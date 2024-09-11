@@ -2560,7 +2560,8 @@ module HPXMLDefaults
           end
         elsif dist_type == HPXML::HVACDistributionTypeHydronic
           # Assume same default logic as a water heater
-          hvac_system.location = Waterheater.get_default_location(hpxml_bldg, hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0])
+          iecc_zone = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty? ? nil : hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
+          hvac_system.location = Waterheater.get_default_location(hpxml_bldg, iecc_zone)
         elsif dist_type == HPXML::HVACDistributionTypeDSE
           # DSE=1 implies distribution system in conditioned space
           has_dse_of_one = true
@@ -2754,7 +2755,8 @@ module HPXMLDefaults
         end
       end
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(hpxml_bldg, hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0])
+        iecc_zone = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty? ? nil : hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
+        water_heating_system.location = Waterheater.get_default_location(hpxml_bldg, iecc_zone)
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF
@@ -3906,10 +3908,15 @@ module HPXMLDefaults
   def self.get_equivalent_nbeds_for_operational_calculation(hpxml_bldg)
     n_occs = hpxml_bldg.building_occupancy.number_of_residents
     unit_type = hpxml_bldg.building_construction.residential_facility_type
-    if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? unit_type
-      return -0.68 + 1.09 * n_occs
-    elsif [HPXML::ResidentialTypeSFD, HPXML::ResidentialTypeManufactured].include? unit_type
-      return -1.47 + 1.69 * n_occs
+    # Relations below come from 2020 RECS weighted regressions between NBEDS and NHSHLDMEM (sample weights = NWEIGHT)
+    if [HPXML::ResidentialTypeApartment].include? unit_type
+      return -1.36 + 1.49 * n_occs
+    elsif [HPXML::ResidentialTypeSFA].include? unit_type
+      return -1.98 + 1.89 * n_occs
+    elsif [HPXML::ResidentialTypeSFD].include? unit_type
+      return -2.19 + 2.08 * n_occs
+    elsif [HPXML::ResidentialTypeManufactured].include? unit_type
+      return -1.26 + 1.61 * n_occs
     else
       fail "Unexpected residential facility type: #{unit_type}."
     end

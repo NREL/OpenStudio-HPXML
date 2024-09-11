@@ -286,7 +286,7 @@ module MiscLoads
   # @param num_occ [Double] Number of occupants in the dwelling unit
   # @param unit_type [String] HPXML::ResidentialTypeXXX type of dwelling unit
   # @return [Array<Double, Double, Double>] Plug loads annual use (kWh), sensible fraction, and latent fraction
-  def self.get_residual_mels_default_values(cfa, num_occ, unit_type)
+  def self.get_residual_mels_default_values(cfa, num_occ = nil, unit_type = nil)
     if num_occ.nil? # Asset calculation
       # ANSI/RESNET/ICC 301
       annual_kwh = 0.91 * cfa
@@ -298,7 +298,7 @@ module MiscLoads
         annual_kwh = 654.9 + 206.5 * num_occ + 0.21 * cfa
       elsif unit_type == HPXML::ResidentialTypeApartment
         annual_kwh = 706.6 + 149.3 * num_occ + 0.10 * cfa
-      elsif unit_type == HPXML::HPXML::ResidentialTypeManufactured
+      elsif unit_type == HPXML::ResidentialTypeManufactured
         annual_kwh = 1795.1 # No good relationship found in RECS, so just using a constant value
       end
     end
@@ -315,7 +315,7 @@ module MiscLoads
   # @param num_occ [Double] Number of occupants in the dwelling unit
   # @param unit_type [String] HPXML::ResidentialTypeXXX type of dwelling unit
   # @return [Array<Double, Double, Double>] Television annual use (kWh), sensible fraction, and latent fraction
-  def self.get_televisions_default_values(cfa, nbeds, num_occ, unit_type)
+  def self.get_televisions_default_values(cfa, nbeds, num_occ = nil, unit_type = nil)
     if num_occ.nil? # Asset calculation
       # ANSI/RESNET/ICC 301
       annual_kwh = 413.0 + 69.0 * nbeds
@@ -332,7 +332,7 @@ module MiscLoads
         annual_kwh = 283.9 + 80.1 * num_occ + 0.07 * cfa
       elsif unit_type == HPXML::ResidentialTypeApartment
         annual_kwh = 190.3 + 81.0 * num_occ + 0.11 * cfa
-      elsif unit_type == HPXML::HPXML::ResidentialTypeManufactured
+      elsif unit_type == HPXML::ResidentialTypeManufactured
         annual_kwh = 99.9 + 129.6 * num_occ + 0.21 * cfa
       end
     end
