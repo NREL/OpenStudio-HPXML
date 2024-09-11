@@ -382,10 +382,6 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
     if timestep > 15
       next if message.include?('Timestep: Requested number') && message.include?('is less than the suggested minimum')
     end
-    # Location doesn't match EPW station (see https://github.com/NREL/EnergyPlus/issues/10579)
-    if hpxml_path.include? 'base-location-detailed.xml'
-      next if message.include? 'Weather file location will be used rather than entered (IDF) Location object.'
-    end
     # Coil speed level EMS
     if hpxml_header.hvac_onoff_thermostat_deadband
       next if message.include?('Wrong coil speed EMS override value, for unit=') && message.include?('Exceeding maximum coil speed level.') # Speed level actuator throws this error when speed is set to 1 but no load
