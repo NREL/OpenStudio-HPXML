@@ -2917,6 +2917,11 @@
     "hvac_control_heating_season_period": "Nov 1 - May 1",
     "hvac_control_cooling_season_period": "Jun 1 - Oct 1"
   },
+  "sample_files/base-hvac-seasons-none.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "hvac_control_heating_season_period": "Jan 1 - Jan 1",
+    "hvac_control_cooling_season_period": "Jul 1 - Jul 1"
+  },
   "sample_files/base-hvac-setpoints.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "hvac_control_heating_weekday_setpoint": 60,
