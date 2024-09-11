@@ -2919,7 +2919,7 @@
   },
   "sample_files/base-hvac-seasons-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "hvac_control_heating_season_period": "Jan 1 - Jan 1",
+    "hvac_control_heating_season_period": "Jan 1 - Jan 2",
     "hvac_control_cooling_season_period": "Jul 1 - Jul 1"
   },
   "sample_files/base-hvac-setpoints.xml": {

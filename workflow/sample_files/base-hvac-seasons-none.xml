@@ -357,7 +357,7 @@
               <BeginMonth>1</BeginMonth>
               <BeginDayOfMonth>1</BeginDayOfMonth>
               <EndMonth>1</EndMonth>
-              <EndDayOfMonth>1</EndDayOfMonth>
+              <EndDayOfMonth>2</EndDayOfMonth>
             </HeatingSeason>
             <CoolingSeason>
               <BeginMonth>7</BeginMonth>
