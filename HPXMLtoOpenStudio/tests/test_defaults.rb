@@ -1092,7 +1092,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     int_sf = 0.92 - (0.21 * hpxml_bldg.windows[0].shgc)
-    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_sf, int_sf, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.4, 0.4)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_sf, int_sf, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.6, 0.6)
   end
 
   def test_windows_properties
@@ -1185,8 +1185,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
-    assert_equal(0.1, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
-    assert_equal(0.25, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.75, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
 
     # Test defaults w/ overhangs not explicitly defined
     hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeExternalOverhangs
@@ -1212,7 +1212,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
     assert_equal(0.75, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
-    assert_equal(0.25, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
 
     # Test defaults w/ neighbor buildings explicitly defined
     hpxml_bldg.neighbor_buildings.add(azimuth: 0,
