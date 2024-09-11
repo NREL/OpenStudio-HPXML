@@ -2331,17 +2331,8 @@ module Constructions
     is_summer = 1.0
     is_winter = 1.0
     if window_or_skylight.respond_to?(:insect_screen_present) && window_or_skylight.insect_screen_present
-      # Values based on "Measurement of the Solar Heat Gain Coefficient and U Value of Windows
-      # with Insect Screens" (1999) by Brunger, Dubrous, and Harrison
-      is_int_reduction = 0.15 # 15%
-      is_ext_reduction = 0.46 # 46%
-      if window_or_skylight.insect_screen_location == HPXML::LocationInterior
-        is_summer = 1.0 - is_int_reduction * window_or_skylight.insect_screen_summer_fraction_covered
-        is_winter = 1.0 - is_int_reduction * window_or_skylight.insect_screen_winter_fraction_covered
-      elsif window_or_skylight.insect_screen_location == HPXML::LocationExterior
-        is_summer = 1.0 - is_ext_reduction * window_or_skylight.insect_screen_summer_fraction_covered
-        is_winter = 1.0 - is_ext_reduction * window_or_skylight.insect_screen_winter_fraction_covered
-      end
+      is_summer = 1.0 - (1.0 - window_or_skylight.insect_screen_factor_summer) * window_or_skylight.insect_screen_summer_fraction_covered
+      is_winter = 1.0 - (1.0 - window_or_skylight.insect_screen_factor_winter) * window_or_skylight.insect_screen_winter_fraction_covered
     end
 
     # Total combined factors

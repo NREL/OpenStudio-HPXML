@@ -1070,9 +1070,11 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].insect_screen_location = HPXML::LocationInterior
     hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = 0.19
     hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = 0.28
+    hpxml_bldg.windows[0].insect_screen_factor_summer = 0.37
+    hpxml_bldg.windows[0].insect_screen_factor_winter = 0.46
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_window_values(default_hpxml_bldg.windows[0], 0.44, 0.55, 0.66, 0.77, 0.5, 123, HPXML::LocationInterior, 0.19, 0.28)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 0.44, 0.55, 0.66, 0.77, 0.5, 123, HPXML::LocationInterior, 0.19, 0.28, 0.37, 0.46)
 
     # Test defaults after 301-2022 Addendum C
     hpxml_bldg.windows[0].fraction_operable = nil
@@ -1085,10 +1087,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].insect_screen_location = nil
     hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = nil
     hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = nil
+    hpxml_bldg.windows[0].insect_screen_factor_summer = nil
+    hpxml_bldg.windows[0].insect_screen_factor_winter = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    int_shade_coeff = 0.92 - (0.21 * 0.45)
-    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_shade_coeff, int_shade_coeff, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67)
+    int_sf = 0.92 - (0.21 * hpxml_bldg.windows[0].shgc)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_sf, int_sf, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.4, 0.4)
   end
 
   def test_windows_properties
@@ -4679,7 +4683,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
   end
 
   def _test_default_window_values(window, ext_summer_sf, ext_winter_sf, int_summer_sf, int_winter_sf, fraction_operable, azimuth,
-                                  is_location, is_summer, is_winter)
+                                  is_location, is_summer_cover, is_winter_cover, is_summer_sf, is_winter_sf)
     assert_equal(ext_summer_sf, window.exterior_shading_factor_summer)
     assert_equal(ext_winter_sf, window.exterior_shading_factor_winter)
     assert_equal(int_summer_sf, window.interior_shading_factor_summer)
@@ -4687,8 +4691,10 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(fraction_operable, window.fraction_operable)
     assert_equal(azimuth, window.azimuth)
     assert_equal(is_location, window.insect_screen_location)
-    assert_equal(is_summer, window.insect_screen_summer_fraction_covered)
-    assert_equal(is_winter, window.insect_screen_winter_fraction_covered)
+    assert_equal(is_summer_cover, window.insect_screen_summer_fraction_covered)
+    assert_equal(is_winter_cover, window.insect_screen_winter_fraction_covered)
+    assert_equal(is_summer_sf, window.insect_screen_factor_summer)
+    assert_equal(is_winter_sf, window.insect_screen_factor_winter)
   end
 
   def _test_default_skylight_values(skylight, ext_summer_sf, ext_winter_sf, int_summer_sf, int_winter_sf, azimuth)

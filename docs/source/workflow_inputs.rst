@@ -1628,9 +1628,9 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **solar film**: 0.3
          
-         \- **deciduous tree**: 0.1
+         \- **deciduous tree**: 0.5
          
-         \- **evergreen tree**: 0.1
+         \- **evergreen tree**: 0.5
          
          \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
@@ -1647,11 +1647,11 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **solar film**: 0.3
          
-         \- **deciduous tree**: 0.25
+         \- **deciduous tree**: 0.75
          
-         \- **evergreen tree**: 0.1
+         \- **evergreen tree**: 0.5
          
-         \- **building**: 0.25 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
+         \- **building**: 0.5 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
          \- **other**: 0.5
          
@@ -1689,14 +1689,18 @@ If an insect screen is specified, additional information is entered in ``InsectS
   Element                       Type      Units   Constraints  Required  Default   Notes
   ============================  ========  ======  ===========  ========  ========  ========================================================
   ``Location``                  string            See [#]_     No        exterior  Whether the screen is on the interior or exterior of the glass
-  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  How much of the window area is covered by the screen in the summer [#]_
-  ``WinterFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  How much of the window area is covered by the screen in the winter
+  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the summer [#]_
+  ``WinterFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the winter
+  ``SummerShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ========  ======  ===========  ========  ========  ========================================================
 
   .. [#] Location choices are "interior" or "exterior".
   .. [#] If SummerFractionCovered not provided, defaults to the same value as FractionOperable.
   .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] If WinterFractionCovered not provided, defaults to the same value as FractionOperable.
+  .. [#] If SummerShadingCoefficient not provided, defaults to 0.6 for exterior screen (based on `Solar Gain through Windows with Shading Devices: Simulation Versus Measurement <https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11>`_) and 0.85 for interior screen (based on `Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens <https://www.proquest.com/docview/192518844>`_).
+  .. [#] If WinterShadingCoefficient not provided, defaults to 0.6 for exterior screen (based on `Solar Gain through Windows with Shading Devices: Simulation Versus Measurement <https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11>`_) and 0.85 for interior screen (based on `Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens <https://www.proquest.com/docview/192518844>`_).
 
 .. _window_storm:
 

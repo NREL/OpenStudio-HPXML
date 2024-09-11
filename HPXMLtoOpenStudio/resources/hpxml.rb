@@ -5571,6 +5571,8 @@ class HPXML < Object
              :insect_screen_location,                 # [String] InsectScreen/Location (HPXML::LocationXXX)
              :insect_screen_summer_fraction_covered,  # [Double] InsectScreen/SummerFractionCovered (frac)
              :insect_screen_winter_fraction_covered,  # [Double] InsectScreen/WinterFractionCovered (frac)
+             :insect_screen_factor_summer,            # [Double] InsectScreen/SummerShadingCoefficient (frac)
+             :insect_screen_factor_winter,            # [Double] InsectScreen/WinterShadingCoefficient (frac)
              :overhangs_depth,                        # [Double] Overhangs/Depth (ft)
              :overhangs_distance_to_top_of_window,    # [Double] Overhangs/DistanceToTopOfWindow (ft)
              :overhangs_distance_to_bottom_of_window, # [Double] Overhangs/DistanceToBottomOfWindow (ft)
@@ -5703,6 +5705,8 @@ class HPXML < Object
         XMLHelper.add_element(insect_screen, 'Location', @insect_screen_location, :string, @insect_screen_location_isdefaulted) unless @insect_screen_location.nil?
         XMLHelper.add_element(insect_screen, 'SummerFractionCovered', @insect_screen_summer_fraction_covered, :float, @insect_screen_summer_fraction_covered_isdefaulted) unless @insect_screen_summer_fraction_covered.nil?
         XMLHelper.add_element(insect_screen, 'WinterFractionCovered', @insect_screen_winter_fraction_covered, :float, @insect_screen_winter_fraction_covered_isdefaulted) unless @insect_screen_winter_fraction_covered.nil?
+        XMLHelper.add_element(insect_screen, 'SummerShadingCoefficient', @insect_screen_factor_summer, :float, @insect_screen_factor_summer_isdefaulted) unless @insect_screen_factor_summer.nil?
+        XMLHelper.add_element(insect_screen, 'WinterShadingCoefficient', @insect_screen_factor_winter, :float, @insect_screen_factor_winter_isdefaulted) unless @insect_screen_factor_winter.nil?
       end
       if not @storm_type.nil?
         storm_window = XMLHelper.add_element(window, 'StormWindow')
@@ -5766,6 +5770,8 @@ class HPXML < Object
         @insect_screen_location = XMLHelper.get_value(window, 'InsectScreen/Location', :string)
         @insect_screen_summer_fraction_covered = XMLHelper.get_value(window, 'InsectScreen/SummerFractionCovered', :float)
         @insect_screen_winter_fraction_covered = XMLHelper.get_value(window, 'InsectScreen/WinterFractionCovered', :float)
+        @insect_screen_factor_summer = XMLHelper.get_value(window, 'InsectScreen/SummerShadingCoefficient', :float)
+        @insect_screen_factor_winter = XMLHelper.get_value(window, 'InsectScreen/WinterShadingCoefficient', :float)
       end
     end
   end

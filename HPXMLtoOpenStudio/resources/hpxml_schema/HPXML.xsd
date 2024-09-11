@@ -5246,6 +5246,18 @@
 								<xs:documentation>The fraction of the window area covered by the insect screen during the winter.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="SummerShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the summer months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="WinterShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the winter months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element minOccurs="0" name="Condition" type="WindowCondition"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>

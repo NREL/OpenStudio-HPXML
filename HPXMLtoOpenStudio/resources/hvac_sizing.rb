@@ -720,6 +720,14 @@ module HVACSizing
       zone = space.zone
 
       window_isc = window.interior_shading_factor_summer
+      window_esc = 1.0
+      if window.insect_screen_present
+        if window.insect_screen_location == HPXML::LocationInterior
+          window_esc = 1.0 - 0.1 * window.insect_screen_summer_fraction_covered
+        elsif window.insect_screen_location == HPXML::LocationExterior
+          window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
+        end
+      end
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -758,15 +766,6 @@ module HVACSizing
           ctd_adj += hta[mj.daily_range_num][hr]
         end
 
-        window_esc = 1.0
-        if window.insect_screen_present
-          if window.insect_screen_location == HPXML::LocationInterior
-            window_esc = 1.0 - 0.1 * window.insect_screen_summer_fraction_covered
-          elsif window.insect_screen_location == HPXML::LocationExterior
-            window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
-          end
-        end
-
         # Hourly Heat Transfer Multiplier for the given window Direction
         htm_d = psf_lat[cnt45] * clf_d * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
         htm_d *= window_esc
@@ -775,9 +774,10 @@ module HVACSizing
         htm_n = psf_lat[4] * clf_n * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
         htm_n *= window_esc
 
-        if window.exterior_shading_type == HPXML::ExteriorShadingTypeSolarScreens
-          sunscreen_sc = 0.25
-          clg_htm = (htm_d - htm_n) * sunscreen_sc + htm_n
+        if [HPXML::ExteriorShadingTypeSolarScreens,
+            HPXML::ExteriorShadingTypeSolarFilm].include? window.exterior_shading_type
+          screen_sc = 0.25
+          clg_htm = (htm_d - htm_n) * screen_sc + htm_n
         elsif window.overhangs_depth.to_f > 0
           if hr.nil?
             slm = slm_avg_lat[cnt45]

@@ -1579,6 +1579,15 @@ module HPXMLDefaults
         window.insect_screen_winter_fraction_covered = window.fraction_operable
         window.insect_screen_winter_fraction_covered_isdefaulted = true
       end
+      default_is_sf_summer, default_is_sf_winter = get_default_window_insect_screen_factors(window)
+      if window.insect_screen_factor_summer.nil?
+        window.insect_screen_factor_summer = default_is_sf_summer
+        window.insect_screen_factor_summer_isdefaulted = true
+      end
+      if window.insect_screen_factor_winter.nil?
+        window.insect_screen_factor_winter = default_is_sf_winter
+        window.insect_screen_factor_winter_isdefaulted = true
+      end
     end
   end
 
@@ -4000,8 +4009,8 @@ module HPXMLDefaults
         ext_sf_summer = nil
         ext_sf_winter = nil
       else
-        ext_sf_summer = 0.0
-        ext_sf_winter = 0.0
+        ext_sf_summer = 0.0 # Based on MulTEA engineering manual
+        ext_sf_winter = 0.0 # Based on MulTEA engineering manual
       end
     elsif [HPXML::ExteriorShadingTypeBuilding].include? window.exterior_shading_type
       if hpxml_bldg.neighbor_buildings.size > 0
@@ -4009,24 +4018,46 @@ module HPXMLDefaults
         ext_sf_summer = nil
         ext_sf_winter = nil
       else
-        ext_sf_summer = 0.75
-        ext_sf_winter = 0.25
+        ext_sf_summer = 0.75 # Engineering judgment
+        ext_sf_winter = 0.5 # Engineering judgment
       end
     else
-      ext_sf_summer = { HPXML::ExteriorShadingTypeDeciduousTree => 0.1,
-                        HPXML::ExteriorShadingTypeEvergreenTree => 0.1,
-                        HPXML::ExteriorShadingTypeNone => 1.0,
-                        HPXML::ExteriorShadingTypeOther => 0.5,
-                        HPXML::ExteriorShadingTypeSolarFilm => 0.3,
-                        HPXML::ExteriorShadingTypeSolarScreens => 0.7 }[window.exterior_shading_type]
-      ext_sf_winter = { HPXML::ExteriorShadingTypeDeciduousTree => 0.25,
-                        HPXML::ExteriorShadingTypeEvergreenTree => 0.1,
-                        HPXML::ExteriorShadingTypeNone => 1.0,
-                        HPXML::ExteriorShadingTypeOther => 0.5,
-                        HPXML::ExteriorShadingTypeSolarFilm => 0.3,
-                        HPXML::ExteriorShadingTypeSolarScreens => 0.7 }[window.exterior_shading_type]
+      ext_sf_summer = {
+        HPXML::ExteriorShadingTypeDeciduousTree => 0.5, # Engineering judgment
+        HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Engineering judgment
+        HPXML::ExteriorShadingTypeNone => 1.0,
+        HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
+        HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
+        HPXML::ExteriorShadingTypeSolarScreens => 0.7 # Based on MulTEA engineering manual
+      }[window.exterior_shading_type]
+      ext_sf_winter = {
+        HPXML::ExteriorShadingTypeDeciduousTree => 0.75, # Engineering judgment, higher than summer value because no leaves
+        HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Engineering judgment
+        HPXML::ExteriorShadingTypeNone => 1.0,
+        HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
+        HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
+        HPXML::ExteriorShadingTypeSolarScreens => 0.7 # Based on MulTEA engineering manual
+      }[window.exterior_shading_type]
     end
     return ext_sf_summer, ext_sf_winter
+  end
+
+  # Gets the default insect screen shading factors for the window.
+  #
+  # @param window [HPXML::Window] The window of interest
+  # @return [Array<Double, Double>] The summer and winter shading factors
+  def self.get_default_window_insect_screen_factors(window)
+    if window.insect_screen_location == HPXML::LocationInterior
+      # Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens
+      # https://www.proquest.com/docview/192518844
+      is_sf_summer = 1.0 - 0.15
+    elsif window.insect_screen_location == HPXML::LocationExterior
+      # Solar Gain through Windows with Shading Devices: Simulation Versus Measurement
+      # https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11
+      is_sf_summer = 1.0 - 0.40
+    end
+    is_sf_winter = is_sf_summer
+    return is_sf_summer, is_sf_winter
   end
 
   # Gets the default latitude from the HPXML file or, as backup, weather file.
