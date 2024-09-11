@@ -79,7 +79,7 @@ Absolute/relative paths of csv files containing user-specified detailed schedule
 
 **Schedules: Vacancy Periods**
 
-Specifies the vacancy periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+Specifies the vacancy periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
 - **Name:** ``schedules_vacancy_periods``
 - **Type:** ``String``
@@ -90,7 +90,7 @@ Specifies the vacancy periods. Enter a date like "Dec 15 - Jan 15". Optionally, 
 
 **Schedules: Power Outage Periods**
 
-Specifies the power outage periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+Specifies the power outage periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
 - **Name:** ``schedules_power_outage_periods``
 - **Type:** ``String``
@@ -125,7 +125,7 @@ Value must be a divisor of 60. If not provided, the OS-HPXML default (see <a hre
 
 **Simulation Control: Run Period**
 
-Enter a date like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
+Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.
 
 - **Name:** ``simulation_control_run_period``
 - **Type:** ``String``
@@ -160,7 +160,7 @@ Whether to use daylight saving. If not provided, the OS-HPXML default (see <a hr
 
 **Simulation Control: Daylight Saving Period**
 
-Enter a date like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
+Enter a date range like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-site'>HPXML Building Site</a>) is used.
 
 - **Name:** ``simulation_control_daylight_saving_period``
 - **Type:** ``String``
@@ -1488,7 +1488,7 @@ Exterior shading coefficient for the summer season. 1.0 indicates no reduction i
 
 **Windows: Shading Summer Season**
 
-Enter a date like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
+Enter a date range like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-windows'>HPXML Windows</a>) is used.
 
 - **Name:** ``window_shading_summer_season``
 - **Type:** ``String``
@@ -2962,7 +2962,7 @@ Specify the constant or 24-hour comma-separated weekend cooling setpoint schedul
 
 **HVAC Control: Heating Season Period**
 
-Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.
+Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols. A date range in which the begin date equals the end date, e.g., 'Jan 1 - Jan 1', will be treated as year-round unavailability.
 
 - **Name:** ``hvac_control_heating_season_period``
 - **Type:** ``String``
@@ -2973,7 +2973,7 @@ Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <
 
 **HVAC Control: Cooling Season Period**
 
-Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols.
+Enter a date range like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide 'BuildingAmerica' to use automatic seasons from the Building America House Simulation Protocols. A date range in which the begin date equals the end date, e.g., 'Jan 1 - Jan 1', will be treated as year-round unavailability.
 
 - **Name:** ``hvac_control_cooling_season_period``
 - **Type:** ``String``
@@ -4627,7 +4627,7 @@ The daily energy consumption for holiday lighting (exterior). If not provided, t
 
 **Holiday Lighting: Period**
 
-Enter a date like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
+Enter a date range like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-lighting'>HPXML Lighting</a>) is used.
 
 - **Name:** ``holiday_lighting_period``
 - **Type:** ``String``

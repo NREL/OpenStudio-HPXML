@@ -74,12 +74,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_vacancy_periods', false)
     arg.setDisplayName('Schedules: Vacancy Periods')
-    arg.setDescription('Specifies the vacancy periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
+    arg.setDescription('Specifies the vacancy periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_periods', false)
     arg.setDisplayName('Schedules: Power Outage Periods')
-    arg.setDescription('Specifies the power outage periods. Enter a date like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
+    arg.setDescription('Specifies the power outage periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_power_outage_periods_window_natvent_availability', false)
@@ -95,7 +95,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_run_period', false)
     arg.setDisplayName('Simulation Control: Run Period')
-    arg.setDescription("Enter a date like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
+    arg.setDescription("Enter a date range like 'Jan 1 - Dec 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-simulation-control'>HPXML Simulation Control</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_calendar_year', false)
@@ -111,7 +111,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_daylight_saving_period', false)
     arg.setDisplayName('Simulation Control: Daylight Saving Period')
-    arg.setDescription("Enter a date like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>) is used.")
+    arg.setDescription("Enter a date range like 'Mar 15 - Dec 15'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-building-site'>HPXML Building Site</a>) is used.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('simulation_control_temperature_capacitance_multiplier', false)
@@ -916,7 +916,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('window_shading_summer_season', false)
     arg.setDisplayName('Windows: Shading Summer Season')
-    arg.setDescription("Enter a date like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
+    arg.setDescription("Enter a date range like 'May 1 - Sep 30'. Defines the summer season for purposes of shading coefficients; the rest of the year is assumed to be winter. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-windows'>HPXML Windows</a>) is used.")
     args << arg
 
     storm_window_type_choices = OpenStudio::StringVector.new
@@ -1760,12 +1760,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_heating_season_period', false)
     arg.setDisplayName('HVAC Control: Heating Season Period')
-    arg.setDescription("Enter a date like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
+    arg.setDescription("Enter a date range like 'Nov 1 - Jun 30'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols. A date range in which the begin date equals the end date, e.g., 'Jan 1 - Jan 1', will be treated as year-round unavailability.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hvac_control_cooling_season_period', false)
     arg.setDisplayName('HVAC Control: Cooling Season Period')
-    arg.setDescription("Enter a date like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols.")
+    arg.setDescription("Enter a date range like 'Jun 1 - Oct 31'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-hvac-control'>HPXML HVAC Control</a>) is used. Can also provide '#{Constants::BuildingAmerica}' to use automatic seasons from the Building America House Simulation Protocols. A date range in which the begin date equals the end date, e.g., 'Jan 1 - Jan 1', will be treated as year-round unavailability.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('hvac_blower_fan_watts_per_cfm', false)
@@ -2725,7 +2725,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period', false)
     arg.setDisplayName('Holiday Lighting: Period')
-    arg.setDescription("Enter a date like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
+    arg.setDescription("Enter a date range like 'Nov 25 - Jan 5'. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#hpxml-lighting'>HPXML Lighting</a>) is used.")
     args << arg
 
     dehumidifier_type_choices = OpenStudio::StringVector.new
