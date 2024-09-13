@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+$zip_csv_data = nil
+
 # Collection of methods related to defaulting optional inputs in the HPXML
 # that were not provided.
 #
@@ -935,8 +937,13 @@ module HPXMLDefaults
     end
     if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.nil?
       hpxml_bldg.climate_and_risk_zones.weather_station_id = 'WeatherStation'
-      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = get_default_epw_filepath_from_zipcode(hpxml_bldg.zip_code)
+      epw_filepath = get_default_epw_filepath_from_zipcode(hpxml_bldg.zip_code)
+      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = epw_filepath
       hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath_isdefaulted = true
+      hpxml_bldg.climate_and_risk_zones.weather_station_name = File.basename(epw_filepath).gsub('.epw', '')
+      hpxml_bldg.climate_and_risk_zones.weather_station_name_isdefaulted = true
+      hpxml_bldg.climate_and_risk_zones.weather_station_wmo = File.basename(epw_filepath).split('_TMY3')[0].split('.')[-1]
+      hpxml_bldg.climate_and_risk_zones.weather_station_wmo_isdefaulted = true
     end
   end
 
@@ -4067,9 +4074,13 @@ module HPXMLDefaults
 
     zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcodes_tmy3s.csv')
 
+    if $zip_csv_data.nil?
+      $zip_csv_data = CSV.open(zipcode_csv_filepath).each.to_a
+    end
+
     epw_filename = nil
     zip_distance = 99999 # init
-    CSV.foreach(zipcode_csv_filepath, headers: false) do |row|
+    $zip_csv_data.each do |row|
       row[1, row.size - 1].each do |row_zipcode|
         next unless row_zipcode.start_with?(zipcode3)
 
@@ -4079,7 +4090,7 @@ module HPXMLDefaults
           epw_filename = row[0]
         end
         if distance == 0
-          break # Exact match
+          return epw_filename # Exact match
         end
       end
     end

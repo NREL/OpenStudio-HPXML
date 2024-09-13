@@ -89,6 +89,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
     assert_equal('USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3.epw', default_hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath)
+    assert_equal('USA_AZ_Phoenix-Sky.Harbor.Intl.AP.722780_TMY3', default_hpxml_bldg.climate_and_risk_zones.weather_station_name)
+    assert_equal('722780', default_hpxml_bldg.climate_and_risk_zones.weather_station_wmo)
   end
 
   def test_emissions_factors
