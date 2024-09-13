@@ -1032,7 +1032,7 @@ module Schedule
       end
       if applies == 1
         if not runner.nil?
-          if schedule_name == SchedulesFile::Columns[:HVAC].name
+          if [SchedulesFile::Columns[:SpaceHeating].name, SchedulesFile::Columns[:SpaceCooling].name].include?(schedule_name)
             runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.')
           elsif schedule_name == SchedulesFile::Columns[:WaterHeater].name
             runner.registerWarning('It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.')
@@ -1117,7 +1117,7 @@ class SchedulesFile
 
   # Define all schedule columns
   # Columns may be used for A) detailed schedule CSVs (e.g., occupants), B) unavailable
-  # periods CSV (e.g., hvac), and/or C) EnergyPlus-specific schedules (e.g., battery_charging).
+  # periods CSV (e.g., heating), and/or C) EnergyPlus-specific schedules (e.g., battery_charging).
   Columns = {
     Occupants: Column.new('occupants', true, true, :frac),
     LightingInterior: Column.new('lighting_interior', true, true, :frac),
@@ -1156,7 +1156,8 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    HVAC: Column.new('hvac', true, false, nil),
+    SpaceHeating: Column.new('space_heating', true, false, nil),
+    SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
     WaterHeater: Column.new('water_heater', true, false, nil),
     Dehumidifier: Column.new('dehumidifier', true, false, nil),
@@ -1567,8 +1568,10 @@ class SchedulesFile
           schedule_name2 = SchedulesFile::Columns[:Dishwasher].name
         elsif [SchedulesFile::Columns[:HotWaterClothesWasher].name].include?(schedule_name)
           schedule_name2 = SchedulesFile::Columns[:ClothesWasher].name
-        elsif [SchedulesFile::Columns[:HeatingSetpoint].name, SchedulesFile::Columns[:CoolingSetpoint].name].include?(schedule_name)
-          schedule_name2 = SchedulesFile::Columns[:HVAC].name
+        elsif [SchedulesFile::Columns[:HeatingSetpoint].name].include?(schedule_name)
+          schedule_name2 = SchedulesFile::Columns[:SpaceHeating].name
+        elsif [SchedulesFile::Columns[:CoolingSetpoint].name].include?(schedule_name)
+          schedule_name2 = SchedulesFile::Columns[:SpaceCooling].name
         elsif [SchedulesFile::Columns[:WaterHeaterSetpoint].name].include?(schedule_name)
           schedule_name2 = SchedulesFile::Columns[:WaterHeater].name
         end

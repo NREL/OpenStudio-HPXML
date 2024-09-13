@@ -525,7 +525,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_num_occupants(model, runner, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, @hpxml_header.unavailable_periods)
+    @hvac_unavailable_periods = []
+    @hvac_unavailable_periods << Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, @hpxml_header.unavailable_periods)
+    @hvac_unavailable_periods << Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, weather)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
@@ -2284,7 +2286,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # Create HVAC availability sensor
     hvac_availability_sensor = nil
     if not @hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
+      avail_sch = ScheduleConstant.new(model, 'hvac', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
 
       hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       hvac_availability_sensor.setName('hvac availability s')
