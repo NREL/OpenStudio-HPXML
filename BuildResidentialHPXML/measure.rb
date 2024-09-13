@@ -3528,7 +3528,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     epw_path = args[:weather_station_epw_filepath]
     if epw_path.nil?
       # Get EPW path from zip code
-      epw_path = HPXMLDefaults.get_default_epw_filepath_from_zipcode(args[:site_zip_code])
+      epw_path = HPXMLDefaults.get_default_weather_station_from_zipcode(args[:site_zip_code])[0]
     end
 
     # Create EpwFile object

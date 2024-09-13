@@ -933,7 +933,7 @@ Climate zone information can be optionally entered as an ``/HPXML/Building/Build
   .. [#] Year choices are 2003, 2006, 2009, 2012, 2015, 2018, 2021, or 2024.
   .. [#] ClimateZone choices are "1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", or "8".
 
-If Climate zone information not provided, defaults according to the mapping found at ``HPXMLtoOpenStudio/resources/data/climate_zones.csv``.
+If Climate zone information not provided, defaults according to the mapping found at ``HPXMLtoOpenStudio/resources/data/weather_stations.csv``.
 
 .. _weather_station:
 
@@ -952,7 +952,7 @@ Weather information is entered in ``/HPXML/Building/BuildingDetails/ClimateandRi
 
   .. [#] Either EPWFilePath or Address/ZipCode (see :ref:`building_site`) must be provided.
   .. [#] If EPWFilePath not provided, defaults based on the U.S. TMY3 weather station closest to the zip code centroid.
-         The mapping can be found at ``HPXMLtoOpenStudio/resources/data/zipcodes_tmy3s.csv``.
+         The mapping can be found at ``HPXMLtoOpenStudio/resources/data/weather_stations.csv``.
   .. [#] The full set of U.S. TMY3 EPW weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
 
 .. _enclosure:

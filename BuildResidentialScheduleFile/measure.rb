@@ -143,7 +143,7 @@ class BuildResidentialScheduleFile < OpenStudio::Measure::ModelMeasure
       if epw_path.nil?
         epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
         if epw_filepath.nil?
-          epw_filepath = HPXMLDefaults.get_default_epw_filepath_from_zipcode(hpxml_bldg.zip_code)
+          epw_filepath = HPXMLDefaults.get_default_weather_station_from_zipcode(hpxml_bldg.zip_code)[0]
         end
         epw_path = Location.get_epw_path(epw_filepath, hpxml_path)
         weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)

@@ -161,7 +161,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Process weather once upfront
       if hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath.nil?
-        epw_filepath = HPXMLDefaults.get_default_epw_filepath_from_zipcode(hpxml.buildings[0].zip_code)
+        epw_filepath = HPXMLDefaults.get_default_weather_station_from_zipcode(hpxml.buildings[0].zip_code)[0]
         epw_path = Location.get_epw_path(epw_filepath, args[:hpxml_path])
       else
         epw_path = Location.get_epw_path(hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath, args[:hpxml_path])
