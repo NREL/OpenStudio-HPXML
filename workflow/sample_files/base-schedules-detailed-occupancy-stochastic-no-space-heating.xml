@@ -20,10 +20,10 @@
         <UnavailablePeriod>
           <ColumnName>No Space Heating</ColumnName>
           <BeginMonth>12</BeginMonth>
-          <BeginDayOfMonth>1</BeginDayOfMonth>
+          <BeginDayOfMonth>11</BeginDayOfMonth>
           <BeginHourOfDay>5</BeginHourOfDay>
           <EndMonth>1</EndMonth>
-          <EndDayOfMonth>31</EndDayOfMonth>
+          <EndDayOfMonth>2</EndDayOfMonth>
           <EndHourOfDay>14</EndHourOfDay>
           <NaturalVentilation>regular schedule</NaturalVentilation>
         </UnavailablePeriod>

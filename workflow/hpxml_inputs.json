@@ -3669,13 +3669,13 @@
   "sample_files/base-schedules-simple-no-space-heating.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_unavailable_period_types": "No Space Heating",
-    "schedules_unavailable_period_dates": "Jan 1 - Dec 31",
+    "schedules_unavailable_period_dates": "Dec 5 0 - Dec 31 23",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
   "sample_files/base-schedules-simple-no-space-cooling.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "schedules_unavailable_period_types": "No Space Cooling",
-    "schedules_unavailable_period_dates": "Jan 1 - Dec 31",
+    "schedules_unavailable_period_dates": "Jul 1 22 - Aug 3 14",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
@@ -3721,13 +3721,13 @@
   "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-heating.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
     "schedules_unavailable_period_types": "No Space Heating",
-    "schedules_unavailable_period_dates": "Dec 1 5 - Jan 31 14",
+    "schedules_unavailable_period_dates": "Dec 11 5 - Jan 2 14",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml": {
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
     "schedules_unavailable_period_types": "No Space Cooling",
-    "schedules_unavailable_period_dates": "Jun 1 5 - Jul 31 14",
+    "schedules_unavailable_period_dates": "Jun 15 5 - Jul 30 14",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-10-mins.xml": {

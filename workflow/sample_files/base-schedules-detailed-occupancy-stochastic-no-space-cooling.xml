@@ -20,10 +20,10 @@
         <UnavailablePeriod>
           <ColumnName>No Space Cooling</ColumnName>
           <BeginMonth>6</BeginMonth>
-          <BeginDayOfMonth>1</BeginDayOfMonth>
+          <BeginDayOfMonth>15</BeginDayOfMonth>
           <BeginHourOfDay>5</BeginHourOfDay>
           <EndMonth>7</EndMonth>
-          <EndDayOfMonth>31</EndDayOfMonth>
+          <EndDayOfMonth>30</EndDayOfMonth>
           <EndHourOfDay>14</EndHourOfDay>
           <NaturalVentilation>regular schedule</NaturalVentilation>
         </UnavailablePeriod>

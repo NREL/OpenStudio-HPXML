@@ -19,10 +19,12 @@
       <UnavailablePeriods>
         <UnavailablePeriod>
           <ColumnName>No Space Heating</ColumnName>
-          <BeginMonth>1</BeginMonth>
-          <BeginDayOfMonth>1</BeginDayOfMonth>
+          <BeginMonth>12</BeginMonth>
+          <BeginDayOfMonth>5</BeginDayOfMonth>
+          <BeginHourOfDay>0</BeginHourOfDay>
           <EndMonth>12</EndMonth>
           <EndDayOfMonth>31</EndDayOfMonth>
+          <EndHourOfDay>23</EndHourOfDay>
           <NaturalVentilation>regular schedule</NaturalVentilation>
         </UnavailablePeriod>
       </UnavailablePeriods>
