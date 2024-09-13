@@ -87,24 +87,6 @@ module Location
     end
   end
 
-  # From the climate zones CSV lookup file, get the IECC zone corresponding to given WMO number.
-  #
-  # @param wmo [String] Weather station World Meteorological Organization (WMO) number
-  # @return [String or nil] IECC zone if WMO is found, otherwise nil
-  def self.get_climate_zone_iecc(wmo)
-    zones_csv = File.join(File.dirname(__FILE__), 'data', 'climate_zones.csv')
-    if not File.exist?(zones_csv)
-      fail 'Could not find climate_zones.csv'
-    end
-
-    require 'csv'
-    CSV.foreach(zones_csv) do |row|
-      return row[6].to_s if row[0].to_s == wmo
-    end
-
-    return
-  end
-
   # Get (find) the absolute path to the EPW file.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit

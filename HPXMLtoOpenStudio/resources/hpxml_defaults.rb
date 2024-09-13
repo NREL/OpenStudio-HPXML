@@ -927,7 +927,7 @@ module HPXMLDefaults
   # @return [nil]
   def self.apply_climate_and_risk_zones(hpxml_bldg, weather)
     if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
-      zone = Location.get_climate_zone_iecc(weather.header.WMONumber)
+      zone = get_default_iecc_climate_zone(weather.header.WMONumber)
       if not zone.nil?
         hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: zone,
                                                                  year: 2006,
@@ -940,9 +940,9 @@ module HPXMLDefaults
       epw_filepath = get_default_epw_filepath_from_zipcode(hpxml_bldg.zip_code)
       hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = epw_filepath
       hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath_isdefaulted = true
-      hpxml_bldg.climate_and_risk_zones.weather_station_name = File.basename(epw_filepath).gsub('.epw', '')
+      hpxml_bldg.climate_and_risk_zones.weather_station_name = epw_filepath.gsub('.epw', '')
       hpxml_bldg.climate_and_risk_zones.weather_station_name_isdefaulted = true
-      hpxml_bldg.climate_and_risk_zones.weather_station_wmo = File.basename(epw_filepath).split('_TMY3')[0].split('.')[-1]
+      hpxml_bldg.climate_and_risk_zones.weather_station_wmo = epw_filepath.split('_TMY3')[0].split('.')[-1]
       hpxml_bldg.climate_and_risk_zones.weather_station_wmo_isdefaulted = true
     end
   end
@@ -4100,5 +4100,23 @@ module HPXMLDefaults
     end
 
     return epw_filename
+  end
+
+  # From the climate zones CSV lookup file, get the IECC zone corresponding to given WMO number.
+  #
+  # @param wmo [String] Weather station World Meteorological Organization (WMO) number
+  # @return [String or nil] IECC zone if WMO is found, otherwise nil
+  def self.get_default_iecc_climate_zone(wmo)
+    zones_csv = File.join(File.dirname(__FILE__), 'data', 'climate_zones.csv')
+    if not File.exist?(zones_csv)
+      fail 'Could not find climate_zones.csv'
+    end
+
+    require 'csv'
+    CSV.foreach(zones_csv) do |row|
+      return row[6].to_s if row[0].to_s == wmo
+    end
+
+    return
   end
 end
