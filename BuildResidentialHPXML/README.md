@@ -77,33 +77,33 @@ Absolute/relative paths of csv files containing user-specified detailed schedule
 
 <br/>
 
-**Schedules: Vacancy Periods**
+**Schedules: Unavailable Period Types**
 
-Specifies the vacancy periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv. If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_vacancy_periods``
+- **Name:** ``schedules_unavailable_period_types``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Schedules: Power Outage Periods**
+**Schedules: Unavailable Period Dates**
 
-Specifies the power outage periods. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". If multiple periods, use a comma-separated list. Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_power_outage_periods``
+- **Name:** ``schedules_unavailable_period_dates``
 - **Type:** ``String``
 
 - **Required:** ``false``
 
 <br/>
 
-**Schedules: Power Outage Periods Window Natural Ventilation Availability**
+**Schedules: Unavailable Period Window Natural Ventilation Availabilities**
 
-The availability of the natural ventilation schedule during the power outage periods. Valid choices are 'regular schedule', 'always available', 'always unavailable'. If multiple periods, use a comma-separated list.
+The availability of the natural ventilation schedule during unavailable periods. Valid choices are 'regular schedule', 'always available', 'always unavailable'. If multiple periods, use a comma-separated list.
 
-- **Name:** ``schedules_power_outage_periods_window_natvent_availability``
+- **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
 - **Type:** ``String``
 
 - **Required:** ``false``

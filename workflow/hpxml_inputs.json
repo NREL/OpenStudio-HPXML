@@ -3672,6 +3672,12 @@
     "schedules_unavailable_period_dates": "Jan 1 - Dec 31",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
+  "sample_files/base-schedules-simple-no-space-cooling.xml": {
+    "parent_hpxml": "sample_files/base.xml",
+    "schedules_unavailable_period_types": "No Space Cooling",
+    "schedules_unavailable_period_dates": "Jan 1 - Dec 31",
+    "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
+  },
   "sample_files/base-schedules-detailed-all-10-mins.xml": {
     "parent_hpxml": "sample_files/base-simcontrol-timestep-10-mins.xml",
     "hvac_control_heating_weekday_setpoint": null,
@@ -3710,6 +3716,18 @@
     "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
     "schedules_unavailable_period_types": "Power Outage",
     "schedules_unavailable_period_dates": "Dec 1 5 - Jan 31 14",
+    "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
+  },
+  "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-heating.xml": {
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
+    "schedules_unavailable_period_types": "No Space Heating",
+    "schedules_unavailable_period_dates": "Dec 1 5 - Jan 31 14",
+    "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
+  },
+  "sample_files/base-schedules-detailed-occupancy-stochastic-no-space-cooling.xml": {
+    "parent_hpxml": "sample_files/base-schedules-detailed-occupancy-stochastic.xml",
+    "schedules_unavailable_period_types": "No Space Cooling",
+    "schedules_unavailable_period_dates": "Jun 1 5 - Jul 31 14",
     "schedules_unavailable_period_window_natvent_availabilities": "regular schedule"
   },
   "sample_files/base-schedules-detailed-occupancy-stochastic-10-mins.xml": {

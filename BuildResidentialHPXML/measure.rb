@@ -74,7 +74,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_types', false)
     arg.setDisplayName('Schedules: Unavailable Period Types')
-    arg.setDescription("Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv. If multiple periods, use a comma-separated list.")
+    arg.setDescription('Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv. If multiple periods, use a comma-separated list.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_dates', false)
@@ -4100,7 +4100,7 @@ module HPXMLFile
       unavailable_period_types = args[:schedules_unavailable_period_types].split(',').map(&:strip)
       unavailable_period_dates = args[:schedules_unavailable_period_dates].split(',').map(&:strip)
       natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
-      
+
       unavailable_periods = unavailable_period_types.zip(unavailable_period_dates,
                                                          natvent_availabilities)
 

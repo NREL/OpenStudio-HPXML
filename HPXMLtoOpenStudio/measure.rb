@@ -2285,6 +2285,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Create HVAC availability sensor
     hvac_availability_sensor = nil
+    @hvac_unavailable_periods = @hvac_unavailable_periods.flatten
     if not @hvac_unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, 'hvac', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
 
