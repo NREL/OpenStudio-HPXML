@@ -169,7 +169,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
         next if i == 0
-        next if Location.get_epw_path(hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath, args[:hpxml_path]) == epw_path
+        next if Location.get_epw_path(epw_path, args[:hpxml_path]) == epw_path
 
         fail 'Weather station EPW filepath has different values across dwelling units.'
       end
