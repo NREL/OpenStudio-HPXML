@@ -4634,7 +4634,7 @@ If not entered, the simulation will not include a dehumidifier.
 
 .. note::
 
-  Dehumidifiers are currently modeled as located within conditioned space; the model is not suited for a dehumidifier in, e.g., a wet unconditioned basement or crawlspace.
+  Dehumidifiers are currently modeled as located within conditioned space; the model is not suited for a dehumidifier in, e.g., a wet basement or crawlspace where there is significant moisture from the ground.
   Therefore the dehumidifier Location is currently restricted to "conditioned space".
   Like an HVAC system, the dehumidifier operates as needed to maintain the RH setpoint for the conditioned space.
 
