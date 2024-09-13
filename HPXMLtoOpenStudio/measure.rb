@@ -160,11 +160,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       eri_version = Constants::ERIVersions[-1] if eri_version == 'latest'
 
       # Process weather once upfront
-      epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
+      if hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath.nil?
+        epw_filepath = HPXMLDefaults.get_default_epw_filepath_from_zipcode(hpxml.buildings[0].zip_code)
+        epw_path = Location.get_epw_path(epw_filepath, args[:hpxml_path])
+      else
+        epw_path = Location.get_epw_path(hpxml.buildings[0].climate_and_risk_zones.weather_station_epw_filepath, args[:hpxml_path])
+      end
       weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
         next if i == 0
-        next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
+        next if Location.get_epw_path(hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath, args[:hpxml_path]) == epw_path
 
         fail 'Weather station EPW filepath has different values across dwelling units.'
       end

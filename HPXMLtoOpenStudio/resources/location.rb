@@ -117,21 +117,20 @@ module Location
   # Get (find) the absolute path to the EPW file.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_path [String] Path to the HPXML file
+  # @param hpxml_epw_filepath [String] EPW file path from the HPXML file
   # @return [String] Path to the EnergyPlus weather file (EPW)
-  def self.get_epw_path(hpxml_bldg, hpxml_path)
-    epw_filepath = hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath
-    abs_epw_path = File.absolute_path(epw_filepath)
+  def self.get_epw_path(hpxml_epw_filepath, hpxml_path)
+    abs_epw_path = File.absolute_path(hpxml_epw_filepath)
 
     if not File.exist? abs_epw_path
       # Check path relative to HPXML file
-      abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), epw_filepath))
+      abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), hpxml_epw_filepath))
     end
     if not File.exist? abs_epw_path
       # Check for weather path relative to the HPXML file
       for level_deep in 1..3
         level = (['..'] * level_deep).join('/')
-        abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), level, 'weather', epw_filepath))
+        abs_epw_path = File.absolute_path(File.join(File.dirname(hpxml_path), level, 'weather', hpxml_epw_filepath))
         break if File.exist? abs_epw_path
       end
     end
@@ -139,12 +138,12 @@ module Location
       # Check for weather path relative to this file
       for level_deep in 1..3
         level = (['..'] * level_deep).join('/')
-        abs_epw_path = File.absolute_path(File.join(File.dirname(__FILE__), level, 'weather', epw_filepath))
+        abs_epw_path = File.absolute_path(File.join(File.dirname(__FILE__), level, 'weather', hpxml_epw_filepath))
         break if File.exist? abs_epw_path
       end
     end
     if not File.exist? abs_epw_path
-      fail "'#{epw_filepath}' could not be found."
+      fail "'#{hpxml_epw_filepath}' could not be found."
     end
 
     return abs_epw_path

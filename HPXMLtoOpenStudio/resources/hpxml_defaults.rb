@@ -933,6 +933,11 @@ module HPXMLDefaults
                                                                  year_isdefaulted: true)
       end
     end
+    if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.nil?
+      hpxml_bldg.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = get_default_epw_filepath_from_zipcode(hpxml_bldg.zip_code)
+      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath_isdefaulted = true
+    end
   end
 
   # Assigns default values for omitted optional inputs in the HPXML::Attic objects
@@ -4043,5 +4048,46 @@ module HPXMLDefaults
     end
 
     return default_schedules_csv_data
+  end
+
+  # Get the default TMY3 EPW weather station for the specified zipcode.
+  #
+  # Uses the mapping from data/zipcodes_tmy3s.csv, which is based on nearest
+  # weather station to the zip code centroid.
+  #
+  # @param zipcode [string] Zipcode of interest
+  # @return [string] EPW file path
+  def self.get_default_epw_filepath_from_zipcode(zipcode)
+    begin
+      zipcode3 = zipcode[0, 3]
+      zipcode_int = Integer(Float(zipcode[0, 5])) # Convert to 5-digit integer
+    rescue
+      fail "Unexpected zip code: #{zipcode}."
+    end
+
+    zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcodes_tmy3s.csv')
+
+    epw_filename = nil
+    zip_distance = 99999 # init
+    CSV.foreach(zipcode_csv_filepath, headers: false) do |row|
+      row[1, row.size - 1].each do |row_zipcode|
+        next unless row_zipcode.start_with?(zipcode3)
+
+        distance = (Integer(Float(row_zipcode)) - zipcode_int).abs()
+        if distance < zip_distance
+          zip_distance = distance
+          epw_filename = row[0]
+        end
+        if distance == 0
+          break # Exact match
+        end
+      end
+    end
+
+    if epw_filename.nil?
+      fail "Zip code '#{zipcode}' could not be found in #{zipcode_csv_filepath}"
+    end
+
+    return epw_filename
   end
 end

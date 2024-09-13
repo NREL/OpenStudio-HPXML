@@ -2696,7 +2696,7 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @weather_station_id)
         XMLHelper.add_element(weather_station, 'Name', @weather_station_name, :string) unless @weather_station_name.nil?
         XMLHelper.add_element(weather_station, 'WMO', @weather_station_wmo, :string) unless @weather_station_wmo.nil?
-        XMLHelper.add_extension(weather_station, 'EPWFilePath', @weather_station_epw_filepath, :string) unless @weather_station_epw_filepath.nil?
+        XMLHelper.add_extension(weather_station, 'EPWFilePath', @weather_station_epw_filepath, :string, @weather_station_epw_filepath_isdefaulted) unless @weather_station_epw_filepath.nil?
       end
     end
 
