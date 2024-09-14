@@ -932,9 +932,9 @@ module HPXMLDefaults
   # @return [nil]
   def self.apply_climate_and_risk_zones(hpxml_bldg, weather, unit_num)
     if (not weather.nil?) && hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty?
-      zone = get_default_iecc_climate_zone_from_wmo(weather.header.WMONumber)
-      if not zone.nil?
-        hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: zone,
+      weather_data = lookup_weather_data_from_wmo(weather.header.WMONumber)
+      if not weather_data.nil?
+        hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.add(zone: weather_data[:zipcode_iecc_zone],
                                                                  year: 2006,
                                                                  zone_isdefaulted: true,
                                                                  year_isdefaulted: true)
@@ -942,12 +942,12 @@ module HPXMLDefaults
     end
     if hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath.nil?
       hpxml_bldg.climate_and_risk_zones.weather_station_id = "WeatherStation#{unit_num}"
-      epw_filepath, station_name, station_wmo = get_default_weather_station_from_zipcode(hpxml_bldg.zip_code)
-      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = epw_filepath
+      weather_data = lookup_weather_data_from_zipcode(hpxml_bldg.zip_code)
+      hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath = weather_data[:station_filename]
       hpxml_bldg.climate_and_risk_zones.weather_station_epw_filepath_isdefaulted = true
-      hpxml_bldg.climate_and_risk_zones.weather_station_name = station_name
+      hpxml_bldg.climate_and_risk_zones.weather_station_name = weather_data[:station_name]
       hpxml_bldg.climate_and_risk_zones.weather_station_name_isdefaulted = true
-      hpxml_bldg.climate_and_risk_zones.weather_station_wmo = station_wmo
+      hpxml_bldg.climate_and_risk_zones.weather_station_wmo = weather_data[:station_wmo]
       hpxml_bldg.climate_and_risk_zones.weather_station_wmo_isdefaulted = true
     end
   end
@@ -4061,15 +4061,16 @@ module HPXMLDefaults
     return default_schedules_csv_data
   end
 
-  # Reads the data (or retrieves the cached data) from weather_stations.csv.
+  # Reads the data (or retrieves the cached data) from zipcode_weather_stations.csv.
   # Uses a global variable so the data is only read once.
   #
   # @return [Array<Array>] Array of arrays of data
   def self.get_weather_station_csv_data
-    zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'weather_stations.csv')
+    zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcode_weather_stations.csv')
 
     if $zip_csv_data.nil?
-      $zip_csv_data = CSV.open(zipcode_csv_filepath).each.to_a
+      # Don't use the CSV library because it's much slower
+      $zip_csv_data = File.readlines(zipcode_csv_filepath).map(&:strip)
     end
 
     return $zip_csv_data
@@ -4077,12 +4078,9 @@ module HPXMLDefaults
 
   # Get the default TMY3 EPW weather station for the specified zipcode.
   #
-  # Uses the mapping from data/weather_stations.csv, which is based on nearest
-  # weather station to the zip code centroid.
-  #
   # @param zipcode [string] Zipcode of interest
-  # @return [Array<string, string, string>] EPW filename, station name, station WMO
-  def self.get_default_weather_station_from_zipcode(zipcode)
+  # @return [Hash] Mapping with keys for every column name in weather_station.csv
+  def self.lookup_weather_data_from_zipcode(zipcode)
     begin
       zipcode3 = zipcode[0, 3]
       zipcode_int = Integer(Float(zipcode[0, 5])) # Convert to 5-digit integer
@@ -4092,60 +4090,67 @@ module HPXMLDefaults
 
     zip_csv_data = get_weather_station_csv_data()
 
-    weather_station = nil
+    weather_station = {}
     zip_distance = 99999 # init
-    zip_csv_data.each do |row|
-      next if row.nil? # skip header
+    col_names = nil
+    zip_csv_data.each_with_index do |row, i|
+      if i == 0 # header
+        col_names = row.split(',').map { |x| x.to_sym }
+        next
+      end
+      next if row.nil?
+      next unless row.start_with?(zipcode3) # Only allow match if first 3 digits are the same
 
-      row[5, row.size - 1].each do |row_zipcode|
-        next if row_zipcode.nil?
-        next unless row_zipcode.start_with?(zipcode3) # Only allow match if first 3 digits are the same
+      row = row.split(',')
 
-        distance = (Integer(Float(row_zipcode)) - zipcode_int).abs() # Find closest zip code
-        if distance < zip_distance
-          zip_distance = distance
-          weather_station = [row[0], row[1], row[2]]
+      distance = (Integer(Float(row[0])) - zipcode_int).abs() # Find closest zip code
+      if distance < zip_distance
+        zip_distance = distance
+        weather_station = {}
+        col_names.each_with_index do |col_name, j|
+          weather_station[col_name] = row[j]
         end
-        if distance == 0
-          return weather_station # Exact match
-        end
+      end
+      if distance == 0
+        return weather_station # Exact match
       end
     end
 
-    if weather_station.nil?
-      fail "Zip code '#{zipcode}' could not be found in 'weather_stations.csv'"
+    if weather_station.empty?
+      fail "Zip code '#{zipcode}' could not be found in 'zipcode_weather_stations.csv'"
     end
 
     return weather_station
   end
 
-  # Gets the default ASHRAE 62.2 WSF value for the given WMO number.
+  # Get the default TMY3 EPW weather station for the specified WMO.
   #
-  # @param wmo [String] Weather station World Meteorological Organization (WMO) number
-  # @return [String or nil] ASHRAE 62.2 WSF if WMO is found, otherwise nil
-  def self.get_default_ashrae_622_wsf_from_wmo(wmo)
+  # @param wmo [string] Weather station World Meteorological Organization (WMO) number
+  # @return [Hash or nil] Mapping with keys for every column name in weather_station.csv if WMO is found, otherwise nil
+  def self.lookup_weather_data_from_wmo(wmo, throw_error: false)
     zip_csv_data = get_weather_station_csv_data()
 
-    zip_csv_data.each do |row|
+    col_names = nil
+    zip_csv_data.each_with_index do |row, i|
+      if i == 0 # header
+        col_names = row.split(',').map { |x| x.to_sym }
+        next
+      end
       next if row.nil?
 
-      return Float(row[4]) if row[2].to_s == wmo
+      row = row.split(',')
+
+      next unless row[7] == wmo
+
+      weather_station = {}
+      col_names.each_with_index do |col_name, j|
+        weather_station[col_name] = row[j]
+      end
+      return weather_station
     end
 
-    return
-  end
-
-  # Gets the default IECC climate zone for the given WMO number.
-  #
-  # @param wmo [String] Weather station World Meteorological Organization (WMO) number
-  # @return [String or nil] IECC zone if WMO is found, otherwise nil
-  def self.get_default_iecc_climate_zone_from_wmo(wmo)
-    zip_csv_data = get_weather_station_csv_data()
-
-    zip_csv_data.each do |row|
-      next if row.nil?
-
-      return row[3].to_s if row[2].to_s == wmo
+    if throw_error
+      fail "WMO '#{wmo}' could not be found in 'zipcode_weather_stations.csv'"
     end
 
     return
