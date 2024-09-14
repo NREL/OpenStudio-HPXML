@@ -4076,10 +4076,11 @@ module HPXMLDefaults
     return $zip_csv_data
   end
 
-  # Get the default TMY3 EPW weather station for the specified zipcode.
+  # Get the default TMY3 EPW weather station for the specified zipcode. If the exact
+  # zipcode is not found, we find the closest zipcode that shares the first 3 digits.
   #
   # @param zipcode [string] Zipcode of interest
-  # @return [Hash] Mapping with keys for every column name in weather_station.csv
+  # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
   def self.lookup_weather_data_from_zipcode(zipcode)
     begin
       zipcode3 = zipcode[0, 3]
@@ -4103,6 +4104,10 @@ module HPXMLDefaults
 
       row = row.split(',')
 
+      if row[0].size != 5
+        fail "Zip code '#{row[0]}' in zipcode_weather_stations.csv does not have 5 digits."
+      end
+
       distance = (Integer(Float(row[0])) - zipcode_int).abs() # Find closest zip code
       if distance < zip_distance
         zip_distance = distance
@@ -4117,7 +4122,7 @@ module HPXMLDefaults
     end
 
     if weather_station.empty?
-      fail "Zip code '#{zipcode}' could not be found in 'zipcode_weather_stations.csv'"
+      fail "Zip code '#{zipcode}' could not be found in zipcode_weather_stations.csv"
     end
 
     return weather_station
@@ -4126,31 +4131,29 @@ module HPXMLDefaults
   # Get the default TMY3 EPW weather station for the specified WMO.
   #
   # @param wmo [string] Weather station World Meteorological Organization (WMO) number
-  # @return [Hash or nil] Mapping with keys for every column name in weather_station.csv if WMO is found, otherwise nil
-  def self.lookup_weather_data_from_wmo(wmo, throw_error: false)
+  # @return [Hash or nil] Mapping with keys for every column name in zipcode_weather_stations.csv if WMO is found, otherwise nil
+  def self.lookup_weather_data_from_wmo(wmo)
     zip_csv_data = get_weather_station_csv_data()
 
     col_names = nil
+    wmo_idx = nil
     zip_csv_data.each_with_index do |row, i|
       if i == 0 # header
         col_names = row.split(',').map { |x| x.to_sym }
+        wmo_idx = col_names.index(:station_wmo)
         next
       end
       next if row.nil?
 
       row = row.split(',')
 
-      next unless row[7] == wmo
+      next unless row[wmo_idx] == wmo
 
       weather_station = {}
       col_names.each_with_index do |col_name, j|
         weather_station[col_name] = row[j]
       end
       return weather_station
-    end
-
-    if throw_error
-      fail "WMO '#{wmo}' could not be found in 'zipcode_weather_stations.csv'"
     end
 
     return
