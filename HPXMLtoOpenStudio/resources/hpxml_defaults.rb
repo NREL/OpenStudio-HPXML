@@ -4069,7 +4069,7 @@ module HPXMLDefaults
     zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'weather_stations.csv')
 
     if $zip_csv_data.nil?
-      $zip_csv_data = CSV.open(zipcode_csv_filepath).each.to_a.map { |row| row.reject! { |val| val.nil? } }
+      $zip_csv_data = CSV.open(zipcode_csv_filepath).each.to_a
     end
 
     return $zip_csv_data
@@ -4098,6 +4098,7 @@ module HPXMLDefaults
       next if row.nil? # skip header
 
       row[5, row.size - 1].each do |row_zipcode|
+        next if row_zipcode.nil?
         next unless row_zipcode.start_with?(zipcode3) # Only allow match if first 3 digits are the same
 
         distance = (Integer(Float(row_zipcode)) - zipcode_int).abs() # Find closest zip code
