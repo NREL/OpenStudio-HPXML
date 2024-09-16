@@ -35,6 +35,7 @@
     "rim_joist_assembly_r": 5.01,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
     "slab_under_insulation_r": 0,
     "slab_under_insulation_width": 0,
     "slab_thickness": 4,
@@ -640,6 +641,7 @@
     "rim_joist_assembly_r": 23,
     "slab_perimeter_insulation_r": 0,
     "slab_perimeter_insulation_depth": 0,
+    "slab_perimeter_insulation_depth": 0,
     "slab_under_insulation_r": 0,
     "slab_under_insulation_width": 0,
     "slab_thickness": 4,
@@ -1054,6 +1056,7 @@
     "geometry_building_num_units": 6,
     "geometry_foundation_type": "AboveApartment",
     "geometry_attic_type": "BelowApartment",
+    "geometry_unit_height_above_grade": 10,
     "window_front_wwr": 0.18,
     "window_back_wwr": 0.18,
     "window_left_wwr": 0.18,
@@ -1105,6 +1108,11 @@
     "air_leakage_value": null,
     "air_leakage_units": null,
     "air_leakage_type": null
+  },
+  "sample_files/base-bldgtype-mf-unit-neighbor-shading.xml": {
+    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
+    "neighbor_right_distance": 15,
+    "combine_like_surfaces": false
   },
   "sample_files/base-bldgtype-mf-unit-residents-1.xml": {
     "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
@@ -1858,6 +1866,13 @@
     "ducts_return_location": "under slab",
     "misc_plug_loads_other_annual_kwh": 1228.5
   },
+  "sample_files/base-foundation-slab-exterior-horizontal-insulation.xml": {
+    "parent_hpxml": "sample_files/base-foundation-slab.xml",
+    "slab_perimeter_insulation_r": 5.4,
+    "slab_exterior_horizontal_insulation_r": 5.4,
+    "slab_exterior_horizontal_insulation_width": 2.5,
+    "slab_exterior_horizontal_insulation_depth_below_grade": 1
+  },
   "sample_files/base-foundation-multiple.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml"
   },
@@ -1990,19 +2005,8 @@
     "hvac_control_heating_weekday_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64",
     "hvac_control_heating_weekend_setpoint": "64, 64, 64, 64, 64, 64, 64, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 64, 64"
   },
-  "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures-research-features.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
-    "site_iecc_zone": 7,
-    "site_state_code": "MN",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
-    "simulation_control_timestep": 1,
-    "heat_pump_backup_heating_capacity": 34121.4,
-    "simulation_control_onoff_thermostat_deadband": 2,
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
-    "simulation_control_defrost_model_type": "advanced"
-  },
   "sample_files/base-hvac-air-to-air-heat-pump-1-speed-research-features.xml": {
-    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed-lockout-temperatures.xml",
     "site_iecc_zone": 7,
     "site_state_code": "MN",
     "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
@@ -2094,13 +2098,8 @@
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-research-features.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml",
-    "site_iecc_zone": 7,
-    "site_state_code": "MN",
-    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/hvac-variable-system-maximum-power-ratios-varied.csv",
-    "simulation_control_timestep": 1,
-    "heat_pump_backup_heating_capacity": 34121.4,
-    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_timestep": 60,
     "simulation_control_defrost_model_type": "advanced"
   },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed-max-power-ratio-schedule-two-systems.xml": {
@@ -2245,11 +2244,6 @@
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
     "cooling_system_cooling_efficiency": 18,
     "cooling_system_cooling_compressor_type": "two stage"
-  },
-  "sample_files/base-hvac-central-ac-only-2-speed-research-features.xml": {
-    "parent_hpxml": "sample_files/base-hvac-central-ac-only-2-speed.xml",
-    "simulation_control_timestep": 1,
-    "simulation_control_onoff_thermostat_deadband": 2
   },
   "sample_files/base-hvac-central-ac-only-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-central-ac-only-1-speed.xml",
@@ -2914,11 +2908,6 @@
     "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/setpoints-cooling-only.csv"
   },
   "sample_files/base-hvac-room-ac-only-research-features.xml": {
-    "parent_hpxml": "sample_files/base-hvac-room-ac-only.xml",
-    "simulation_control_timestep": 1,
-    "simulation_control_onoff_thermostat_deadband": 2
-  },
-  "sample_files/base-hvac-room-ac-only-research-features-detailed-setpoints.xml": {
     "parent_hpxml": "sample_files/base-hvac-room-ac-only-detailed-setpoints.xml",
     "simulation_control_timestep": 1,
     "simulation_control_onoff_thermostat_deadband": 2
@@ -3041,13 +3030,14 @@
   },
   "sample_files/base-location-detailed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_time_zone_utc_offset": -7,
-    "site_elevation": 6191,
-    "site_latitude": 40.51,
-    "site_longitude": -107.55,
+    "site_time_zone_utc_offset": -6,
+    "site_elevation": 5548,
+    "site_latitude": 39.77,
+    "site_longitude": -104.73,
     "site_state_code": "CO",
-    "site_city": "Craig",
-    "site_zip_code": 81625
+    "site_city": "Aurora",
+    "site_zip_code": 80019,
+    "weather_station_epw_filepath": null
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
@@ -3425,11 +3415,6 @@
     "neighbor_front_distance": 15,
     "neighbor_back_distance": 10,
     "neighbor_front_height": 12
-  },
-  "sample_files/base-misc-neighbor-shading-bldgtype-multifamily.xml": {
-    "parent_hpxml": "sample_files/base-bldgtype-mf-unit.xml",
-    "neighbor_right_distance": 15,
-    "combine_like_surfaces": false
   },
   "sample_files/base-misc-shielding-of-home.xml": {
     "parent_hpxml": "sample_files/base.xml",

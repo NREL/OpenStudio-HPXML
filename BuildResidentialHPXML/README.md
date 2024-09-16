@@ -323,7 +323,7 @@ State code of the home address. If not provided, the OS-HPXML default (see <a hr
 
 **Site: Zip Code**
 
-Zip code of the home address.
+Zip code of the home address. Either this or the Weather Station: EnergyPlus Weather (EPW) Filepath input below must be provided.
 
 - **Name:** ``site_zip_code``
 - **Type:** ``String``
@@ -386,12 +386,12 @@ Longitude of the home address. Must be between -180 and 180. Use negative values
 
 **Weather Station: EnergyPlus Weather (EPW) Filepath**
 
-Path of the EPW file.
+Path of the EPW file. Either this or the Site: Zip Code input above must be provided.
 
 - **Name:** ``weather_station_epw_filepath``
 - **Type:** ``String``
 
-- **Required:** ``true``
+- **Required:** ``false``
 
 <br/>
 
@@ -588,6 +588,19 @@ Average distance from the floor to the ceiling.
 - **Units:** ``ft``
 
 - **Required:** ``true``
+
+<br/>
+
+**Geometry: Unit Height Above Grade**
+
+Describes the above-grade height of apartment units on upper floors or homes above ambient or belly-and-wing foundations. It is defined as the height of the lowest conditioned floor above grade and is used to calculate the wind speed for the infiltration model. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-building-construction'>HPXML Building Construction</a>) is used.
+
+- **Name:** ``geometry_unit_height_above_grade``
+- **Type:** ``Double``
+
+- **Units:** ``ft``
+
+- **Required:** ``false``
 
 <br/>
 
@@ -801,7 +814,7 @@ The distance between the unit and the neighboring building to the right (not inc
 
 **Neighbor: Front Height**
 
-The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the front. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_front_height``
 - **Type:** ``Double``
@@ -814,7 +827,7 @@ The height of the neighboring building to the front. If not provided, the OS-HPX
 
 **Neighbor: Back Height**
 
-The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the back. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_back_height``
 - **Type:** ``Double``
@@ -827,7 +840,7 @@ The height of the neighboring building to the back. If not provided, the OS-HPXM
 
 **Neighbor: Left Height**
 
-The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the left. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_left_height``
 - **Type:** ``Double``
@@ -840,7 +853,7 @@ The height of the neighboring building to the left. If not provided, the OS-HPXM
 
 **Neighbor: Right Height**
 
-The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-site'>HPXML Site</a>) is used.
+The height of the neighboring building to the right. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-neighbor-buildings'>HPXML Neighbor Building</a>) is used.
 
 - **Name:** ``neighbor_right_height``
 - **Type:** ``Double``
@@ -1017,6 +1030,45 @@ Depth from grade to bottom of vertical slab perimeter insulation. Applies to sla
 - **Units:** ``ft``
 
 - **Required:** ``true``
+
+<br/>
+
+**Slab: Exterior Horizontal Insulation Nominal R-value**
+
+Nominal R-value of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_r``
+- **Type:** ``Double``
+
+- **Units:** ``h-ft^2-R/Btu``
+
+- **Required:** ``false``
+
+<br/>
+
+**Slab: Exterior Horizontal Insulation Width**
+
+Width of the slab exterior horizontal insulation measured from the exterior surface of the vertical slab perimeter insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_width``
+- **Type:** ``Double``
+
+- **Units:** ``ft``
+
+- **Required:** ``false``
+
+<br/>
+
+**Slab: Exterior Horizontal Insulation Depth Below Grade**
+
+Depth of the slab exterior horizontal insulation measured from the top surface of the slab exterior horizontal insulation. Applies to slab-on-grade foundations and basement/crawlspace floors.
+
+- **Name:** ``slab_exterior_horizontal_insulation_depth_below_grade``
+- **Type:** ``Double``
+
+- **Units:** ``ft``
+
+- **Required:** ``false``
 
 <br/>
 

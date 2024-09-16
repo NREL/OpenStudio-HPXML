@@ -1,15 +1,23 @@
 ## OpenStudio-HPXML v1.9.0
 
 __New Features__
-- Updates to HPXML v4.0-rc5.
+- Updates to HPXML v4.0 final release.
+- Allows `Site/Address/ZipCode` to be provided instead of `ClimateandRiskZones/WeatherStation/extension/EPWFilePath`, in which case the closest TMY3 weather station will be automatically selected.
 - Adds inputs for modeling skylight curbs and/or shafts.
+- Allows modeling exterior horizontal insulation for a slab-on-grade foundation (or basement/crawlspace floor).
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
-- Updates hot water end uses for operational calculations (i.e., when `NumberofResidents` provided) based on FSEC study.
+- Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
+- Updates operational calculations (i.e., when `NumberofResidents` provided):
+  - Updates hot water usage based on FSEC study.
+  - Updates misc/tv plug load usage based on RECS 2020 data.
+  - Updates relationship between number of bedrooms and number of occupants to use RECS 2020 instead of RECS 2015.
 - Central Fan Integrated Supply (CFIS) mechanical ventilation enhancements:
   - CFIS systems with no strategy to meet remainder of ventilation target (`CFISControls/AdditionalRuntimeOperatingMode="none"`).
 - HVAC Manual J design load and sizing calculations:
-  - Adds optional inputs and outputs for blower fan heat and piping load.
-  - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which infiltration method to use for design load calculations.
+  - Adds optional `DistributionSystemType/AirDistribution/extension/ManualJInputs/BlowerFanHeatBtuh` input.
+  - Adds optional `DistributionSystemType/HydronicDistribution/extension/ManualJInputs/HotWaterPipingBtuh` input.
+  - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationShieldingClass` input to specify wind shielding class for infiltration design load calculations.
+  - Adds optional `HVACSizingControl/ManualJInputs/InfiltrationMethod` input to specify which method to use for infiltration design load calculations.
   - Updates heat pump HERS sizing methodology to better prevent unmet hours in warmer climates.
   - Misc Manual J design load calculation improvements.
 - Advanced research features:

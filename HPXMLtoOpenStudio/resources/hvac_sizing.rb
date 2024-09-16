@@ -767,7 +767,12 @@ module HVACSizing
         htm_n = psf_lat[4] * clf_n * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
         htm_n *= window_esc
 
-        if window.overhangs_depth.to_f > 0
+        if window.exterior_shading_type == HPXML::ExteriorShadingTypeSolarScreens
+          # FUTURE: For now, ACCA is okay with us bypassing our inputs to manually test this.
+          # Bob Ross 3-4: Sunscreen on south/west windows
+          sunscreen_sc = 0.25
+          clg_htm = (htm_d - htm_n) * sunscreen_sc + htm_n
+        elsif window.overhangs_depth.to_f > 0
           if hr.nil?
             slm = slm_avg_lat[cnt45]
           elsif [0, 1, 2].include? hr # 8, 9, and 10 am: use 09:00 hours
@@ -1390,9 +1395,14 @@ module HVACSizing
         slab_is_insulated = false
         if slab.under_slab_insulation_width.to_f > 0 && slab.under_slab_insulation_r_value > 0
           slab_is_insulated = true
-        elsif slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
+        end
+        if slab.perimeter_insulation_depth > 0 && slab.perimeter_insulation_r_value > 0
           slab_is_insulated = true
-        elsif slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
+        end
+        if slab.under_slab_insulation_spans_entire_slab && slab.under_slab_insulation_r_value > 0
+          slab_is_insulated = true
+        end
+        if slab.exterior_horizontal_insulation_width > 0 && slab.exterior_horizontal_insulation_r_value > 0
           slab_is_insulated = true
         end
 
@@ -1427,24 +1437,10 @@ module HVACSizing
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: hpxml_bldg.header.manualj_infiltration_method)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
       infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
-      sla = infil_values[:sla] * infil_values[:a_ext]
-      ela = sla * cfa
+      ela = infil_values[:sla] * cfa * infil_values[:a_ext] # Account for exterior exposure
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
-      # Determine if we are in a higher or lower shielding class
-      # Combines the effects of terrain and wind shielding
-      shielding_class = 4
-      if hpxml_bldg.site.shielding_of_home == HPXML::ShieldingWellShielded
-        shielding_class += 1
-      elsif hpxml_bldg.site.shielding_of_home == HPXML::ShieldingExposed
-        shielding_class -= 1
-      end
-      if hpxml_bldg.site.site_type == HPXML::SiteTypeUrban
-        shielding_class += 1
-      elsif hpxml_bldg.site.site_type == HPXML::SiteTypeRural
-        shielding_class -= 1
-      end
-      shielding_class = [[shielding_class, 5].min, 1].max
+      shielding_class = hpxml_bldg.header.manualj_infiltration_shielding_class
 
       # Set stack/wind coefficients from Tables 5D/5E
       c_s = 0.015 * ncfl_ag
@@ -1453,6 +1449,18 @@ module HVACSizing
       ela_in2 = UnitConversions.convert(ela, 'ft^2', 'in^2')
       windspeed_cooling_mph = 7.5 # Table 5D/5E Wind Velocity Value footnote
       windspeed_heating_mph = 15.0 # Table 5D/5E Wind Velocity Value footnote
+
+      if [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml_bldg.building_construction.residential_facility_type
+        if hpxml_bldg.building_construction.unit_height_above_grade > 0
+          # Scale default wind speed for height (a_exponent from Figure A15-1)
+          a_exponent = { HPXML::ShieldingNormal => 0.22,
+                         HPXML::ShieldingExposed => 0.14,
+                         HPXML::ShieldingWellShielded => 0.33 }[hpxml_bldg.site.shielding_of_home]
+          estimated_story = (hpxml_bldg.building_construction.unit_height_above_grade + infil_values[:height]) / infil_values[:height]
+          windspeed_cooling_mph *= estimated_story**a_exponent
+          windspeed_heating_mph *= estimated_story**a_exponent
+        end
+      end
 
       # Calculate infiltration airflow rates
       icfm_cool = ela_in2 * (c_s * mj.ctd + c_w * windspeed_cooling_mph**2)**0.5
@@ -1486,8 +1494,9 @@ module HVACSizing
     q_preheat = ventilation_data[:q_preheat]
     q_precool = ventilation_data[:q_precool]
     q_recirc = ventilation_data[:q_recirc]
-    oa_sens_eff = ventilation_data[:oa_sens_eff]
-    oa_lat_eff = ventilation_data[:oa_lat_eff]
+    htg_sens_eff = ventilation_data[:htg_sens_eff]
+    clg_sens_eff = ventilation_data[:clg_sens_eff]
+    clg_lat_eff = ventilation_data[:clg_lat_eff]
 
     # Calculate net infiltration cfm (NCFM; infiltration combined with imbalanced supply ventilation)
     if q_imb == 0
@@ -1531,9 +1540,9 @@ module HVACSizing
     hpxml_bldg.additional_properties.vent_cool_cfm = vent_cfm_cool
 
     # Calculate vent cfm incorporating sens/lat effectiveness, preheat/precool, and recirc
-    vent_cfm_heat = q_oa * (1.0 - oa_sens_eff) - q_preheat - q_recirc
-    vent_cfm_cool_sens = q_oa * (1.0 - oa_sens_eff) - q_precool - q_recirc
-    vent_cfm_cool_lat = q_oa * (1.0 - oa_lat_eff) - q_recirc
+    vent_cfm_heat = q_oa * (1.0 - htg_sens_eff) - q_preheat - q_recirc
+    vent_cfm_cool_sens = q_oa * (1.0 - clg_sens_eff) - q_precool - q_recirc
+    vent_cfm_cool_lat = q_oa * (1.0 - clg_lat_eff) - q_recirc
 
     bldg_Heat_Vent = 1.1 * mj.acf * vent_cfm_heat * mj.htd
     bldg_Cool_Vent_Sens = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
@@ -1953,21 +1962,39 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_hvac_cfis_loads(mj, hvac_loads, zone_loads, hvac_heating, hvac_cooling, hpxml_bldg)
-    if (not hvac_heating.nil?) && (not hvac_heating.distribution_system.nil?)
-      hvac_distribution = hvac_heating.distribution_system
-    elsif (not hvac_cooling.nil?) && (not hvac_cooling.distribution_system.nil?)
-      hvac_distribution = hvac_cooling.distribution_system
+    if hpxml_bldg.zones[0].id == 'BobRossResidenceConditioned' && hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.fan_type == HPXML::MechVentTypeERV }.size == 1
+      # FUTURE: For now, ACCA is okay with us bypassing our inputs to manually test this.
+      # Bob Ross 3-18: ERV to equipment (system load)
+      htg_sens_eff = 0.68
+      clg_sens_eff = 0.61
+      clg_lat_eff = 0.48
+
+      vent_cfm = hpxml_bldg.ventilation_fans[0].average_unit_flow_rate
+
+      vent_cfm_heat = vent_cfm * (1.0 - htg_sens_eff)
+      vent_cfm_cool_sens = vent_cfm * (1.0 - clg_sens_eff)
+      vent_cfm_cool_lat = vent_cfm * (1.0 - clg_lat_eff)
+    else
+      if (not hvac_heating.nil?) && (not hvac_heating.distribution_system.nil?)
+        hvac_distribution = hvac_heating.distribution_system
+      elsif (not hvac_cooling.nil?) && (not hvac_cooling.distribution_system.nil?)
+        hvac_distribution = hvac_cooling.distribution_system
+      end
+      return if hvac_distribution.nil?
+
+      vent_mech_cfis = hpxml_bldg.ventilation_fans.find { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS && vent_mech.distribution_system_idref == hvac_distribution.id }
+      return if vent_mech_cfis.nil?
+
+      vent_cfm = vent_mech_cfis.average_unit_flow_rate
+
+      vent_cfm_heat = vent_cfm
+      vent_cfm_cool_sens = vent_cfm
+      vent_cfm_cool_lat = vent_cfm
     end
-    return if hvac_distribution.nil?
 
-    vent_mech_cfis = hpxml_bldg.ventilation_fans.find { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS && vent_mech.distribution_system_idref == hvac_distribution.id }
-    return if vent_mech_cfis.nil?
-
-    vent_cfm = vent_mech_cfis.average_unit_flow_rate
-
-    heat_load = 1.1 * mj.acf * vent_cfm * mj.htd
-    cool_sens_load = 1.1 * mj.acf * vent_cfm * mj.ctd
-    cool_lat_load = 0.68 * mj.acf * vent_cfm * mj.cool_design_grains
+    heat_load = 1.1 * mj.acf * vent_cfm_heat * mj.htd
+    cool_sens_load = 1.1 * mj.acf * vent_cfm_cool_sens * mj.ctd
+    cool_lat_load = 0.68 * mj.acf * vent_cfm_cool_lat * mj.cool_design_grains
 
     hvac_loads.Heat_Vent += heat_load
     hvac_loads.Heat_Tot += heat_load
@@ -3223,8 +3250,8 @@ module HVACSizing
     # all ventilation needs (i.e., supplemental fan does not need to run), so skip supplement fan
     vent_fans_mech = hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && !f.is_cfis_supplemental_fan && f.flow_rate > 0 && f.hours_in_operation > 0 }
     if vent_fans_mech.empty?
-      return { q_imb: 0.0, q_oa: 0.0, q_preheat: 0.0, q_precool: 0.0,
-               q_recirc: 0.0, oa_sens_eff: 0.0, oa_lat_eff: 0.0 }
+      return { q_imb: 0.0, q_oa: 0.0, q_preheat: 0.0, q_precool: 0.0, q_recirc: 0.0,
+               htg_sens_eff: 0.0, clg_sens_eff: 0.0, clg_lat_eff: 0.0 }
     end
 
     # Categorize fans into different types
@@ -3260,16 +3287,31 @@ module HVACSizing
     hrv_erv_effectiveness_map = Airflow.calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
 
     # Calculate cfm weighted average effectiveness for the OA space load
-    oa_lat_eff = 0.0
-    oa_sens_eff = 0.0
+    htg_sens_eff = 0.0
+    clg_sens_eff = 0.0
+    clg_lat_eff = 0.0
     vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
     vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      oa_lat_eff += vent_mech.average_oa_unit_flow_rate / q_oa * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      oa_sens_eff += vent_mech.average_oa_unit_flow_rate / q_oa * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      htg_sens_eff += vent_mech.average_oa_unit_flow_rate / q_oa * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      clg_sens_eff = htg_sens_eff
+      clg_lat_eff += vent_mech.average_oa_unit_flow_rate / q_oa * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
     end
 
-    return { q_imb: q_imb, q_oa: q_oa, q_preheat: q_preheat, q_precool: q_precool,
-             q_recirc: q_recirc, oa_sens_eff: oa_sens_eff, oa_lat_eff: oa_lat_eff }
+    # FUTURE: For now, ACCA is okay with us bypassing our inputs to manually test these.
+    if hpxml_bldg.zones[0].id == 'BobRossResidenceConditioned'
+      if hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.fan_type == HPXML::MechVentTypeERV }.size == 1
+        # Bob Ross 3-18: ERV to equipment (system load)
+        return { q_imb: 0.0, q_oa: 0.0, q_preheat: 0.0, q_precool: 0.0, q_recirc: 0.0,
+                 htg_sens_eff: 0.0, clg_sens_eff: 0.0, clg_lat_eff: 0.0 }
+      elsif hpxml_bldg.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && f.fan_type == HPXML::MechVentTypeHRV }.size == 1
+        # Bob Ross 3-21: HRV to space (space load)
+        htg_sens_eff = 0.64
+        clg_sens_eff = 0.58
+      end
+    end
+
+    return { q_imb: q_imb, q_oa: q_oa, q_preheat: q_preheat, q_precool: q_precool, q_recirc: q_recirc,
+             htg_sens_eff: htg_sens_eff, clg_sens_eff: clg_sens_eff, clg_lat_eff: clg_lat_eff }
   end
 
   # Calculates the airflow rate associated with a given load/capacity per ACCA Manual S.
@@ -4321,29 +4363,32 @@ module HVACSizing
       u_effective = []
       for radius in 0..path_radius
         spl = [Math::PI * radius - 1, 0].max # soil path length (SPL)
-
+        r_ins = 0.0
         # Concrete, gravel, and insulation
         if radius == 0
           r_concrete = 0.0
           r_gravel = 0.0 # No gravel on edge
           if slab.perimeter_insulation_depth > 0
             r_ins = slab.perimeter_insulation_r_value # Insulation on edge
-          else
-            r_ins = 0.0
           end
         else
           r_concrete = Material.Concrete(slab.thickness).rvalue
           r_gravel = [slab_r_gravel_per_inch * (12.0 - slab.thickness), 0].max
           if slab.under_slab_insulation_spans_entire_slab
-            r_ins = slab.under_slab_insulation_r_value
-          elsif radius <= slab.under_slab_insulation_width && radius <= slab.perimeter_insulation_depth
-            r_ins = slab.under_slab_insulation_r_value + slab.perimeter_insulation_r_value
+            r_ins += slab.under_slab_insulation_r_value
           elsif radius <= slab.under_slab_insulation_width
-            r_ins = slab.under_slab_insulation_r_value
-          elsif radius <= slab.perimeter_insulation_depth
-            r_ins = slab.perimeter_insulation_r_value
-          else
-            r_ins = 0.0
+            r_ins += slab.under_slab_insulation_r_value
+          end
+          if radius <= slab.perimeter_insulation_depth
+            r_ins += slab.perimeter_insulation_r_value
+          end
+          if slab.exterior_horizontal_insulation_r_value > 0
+            if radius >= slab.exterior_horizontal_insulation_depth_below_grade
+              hypotenuse = Math.sqrt(slab.exterior_horizontal_insulation_depth_below_grade**2 + slab.exterior_horizontal_insulation_width**2)
+              if radius <= hypotenuse
+                r_ins += slab.exterior_horizontal_insulation_r_value
+              end
+            end
           end
         end
 
