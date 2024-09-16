@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Collection of methods for adding photovoltaic-related OpenStudio objects.
+# Collection of methods related to Photovoltaic systems.
 module PV
   # Adds any HPXML Photovoltaics to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_pv_systems(model, hpxml_bldg)
+  def self.apply(model, hpxml_bldg)
     # Error-checking
     hpxml_bldg.pv_systems.each do |pv_system|
       next if pv_system.inverter.inverter_efficiency == hpxml_bldg.pv_systems[0].inverter.inverter_efficiency

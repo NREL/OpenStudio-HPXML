@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Collection of methods for adding generator-related OpenStudio objects.
+# Collection of methods related to generators.
 module Generator
   # Adds any HPXML Generators to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_generators(model, hpxml_bldg)
+  def self.apply(model, hpxml_bldg)
     hpxml_bldg.generators.each do |generator|
       apply_generator(model, hpxml_bldg, generator)
     end

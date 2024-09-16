@@ -155,19 +155,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
       return false unless hpxml.errors.empty?
 
-      # Hidden feature: Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-      if hpxml.header.eri_calculation_version.nil?
-        hpxml.header.eri_calculation_version = 'latest'
-      end
-      if hpxml.header.eri_calculation_version == 'latest'
-        hpxml.header.eri_calculation_version = Constants::ERIVersions[-1]
-      end
-
-      # Hidden feature: Whether to override certain assumptions to better match the ASHRAE 140 specification
-      if hpxml.header.apply_ashrae140_assumptions.nil?
-        hpxml.header.apply_ashrae140_assumptions = false
-      end
-
       # Process weather once upfront
       epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
       weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
@@ -286,12 +273,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     model.setStrictnessLevel('None'.to_StrictnessLevel)
 
     # Init
-    apply_init(hpxml_bldg, hpxml.header)
-
-    # Simulation Controls
+    init(hpxml_bldg, hpxml.header)
     SimControls.apply(model, hpxml.header)
-
-    # Location
     Location.apply(model, weather, hpxml_bldg, hpxml.header, epw_path)
 
     # Geometry/Enclosure
@@ -300,7 +283,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg)
     Geometry.apply_floors(runner, model, spaces, hpxml_bldg, hpxml.header)
-    Geometry.apply_foundation_walls_slabs(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    Geometry.apply_foundation_walls_slabs(runner, model, spaces, hpxml_bldg)
     Geometry.apply_windows(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_doors(model, spaces, hpxml_bldg)
     Geometry.apply_skylights(model, spaces, hpxml_bldg, hpxml.header)
@@ -311,12 +294,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_building_unit(model, unit_num)
 
     # Systems
-    hvac_data = HVAC.apply_hvac_systems(model, runner, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    hvac_data = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
     HVAC.apply_dehumidifiers(runner, model, spaces, hpxml_bldg, hpxml.header)
     HVAC.apply_ceiling_fans(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
 
-    # Hot Water
-    add_hot_water_and_appliances(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    # Hot Water & Appliances
+    Waterheater.apply_dhw_appliances(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
 
     # Lighting
     Lighting.apply(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
@@ -327,14 +310,14 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     MiscLoads.apply_pools_and_permanent_spas(runner, model, spaces, hpxml_bldg, hpxml.header, schedules_file)
 
     # Internal Gains
-    InternalGains.apply_building_occupants(model, runner, hpxml_bldg, hpxml.header, spaces, schedules_file)
-    InternalGains.apply_general_water_use(model, runner, hpxml_bldg, hpxml.header, spaces, schedules_file)
+    InternalGains.apply_building_occupants(runner, model, hpxml_bldg, hpxml.header, spaces, schedules_file)
+    InternalGains.apply_general_water_use(runner, model, hpxml_bldg, hpxml.header, spaces, schedules_file)
 
     # Other
-    add_airflow(runner, model, weather, spaces, hpxml_bldg, hpxml.header, hvac_data, schedules_file)
-    PV.apply_pv_systems(model, hpxml_bldg)
-    Generator.apply_generators(model, hpxml_bldg)
-    Battery.apply_batteries(runner, model, spaces, hpxml_bldg, schedules_file)
+    Airflow.apply(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_data)
+    PV.apply(model, hpxml_bldg)
+    Generator.apply(model, hpxml_bldg)
+    Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
   end
 
   # TODO
@@ -342,15 +325,26 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def apply_init(hpxml_bldg, hpxml_header)
-    # Apply unit multipliers to HVAC systems and water heaters
-    HVAC.apply_unit_multiplier(hpxml_bldg, hpxml_header)
-    # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
-    HVAC.ensure_nonzero_sizing_values(hpxml_bldg)
+  def init(hpxml_bldg, hpxml_header)
+    # Store the fraction of windows operable before we collapse surfaces
+    hpxml_bldg.additional_properties.initial_frac_windows_operable = hpxml_bldg.fraction_of_windows_operable()
+
     # Make adjustments for modeling purposes
-    @frac_windows_operable = hpxml_bldg.fraction_of_windows_operable()
     hpxml_bldg.collapse_enclosure_surfaces() # Speeds up simulation
     hpxml_bldg.delete_adiabatic_subsurfaces() # EnergyPlus doesn't allow this
+
+    # Hidden feature: Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+    if hpxml_header.eri_calculation_version.nil?
+      hpxml_header.eri_calculation_version = 'latest'
+    end
+    if hpxml_header.eri_calculation_version == 'latest'
+      hpxml_header.eri_calculation_version = Constants::ERIVersions[-1]
+    end
+
+    # Hidden feature: Whether to override certain assumptions to better match the ASHRAE 140 specification
+    if hpxml_header.apply_ashrae140_assumptions.nil?
+      hpxml_header.apply_ashrae140_assumptions = false
+    end
 
     if not hpxml_bldg.building_occupancy.number_of_residents.nil?
       # If zero occupants, ensure end uses of interest are zeroed out
@@ -365,183 +359,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
                                              natvent_availability: HPXML::ScheduleUnavailable)
       end
     end
-  end
-
-  # First assign OpenStudio Space object for appliances based on HPXML Location.
-  # Then adds any of the following to the OpenStudio model:
-  # - HPXML Clothes Washers
-  # - HPXML Clothes Dryers
-  # - HPXML Dishwashers
-  # - HPXML Refrigerators
-  # - HPXML Freezers
-  # - HPXML Cooking Ranges / Ovens
-  # - HPXML Hot Water Distribution
-  # - HPXML Solar Thermal System
-  # - HPXML Water Heating Systems
-  # - HPXML Water Fixtures
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [nil]
-  def add_hot_water_and_appliances(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file)
-    # Distribution
-    if hpxml_bldg.water_heating_systems.size > 0
-      hot_water_distribution = hpxml_bldg.hot_water_distributions[0]
-    end
-
-    # Solar thermal system
-    solar_thermal_system = nil
-    if hpxml_bldg.solar_thermal_systems.size > 0
-      solar_thermal_system = hpxml_bldg.solar_thermal_systems[0]
-    end
-
-    # Water Heater
-    unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:WaterHeater].name, hpxml_header.unavailable_periods)
-    unit_multiplier = hpxml_bldg.building_construction.number_of_units
-    has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
-    has_cond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementConditioned)
-    nbeds = hpxml_bldg.building_construction.number_of_bedrooms
-    cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
-    eri_version = hpxml_header.eri_calculation_version
-    plantloop_map = {}
-    hpxml_bldg.water_heating_systems.each do |water_heating_system|
-      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(water_heating_system.location, model, spaces)
-
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, water_heating_system, hot_water_distribution)
-
-      sys_id = water_heating_system.id
-      if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        plantloop_map[sys_id] = Waterheater.apply_tank(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-        plantloop_map[sys_id] = Waterheater.apply_tankless(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
-      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
-        plantloop_map[sys_id] = Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, hpxml_bldg.elevation, water_heating_system, ec_adj, solar_thermal_system, conditioned_zone, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
-      elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-        plantloop_map[sys_id] = Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, solar_thermal_system, eri_version, schedules_file, unavailable_periods, unit_multiplier, nbeds)
-      else
-        fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
-      end
-    end
-
-    # Hot water fixtures and appliances
-    HotWaterAndAppliances.apply(model, runner, hpxml_header, hpxml_bldg, weather, spaces, hot_water_distribution,
-                                solar_thermal_system, eri_version, schedules_file, plantloop_map,
-                                hpxml_header.unavailable_periods, hpxml_bldg.building_construction.number_of_units)
-
-    if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-      loc_space, loc_schedule = Geometry.get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, model, spaces)
-      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, plantloop_map, unit_multiplier)
-    end
-
-    # Add combi-system EMS program with water use equipment information
-    Waterheater.apply_combi_system_EMS(model, hpxml_bldg.water_heating_systems, plantloop_map)
-  end
-
-  # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
-  # TODO for adding more description (e.g., around checks and warnings)
-  #
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param hvac_data [Array<Hash, HPXML::UnavailablePeriods>] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects, HVAC unavailable period objects
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [nil]
-  def add_airflow(runner, model, weather, spaces, hpxml_bldg, hpxml_header, hvac_data, schedules_file)
-    cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    airloop_map, hvac_unavailable_periods = hvac_data
-
-    # Ducts
-    duct_systems = {}
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      air_ducts = Airflow.create_ducts(model, hvac_distribution, spaces)
-      next if air_ducts.empty?
-
-      # Connect AirLoopHVACs to ducts
-      added_ducts = false
-      hvac_distribution.hvac_systems.each do |hvac_system|
-        next if airloop_map[hvac_system.id].nil?
-
-        object = airloop_map[hvac_system.id]
-        if duct_systems[air_ducts].nil?
-          duct_systems[air_ducts] = object
-          added_ducts = true
-        elsif duct_systems[air_ducts] != object
-          # Multiple air loops associated with this duct system, treat
-          # as separate duct systems.
-          air_ducts2 = Airflow.create_ducts(model, hvac_distribution, spaces)
-          duct_systems[air_ducts2] = object
-          added_ducts = true
-        end
-      end
-      if not added_ducts
-        fail 'Unexpected error adding ducts to model.'
-      end
-    end
-
-    # Duct leakage to outside warnings?
-    # Need to check here instead of in schematron in case duct locations are defaulted
-    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-      next if hvac_distribution.duct_leakage_measurements.empty?
-
-      units = hvac_distribution.duct_leakage_measurements[0].duct_leakage_units
-      lto_measurements = hvac_distribution.duct_leakage_measurements.select { |dlm| dlm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside }
-      sum_lto = lto_measurements.map { |dlm| dlm.duct_leakage_value }.sum(0.0)
-
-      if hvac_distribution.ducts.select { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) }.size == 0
-        # If ducts completely in conditioned space, issue warning if duct leakage to outside above a certain threshold (e.g., 5%)
-        issue_warning = false
-        if units == HPXML::UnitsCFM25
-          issue_warning = true if sum_lto > 0.04 * cfa
-        elsif units == HPXML::UnitsCFM50
-          issue_warning = true if sum_lto > 0.06 * cfa
-        elsif units == HPXML::UnitsPercent
-          issue_warning = true if sum_lto > 0.05
-        end
-        next unless issue_warning
-
-        runner.registerWarning('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
-      else
-        # If ducts in unconditioned space, issue warning if duct leakage to outside above a certain threshold (e.g., 40%)
-        issue_warning = false
-        if units == HPXML::UnitsCFM25
-          issue_warning = true if sum_lto >= 0.32 * cfa
-        elsif units == HPXML::UnitsCFM50
-          issue_warning = true if sum_lto >= 0.48 * cfa
-        elsif units == HPXML::UnitsPercent
-          issue_warning = true if sum_lto >= 0.4
-        end
-        next unless issue_warning
-
-        runner.registerWarning('Very high sum of supply + return duct leakage to the outside; double-check inputs.')
-      end
-    end
-
-    # Create HVAC availability sensor
-    hvac_availability_sensor = nil
-    if not hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: hvac_unavailable_periods)
-
-      hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      hvac_availability_sensor.setName('hvac availability s')
-      hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
-      hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
-    end
-
-    Airflow.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, duct_systems,
-                  airloop_map, @frac_windows_operable, schedules_file, hvac_availability_sensor)
   end
 end
 

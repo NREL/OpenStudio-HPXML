@@ -8,23 +8,19 @@ module Airflow
   AssumedInsideTemp = 73.5 # (F)
   Gravity = 32.174 # acceleration of gravity (ft/s2)
 
-  # TODO
+  # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
+  # TODO for adding more description (e.g., around checks and warnings)
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
-  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param duct_systems [TODO] TODO
-  # @param airloop_map [TODO] TODO
-  # @param frac_windows_operable [TODO] TODO
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param hvac_availability_sensor [TODO] TODO
+  # @param hvac_data [Array<Hash, HPXML::UnavailablePeriods>] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects, HVAC unavailable period objects
   # @return [TODO] TODO
-  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, duct_systems,
-                 airloop_map, frac_windows_operable, schedules_file, hvac_availability_sensor)
-
+  def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, hvac_data)
     # Global variables
 
     @runner = runner
@@ -37,9 +33,10 @@ module Airflow
     @apply_ashrae140_assumptions = hpxml_header.apply_ashrae140_assumptions
     @cooking_range_in_cond_space = hpxml_bldg.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.cooking_ranges[0].location)
     @clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
-    @hvac_availability_sensor = hvac_availability_sensor
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     unavailable_periods = hpxml_header.unavailable_periods
+    airloop_map, hvac_unavailable_periods = hvac_data
+    frac_windows_operable = hpxml_bldg.additional_properties.initial_frac_windows_operable
 
     # Global sensors
 
@@ -65,6 +62,17 @@ module Airflow
     @tout_sensor.setKeyName(@conditioned_zone.name.to_s)
 
     @adiabatic_const = nil
+
+    # Create HVAC availability sensor
+    @hvac_availability_sensor = nil
+    if not hvac_unavailable_periods.empty?
+      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: hvac_unavailable_periods)
+
+      @hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      @hvac_availability_sensor.setName('hvac availability s')
+      @hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
+      @hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
+    end
 
     # Ventilation fans
     vent_fans_mech = []
@@ -107,6 +115,8 @@ module Airflow
     # Apply ducts
 
     duct_lk_imbals = []
+    duct_systems = create_duct_systems(model, spaces, hpxml_bldg, airloop_map)
+    check_duct_leakage(runner, hpxml_bldg)
     duct_systems.each do |ducts, object|
       apply_ducts(model, ducts, object, vent_fans_mech, hpxml_bldg.building_construction.number_of_units, duct_lk_imbals)
     end
@@ -873,7 +883,7 @@ module Airflow
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param vent_fans_mech [TODO] TODO
-  # @param airloop_map [TODO] TODO
+  # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
   def self.initialize_cfis(model, vent_fans_mech, airloop_map, unavailable_periods)
@@ -967,6 +977,53 @@ module Airflow
       end
     else
       fail "Unexpected fan: #{supply_fan.name}"
+    end
+  end
+
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.check_duct_leakage(runner, hpxml_bldg)
+    # Duct leakage to outside warnings?
+    # Need to check here instead of in schematron in case duct locations are defaulted
+    cfa = hpxml_bldg.building_construction.conditioned_floor_area
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next if hvac_distribution.duct_leakage_measurements.empty?
+
+      units = hvac_distribution.duct_leakage_measurements[0].duct_leakage_units
+      lto_measurements = hvac_distribution.duct_leakage_measurements.select { |dlm| dlm.duct_leakage_total_or_to_outside == HPXML::DuctLeakageToOutside }
+      sum_lto = lto_measurements.map { |dlm| dlm.duct_leakage_value }.sum(0.0)
+
+      if hvac_distribution.ducts.select { |d| !HPXML::conditioned_locations_this_unit.include?(d.duct_location) }.size == 0
+        # If ducts completely in conditioned space, issue warning if duct leakage to outside above a certain threshold (e.g., 5%)
+        issue_warning = false
+        if units == HPXML::UnitsCFM25
+          issue_warning = true if sum_lto > 0.04 * cfa
+        elsif units == HPXML::UnitsCFM50
+          issue_warning = true if sum_lto > 0.06 * cfa
+        elsif units == HPXML::UnitsPercent
+          issue_warning = true if sum_lto > 0.05
+        end
+        next unless issue_warning
+
+        runner.registerWarning('Ducts are entirely within conditioned space but there is moderate leakage to the outside. Leakage to the outside is typically zero or near-zero in these situations, consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.')
+      else
+        # If ducts in unconditioned space, issue warning if duct leakage to outside above a certain threshold (e.g., 40%)
+        issue_warning = false
+        if units == HPXML::UnitsCFM25
+          issue_warning = true if sum_lto >= 0.32 * cfa
+        elsif units == HPXML::UnitsCFM50
+          issue_warning = true if sum_lto >= 0.48 * cfa
+        elsif units == HPXML::UnitsPercent
+          issue_warning = true if sum_lto >= 0.4
+        end
+        next unless issue_warning
+
+        runner.registerWarning('Very high sum of supply + return duct leakage to the outside; double-check inputs.')
+      end
     end
   end
 
@@ -2727,6 +2784,45 @@ module Airflow
     end
 
     return [q_fan, 0.0].max
+  end
+
+  # TODO
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
+  # @return [TODO] TODO
+  def self.create_duct_systems(model, spaces, hpxml_bldg, airloop_map)
+    duct_systems = {}
+    hpxml_bldg.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      air_ducts = create_ducts(model, hvac_distribution, spaces)
+      next if air_ducts.empty?
+
+      # Connect AirLoopHVACs to ducts
+      added_ducts = false
+      hvac_distribution.hvac_systems.each do |hvac_system|
+        next if airloop_map[hvac_system.id].nil?
+
+        object = airloop_map[hvac_system.id]
+        if duct_systems[air_ducts].nil?
+          duct_systems[air_ducts] = object
+          added_ducts = true
+        elsif duct_systems[air_ducts] != object
+          # Multiple air loops associated with this duct system, treat
+          # as separate duct systems.
+          air_ducts2 = create_ducts(model, hvac_distribution, spaces)
+          duct_systems[air_ducts2] = object
+          added_ducts = true
+        end
+      end
+      if not added_ducts
+        fail 'Unexpected error adding ducts to model.'
+      end
+    end
+    return duct_systems
   end
 
   # TODO

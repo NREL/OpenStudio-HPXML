@@ -34,7 +34,14 @@ module HPXMLDefaults
     nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+
     eri_version = hpxml.header.eri_calculation_version
+    if eri_version.nil?
+      eri_version = 'latest'
+    end
+    if eri_version == 'latest'
+      eri_version = Constants::ERIVersions[-1]
+    end
 
     if hpxml.buildings.size > 1
       # This is helpful if we need to make unique HPXML IDs across dwelling units

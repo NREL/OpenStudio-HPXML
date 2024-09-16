@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to lighting.
 module Lighting
   # Adds any HPXML Lighting Groups and Lighting to the OpenStudio model.
   #

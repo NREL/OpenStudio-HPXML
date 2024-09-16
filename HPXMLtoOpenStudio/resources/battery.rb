@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Collection of methods for adding battery-related OpenStudio objects.
+# Collection of methods related to batteries.
 module Battery
   # Adds any HPXML Batteries to the OpenStudio model.
   #
@@ -10,7 +10,7 @@ module Battery
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_batteries(runner, model, spaces, hpxml_bldg, schedules_file)
+  def self.apply(runner, model, spaces, hpxml_bldg, schedules_file)
     hpxml_bldg.batteries.each do |battery|
       apply_battery(runner, model, spaces, hpxml_bldg, battery, schedules_file)
     end

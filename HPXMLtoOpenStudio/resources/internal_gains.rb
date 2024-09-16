@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to internal gains.
 module InternalGains
   # Create an OpenStudio People object using number of occupants and people/activity schedules.
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_building_occupants(model, runner, hpxml_bldg, hpxml_header, spaces, schedules_file)
+  def self.apply_building_occupants(runner, model, hpxml_bldg, hpxml_header, spaces, schedules_file)
     if hpxml_bldg.building_occupancy.number_of_residents.nil? # Asset calculation
       num_occ = Geometry.get_occupancy_default_num(nbeds: hpxml_bldg.building_construction.number_of_bedrooms)
     else # Operational calculation
@@ -85,13 +85,14 @@ module InternalGains
   # Adds general water use internal gains (floor mopping, shower evaporation, water films
   # on showers, tubs & sinks surfaces, plant watering, etc.) to the OpenStudio Model.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_general_water_use(model, runner, hpxml_bldg, hpxml_header, spaces, schedules_file)
+  def self.apply_general_water_use(runner, model, hpxml_bldg, hpxml_header, spaces, schedules_file)
     general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
 

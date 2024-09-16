@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to HVAC systems.
 module HVAC
   AirSourceHeatRatedODB = 47.0 # degF, Rated outdoor drybulb for air-source systems, heating
   AirSourceHeatRatedIDB = 70.0 # degF, Rated indoor drybulb for air-source systems, heating
@@ -9,23 +9,26 @@ module HVAC
   CrankcaseHeaterTemp = 50.0 # degF
 
   # TODO
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  #
   # @return [Array<Hash, TODO>] Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil), TODO
-  def self.apply_hvac_systems(model, runner, weather, spaces, hpxml_bldg, hpxml_header, schedules_file)
-    return if hpxml_bldg.hvac_controls.size == 0
-
+  def self.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file)
     # Init
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
     @hp_backup_system_object = nil
     @hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, hpxml_header.unavailable_periods)
+    airloop_map = {}
+
+    if hpxml_bldg.hvac_controls.size == 0
+      return airloop_map, @hvac_unavailable_periods
+    end
 
     # Set 365 (or 366 for a leap year) heating/cooling day arrays based on heating/cooling
     # season begin/end month/day, respectively.
@@ -44,8 +47,8 @@ module HVAC
     @heating_days = Calendar.get_daily_season(hpxml_header.sim_calendar_year, htg_start_month, htg_start_day, htg_end_month, htg_end_day)
     @cooling_days = Calendar.get_daily_season(hpxml_header.sim_calendar_year, clg_start_month, clg_start_day, clg_end_month, clg_end_day)
 
-    airloop_map = {}
-
+    apply_unit_multiplier(hpxml_bldg, hpxml_header)
+    ensure_nonzero_sizing_values(hpxml_bldg)
     apply_setpoints(model, runner, weather, spaces, hpxml_bldg, hpxml_header, schedules_file)
     apply_ideal_air_system(model, weather, spaces, hpxml_bldg, hpxml_header)
     apply_cooling_system(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, airloop_map)
@@ -1394,6 +1397,9 @@ module HVAC
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
     thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(onoff_thermostat_ddb, 'deltaF', 'deltaC'))
     conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+
+    # Now that we have assigned the HVAC setpoint, set Kiva foundation initial temperatures.
+    Constructions.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml_header, conditioned_zone, schedules_file)
   end
 
   # TODO
@@ -5500,7 +5506,7 @@ module HVAC
     return hvac_systems
   end
 
-  # TODO
+  # Ensure that no capacities/airflows are zero in order to prevent potential E+ errors.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [TODO] TODO
@@ -5548,15 +5554,14 @@ module HVAC
     end
   end
 
-  # TODO
+  # Apply unit multiplier (E+ thermal zone multiplier) to HVAC systems; E+ sends the
+  # multiplied thermal zone load to the HVAC system, so the HVAC system needs to be
+  # sized to meet the entire multiplied zone load.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [TODO] TODO
   def self.apply_unit_multiplier(hpxml_bldg, hpxml_header)
-    # Apply unit multiplier (E+ thermal zone multiplier); E+ sends the
-    # multiplied thermal zone load to the HVAC system, so the HVAC system
-    # needs to be sized to meet the entire multiplied zone load.
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
     hpxml_bldg.heating_systems.each do |htg_sys|
       htg_sys.heating_capacity *= unit_multiplier

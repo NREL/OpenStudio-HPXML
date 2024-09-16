@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO
+# Collection of methods related to miscellaneous plug/fuel loads.
 module MiscLoads
   # Adds any HPXML Plug Loads to the OpenStudio model.
   #
