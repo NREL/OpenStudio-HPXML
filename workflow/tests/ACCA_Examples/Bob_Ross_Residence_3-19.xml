@@ -1302,7 +1302,7 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
-              <FanType>supply only</FanType>
+              <FanType>balanced</FanType>
               <RatedFlowRate>100.0</RatedFlowRate>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
             </VentilationFan>
