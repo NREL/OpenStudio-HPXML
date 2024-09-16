@@ -26,14 +26,21 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
             battery.cellVoltageatEndofNominalZone * battery.fullyChargedCellCapacity)
   end
 
-  def test_battery_default
+  def test_ev_battery_default
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-defaults.xml'))
     model, _hpxml, hpxml_bldg = _test_measure(args_hash)
 
     hpxml_bldg.vehicles.each do |hpxml_ev|
+      next unless hpxml_ev.id.include? 'ElectricVehicle'
+
       ev_battery = get_battery(model, hpxml_ev.id)
-      assert_nil(ev_battery)
+      assert_nil(ev_battery) # no defaulted schedule means no EV is generated
+
+      elcds = model.getElectricLoadCenterDistributions
+      elcds.each do |elcd|
+        assert(!elcd.name.to_s.include?(hpxml_ev.id))
+      end
     end
   end
 
@@ -46,10 +53,12 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
     hpxml_bldg.vehicles.each do |hpxml_ev|
       ev_battery = get_battery(model, hpxml_ev.id)
       assert_nil(ev_battery)
-    end
 
-    elcds = model.getElectricLoadCenterDistributions
-    assert_equal(0, elcds.size)
+      elcds = model.getElectricLoadCenterDistributions
+      elcds.each do |elcd|
+        assert(!elcd.name.to_s.include?(hpxml_ev.id))
+      end
+    end
   end
 
   def test_ev_battery_scheduled
@@ -65,30 +74,37 @@ class HPXMLtoOpenStudioBatteryTest < Minitest::Test
       assert_equal(HPXML::BatteryLifetimeModelNone, ev_battery.lifetimeModel)
       assert_in_epsilon(15, ev_battery.numberofCellsinSeries, 0.01)
       assert_in_epsilon(623, ev_battery.numberofStringsinParallel, 0.01)
-      assert_in_epsilon(0.0, ev_battery.initialFractionalStateofCharge, 0.01)
+      assert_in_epsilon(0.95, ev_battery.initialFractionalStateofCharge, 0.01)
       assert_in_epsilon(990.0, ev_battery.batteryMass, 0.01)
       assert_in_epsilon(6.59, ev_battery.batterySurfaceArea, 0.01)
       assert_in_epsilon(100000, calc_nom_capacity(ev_battery), 0.01)
 
-      elcds = model.getElectricLoadCenterDistributions
-      assert_equal(1, elcds.size)
-      elcd = elcds[0]
-      assert_equal('AlternatingCurrentWithStorage', elcd.electricalBussType)
-      assert_equal(0.15, elcd.minimumStorageStateofChargeFraction)
-      assert_equal(0.95, elcd.maximumStorageStateofChargeFraction)
-      assert_equal(7200.0, elcd.designStorageControlChargePower.get)
-      assert_equal(6000.0, elcd.designStorageControlDischargePower.get)
-      assert(!elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
-      assert_equal('TrackChargeDischargeSchedules', elcd.storageOperationScheme)
-      assert(elcd.storageChargePowerFractionSchedule.is_initialized)
-      assert(elcd.storageDischargePowerFractionSchedule.is_initialized)
-      assert(elcd.storageConverter.is_initialized)
-
-      elcscs = model.getElectricLoadCenterStorageConverters
-      assert_equal(1, elcscs.size)
-      elcsc = elcscs[0]
-      assert_equal(1.0, elcsc.simpleFixedEfficiency.get)
+      ev_elcd = nil
+      model.getElectricLoadCenterDistributions.each do |elcd|
+        if elcd.name.to_s.include? hpxml_ev.id
+          ev_elcd = elcd
+          break
+        end
+      end
+      assert_equal('AlternatingCurrentWithStorage', ev_elcd.electricalBussType)
+      assert_equal(0.15, ev_elcd.minimumStorageStateofChargeFraction)
+      assert_equal(0.95, ev_elcd.maximumStorageStateofChargeFraction)
+      assert_equal(7200.0, ev_elcd.designStorageControlChargePower.get)
+      assert_equal(6000.0, ev_elcd.designStorageControlDischargePower.get)
+      assert(!ev_elcd.demandLimitSchemePurchasedElectricDemandLimit.is_initialized)
+      assert_equal('TrackChargeDischargeSchedules', ev_elcd.storageOperationScheme)
+      assert(ev_elcd.storageChargePowerFractionSchedule.is_initialized)
+      assert(ev_elcd.storageDischargePowerFractionSchedule.is_initialized)
+      assert(ev_elcd.storageConverter.is_initialized)
     end
+  end
+
+  def test_ev_battery_home_battery
+    # TO-DO: test two batteries, one EV, one home
+  end
+
+  def test_ev_battery_scheduled_default
+    # TO-DO: test ev battery with schedule (so it is modeled) but with all other fields defaulted
   end
 
   def _test_measure(args_hash)

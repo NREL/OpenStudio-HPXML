@@ -502,19 +502,33 @@
           </WaterFixture>
         </WaterHeating>
         <Vehicles>
-          <ElectricVehicle>
+          <Vehicle>
             <SystemIdentifier id='ElectricVehicle1'/>
-            <BatteryType>Li-ion</BatteryType>
-            <NominalCapacity>
-              <Units>kWh</Units>
-              <Value>100.0</Value>
-            </NominalCapacity>
-            <UsableCapacity>
-              <Units>kWh</Units>
-              <Value>80.0</Value>
-            </UsableCapacity>
-            <RatedPowerOutput>6000.0</RatedPowerOutput>
-          </ElectricVehicle>
+            <VehicleType>
+              <BEV>
+                <Battery>
+                  <NominalCapacity>
+                    <Units>kWh</Units>
+                    <Value>100.0</Value>
+                  </NominalCapacity>
+                  <UsableCapacity>
+                    <Units>kWh</Units>
+                    <Value>80.0</Value>
+                  </UsableCapacity>
+                  <RatedPowerOutput>6000.0</RatedPowerOutput>
+                </Battery>
+                <FractionChargedLocation>
+                  <Location>Home</Location>
+                </FractionChargedLocation>
+              </BEV>
+            </VehicleType>
+            <MilesDrivenPerYear>10000.0</MilesDrivenPerYear>
+            <HoursDrivenPerWeek>14.0</HoursDrivenPerWeek>
+            <FuelEconomyCombined>
+              <Units>kWh/mile</Units>
+              <Value>0.32</Value>
+            </FuelEconomyCombined>
+          </Vehicle>
         </Vehicles>
       </Systems>
       <Appliances>
@@ -551,7 +565,6 @@
           <SystemIdentifier id='Refrigerator1'/>
           <Location>garage</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
-          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>

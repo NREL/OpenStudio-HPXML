@@ -7,6 +7,11 @@ require 'fileutils'
 require_relative '../measure.rb'
 
 class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
+  def teardown
+    File.delete(File.join(File.dirname(__FILE__), 'results_annual.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_annual.csv')
+    File.delete(File.join(File.dirname(__FILE__), 'results_design_load_details.csv')) if File.exist? File.join(File.dirname(__FILE__), 'results_design_load_details.csv')
+  end
+
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -488,7 +493,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ther_eff = 1.0
     iam_coeff2 = 0.3023
     iam_coeff3 = -0.3057
-    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_frul, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
+    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_rated_thermal_losses, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
     storage_tank_volume = 0.2271
     storage_tank_height = UnitConversions.convert(4.5, 'ft', 'm')
     storage_tank_u = 0.0
@@ -519,7 +524,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     collector = model.getSolarCollectorFlatPlateWaters[0]
     collector_performance = collector.solarCollectorPerformance
     assert_in_epsilon(collector_area, collector_performance.grossArea, 0.001)
-    assert_in_epsilon(solar_thermal_system.collector_frta, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
+    assert_in_epsilon(solar_thermal_system.collector_rated_optical_efficiency, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
     assert_in_epsilon(collector_coeff_2, collector_performance.coefficient2ofEfficiencyEquation, 0.001)
     assert_in_epsilon(-iam_coeff2, collector_performance.coefficient2ofIncidentAngleModifier.get, 0.001)
     assert_in_epsilon(iam_coeff3, collector_performance.coefficient3ofIncidentAngleModifier.get, 0.001)
@@ -531,7 +536,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -561,7 +566,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ther_eff = 1.0
     iam_coeff2 = 0.1
     iam_coeff3 = 0
-    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_frul, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
+    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_rated_thermal_losses, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
     storage_tank_volume = 0.2271
     storage_tank_height = UnitConversions.convert(4.5, 'ft', 'm')
     storage_tank_u = 0.0
@@ -592,7 +597,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     collector = model.getSolarCollectorFlatPlateWaters[0]
     collector_performance = collector.solarCollectorPerformance
     assert_in_epsilon(collector_area, collector_performance.grossArea, 0.001)
-    assert_in_epsilon(solar_thermal_system.collector_frta, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
+    assert_in_epsilon(solar_thermal_system.collector_rated_optical_efficiency, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
     assert_in_epsilon(collector_coeff_2, collector_performance.coefficient2ofEfficiencyEquation, 0.001)
     assert_in_epsilon(-iam_coeff2, collector_performance.coefficient2ofIncidentAngleModifier.get, 0.001)
     assert_in_epsilon(iam_coeff3, collector_performance.coefficient3ofIncidentAngleModifier.get, 0.001)
@@ -604,7 +609,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -634,7 +639,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ther_eff = 1.0
     iam_coeff2 = 0.1
     iam_coeff3 = 0
-    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_frul, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
+    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_rated_thermal_losses, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
     storage_tank_volume = UnitConversions.convert(solar_thermal_system.storage_volume, 'gal', 'm^3')
     storage_tank_height = UnitConversions.convert(4.5, 'ft', 'm')
     storage_tank_u = UnitConversions.convert(0.1, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
@@ -665,7 +670,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     collector = model.getSolarCollectorFlatPlateWaters[0]
     collector_performance = collector.solarCollectorPerformance
     assert_in_epsilon(collector_area, collector_performance.grossArea, 0.001)
-    assert_in_epsilon(solar_thermal_system.collector_frta, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
+    assert_in_epsilon(solar_thermal_system.collector_rated_optical_efficiency, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
     assert_in_epsilon(collector_coeff_2, collector_performance.coefficient2ofEfficiencyEquation, 0.001)
     assert_in_epsilon(-iam_coeff2, collector_performance.coefficient2ofIncidentAngleModifier.get, 0.001)
     assert_in_epsilon(iam_coeff3, collector_performance.coefficient3ofIncidentAngleModifier.get, 0.001)
@@ -677,7 +682,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'PropyleneGlycol')
+      assert_equal(plant_loop.fluidType, EPlus::FluidPropyleneGlycol)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -707,7 +712,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     ther_eff = 1.0
     iam_coeff2 = 0.1
     iam_coeff3 = 0
-    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_frul, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
+    collector_coeff_2 = -UnitConversions.convert(solar_thermal_system.collector_rated_thermal_losses, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')
     storage_tank_volume = 0.2271
     storage_tank_height = UnitConversions.convert(4.5, 'ft', 'm')
     storage_tank_u = 0.0
@@ -738,7 +743,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
     collector = model.getSolarCollectorFlatPlateWaters[0]
     collector_performance = collector.solarCollectorPerformance
     assert_in_epsilon(collector_area, collector_performance.grossArea, 0.001)
-    assert_in_epsilon(solar_thermal_system.collector_frta, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
+    assert_in_epsilon(solar_thermal_system.collector_rated_optical_efficiency, collector_performance.coefficient1ofEfficiencyEquation, 0.001)
     assert_in_epsilon(collector_coeff_2, collector_performance.coefficient2ofEfficiencyEquation, 0.001)
     assert_in_epsilon(-iam_coeff2, collector_performance.coefficient2ofIncidentAngleModifier.get, 0.001)
     assert_in_epsilon(iam_coeff3, collector_performance.coefficient3ofIncidentAngleModifier.get, 0.001)
@@ -750,7 +755,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }
@@ -818,7 +823,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < Minitest::Test
       next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
-      assert_equal(plant_loop.fluidType, 'Water')
+      assert_equal(plant_loop.fluidType, EPlus::FluidWater)
       loop = plant_loop
     end
     pump = loop.supplyComponents.find { |comp| comp.to_PumpConstantSpeed.is_initialized }

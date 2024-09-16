@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_schedule_file</name>
   <uid>f770b2db-1a9f-4e99-99a7-7f3161a594b1</uid>
-  <version_id>f3ee0ac4-9f12-4b23-8a57-ff5e2bfa2130</version_id>
-  <version_modified>2024-06-21T00:37:39Z</version_modified>
+  <version_id>c51b1eff-b508-42dd-a77e-671265e526ab</version_id>
+  <version_modified>2024-08-28T16:06:34Z</version_modified>
   <xml_checksum>03F02484</xml_checksum>
   <class_name>BuildResidentialScheduleFile</class_name>
   <display_name>Schedule File Builder</display_name>
@@ -133,13 +133,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A981343F</checksum>
+      <checksum>19F7FF66</checksum>
     </file>
     <file>
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C8528AAA</checksum>
+      <checksum>7060BE69</checksum>
     </file>
     <file>
       <filename>clothes_dryer_consumption_dist.csv</filename>
@@ -169,7 +169,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CD2BE631</checksum>
+      <checksum>27E808FB</checksum>
     </file>
     <file>
       <filename>cooking_consumption_dist.csv</filename>
@@ -220,16 +220,16 @@
       <checksum>419E598E</checksum>
     </file>
     <file>
+      <filename>schedules.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7B6640FE</checksum>
+    </file>
+    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A3B15907</checksum>
-    </file>
-    <file>
-      <filename>schedules_config.md</filename>
-      <filetype>md</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>916BF4C3</checksum>
+      <checksum>1E6EB1B1</checksum>
     </file>
     <file>
       <filename>shower_cluster_size_probability.csv</filename>
