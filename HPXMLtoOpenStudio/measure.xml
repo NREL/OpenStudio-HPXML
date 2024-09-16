@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5a145ea9-f949-4aac-80ab-b6925c428957</version_id>
-  <version_modified>2024-09-16T14:45:24Z</version_modified>
+  <version_id>735921d7-e5e7-46fa-969c-87cafd760d8a</version_id>
+  <version_modified>2024-09-16T20:47:51Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,19 +183,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>25D005AC</checksum>
+      <checksum>3B5C6261</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B363F803</checksum>
+      <checksum>5929C59D</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>520825A4</checksum>
+      <checksum>1F96B42D</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -333,19 +333,19 @@
       <filename>generator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A4B07257</checksum>
+      <checksum>6952CD2A</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3CF58696</checksum>
+      <checksum>B1B13531</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B8578044</checksum>
+      <checksum>14725DD9</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>834FF6AE</checksum>
+      <checksum>18DD0B67</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,31 +387,31 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>93926A7F</checksum>
+      <checksum>7BB9BD6F</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BA28B74A</checksum>
+      <checksum>9E3F6A59</checksum>
     </file>
     <file>
       <filename>internal_gains.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>808BF9F9</checksum>
+      <checksum>FD08F8A8</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>65744C8E</checksum>
+      <checksum>3851C46B</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2CB41E3C</checksum>
+      <checksum>BC2B3366</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -441,7 +441,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8E650A1B</checksum>
+      <checksum>9A5914F8</checksum>
     </file>
     <file>
       <filename>model.rb</filename>
@@ -453,7 +453,7 @@
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1AF3410C</checksum>
+      <checksum>AAF299D9</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -465,7 +465,7 @@
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6ACFD5FF</checksum>
+      <checksum>FF6B391A</checksum>
     </file>
     <file>
       <filename>schedule_files/battery.csv</filename>

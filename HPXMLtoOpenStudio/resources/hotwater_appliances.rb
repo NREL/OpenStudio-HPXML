@@ -62,7 +62,8 @@ module HotWaterAndAppliances
 
     # Clothes washer energy
     if not clothes_washer.nil?
-      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?, n_occ)
+      cw_space = Geometry.get_space_from_location(clothes_washer.location, spaces)
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, cw_space.nil?, n_occ)
 
       # Create schedule
       cw_power_schedule = nil
@@ -86,14 +87,14 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{cw_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !clothes_washer.monthly_multipliers.nil?
       end
 
-      cw_space = clothes_washer.additional_properties.space
       cw_space = conditioned_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cw_object_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_power_schedule)
     end
 
     # Clothes dryer energy
     if not clothes_dryer.nil?
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?, n_occ)
+      cd_space = Geometry.get_space_from_location(clothes_dryer.location, spaces)
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, cd_space.nil?, n_occ)
 
       # Create schedule
       cd_schedule = nil
@@ -119,7 +120,6 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{cd_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !clothes_dryer.monthly_multipliers.nil?
       end
 
-      cd_space = clothes_dryer.additional_properties.space
       cd_space = conditioned_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cd_obj_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule)
       add_other_equipment(model, cd_obj_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
@@ -127,7 +127,8 @@ module HotWaterAndAppliances
 
     # Dishwasher energy
     if not dishwasher.nil?
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?, n_occ)
+      dw_space = Geometry.get_space_from_location(dishwasher.location, spaces)
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dw_space.nil?, n_occ)
 
       # Create schedule
       dw_power_schedule = nil
@@ -151,14 +152,14 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{dw_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !dishwasher.monthly_multipliers.nil?
       end
 
-      dw_space = dishwasher.additional_properties.space
       dw_space = conditioned_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, dw_obj_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_power_schedule)
     end
 
     # Refrigerator(s) energy
     hpxml_bldg.refrigerators.each do |refrigerator|
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.loc_space.nil?)
+      rf_space, rf_schedule = Geometry.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
+      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_fridge_or_freezer_energy(refrigerator, rf_space.nil?)
 
       # Create schedule
       fridge_schedule = nil
@@ -174,7 +175,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           fridge_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
-          fridge_schedule = refrigerator_or_freezer_coefficients_schedule(model, fridge_col_name, fridge_obj_name, refrigerator, fridge_unavailable_periods)
+          fridge_schedule = fridge_or_freezer_coefficients_schedule(model, fridge_col_name, fridge_obj_name, refrigerator, rf_space, rf_schedule, fridge_unavailable_periods)
         elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
           fridge_weekday_sch = refrigerator.weekday_fractions
           fridge_weekend_sch = refrigerator.weekend_fractions
@@ -192,7 +193,6 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{fridge_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !refrigerator.temperature_coefficients.nil?
       end
 
-      rf_space = refrigerator.additional_properties.loc_space
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
       add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
@@ -200,7 +200,8 @@ module HotWaterAndAppliances
 
     # Freezer(s) energy
     hpxml_bldg.freezers.each do |freezer|
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.loc_space.nil?)
+      fz_space, fz_schedule = Geometry.get_space_or_schedule_from_location(freezer.location, model, spaces)
+      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_fridge_or_freezer_energy(freezer, fz_space.nil?)
 
       # Create schedule
       freezer_schedule = nil
@@ -216,7 +217,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !freezer.constant_coefficients.nil? && !freezer.temperature_coefficients.nil?
           freezer_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
-          freezer_schedule = refrigerator_or_freezer_coefficients_schedule(model, freezer_col_name, freezer_obj_name, freezer, freezer_unavailable_periods)
+          freezer_schedule = fridge_or_freezer_coefficients_schedule(model, freezer_col_name, freezer_obj_name, freezer, fz_space, fz_schedule, freezer_unavailable_periods)
         elsif !freezer.weekday_fractions.nil? && !freezer.weekend_fractions.nil? && !freezer.monthly_multipliers.nil?
           freezer_weekday_sch = freezer.weekday_fractions
           freezer_weekend_sch = freezer.weekend_fractions
@@ -234,7 +235,6 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{freezer_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !freezer.temperature_coefficients.nil?
       end
 
-      fz_space = freezer.additional_properties.loc_space
       fz_space = conditioned_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
       add_electric_equipment(model, freezer_obj_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
@@ -242,7 +242,8 @@ module HotWaterAndAppliances
 
     # Cooking Range energy
     if not cooking_range.nil?
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds_eq, cooking_range, oven, cooking_range.additional_properties.space.nil?)
+      cook_space = Geometry.get_space_from_location(cooking_range.location, spaces)
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds_eq, cooking_range, oven, cook_space.nil?)
 
       # Create schedule
       cook_schedule = nil
@@ -268,7 +269,6 @@ module HotWaterAndAppliances
         runner.registerWarning("Both '#{cook_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !cooking_range.monthly_multipliers.nil?
       end
 
-      cook_space = cooking_range.additional_properties.space
       cook_space = conditioned_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cook_obj_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
       add_other_equipment(model, cook_obj_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
@@ -848,13 +848,13 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @param refrigerator_or_freezer [TODO] TODO
+  # @param fridge_or_freezer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_refrigerator_or_freezer_energy(refrigerator_or_freezer, is_outside = false)
+  def self.calc_fridge_or_freezer_energy(fridge_or_freezer, is_outside = false)
     # Get values
-    annual_kwh = refrigerator_or_freezer.rated_annual_kwh
-    annual_kwh *= refrigerator_or_freezer.usage_multiplier
+    annual_kwh = fridge_or_freezer.rated_annual_kwh
+    annual_kwh *= fridge_or_freezer.usage_multiplier
     if not is_outside
       frac_sens = 1.0
       frac_lat = 0.0
@@ -876,10 +876,12 @@ module HotWaterAndAppliances
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param col_name [TODO] TODO
   # @param obj_name [String] Name for the OpenStudio object
-  # @param refrigerator_or_freezer [TODO] TODO
+  # @param fridge_or_freezer [TODO] TODO
+  # @param loc_space [TODO] TODO
+  # @param loc_schedule [TODO] TODO
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [TODO] TODO
-  def self.refrigerator_or_freezer_coefficients_schedule(model, col_name, obj_name, refrigerator_or_freezer, unavailable_periods)
+  def self.fridge_or_freezer_coefficients_schedule(model, col_name, obj_name, fridge_or_freezer, loc_space, loc_schedule, unavailable_periods)
     # Create availability sensor
     if not unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, col_name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
@@ -892,21 +894,21 @@ module HotWaterAndAppliances
     schedule = OpenStudio::Model::ScheduleConstant.new(model)
     schedule.setName(obj_name + ' schedule')
 
-    if not refrigerator_or_freezer.additional_properties.loc_space.nil?
+    if not loc_space.nil?
       temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       temperature_sensor.setName(obj_name + ' tin s')
-      temperature_sensor.setKeyName(refrigerator_or_freezer.additional_properties.loc_space.thermalZone.get.name.to_s)
-    elsif not refrigerator_or_freezer.additional_properties.loc_schedule.nil?
+      temperature_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
+    elsif not loc_schedule.nil?
       temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       temperature_sensor.setName(obj_name + ' tin s')
-      temperature_sensor.setKeyName(refrigerator_or_freezer.additional_properties.loc_schedule.name.to_s)
+      temperature_sensor.setKeyName(loc_schedule.name.to_s)
     end
 
     schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(schedule, *EPlus::EMSActuatorScheduleConstantValue)
     schedule_actuator.setName("#{schedule.name} act")
 
-    constant_coefficients = refrigerator_or_freezer.constant_coefficients.split(',').map { |i| i.to_f }
-    temperature_coefficients = refrigerator_or_freezer.temperature_coefficients.split(',').map { |i| i.to_f }
+    constant_coefficients = fridge_or_freezer.constant_coefficients.split(',').map { |i| i.to_f }
+    temperature_coefficients = fridge_or_freezer.temperature_coefficients.split(',').map { |i| i.to_f }
 
     schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     schedule_program.setName("#{schedule.name} program")

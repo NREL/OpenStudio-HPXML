@@ -3915,8 +3915,7 @@ module HPXMLFile
         return false
       end
 
-      eri_version = Constants::ERIVersions[-1]
-      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather)
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)

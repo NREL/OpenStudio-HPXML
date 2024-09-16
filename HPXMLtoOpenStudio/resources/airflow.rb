@@ -16,21 +16,14 @@ module Airflow
   # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
-  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
   # @param duct_systems [TODO] TODO
   # @param airloop_map [TODO] TODO
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param frac_windows_operable [TODO] TODO
-  # @param apply_ashrae140_assumptions [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @param hvac_availability_sensor [TODO] TODO
   # @return [TODO] TODO
-  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, cfa,
-                 ncfl_ag, duct_systems, airloop_map, eri_version,
-                 frac_windows_operable, apply_ashrae140_assumptions, schedules_file,
-                 unavailable_periods, hvac_availability_sensor)
+  def self.apply(model, runner, weather, spaces, hpxml_header, hpxml_bldg, duct_systems,
+                 airloop_map, frac_windows_operable, schedules_file, hvac_availability_sensor)
 
     # Global variables
 
@@ -39,13 +32,14 @@ module Airflow
     @year = hpxml_header.sim_calendar_year
     @conditioned_space = spaces[HPXML::LocationConditionedSpace]
     @conditioned_zone = @conditioned_space.thermalZone.get
-    @ncfl_ag = ncfl_ag
-    @eri_version = eri_version
-    @apply_ashrae140_assumptions = apply_ashrae140_assumptions
-    @cfa = cfa
+    @ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
+    @eri_version = hpxml_header.eri_calculation_version
+    @apply_ashrae140_assumptions = hpxml_header.apply_ashrae140_assumptions
     @cooking_range_in_cond_space = hpxml_bldg.cooking_ranges.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.cooking_ranges[0].location)
     @clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
     @hvac_availability_sensor = hvac_availability_sensor
+    cfa = hpxml_bldg.building_construction.conditioned_floor_area
+    unavailable_periods = hpxml_header.unavailable_periods
 
     # Global sensors
 
@@ -164,7 +158,7 @@ module Airflow
     apply_infiltration_ventilation_to_conditioned(model, hpxml_bldg.site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_values[:volume],
                                                   infil_values[:height], weather, vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space,
                                                   clg_ssn_sensor, schedules_file, vent_fans_cfis_suppl, unavailable_periods, hpxml_bldg.elevation, duct_lk_imbals,
-                                                  unit_height_above_grade)
+                                                  unit_height_above_grade, cfa)
   end
 
   # TODO
@@ -1138,7 +1132,7 @@ module Airflow
       equip_act_infos = []
 
       if duct_location.is_a? OpenStudio::Model::ScheduleConstant
-        space_values = Geometry.get_temperature_scheduled_space_values(location: duct_location.name.to_s)
+        space_values = Geometry.get_temperature_scheduled_space_values(duct_location.name.to_s)
         f_regain = space_values[:f_regain]
       else
         f_regain = 0.0
@@ -2294,10 +2288,11 @@ module Airflow
   # @param elevation [Double] Elevation of the building site (ft)
   # @param duct_lk_imbals [TODO] TODO
   # @param unit_height_above_grade [TODO] TODO
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [TODO] TODO
   def self.apply_infiltration_ventilation_to_conditioned(model, site, vent_fans_mech, conditioned_ach50, conditioned_const_ach, infil_volume, infil_height, weather,
                                                          vent_fans_kitchen, vent_fans_bath, vented_dryers, has_flue_chimney_in_cond_space, clg_ssn_sensor, schedules_file,
-                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals, unit_height_above_grade)
+                                                         vent_fans_cfis_suppl, unavailable_periods, elevation, duct_lk_imbals, unit_height_above_grade, cfa)
     # Categorize fans into different types
     vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
     vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
@@ -2344,7 +2339,7 @@ module Airflow
 
     # Calculate infiltration without adjustment by ventilation
     apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
-                                      infil_height, unit_height_above_grade, elevation)
+                                      infil_height, unit_height_above_grade, elevation, cfa)
 
     # Common variable and load actuators across multiple mech vent calculations, create only once
     fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
@@ -2391,9 +2386,10 @@ module Airflow
   # @param infil_height [Double] Vertical distance between the lowest and highest above-grade points within the pressure boundary, per ASHRAE 62.2 (ft2)
   # @param unit_height_above_grade [TODO] TODO
   # @param elevation [Double] Elevation of the building site (ft)
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @return [nil]
   def self.apply_infiltration_to_conditioned(site, conditioned_ach50, conditioned_const_ach, infil_program, weather, has_flue_chimney_in_cond_space, infil_volume,
-                                             infil_height, unit_height_above_grade, elevation)
+                                             infil_height, unit_height_above_grade, elevation, cfa)
     site_ap = site.additional_properties
 
     if conditioned_ach50.to_f > 0
@@ -2404,8 +2400,8 @@ module Airflow
       outside_air_density = UnitConversions.convert(p_atm, 'atm', 'Btu/ft^3') / (Gas.Air.r * UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'R'))
 
       n_i = InfilPressureExponent
-      conditioned_sla = get_infiltration_SLA_from_ACH50(conditioned_ach50, n_i, @cfa, infil_volume) # Calculate SLA
-      a_o = conditioned_sla * @cfa # Effective Leakage Area (ft2)
+      conditioned_sla = get_infiltration_SLA_from_ACH50(conditioned_ach50, n_i, cfa, infil_volume) # Calculate SLA
+      a_o = conditioned_sla * cfa # Effective Leakage Area (ft2)
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       inf_conv_factor = 776.25 # [ft/min]/[inH2O^(1/2)*ft^(3/2)/lbm^(1/2)]
@@ -2512,7 +2508,7 @@ module Airflow
     if space_height.nil?
       space_height = Geometry.get_height_of_spaces(spaces: [space])
     end
-    coord_z = Geometry.get_z_origin_for_zone(zone: space.thermalZone.get)
+    coord_z = Geometry.get_z_origin_for_zone(space.thermalZone.get)
     f_t_SG = site_ap.site_terrain_multiplier * ((space_height + coord_z) / 32.8)**site_ap.site_terrain_exponent / (site_ap.terrain_multiplier * (site_ap.height / 32.8)**site_ap.terrain_exponent)
     f_s_SG = 2.0 / 3.0 * (1 + hor_lk_frac / 2.0) * (2.0 * neutral_level * (1.0 - neutral_level))**0.5 / (neutral_level**0.5 + (1.0 - neutral_level)**0.5)
     f_w_SG = site_ap.s_g_shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG

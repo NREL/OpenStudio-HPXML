@@ -2,33 +2,21 @@
 
 # TODO
 module InternalGains
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param num_occ [Double] Number of occupants in the dwelling unit
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @param apply_ashrae140_assumptions [Boolean] TODO
-  # @return [nil]
-  def self.apply(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods, apply_ashrae140_assumptions)
-    apply_building_occupancy(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
-    apply_general_water_use(model, runner, hpxml_bldg, space, schedules_file, unavailable_periods, apply_ashrae140_assumptions)
-  end
-
   # Create an OpenStudio People object using number of occupants and people/activity schedules.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param num_occ [Double] Number of occupants in the dwelling unit
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [nil]
-  def self.apply_building_occupancy(model, runner, hpxml_bldg, num_occ, space, schedules_file, unavailable_periods)
+  def self.apply_building_occupants(model, runner, hpxml_bldg, hpxml_header, spaces, schedules_file)
+    if hpxml_bldg.building_occupancy.number_of_residents.nil? # Asset calculation
+      num_occ = Geometry.get_occupancy_default_num(nbeds: hpxml_bldg.building_construction.number_of_bedrooms)
+    else # Operational calculation
+      num_occ = hpxml_bldg.building_occupancy.number_of_residents
+    end
     return if num_occ <= 0
 
     occ_gain, _hrs_per_day, sens_frac, _lat_frac = get_occupancy_default_values()
@@ -45,7 +33,7 @@ module InternalGains
       people_sch = schedules_file.create_schedule_file(model, col_name: people_col_name)
     end
     if people_sch.nil?
-      people_unavailable_periods = Schedule.get_unavailable_periods(runner, people_col_name, unavailable_periods)
+      people_unavailable_periods = Schedule.get_unavailable_periods(runner, people_col_name, hpxml_header.unavailable_periods)
       weekday_sch = hpxml_bldg.building_occupancy.weekday_fractions.split(',').map(&:to_f)
       weekday_sch = weekday_sch.map { |v| v / weekday_sch.max }.join(',')
       weekend_sch = hpxml_bldg.building_occupancy.weekend_fractions.split(',').map(&:to_f)
@@ -68,7 +56,7 @@ module InternalGains
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
     occ = OpenStudio::Model::People.new(occ_def)
     occ.setName(Constants::ObjectTypeOccupants)
-    occ.setSpace(space)
+    occ.setSpace(spaces[HPXML::LocationConditionedSpace])
     occ_def.setName(Constants::ObjectTypeOccupants)
     occ_def.setNumberofPeople(num_occ)
     occ_def.setFractionRadiant(occ_rad)
@@ -94,19 +82,20 @@ module InternalGains
     return heat_gain, hrs_per_day, sens_frac, lat_frac
   end
 
-  # Set calendar year on the OpenStudio YearDescription object.
+  # Adds general water use internal gains (floor mopping, shower evaporation, water films
+  # on showers, tubs & sinks surfaces, plant watering, etc.) to the OpenStudio Model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param apply_ashrae140_assumptions [Boolean] TODO
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_general_water_use(model, runner, hpxml_bldg, space, schedules_file, unavailable_periods, apply_ashrae140_assumptions)
+  def self.apply_general_water_use(model, runner, hpxml_bldg, hpxml_header, spaces, schedules_file)
     general_water_use_usage_multiplier = hpxml_bldg.building_occupancy.general_water_use_usage_multiplier
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
 
-    if not apply_ashrae140_assumptions
-      # General water use internal gains
-      # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
+    if not hpxml_header.apply_ashrae140_assumptions
       water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier)
 
       # Create schedule
@@ -119,7 +108,7 @@ module InternalGains
         water_schedule = schedules_file.create_schedule_file(model, col_name: water_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
       end
       if water_schedule.nil?
-        water_unavailable_periods = Schedule.get_unavailable_periods(runner, water_col_name, unavailable_periods)
+        water_unavailable_periods = Schedule.get_unavailable_periods(runner, water_col_name, hpxml_header.unavailable_periods)
         water_weekday_sch = hpxml_bldg.building_occupancy.general_water_use_weekday_fractions
         water_weekend_sch = hpxml_bldg.building_occupancy.general_water_use_weekend_fractions
         water_monthly_sch = hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers
@@ -132,8 +121,8 @@ module InternalGains
         runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil?
         runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
       end
-      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseSensible, space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
-      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseLatent, space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)
+      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseSensible, spaces[HPXML::LocationConditionedSpace], water_design_level_sens, 1.0, 0.0, water_schedule, nil)
+      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseLatent, spaces[HPXML::LocationConditionedSpace], water_design_level_lat, 0.0, 1.0, water_schedule, nil)
     end
   end
 
