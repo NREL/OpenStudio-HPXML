@@ -84,7 +84,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_unavailable_period_window_natvent_availabilities', false)
     arg.setDisplayName('Schedules: Unavailable Period Window Natural Ventilation Availabilities')
-    arg.setDescription("The availability of the natural ventilation schedule during unavailable periods. Valid choices are '#{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join("', '")}'. If multiple periods, use a comma-separated list.")
+    arg.setDescription("The availability of the natural ventilation schedule during unavailable periods. Valid choices are: #{[HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].join(', ')}. If multiple periods, use a comma-separated list.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', false)
@@ -3676,15 +3676,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << 'Specified a rim joist assembly R-value but no rim joist height.' if error
 
     schedules_unavailable_period_args_initialized = [!args[:schedules_unavailable_period_types].nil?,
-                                                     !args[:schedules_unavailable_period_dates].nil?,
-                                                     !args[:schedules_unavailable_period_window_natvent_availabilities].nil?]
+                                                     !args[:schedules_unavailable_period_dates].nil?]
     error = (schedules_unavailable_period_args_initialized.uniq.size != 1)
     errors << 'Did not specify all required unavailable period arguments.' if error
 
     if schedules_unavailable_period_args_initialized.uniq.size == 1 && schedules_unavailable_period_args_initialized.uniq[0]
       schedules_unavailable_period_lengths = [args[:schedules_unavailable_period_types].count(','),
-                                              args[:schedules_unavailable_period_dates].count(','),
-                                              args[:schedules_unavailable_period_window_natvent_availabilities].count(',')]
+                                              args[:schedules_unavailable_period_dates].count(',')]
+
+      if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
+        schedules_unavailable_period_lengths += [args[:schedules_unavailable_period_window_natvent_availabilities].count(',')]
+      end
 
       error = (schedules_unavailable_period_lengths.uniq.size != 1)
       errors << 'One or more unavailable period arguments does not have enough comma-separated elements specified.' if error
@@ -3693,6 +3695,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
       natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
       natvent_availabilities.each do |natvent_availability|
+        next if natvent_availability.empty?
+
         error = ![HPXML::ScheduleRegular, HPXML::ScheduleAvailable, HPXML::ScheduleUnavailable].include?(natvent_availability)
         errors << "Window natural ventilation availability '#{natvent_availability}' during an unavailable period is invalid." if error
       end
@@ -4108,13 +4112,19 @@ module HPXMLFile
     if not args[:schedules_unavailable_period_types].nil?
       unavailable_period_types = args[:schedules_unavailable_period_types].split(',').map(&:strip)
       unavailable_period_dates = args[:schedules_unavailable_period_dates].split(',').map(&:strip)
-      natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
+      if !args[:schedules_unavailable_period_window_natvent_availabilities].nil?
+        natvent_availabilities = args[:schedules_unavailable_period_window_natvent_availabilities].split(',').map(&:strip)
+      else
+        natvent_availabilities = [''] * unavailable_period_types.size
+      end
 
       unavailable_periods = unavailable_period_types.zip(unavailable_period_dates,
                                                          natvent_availabilities)
 
       unavailable_periods.each do |unavailable_period|
         column_name, date_time_range, natvent_availability = unavailable_period
+        natvent_availability = nil if natvent_availability.empty?
+
         begin_month, begin_day, begin_hour, end_month, end_day, end_hour = Calendar.parse_date_time_range(date_time_range)
 
         if not unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour)

@@ -186,8 +186,9 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-sfd-with-shared-system.xml' => 'base-sfd.xml',
       'error-rim-joist-height-but-no-assembly-r.xml' => 'base-sfd.xml',
       'error-rim-joist-assembly-r-but-no-height.xml' => 'base-sfd.xml',
-      'error-power-outage-args-not-all-same-size.xml' => 'base-sfd.xml',
-      'error-power-outage-window-natvent-invalid.xml' => 'base-sfd.xml',
+      'error-unavailable-period-args-not-all-specified' => 'base-sfd.xml',
+      'error-unavailable-period-args-not-all-same-size.xml' => 'base-sfd.xml',
+      'error-unavailable-period-window-natvent-invalid.xml' => 'base-sfd.xml',
       'error-heating-perf-data-not-all-specified.xml' => 'base-sfd.xml',
       'error-heating-perf-data-not-all-same-size.xml' => 'base-sfd.xml',
       'error-cooling-perf-data-not-all-specified.xml' => 'base-sfd.xml',
@@ -960,7 +961,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
     elsif ['extra-power-outage-periods.xml'].include? hpxml_file
       args['schedules_unavailable_period_types'] = 'Power Outage, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'
-      args['schedules_unavailable_period_window_natvent_availabilities'] = "#{HPXML::ScheduleRegular}, #{HPXML::ScheduleAvailable}"
     elsif ['extra-sfa-atticroof-flat.xml'].include? hpxml_file
       args['geometry_attic_type'] = HPXML::AtticTypeFlatRoof
       args['ducts_supply_leakage_to_outside_value'] = 0.0
@@ -1208,7 +1208,6 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args.delete('geometry_rim_joist_height')
     elsif ['error-unavailable-period-args-not-all-specified'].include? hpxml_file
       args['schedules_unavailable_period_types'] = 'Vacancy'
-      args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5'
     elsif ['error-unavailable-period-args-not-all-same-size.xml'].include? hpxml_file
       args['schedules_unavailable_period_types'] = 'Vacancy, Power Outage'
       args['schedules_unavailable_period_dates'] = 'Jan 1 - Jan 5, Jan 7 - Jan 9'

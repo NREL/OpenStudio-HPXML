@@ -25,7 +25,6 @@
           <EndMonth>7</EndMonth>
           <EndDayOfMonth>30</EndDayOfMonth>
           <EndHourOfDay>14</EndHourOfDay>
-          <NaturalVentilation>regular schedule</NaturalVentilation>
         </UnavailablePeriod>
       </UnavailablePeriods>
     </extension>
