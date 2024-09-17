@@ -3500,7 +3500,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    Geometry.tear_down_model(model: model, runner: runner)
+    Model.tear_down(model: model, runner: runner)
 
     Version.check_openstudio_version()
 
@@ -3915,8 +3915,7 @@ module HPXMLFile
         return false
       end
 
-      eri_version = Constants::ERIVersions[-1]
-      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, eri_version, weather)
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -6070,7 +6069,7 @@ module HPXMLFile
 
   # Get the specific HPXML foundation or attic location based on general HPXML location and specific HPXML foundation or attic type.
   #
-  # @param location [String] the general HPXML location (crawlspace or attic)
+  # @param location [String] the location of interest (HPXML::LocationCrawlspace or HPXML::LocationAttic)
   # @param foundation_type [String] the specific HPXML foundation type (unvented crawlspace, vented crawlspace, conditioned crawlspace)
   # @param attic_type [String] the specific HPXML attic type (unvented attic, vented attic, conditioned attic)
   # @return [nil]
