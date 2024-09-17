@@ -101,7 +101,7 @@ Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - 
 
 **Schedules: Unavailable Period Window Natural Ventilation Availabilities**
 
-The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list.
+The availability of the natural ventilation schedule during unavailable periods. Valid choices are: regular schedule, always available, always unavailable. If multiple periods, use a comma-separated list. If not provided, the OS-HPXML default (see <a href='https://openstudio-hpxml.readthedocs.io/en/v1.8.1/workflow_inputs.html#hpxml-unavailable-periods'>HPXML Unavailable Periods</a>) is used.
 
 - **Name:** ``schedules_unavailable_period_window_natvent_availabilities``
 - **Type:** ``String``

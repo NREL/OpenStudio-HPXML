@@ -1566,9 +1566,9 @@ class SchedulesFile
   # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods.
   #
   # @param col_name [String] the column header of the detailed schedule
-  # @param periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [nil]
-  def create_column_values_from_periods(col_name, periods)
+  def create_column_values_from_periods(col_name, unavailable_periods)
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
     num_days_in_year = Calendar.num_days_in_year(@year)
     steps_in_day = n_steps / num_days_in_year
@@ -1578,15 +1578,15 @@ class SchedulesFile
       @tmp_schedules[col_name] = Array.new(n_steps, 0)
     end
 
-    periods.each do |period|
-      begin_day_num = Calendar.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
-      end_day_num = Calendar.get_day_num_from_month_day(@year, period.end_month, period.end_day)
+    unavailable_periods.each do |unavailable_period|
+      begin_day_num = Calendar.get_day_num_from_month_day(@year, unavailable_period.begin_month, unavailable_period.begin_day)
+      end_day_num = Calendar.get_day_num_from_month_day(@year, unavailable_period.end_month, unavailable_period.end_day)
 
       begin_hour = 0
       end_hour = 24
 
-      begin_hour = period.begin_hour if not period.begin_hour.nil?
-      end_hour = period.end_hour if not period.end_hour.nil?
+      begin_hour = unavailable_period.begin_hour if not unavailable_period.begin_hour.nil?
+      end_hour = unavailable_period.end_hour if not unavailable_period.end_hour.nil?
 
       if end_day_num >= begin_day_num
         @tmp_schedules[col_name].fill(1.0, (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour), (end_day_num - begin_day_num + 1) * steps_in_day - ((24 - end_hour + begin_hour) * steps_in_hour)) # Fill between begin/end days
