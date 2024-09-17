@@ -4818,6 +4818,7 @@ module HVAC
     if nominal_cooling_capacity_1x > 18000.0 # > 1.5 tons
       p_dot_odu_fan = 44.348 * UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'ton') + 62.452
     else # < 1.5 tons, scale fan power to avoid negative p_dot_defrost
+      # Use p_dot_odu_fan at 1.5 ton to scale down
       p_dot_odu_fan = 128.974 * (nominal_cooling_capacity_1x / 18000.0)
     end
     q_dot_defrost = UnitConversions.convert(nominal_cooling_capacity_1x, 'Btu/hr', 'W') * capacity_defrost_multiplier
