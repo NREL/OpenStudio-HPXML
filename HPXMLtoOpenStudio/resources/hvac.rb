@@ -1397,9 +1397,6 @@ module HVAC
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
     thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(onoff_thermostat_ddb, 'deltaF', 'deltaC'))
     conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
-
-    # Now that we have assigned the HVAC setpoint, set Kiva foundation initial temperatures.
-    Constructions.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml_header, conditioned_zone, schedules_file)
   end
 
   # TODO

@@ -115,7 +115,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     set_file_paths(args)
 
     begin
-      hpxml = create_hpxml_object(args)
+      hpxml = create_hpxml_object(runner, args)
       return false unless hpxml.errors.empty?
 
       # Do these once upfront for the entire HPXML object
@@ -199,9 +199,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # Creates the HPXML object from the HPXML file. Performs schema/schematron validation
   # as appropriate.
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param args [Hash] Map of :argument_name => value
   # @return [HPXML] HPXML object
-  def create_hpxml_object(args)
+  def create_hpxml_object(runner, args)
     if args[:skip_validation]
       schema_validator = nil
       schematron_validator = nil
@@ -338,6 +339,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     hvac_data = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
     HVAC.apply_dehumidifiers(runner, model, spaces, hpxml_bldg, hpxml.header)
     HVAC.apply_ceiling_fans(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
+
+    # Kiva foundations (must come after setpoints defined)
+    Constructions.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml.header, spaces, schedules_file)
 
     # Hot Water & Appliances
     Waterheater.apply_dhw_appliances(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)

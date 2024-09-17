@@ -1102,7 +1102,7 @@ module Geometry
   # Sets a "dwelling unit multiplier" equal to the number of similar units represented.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param location [String] HPXML location
   # @param zone_multiplier [Integer] the number of similar zones represented
   # @return [OpenStudio::Model::Space, nil] updated spaces hash if location is not already a key

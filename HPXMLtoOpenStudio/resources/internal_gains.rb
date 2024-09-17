@@ -8,7 +8,7 @@ module InternalGains
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_building_occupants(runner, model, hpxml_bldg, hpxml_header, spaces, schedules_file)
@@ -90,7 +90,7 @@ module InternalGains
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_general_water_use(runner, model, hpxml_bldg, hpxml_header, spaces, schedules_file)

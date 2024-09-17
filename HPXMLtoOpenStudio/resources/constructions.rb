@@ -2,8 +2,6 @@
 
 # Collection of methods related to surface constructions.
 module Constructions
-  # Container class for walls, floors/ceilings, roofs, etc.
-
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1507,7 +1505,7 @@ module Constructions
   # @param constr_name [TODO] TODO
   # @param mat_int_finish [TODO] TODO
   # @param partition_wall_area [TODO] TODO
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def self.apply_partition_walls(model, constr_name, mat_int_finish, partition_wall_area, spaces)
     return if partition_wall_area <= 0
@@ -1517,31 +1515,15 @@ module Constructions
     obj_name = 'partition wall mass'
     imdef = create_os_int_mass_and_def(model, obj_name, spaces[HPXML::LocationConditionedSpace], partition_wall_area)
 
-    apply_wood_stud_wall(model,
-                         [imdef],
-                         constr_name,
-                         0,
-                         1,
-                         3.5,
-                         false,
-                         0.16,
-                         mat_int_finish,
-                         0,
-                         0,
-                         mat_int_finish,
-                         false,
-                         Material.AirFilmVertical,
-                         Material.AirFilmVertical,
-                         1,
-                         nil,
-                         nil)
+    apply_wood_stud_wall(model, [imdef], constr_name, 0, 1, 3.5, false, 0.16, mat_int_finish, 0, 0, mat_int_finish,
+                         false, Material.AirFilmVertical, Material.AirFilmVertical, 1, nil, nil)
   end
 
   # TODO
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param furniture_mass [TODO] TODO
-  # @param spaces [Hash] keys are locations and values are OpenStudio::Model::Space objects
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @return [TODO] TODO
   def self.apply_furniture(model, furniture_mass, spaces)
     if furniture_mass.type == HPXML::FurnitureMassTypeLightWeight
@@ -2021,10 +2003,10 @@ module Constructions
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param conditioned_zone [TODO] TODO
+  # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml_header, conditioned_zone, schedules_file)
+  def self.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml_header, spaces, schedules_file)
     sim_begin_month = hpxml_header.sim_begin_month
     sim_begin_day = hpxml_header.sim_begin_day
     sim_year = hpxml_header.sim_calendar_year
@@ -2057,6 +2039,7 @@ module Constructions
       end
 
       # Approximate indoor temperature
+      conditioned_zone = spaces[HPXML::LocationConditionedSpace].thermalZone.get
       if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
         # Building has HVAC system
         setpoint_sch = conditioned_zone.thermostatSetpointDualSetpoint.get
