@@ -18,11 +18,10 @@ module Airflow
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param hvac_data [Array<Hash, HPXML::UnavailablePeriods>] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects, HVAC unavailable period objects
+  # @param airloop_map [Hash] Map of HPXML System ID => OpenStudio AirLoopHVAC (or ZoneHVACFourPipeFanCoil or ZoneHVACBaseboardConvectiveWater) objects
   # @return [TODO] TODO
-  def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, hvac_data)
+  def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, airloop_map)
     # Global variables
-
     @runner = runner
     @spaces = spaces
     @year = hpxml_header.sim_calendar_year
@@ -35,8 +34,8 @@ module Airflow
     @clothes_dryer_in_cond_space = hpxml_bldg.clothes_dryers.empty? ? true : HPXML::conditioned_locations_this_unit.include?(hpxml_bldg.clothes_dryers[0].location)
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     unavailable_periods = hpxml_header.unavailable_periods
-    airloop_map, hvac_unavailable_periods = hvac_data
     frac_windows_operable = hpxml_bldg.additional_properties.initial_frac_windows_operable
+    hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, hpxml_header.unavailable_periods)
 
     # Global sensors
 

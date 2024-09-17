@@ -319,13 +319,17 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     SimControls.apply(model, hpxml.header)
     Location.apply(model, weather, hpxml_bldg, hpxml.header, epw_path)
 
-    # Geometry & Enclosure
+    # Conditioned space & setpoints
     spaces = {} # Map of HPXML locations => OpenStudio Space objects
+    Geometry.create_or_get_space(model, spaces, HPXML::LocationConditionedSpace, hpxml_bldg)
+    hvac_days = HVAC.apply_setpoints(model, runner, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+
+    # Geometry & Enclosure
     Geometry.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg)
     Geometry.apply_floors(runner, model, spaces, hpxml_bldg, hpxml.header)
-    Geometry.apply_foundation_walls_slabs(runner, model, spaces, hpxml_bldg)
+    Geometry.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
     Geometry.apply_windows(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_doors(model, spaces, hpxml_bldg)
     Geometry.apply_skylights(model, spaces, hpxml_bldg, hpxml.header)
@@ -336,12 +340,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.apply_building_unit(model, unit_num)
 
     # HVAC
-    hvac_data = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
+    airloop_map = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_days)
     HVAC.apply_dehumidifiers(runner, model, spaces, hpxml_bldg, hpxml.header)
     HVAC.apply_ceiling_fans(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
-
-    # Kiva foundations (must come after setpoints defined)
-    Constructions.apply_kiva_initial_temperatures(model, weather, hpxml_bldg, hpxml.header, spaces, schedules_file)
 
     # Hot Water & Appliances
     Waterheater.apply_dhw_appliances(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
@@ -359,7 +360,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     InternalGains.apply_general_water_use(runner, model, hpxml_bldg, hpxml.header, spaces, schedules_file)
 
     # Airflow (e.g., ducts, infiltration, ventilation)
-    Airflow.apply(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_data)
+    Airflow.apply(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, airloop_map)
 
     # Other
     PV.apply(model, hpxml_bldg)

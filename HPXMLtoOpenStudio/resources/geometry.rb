@@ -386,9 +386,12 @@ module Geometry
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_foundation_walls_slabs(runner, model, spaces, hpxml_bldg)
+  def self.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml_header, schedules_file)
     default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
 
     foundation_types = hpxml_bldg.slabs.map { |s| s.interior_adjacent_to }.uniq
@@ -408,7 +411,7 @@ module Geometry
 
         if ext_fnd_walls.empty?
           # Slab w/o foundation walls
-          apply_foundation_slab(model, spaces, hpxml_bldg, slab, -1 * slab.depth_below_grade.to_f, slab.exposed_perimeter, nil, default_azimuths)
+          apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, -1 * slab.depth_below_grade.to_f, slab.exposed_perimeter, nil, default_azimuths, schedules_file)
         else
           # Slab w/ foundation walls
           ext_fnd_walls_length = ext_fnd_walls.map { |fw| fw.area / fw.height }.sum
@@ -426,14 +429,14 @@ module Geometry
             remaining_exposed_length -= exposed_length
 
             kiva_foundation = apply_foundation_wall(runner, model, spaces, hpxml_bldg, fnd_wall, exposed_length, fnd_wall_length, default_azimuths)
-            apply_foundation_slab(model, spaces, hpxml_bldg, slab, -1 * fnd_wall.depth_below_grade, exposed_length, kiva_foundation, default_azimuths)
+            apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, -1 * fnd_wall.depth_below_grade, exposed_length, kiva_foundation, default_azimuths, schedules_file)
           end
 
           if remaining_exposed_length > 1 # Skip if a small length (e.g., due to rounding)
             # The slab's exposed perimeter exceeds the sum of attached exterior foundation wall lengths.
             # This may legitimately occur for a walkout basement, where a portion of the slab has no
             # adjacent foundation wall.
-            apply_foundation_slab(model, spaces, hpxml_bldg, slab, 0, remaining_exposed_length, nil, default_azimuths)
+            apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, 0, remaining_exposed_length, nil, default_azimuths, schedules_file)
           end
         end
       end
@@ -589,15 +592,19 @@ module Geometry
   # Adds an HPXML Slab to the OpenStudio model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param slab [HPXML::Slab] HPXML Slab object
   # @param z_origin [Double] The z-coordinate for which the slab is relative (ft)
   # @param exposed_length [Double] TODO
   # @param kiva_foundation [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   # @param default_azimuths [TODO] TODO
+  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_foundation_slab(model, spaces, hpxml_bldg, slab, z_origin, exposed_length, kiva_foundation, default_azimuths)
+  def self.apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, z_origin,
+                                 exposed_length, kiva_foundation, default_azimuths, schedules_file)
     exposed_fraction = exposed_length / slab.exposed_perimeter
     slab_tot_perim = exposed_length
     slab_area = slab.area * exposed_fraction
@@ -658,6 +665,11 @@ module Geometry
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         exposed_length, mat_carpet, soil_k_in, kiva_foundation,
                                         ext_horiz_r, ext_horiz_width, ext_horiz_depth)
+
+    kiva_foundation = surface.adjacentFoundation.get
+
+    Constructions.apply_kiva_initial_temperature(kiva_foundation, weather, hpxml_bldg, hpxml_header,
+                                                 spaces, schedules_file, slab.interior_adjacent_to)
 
     return kiva_foundation
   end
