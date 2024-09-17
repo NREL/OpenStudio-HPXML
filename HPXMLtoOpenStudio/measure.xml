@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>38d2b85c-d365-4840-99e0-c31750872b0b</version_id>
-  <version_modified>2024-09-16T23:18:13Z</version_modified>
+  <version_id>f4eedfe8-91c6-4f25-877e-a5b3ae5e1d62</version_id>
+  <version_modified>2024-09-17T00:55:16Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -183,7 +183,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>008103D2</checksum>
+      <checksum>E1019376</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -399,7 +399,7 @@
       <filename>internal_gains.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>234EE1ED</checksum>
+      <checksum>0AC5849A</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -447,13 +447,13 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>040BA07A</checksum>
+      <checksum>C620569D</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AAF299D9</checksum>
+      <checksum>67DCE0D1</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -591,7 +591,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>29AC582F</checksum>
+      <checksum>19EC4B9B</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>

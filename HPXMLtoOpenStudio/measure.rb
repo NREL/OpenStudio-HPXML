@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Require all gems up front; this is much faster than multiple resource
+# Require all gems upfront; this is much faster than multiple resource
 # files lazy loading as needed, as it prevents multiple lookups for the
 # same gem.
 require 'pathname'
@@ -108,147 +108,188 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    Version.check_openstudio_version()
     Model.tear_down(model: model, runner: runner)
 
-    Version.check_openstudio_version()
-
     args = runner.getArgumentValues(arguments(model), user_arguments)
-
-    unless (Pathname.new args[:hpxml_path]).absolute?
-      args[:hpxml_path] = File.expand_path(args[:hpxml_path])
-    end
-    unless File.exist?(args[:hpxml_path]) && args[:hpxml_path].downcase.end_with?('.xml')
-      fail "'#{args[:hpxml_path]}' does not exist or is not an .xml file."
-    end
-
-    unless (Pathname.new args[:output_dir]).absolute?
-      args[:output_dir] = File.expand_path(args[:output_dir])
-    end
-
-    unless File.extname(args[:annual_output_file_name]).length > 0
-      args[:annual_output_file_name] = "#{args[:annual_output_file_name]}.#{args[:output_format]}"
-    end
-    annual_output_file_path = File.join(args[:output_dir], args[:annual_output_file_name])
-
-    unless File.extname(args[:design_load_details_output_file_name]).length > 0
-      args[:design_load_details_output_file_name] = "#{args[:design_load_details_output_file_name]}.#{args[:output_format]}"
-    end
-    design_load_details_output_file_path = File.join(args[:output_dir], args[:design_load_details_output_file_name])
+    set_file_paths(args)
 
     begin
-      if args[:skip_validation]
-        schema_validator = nil
-        schematron_validator = nil
-      else
-        schema_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schema', 'HPXML.xsd')
-        schema_validator = XMLValidator.get_xml_validator(schema_path)
-        schematron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
-        schematron_validator = XMLValidator.get_xml_validator(schematron_path)
-      end
-
-      hpxml = HPXML.new(hpxml_path: args[:hpxml_path], schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: args[:building_id])
-      hpxml.errors.each do |error|
-        runner.registerError(error)
-      end
-      hpxml.warnings.each do |warning|
-        runner.registerWarning(warning)
-      end
+      hpxml = create_hpxml_object(args)
       return false unless hpxml.errors.empty?
 
-      # Process weather once upfront
-      epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
-      weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
-      hpxml.buildings.each_with_index do |hpxml_bldg, i|
-        next if i == 0
-        next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
-
-        fail 'Weather station EPW filepath has different values across dwelling units.'
-      end
-
-      if hpxml.header.whole_sfa_or_mf_building_sim && (hpxml.buildings.size > 1)
-        if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.batteries.size }.sum > 0
-          # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
-          # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
-          # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
-          # and switch to "TrackMeterDemandStoreExcessOnSite".
-          # https://github.com/NREL/OpenStudio-HPXML/issues/1499
-          fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
-        end
-      end
-
-      # Apply HPXML defaults upfront; process schedules & emissions
-      hpxml_sch_map = {}
-      Schedule.check_emissions_references(hpxml.header, args[:hpxml_path])
-      hpxml.buildings.each_with_index do |hpxml_bldg, i|
-        Schedule.check_schedule_references(hpxml_bldg.header, args[:hpxml_path])
-        in_schedules_csv = 'in.schedules.csv'
-        in_schedules_csv = "in.schedules#{i + 1}.csv" if i > 0
-        schedules_file = SchedulesFile.new(runner: runner,
-                                           schedules_paths: hpxml_bldg.header.schedules_filepaths,
-                                           year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather),
-                                           unavailable_periods: hpxml.header.unavailable_periods,
-                                           output_path: File.join(args[:output_dir], in_schedules_csv),
-                                           offset_db: hpxml.header.hvac_onoff_thermostat_deadband)
-        HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, weather, schedules_file: schedules_file,
-                                                                design_load_details_output_file_path: design_load_details_output_file_path,
-                                                                output_format: args[:output_format])
-        hpxml_sch_map[hpxml_bldg] = schedules_file
-      end
-      Schedule.validate_emissions_files(hpxml.header)
+      # Do these once upfront for the entire HPXML object
+      epw_path, weather = process_weather(runner, hpxml, args)
+      process_whole_sfa_mf_inputs(hpxml)
+      hpxml_sch_map = process_defaults_schedules_emissions_files(runner, weather, hpxml, args)
 
       # Write updated HPXML object (w/ defaults) to file for inspection
-      hpxml_defaults_path = File.join(args[:output_dir], 'in.xml')
-      XMLHelper.write_file(hpxml.to_doc, hpxml_defaults_path)
+      XMLHelper.write_file(hpxml.to_doc, args[:hpxml_defaults_path])
 
       # Write annual results output file
       # This is helpful if the user wants to get these results right away (e.g.,
       # they might be using the run_simulation.rb --skip-simulation argument.
       results_out = []
       Outputs.append_sizing_results(hpxml.buildings, results_out)
-      Outputs.write_results_out_to_file(results_out, args[:output_format], annual_output_file_path)
+      Outputs.write_results_out_to_file(results_out, args[:output_format], args[:annual_output_file_path])
 
-      # Create OpenStudio model
+      # Create OpenStudio unit model(s)
       hpxml_osm_map = {}
       hpxml.buildings.each_with_index do |hpxml_bldg, i|
-        schedules_file = hpxml_sch_map[hpxml_bldg]
+        # Create the model for this single unit
+        # If we're running a whole SFA/MF building, all the unit models will be merged later
         if hpxml.buildings.size > 1
-          # Create the model for this single unit
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, schedules_file, i + 1)
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, hpxml_sch_map[hpxml_bldg], i + 1)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, schedules_file, i + 1)
+          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg], i + 1)
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
 
       # Merge unit models into final model
       if hpxml.buildings.size > 1
-        Model.add_unit_model(model, hpxml_osm_map)
+        Model.merge_unit_models(model, hpxml_osm_map)
       end
 
-      # Output
+      # Create/write output
       Outputs.apply_ems_programs(model, hpxml_osm_map, hpxml.header, args[:add_component_loads])
       Outputs.apply_output_files(model, args[:debug])
-      Outputs.apply_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], hpxml_defaults_path)
+      Outputs.apply_additional_properties(model, hpxml, hpxml_osm_map, args[:hpxml_path], args[:building_id], args[:hpxml_defaults_path])
+      Outputs.write_debug_files(runner, model, args[:debug], args[:output_dir], epw_path)
       # Outputs.apply_ems_debug_output(model) # Uncomment to debug EMS
-
-      if args[:debug]
-        # Write OSM file to run dir
-        osm_output_path = File.join(args[:output_dir], 'in.osm')
-        File.write(osm_output_path, model.to_s)
-        runner.registerInfo("Wrote file: #{osm_output_path}")
-
-        # Copy EPW file to run dir
-        epw_output_path = File.join(args[:output_dir], 'in.epw')
-        FileUtils.cp(epw_path, epw_output_path)
-      end
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
     end
 
     return true
+  end
+
+  # Updates the args hash with final paths for various input/output files.
+  #
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
+  def set_file_paths(args)
+    if not (Pathname.new args[:hpxml_path]).absolute?
+      args[:hpxml_path] = File.expand_path(args[:hpxml_path])
+    end
+    if not File.exist?(args[:hpxml_path]) && args[:hpxml_path].downcase.end_with?('.xml')
+      fail "'#{args[:hpxml_path]}' does not exist or is not an .xml file."
+    end
+
+    if not (Pathname.new args[:output_dir]).absolute?
+      args[:output_dir] = File.expand_path(args[:output_dir])
+    end
+
+    if File.extname(args[:annual_output_file_name]).length == 0
+      args[:annual_output_file_name] = "#{args[:annual_output_file_name]}.#{args[:output_format]}"
+    end
+    args[:annual_output_file_path] = File.join(args[:output_dir], args[:annual_output_file_name])
+
+    if File.extname(args[:design_load_details_output_file_name]).length == 0
+      args[:design_load_details_output_file_name] = "#{args[:design_load_details_output_file_name]}.#{args[:output_format]}"
+    end
+    args[:design_load_details_output_file_path] = File.join(args[:output_dir], args[:design_load_details_output_file_name])
+
+    args[:hpxml_defaults_path] = File.join(args[:output_dir], 'in.xml')
+  end
+
+  # Creates the HPXML object from the HPXML file. Performs schema/schematron validation
+  # as appropriate.
+  #
+  # @param args [Hash] Map of :argument_name => value
+  # @return [HPXML] HPXML object
+  def create_hpxml_object(args)
+    if args[:skip_validation]
+      schema_validator = nil
+      schematron_validator = nil
+    else
+      schema_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schema', 'HPXML.xsd')
+      schema_validator = XMLValidator.get_xml_validator(schema_path)
+      schematron_path = File.join(File.dirname(__FILE__), 'resources', 'hpxml_schematron', 'EPvalidator.xml')
+      schematron_validator = XMLValidator.get_xml_validator(schematron_path)
+    end
+
+    hpxml = HPXML.new(hpxml_path: args[:hpxml_path], schema_validator: schema_validator, schematron_validator: schematron_validator, building_id: args[:building_id])
+    hpxml.errors.each do |error|
+      runner.registerError(error)
+    end
+    hpxml.warnings.each do |warning|
+      runner.registerWarning(warning)
+    end
+    return hpxml
+  end
+
+  # Returns the EPW file path and the WeatherFile object.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param hpxml [HPXML] HPXML object
+  # @param args [Hash] Map of :argument_name => value
+  # @return [Array<String, WeatherFile>] Path to the EPW weather file, Weather object containing EPW information
+  def process_weather(runner, hpxml, args)
+    epw_path = Location.get_epw_path(hpxml.buildings[0], args[:hpxml_path])
+    weather = WeatherFile.new(epw_path: epw_path, runner: runner, hpxml: hpxml)
+    hpxml.buildings.each_with_index do |hpxml_bldg, i|
+      next if i == 0
+      next if Location.get_epw_path(hpxml_bldg, args[:hpxml_path]) == epw_path
+
+      fail 'Weather station EPW filepath has different values across dwelling units.'
+    end
+
+    return epw_path, weather
+  end
+
+  # Performs error-checking on the inputs for whole SFA/MF building simulations.
+  #
+  # @param hpxml [HPXML] HPXML object
+  # @return [nil]
+  def process_whole_sfa_mf_inputs(hpxml)
+    if hpxml.header.whole_sfa_or_mf_building_sim && (hpxml.buildings.size > 1)
+      if hpxml.buildings.map { |hpxml_bldg| hpxml_bldg.batteries.size }.sum > 0
+        # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
+        # Batteries use "TrackFacilityElectricDemandStoreExcessOnSite"; to support modeling of batteries in whole
+        # SFA/MF building simulations, we'd need to create custom meters with electricity usage *for each unit*
+        # and switch to "TrackMeterDemandStoreExcessOnSite".
+        # https://github.com/NREL/OpenStudio-HPXML/issues/1499
+        fail 'Modeling batteries for whole SFA/MF buildings is not currently supported.'
+      end
+    end
+  end
+
+  # Processes HPXML defaults, schedules, and emissions files upfront.
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param hpxml [HPXML] HPXML object
+  # @param args [Hash] Map of :argument_name => value
+  # @return [Hash] Map of HPXML Building => SchedulesFile object
+  def process_defaults_schedules_emissions_files(runner, weather, hpxml, args)
+    hpxml_sch_map = {}
+    hpxml.buildings.each_with_index do |hpxml_bldg, i|
+      # Schedules file
+      Schedule.check_schedule_references(hpxml_bldg.header, args[:hpxml_path])
+      in_schedules_csv = i > 0 ? "in.schedules#{i + 1}.csv" : 'in.schedules.csv'
+      schedules_file = SchedulesFile.new(runner: runner,
+                                         schedules_paths: hpxml_bldg.header.schedules_filepaths,
+                                         year: Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather),
+                                         unavailable_periods: hpxml.header.unavailable_periods,
+                                         output_path: File.join(args[:output_dir], in_schedules_csv),
+                                         offset_db: hpxml.header.hvac_onoff_thermostat_deadband)
+      hpxml_sch_map[hpxml_bldg] = schedules_file
+
+      # HPXML defaults
+      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, weather, schedules_file: schedules_file,
+                                                              design_load_details_output_file_path: args[:design_load_details_output_file_path],
+                                                              output_format: args[:output_format])
+    end
+
+    # Emissions files
+    Schedule.check_emissions_references(hpxml.header, args[:hpxml_path])
+    Schedule.validate_emissions_files(hpxml.header)
+
+    return hpxml_sch_map
   end
 
   # Creates a full OpenStudio model that represents the given HPXML individual dwelling by
@@ -277,7 +318,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     SimControls.apply(model, hpxml.header)
     Location.apply(model, weather, hpxml_bldg, hpxml.header, epw_path)
 
-    # Geometry/Enclosure
+    # Geometry & Enclosure
     spaces = {} # Map of HPXML locations => OpenStudio Space objects
     Geometry.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header)
@@ -293,7 +334,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     Geometry.explode_surfaces(model, hpxml_bldg)
     Geometry.apply_building_unit(model, unit_num)
 
-    # Systems
+    # HVAC
     hvac_data = HVAC.apply_hvac_systems(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file)
     HVAC.apply_dehumidifiers(runner, model, spaces, hpxml_bldg, hpxml.header)
     HVAC.apply_ceiling_fans(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
@@ -313,14 +354,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     InternalGains.apply_building_occupants(runner, model, hpxml_bldg, hpxml.header, spaces, schedules_file)
     InternalGains.apply_general_water_use(runner, model, hpxml_bldg, hpxml.header, spaces, schedules_file)
 
-    # Other
+    # Airflow (e.g., ducts, infiltration, ventilation)
     Airflow.apply(runner, model, weather, spaces, hpxml_bldg, hpxml.header, schedules_file, hvac_data)
+
+    # Other
     PV.apply(model, hpxml_bldg)
     Generator.apply(model, hpxml_bldg)
     Battery.apply(runner, model, spaces, hpxml_bldg, schedules_file)
   end
 
-  # TODO
+  # Miscellaneous logic that needs to occur upfront.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)

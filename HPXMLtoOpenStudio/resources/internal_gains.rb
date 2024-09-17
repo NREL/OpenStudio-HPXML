@@ -68,10 +68,11 @@ module InternalGains
     occ.setNumberofPeopleSchedule(people_sch)
   end
 
-  # Table 4.2.2(3). Internal Gains for Reference Homes
+  # Gets the default values associated with occupant internal gains.
   #
-  # @return [Array<Double, Double, Double, Double>] TODO
+  # @return [Array<Double, Double, Double, Double>] Heat gain (Btu/person/hr), Hours per day, sensible/latent fractions
   def self.get_occupancy_default_values()
+    # ANSI/RESNET/ICC 301 - Table 4.2.2(3). Internal Gains for Reference Homes
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day
     lat_gains = 2884.0 # Btu/person/day
@@ -127,13 +128,13 @@ module InternalGains
     end
   end
 
-  # TODO
+  # Gets the default values associated with general water use internal gains.
   #
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
-  # @param general_water_use_usage_multiplier [TODO] TODO
-  # @return [TODO] TODO
+  # @param general_water_use_usage_multiplier [Double] Usage multiplier on internal gains
+  # @return [Array<Double, Double>] Sensible/latent internal gains (Btu/yr)
   def self.get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier = 1.0)
-    # Table 4.2.2(3). Internal Gains for Reference Homes
+    # ANSI/RESNET/ICC 301 - Table 4.2.2(3). Internal Gains for Reference Homes
     sens_gains = (-1227.0 - 409.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
     lat_gains = (1245.0 + 415.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
     return sens_gains * 365.0, lat_gains * 365.0

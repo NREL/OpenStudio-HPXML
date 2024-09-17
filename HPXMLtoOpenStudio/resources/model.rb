@@ -46,7 +46,7 @@ module Model
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [nil]
-  def self.add_unit_model(model, hpxml_osm_map)
+  def self.merge_unit_models(model, hpxml_osm_map)
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
     unit_model_objects = []

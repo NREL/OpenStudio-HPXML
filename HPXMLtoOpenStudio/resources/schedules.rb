@@ -1117,7 +1117,7 @@ module Schedule
 
   # Check/update schedule file references.
   #
-  # @param hpxml_bldg_header [TODO] TODO
+  # @param hpxml_bldg_header [HPXML::BuildingHeader] HPXML Building Header object
   # @param hpxml_path [String] Path to the HPXML file
   # @return [nil]
   def self.check_schedule_references(hpxml_bldg_header, hpxml_path)

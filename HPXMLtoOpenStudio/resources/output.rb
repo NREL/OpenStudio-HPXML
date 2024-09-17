@@ -915,7 +915,7 @@ module Outputs
   # Always request MessagePack output.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param debug [Boolean] true writes in.osm, generates additional log output, and creates all E+ output files
+  # @param debug [Boolean] If true,  writes in.osm, generates additional log output, and creates all E+ output files
   # @return [nil]
   def self.apply_output_files(model, debug)
     oj = model.getOutputJSON
@@ -976,6 +976,27 @@ module Outputs
     oems.setActuatorAvailabilityDictionaryReporting('Verbose')
     oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
     oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
+  end
+
+  # TODO
+  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param debug [Boolean] If true, writes the OSM/EPW files to the output dir
+  # @param output_dir [String] Path of the output files directory
+  # @param epw_path [String] Path to the EPW weather file
+  # @return [nil]
+  def self.write_debug_files(runner, model, debug, output_dir, epw_path)
+    return unless debug
+
+    # Write OSM file to run dir
+    osm_output_path = File.join(output_dir, 'in.osm')
+    File.write(osm_output_path, model.to_s)
+    runner.registerInfo("Wrote file: #{osm_output_path}")
+
+    # Copy EPW file to run dir
+    epw_output_path = File.join(output_dir, 'in.epw')
+    FileUtils.cp(epw_path, epw_output_path)
   end
 
   # TODO
