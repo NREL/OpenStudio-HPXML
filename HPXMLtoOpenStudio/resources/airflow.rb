@@ -35,7 +35,8 @@ module Airflow
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     unavailable_periods = hpxml_header.unavailable_periods
     frac_windows_operable = hpxml_bldg.additional_properties.initial_frac_windows_operable
-    hvac_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:HVAC].name, hpxml_header.unavailable_periods)
+    heating_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, hpxml_header.unavailable_periods)
+    cooling_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, hpxml_header.unavailable_periods)
 
     # Global sensors
 
@@ -64,11 +65,11 @@ module Airflow
 
     # Create HVAC availability sensor
     @hvac_availability_sensor = nil
-    if not hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, SchedulesFile::Columns[:HVAC].name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: hvac_unavailable_periods)
+    if (not heating_unavailable_periods.empty?) || (not cooling_unavailable_periods.empty?)
+      avail_sch = ScheduleConstant.new(model, 'hvac availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods + cooling_unavailable_periods)
 
       @hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      @hvac_availability_sensor.setName('hvac availability s')
+      @hvac_availability_sensor.setName("#{avail_sch.schedule.name} s")
       @hvac_availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
       @hvac_availability_sensor.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
     end
