@@ -61,7 +61,6 @@ module Calendar
     end_day_num = get_day_num_from_month_day(year, end_month, end_day)
 
     season = Array.new(Calendar.num_days_in_year(year), 0)
-
     if end_day_num >= start_day_num
       season.fill(1, start_day_num - 1, end_day_num - start_day_num + 1) # Fill between start/end days
     else # Wrap around year
