@@ -1107,7 +1107,9 @@ module HVAC
           fail 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
-      apply_ideal_air_loads(model, [cooling_load_frac], [heating_load_frac], conditioned_zone, hvac_unavailable_periods)
+      hvac_sequential_load_fracs = { htg: [heating_load_frac],
+                                     clg: [cooling_load_frac] }
+      apply_ideal_air_loads(model, hvac_sequential_load_fracs, conditioned_zone, hvac_unavailable_periods)
       return
     end
 
@@ -1138,7 +1140,7 @@ module HVAC
   # @param hvac_sequential_load_fracs [Array<Double>] Array of daily fractions of remaining heating/cooling load to bet met by the HVAC system
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [Hash] Map of htg/clg => HPXML::UnavailablePeriods for heating/cooling
-  # @return [TODO] TODO
+  # @return [nil]
   def self.apply_ideal_air_loads(model, hvac_sequential_load_fracs, control_zone, hvac_unavailable_periods)
     obj_name = Constants::ObjectTypeIdealAirSystem
 
