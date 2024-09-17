@@ -917,7 +917,7 @@ module Outputs
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param debug [Boolean] If true,  writes in.osm, generates additional log output, and creates all E+ output files
   # @return [nil]
-  def self.apply_output_files(model, debug)
+  def self.apply_output_file_controls(model, debug)
     oj = model.getOutputJSON
     oj.setOptionType('TimeSeriesAndTabular')
     oj.setOutputJSON(debug)
