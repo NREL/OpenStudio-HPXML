@@ -79,7 +79,7 @@ Absolute/relative paths of csv files containing user-specified detailed schedule
 
 **Schedules: Unavailable Period Types**
 
-Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv. If multiple periods, use a comma-separated list.
+Specifies the unavailable period types. Possible types are column names defined in unavailable_periods.csv: Vacancy, Power Outage, No Space Heating, No Space Cooling. If multiple periods, use a comma-separated list.
 
 - **Name:** ``schedules_unavailable_period_types``
 - **Type:** ``String``
@@ -90,7 +90,7 @@ Specifies the unavailable period types. Possible types are column names defined 
 
 **Schedules: Unavailable Period Dates**
 
-Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". If multiple periods, use a comma-separated list. Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
+Specifies the unavailable period date ranges. Enter a date range like "Dec 15 - Jan 15". Optionally, can enter hour of the day like "Dec 15 2 - Jan 15 20" (start hour can be 0 through 23 and end hour can be 1 through 24). If multiple periods, use a comma-separated list.
 
 - **Name:** ``schedules_unavailable_period_dates``
 - **Type:** ``String``

@@ -525,9 +525,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     add_num_occupants(model, runner, spaces)
 
     # HVAC
-    @hvac_unavailable_periods = []
-    @hvac_unavailable_periods << Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, @hpxml_header.unavailable_periods)
-    @hvac_unavailable_periods << Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, @hpxml_header.unavailable_periods)
+    @heating_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceHeating].name, @hpxml_header.unavailable_periods)
+    @cooling_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:SpaceCooling].name, @hpxml_header.unavailable_periods)
     airloop_map = {} # Map of HPXML System ID -> AirLoopHVAC (or ZoneHVACFourPipeFanCoil)
     add_ideal_system(model, spaces, weather)
     add_cooling_system(model, runner, weather, spaces, airloop_map)
@@ -1859,13 +1858,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg,
+                                                                 conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods, @schedules_file, @hpxml_bldg,
                                                                  @hpxml_header)
 
       elsif [HPXML::HVACTypeEvaporativeCooler].include? cooling_system.cooling_system_type
 
         airloop_map[sys_id] = HVAC.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs,
-                                                            conditioned_zone, @hvac_unavailable_periods,
+                                                            conditioned_zone, @cooling_unavailable_periods,
                                                             @hpxml_bldg.building_construction.number_of_units)
       end
     end
@@ -1913,18 +1912,18 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, nil, heating_system, [0], sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg,
+                                                                 conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods, @schedules_file, @hpxml_bldg,
                                                                  @hpxml_header)
 
       elsif [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
         airloop_map[sys_id] = HVAC.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, conditioned_zone,
-                                                @hvac_unavailable_periods)
+                                                @heating_unavailable_periods)
 
       elsif [HPXML::HVACTypeElectricResistance].include? heating_system.heating_system_type
 
         HVAC.apply_electric_baseboard(model, heating_system,
-                                      sequential_heat_load_fracs, conditioned_zone, @hvac_unavailable_periods)
+                                      sequential_heat_load_fracs, conditioned_zone, @heating_unavailable_periods)
 
       elsif [HPXML::HVACTypeStove,
              HPXML::HVACTypeSpaceHeater,
@@ -1933,7 +1932,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
              HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
 
         HVAC.apply_unit_heater(model, heating_system,
-                               sequential_heat_load_fracs, conditioned_zone, @hvac_unavailable_periods)
+                               sequential_heat_load_fracs, conditioned_zone, @heating_unavailable_periods)
       end
 
       next unless heating_system.is_heat_pump_backup_system
@@ -1976,21 +1975,21 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
         airloop_map[sys_id] = HVAC.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                                                      sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                                                     conditioned_zone, @hvac_unavailable_periods)
+                                                                     conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods)
       elsif [HPXML::HVACTypeHeatPumpAirToAir,
              HPXML::HVACTypeHeatPumpMiniSplit,
              HPXML::HVACTypeHeatPumpPTHP,
              HPXML::HVACTypeHeatPumpRoom].include? heat_pump.heat_pump_type
         airloop_map[sys_id] = HVAC.apply_air_source_hvac_systems(model, runner, heat_pump, heat_pump, sequential_cool_load_fracs, sequential_heat_load_fracs,
                                                                  weather.data.AnnualMaxDrybulb, weather.data.AnnualMinDrybulb,
-                                                                 conditioned_zone, @hvac_unavailable_periods, @schedules_file, @hpxml_bldg,
+                                                                 conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods, @schedules_file, @hpxml_bldg,
                                                                  @hpxml_header)
       elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
 
         airloop_map[sys_id] = HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                                                  sequential_heat_load_fracs, sequential_cool_load_fracs,
                                                                  conditioned_zone, @hpxml_bldg.site.ground_conductivity, @hpxml_bldg.site.ground_diffusivity,
-                                                                 @hvac_unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
+                                                                 @heating_unavailable_periods, @cooling_unavailable_periods, @hpxml_bldg.building_construction.number_of_units)
 
       end
 
@@ -2029,7 +2028,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
         end
       end
       HVAC.apply_ideal_air_loads(model, [cooling_load_frac], [heating_load_frac],
-                                 conditioned_zone, @hvac_unavailable_periods)
+                                 conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods)
       return
     end
 
@@ -2049,7 +2048,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     if (sequential_heat_load_fracs.sum > 0.0) || (sequential_cool_load_fracs.sum > 0.0)
       HVAC.apply_ideal_air_loads(model, sequential_cool_load_fracs, sequential_heat_load_fracs,
-                                 conditioned_zone, @hvac_unavailable_periods)
+                                 conditioned_zone, @heating_unavailable_periods, @cooling_unavailable_periods)
     end
   end
 
@@ -2285,9 +2284,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Create HVAC availability sensor
     hvac_availability_sensor = nil
-    @hvac_unavailable_periods = @hvac_unavailable_periods.flatten
-    if not @hvac_unavailable_periods.empty?
-      avail_sch = ScheduleConstant.new(model, 'hvac', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @hvac_unavailable_periods)
+    if (not @heating_unavailable_periods.empty?) || (not @cooling_unavailable_periods.empty?)
+      avail_sch = ScheduleConstant.new(model, 'hvac', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: @heating_unavailable_periods + @cooling_unavailable_periods)
 
       hvac_availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       hvac_availability_sensor.setName('hvac availability s')

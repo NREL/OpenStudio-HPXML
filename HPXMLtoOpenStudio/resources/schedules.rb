@@ -1008,6 +1008,17 @@ module Schedule
     return unavailable_periods_csv_data
   end
 
+  # Get the unavailable period type column names from unvailable_periods.csv.
+  #
+  # @return [Array<String>] list of all defined unavailable period types in unavailable_periods.csv
+  def self.unavailable_period_types
+    if @unavailable_periods_csv_data.nil?
+      @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
+    end
+    column_names = @unavailable_periods_csv_data[0].keys[1..-1]
+    return column_names
+  end
+
   # Determine whether an unavailable period applies to a given detailed schedule.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings

@@ -27,7 +27,7 @@ module HVAC
   def self.apply_air_source_hvac_systems(model, runner, cooling_system, heating_system,
                                          sequential_cool_load_fracs, sequential_heat_load_fracs,
                                          weather_max_drybulb, weather_min_drybulb,
-                                         control_zone, hvac_unavailable_periods, schedules_file, hpxml_bldg,
+                                         control_zone, heating_unavailable_periods, cooling_unavailable_periods, schedules_file, hpxml_bldg,
                                          hpxml_header)
     is_heatpump = false
 
@@ -242,7 +242,7 @@ module HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, hvac_unavailable_periods)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm.to_f, clg_cfm.to_f].max, heating_system, heating_unavailable_periods, cooling_unavailable_periods)
 
     add_backup_staging_EMS(model, air_loop_unitary, htg_supp_coil, control_zone, htg_coil)
     apply_installation_quality(model, heating_system, cooling_system, air_loop_unitary, htg_coil, clg_coil, control_zone)
@@ -271,7 +271,7 @@ module HVAC
   # @param unit_multiplier [Integer] Number of similar dwelling units
   # @return [TODO] TODO
   def self.apply_evaporative_cooler(model, cooling_system, sequential_cool_load_fracs, control_zone,
-                                    hvac_unavailable_periods, unit_multiplier)
+                                    cooling_unavailable_periods, unit_multiplier)
 
     obj_name = Constants::ObjectTypeEvaporativeCooler
 
@@ -289,7 +289,7 @@ module HVAC
     evap_cooler.additionalProperties.setFeature('HPXML_ID', cooling_system.id) # Used by reporting measure
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, [0], sequential_cool_load_fracs, clg_cfm, nil, hvac_unavailable_periods)
+    air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, [0], sequential_cool_load_fracs, clg_cfm, nil, [], cooling_unavailable_periods)
 
     # Fan
     fan_watts_per_cfm = [2.79 * (clg_cfm / unit_multiplier)**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
@@ -337,7 +337,7 @@ module HVAC
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                          sequential_heat_load_fracs, sequential_cool_load_fracs,
                                          control_zone, ground_conductivity, ground_diffusivity,
-                                         hvac_unavailable_periods, unit_multiplier)
+                                         heating_unavailable_periods, cooling_unavailable_periods, unit_multiplier)
 
     if unit_multiplier > 1
       # FUTURE: Figure out how to allow this. If we allow it, update docs and hpxml_translator_test.rb too.
@@ -521,7 +521,7 @@ module HVAC
     end
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm, clg_cfm].max, heat_pump, hvac_unavailable_periods)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, [htg_cfm, clg_cfm].max, heat_pump, heating_unavailable_periods, cooling_unavailable_periods)
 
     # HVAC Installation Quality
     apply_installation_quality(model, heat_pump, heat_pump, air_loop_unitary, htg_coil, clg_coil, control_zone)
@@ -540,7 +540,7 @@ module HVAC
   # @return [TODO] TODO
   def self.apply_water_loop_to_air_heat_pump(model, heat_pump,
                                              sequential_heat_load_fracs, sequential_cool_load_fracs,
-                                             control_zone, hvac_unavailable_periods)
+                                             control_zone, heating_unavailable_periods, cooling_unavailable_periods)
     if heat_pump.fraction_cool_load_served > 0
       # WLHPs connected to chillers or cooling towers should have already been converted to
       # central air conditioners
@@ -578,7 +578,7 @@ module HVAC
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil)
 
     # Air Loop
-    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, htg_cfm, heat_pump, hvac_unavailable_periods)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, htg_cfm, heat_pump, heating_unavailable_periods, cooling_unavailable_periods)
 
     return air_loop
   end
@@ -592,7 +592,7 @@ module HVAC
   # @param control_zone [OpenStudio::Model::ThermalZone] Conditioned space thermal zone
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
-  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+  def self.apply_boiler(model, runner, heating_system, sequential_heat_load_fracs, control_zone, heating_unavailable_periods)
     obj_name = Constants::ObjectTypeBoiler
     is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
@@ -773,7 +773,7 @@ module HVAC
       end
     end
 
-    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
+    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, heating_unavailable_periods, nil, heating_system)
 
     return zone_hvac
   end
@@ -787,7 +787,7 @@ module HVAC
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_electric_baseboard(model, heating_system,
-                                    sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+                                    sequential_heat_load_fracs, control_zone, heating_unavailable_periods)
 
     obj_name = Constants::ObjectTypeElectricBaseboard
 
@@ -800,7 +800,7 @@ module HVAC
     zone_hvac.additionalProperties.setFeature('HPXML_ID', heating_system.id) # Used by reporting measure
     zone_hvac.additionalProperties.setFeature('IsHeatPumpBackup', heating_system.is_heat_pump_backup_system) # Used by reporting measure
 
-    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
+    set_sequential_load_fractions(model, control_zone, zone_hvac, sequential_heat_load_fracs, nil, heating_unavailable_periods, nil, heating_system)
   end
 
   # TODO
@@ -812,7 +812,7 @@ module HVAC
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_unit_heater(model, heating_system,
-                             sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+                             sequential_heat_load_fracs, control_zone, heating_unavailable_periods)
 
     obj_name = Constants::ObjectTypeUnitHeater
 
@@ -845,7 +845,7 @@ module HVAC
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.addToThermalZone(control_zone)
 
-    set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, nil, hvac_unavailable_periods, heating_system)
+    set_sequential_load_fractions(model, control_zone, unitary_system, sequential_heat_load_fracs, nil, heating_unavailable_periods, nil, heating_system)
   end
 
   # TODO
@@ -857,7 +857,7 @@ module HVAC
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
   def self.apply_ideal_air_loads(model, sequential_cool_load_fracs,
-                                 sequential_heat_load_fracs, control_zone, hvac_unavailable_periods)
+                                 sequential_heat_load_fracs, control_zone, heating_unavailable_periods, cooling_unavailable_periods)
 
     obj_name = Constants::ObjectTypeIdealAirSystem
 
@@ -884,7 +884,7 @@ module HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods)
+    set_sequential_load_fractions(model, control_zone, ideal_air, sequential_heat_load_fracs, sequential_cool_load_fracs, heating_unavailable_periods, cooling_unavailable_periods)
   end
 
   # TODO
@@ -2363,7 +2363,7 @@ module HVAC
   # @param heating_system [TODO] TODO
   # @param hvac_unavailable_periods [TODO] TODO
   # @return [TODO] TODO
-  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, airflow_cfm, heating_system, hvac_unavailable_periods)
+  def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_fracs, sequential_cool_load_fracs, airflow_cfm, heating_system, heating_unavailable_periods, cooling_unavailable_periods)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + ' airloop')
@@ -2384,7 +2384,7 @@ module HVAC
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
-    set_sequential_load_fractions(model, control_zone, air_terminal, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods, heating_system)
+    set_sequential_load_fractions(model, control_zone, air_terminal, sequential_heat_load_fracs, sequential_cool_load_fracs, heating_unavailable_periods, cooling_unavailable_periods, heating_system)
 
     return air_loop
   end
@@ -4347,9 +4347,9 @@ module HVAC
   # @param hvac_unavailable_periods [TODO] TODO
   # @param heating_system [TODO] TODO
   # @return [TODO] TODO
-  def self.set_sequential_load_fractions(model, control_zone, hvac_object, sequential_heat_load_fracs, sequential_cool_load_fracs, hvac_unavailable_periods, heating_system = nil)
-    heating_sch = get_sequential_load_schedule(model, sequential_heat_load_fracs, hvac_unavailable_periods[0])
-    cooling_sch = get_sequential_load_schedule(model, sequential_cool_load_fracs, hvac_unavailable_periods[1])
+  def self.set_sequential_load_fractions(model, control_zone, hvac_object, sequential_heat_load_fracs, sequential_cool_load_fracs, heating_unavailable_periods, cooling_unavailable_periods, heating_system = nil)
+    heating_sch = get_sequential_load_schedule(model, sequential_heat_load_fracs, heating_unavailable_periods)
+    cooling_sch = get_sequential_load_schedule(model, sequential_cool_load_fracs, cooling_unavailable_periods)
     control_zone.setSequentialHeatingFractionSchedule(hvac_object, heating_sch)
     control_zone.setSequentialCoolingFractionSchedule(hvac_object, cooling_sch)
 
