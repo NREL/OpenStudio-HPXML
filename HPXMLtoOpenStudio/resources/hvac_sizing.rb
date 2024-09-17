@@ -4824,27 +4824,32 @@ module HVACSizing
 
     # Zone results
     all_zone_loads.keys.each_with_index do |zone, i|
+      if hpxml_bldg.conditioned_zones.empty?
+        zone_or_bldg = hpxml_bldg
+      else
+        zone_or_bldg = zone
+      end
       results_out << [line_break]
       results_out << ["Report: #{zone_col_names[i]}: Loads", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
-      get_surfaces_with_property(zone, :detailed_output_values_windows).each do |window, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_windows).each do |window, fj1|
         results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_skylights).each do |skylight, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_skylights).each do |skylight, fj1|
         results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_doors).each do |door, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_doors).each do |door, fj1|
         results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_above_grade_walls).each do |wall, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_above_grade_walls).each do |wall, fj1|
         results_out << ["Above Grade Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_below_grade_walls).each do |wall, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_below_grade_walls).each do |wall, fj1|
         results_out << ["Below Grade Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_ceilings).each do |ceiling, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_ceilings).each do |ceiling, fj1|
         results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_floors).each do |floor, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_floors).each do |floor, fj1|
         results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       zone_loads = all_zone_loads[zone]
