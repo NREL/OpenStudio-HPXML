@@ -1003,7 +1003,7 @@ module Schedule
     end
 
     require 'csv'
-    unavailable_periods_csv_data = CSV.open(unavailable_periods_csv, headers: :first_row).map(&:to_h)
+    unavailable_periods_csv_data = CSV.open(unavailable_periods_csv, headers: true).map(&:to_h)
 
     return unavailable_periods_csv_data
   end
@@ -1095,6 +1095,58 @@ module Schedule
       fail err_msg
     end
     return floats
+  end
+
+  # Check/update emissions file references.
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @param hpxml_path [String] Path to the HPXML file
+  # @return [nil]
+  def self.check_emissions_references(hpxml_header, hpxml_path)
+    hpxml_header.emissions_scenarios.each do |scenario|
+      if hpxml_header.emissions_scenarios.select { |s| s.emissions_type == scenario.emissions_type && s.name == scenario.name }.size > 1
+        fail "Found multiple Emissions Scenarios with the Scenario Name=#{scenario.name} and Emissions Type=#{scenario.emissions_type}."
+      end
+      next if scenario.elec_schedule_filepath.nil?
+
+      scenario.elec_schedule_filepath = FilePath.check_path(scenario.elec_schedule_filepath,
+                                                            File.dirname(hpxml_path),
+                                                            'Emissions File')
+    end
+  end
+
+  # Check/update schedule file references.
+  #
+  # @param hpxml_bldg_header [HPXML::BuildingHeader] HPXML Building Header object
+  # @param hpxml_path [String] Path to the HPXML file
+  # @return [nil]
+  def self.check_schedule_references(hpxml_bldg_header, hpxml_path)
+    hpxml_bldg_header.schedules_filepaths = hpxml_bldg_header.schedules_filepaths.collect { |sfp|
+      FilePath.check_path(sfp,
+                          File.dirname(hpxml_path),
+                          'Schedules')
+    }
+  end
+
+  # Check that any electricity emissions schedule files contain the correct number of rows and columns.
+  #
+  # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
+  # @return [nil]
+  def self.validate_emissions_files(hpxml_header)
+    hpxml_header.emissions_scenarios.each do |scenario|
+      next if scenario.elec_schedule_filepath.nil?
+
+      data = File.readlines(scenario.elec_schedule_filepath)
+      num_header_rows = scenario.elec_schedule_number_of_header_rows
+      col_index = scenario.elec_schedule_column_number - 1
+
+      if data.size != 8760 + num_header_rows
+        fail "Emissions File has invalid number of rows (#{data.size}). Expected 8760 plus #{num_header_rows} header row(s)."
+      end
+      if col_index > data[num_header_rows, 8760].map { |x| x.count(',') }.min
+        fail "Emissions File has too few columns. Cannot find column number (#{scenario.elec_schedule_column_number})."
+      end
+    end
   end
 end
 

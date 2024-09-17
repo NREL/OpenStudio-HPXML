@@ -2029,6 +2029,17 @@
     "heat_pump_cooling_efficiency": 18,
     "heat_pump_cooling_compressor_type": "two stage"
   },
+  "sample_files/base-hvac-air-to-air-heat-pump-2-speed-research-features.xml": {
+    "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-2-speed.xml",
+    "site_iecc_zone": 7,
+    "site_state_code": "MN",
+    "weather_station_epw_filepath": "USA_MN_Duluth.Intl.AP.727450_TMY3.epw",
+    "simulation_control_timestep": 1,
+    "simulation_control_onoff_thermostat_deadband": 2,
+    "heat_pump_backup_heating_capacity": 34121.4,
+    "simulation_control_heat_pump_backup_heating_capacity_increment": 17060.71,
+    "simulation_control_defrost_model_type": "advanced"
+  },
   "sample_files/base-hvac-air-to-air-heat-pump-var-speed.xml": {
     "parent_hpxml": "sample_files/base-hvac-air-to-air-heat-pump-1-speed.xml",
     "heat_pump_heating_efficiency": 10,
@@ -3019,13 +3030,14 @@
   },
   "sample_files/base-location-detailed.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "site_time_zone_utc_offset": -7,
-    "site_elevation": 6191,
-    "site_latitude": 40.51,
-    "site_longitude": -107.55,
+    "site_time_zone_utc_offset": -6,
+    "site_elevation": 5548,
+    "site_latitude": 39.77,
+    "site_longitude": -104.73,
     "site_state_code": "CO",
-    "site_city": "Craig",
-    "site_zip_code": 81625
+    "site_city": "Aurora",
+    "site_zip_code": 80019,
+    "weather_station_epw_filepath": null
   },
   "sample_files/base-location-duluth-mn.xml": {
     "parent_hpxml": "sample_files/base-foundation-unconditioned-basement.xml",
