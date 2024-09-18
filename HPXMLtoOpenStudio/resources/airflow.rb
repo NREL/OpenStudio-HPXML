@@ -411,12 +411,12 @@ module Airflow
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param vent_fan [TODO] TODO
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [TODO] TODO
-  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, nbeds, eri_version)
+  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, eri_version)
     # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
+    nbeds = hpxml_bldg.building_construction.number_of_bedrooms
     infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
     bldg_type = hpxml_bldg.building_construction.residential_facility_type
 
