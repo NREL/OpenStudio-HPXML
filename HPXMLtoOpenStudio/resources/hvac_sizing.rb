@@ -1427,7 +1427,7 @@ module HVACSizing
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: hpxml_bldg.header.manualj_infiltration_method)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
-      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
       ela = infil_values[:sla] * cfa * infil_values[:a_ext] # Account for exterior exposure
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
