@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>81459f0e-7071-46eb-a1f5-6af1b1f4efee</version_id>
-  <version_modified>2024-08-08T14:11:36Z</version_modified>
+  <version_id>5795067c-61ff-4822-b2c2-c526d2eb4b14</version_id>
+  <version_modified>2024-09-18T16:20:20Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -212,7 +212,7 @@
     <argument>
       <name>include_annual_unmet_loads</name>
       <display_name>Generate Annual Output: Unmet Loads</display_name>
-      <description>Generates annual unmet loads for hot water.</description>
+      <description>Generates annual unmet loads.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1964,7 +1964,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>97F7F7F2</checksum>
+      <checksum>8FCCA080</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1981,13 +1981,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BF126A7D</checksum>
+      <checksum>E1DAA5DA</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>07AB5817</checksum>
+      <checksum>C9864F96</checksum>
     </file>
   </files>
 </measure>

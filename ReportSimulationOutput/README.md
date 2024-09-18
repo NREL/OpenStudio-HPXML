@@ -125,7 +125,7 @@ Generates annual unmet hours for heating and cooling.
 
 **Generate Annual Output: Unmet Loads**
 
-Generates annual unmet loads for hot water.
+Generates annual unmet loads.
 
 - **Name:** ``include_annual_unmet_loads``
 - **Type:** ``Boolean``
