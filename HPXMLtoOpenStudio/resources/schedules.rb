@@ -1008,6 +1008,17 @@ module Schedule
     return unavailable_periods_csv_data
   end
 
+  # Get the unavailable period type column names from unvailable_periods.csv.
+  #
+  # @return [Array<String>] list of all defined unavailable period types in unavailable_periods.csv
+  def self.unavailable_period_types
+    if @unavailable_periods_csv_data.nil?
+      @unavailable_periods_csv_data = Schedule.get_unavailable_periods_csv_data
+    end
+    column_names = @unavailable_periods_csv_data[0].keys[1..-1]
+    return column_names
+  end
+
   # Determine whether an unavailable period applies to a given detailed schedule.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -1032,7 +1043,7 @@ module Schedule
       end
       if applies == 1
         if not runner.nil?
-          if schedule_name == SchedulesFile::Columns[:HVAC].name
+          if [SchedulesFile::Columns[:SpaceHeating].name, SchedulesFile::Columns[:SpaceCooling].name].include?(schedule_name)
             runner.registerWarning('It is not possible to eliminate all HVAC energy use (e.g. crankcase/defrost energy) in EnergyPlus during an unavailable period.')
           elsif schedule_name == SchedulesFile::Columns[:WaterHeater].name
             runner.registerWarning('It is not possible to eliminate all DHW energy use (e.g. water heater parasitics) in EnergyPlus during an unavailable period.')
@@ -1169,7 +1180,7 @@ class SchedulesFile
 
   # Define all schedule columns
   # Columns may be used for A) detailed schedule CSVs (e.g., occupants), B) unavailable
-  # periods CSV (e.g., hvac), and/or C) EnergyPlus-specific schedules (e.g., battery_charging).
+  # periods CSV (e.g., heating), and/or C) EnergyPlus-specific schedules (e.g., battery_charging).
   Columns = {
     Occupants: Column.new('occupants', true, true, :frac),
     LightingInterior: Column.new('lighting_interior', true, true, :frac),
@@ -1208,7 +1219,8 @@ class SchedulesFile
     Battery: Column.new('battery', false, false, :neg_one_to_one),
     BatteryCharging: Column.new('battery_charging', true, false, nil),
     BatteryDischarging: Column.new('battery_discharging', true, false, nil),
-    HVAC: Column.new('hvac', true, false, nil),
+    SpaceHeating: Column.new('space_heating', true, false, nil),
+    SpaceCooling: Column.new('space_cooling', true, false, nil),
     HVACMaximumPowerRatio: Column.new('hvac_maximum_power_ratio', false, false, :frac),
     WaterHeater: Column.new('water_heater', true, false, nil),
     Dehumidifier: Column.new('dehumidifier', true, false, nil),
@@ -1554,9 +1566,9 @@ class SchedulesFile
   # Create a column of zeroes or ones for, e.g., vacancy periods or power outage periods.
   #
   # @param col_name [String] the column header of the detailed schedule
-  # @param periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
+  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
   # @return [nil]
-  def create_column_values_from_periods(col_name, periods)
+  def create_column_values_from_periods(col_name, unavailable_periods)
     n_steps = @tmp_schedules[@tmp_schedules.keys[0]].length
     num_days_in_year = Calendar.num_days_in_year(@year)
     steps_in_day = n_steps / num_days_in_year
@@ -1566,15 +1578,15 @@ class SchedulesFile
       @tmp_schedules[col_name] = Array.new(n_steps, 0)
     end
 
-    periods.each do |period|
-      begin_day_num = Calendar.get_day_num_from_month_day(@year, period.begin_month, period.begin_day)
-      end_day_num = Calendar.get_day_num_from_month_day(@year, period.end_month, period.end_day)
+    unavailable_periods.each do |unavailable_period|
+      begin_day_num = Calendar.get_day_num_from_month_day(@year, unavailable_period.begin_month, unavailable_period.begin_day)
+      end_day_num = Calendar.get_day_num_from_month_day(@year, unavailable_period.end_month, unavailable_period.end_day)
 
       begin_hour = 0
       end_hour = 24
 
-      begin_hour = period.begin_hour if not period.begin_hour.nil?
-      end_hour = period.end_hour if not period.end_hour.nil?
+      begin_hour = unavailable_period.begin_hour if not unavailable_period.begin_hour.nil?
+      end_hour = unavailable_period.end_hour if not unavailable_period.end_hour.nil?
 
       if end_day_num >= begin_day_num
         @tmp_schedules[col_name].fill(1.0, (begin_day_num - 1) * steps_in_day + (begin_hour * steps_in_hour), (end_day_num - begin_day_num + 1) * steps_in_day - ((24 - end_hour + begin_hour) * steps_in_hour)) # Fill between begin/end days
@@ -1619,8 +1631,10 @@ class SchedulesFile
           schedule_name2 = SchedulesFile::Columns[:Dishwasher].name
         elsif [SchedulesFile::Columns[:HotWaterClothesWasher].name].include?(schedule_name)
           schedule_name2 = SchedulesFile::Columns[:ClothesWasher].name
-        elsif [SchedulesFile::Columns[:HeatingSetpoint].name, SchedulesFile::Columns[:CoolingSetpoint].name].include?(schedule_name)
-          schedule_name2 = SchedulesFile::Columns[:HVAC].name
+        elsif [SchedulesFile::Columns[:HeatingSetpoint].name].include?(schedule_name)
+          schedule_name2 = SchedulesFile::Columns[:SpaceHeating].name
+        elsif [SchedulesFile::Columns[:CoolingSetpoint].name].include?(schedule_name)
+          schedule_name2 = SchedulesFile::Columns[:SpaceCooling].name
         elsif [SchedulesFile::Columns[:WaterHeaterSetpoint].name].include?(schedule_name)
           schedule_name2 = SchedulesFile::Columns[:WaterHeater].name
         end
