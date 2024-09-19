@@ -5128,7 +5128,8 @@ module HVAC
     return q_dot_defrost, p_dot_defrost
   end
 
-  # Create EMS program and Other equipment objects to account for delivered cooling and supplemental heating energy during defrost
+  # Create EMS program and Other equipment objects to account for delivered cooling load and supplemental heating energy during defrost
+  # when using the advanced defrost model.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed]  OpenStudio Heating Coil object
