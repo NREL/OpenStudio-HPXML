@@ -5085,7 +5085,8 @@ module HVAC
     program_calling_manager.addProgram(fault_program)
   end
 
-  # Calculate delivered cooling q_dot and compressor power p_dot during defrost
+  # Calculate delivered cooling load and compressor power during defrost when using
+  # the advanced defrost model.
   #
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
