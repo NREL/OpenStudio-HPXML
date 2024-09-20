@@ -1558,15 +1558,15 @@ module HPXMLDefaults
       end
       if window.interior_shading_factor_winter.nil? || window.interior_shading_factor_summer.nil?
         if window.interior_shading_type.nil?
-          window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains
+          window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
           window.interior_shading_type_isdefaulted = true
         end
         if window.interior_shading_summer_fraction_covered.nil?
-          window.interior_shading_summer_fraction_covered = 0.5
+          window.interior_shading_summer_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
           window.interior_shading_summer_fraction_covered_isdefaulted = true
         end
         if window.interior_shading_winter_fraction_covered.nil?
-          window.interior_shading_winter_fraction_covered = 0.5
+          window.interior_shading_winter_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
           window.interior_shading_winter_fraction_covered_isdefaulted = true
         end
         if [HPXML::InteriorShadingTypeDarkBlinds,
@@ -4048,9 +4048,8 @@ module HPXMLDefaults
     return 1.0, 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
-      # C1/C2 coefficients derived from Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP)
-      # https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980
-      # See FIXME GitHub Link for derivation
+      # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
+      # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
       if [HPXML::InteriorShadingTypeDarkBlinds,
           HPXML::InteriorShadingTypeMediumBlinds,
           HPXML::InteriorShadingTypeLightBlinds].include? window.interior_shading_type
@@ -4154,12 +4153,11 @@ module HPXMLDefaults
   # @param window [HPXML::Window] The window of interest
   # @return [Array<Double, Double>] The summer and winter shading factors
   def self.get_default_window_insect_screen_factors(window)
-    # C1/C2 coefficients derived from Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP)
-    # https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980
-    # See FIXME GitHub Link for derivation
+    # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
+    # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
     c_map = {
-      HPXML::LocationExterior => [0.99, 0.1],
-      HPXML::LocationInterior => [0.64, 0.0],
+      HPXML::LocationExterior => [0.64, 0.0],
+      HPXML::LocationInterior => [0.99, 0.1],
     }
     c1, c2 = c_map[window.insect_screen_location]
 

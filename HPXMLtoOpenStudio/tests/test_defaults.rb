@@ -1109,8 +1109,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].insect_screen_factor_winter = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    int_sf = 0.92 - (0.21 * hpxml_bldg.windows[0].shgc)
-    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_sf, int_sf, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.6, 0.6)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, 0.83, 0.83, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.76, 0.76)
   end
 
   def test_windows_physical_properties

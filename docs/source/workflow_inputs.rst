@@ -1694,7 +1694,7 @@ If interior shading is present, additional information is entered in ``InteriorS
   .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "light curtains".
   .. [#] BlindsSummerClosedOrOpen choices are "closed", "open", or "half open".
   .. [#] BlindsWinterClosedOrOpen choices are "closed", "open", or "half open".
-  .. [#] SummerShadingCoefficient default value is 1.0 if Type="none", otherwise calculated based on data from `Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP) <https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980>`_:
+  .. [#] SummerShadingCoefficient default value is 1.0 if Type="none", otherwise calculated based on Chapter 15 Table 14 of `ASHRAE 2021 Handbook of Fundamentals <https://www.ashrae.org/technical-resources/ashrae-handbook/description-2021-ashrae-handbook-fundamentals>`_:
   
          SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0
          
@@ -1757,7 +1757,7 @@ If an insect screen is specified, additional information is entered in ``InsectS
   .. [#] Location choices are "interior" or "exterior".
   .. [#] If SummerFractionCovered not provided, defaults to the same value as FractionOperable.
   .. [#] If WinterFractionCovered not provided, defaults to the same value as FractionOperable.
-  .. [#] If SummerShadingCoefficient not provided, calculated based on data from `Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP) <https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980>`_:
+  .. [#] If SummerShadingCoefficient not provided, calculated based on Chapter 15 Table 14 of `ASHRAE 2021 Handbook of Fundamentals <https://www.ashrae.org/technical-resources/ashrae-handbook/description-2021-ashrae-handbook-fundamentals>`_:
 
          SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0
          
