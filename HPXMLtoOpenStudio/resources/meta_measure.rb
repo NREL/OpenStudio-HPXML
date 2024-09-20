@@ -12,7 +12,7 @@ require 'fileutils'
 # Again, report any log messages to file.
 #
 # @param rundir [String] The run directory containing all simulation output files
-# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Array<Hash of measure arguments>
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
 # @param debug [Boolean] If true, reports info statements from the runner results
 # @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping forward transation and the simulation
@@ -209,17 +209,16 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
     full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
     check_file_exists(full_measure_path, runner)
     measure = get_measure_instance(full_measure_path)
-    measures[measure_subdir].each do |args|
-      next unless measure_type == measure.class.superclass.name.to_s
+    args = measures[measure_subdir]
+    next unless measure_type == measure.class.superclass.name.to_s
 
-      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
-      if show_measure_calls
-        print_measure_call(args, measure_subdir, runner)
-      end
+    argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+    if show_measure_calls
+      print_measure_call(args, measure_subdir, runner)
+    end
 
-      if not run_measure(model, measure, argument_map, runner)
-        return false
-      end
+    if not run_measure(model, measure, argument_map, runner)
+      return false
     end
   end
 
@@ -241,15 +240,14 @@ def apply_energyplus_output_requests(measures_dir, measures, runner, model, work
     full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
     check_file_exists(full_measure_path, runner)
     measure = get_measure_instance(full_measure_path)
-    measures[measure_subdir].each do |args|
-      next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
+    args = measures[measure_subdir]
+    next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
 
-      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
-      runner.setLastOpenStudioModel(model)
-      idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
-      idf_objects.each do |idf_object|
-        workspace.addObject(idf_object)
-      end
+    argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+    runner.setLastOpenStudioModel(model)
+    idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
+    idf_objects.each do |idf_object|
+      workspace.addObject(idf_object)
     end
   end
 
@@ -510,25 +508,6 @@ end
 def check_dir_exists(full_path, runner = nil)
   if not Dir.exist?(full_path)
     register_error("Cannot find directory #{full_path}.", runner)
-  end
-end
-
-# Update a Hash using provided keys and arguments.
-#
-# @param hash [Hash] Map of OpenStudio-HPXML measure directory name => Array<Hash of measure arguments>
-# @param key [String] OpenStudio-HPXML measure directory name
-# @param args [Hash] Map of provided measure arguments to values
-# @param add_new [Boolean] TODO
-# @return [nil]
-def update_args_hash(hash, key, args, add_new = true)
-  if not hash.keys.include? key
-    hash[key] = [args]
-  elsif add_new
-    hash[key] << args
-  else # merge new arguments into existing
-    args.each do |k, v|
-      hash[key][0][k] = v
-    end
   end
 end
 
