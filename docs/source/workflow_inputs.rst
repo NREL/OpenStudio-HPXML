@@ -1684,8 +1684,8 @@ If interior shading is present, additional information is entered in ``InteriorS
   ``Type``                      string         See [#]_     No        See [#]_   Interior shading type
   ``BlindsSummerClosedOrOpen``  string         See [#]_     No        half open  Blinds position in summer (only used if shading type is blinds)
   ``BlindsWinterClosedOrOpen``  string         See [#]_     No        half open  Blinds position in winter (only used if shading type is blinds)
-  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        0.5        Fraction of window area covered by interior shading in summer
-  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        0.5        Fraction of window area covered by interior shading in winter
+  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by interior shading in summer
+  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by interior shading in winter
   ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque)
   ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
@@ -1694,6 +1694,8 @@ If interior shading is present, additional information is entered in ``InteriorS
   .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "light curtains".
   .. [#] BlindsSummerClosedOrOpen choices are "closed", "open", or "half open".
   .. [#] BlindsWinterClosedOrOpen choices are "closed", "open", or "half open".
+  .. [#] If SummerFractionCovered not provided, defaults to 0.5 for shades/curtains and 1.0 for blinds.
+  .. [#] If WinterFractionCovered not provided, defaults to 0.5 for shades/curtains and 1.0 for blinds.
   .. [#] SummerShadingCoefficient default value is 1.0 if Type="none", otherwise calculated based on Chapter 15 Table 14 of `ASHRAE 2021 Handbook of Fundamentals <https://www.ashrae.org/technical-resources/ashrae-handbook/description-2021-ashrae-handbook-fundamentals>`_:
   
          SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0

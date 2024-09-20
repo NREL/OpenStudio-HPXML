@@ -252,14 +252,15 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window1ExteriorShading'/>
-              <Type>deciduous tree</Type>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <Type>none</Type>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window1InsectScreen'/>
+              <Location>interior</Location>
+            </InsectScreen>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -269,14 +270,15 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window2ExteriorShading'/>
-              <Type>solar screens</Type>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <Type>dark shades</Type>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window2InsectScreen'/>
+              <Location>interior</Location>
+            </InsectScreen>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -286,21 +288,15 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window3ExteriorShading'/>
-              <Type>external overhangs</Type>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
-              <Type>medium curtains</Type>
-              <SummerFractionCovered>0.5</SummerFractionCovered>
-              <WinterFractionCovered>0.0</WinterFractionCovered>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <Overhangs>
-              <Depth>2.0</Depth>
-              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
-            </Overhangs>
+            <InsectScreen>
+              <SystemIdentifier id='Window3InsectScreen'/>
+              <Location>interior</Location>
+            </InsectScreen>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -310,18 +306,15 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id='Window4ExteriorShading'/>
-              <Type>building</Type>
-            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <Type>light blinds</Type>
-              <BlindsSummerClosedOrOpen>closed</BlindsSummerClosedOrOpen>
-              <BlindsWinterClosedOrOpen>half open</BlindsWinterClosedOrOpen>
-              <SummerFractionCovered>0.5</SummerFractionCovered>
-              <WinterFractionCovered>1.0</WinterFractionCovered>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <InsectScreen>
+              <SystemIdentifier id='Window4InsectScreen'/>
+              <Location>interior</Location>
+            </InsectScreen>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>

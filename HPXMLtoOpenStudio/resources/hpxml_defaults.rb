@@ -1505,6 +1505,10 @@ module HPXMLDefaults
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [nil]
   def self.apply_windows(hpxml_bldg, eri_version)
+    blinds_types = [HPXML::InteriorShadingTypeDarkBlinds,
+                    HPXML::InteriorShadingTypeMediumBlinds,
+                    HPXML::InteriorShadingTypeLightBlinds]
+
     hpxml_bldg.windows.each do |window|
       if window.ufactor.nil? || window.shgc.nil?
         # Frame/Glass provided instead, fill in more defaults as needed
@@ -1562,16 +1566,22 @@ module HPXMLDefaults
           window.interior_shading_type_isdefaulted = true
         end
         if window.interior_shading_summer_fraction_covered.nil?
-          window.interior_shading_summer_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+          if blinds_types.include? window.interior_shading_type
+            window.interior_shading_summer_fraction_covered = 1.0
+          else
+            window.interior_shading_summer_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+          end
           window.interior_shading_summer_fraction_covered_isdefaulted = true
         end
         if window.interior_shading_winter_fraction_covered.nil?
-          window.interior_shading_winter_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+          if blinds_types.include? window.interior_shading_type
+            window.interior_shading_winter_fraction_covered = 1.0
+          else
+            window.interior_shading_winter_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+          end
           window.interior_shading_winter_fraction_covered_isdefaulted = true
         end
-        if [HPXML::InteriorShadingTypeDarkBlinds,
-            HPXML::InteriorShadingTypeMediumBlinds,
-            HPXML::InteriorShadingTypeLightBlinds].include? window.interior_shading_type
+        if blinds_types.include? window.interior_shading_type
           if window.interior_shading_blinds_summer_closed_or_open.nil?
             window.interior_shading_blinds_summer_closed_or_open = HPXML::BlindsHalfOpen
             window.interior_shading_blinds_summer_closed_or_open_isdefaulted = true

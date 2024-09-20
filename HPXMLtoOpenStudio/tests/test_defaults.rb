@@ -1228,12 +1228,12 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     # Test defaults w/ medium blinds (closed fully covered summer, half open half covered winter)
     hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeMediumBlinds
     hpxml_bldg.windows[0].interior_shading_blinds_summer_closed_or_open = HPXML::BlindsClosed
-    hpxml_bldg.windows[0].interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
-    hpxml_bldg.windows[0].interior_shading_summer_fraction_covered = 1.0
     hpxml_bldg.windows[0].interior_shading_winter_fraction_covered = 0.5
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
+    assert_equal(HPXML::BlindsHalfOpen, default_hpxml_bldg.windows[0].interior_shading_blinds_winter_closed_or_open)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_summer_fraction_covered)
     assert_equal(0.72, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
     assert_equal(0.92, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
   end

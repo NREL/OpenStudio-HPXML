@@ -252,10 +252,13 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window1ExteriorShading'/>
+              <Type>deciduous tree</Type>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <Type>none</Type>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window1InsectScreen'/>
@@ -272,10 +275,13 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window2ExteriorShading'/>
+              <Type>solar screens</Type>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <Type>dark shades</Type>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window2InsectScreen'/>
@@ -292,15 +298,25 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window3ExteriorShading'/>
+              <Type>external overhangs</Type>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
+              <WinterFractionCovered>0.0</WinterFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window3InsectScreen'/>
               <Location>exterior</Location>
             </InsectScreen>
+            <Overhangs>
+              <Depth>2.0</Depth>
+              <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
+            </Overhangs>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -310,10 +326,17 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id='Window4ExteriorShading'/>
+              <Type>building</Type>
+            </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+              <Type>light blinds</Type>
+              <BlindsSummerClosedOrOpen>closed</BlindsSummerClosedOrOpen>
+              <BlindsWinterClosedOrOpen>half open</BlindsWinterClosedOrOpen>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
+              <WinterFractionCovered>1.0</WinterFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window4InsectScreen'/>

@@ -890,18 +890,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.skylights[1].interior_shading_factor_summer = 0.5
         hpxml_bldg.skylights[1].interior_shading_factor_winter = 1.0
       end
-    elsif ['base-enclosure-windows-insect-screens.xml'].include? hpxml_file
-      hpxml_bldg.windows[0].insect_screen_present = true
-      hpxml_bldg.windows[0].insect_screen_location = HPXML::LocationInterior
-      hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = 1.0
-      hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = 0.0
-      hpxml_bldg.windows[1].insect_screen_present = true
-      hpxml_bldg.windows[1].insect_screen_location = HPXML::LocationExterior
-      hpxml_bldg.windows[1].insect_screen_summer_fraction_covered = 1.0
-      hpxml_bldg.windows[1].insect_screen_winter_fraction_covered = 1.0
-      hpxml_bldg.windows[2].insect_screen_present = true
-      hpxml_bldg.windows[2].insect_screen_location = HPXML::LocationExterior
-      hpxml_bldg.windows[3].insect_screen_present = true
     elsif ['base-enclosure-windows-physical-properties.xml'].include? hpxml_file
       hpxml_bldg.windows[0].ufactor = nil
       hpxml_bldg.windows[0].shgc = nil
@@ -937,7 +925,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[3].exterior_shading_factor_winter = 1.0
       hpxml_bldg.windows[3].interior_shading_factor_summer = 0.0
       hpxml_bldg.windows[3].interior_shading_factor_winter = 1.0
-    elsif ['base-enclosure-windows-shading-types.xml'].include? hpxml_file
+    elsif ['base-enclosure-windows-shading-types-detailed.xml'].include? hpxml_file
       hpxml_bldg.windows.each do |window|
         window.interior_shading_factor_summer = nil
         window.interior_shading_factor_winter = nil
@@ -961,6 +949,17 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[2].overhangs_distance_to_top_of_window = 1.0
       hpxml_bldg.windows[2].overhangs_distance_to_bottom_of_window = 4.0
       hpxml_bldg.windows[3].exterior_shading_type = HPXML::ExteriorShadingTypeBuilding
+      hpxml_bldg.windows[0].insect_screen_present = true
+      hpxml_bldg.windows[0].insect_screen_location = HPXML::LocationInterior
+      hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = 1.0
+      hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = 0.0
+      hpxml_bldg.windows[1].insect_screen_present = true
+      hpxml_bldg.windows[1].insect_screen_location = HPXML::LocationExterior
+      hpxml_bldg.windows[1].insect_screen_summer_fraction_covered = 1.0
+      hpxml_bldg.windows[1].insect_screen_winter_fraction_covered = 1.0
+      hpxml_bldg.windows[2].insect_screen_present = true
+      hpxml_bldg.windows[2].insect_screen_location = HPXML::LocationExterior
+      hpxml_bldg.windows[3].insect_screen_present = true
     elsif ['base-enclosure-thermal-mass.xml'].include? hpxml_file
       hpxml_bldg.partition_wall_mass.area_fraction = 0.8
       hpxml_bldg.partition_wall_mass.interior_finish_type = HPXML::InteriorFinishGypsumBoard
