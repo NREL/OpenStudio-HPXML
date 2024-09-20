@@ -2,7 +2,14 @@
 
 require 'fileutils'
 
-# TODO
+# Initialize OpenStudio objects (log, model, runner, etc.).
+# Call run methods of OpenStudio Model measures.
+# Report infos/warnings/errors to run.log file.
+# Forward translate the model and call energyPlusOutputRequests methods.
+# Again, report any log messages to file.
+# Simulate the IDF using the EnergyPlus CLI.
+# Call run methods of OpenStudio ReportingMeasures.
+# Again, report any log messages to file.
 #
 # @param rundir [String] The run directory containing all simulation output files
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Array<Hash of measure arguments>
@@ -10,21 +17,16 @@ require 'fileutils'
 # @param debug [Boolean] If true, reports info statements from the runner results
 # @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping forward transation and the simulation
 # @param ep_input_format [String] EnergyPlus input file format (idf, epjson)
-# @param suppress_print [Boolean] TODO
+# @param suppress_print [Boolean] True reduces printed workflow output
 # @return [Hash] Map of 'success' and 'runner' results
 def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
                        run_measures_only: false, ep_input_format: 'idf', suppress_print: false)
-  output_vars = []
-  output_meters = []
-  print_prefix = ''
-  skip_simulation = false # True applies OpenStudio Model measures and forward translation, skipping the simulation
-
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
 
   # Use print instead of puts in here in case running inside
   # a Parallel process (see https://stackoverflow.com/a/5044669)
-  print "#{print_prefix}Creating input...\n" unless suppress_print
+  print "Creating input...\n" unless suppress_print
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   os_log = OpenStudio::StringStreamLogSink.new
@@ -39,27 +41,13 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
   report_os_warnings(os_log, rundir)
 
   if not success
-    print "#{print_prefix}Creating input unsuccessful.\n"
-    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
+    print "Creating input unsuccessful.\n"
+    print "See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   end
 
   if run_measures_only
     return { success: success, runner: runner }
-  end
-
-  # Apply any additional output variables
-  output_vars.each do |output_var|
-    ov = OpenStudio::Model::OutputVariable.new(output_var[0], model)
-    ov.setReportingFrequency(output_var[1])
-    ov.setKeyValue(output_var[2])
-  end
-
-  # Apply any additional output meters
-  output_meters.each do |output_meter|
-    om = OpenStudio::Model::OutputMeter.new(model)
-    om.setName(output_meter[0])
-    om.setReportingFrequency(output_meter[1])
   end
 
   # Remove unused objects automatically added by OpenStudio?
@@ -91,8 +79,8 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
   end
 
   if not success
-    print "#{print_prefix}Creating input unsuccessful.\n"
-    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
+    print "Creating input unsuccessful.\n"
+    print "See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   end
 
@@ -111,18 +99,14 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
     fail "Unexpected ep_input_format: #{ep_input_format}."
   end
 
-  if skip_simulation
-    return { success: success, runner: runner }
-  end
-
   if not model.getWeatherFile.path.is_initialized
-    print "#{print_prefix}Creating input unsuccessful.\n"
-    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
+    print "Creating input unsuccessful.\n"
+    print "See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   end
 
   # Run simulation
-  print "#{print_prefix}Running simulation...\n" unless suppress_print
+  print "Running simulation...\n" unless suppress_print
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   simulation_start = Time.now
   command = "\"#{ep_path}\" -w \"#{model.getWeatherFile.path.get}\" #{ep_input_filename}"
@@ -148,18 +132,18 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
       break
     end
     if sim_success
-      print "#{print_prefix}Completed simulation in #{sim_time}s.\n" unless suppress_print
+      print "Completed simulation in #{sim_time}s.\n" unless suppress_print
     else
-      print "#{print_prefix}Simulation unsuccessful.\n"
-      print "#{print_prefix}See #{File.join(rundir, 'eplusout.err')} for details.\n"
+      print "Simulation unsuccessful.\n"
+      print "See #{File.join(rundir, 'eplusout.err')} for details.\n"
       return { success: false, runner: runner }
     end
   else
-    print "#{print_prefix}Simulation unsuccessful.\n"
+    print "Simulation unsuccessful.\n"
     return { success: false, runner: runner }
   end
 
-  print "#{print_prefix}Processing output...\n" unless suppress_print
+  print "Processing output...\n" unless suppress_print
 
   # Apply reporting measures
   runner.setLastEpwFilePath(File.join(rundir, 'in.epw'))
@@ -169,23 +153,24 @@ def run_hpxml_workflow(rundir, measures, measures_dir, debug: false,
   runner.resetLastEpwFilePath
 
   Dir[File.join(rundir, 'results_*.*')].each do |results_path|
-    print "#{print_prefix}Wrote output file: #{results_path}.\n" unless suppress_print
+    print "Wrote output file: #{results_path}.\n" unless suppress_print
   end
 
   if not success
-    print "#{print_prefix}Processing output unsuccessful.\n"
-    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
+    print "Processing output unsuccessful.\n"
+    print "See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   else
-    print "#{print_prefix}Wrote log file: #{File.join(rundir, 'run.log')}.\n" unless suppress_print
+    print "Wrote log file: #{File.join(rundir, 'run.log')}.\n" unless suppress_print
   end
 
-  print "#{print_prefix}Done.\n" unless suppress_print
+  print "Done.\n" unless suppress_print
 
   return { success: true, runner: runner, sim_time: sim_time }
 end
 
-# TODO
+# Apply OpenStudio measures and arguments (i.e., "run" method) corresponding to a provided Hash.
+# Optionally, save an OpenStudio Workflow based on the provided Hash.
 #
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
@@ -241,7 +226,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
   return true
 end
 
-# TODO
+# Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
 #
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
@@ -271,7 +256,7 @@ def apply_energyplus_output_requests(measures_dir, measures, runner, model, work
   return true
 end
 
-# TODO
+# Register an info statement to the OpenStudio Runner about calling measures with arguments.
 #
 # @param measure_args [Hash] Map of provided measure arguments to values
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
@@ -290,7 +275,7 @@ def print_measure_call(measure_args, measure_dir, runner)
   end
 end
 
-# TODO
+# Instantiate an OpenStudio measure's class based on the name that is stored in its measure.xml file.
 #
 # @param measure_rb_path [String] Path of an OpenStudio measure's measure.rb file
 # @return [Class] OpenStudio measure class instance
@@ -310,26 +295,31 @@ def get_measure_instance(measure_rb_path)
   return measure
 end
 
-# TODO
+# Check provided arguments and values against OpenStudio Measure Arguments.
 #
 # @param measure_args [OpenStudio::Measure::OSArgumentVector] Array of OpenStudio Measure Arguments
 # @param provided_args [Hash] Map of provided measure arguments to values
+# @param lookup_file [String] optional file name to provide more information in registered error message
 # @param measure_name [String] OpenStudio-HPXML measure directory name
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @return [Hash] Map of provided measure arguments to values
-def validate_measure_args(measure_args, provided_args, measure_name, runner = nil)
+def validate_measure_args(measure_args, provided_args, lookup_file, measure_name, runner = nil)
   measure_arg_names = measure_args.map { |arg| arg.name }
+  lookup_file_str = ''
+  if not lookup_file.nil?
+    lookup_file_str = " in #{lookup_file}"
+  end
   # Verify all arguments have been provided
   measure_args.each do |arg|
     next if provided_args.keys.include?(arg.name)
     next if not arg.required
 
-    register_error("Required argument '#{arg.name}' not provided for measure '#{measure_name}'.", runner)
+    register_error("Required argument '#{arg.name}' not provided#{lookup_file_str} for measure '#{measure_name}'.", runner)
   end
   provided_args.keys.each do |k|
     next if measure_arg_names.include?(k)
 
-    register_error("Extra argument '#{k}' specified for measure '#{measure_name}'.", runner)
+    register_error("Extra argument '#{k}' specified#{lookup_file_str} for measure '#{measure_name}'.", runner)
   end
   # Check for valid argument values
   measure_args.each do |arg|
@@ -367,7 +357,7 @@ def validate_measure_args(measure_args, provided_args, measure_name, runner = ni
   return provided_args
 end
 
-# TODO
+# Get a map of OpenStudio measure arguments with values set based on provided arguments.
 #
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
 # @param measure [Class] OpenStudio measure class instance
@@ -377,7 +367,7 @@ end
 # @return [OpenStudio::Measure::OSArgumentMap] OpenStudio measure arguments
 def get_argument_map(model, measure, provided_args, measure_name, runner = nil)
   measure_args = measure.arguments(model)
-  provided_args = validate_measure_args(measure_args, provided_args, measure_name, runner)
+  provided_args = validate_measure_args(measure_args, provided_args, nil, measure_name, runner)
 
   # Convert to argument map needed by OS
   argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(measure_args)
@@ -391,7 +381,7 @@ def get_argument_map(model, measure, provided_args, measure_name, runner = nil)
   return argument_map
 end
 
-# TODO
+# Get the value from an OpenStudio Workflow step.
 #
 # @param step_value [OpenStudio::WorkflowStepValue] OpenStudio WorkflowStepValue
 # @return [Boolean or Float or Integer or String] the step value
@@ -408,7 +398,7 @@ def get_value_from_workflow_step_value(step_value)
   end
 end
 
-# TODO
+# Call the run method of an OpenStudio measure and register any log messages to the provided OpenStudio Runner.
 #
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
 # @param measure [Class] OpenStudio measure class instance
@@ -470,12 +460,12 @@ def run_measure(model, measure, argument_map, runner)
   return true
 end
 
-# TODO
+# Convert contents of a Hash to single String using provided delimiter and seperator characters.
 #
-# @param hash [Hash] TODO
-# @param delim [TODO] TODO
-# @param separator [TODO] TODO
-# @return [String] TODO
+# @param hash [Hash] Map of keys to values
+# @param delim [String] character between each key and value
+# @param separator [String] character between key and value sets
+# @return [String] a single String containing Hash contents
 def hash_to_string(hash, delim = '=', separator = ',')
   hash_s = ''
   hash.each do |k, v|
@@ -487,7 +477,7 @@ def hash_to_string(hash, delim = '=', separator = ',')
   return hash_s
 end
 
-# TODO
+# Register provided error message to OpenStudio Runner.
 #
 # @param msg [String] Error message to register to the OpenStudio runner
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -501,7 +491,7 @@ def register_error(msg, runner = nil)
   end
 end
 
-# TODO
+# Register an error if provided file path does not exist.
 #
 # @param full_path [String] Path of an OpenStudio measure's measure.rb file
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -512,7 +502,7 @@ def check_file_exists(full_path, runner = nil)
   end
 end
 
-# TODO
+# Register an error if provided directory path does not exist.
 #
 # @param full_path [String] Path of an OpenStudio measure's measure.rb file
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -523,7 +513,7 @@ def check_dir_exists(full_path, runner = nil)
   end
 end
 
-# TODO
+# Update a Hash using provided keys and arguments.
 #
 # @param hash [Hash] Map of OpenStudio-HPXML measure directory name => Array<Hash of measure arguments>
 # @param key [String] OpenStudio-HPXML measure directory name
@@ -542,7 +532,7 @@ def update_args_hash(hash, key, args, add_new = true)
   end
 end
 
-# TODO
+# Write runner warnings and errors (and optionally infos) to log file.
 #
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param rundir [String] The run directory containing all simulation output files
@@ -566,7 +556,7 @@ def report_measure_errors_warnings(runner, rundir, debug)
   runner.reset
 end
 
-# TODO
+# Write forward translator warnings and errors to log file.
 #
 # @param forward_translator [OpenStudio::EnergyPlus::ForwardTranslator] OpenStudio ForwardTranslator object
 # @param rundir [String] The run directory containing all simulation output files
@@ -586,7 +576,7 @@ def report_ft_errors_warnings(forward_translator, rundir)
   return success
 end
 
-# TODO
+# Write OpenStudio log messages to log file.
 #
 # @param os_log [OpenStudio::StringStreamLogSink] OpenStudio Log object
 # @param rundir [String] The run directory containing all simulation output files
@@ -610,9 +600,9 @@ def report_os_warnings(os_log, rundir)
   os_log.resetStringStream
 end
 
-# TODO
+# Remove file or directory if it exists, and exit the method only after it is actually removed.
 #
-# @param path [TODO] TODO
+# @param path [String] File or directory path
 # @return [nil]
 def rm_path(path)
   if Dir.exist?(path)
@@ -625,16 +615,16 @@ def rm_path(path)
   end
 end
 
-# TODO
+# Collection of methods for describing a String object.
 class String
-  # TODO
+  # Check if contents of String is a number.
   #
   # @return [Boolean] True if string is a number
   def is_number?
     true if Float(self) rescue false
   end
 
-  # TODO
+  # Check if contents of String is an integer.
   #
   # @return [Boolean] True if string is an integer
   def is_integer?

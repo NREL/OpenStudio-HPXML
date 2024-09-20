@@ -506,7 +506,7 @@ module Geometry
   # @param foundation_wall [HPXML::FoundationWall] HPXML Foundation Wall object
   # @param exposed_length [Double] TODO
   # @param fnd_wall_length [Double] TODO
-  # @param default_azimuths [TODO] TODO
+  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
   # @return [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   def self.apply_foundation_wall(runner, model, spaces, hpxml_bldg, foundation_wall, exposed_length, fnd_wall_length, default_azimuths)
     exposed_fraction = exposed_length / fnd_wall_length
@@ -600,7 +600,7 @@ module Geometry
   # @param z_origin [Double] The z-coordinate for which the slab is relative (ft)
   # @param exposed_length [Double] TODO
   # @param kiva_foundation [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
-  # @param default_azimuths [TODO] TODO
+  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, z_origin,
@@ -1133,15 +1133,15 @@ module Geometry
     end
   end
 
-  # TODO
+  # Create vertices for a pitched horizontal plane based on length, height, z origin, azimuth, tilt, and presence of a buffer.
   #
-  # @param length [TODO] TODO
-  # @param width [TODO] TODO
-  # @param z_origin [TODO] TODO
-  # @param azimuth [TODO] TODO
-  # @param tilt [TODO] TODO
-  # @param add_buffer [TODO] TODO
-  # @return [TODO] TODO
+  # @param length [Double] length of the roof (ft)
+  # @param width [Double] width of the roof (ft)
+  # @param z_origin [Double] The z-coordinate for which the length and height are relative (ft)
+  # @param azimuth [Double] azimuth (degrees)
+  # @param tilt [Double] ratio of vertical rise to horizontal run (frac)
+  # @param add_buffer [Boolean] whether to use a buffer on each side of a subsurface
+  # @return [OpenStudio::Point3dVector] an array of points
   def self.create_roof_vertices(length, width, z_origin, azimuth, tilt, add_buffer: false)
     length = UnitConversions.convert(length, 'ft', 'm')
     width = UnitConversions.convert(width, 'ft', 'm')
@@ -1264,22 +1264,22 @@ module Geometry
 
   # Reverse the vertices after calling create_floor_vertices with the same argument values.
   #
-  # @param length [TODO] TODO
-  # @param width [TODO] TODO
+  # @param length [Double] length of the ceiling (ft)
+  # @param width [Double] width of the ceiling (ft)
   # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
-  # @param default_azimuths [TODO] TODO
-  # @return [TODO] TODO
+  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @return [OpenStudio::Point3dVector] an array of points
   def self.create_ceiling_vertices(length, width, z_origin, default_azimuths)
     return OpenStudio::reverse(create_floor_vertices(length, width, z_origin, default_azimuths))
   end
 
-  # TODO
+  # Create vertices for a horizontal plane based on length, width, z origin, and default azimuths.
   #
-  # @param length [TODO] TODO
-  # @param width [TODO] TODO
+  # @param length [Double] length of the floor (ft)
+  # @param width [Double] width of the floor (ft)
   # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
-  # @param default_azimuths [TODO] TODO
-  # @return [TODO] TODO
+  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @return [OpenStudio::Point3dVector] an array of points
   def self.create_floor_vertices(length, width, z_origin, default_azimuths)
     length = UnitConversions.convert(length, 'ft', 'm')
     width = UnitConversions.convert(width, 'ft', 'm')
@@ -1589,11 +1589,11 @@ module Geometry
     end
   end
 
-  # TODO
+  # Calculate zone volume for an HPXML location based on floor area and an assumed height.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param location [String] the location of interest (HPXML::LocationXXX)
-  # @return [Double] TODO
+  # @return [Double] calculated zone volume (ft^3)
   def self.calculate_zone_volume(hpxml_bldg, location)
     if [HPXML::LocationBasementUnconditioned,
         HPXML::LocationCrawlspaceUnvented,
@@ -1620,10 +1620,10 @@ module Geometry
     end
   end
 
-  # TODO
+  # Get temperature scheduled space values for an HPXML location.
   #
   # @param location [String] the general HPXML location
-  # @return [Hash] TODO
+  # @return [Hash] Map of minimum temperature, indoor/outdoor/ground weights, duct regain factor
   def self.get_temperature_scheduled_space_values(location)
     if location == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of heating setpoint
@@ -1680,7 +1680,7 @@ module Geometry
     fail "Unhandled location: #{location}."
   end
 
-  # TODO
+  # For a given OpenStudio Surface, set the OpenStudio Space based on the adjacent interior location of an HPXML Surface.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
@@ -1696,7 +1696,7 @@ module Geometry
     end
   end
 
-  # TODO
+  # For a given OpenStudio Surface, set either an outside boundary condition or adjacent OpenStudio Surface based on the adjacent exterior location of an HPXML Surface.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
@@ -1741,7 +1741,7 @@ module Geometry
     end
   end
 
-  # TODO
+  # For a given OpenStudio Surface, set the Other Side Coefficients (based on space temperature schedule) and sun/wind exposure.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param exterior_adjacent_to [String] Exterior adjacent to location (HPXML::LocationXXX)
@@ -1947,10 +1947,10 @@ module Geometry
     return maxzs.max - minzs.min
   end
 
-  # TODO
+  # Determine the length of an OpenStudio Surface by calculating the maximum difference between x and y coordinates.
   #
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
-  # @return [TODO] TODO
+  # @return [Double] length of the OpenStudio Surface (ft)
   def self.get_surface_length(surface:)
     xvalues = get_surface_x_values(surfaceArray: [surface])
     yvalues = get_surface_y_values(surfaceArray: [surface])
