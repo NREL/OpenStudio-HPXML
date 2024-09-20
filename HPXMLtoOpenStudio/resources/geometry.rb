@@ -1520,10 +1520,10 @@ module Geometry
     end
   end
 
-  # TODO
+  # Get the z origin (minimum) of a thermal zone.
   #
-  # @param zone [TODO] TODO
-  # @return [TODO] TODO
+  # @param zone [OpenStudio::Model::ThermalZone] OpenStudio ThermalZone object
+  # @return [Double] Minimum of space z origins in a zone (ft)
   def self.get_z_origin_for_zone(zone)
     z_origins = []
     zone.spaces.each do |space|
@@ -1557,10 +1557,10 @@ module Geometry
     return OpenStudio::Transformation.new(m)
   end
 
-  # TODO
+  # Add OpenStudio Shading Surfaces representing neighbor buildings.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param length [TODO] TODO
+  # @param length [Double] the shading surface length for each neighbor azimuth (ft)
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.add_neighbor_shading(model, length, hpxml_bldg)
