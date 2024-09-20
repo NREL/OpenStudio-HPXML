@@ -72,6 +72,9 @@ class HPXML < Object
   BatteryTypeLithiumIon = 'Li-ion'
   BatteryLifetimeModelNone = 'None'
   BatteryLifetimeModelKandlerSmith = 'KandlerSmith'
+  BlindsClosed = 'closed'
+  BlindsOpen = 'open'
+  BlindsHalfOpen = 'half open'
   CapacityDescriptionMinimum = 'minimum'
   CapacityDescriptionMaximum = 'maximum'
   CertificationEnergyStar = 'Energy Star'
@@ -253,6 +256,9 @@ class HPXML < Object
   InteriorShadingTypeLightBlinds = 'light blinds'
   InteriorShadingTypeLightCurtains = 'light curtains'
   InteriorShadingTypeLightShades = 'light shades'
+  InteriorShadingTypeMediumBlinds = 'medium blinds'
+  InteriorShadingTypeMediumCurtains = 'medium curtains'
+  InteriorShadingTypeMediumShades = 'medium shades'
   InteriorShadingTypeNone = 'none'
   InfiltrationTypeUnitTotal = 'unit total'
   InfiltrationTypeUnitExterior = 'unit exterior only'
@@ -5547,38 +5553,42 @@ class HPXML < Object
 
   # Object for /HPXML/Building/BuildingDetails/Enclosure/Windows/Window.
   class Window < BaseElement
-    ATTRS = [:id,                                     # [String] SystemIdentifier/@id
-             :area,                                   # [Double] Area (ft2)
-             :azimuth,                                # [Integer] Azimuth (deg)
-             :orientation,                            # [String] Orientation (HPXML::OrientationXXX)
-             :frame_type,                             # [String] FrameType/* (HPXML::WindowFrameTypeXXX)
-             :thermal_break,                          # [Boolean] FrameType/*/ThermalBreak
-             :glass_layers,                           # [String] GlassLayers (HPXML::WindowLayersXXX)
-             :glass_type,                             # [String] GlassType (HPXML::WindowGlassTypeXXX)
-             :gas_fill,                               # [String] GasFill (HPXML::WindowGasXXX)
-             :ufactor,                                # [Double] UFactor (Btu/F-ft2-hr)
-             :shgc,                                   # [Double] SHGC
-             :exterior_shading_id,                    # [String] ExteriorShading/SystemIdentifier/@id
-             :exterior_shading_type,                  # [String] ExteriorShading/Type
-             :exterior_shading_factor_summer,         # [Double] ExteriorShading/SummerShadingCoefficient (frac)
-             :exterior_shading_factor_winter,         # [Double] ExteriorShading/WinterShadingCoefficient (frac)
-             :interior_shading_id,                    # [String] InteriorShading/SystemIdentifier/@id
-             :interior_shading_type,                  # [String] InteriorShading/Type
-             :interior_shading_factor_summer,         # [Double] InteriorShading/SummerShadingCoefficient (frac)
-             :interior_shading_factor_winter,         # [Double] InteriorShading/WinterShadingCoefficient (frac)
-             :storm_type,                             # [String] StormWindow/GlassType (HPXML::WindowGlassTypeXXX)
-             :insect_screen_present,                  # [Element] InsectScreen
-             :insect_screen_location,                 # [String] InsectScreen/Location (HPXML::LocationXXX)
-             :insect_screen_summer_fraction_covered,  # [Double] InsectScreen/SummerFractionCovered (frac)
-             :insect_screen_winter_fraction_covered,  # [Double] InsectScreen/WinterFractionCovered (frac)
-             :insect_screen_factor_summer,            # [Double] InsectScreen/SummerShadingCoefficient (frac)
-             :insect_screen_factor_winter,            # [Double] InsectScreen/WinterShadingCoefficient (frac)
-             :overhangs_depth,                        # [Double] Overhangs/Depth (ft)
-             :overhangs_distance_to_top_of_window,    # [Double] Overhangs/DistanceToTopOfWindow (ft)
-             :overhangs_distance_to_bottom_of_window, # [Double] Overhangs/DistanceToBottomOfWindow (ft)
-             :fraction_operable,                      # [Double] FractionOperable (frac)
-             :performance_class,                      # [String] PerformanceClass (HPXML::WindowClassXXX)
-             :attached_to_wall_idref]                 # [String] AttachedToWall/@idref
+    ATTRS = [:id,                                             # [String] SystemIdentifier/@id
+             :area,                                           # [Double] Area (ft2)
+             :azimuth,                                        # [Integer] Azimuth (deg)
+             :orientation,                                    # [String] Orientation (HPXML::OrientationXXX)
+             :frame_type,                                     # [String] FrameType/* (HPXML::WindowFrameTypeXXX)
+             :thermal_break,                                  # [Boolean] FrameType/*/ThermalBreak
+             :glass_layers,                                   # [String] GlassLayers (HPXML::WindowLayersXXX)
+             :glass_type,                                     # [String] GlassType (HPXML::WindowGlassTypeXXX)
+             :gas_fill,                                       # [String] GasFill (HPXML::WindowGasXXX)
+             :ufactor,                                        # [Double] UFactor (Btu/F-ft2-hr)
+             :shgc,                                           # [Double] SHGC
+             :exterior_shading_id,                            # [String] ExteriorShading/SystemIdentifier/@id
+             :exterior_shading_type,                          # [String] ExteriorShading/Type (HPXML::ExteriorShadingTypeXXX)
+             :exterior_shading_factor_summer,                 # [Double] ExteriorShading/SummerShadingCoefficient (frac)
+             :exterior_shading_factor_winter,                 # [Double] ExteriorShading/WinterShadingCoefficient (frac)
+             :interior_shading_id,                            # [String] InteriorShading/SystemIdentifier/@id
+             :interior_shading_type,                          # [String] InteriorShading/Type (HPXML::InteriorShadingTypeXXX)
+             :interior_shading_blinds_summer_closed_or_open,  # [String] InteriorShading/BlindsSummerClosedOrOpen (HPXML::BlindsXXX)
+             :interior_shading_blinds_winter_closed_or_open,  # [String] InteriorShading/BlindsWinterClosedOrOpen (HPXML::BlindsXXX)
+             :interior_shading_summer_fraction_covered,       # [Double] InteriorShading/SummerFractionCovered
+             :interior_shading_winter_fraction_covered,       # [Double] InteriorShading/WinterFractionCovered
+             :interior_shading_factor_summer,                 # [Double] InteriorShading/SummerShadingCoefficient (frac)
+             :interior_shading_factor_winter,                 # [Double] InteriorShading/WinterShadingCoefficient (frac)
+             :storm_type,                                     # [String] StormWindow/GlassType (HPXML::WindowGlassTypeXXX)
+             :insect_screen_present,                          # [Element] InsectScreen
+             :insect_screen_location,                         # [String] InsectScreen/Location (HPXML::LocationXXX)
+             :insect_screen_summer_fraction_covered,          # [Double] InsectScreen/SummerFractionCovered (frac)
+             :insect_screen_winter_fraction_covered,          # [Double] InsectScreen/WinterFractionCovered (frac)
+             :insect_screen_factor_summer,                    # [Double] InsectScreen/SummerShadingCoefficient (frac)
+             :insect_screen_factor_winter,                    # [Double] InsectScreen/WinterShadingCoefficient (frac)
+             :overhangs_depth,                                # [Double] Overhangs/Depth (ft)
+             :overhangs_distance_to_top_of_window,            # [Double] Overhangs/DistanceToTopOfWindow (ft)
+             :overhangs_distance_to_bottom_of_window,         # [Double] Overhangs/DistanceToBottomOfWindow (ft)
+             :fraction_operable,                              # [Double] FractionOperable (frac)
+             :performance_class,                              # [String] PerformanceClass (HPXML::WindowClassXXX)
+             :attached_to_wall_idref]                         # [String] AttachedToWall/@idref
     attr_accessor(*ATTRS)
 
     # Returns the parent wall that includes this skylight.
@@ -5686,7 +5696,7 @@ class HPXML < Object
         XMLHelper.add_element(exterior_shading, 'SummerShadingCoefficient', @exterior_shading_factor_summer, :float, @exterior_shading_factor_summer_isdefaulted) unless @exterior_shading_factor_summer.nil?
         XMLHelper.add_element(exterior_shading, 'WinterShadingCoefficient', @exterior_shading_factor_winter, :float, @exterior_shading_factor_winter_isdefaulted) unless @exterior_shading_factor_winter.nil?
       end
-      if (not @interior_shading_type.nil?) || (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?)
+      if (not @interior_shading_type.nil?) || (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?) || (not @interior_shading_blinds_summer_closed_or_open.nil?) || (not @interior_shading_blinds_winter_closed_or_open.nil?) || (not @interior_shading_summer_fraction_covered.nil?) || (not @interior_shading_winter_fraction_covered.nil?)
         interior_shading = XMLHelper.add_element(window, 'InteriorShading')
         sys_id = XMLHelper.add_element(interior_shading, 'SystemIdentifier')
         if @interior_shading_id.nil?
@@ -5695,6 +5705,10 @@ class HPXML < Object
           XMLHelper.add_attribute(sys_id, 'id', @interior_shading_id)
         end
         XMLHelper.add_element(interior_shading, 'Type', @interior_shading_type, :string, @interior_shading_type_isdefaulted) unless @interior_shading_type.nil?
+        XMLHelper.add_element(interior_shading, 'BlindsSummerClosedOrOpen', @interior_shading_blinds_summer_closed_or_open, :string, @interior_shading_blinds_summer_closed_or_open_isdefaulted) unless @interior_shading_blinds_summer_closed_or_open.nil?
+        XMLHelper.add_element(interior_shading, 'BlindsWinterClosedOrOpen', @interior_shading_blinds_winter_closed_or_open, :string, @interior_shading_blinds_winter_closed_or_open_isdefaulted) unless @interior_shading_blinds_winter_closed_or_open.nil?
+        XMLHelper.add_element(interior_shading, 'SummerFractionCovered', @interior_shading_summer_fraction_covered, :float, @interior_shading_summer_fraction_covered_isdefaulted) unless @interior_shading_summer_fraction_covered.nil?
+        XMLHelper.add_element(interior_shading, 'WinterFractionCovered', @interior_shading_winter_fraction_covered, :float, @interior_shading_winter_fraction_covered_isdefaulted) unless @interior_shading_winter_fraction_covered.nil?
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
@@ -5756,6 +5770,10 @@ class HPXML < Object
       @exterior_shading_factor_winter = XMLHelper.get_value(window, 'ExteriorShading/WinterShadingCoefficient', :float)
       @interior_shading_id = HPXML::get_id(window, 'InteriorShading/SystemIdentifier')
       @interior_shading_type = XMLHelper.get_value(window, 'InteriorShading/Type', :string)
+      @interior_shading_blinds_summer_closed_or_open = XMLHelper.get_value(window, 'InteriorShading/BlindsSummerClosedOrOpen', :string)
+      @interior_shading_blinds_winter_closed_or_open = XMLHelper.get_value(window, 'InteriorShading/BlindsWinterClosedOrOpen', :string)
+      @interior_shading_summer_fraction_covered = XMLHelper.get_value(window, 'InteriorShading/SummerFractionCovered', :float)
+      @interior_shading_winter_fraction_covered = XMLHelper.get_value(window, 'InteriorShading/WinterFractionCovered', :float)
       @interior_shading_factor_summer = XMLHelper.get_value(window, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(window, 'InteriorShading/WinterShadingCoefficient', :float)
       @overhangs_depth = XMLHelper.get_value(window, 'Overhangs/Depth', :float)

@@ -658,7 +658,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBedroomNorthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowPrimaryBedroomNorthInsectScreen'/>
@@ -680,7 +682,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBathroomNorthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowPrimaryBathroomNorthInsectScreen'/>
@@ -702,7 +706,7 @@
             <SHGC>0.39</SHGC>
             <InteriorShading>
               <SystemIdentifier id='FrenchDoorFamilyRoomNorthInteriorShading'/>
-              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <Type>none</Type>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -719,7 +723,8 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowFamilyRoomEastInteriorShading'/>
-              <SummerShadingCoefficient>0.93</SummerShadingCoefficient>
+              <Type>dark curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <Overhangs>
               <Depth>1.5</Depth>
@@ -736,7 +741,8 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowKitchenSouthInteriorShading'/>
-              <SummerShadingCoefficient>0.73</SummerShadingCoefficient>
+              <Type>light shades</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowKitchenSouthInsectScreen'/>
@@ -758,7 +764,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom1SouthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBathroom1SouthInsectScreen'/>
@@ -780,7 +788,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom1WestInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom1WestInsectScreen'/>
@@ -802,7 +812,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowPrimaryBedroomWestInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowPrimaryBedroomWestInsectScreen'/>
@@ -824,7 +836,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2NorthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom2NorthInsectScreen'/>
@@ -846,7 +860,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowCraftNorthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowCraftNorthInsectScreen'/>
@@ -868,7 +884,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowRecRoomSouthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowRecRoomSouthInsectScreen'/>
@@ -890,7 +908,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3SouthInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom3SouthInsectScreen'/>
@@ -912,7 +932,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3WestInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom3WestInsectScreen'/>
@@ -934,7 +956,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBathroom2WestInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBathroom2WestInsectScreen'/>
@@ -956,7 +980,9 @@
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2WestInteriorShading'/>
-              <SummerShadingCoefficient>0.693</SummerShadingCoefficient>
+              <Type>medium blinds</Type>
+              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
+              <SummerFractionCovered>1.0</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom2WestInsectScreen'/>

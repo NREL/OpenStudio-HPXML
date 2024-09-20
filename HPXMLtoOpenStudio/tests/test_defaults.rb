@@ -1095,7 +1095,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, int_sf, int_sf, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.6, 0.6)
   end
 
-  def test_windows_properties
+  def test_windows_physical_properties
     # Test defaults w/ single pane, aluminum frame
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
     hpxml_bldg.windows[0].ufactor = nil
@@ -1176,11 +1176,72 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     end
   end
 
-  def test_windows_shading_types
-    # Test defaults w/ deciduous tree shading
+  def test_windows_interior_shading_types
+    # Test defaults
+    hpxml, hpxml_bldg = _create_hpxml('base.xml')
+    hpxml_bldg.windows[0].interior_shading_factor_summer = nil
+    hpxml_bldg.windows[0].interior_shading_factor_winter = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(HPXML::InteriorShadingTypeLightCurtains, default_hpxml_bldg.windows[0].interior_shading_type)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_summer_fraction_covered)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_winter_fraction_covered)
+    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+
+    # Test defaults w/ none shading
+    hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeNone
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+
+    # Test defaults w/ dark shades (fully covered summer, fully uncovered winter)
+    hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeDarkShades
+    hpxml_bldg.windows[0].interior_shading_summer_fraction_covered = 1.0
+    hpxml_bldg.windows[0].interior_shading_winter_fraction_covered = 0.0
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+
+    # Test defaults w/ medium blinds (closed fully covered summer, half open half covered winter)
+    hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeMediumBlinds
+    hpxml_bldg.windows[0].interior_shading_blinds_summer_closed_or_open = HPXML::BlindsClosed
+    hpxml_bldg.windows[0].interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
+    hpxml_bldg.windows[0].interior_shading_summer_fraction_covered = 1.0
+    hpxml_bldg.windows[0].interior_shading_winter_fraction_covered = 0.5
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(0.72, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.92, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+  end
+
+  def test_windows_exterior_shading_types
+    # Test defaults
     hpxml, hpxml_bldg = _create_hpxml('base.xml')
     hpxml_bldg.windows[0].exterior_shading_factor_summer = nil
     hpxml_bldg.windows[0].exterior_shading_factor_winter = nil
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(HPXML::InteriorShadingTypeNone, default_hpxml_bldg.windows[0].exterior_shading_type)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ none shading
+    hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeNone
+    XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
+    _default_hpxml, default_hpxml_bldg = _test_measure()
+
+    assert_equal(1.0, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(1.0, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+
+    # Test defaults w/ deciduous tree shading
     hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
@@ -1248,7 +1309,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _test_default_skylight_values(default_hpxml_bldg.skylights[0], 1.0, 1.0, 1.0, 1.0, 270)
   end
 
-  def test_skylights_properties
+  def test_skylights_physical_properties
     # Test defaults w/ single pane, aluminum frame
     hpxml, hpxml_bldg = _create_hpxml('base-enclosure-skylights.xml')
     hpxml_bldg.skylights[0].ufactor = nil

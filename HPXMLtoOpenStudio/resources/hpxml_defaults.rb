@@ -1531,7 +1531,6 @@ module HPXMLDefaults
           window.shgc_isdefaulted = true
         end
       end
-      default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors(eri_version, window.shgc)
       if window.azimuth.nil?
         window.azimuth = get_azimuth_from_orientation(window.orientation)
         window.azimuth_isdefaulted = true
@@ -1540,26 +1539,55 @@ module HPXMLDefaults
         window.orientation = get_orientation_from_azimuth(window.azimuth)
         window.orientation_isdefaulted = true
       end
-      if window.interior_shading_factor_summer.nil?
-        window.interior_shading_factor_summer = default_shade_summer
-        window.interior_shading_factor_summer_isdefaulted = true
+      if window.interior_shading_factor_winter.nil? || window.interior_shading_factor_summer.nil?
+        if window.interior_shading_type.nil?
+          window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains
+          window.interior_shading_type_isdefaulted = true
+        end
+        if window.interior_shading_summer_fraction_covered.nil?
+          window.interior_shading_summer_fraction_covered = 0.5
+          window.interior_shading_summer_fraction_covered_isdefaulted = true
+        end
+        if window.interior_shading_winter_fraction_covered.nil?
+          window.interior_shading_winter_fraction_covered = 0.5
+          window.interior_shading_winter_fraction_covered_isdefaulted = true
+        end
+        if [HPXML::InteriorShadingTypeDarkBlinds,
+            HPXML::InteriorShadingTypeMediumBlinds,
+            HPXML::InteriorShadingTypeLightBlinds].include? window.interior_shading_type
+          if window.interior_shading_blinds_summer_closed_or_open.nil?
+            window.interior_shading_blinds_summer_closed_or_open = HPXML::BlindsHalfOpen
+            window.interior_shading_blinds_summer_closed_or_open_isdefaulted = true
+          end
+          if window.interior_shading_blinds_winter_closed_or_open.nil?
+            window.interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
+            window.interior_shading_blinds_winter_closed_or_open_isdefaulted = true
+          end
+        end
+        default_int_sf_summer, default_int_sf_winter = get_default_window_interior_shading_factors(window, eri_version)
+        if window.interior_shading_factor_summer.nil? && (not default_int_sf_summer.nil?)
+          window.interior_shading_factor_summer = default_int_sf_summer
+          window.interior_shading_factor_summer_isdefaulted = true
+        end
+        if window.interior_shading_factor_winter.nil? && (not default_int_sf_winter.nil?)
+          window.interior_shading_factor_winter = default_int_sf_winter
+          window.interior_shading_factor_winter_isdefaulted = true
+        end
       end
-      if window.interior_shading_factor_winter.nil?
-        window.interior_shading_factor_winter = default_shade_winter
-        window.interior_shading_factor_winter_isdefaulted = true
-      end
-      if window.exterior_shading_type.nil?
-        window.exterior_shading_type = HPXML::ExteriorShadingTypeNone
-        window.exterior_shading_type_isdefaulted = true
-      end
-      default_ext_sf_summer, default_ext_sf_winter = get_default_window_exterior_shading_factors(window, hpxml_bldg)
-      if window.exterior_shading_factor_summer.nil? && (not default_ext_sf_summer.nil?)
-        window.exterior_shading_factor_summer = default_ext_sf_summer
-        window.exterior_shading_factor_summer_isdefaulted = true
-      end
-      if window.exterior_shading_factor_winter.nil? && (not default_ext_sf_winter.nil?)
-        window.exterior_shading_factor_winter = default_ext_sf_winter
-        window.exterior_shading_factor_winter_isdefaulted = true
+      if window.exterior_shading_factor_winter.nil? || window.exterior_shading_factor_summer.nil?
+        if window.exterior_shading_type.nil?
+          window.exterior_shading_type = HPXML::ExteriorShadingTypeNone
+          window.exterior_shading_type_isdefaulted = true
+        end
+        default_ext_sf_summer, default_ext_sf_winter = get_default_window_exterior_shading_factors(window, hpxml_bldg)
+        if window.exterior_shading_factor_summer.nil? && (not default_ext_sf_summer.nil?)
+          window.exterior_shading_factor_summer = default_ext_sf_summer
+          window.exterior_shading_factor_summer_isdefaulted = true
+        end
+        if window.exterior_shading_factor_winter.nil? && (not default_ext_sf_winter.nil?)
+          window.exterior_shading_factor_winter = default_ext_sf_winter
+          window.exterior_shading_factor_winter_isdefaulted = true
+        end
       end
       if window.fraction_operable.nil?
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
@@ -3995,11 +4023,70 @@ module HPXMLDefaults
     return false
   end
 
+  # Gets the default summer/winter interior shading factors for the window.
+  #
+  # @param window [HPXML::Window] The window of interest
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Array<Double, Double>] The interior summer and winter shading factors
+  def self.get_default_window_interior_shading_factors(window, eri_version)
+    return 1.0, 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
+
+    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
+      # C1/C2 coefficients derived from Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP)
+      # https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980
+      # See FIXME GitHub Link for derivation
+      if [HPXML::InteriorShadingTypeDarkBlinds,
+          HPXML::InteriorShadingTypeMediumBlinds,
+          HPXML::InteriorShadingTypeLightBlinds].include? window.interior_shading_type
+        # Shading type, blinds position => c1/c2
+        c_map = {
+          [HPXML::InteriorShadingTypeDarkBlinds, HPXML::BlindsClosed] => [0.98, 0.25],
+          [HPXML::InteriorShadingTypeMediumBlinds, HPXML::BlindsClosed] => [0.90, 0.41],
+          [HPXML::InteriorShadingTypeLightBlinds, HPXML::BlindsClosed] => [0.78, 0.47],
+          [HPXML::InteriorShadingTypeDarkBlinds, HPXML::BlindsHalfOpen] => [1.0, 0.19],
+          [HPXML::InteriorShadingTypeMediumBlinds, HPXML::BlindsHalfOpen] => [0.95, 0.26],
+          [HPXML::InteriorShadingTypeLightBlinds, HPXML::BlindsHalfOpen] => [0.93, 0.38],
+          [HPXML::InteriorShadingTypeDarkBlinds, HPXML::BlindsOpen] => [0.99, 0.0],
+          [HPXML::InteriorShadingTypeMediumBlinds, HPXML::BlindsOpen] => [0.98, 0.0],
+          [HPXML::InteriorShadingTypeLightBlinds, HPXML::BlindsOpen] => [0.98, 0.0],
+        }
+        c1_summer, c2_summer = c_map[[window.interior_shading_type, window.interior_shading_blinds_summer_closed_or_open]]
+        c1_winter, c2_winter = c_map[[window.interior_shading_type, window.interior_shading_blinds_winter_closed_or_open]]
+      else
+        # Shading type => c1/c2
+        c_map = {
+          HPXML::InteriorShadingTypeDarkCurtains => [0.98, 0.25],
+          HPXML::InteriorShadingTypeMediumCurtains => [0.94, 0.37],
+          HPXML::InteriorShadingTypeLightCurtains => [0.84, 0.42],
+          HPXML::InteriorShadingTypeDarkShades => [0.98, 0.33],
+          HPXML::InteriorShadingTypeMediumShades => [0.9, 0.38],
+          HPXML::InteriorShadingTypeLightShades => [0.82, 0.42],
+        }
+        c1_summer, c2_summer = c_map[window.interior_shading_type]
+        c1_winter, c2_winter = c_map[window.interior_shading_type]
+      end
+
+      int_sf_summer = c1_summer - (c2_summer * window.shgc)
+      int_sf_winter = c1_winter - (c2_winter * window.shgc)
+
+      # Apply fraction of window area covered
+      summer_frac_covered = window.interior_shading_summer_fraction_covered
+      winter_frac_covered = window.interior_shading_winter_fraction_covered
+      int_sf_summer = summer_frac_covered * int_sf_summer + (1 - summer_frac_covered) * 1.0
+      int_sf_winter = winter_frac_covered * int_sf_winter + (1 - winter_frac_covered) * 1.0
+    else
+      int_sf_summer = 0.70
+      int_sf_winter = 0.85
+    end
+
+    return int_sf_summer.round(2), int_sf_winter.round(2)
+  end
+
   # Gets the default summer/winter exterior shading factors for the window.
   #
   # @param window [HPXML::Window] The window of interest
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [Array<Double, Double>] The summer and winter shading factors
+  # @return [Array<Double, Double>] The exterior summer and winter shading factors
   def self.get_default_window_exterior_shading_factors(window, hpxml_bldg)
     ext_sf_summer, ext_sf_winter = nil, nil
     if [HPXML::ExteriorShadingTypeExternalOverhangs,
@@ -4028,7 +4115,7 @@ module HPXMLDefaults
         HPXML::ExteriorShadingTypeNone => 1.0,
         HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
         HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
-        HPXML::ExteriorShadingTypeSolarScreens => 0.7 # Based on MulTEA engineering manual
+        HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
       }[window.exterior_shading_type]
       ext_sf_winter = {
         HPXML::ExteriorShadingTypeDeciduousTree => 0.75, # Engineering judgment, higher than summer value because no leaves
@@ -4036,9 +4123,13 @@ module HPXMLDefaults
         HPXML::ExteriorShadingTypeNone => 1.0,
         HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
         HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
-        HPXML::ExteriorShadingTypeSolarScreens => 0.7 # Based on MulTEA engineering manual
+        HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
       }[window.exterior_shading_type]
     end
+
+    ext_sf_summer = ext_sf_summer.round(2) unless ext_sf_summer.nil?
+    ext_sf_winter = ext_sf_winter.round(2) unless ext_sf_winter.nil?
+
     return ext_sf_summer, ext_sf_winter
   end
 
@@ -4047,17 +4138,25 @@ module HPXMLDefaults
   # @param window [HPXML::Window] The window of interest
   # @return [Array<Double, Double>] The summer and winter shading factors
   def self.get_default_window_insect_screen_factors(window)
-    if window.insect_screen_location == HPXML::LocationInterior
-      # Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens
-      # https://www.proquest.com/docview/192518844
-      is_sf_summer = 1.0 - 0.15
-    elsif window.insect_screen_location == HPXML::LocationExterior
-      # Solar Gain through Windows with Shading Devices: Simulation Versus Measurement
-      # https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11
-      is_sf_summer = 1.0 - 0.40
-    end
-    is_sf_winter = is_sf_summer
-    return is_sf_summer, is_sf_winter
+    # C1/C2 coefficients derived from Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP)
+    # https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980
+    # See FIXME GitHub Link for derivation
+    c_map = {
+      HPXML::LocationExterior => [0.99, 0.1],
+      HPXML::LocationInterior => [0.64, 0.0],
+    }
+    c1, c2 = c_map[window.insect_screen_location]
+
+    is_sf_summer = c1 - (c2 * window.shgc)
+    is_sf_winter = c1 - (c2 * window.shgc)
+
+    # Apply fraction of window area covered
+    summer_frac_covered = window.insect_screen_summer_fraction_covered
+    winter_frac_covered = window.insect_screen_winter_fraction_covered
+    is_sf_summer = summer_frac_covered * is_sf_summer + (1 - summer_frac_covered) * 1.0
+    is_sf_winter = winter_frac_covered * is_sf_winter + (1 - winter_frac_covered) * 1.0
+
+    return is_sf_summer.round(2), is_sf_winter.round(2)
   end
 
   # Gets the default latitude from the HPXML file or, as backup, weather file.

@@ -316,7 +316,8 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom2WestInteriorShading'/>
-              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom2WestInsectScreen'/>
@@ -333,7 +334,8 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowBedroom3WestInteriorShading'/>
-              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='WindowBedroom3WestInsectScreen'/>
@@ -350,7 +352,8 @@
             <SHGC>0.69</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowLivingDiningWestInteriorShading'/>
-              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <AttachedToWall idref='WallLivingDiningWest'/>
           </Window>
@@ -362,7 +365,8 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorLivingDiningWestInteriorShading'/>
-              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='GlassDoorLivingDiningWestInsectScreen'/>
@@ -379,7 +383,8 @@
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='GlassDoorBedroom1WestInteriorShading'/>
-              <SummerShadingCoefficient>0.815</SummerShadingCoefficient>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='GlassDoorBedroom1WestInsectScreen'/>

@@ -941,7 +941,19 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows.each do |window|
         window.interior_shading_factor_summer = nil
         window.interior_shading_factor_winter = nil
+        window.exterior_shading_factor_summer = nil
+        window.exterior_shading_factor_winter = nil
       end
+      hpxml_bldg.windows[0].interior_shading_type = HPXML::ExteriorShadingTypeNone
+      hpxml_bldg.windows[1].interior_shading_type = HPXML::InteriorShadingTypeDarkShades
+      hpxml_bldg.windows[2].interior_shading_type = HPXML::InteriorShadingTypeMediumCurtains
+      hpxml_bldg.windows[2].interior_shading_summer_fraction_covered = 0.5
+      hpxml_bldg.windows[2].interior_shading_winter_fraction_covered = 0.0
+      hpxml_bldg.windows[3].interior_shading_type = HPXML::InteriorShadingTypeLightBlinds
+      hpxml_bldg.windows[3].interior_shading_blinds_summer_closed_or_open = HPXML::BlindsClosed
+      hpxml_bldg.windows[3].interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
+      hpxml_bldg.windows[3].interior_shading_summer_fraction_covered = 0.5
+      hpxml_bldg.windows[3].interior_shading_winter_fraction_covered = 1.0
       hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
       hpxml_bldg.windows[1].exterior_shading_type = HPXML::ExteriorShadingTypeSolarScreens
       hpxml_bldg.windows[2].exterior_shading_type = HPXML::ExteriorShadingTypeExternalOverhangs

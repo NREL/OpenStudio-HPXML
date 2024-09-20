@@ -6,7 +6,8 @@ __New Features__
 - Allows modeling exterior horizontal insulation for a slab-on-grade foundation (or basement/crawlspace floor).
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
 - Window shading enhancements:
-  - Allows optional `ExteriorShading/Type` input as an alternative to `ExteriorShading/SummerShadingCoefficient` and `ExteriorShading/WinterShadingCoefficient`.
+  - Allows optional `InteriorShading/Type` input (blinds, shades, curtains) as a way to default summer/winter shading coefficients.
+  - Allows optional `ExteriorShading/Type` input (trees, solar screens/films, etc.) as a way to default summer/winter shading coefficients.
   - Allows optional `InsectScreen` input.
 - Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
 - Updates operational calculations (i.e., when `NumberofResidents` provided):

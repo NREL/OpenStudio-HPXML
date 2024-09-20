@@ -1734,22 +1734,6 @@ module Constructions
 
   # TODO
   #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param shgc [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_interior_shading_factors(eri_version, shgc)
-    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
-      summer = 0.92 - (0.21 * shgc)
-      winter = summer
-    else
-      summer = 0.70
-      winter = 0.85
-    end
-    return summer, winter
-  end
-
-  # TODO
-  #
   # @param roof_type [TODO] TODO
   # @param solar_absorptance [TODO] TODO
   # @return [TODO] TODO
@@ -2331,8 +2315,8 @@ module Constructions
     is_summer = 1.0
     is_winter = 1.0
     if window_or_skylight.respond_to?(:insect_screen_present) && window_or_skylight.insect_screen_present
-      is_summer = 1.0 - (1.0 - window_or_skylight.insect_screen_factor_summer) * window_or_skylight.insect_screen_summer_fraction_covered
-      is_winter = 1.0 - (1.0 - window_or_skylight.insect_screen_factor_winter) * window_or_skylight.insect_screen_winter_fraction_covered
+      is_summer = window_or_skylight.insect_screen_factor_summer
+      is_winter = window_or_skylight.insect_screen_factor_winter
     end
 
     # Total combined factors

@@ -256,6 +256,10 @@
               <SystemIdentifier id='Window1ExteriorShading'/>
               <Type>deciduous tree</Type>
             </ExteriorShading>
+            <InteriorShading>
+              <SystemIdentifier id='Window1InteriorShading'/>
+              <Type>none</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -269,6 +273,10 @@
               <SystemIdentifier id='Window2ExteriorShading'/>
               <Type>solar screens</Type>
             </ExteriorShading>
+            <InteriorShading>
+              <SystemIdentifier id='Window2InteriorShading'/>
+              <Type>dark shades</Type>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -282,6 +290,12 @@
               <SystemIdentifier id='Window3ExteriorShading'/>
               <Type>external overhangs</Type>
             </ExteriorShading>
+            <InteriorShading>
+              <SystemIdentifier id='Window3InteriorShading'/>
+              <Type>medium curtains</Type>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
+              <WinterFractionCovered>0.0</WinterFractionCovered>
+            </InteriorShading>
             <Overhangs>
               <Depth>2.0</Depth>
               <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
@@ -300,6 +314,14 @@
               <SystemIdentifier id='Window4ExteriorShading'/>
               <Type>building</Type>
             </ExteriorShading>
+            <InteriorShading>
+              <SystemIdentifier id='Window4InteriorShading'/>
+              <Type>light blinds</Type>
+              <BlindsSummerClosedOrOpen>closed</BlindsSummerClosedOrOpen>
+              <BlindsWinterClosedOrOpen>half open</BlindsWinterClosedOrOpen>
+              <SummerFractionCovered>0.5</SummerFractionCovered>
+              <WinterFractionCovered>1.0</WinterFractionCovered>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall1'/>
           </Window>

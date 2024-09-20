@@ -1614,13 +1614,14 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``Type``                      string         See [#]_     No        none       Exterior shading type
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``Type``                      string         See [#]_     No        See [#]_   Exterior shading type
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque)
   ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
-  .. [#] ExteriorShading/Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
-  .. [#] If ExteriorShading/SummerShadingCoefficient not provided, defaults as follows:
+  .. [#] Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
+  .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "none".
+  .. [#] If SummerShadingCoefficient not provided, defaults as follows:
   
          \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
          
@@ -1638,8 +1639,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **none**: 1.0
   
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] If ExteriorShading/WinterShadingCoefficient not provided, defaults as follows:
+  .. [#] If WinterShadingCoefficient not provided, defaults as follows:
   
          \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
          
@@ -1657,6 +1657,11 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **none**: 1.0
 
+.. note::
+
+  OpenStudio-HPXML directly uses only the ``SummerShadingCoefficient`` and ``WinterShadingCoefficient`` values (user provided or defaulted) in the energy model.
+  Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+
 .. _window_interior_shading:
 
 HPXML Interior Shading
@@ -1667,16 +1672,61 @@ If interior shading is present, additional information is entered in ``InteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque) [#]_
+  ``Type``                      string         See [#]_     No        See [#]_   Interior shading type
+  ``BlindsSummerClosedOrOpen``  string         See [#]_     No        half open  Blinds position in summer (only used if shading type is blinds)
+  ``BlindsWinterClosedOrOpen``  string         See [#]_     No        half open  Blinds position in winter (only used if shading type is blinds)
+  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        0.5        Fraction of window area covered by interior shading in summer
+  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        0.5        Fraction of window area covered by interior shading in winter
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque)
   ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
-  .. [#] InteriorShading/SummerShadingCoefficient default value is calculated based on ANSI/RESNET/ICC 301-2022 Addendum C: 
+  .. [#] Type choices are "light blinds", "medium blinds", "dark blinds", "light shades", "medium shades", "dark shades", "light curtains", "medium curtains", "dark curtains", or "none".
+  .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "light curtains".
+  .. [#] BlindsSummerClosedOrOpen choices are "closed", "open", or "half open".
+  .. [#] BlindsWinterClosedOrOpen choices are "closed", "open", or "half open".
+  .. [#] SummerShadingCoefficient default value is 1.0 if Type="none", otherwise calculated based on data from `Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP) <https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980>`_:
   
-         Interior shading coefficient = 0.92 - (0.21 * SHGC)
+         SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0
          
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
-  .. [#] InteriorShading/WinterShadingCoefficient default value is the same as InteriorShading/SummerShadingCoefficient default value.
+         where:
+         
+         \- **dark curtains**: C1=0.98, C2=0.25
+         
+         \- **medium curtains**: C1=0.94, C2=0.37
+         
+         \- **light curtains**: C1=0.84, C2=0.42
+         
+         \- **dark shades**: C1=0.98, C2=0.33
+         
+         \- **medium shades**: C1=0.9, C2=0.38
+         
+         \- **light shades**: C1=0.82, C2=0.42
+         
+         \- **dark blinds, closed**: C1=0.98, C2=0.25
+         
+         \- **medium blinds, closed**: C1=0.90, C2=0.41
+         
+         \- **light blinds, closed**: C1=0.78, C2=0.47
+         
+         \- **dark blinds, half open**: C1=1.0, C2=0.19
+         
+         \- **medium blinds, half open**: C1=0.95, C2=0.26
+         
+         \- **light blinds, half open**: C1=0.93, C2=0.38
+         
+         \- **dark blinds, open**: C1=0.99, C2=0.0
+         
+         \- **medium blinds, open**: C1=0.98, C2=0.0
+         
+         \- **light blinds, open**: C1=0.98, C2=0.0
+         
+  .. [#] WinterShadingCoefficient default value is 1.0 if Type="none", otherwise calculated similar to SummerShadingCoefficient.
+
+.. note::
+
+  OpenStudio-HPXML directly uses only the ``SummerShadingCoefficient`` and ``WinterShadingCoefficient`` values (user provided or defaulted) in the energy model.
+  Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
 
 .. _window_insect_screen:
 
@@ -1689,7 +1739,7 @@ If an insect screen is specified, additional information is entered in ``InsectS
   Element                       Type      Units   Constraints  Required  Default   Notes
   ============================  ========  ======  ===========  ========  ========  ========================================================
   ``Location``                  string            See [#]_     No        exterior  Whether the screen is on the interior or exterior of the glass
-  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the summer [#]_
+  ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the summer
   ``WinterFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the winter
   ``SummerShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
   ``WinterShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
@@ -1697,10 +1747,23 @@ If an insect screen is specified, additional information is entered in ``InsectS
 
   .. [#] Location choices are "interior" or "exterior".
   .. [#] If SummerFractionCovered not provided, defaults to the same value as FractionOperable.
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
   .. [#] If WinterFractionCovered not provided, defaults to the same value as FractionOperable.
-  .. [#] If SummerShadingCoefficient not provided, defaults to 0.6 for exterior screen (based on `Solar Gain through Windows with Shading Devices: Simulation Versus Measurement <https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11>`_) and 0.85 for interior screen (based on `Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens <https://www.proquest.com/docview/192518844>`_).
-  .. [#] If WinterShadingCoefficient not provided, defaults to 0.6 for exterior screen (based on `Solar Gain through Windows with Shading Devices: Simulation Versus Measurement <https://uwspace.uwaterloo.ca/items/28e759d0-a4a0-4d46-b4d0-c74b169c8b11>`_) and 0.85 for interior screen (based on `Measurement of the Solar Heat Gain Coefficient and U Value of Windows with Insect Screens <https://www.proquest.com/docview/192518844>`_).
+  .. [#] If SummerShadingCoefficient not provided, calculated based on data from `Improving Cooling Load Calculations for Fenestration with Shading Devices (ASHRAE 1311-RP) <https://store.accuristech.com/ashrae/standards/rp-1311-improving-cooling-load-calculations-for-fenestration-with-shading-devices?product_id=1714980>`_:
+
+         SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0
+         
+         where:
+         
+         \- **exterior**: C1=0.64, C2=0.0
+  
+         \- **interior**: C1=0.99, C2=0.1
+  
+  .. [#] If WinterShadingCoefficient not provided, calculated similar to SummerShadingCoefficient.
+
+.. note::
+
+  OpenStudio-HPXML directly uses only the ``SummerShadingCoefficient`` and ``WinterShadingCoefficient`` values (user provided or defaulted) in the energy model.
+  Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
 
 .. _window_storm:
 
@@ -1856,11 +1919,13 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Exterior summer shading coefficient (1=transparent, 0=opaque) [#]_
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.0        Exterior summer shading coefficient (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.0        Exterior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+.. note::
+
+  Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
 
 .. _skylight_interior_shading:
 
@@ -1872,11 +1937,13 @@ If interior shading is present, additional information is entered in ``InteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Interior summer shading coefficient (1=transparent, 0=opaque) [#]_
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.00       Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        1.0        Interior summer shading coefficient (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        1.0        Interior winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
-  .. [#] Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
+.. note::
+
+  Summer vs winter shading seasons are determined per :ref:`shadingcontrol`.
 
 .. _skylight_storm:
 
