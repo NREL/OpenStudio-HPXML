@@ -11,12 +11,8 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hvac_systems [Array<Hash>] List of HPXML HVAC (heating and/or cooling) systems
   # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports capacities/airflows
-  # @param output_format [String] Detailed output file format ('csv', 'json', or 'msgpack')
-  # @param output_file_path [String] Detailed output file path
-  # @return [Hash] Map of HVAC systems => HVACSizingValues objects
-  def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true,
-                     output_format: 'csv', output_file_path: nil)
-
+  # @return [Array<Hash, Hash, Hash>] Maps of HVAC systems => HVACSizingValues objects, HPXML::Zones => DesignLoadValues object, HPXML::Spaces => DesignLoadValues object
+  def self.calculate(runner, weather, hpxml_bldg, hvac_systems, update_hpxml: true)
     check_for_errors(hpxml_bldg, hvac_systems)
 
     mj = MJValues.new
@@ -111,12 +107,7 @@ module HVACSizing
       end
     end
 
-    # Write detailed outputs (useful for Form J1)
-    if not output_file_path.nil?
-      write_detailed_output(output_format, output_file_path, hpxml_bldg, all_zone_loads, all_space_loads)
-    end
-
-    return @all_hvac_sizings
+    return @all_hvac_sizings, all_zone_loads, all_space_loads
   end
 
   # Checks whether we will be performing sizing calculations on the given HPXML HVAC system.
@@ -1447,7 +1438,7 @@ module HVACSizing
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     measurement = Airflow.get_infiltration_measurement_of_interest(hpxml_bldg, manualj_infiltration_method: hpxml_bldg.header.manualj_infiltration_method)
     if hpxml_bldg.header.manualj_infiltration_method == HPXML::ManualJInfiltrationMethodBlowerDoor
-      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, cfa, weather)
+      infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
       ela = infil_values[:sla] * cfa * infil_values[:a_ext] # Account for exterior exposure
       ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
 
@@ -1756,7 +1747,7 @@ module HVACSizing
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
            HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab,
            HPXML::LocationManufacturedHomeBelly].include? duct.duct_location
-      space_values = Geometry.get_temperature_scheduled_space_values(location: duct.duct_location)
+      space_values = Geometry.get_temperature_scheduled_space_values(duct.duct_location)
       f_regain = space_values[:f_regain]
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.duct_location
@@ -3173,7 +3164,7 @@ module HVACSizing
       # Calculate the heating load at the switchover temperature to limit unutilized capacity
       temp_heat_design_temp = hpxml_bldg.header.manualj_heating_design_temp
       hpxml_bldg.header.manualj_heating_design_temp = min_compressor_temp
-      alternate_all_hvac_sizings = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)
+      alternate_all_hvac_sizings = calculate(runner, weather, hpxml_bldg, [hvac_system], update_hpxml: false)[0]
       heating_load = alternate_all_hvac_sizings[hvac_system].Heat_Load
       heating_temp = min_compressor_temp
       hpxml_bldg.header.manualj_heating_design_temp = temp_heat_design_temp
@@ -3813,7 +3804,7 @@ module HVACSizing
     else # Unvented space
       ach = Airflow.get_default_unvented_space_ach()
     end
-    volume = Geometry.calculate_zone_volume(hpxml_bldg: hpxml_bldg, location: location)
+    volume = Geometry.calculate_zone_volume(hpxml_bldg, location)
     infiltration_cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
     space_UAs[HPXML::LocationOutside] += infiltration_cfm * mj.outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, 'hr', 'min')
 
@@ -3901,7 +3892,7 @@ module HVACSizing
   # @param ground_temp [Double] The approximate ground temperature during the heating or cooling season (F)
   # @return [Double] The location's design temperature (F)
   def self.calculate_scheduled_space_design_temps(location, setpoint_temp, outdoor_design_temp, ground_temp)
-    space_values = Geometry.get_temperature_scheduled_space_values(location: location)
+    space_values = Geometry.get_temperature_scheduled_space_values(location)
     design_temp = setpoint_temp * space_values[:indoor_weight] + outdoor_design_temp * space_values[:outdoor_weight] + ground_temp * space_values[:ground_weight]
     if not space_values[:temp_min].nil?
       design_temp = [design_temp, space_values[:temp_min]].max
@@ -4925,8 +4916,8 @@ module HVACSizing
     end
 
     # Note: Every report name must have the HPXML BuildingID in it in case we are running a whole MF building with multiple Building elements.
-    if hpxml_bldg.conditioned_zones[0].id.start_with?(Constants::AutomaticallyAdded)
-      zone_col_names = ["#{hpxml_bldg.building_id}"] # Leave out name of automatically added zone
+    if hpxml_bldg.conditioned_zones.empty?
+      zone_col_names = ["#{hpxml_bldg.building_id}"]
     else
       zone_col_names = all_zone_loads.keys.map { |zone| "#{hpxml_bldg.building_id}: #{zone.id}" }
     end
@@ -4964,27 +4955,32 @@ module HVACSizing
 
     # Zone results
     all_zone_loads.keys.each_with_index do |zone, i|
+      if hpxml_bldg.conditioned_zones.empty?
+        zone_or_bldg = hpxml_bldg
+      else
+        zone_or_bldg = zone
+      end
       results_out << [line_break]
       results_out << ["Report: #{zone_col_names[i]}: Loads", 'Area (ft^2)', 'Length (ft)', 'Wall Area Ratio', 'Heating (Btuh)', 'Cooling Sensible (Btuh)', 'Cooling Latent (Btuh)']
-      get_surfaces_with_property(zone, :detailed_output_values_windows).each do |window, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_windows).each do |window, fj1|
         results_out << ["Windows: #{window.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_skylights).each do |skylight, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_skylights).each do |skylight, fj1|
         results_out << ["Skylights: #{skylight.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_doors).each do |door, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_doors).each do |door, fj1|
         results_out << ["Doors: #{door.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_above_grade_walls).each do |wall, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_above_grade_walls).each do |wall, fj1|
         results_out << ["Above Grade Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_below_grade_walls).each do |wall, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_below_grade_walls).each do |wall, fj1|
         results_out << ["Below Grade Walls: #{wall.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_ceilings).each do |ceiling, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_ceilings).each do |ceiling, fj1|
         results_out << ["Ceilings: #{ceiling.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
-      get_surfaces_with_property(zone, :detailed_output_values_floors).each do |floor, fj1|
+      get_surfaces_with_property(zone_or_bldg, :detailed_output_values_floors).each do |floor, fj1|
         results_out << ["Floors: #{floor.id}", fj1.Area, fj1.Length, nil, fj1.Heat_Load, fj1.Cool_Load_Sens]
       end
       zone_loads = all_zone_loads[zone]
