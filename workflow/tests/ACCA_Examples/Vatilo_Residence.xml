@@ -205,6 +205,8 @@
             <SystemIdentifier id='Window1'/>
             <Area>24.0</Area>
             <Azimuth>0</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.63</UFactor>
             <SHGC>0.69</SHGC>
             <InteriorShading>
@@ -219,6 +221,8 @@
             <SystemIdentifier id='Window2'/>
             <Area>36.0</Area>
             <Azimuth>90</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.65</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -243,6 +247,8 @@
             <SystemIdentifier id='Window3'/>
             <Area>44.3</Area>
             <Azimuth>270</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.65</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -262,6 +268,8 @@
             <SystemIdentifier id='Window4'/>
             <Area>15.75</Area>
             <Azimuth>270</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.65</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -286,6 +294,8 @@
             <SystemIdentifier id='Window5'/>
             <Area>36.0</Area>
             <Azimuth>0</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.65</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -310,6 +320,8 @@
             <SystemIdentifier id='Window6'/>
             <Area>12.0</Area>
             <Azimuth>0</Azimuth>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.63</UFactor>
             <SHGC>0.69</SHGC>
             <InteriorShading>

@@ -725,7 +725,7 @@ module HVACSizing
           window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
         end
       end
-
+      
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -4422,8 +4422,8 @@ module HVACSizing
     return 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
 
     # Look up window type
-    if window.glass_layers.nil?
-      # Use U-factor/SHGC
+    if window.glass_layers.nil? || window.glass_type.nil?
+      # Estimate based U-factor/SHGC
       if window.ufactor >= 0.85 # single pane
         if window.shgc >= (0.74 + 0.5) / 2
           window_type = '1P Clear'
@@ -4500,7 +4500,7 @@ module HVACSizing
       HPXML::InteriorShadingTypeMediumCurtains => 7,
       HPXML::InteriorShadingTypeLightCurtains => 8,
     }[window.interior_shading_type]
-
+    
     window_isc = {
       '1P Clear' => [0.68, 0.60, 0.51, 0.80, 0.55, 0.40, 0.80, 0.60, 0.35],
       '1P Heat Absorbing' => [0.81, 0.75, 0.69, 0.66, 0.52, 0.44, 0.81, 0.66, 0.52],
@@ -4531,7 +4531,7 @@ module HVACSizing
       end
     end
 
-    return window_isc.round(2)
+    return window_isc.round(3)
   end
 
   # Gets the system type of the specified HPXML heating system.

@@ -850,6 +850,8 @@
             <SystemIdentifier id='WindowPrimaryBedroomNorth'/>
             <Area>28.33</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -874,6 +876,8 @@
             <SystemIdentifier id='WindowPrimaryBathroomNorth'/>
             <Area>10.0</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -898,6 +902,8 @@
             <SystemIdentifier id='FrenchDoorFamilyRoomNorth'/>
             <Area>35.0</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.6</UFactor>
             <SHGC>0.39</SHGC>
             <InteriorShading>
@@ -915,6 +921,8 @@
             <SystemIdentifier id='WindowFamilyRoomEast'/>
             <Area>26.7</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -933,6 +941,8 @@
             <SystemIdentifier id='WindowKitchenSouth'/>
             <Area>10.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -955,6 +965,8 @@
             <SystemIdentifier id='WindowBathroom1South'/>
             <Area>10.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -978,6 +990,8 @@
             <SystemIdentifier id='WindowBedroom1West'/>
             <Area>28.33</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1001,6 +1015,8 @@
             <SystemIdentifier id='WindowPrimaryBedroomWest'/>
             <Area>28.33</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1024,6 +1040,8 @@
             <SystemIdentifier id='WindowBedroom2North'/>
             <Area>10.0</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -1048,6 +1066,8 @@
             <SystemIdentifier id='WindowCraftNorth'/>
             <Area>10.0</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -1072,6 +1092,8 @@
             <SystemIdentifier id='WindowRecRoomSouth'/>
             <Area>10.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1095,6 +1117,8 @@
             <SystemIdentifier id='WindowBedroom3South'/>
             <Area>10.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1118,6 +1142,8 @@
             <SystemIdentifier id='WindowBedroom3West'/>
             <Area>5.0</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1141,6 +1167,8 @@
             <SystemIdentifier id='WindowBathroom2West'/>
             <Area>5.0</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>
@@ -1164,6 +1192,8 @@
             <SystemIdentifier id='WindowBedroom2West'/>
             <Area>10.0</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <ExteriorShading>

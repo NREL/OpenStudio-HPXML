@@ -790,6 +790,8 @@
             <SystemIdentifier id='WindowDiningRoomNorth'/>
             <Area>20.0</Area>
             <Orientation>north</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <InteriorShading>
@@ -804,6 +806,8 @@
             <SystemIdentifier id='WindowBedroom1West'/>
             <Area>17.0</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -818,6 +822,8 @@
             <SystemIdentifier id='WindowRecRoomSouth'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -832,6 +838,8 @@
             <SystemIdentifier id='WindowWorkshopEast'/>
             <Area>4.0</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>single-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
@@ -860,6 +868,8 @@
             <SystemIdentifier id='WindowKitchenEast'/>
             <Area>11.0</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -884,6 +894,8 @@
             <SystemIdentifier id='WindowBathroom1East'/>
             <Area>8.0</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -908,6 +920,8 @@
             <SystemIdentifier id='WindowBedroom3East'/>
             <Area>22.0</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -932,6 +946,8 @@
             <SystemIdentifier id='WindowBedroom2East'/>
             <Area>17.0</Area>
             <Orientation>east</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -956,6 +972,8 @@
             <SystemIdentifier id='WindowBedroom2South'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -980,6 +998,8 @@
             <SystemIdentifier id='WindowBedroom1South'/>
             <Area>11.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -1004,6 +1024,8 @@
             <SystemIdentifier id='WindowBathroom2South'/>
             <Area>8.0</Area>
             <Orientation>south</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
@@ -1028,6 +1050,8 @@
             <SystemIdentifier id='WindowLivingRoomWest'/>
             <Area>40.0</Area>
             <Orientation>west</Orientation>
+            <GlassLayers>double-pane</GlassLayers>
+            <GlassType>clear</GlassType>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <InteriorShading>
