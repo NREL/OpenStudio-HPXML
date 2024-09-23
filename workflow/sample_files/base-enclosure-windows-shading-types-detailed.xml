@@ -40,6 +40,19 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <extension>
+            <Neighbors>
+              <NeighborBuilding>
+                <Azimuth>180</Azimuth>
+                <Distance>15.0</Distance>
+                <Height>12.0</Height>
+              </NeighborBuilding>
+              <NeighborBuilding>
+                <Azimuth>0</Azimuth>
+                <Distance>10.0</Distance>
+              </NeighborBuilding>
+            </Neighbors>
+          </extension>
         </Site>
         <BuildingConstruction>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>

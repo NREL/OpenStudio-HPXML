@@ -1814,7 +1814,7 @@
     "window_shading_summer_season": "May 1 - Sep 30"
   },
   "sample_files/base-enclosure-windows-shading-types-detailed.xml": {
-    "parent_hpxml": "sample_files/base.xml"
+    "parent_hpxml": "sample_files/base-misc-neighbor-shading.xml"
   },
   "sample_files/base-enclosure-windows-storms.xml": {
     "parent_hpxml": "sample_files/base.xml",
