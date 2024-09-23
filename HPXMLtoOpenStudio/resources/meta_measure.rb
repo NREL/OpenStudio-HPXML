@@ -12,7 +12,7 @@ require 'fileutils'
 # Again, report any log messages to file.
 #
 # @param rundir [String] The run directory containing all simulation output files
-# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
 # @param debug [Boolean] If true, reports info statements from the runner results
 # @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping forward transation and the simulation
@@ -173,7 +173,7 @@ end
 # Optionally, save an OpenStudio Workflow based on the provided Hash.
 #
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
-# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
 # @param show_measure_calls [Boolean] Whether to print the measure name and arguments
@@ -209,16 +209,17 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
     full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
     check_file_exists(full_measure_path, runner)
     measure = get_measure_instance(full_measure_path)
-    args = measures[measure_subdir]
-    next unless measure_type == measure.class.superclass.name.to_s
+    measures[measure_subdir].each do |args|
+      next unless measure_type == measure.class.superclass.name.to_s
 
-    argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
-    if show_measure_calls
-      print_measure_call(args, measure_subdir, runner)
-    end
+      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+      if show_measure_calls
+        print_measure_call(args, measure_subdir, runner)
+      end
 
-    if not run_measure(model, measure, argument_map, runner)
-      return false
+      if not run_measure(model, measure, argument_map, runner)
+        return false
+      end
     end
   end
 
@@ -228,7 +229,7 @@ end
 # Apply OpenStudio measures and arguments (i.e., "energyPlusOutputRequests" method) corresponding to a provided Hash.
 #
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
-# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => Hash of measure arguments
+# @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
 # @param model [OpenStudio::Model::Model] OpenStudio Model object
 # @param workspace [OpenStudio::Workspace] EnergyPlus Workspace object
@@ -240,14 +241,15 @@ def apply_energyplus_output_requests(measures_dir, measures, runner, model, work
     full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
     check_file_exists(full_measure_path, runner)
     measure = get_measure_instance(full_measure_path)
-    args = measures[measure_subdir]
-    next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
+    measures[measure_subdir].each do |args|
+      next unless measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
 
-    argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
-    runner.setLastOpenStudioModel(model)
-    idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
-    idf_objects.each do |idf_object|
-      workspace.addObject(idf_object)
+      argument_map = get_argument_map(model, measure, args, measure_subdir, runner)
+      runner.setLastOpenStudioModel(model)
+      idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
+      idf_objects.each do |idf_object|
+        workspace.addObject(idf_object)
+      end
     end
   end
 

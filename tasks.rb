@@ -49,7 +49,7 @@ def create_hpxmls
     json_input.delete('parent_hpxml')
 
     measures = {}
-    measures['BuildResidentialHPXML'] = json_input
+    measures['BuildResidentialHPXML'] = [json_input]
 
     measures_dir = File.dirname(__FILE__)
     model = OpenStudio::Model::Model.new
@@ -61,13 +61,14 @@ def create_hpxmls
     end
 
     for i in 1..num_apply_measures
-      measures['BuildResidentialHPXML']['existing_hpxml_path'] = hpxml_path if i > 1
+      build_residential_hpxml = measures['BuildResidentialHPXML'][0]
+      build_residential_hpxml['existing_hpxml_path'] = hpxml_path if i > 1
       if hpxml_path.include?('base-bldgtype-mf-whole-building.xml')
         suffix = "_#{i}" if i > 1
-        measures['BuildResidentialHPXML']['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
-        measures['BuildResidentialHPXML']['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
-        measures['BuildResidentialHPXML']['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
-        measures['BuildResidentialHPXML']['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
+        build_residential_hpxml['schedules_filepaths'] = "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic#{suffix}.csv"
+        build_residential_hpxml['geometry_foundation_type'] = (i <= 2 ? 'UnconditionedBasement' : 'AboveApartment')
+        build_residential_hpxml['geometry_attic_type'] = (i >= 5 ? 'VentedAttic' : 'BelowApartment')
+        build_residential_hpxml['geometry_unit_height_above_grade'] = { 1 => 0.0, 2 => 0.0, 3 => 10.0, 4 => 10.0, 5 => 20.0, 6 => 20.0 }[i]
       end
 
       # Re-generate stochastic schedule CSV?
@@ -77,7 +78,7 @@ def create_hpxmls
                      'output_csv_path' => csv_path,
                      'hpxml_output_path' => hpxml_path,
                      'building_id' => "MyBuilding#{suffix}" }
-        measures['BuildResidentialScheduleFile'] = sch_args
+        measures['BuildResidentialScheduleFile'] = [sch_args]
         schedules_regenerated << csv_path
       end
 
