@@ -4104,7 +4104,7 @@ module HPXMLDefaults
       int_sf_winter = 0.85
     end
 
-    return int_sf_summer.round(2), int_sf_winter.round(2)
+    return int_sf_summer.round(4), int_sf_winter.round(4)
   end
 
   # Gets the default summer/winter exterior shading factors for the window.
@@ -4152,8 +4152,8 @@ module HPXMLDefaults
       }[window.exterior_shading_type]
     end
 
-    ext_sf_summer = ext_sf_summer.round(2) unless ext_sf_summer.nil?
-    ext_sf_winter = ext_sf_winter.round(2) unless ext_sf_winter.nil?
+    ext_sf_summer = ext_sf_summer.round(4) unless ext_sf_summer.nil?
+    ext_sf_winter = ext_sf_winter.round(4) unless ext_sf_winter.nil?
 
     return ext_sf_summer, ext_sf_winter
   end
@@ -4180,7 +4180,7 @@ module HPXMLDefaults
     is_sf_summer = summer_frac_covered * is_sf_summer + (1 - summer_frac_covered) * 1.0
     is_sf_winter = winter_frac_covered * is_sf_winter + (1 - winter_frac_covered) * 1.0
 
-    return is_sf_summer.round(2), is_sf_winter.round(2)
+    return is_sf_summer.round(4), is_sf_winter.round(4)
   end
 
   # Gets the default latitude from the HPXML file or, as backup, weather file.

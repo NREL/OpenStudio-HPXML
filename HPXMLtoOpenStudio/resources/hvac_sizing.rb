@@ -725,7 +725,7 @@ module HVACSizing
           window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
         end
       end
-      
+
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
 
       window_ufactor, window_shgc = Constructions.get_ufactor_shgc_adjusted_by_storms(window.storm_type, window.ufactor, window.shgc)
@@ -4500,7 +4500,7 @@ module HVACSizing
       HPXML::InteriorShadingTypeMediumCurtains => 7,
       HPXML::InteriorShadingTypeLightCurtains => 8,
     }[window.interior_shading_type]
-    
+
     window_isc = {
       '1P Clear' => [0.68, 0.60, 0.51, 0.80, 0.55, 0.40, 0.80, 0.60, 0.35],
       '1P Heat Absorbing' => [0.81, 0.75, 0.69, 0.66, 0.52, 0.44, 0.81, 0.66, 0.52],
