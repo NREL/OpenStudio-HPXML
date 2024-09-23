@@ -716,7 +716,6 @@ module HVACSizing
         window_isc = window.interior_shading_factor_summer
       end
 
-      # FIXME: Should we ever fallback to window.exterior_shading_factor_summer?
       window_esc = 1.0
       if window.insect_screen_present
         if window.insect_screen_location == HPXML::LocationInterior

@@ -1109,7 +1109,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     hpxml_bldg.windows[0].insect_screen_factor_winter = nil
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
-    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, 0.83, 0.83, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.76, 0.76)
+    _test_default_window_values(default_hpxml_bldg.windows[0], 1.0, 1.0, 0.8255, 0.8255, 0.67, 225, HPXML::LocationExterior, 0.67, 0.67, 0.7588, 0.7588)
   end
 
   def test_windows_physical_properties
@@ -1204,8 +1204,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     assert_equal(HPXML::InteriorShadingTypeLightCurtains, default_hpxml_bldg.windows[0].interior_shading_type)
     assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_summer_fraction_covered)
     assert_equal(0.5, default_hpxml_bldg.windows[0].interior_shading_winter_fraction_covered)
-    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
-    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+    assert_equal(0.8255, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.8255, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
 
     # Test defaults w/ none shading
     hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeNone
@@ -1222,7 +1222,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
-    assert_equal(0.83, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.8315, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
     assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
 
     # Test defaults w/ medium blinds (closed fully covered summer, half open half covered winter)
@@ -1234,8 +1234,8 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
 
     assert_equal(HPXML::BlindsHalfOpen, default_hpxml_bldg.windows[0].interior_shading_blinds_winter_closed_or_open)
     assert_equal(1.0, default_hpxml_bldg.windows[0].interior_shading_summer_fraction_covered)
-    assert_equal(0.72, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
-    assert_equal(0.92, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
+    assert_equal(0.7155, default_hpxml_bldg.windows[0].interior_shading_factor_summer)
+    assert_equal(0.9165, default_hpxml_bldg.windows[0].interior_shading_factor_winter)
   end
 
   def test_windows_exterior_shading_types
