@@ -334,7 +334,10 @@ module HPXMLDefaults
       if sum_space_manualj_num_occupants > 0
         hpxml_bldg.header.manualj_num_occupants = sum_space_manualj_num_occupants
       else
-        hpxml_bldg.header.manualj_num_occupants = hpxml_bldg.building_construction.number_of_bedrooms + 1 # Per Manual J
+        # Manual J default: full time occupants = 1 + number of bedrooms
+        # If the actual number of full time occupants exceeds the default value, the actual occupant count is used
+        # See https://github.com/NREL/OpenStudio-HPXML/issues/1841
+        hpxml_bldg.header.manualj_num_occupants = [hpxml_bldg.building_construction.number_of_bedrooms + 1, hpxml_bldg.building_occupancy.number_of_residents.to_f].max
       end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
     end
