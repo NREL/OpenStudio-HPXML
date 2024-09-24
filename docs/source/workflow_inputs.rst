@@ -1624,8 +1624,8 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
   ``Type``                      string         See [#]_     No        See [#]_   Shading type
-  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        1.0        Fraction of window area covered by shading in summer
-  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        1.0        Fraction of window area covered by shading in winter
+  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in summer
+  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in winter
   ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient (1=transparent, 0=opaque)
   ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
