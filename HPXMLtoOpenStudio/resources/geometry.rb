@@ -499,14 +499,18 @@ module Geometry
 
   # Adds an HPXML Foundation Wall to the OpenStudio model.
   #
+  # Note: Since we don't know which FoundationWalls are adjacent to which Slabs, we may call this method multiple times
+  # for the same HPXML Foundation Wall, each time with a different exposed_length and fnd_wall_length, specific to an
+  # adjacent HPXML Slab.
+  #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param foundation_wall [HPXML::FoundationWall] HPXML Foundation Wall object
-  # @param exposed_length [Double] TODO
-  # @param fnd_wall_length [Double] TODO
-  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @param foundation_wall [HPXML::FoundationWall] The HPXML foundation wall of interest
+  # @param exposed_length [Double] Length of foundation wall exposed to ambient conditions, specific to an associated HPXML Slab (ft)
+  # @param fnd_wall_length [Double] The total length of the foundation wall (ft)
+  # @param default_azimuths [Array<Double>] Default azimuths for the four sides of the home, used for surfaces without an orientation
   # @return [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   def self.apply_foundation_wall(runner, model, spaces, hpxml_bldg, foundation_wall, exposed_length, fnd_wall_length, default_azimuths)
     exposed_fraction = exposed_length / fnd_wall_length
@@ -591,18 +595,21 @@ module Geometry
 
   # Adds an HPXML Slab to the OpenStudio model.
   #
+  # Note: Since we don't know which FoundationWalls are adjacent to which Slabs, we may call this method multiple times
+  # for the same HPXML Slab, each time with a different exposed_length, specific to an adjacent HPXML FoundationWall.
+  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @param slab [HPXML::Slab] HPXML Slab object
+  # @param slab [HPXML::Slab] The HPXML slab of interest
   # @param z_origin [Double] The z-coordinate for which the slab is relative (ft)
-  # @param exposed_length [Double] TODO
+  # @param exposed_length [Double] Length of foundation wall exposed to ambient conditions, specific to an associated HPXML Slab (ft)
   # @param kiva_foundation [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
-  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @param default_azimuths [Array<Double>] Default azimuths for the four sides of the home, used for surfaces without an orientation
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @return [nil]
+  # @return [OpenStudio::Model::FoundationKiva] OpenStudio Foundation Kiva object
   def self.apply_foundation_slab(model, weather, spaces, hpxml_bldg, hpxml_header, slab, z_origin,
                                  exposed_length, kiva_foundation, default_azimuths, schedules_file)
     exposed_fraction = exposed_length / slab.exposed_perimeter
@@ -1267,7 +1274,7 @@ module Geometry
   # @param length [Double] length of the ceiling (ft)
   # @param width [Double] width of the ceiling (ft)
   # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
-  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @param default_azimuths [Array<Double>] Default azimuths for the four sides of the home, used for surfaces without an orientation
   # @return [OpenStudio::Point3dVector] an array of points
   def self.create_ceiling_vertices(length, width, z_origin, default_azimuths)
     return OpenStudio::reverse(create_floor_vertices(length, width, z_origin, default_azimuths))
@@ -1278,7 +1285,7 @@ module Geometry
   # @param length [Double] length of the floor (ft)
   # @param width [Double] width of the floor (ft)
   # @param z_origin [Double] The z-coordinate for which the length and width are relative (ft)
-  # @param default_azimuths [Array<Double>] Azimuths for the four sides of the home
+  # @param default_azimuths [Array<Double>] Default azimuths for the four sides of the home, used for surfaces without an orientation
   # @return [OpenStudio::Point3dVector] an array of points
   def self.create_floor_vertices(length, width, z_origin, default_azimuths)
     length = UnitConversions.convert(length, 'ft', 'm')
@@ -1307,7 +1314,7 @@ module Geometry
     return transformation * vertices
   end
 
-  # Set calculated zone volumes for HPXML locations on OpenStudio Thermal Zone and Space objects.
+  # Set calculated zone volumes for all HPXML locations on OpenStudio Thermal Zone and Space objects.
   # TODO why? for reporting?
   #
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
@@ -1315,8 +1322,6 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.set_zone_volumes(spaces, hpxml_bldg, hpxml_header)
-    apply_ashrae140_assumptions = hpxml_header.apply_ashrae140_assumptions
-
     # Conditioned space
     volume = UnitConversions.convert(hpxml_bldg.building_construction.conditioned_building_volume, 'ft^3', 'm^3')
     spaces[HPXML::LocationConditionedSpace].thermalZone.get.setVolume(volume)
@@ -1335,7 +1340,7 @@ module Geometry
     spaces.keys.each do |location|
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? location
 
-      if apply_ashrae140_assumptions
+      if hpxml_header.apply_ashrae140_assumptions
         volume = UnitConversions.convert(3463, 'ft^3', 'm^3') # Hardcode the attic volume to match ASHRAE 140 Table 7-2 specification
       else
         volume = UnitConversions.convert(calculate_zone_volume(hpxml_bldg, location), 'ft^3', 'm^3')
