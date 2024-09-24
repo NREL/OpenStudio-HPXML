@@ -1618,7 +1618,7 @@ If UFactor and SHGC are not provided, they are defaulted as follows:
 HPXML Exterior Shading
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If exterior shading is present, additional information is entered in ``ExteriorShading``.
+If exterior shading is specified, additional information is entered in ``ExteriorShading``.
 
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
@@ -1626,8 +1626,8 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   ``Type``                      string         See [#]_     No        See [#]_   Shading type
   ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in summer
   ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in winter
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient (1=transparent, 0=opaque)
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient for modeling (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient for modeling (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
   .. [#] Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
@@ -1662,7 +1662,7 @@ If exterior shading is present, additional information is entered in ``ExteriorS
 HPXML Interior Shading
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If interior shading is present, additional information is entered in ``InteriorShading``.
+If interior shading is specified, additional information is entered in ``InteriorShading``.
 
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
@@ -1672,8 +1672,8 @@ If interior shading is present, additional information is entered in ``InteriorS
   ``BlindsWinterClosedOrOpen``  string         See [#]_     No        half open  Blinds position in winter (only used if shading type is blinds)
   ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in summer
   ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in winter
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient (1=transparent, 0=opaque)
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient for modeling (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient for modeling (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
   .. [#] Type choices are "light blinds", "medium blinds", "dark blinds", "light shades", "medium shades", "dark shades", "light curtains", "medium curtains", "dark curtains", "other", or "none".
@@ -1740,8 +1740,8 @@ If an insect screen is specified, additional information is entered in ``InsectS
   ``Location``                  string            See [#]_     No        exterior  Whether the screen is on the interior or exterior of the glass
   ``SummerFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the summer
   ``WinterFractionCovered``     double    frac    >= 0, <= 1   No        See [#]_  Fraction of window area covered in the winter
-  ``SummerShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``WinterShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior summer shading coefficient for modeling (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double    frac    >= 0, <= 1   No        See [#]_  Interior winter shading coefficient for modeling (1=transparent, 0=opaque)
   ============================  ========  ======  ===========  ========  ========  ========================================================
 
   .. [#] Location choices are "interior" or "exterior".

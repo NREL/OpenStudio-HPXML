@@ -4122,10 +4122,8 @@ module HPXMLDefaults
       int_sf_winter = c1_winter - (c2_winter * window.shgc)
 
       # Apply fraction of window area covered
-      summer_frac_covered = window.interior_shading_coverage_summer
-      winter_frac_covered = window.interior_shading_coverage_winter
-      int_sf_summer = summer_frac_covered * int_sf_summer + (1 - summer_frac_covered) * 1.0
-      int_sf_winter = winter_frac_covered * int_sf_winter + (1 - winter_frac_covered) * 1.0
+      int_sf_summer = apply_shading_coverage(int_sf_summer, window.interior_shading_coverage_summer)
+      int_sf_winter = apply_shading_coverage(int_sf_winter, window.interior_shading_coverage_winter)
     else
       int_sf_summer = 0.70
       int_sf_winter = 0.85
@@ -4166,10 +4164,8 @@ module HPXMLDefaults
     ext_sf_winter = c_map[window.exterior_shading_type]
 
     # Apply fraction of window area covered
-    summer_frac_covered = window.exterior_shading_coverage_summer
-    winter_frac_covered = window.exterior_shading_coverage_winter
-    ext_sf_summer = summer_frac_covered * ext_sf_summer + (1 - summer_frac_covered) * 1.0
-    ext_sf_winter = winter_frac_covered * ext_sf_winter + (1 - winter_frac_covered) * 1.0
+    ext_sf_summer = apply_shading_coverage(ext_sf_summer, window.exterior_shading_coverage_summer)
+    ext_sf_winter = apply_shading_coverage(ext_sf_winter, window.exterior_shading_coverage_winter)
 
     return ext_sf_summer, ext_sf_winter
   end
@@ -4191,12 +4187,20 @@ module HPXMLDefaults
     is_sf_winter = c1 - (c2 * window.shgc)
 
     # Apply fraction of window area covered
-    summer_frac_covered = window.insect_screen_coverage_summer
-    winter_frac_covered = window.insect_screen_coverage_winter
-    is_sf_summer = summer_frac_covered * is_sf_summer + (1 - summer_frac_covered) * 1.0
-    is_sf_winter = winter_frac_covered * is_sf_winter + (1 - winter_frac_covered) * 1.0
+    is_sf_summer = apply_shading_coverage(is_sf_summer, window.insect_screen_coverage_summer)
+    is_sf_winter = apply_shading_coverage(is_sf_winter, window.insect_screen_coverage_winter)
 
     return is_sf_summer.round(4), is_sf_winter.round(4)
+  end
+
+  # Incorporates a shading coverage adjustment on the shading factor.
+  #
+  # @param shading_factor [Double] The shading factor not taking window area coverage into account
+  # @param shading_coverage [Double] The fraction of window area covered by the shade
+  # @return [Double] The coverage-adjustment shading factor
+  def self.apply_shading_coverage(shading_factor, shading_coverage)
+    non_shading_factor = 1.0 # 1.0 (i.e., fully transparent) is the shading factor for the unshaded portion of the window
+    return shading_coverage * shading_factor + (1 - shading_coverage) * non_shading_factor
   end
 
   # Gets the default latitude from the HPXML file or, as backup, weather file.

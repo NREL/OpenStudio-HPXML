@@ -5582,8 +5582,8 @@ class HPXML < Object
              :storm_type,                                     # [String] StormWindow/GlassType (HPXML::WindowGlassTypeXXX)
              :insect_screen_present,                          # [Element] InsectScreen
              :insect_screen_location,                         # [String] InsectScreen/Location (HPXML::LocationXXX)
-             :insect_screen_coverage_summer,          # [Double] InsectScreen/SummerFractionCovered (frac)
-             :insect_screen_coverage_winter,          # [Double] InsectScreen/WinterFractionCovered (frac)
+             :insect_screen_coverage_summer,                  # [Double] InsectScreen/SummerFractionCovered (frac)
+             :insect_screen_coverage_winter,                  # [Double] InsectScreen/WinterFractionCovered (frac)
              :insect_screen_factor_summer,                    # [Double] InsectScreen/SummerShadingCoefficient (frac)
              :insect_screen_factor_winter,                    # [Double] InsectScreen/WinterShadingCoefficient (frac)
              :overhangs_depth,                                # [Double] Overhangs/Depth (ft)
