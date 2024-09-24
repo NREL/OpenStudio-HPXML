@@ -259,6 +259,7 @@ class HPXML < Object
   InteriorShadingTypeMediumBlinds = 'medium blinds'
   InteriorShadingTypeMediumCurtains = 'medium curtains'
   InteriorShadingTypeMediumShades = 'medium shades'
+  InteriorShadingTypeOther = 'other'
   InteriorShadingTypeNone = 'none'
   InfiltrationTypeUnitTotal = 'unit total'
   InfiltrationTypeUnitExterior = 'unit exterior only'
@@ -5566,21 +5567,23 @@ class HPXML < Object
              :shgc,                                           # [Double] SHGC
              :exterior_shading_id,                            # [String] ExteriorShading/SystemIdentifier/@id
              :exterior_shading_type,                          # [String] ExteriorShading/Type (HPXML::ExteriorShadingTypeXXX)
+             :exterior_shading_coverage_summer,               # [Double] ExteriorShading/SummerFractionCovered
+             :exterior_shading_coverage_winter,               # [Double] ExteriorShading/WinterFractionCovered
              :exterior_shading_factor_summer,                 # [Double] ExteriorShading/SummerShadingCoefficient (frac)
              :exterior_shading_factor_winter,                 # [Double] ExteriorShading/WinterShadingCoefficient (frac)
              :interior_shading_id,                            # [String] InteriorShading/SystemIdentifier/@id
              :interior_shading_type,                          # [String] InteriorShading/Type (HPXML::InteriorShadingTypeXXX)
              :interior_shading_blinds_summer_closed_or_open,  # [String] InteriorShading/BlindsSummerClosedOrOpen (HPXML::BlindsXXX)
              :interior_shading_blinds_winter_closed_or_open,  # [String] InteriorShading/BlindsWinterClosedOrOpen (HPXML::BlindsXXX)
-             :interior_shading_summer_fraction_covered,       # [Double] InteriorShading/SummerFractionCovered
-             :interior_shading_winter_fraction_covered,       # [Double] InteriorShading/WinterFractionCovered
+             :interior_shading_coverage_summer,               # [Double] InteriorShading/SummerFractionCovered
+             :interior_shading_coverage_winter,               # [Double] InteriorShading/WinterFractionCovered
              :interior_shading_factor_summer,                 # [Double] InteriorShading/SummerShadingCoefficient (frac)
              :interior_shading_factor_winter,                 # [Double] InteriorShading/WinterShadingCoefficient (frac)
              :storm_type,                                     # [String] StormWindow/GlassType (HPXML::WindowGlassTypeXXX)
              :insect_screen_present,                          # [Element] InsectScreen
              :insect_screen_location,                         # [String] InsectScreen/Location (HPXML::LocationXXX)
-             :insect_screen_summer_fraction_covered,          # [Double] InsectScreen/SummerFractionCovered (frac)
-             :insect_screen_winter_fraction_covered,          # [Double] InsectScreen/WinterFractionCovered (frac)
+             :insect_screen_coverage_summer,          # [Double] InsectScreen/SummerFractionCovered (frac)
+             :insect_screen_coverage_winter,          # [Double] InsectScreen/WinterFractionCovered (frac)
              :insect_screen_factor_summer,                    # [Double] InsectScreen/SummerShadingCoefficient (frac)
              :insect_screen_factor_winter,                    # [Double] InsectScreen/WinterShadingCoefficient (frac)
              :overhangs_depth,                                # [Double] Overhangs/Depth (ft)
@@ -5684,7 +5687,7 @@ class HPXML < Object
       XMLHelper.add_element(window, 'GasFill', @gas_fill, :string, @gas_fill_isdefaulted) unless @gas_fill.nil?
       XMLHelper.add_element(window, 'UFactor', @ufactor, :float, @ufactor_isdefaulted) unless @ufactor.nil?
       XMLHelper.add_element(window, 'SHGC', @shgc, :float, @shgc_isdefaulted) unless @shgc.nil?
-      if (not @exterior_shading_type.nil?) || (not @exterior_shading_factor_summer.nil?) || (not @exterior_shading_factor_winter.nil?)
+      if (not @exterior_shading_type.nil?) || (not @exterior_shading_factor_summer.nil?) || (not @exterior_shading_factor_winter.nil?) || (not @exterior_shading_coverage_summer.nil?) || (not @exterior_shading_coverage_winter.nil?)
         exterior_shading = XMLHelper.add_element(window, 'ExteriorShading')
         sys_id = XMLHelper.add_element(exterior_shading, 'SystemIdentifier')
         if @exterior_shading_id.nil?
@@ -5693,10 +5696,12 @@ class HPXML < Object
           XMLHelper.add_attribute(sys_id, 'id', @exterior_shading_id)
         end
         XMLHelper.add_element(exterior_shading, 'Type', @exterior_shading_type, :string, @exterior_shading_type_isdefaulted) unless @exterior_shading_type.nil?
+        XMLHelper.add_element(exterior_shading, 'SummerFractionCovered', @exterior_shading_coverage_summer, :float, @exterior_shading_coverage_summer_isdefaulted) unless @exterior_shading_coverage_summer.nil?
+        XMLHelper.add_element(exterior_shading, 'WinterFractionCovered', @exterior_shading_coverage_winter, :float, @exterior_shading_coverage_winter_isdefaulted) unless @exterior_shading_coverage_winter.nil?
         XMLHelper.add_element(exterior_shading, 'SummerShadingCoefficient', @exterior_shading_factor_summer, :float, @exterior_shading_factor_summer_isdefaulted) unless @exterior_shading_factor_summer.nil?
         XMLHelper.add_element(exterior_shading, 'WinterShadingCoefficient', @exterior_shading_factor_winter, :float, @exterior_shading_factor_winter_isdefaulted) unless @exterior_shading_factor_winter.nil?
       end
-      if (not @interior_shading_type.nil?) || (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?) || (not @interior_shading_blinds_summer_closed_or_open.nil?) || (not @interior_shading_blinds_winter_closed_or_open.nil?) || (not @interior_shading_summer_fraction_covered.nil?) || (not @interior_shading_winter_fraction_covered.nil?)
+      if (not @interior_shading_type.nil?) || (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?) || (not @interior_shading_blinds_summer_closed_or_open.nil?) || (not @interior_shading_blinds_winter_closed_or_open.nil?) || (not @interior_shading_coverage_summer.nil?) || (not @interior_shading_coverage_winter.nil?)
         interior_shading = XMLHelper.add_element(window, 'InteriorShading')
         sys_id = XMLHelper.add_element(interior_shading, 'SystemIdentifier')
         if @interior_shading_id.nil?
@@ -5707,8 +5712,8 @@ class HPXML < Object
         XMLHelper.add_element(interior_shading, 'Type', @interior_shading_type, :string, @interior_shading_type_isdefaulted) unless @interior_shading_type.nil?
         XMLHelper.add_element(interior_shading, 'BlindsSummerClosedOrOpen', @interior_shading_blinds_summer_closed_or_open, :string, @interior_shading_blinds_summer_closed_or_open_isdefaulted) unless @interior_shading_blinds_summer_closed_or_open.nil?
         XMLHelper.add_element(interior_shading, 'BlindsWinterClosedOrOpen', @interior_shading_blinds_winter_closed_or_open, :string, @interior_shading_blinds_winter_closed_or_open_isdefaulted) unless @interior_shading_blinds_winter_closed_or_open.nil?
-        XMLHelper.add_element(interior_shading, 'SummerFractionCovered', @interior_shading_summer_fraction_covered, :float, @interior_shading_summer_fraction_covered_isdefaulted) unless @interior_shading_summer_fraction_covered.nil?
-        XMLHelper.add_element(interior_shading, 'WinterFractionCovered', @interior_shading_winter_fraction_covered, :float, @interior_shading_winter_fraction_covered_isdefaulted) unless @interior_shading_winter_fraction_covered.nil?
+        XMLHelper.add_element(interior_shading, 'SummerFractionCovered', @interior_shading_coverage_summer, :float, @interior_shading_coverage_summer_isdefaulted) unless @interior_shading_coverage_summer.nil?
+        XMLHelper.add_element(interior_shading, 'WinterFractionCovered', @interior_shading_coverage_winter, :float, @interior_shading_coverage_winter_isdefaulted) unless @interior_shading_coverage_winter.nil?
         XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', @interior_shading_factor_summer, :float, @interior_shading_factor_summer_isdefaulted) unless @interior_shading_factor_summer.nil?
         XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', @interior_shading_factor_winter, :float, @interior_shading_factor_winter_isdefaulted) unless @interior_shading_factor_winter.nil?
       end
@@ -5717,8 +5722,8 @@ class HPXML < Object
         sys_id = XMLHelper.add_element(insect_screen, 'SystemIdentifier')
         XMLHelper.add_attribute(sys_id, 'id', "#{id}InsectScreen")
         XMLHelper.add_element(insect_screen, 'Location', @insect_screen_location, :string, @insect_screen_location_isdefaulted) unless @insect_screen_location.nil?
-        XMLHelper.add_element(insect_screen, 'SummerFractionCovered', @insect_screen_summer_fraction_covered, :float, @insect_screen_summer_fraction_covered_isdefaulted) unless @insect_screen_summer_fraction_covered.nil?
-        XMLHelper.add_element(insect_screen, 'WinterFractionCovered', @insect_screen_winter_fraction_covered, :float, @insect_screen_winter_fraction_covered_isdefaulted) unless @insect_screen_winter_fraction_covered.nil?
+        XMLHelper.add_element(insect_screen, 'SummerFractionCovered', @insect_screen_coverage_summer, :float, @insect_screen_coverage_summer_isdefaulted) unless @insect_screen_coverage_summer.nil?
+        XMLHelper.add_element(insect_screen, 'WinterFractionCovered', @insect_screen_coverage_winter, :float, @insect_screen_coverage_winter_isdefaulted) unless @insect_screen_coverage_winter.nil?
         XMLHelper.add_element(insect_screen, 'SummerShadingCoefficient', @insect_screen_factor_summer, :float, @insect_screen_factor_summer_isdefaulted) unless @insect_screen_factor_summer.nil?
         XMLHelper.add_element(insect_screen, 'WinterShadingCoefficient', @insect_screen_factor_winter, :float, @insect_screen_factor_winter_isdefaulted) unless @insect_screen_factor_winter.nil?
       end
@@ -5766,14 +5771,16 @@ class HPXML < Object
       @shgc = XMLHelper.get_value(window, 'SHGC', :float)
       @exterior_shading_id = HPXML::get_id(window, 'ExteriorShading/SystemIdentifier')
       @exterior_shading_type = XMLHelper.get_value(window, 'ExteriorShading/Type', :string)
+      @exterior_shading_coverage_summer = XMLHelper.get_value(window, 'ExteriorShading/SummerFractionCovered', :float)
+      @exterior_shading_coverage_winter = XMLHelper.get_value(window, 'ExteriorShading/WinterFractionCovered', :float)
       @exterior_shading_factor_summer = XMLHelper.get_value(window, 'ExteriorShading/SummerShadingCoefficient', :float)
       @exterior_shading_factor_winter = XMLHelper.get_value(window, 'ExteriorShading/WinterShadingCoefficient', :float)
       @interior_shading_id = HPXML::get_id(window, 'InteriorShading/SystemIdentifier')
       @interior_shading_type = XMLHelper.get_value(window, 'InteriorShading/Type', :string)
       @interior_shading_blinds_summer_closed_or_open = XMLHelper.get_value(window, 'InteriorShading/BlindsSummerClosedOrOpen', :string)
       @interior_shading_blinds_winter_closed_or_open = XMLHelper.get_value(window, 'InteriorShading/BlindsWinterClosedOrOpen', :string)
-      @interior_shading_summer_fraction_covered = XMLHelper.get_value(window, 'InteriorShading/SummerFractionCovered', :float)
-      @interior_shading_winter_fraction_covered = XMLHelper.get_value(window, 'InteriorShading/WinterFractionCovered', :float)
+      @interior_shading_coverage_summer = XMLHelper.get_value(window, 'InteriorShading/SummerFractionCovered', :float)
+      @interior_shading_coverage_winter = XMLHelper.get_value(window, 'InteriorShading/WinterFractionCovered', :float)
       @interior_shading_factor_summer = XMLHelper.get_value(window, 'InteriorShading/SummerShadingCoefficient', :float)
       @interior_shading_factor_winter = XMLHelper.get_value(window, 'InteriorShading/WinterShadingCoefficient', :float)
       @overhangs_depth = XMLHelper.get_value(window, 'Overhangs/Depth', :float)
@@ -5786,8 +5793,8 @@ class HPXML < Object
       @insect_screen_present = XMLHelper.has_element(window, 'InsectScreen')
       if @insect_screen_present
         @insect_screen_location = XMLHelper.get_value(window, 'InsectScreen/Location', :string)
-        @insect_screen_summer_fraction_covered = XMLHelper.get_value(window, 'InsectScreen/SummerFractionCovered', :float)
-        @insect_screen_winter_fraction_covered = XMLHelper.get_value(window, 'InsectScreen/WinterFractionCovered', :float)
+        @insect_screen_coverage_summer = XMLHelper.get_value(window, 'InsectScreen/SummerFractionCovered', :float)
+        @insect_screen_coverage_winter = XMLHelper.get_value(window, 'InsectScreen/WinterFractionCovered', :float)
         @insect_screen_factor_summer = XMLHelper.get_value(window, 'InsectScreen/SummerShadingCoefficient', :float)
         @insect_screen_factor_winter = XMLHelper.get_value(window, 'InsectScreen/WinterShadingCoefficient', :float)
       end

@@ -294,7 +294,7 @@
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <Type>dark shades</Type>
+              <Type>other</Type>
             </InteriorShading>
             <InsectScreen>
               <SystemIdentifier id='Window2InsectScreen'/>

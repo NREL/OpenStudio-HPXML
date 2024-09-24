@@ -1623,48 +1623,50 @@ If exterior shading is present, additional information is entered in ``ExteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``Type``                      string         See [#]_     No        See [#]_   Exterior shading type
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior summer shading coefficient (1=transparent, 0=opaque)
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Exterior winter shading coefficient (1=transparent, 0=opaque)
+  ``Type``                      string         See [#]_     No        See [#]_   Shading type
+  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        1.0        Fraction of window area covered by shading in summer
+  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        1.0        Fraction of window area covered by shading in winter
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
   .. [#] Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
   .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "none".
-  .. [#] If SummerShadingCoefficient not provided, defaults as follows:
+  .. [#] If SummerShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated as follows:
   
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
-         
-         \- **solar screens**: 0.7
-         
-         \- **solar film**: 0.3
-         
-         \- **deciduous tree**: 0.5
-         
-         \- **evergreen tree**: 0.5
-         
-         \- **building**: 0.75 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
-         
-         \- **other**: 0.5
-         
-         \- **none**: 1.0
+         SummerShadingCoefficient = SummerFractionCovered * C1 + (1 - SummerFractionCovered) * 1.0
   
-  .. [#] If WinterShadingCoefficient not provided, defaults as follows:
+         \- **external overhangs** or **awnings**: C1=0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
+         
+         \- **solar screens**: C1=0.7
+         
+         \- **solar film**: C1=0.3
+         
+         \- **deciduous tree**: C1=0.5
+         
+         \- **evergreen tree**: C1=0.5
+         
+         \- **building**: C1=0.75 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
+         
+         \- **other**: C1=0.5
   
-         \- **external overhangs** or **awnings**: 0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
+  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated as follows:
+  
+         WinterShadingCoefficient = WinterFractionCovered * C1 + (1 - SummerFractionCovered) * 1.0
+  
+         \- **external overhangs** or **awnings**: C1=0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
          
-         \- **solar screens**: 0.7
+         \- **solar screens**: C1=0.7
          
-         \- **solar film**: 0.3
+         \- **solar film**: C1=0.3
          
-         \- **deciduous tree**: 0.75
+         \- **deciduous tree**: C1=0.75
          
-         \- **evergreen tree**: 0.5
+         \- **evergreen tree**: C1=0.5
          
-         \- **building**: 0.5 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
+         \- **building**: C1=0.5 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
-         \- **other**: 0.5
-         
-         \- **none**: 1.0
+         \- **other**: C1=0.5
 
 .. note::
 
@@ -1681,22 +1683,22 @@ If interior shading is present, additional information is entered in ``InteriorS
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
   ============================  ======  =====  ===========  ========  =========  =============================================================
-  ``Type``                      string         See [#]_     No        See [#]_   Interior shading type
+  ``Type``                      string         See [#]_     No        See [#]_   Shading type
   ``BlindsSummerClosedOrOpen``  string         See [#]_     No        half open  Blinds position in summer (only used if shading type is blinds)
   ``BlindsWinterClosedOrOpen``  string         See [#]_     No        half open  Blinds position in winter (only used if shading type is blinds)
-  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by interior shading in summer
-  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by interior shading in winter
-  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior summer shading coefficient (1=transparent, 0=opaque)
-  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Interior winter shading coefficient (1=transparent, 0=opaque)
+  ``SummerFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in summer
+  ``WinterFractionCovered``     double  frac   >= 0, <= 1   No        See [#]_   Fraction of window area covered by shading in winter
+  ``SummerShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total summer shading coefficient (1=transparent, 0=opaque)
+  ``WinterShadingCoefficient``  double  frac   >= 0, <= 1   No        See [#]_   Total winter shading coefficient (1=transparent, 0=opaque)
   ============================  ======  =====  ===========  ========  =========  =============================================================
 
-  .. [#] Type choices are "light blinds", "medium blinds", "dark blinds", "light shades", "medium shades", "dark shades", "light curtains", "medium curtains", "dark curtains", or "none".
+  .. [#] Type choices are "light blinds", "medium blinds", "dark blinds", "light shades", "medium shades", "dark shades", "light curtains", "medium curtains", "dark curtains", "other", or "none".
   .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "light curtains".
   .. [#] BlindsSummerClosedOrOpen choices are "closed", "open", or "half open".
   .. [#] BlindsWinterClosedOrOpen choices are "closed", "open", or "half open".
-  .. [#] If SummerFractionCovered not provided, defaults to 0.5 for shades/curtains and 1.0 for blinds.
-  .. [#] If WinterFractionCovered not provided, defaults to 0.5 for shades/curtains and 1.0 for blinds.
-  .. [#] SummerShadingCoefficient default value is 1.0 if Type="none", otherwise calculated based on Chapter 15 Table 14 of `ASHRAE 2021 Handbook of Fundamentals <https://www.ashrae.org/technical-resources/ashrae-handbook/description-2021-ashrae-handbook-fundamentals>`_:
+  .. [#] If SummerFractionCovered not provided, defaults to 1.0 for blinds and 0.5 for shades/curtains/other.
+  .. [#] If WinterFractionCovered not provided, defaults to 1.0 for blinds and 0.5 for shades/curtains/other.
+  .. [#] If SummerShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated based on Chapter 15 Table 14 of `ASHRAE 2021 Handbook of Fundamentals <https://www.ashrae.org/technical-resources/ashrae-handbook/description-2021-ashrae-handbook-fundamentals>`_:
   
          SummerShadingCoefficient = SummerFractionCovered * (C1 - (C2 * WindowSHGC)) + (1 - SummerFractionCovered) * 1.0
          
@@ -1732,7 +1734,9 @@ If interior shading is present, additional information is entered in ``InteriorS
          
          \- **light blinds, open**: C1=0.98, C2=0.0
          
-  .. [#] WinterShadingCoefficient default value is 1.0 if Type="none", otherwise calculated similar to SummerShadingCoefficient.
+         \- **other**: C1=0.5, C2=0.0
+         
+  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated similar to SummerShadingCoefficient.
 
 .. note::
 

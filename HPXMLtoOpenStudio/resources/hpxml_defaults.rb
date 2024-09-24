@@ -1565,21 +1565,21 @@ module HPXMLDefaults
           window.interior_shading_type = HPXML::InteriorShadingTypeLightCurtains # ANSI/RESNET/ICC 301-2022
           window.interior_shading_type_isdefaulted = true
         end
-        if window.interior_shading_summer_fraction_covered.nil?
+        if window.interior_shading_coverage_summer.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
           if blinds_types.include? window.interior_shading_type
-            window.interior_shading_summer_fraction_covered = 1.0
+            window.interior_shading_coverage_summer = 1.0
           else
-            window.interior_shading_summer_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+            window.interior_shading_coverage_summer = 0.5 # ANSI/RESNET/ICC 301-2022
           end
-          window.interior_shading_summer_fraction_covered_isdefaulted = true
+          window.interior_shading_coverage_summer_isdefaulted = true
         end
-        if window.interior_shading_winter_fraction_covered.nil?
+        if window.interior_shading_coverage_winter.nil? && window.interior_shading_type != HPXML::InteriorShadingTypeNone
           if blinds_types.include? window.interior_shading_type
-            window.interior_shading_winter_fraction_covered = 1.0
+            window.interior_shading_coverage_winter = 1.0
           else
-            window.interior_shading_winter_fraction_covered = 0.5 # ANSI/RESNET/ICC 301-2022
+            window.interior_shading_coverage_winter = 0.5 # ANSI/RESNET/ICC 301-2022
           end
-          window.interior_shading_winter_fraction_covered_isdefaulted = true
+          window.interior_shading_coverage_winter_isdefaulted = true
         end
         if blinds_types.include? window.interior_shading_type
           if window.interior_shading_blinds_summer_closed_or_open.nil?
@@ -1606,6 +1606,14 @@ module HPXMLDefaults
           window.exterior_shading_type = HPXML::ExteriorShadingTypeNone
           window.exterior_shading_type_isdefaulted = true
         end
+        if window.exterior_shading_coverage_summer.nil? && window.exterior_shading_type != HPXML::ExteriorShadingTypeNone
+          window.exterior_shading_coverage_summer = 1.0
+          window.exterior_shading_coverage_summer_isdefaulted = true
+        end
+        if window.exterior_shading_coverage_winter.nil? && window.exterior_shading_type != HPXML::ExteriorShadingTypeNone
+          window.exterior_shading_coverage_winter = 1.0
+          window.exterior_shading_coverage_winter_isdefaulted = true
+        end
         default_ext_sf_summer, default_ext_sf_winter = get_default_window_exterior_shading_factors(window, hpxml_bldg)
         if window.exterior_shading_factor_summer.nil? && (not default_ext_sf_summer.nil?)
           window.exterior_shading_factor_summer = default_ext_sf_summer
@@ -1626,13 +1634,13 @@ module HPXMLDefaults
         window.insect_screen_location = HPXML::LocationExterior
         window.insect_screen_location_isdefaulted = true
       end
-      if window.insect_screen_summer_fraction_covered.nil?
-        window.insect_screen_summer_fraction_covered = window.fraction_operable
-        window.insect_screen_summer_fraction_covered_isdefaulted = true
+      if window.insect_screen_coverage_summer.nil?
+        window.insect_screen_coverage_summer = window.fraction_operable
+        window.insect_screen_coverage_summer_isdefaulted = true
       end
-      if window.insect_screen_winter_fraction_covered.nil?
-        window.insect_screen_winter_fraction_covered = window.fraction_operable
-        window.insect_screen_winter_fraction_covered_isdefaulted = true
+      if window.insect_screen_coverage_winter.nil?
+        window.insect_screen_coverage_winter = window.fraction_operable
+        window.insect_screen_coverage_winter_isdefaulted = true
       end
       default_is_sf_summer, default_is_sf_winter = get_default_window_insect_screen_factors(window)
       if window.insect_screen_factor_summer.nil?
@@ -4086,6 +4094,7 @@ module HPXMLDefaults
           HPXML::InteriorShadingTypeDarkShades => [0.98, 0.33],
           HPXML::InteriorShadingTypeMediumShades => [0.9, 0.38],
           HPXML::InteriorShadingTypeLightShades => [0.82, 0.42],
+          HPXML::InteriorShadingTypeOther => [0.5, 0.0],
         }
         c1_summer, c2_summer = c_map[window.interior_shading_type]
         c1_winter, c2_winter = c_map[window.interior_shading_type]
@@ -4095,8 +4104,8 @@ module HPXMLDefaults
       int_sf_winter = c1_winter - (c2_winter * window.shgc)
 
       # Apply fraction of window area covered
-      summer_frac_covered = window.interior_shading_summer_fraction_covered
-      winter_frac_covered = window.interior_shading_winter_fraction_covered
+      summer_frac_covered = window.interior_shading_coverage_summer
+      winter_frac_covered = window.interior_shading_coverage_winter
       int_sf_summer = summer_frac_covered * int_sf_summer + (1 - summer_frac_covered) * 1.0
       int_sf_winter = winter_frac_covered * int_sf_winter + (1 - winter_frac_covered) * 1.0
     else
@@ -4175,8 +4184,8 @@ module HPXMLDefaults
     is_sf_winter = c1 - (c2 * window.shgc)
 
     # Apply fraction of window area covered
-    summer_frac_covered = window.insect_screen_summer_fraction_covered
-    winter_frac_covered = window.insect_screen_winter_fraction_covered
+    summer_frac_covered = window.insect_screen_coverage_summer
+    winter_frac_covered = window.insect_screen_coverage_winter
     is_sf_summer = summer_frac_covered * is_sf_summer + (1 - summer_frac_covered) * 1.0
     is_sf_winter = winter_frac_covered * is_sf_winter + (1 - winter_frac_covered) * 1.0
 

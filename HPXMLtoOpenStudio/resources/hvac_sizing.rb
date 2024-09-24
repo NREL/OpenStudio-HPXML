@@ -710,18 +710,18 @@ module HVACSizing
       space = wall.space
       zone = space.zone
 
-      if not window.interior_shading_type.nil?
-        window_isc = get_window_interior_shading_coefficient(window)
-      else
+      if window.interior_shading_type.nil? || window.interior_shading_type == HPXML::InteriorShadingTypeOther
         window_isc = window.interior_shading_factor_summer
+      else
+        window_isc = get_window_interior_shading_coefficient(window)
       end
 
       window_esc = 1.0
       if window.insect_screen_present
         if window.insect_screen_location == HPXML::LocationInterior
-          window_esc = 1.0 - 0.1 * window.insect_screen_summer_fraction_covered
+          window_esc = 1.0 - 0.1 * window.insect_screen_coverage_summer
         elsif window.insect_screen_location == HPXML::LocationExterior
-          window_esc = 1.0 - 0.2 * window.insect_screen_summer_fraction_covered
+          window_esc = 1.0 - 0.2 * window.insect_screen_coverage_summer
         end
       end
 
@@ -4516,7 +4516,7 @@ module HVACSizing
     }[window_type][table_col_index]
 
     # Apply fraction covered
-    summer_frac_covered = window.interior_shading_summer_fraction_covered
+    summer_frac_covered = window.interior_shading_coverage_summer
     window_isc = summer_frac_covered * window_isc + (1 - summer_frac_covered) * 1.0
 
     # Apply blind opening

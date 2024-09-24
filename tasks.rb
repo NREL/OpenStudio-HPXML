@@ -932,16 +932,18 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         window.exterior_shading_factor_summer = nil
         window.exterior_shading_factor_winter = nil
       end
-      hpxml_bldg.windows[0].interior_shading_type = HPXML::ExteriorShadingTypeNone
-      hpxml_bldg.windows[1].interior_shading_type = HPXML::InteriorShadingTypeDarkShades
+      # Interior shading
+      hpxml_bldg.windows[0].interior_shading_type = HPXML::InteriorShadingTypeNone
+      hpxml_bldg.windows[1].interior_shading_type = HPXML::InteriorShadingTypeOther
       hpxml_bldg.windows[2].interior_shading_type = HPXML::InteriorShadingTypeMediumCurtains
-      hpxml_bldg.windows[2].interior_shading_summer_fraction_covered = 0.5
-      hpxml_bldg.windows[2].interior_shading_winter_fraction_covered = 0.0
+      hpxml_bldg.windows[2].interior_shading_coverage_summer = 0.5
+      hpxml_bldg.windows[2].interior_shading_coverage_winter = 0.0
       hpxml_bldg.windows[3].interior_shading_type = HPXML::InteriorShadingTypeLightBlinds
       hpxml_bldg.windows[3].interior_shading_blinds_summer_closed_or_open = HPXML::BlindsClosed
       hpxml_bldg.windows[3].interior_shading_blinds_winter_closed_or_open = HPXML::BlindsHalfOpen
-      hpxml_bldg.windows[3].interior_shading_summer_fraction_covered = 0.5
-      hpxml_bldg.windows[3].interior_shading_winter_fraction_covered = 1.0
+      hpxml_bldg.windows[3].interior_shading_coverage_summer = 0.5
+      hpxml_bldg.windows[3].interior_shading_coverage_winter = 1.0
+      # Exterior shading
       hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
       hpxml_bldg.windows[1].exterior_shading_type = HPXML::ExteriorShadingTypeSolarScreens
       hpxml_bldg.windows[2].exterior_shading_type = HPXML::ExteriorShadingTypeExternalOverhangs
@@ -949,14 +951,15 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
       hpxml_bldg.windows[2].overhangs_distance_to_top_of_window = 1.0
       hpxml_bldg.windows[2].overhangs_distance_to_bottom_of_window = 4.0
       hpxml_bldg.windows[3].exterior_shading_type = HPXML::ExteriorShadingTypeBuilding
+      # Insect screens
       hpxml_bldg.windows[0].insect_screen_present = true
       hpxml_bldg.windows[0].insect_screen_location = HPXML::LocationInterior
-      hpxml_bldg.windows[0].insect_screen_summer_fraction_covered = 1.0
-      hpxml_bldg.windows[0].insect_screen_winter_fraction_covered = 0.0
+      hpxml_bldg.windows[0].insect_screen_coverage_summer = 1.0
+      hpxml_bldg.windows[0].insect_screen_coverage_winter = 0.0
       hpxml_bldg.windows[1].insect_screen_present = true
       hpxml_bldg.windows[1].insect_screen_location = HPXML::LocationExterior
-      hpxml_bldg.windows[1].insect_screen_summer_fraction_covered = 1.0
-      hpxml_bldg.windows[1].insect_screen_winter_fraction_covered = 1.0
+      hpxml_bldg.windows[1].insect_screen_coverage_summer = 1.0
+      hpxml_bldg.windows[1].insect_screen_coverage_winter = 1.0
       hpxml_bldg.windows[2].insect_screen_present = true
       hpxml_bldg.windows[2].insect_screen_location = HPXML::LocationExterior
       hpxml_bldg.windows[3].insect_screen_present = true
