@@ -731,7 +731,7 @@ module HVACSizing
           HPXML::ExteriorShadingTypeSolarFilm].include? window.exterior_shading_type
         # Covered by MJ
         screen_sc = 0.25
-      else
+      elsif not window.exterior_shading_factor_summer.nil?
         # Not covered by MJ
         window_esc *= window.exterior_shading_factor_summer
       end
