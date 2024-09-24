@@ -711,18 +711,29 @@ module HVACSizing
       zone = space.zone
 
       if window.interior_shading_type.nil? || window.interior_shading_type == HPXML::InteriorShadingTypeOther
+        # Not covered by MJ
         window_isc = window.interior_shading_factor_summer
       else
+        # Covered by MJ
         window_isc = get_window_interior_shading_coefficient(window)
       end
 
       window_esc = 1.0
       if window.insect_screen_present
+        # Covered by MJ
         if window.insect_screen_location == HPXML::LocationInterior
           window_esc = 1.0 - 0.1 * window.insect_screen_coverage_summer
         elsif window.insect_screen_location == HPXML::LocationExterior
           window_esc = 1.0 - 0.2 * window.insect_screen_coverage_summer
         end
+      end
+      if [HPXML::ExteriorShadingTypeSolarScreens,
+          HPXML::ExteriorShadingTypeSolarFilm].include? window.exterior_shading_type
+        # Covered by MJ
+        screen_sc = 0.25
+      else
+        # Not covered by MJ
+        window_esc *= window.exterior_shading_factor_summer
       end
 
       cnt45 = (get_mj_azimuth(window.azimuth) / 45.0).round.to_i
@@ -771,9 +782,7 @@ module HVACSizing
         htm_n = psf_lat[4] * clf_n * window_shgc * window_isc / 0.87 + window_ufactor * ctd_adj
         htm_n *= window_esc
 
-        if [HPXML::ExteriorShadingTypeSolarScreens,
-            HPXML::ExteriorShadingTypeSolarFilm].include? window.exterior_shading_type
-          screen_sc = 0.25
+        if not screen_sc.nil?
           clg_htm = (htm_d - htm_n) * screen_sc + htm_n
         elsif window.overhangs_depth.to_f > 0
           if hr.nil?

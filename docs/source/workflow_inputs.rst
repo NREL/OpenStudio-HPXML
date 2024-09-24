@@ -1632,6 +1632,8 @@ If exterior shading is present, additional information is entered in ``ExteriorS
 
   .. [#] Type choices are "external overhangs", "awnings", "solar screens", "solar film", "deciduous tree", "evergreen tree", "building", "other", or "none".
   .. [#] If Type not provided, and either SummerShadingCoefficient or WinterShadingCoefficient not provided, defaults to "none".
+  .. [#] If SummerFractionCovered not provided, defaults to 1.0 for solar screens/solar film/overhangs/awnings and 0.5 for trees/other/building.
+  .. [#] If WinterFractionCovered not provided, defaults to 1.0 for solar screens/solar film/overhangs/awnings, 0.5 for evergreen tree/other/building, and 0.25 for deciduous tree.
   .. [#] If SummerShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated as follows:
   
          SummerShadingCoefficient = SummerFractionCovered * C1 + (1 - SummerFractionCovered) * 1.0
@@ -1642,31 +1644,13 @@ If exterior shading is present, additional information is entered in ``ExteriorS
          
          \- **solar film**: C1=0.3
          
-         \- **deciduous tree**: C1=0.5
+         \- **deciduous tree** or **evergreen tree**: C1=0.0
          
-         \- **evergreen tree**: C1=0.5
-         
-         \- **building**: C1=0.75 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
+         \- **building**: C1=0.0 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
          
          \- **other**: C1=0.5
   
-  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated as follows:
-  
-         WinterShadingCoefficient = WinterFractionCovered * C1 + (1 - SummerFractionCovered) * 1.0
-  
-         \- **external overhangs** or **awnings**: C1=0.0 (unless :ref:`window_overhangs` are specified, in which case geometric shading is explicitly modeled)
-         
-         \- **solar screens**: C1=0.7
-         
-         \- **solar film**: C1=0.3
-         
-         \- **deciduous tree**: C1=0.75
-         
-         \- **evergreen tree**: C1=0.5
-         
-         \- **building**: C1=0.5 (unless :ref:`neighbor_buildings` are specified, in which case geometric shading is explicitly modeled)
-         
-         \- **other**: C1=0.5
+  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated using same approach as SummerShadingCoefficient.
 
 .. note::
 
@@ -1736,7 +1720,7 @@ If interior shading is present, additional information is entered in ``InteriorS
          
          \- **other**: C1=0.5, C2=0.0
          
-  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated similar to SummerShadingCoefficient.
+  .. [#] If WinterShadingCoefficient not provided, defaults to 1.0 if Type="none", otherwise calculated using same approach as SummerShadingCoefficient.
 
 .. note::
 
@@ -1773,7 +1757,7 @@ If an insect screen is specified, additional information is entered in ``InsectS
   
          \- **interior**: C1=0.99, C2=0.1
   
-  .. [#] If WinterShadingCoefficient not provided, calculated similar to SummerShadingCoefficient.
+  .. [#] If WinterShadingCoefficient not provided, calculated using same approach as SummerShadingCoefficient.
 
 .. note::
 

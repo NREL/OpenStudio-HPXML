@@ -900,6 +900,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_interior_shading_type_choices << HPXML::InteriorShadingTypeDarkShades
     window_interior_shading_type_choices << HPXML::InteriorShadingTypeDarkBlinds
     window_interior_shading_type_choices << HPXML::InteriorShadingTypeNone
+    # Not adding inputs for other because that can be anything
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_interior_shading_type', window_interior_shading_type_choices, false)
     arg.setDisplayName('Windows: Interior Shading Type')
@@ -924,6 +925,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     window_exterior_shading_type_choices << HPXML::ExteriorShadingTypeNone
     # Not adding inputs for trees since that is more specific to select windows, whereas this will apply to every window
     # Not adding inputs for overhangs/neighbors because there are other inputs to describe those (and in more detail)
+    # Not adding inputs for other because that can be anything
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('window_exterior_shading_type', window_exterior_shading_type_choices, false)
     arg.setDisplayName('Windows: Exterior Shading Type')

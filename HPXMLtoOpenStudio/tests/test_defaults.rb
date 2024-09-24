@@ -1287,9 +1287,9 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
     assert_equal(0.25, default_hpxml_bldg.windows[0].exterior_shading_coverage_summer)
-    assert_equal(1.0, default_hpxml_bldg.windows[0].exterior_shading_coverage_winter)
-    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
-    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_coverage_winter)
+    assert_equal(0.875, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.75, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
 
     # Test defaults w/ deciduous tree shading
     hpxml_bldg.windows[0].exterior_shading_type = HPXML::ExteriorShadingTypeDeciduousTree
@@ -1323,7 +1323,7 @@ class HPXMLtoOpenStudioDefaultsTest < Minitest::Test
     XMLHelper.write_file(hpxml.to_doc, @tmp_hpxml_path)
     _default_hpxml, default_hpxml_bldg = _test_measure()
 
-    assert_equal(0.75, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
+    assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_summer)
     assert_equal(0.5, default_hpxml_bldg.windows[0].exterior_shading_factor_winter)
 
     # Test defaults w/ neighbor buildings explicitly defined

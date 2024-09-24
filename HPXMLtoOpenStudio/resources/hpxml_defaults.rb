@@ -1607,11 +1607,29 @@ module HPXMLDefaults
           window.exterior_shading_type_isdefaulted = true
         end
         if window.exterior_shading_coverage_summer.nil? && window.exterior_shading_type != HPXML::ExteriorShadingTypeNone
-          window.exterior_shading_coverage_summer = 1.0
+          window.exterior_shading_coverage_summer = {
+            HPXML::ExteriorShadingTypeExternalOverhangs => 1.0, # Assume window area fully shaded
+            HPXML::ExteriorShadingTypeAwnings => 1.0, # Assume fully shaded
+            HPXML::ExteriorShadingTypeBuilding => 0.5, # Assume half shaded
+            HPXML::ExteriorShadingTypeDeciduousTree => 0.5, # Assume half shaded
+            HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Assume half shaded
+            HPXML::ExteriorShadingTypeOther => 0.5, # Assume half shaded
+            HPXML::ExteriorShadingTypeSolarFilm => 1.0, # Assume fully shaded
+            HPXML::ExteriorShadingTypeSolarScreens => 1.0 # Assume fully shaded
+          }[window.exterior_shading_type]
           window.exterior_shading_coverage_summer_isdefaulted = true
         end
         if window.exterior_shading_coverage_winter.nil? && window.exterior_shading_type != HPXML::ExteriorShadingTypeNone
-          window.exterior_shading_coverage_winter = 1.0
+          window.exterior_shading_coverage_winter = {
+            HPXML::ExteriorShadingTypeExternalOverhangs => 1.0, # Assume window area fully shaded
+            HPXML::ExteriorShadingTypeAwnings => 1.0, # Assume window area fully shaded
+            HPXML::ExteriorShadingTypeBuilding => 0.5, # Assume window area half shaded
+            HPXML::ExteriorShadingTypeDeciduousTree => 0.25, # Assume window area quarter shaded
+            HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Assume window area half shaded
+            HPXML::ExteriorShadingTypeOther => 0.5, # Assume window area half shaded
+            HPXML::ExteriorShadingTypeSolarFilm => 1.0, # Assume window area fully shaded
+            HPXML::ExteriorShadingTypeSolarScreens => 1.0 # Assume window area fully shaded
+          }[window.exterior_shading_type]
           window.exterior_shading_coverage_winter_isdefaulted = true
         end
         default_ext_sf_summer, default_ext_sf_winter = get_default_window_exterior_shading_factors(window, hpxml_bldg)
@@ -4122,47 +4140,36 @@ module HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [Array<Double, Double>] The exterior summer and winter shading factors
   def self.get_default_window_exterior_shading_factors(window, hpxml_bldg)
-    ext_sf_summer, ext_sf_winter = nil, nil
+    return 1.0, 1.0 if window.exterior_shading_type == HPXML::ExteriorShadingTypeNone
+
     if [HPXML::ExteriorShadingTypeExternalOverhangs,
-        HPXML::ExteriorShadingTypeAwnings].include? window.exterior_shading_type
-      if window.overhangs_depth.to_f > 0
-        # Explicitly modeling the overhangs, so don't double count the shading effect
-        ext_sf_summer = nil
-        ext_sf_winter = nil
-      else
-        ext_sf_summer = 0.0 # Based on MulTEA engineering manual
-        ext_sf_winter = 0.0 # Based on MulTEA engineering manual
-      end
-    elsif [HPXML::ExteriorShadingTypeBuilding].include? window.exterior_shading_type
-      if hpxml_bldg.neighbor_buildings.size > 0
-        # Explicitly modeling neighboring building, so don't double count the shading effect
-        ext_sf_summer = nil
-        ext_sf_winter = nil
-      else
-        ext_sf_summer = 0.75 # Engineering judgment
-        ext_sf_winter = 0.5 # Engineering judgment
-      end
-    else
-      ext_sf_summer = {
-        HPXML::ExteriorShadingTypeDeciduousTree => 0.5, # Engineering judgment
-        HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Engineering judgment
-        HPXML::ExteriorShadingTypeNone => 1.0,
-        HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
-        HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
-        HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
-      }[window.exterior_shading_type]
-      ext_sf_winter = {
-        HPXML::ExteriorShadingTypeDeciduousTree => 0.75, # Engineering judgment, higher than summer value because no leaves
-        HPXML::ExteriorShadingTypeEvergreenTree => 0.5, # Engineering judgment
-        HPXML::ExteriorShadingTypeNone => 1.0,
-        HPXML::ExteriorShadingTypeOther => 0.5, # Engineering judgment
-        HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
-        HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
-      }[window.exterior_shading_type]
+        HPXML::ExteriorShadingTypeAwnings].include?(window.exterior_shading_type) && window.overhangs_depth.to_f > 0
+      # Explicitly modeling the overhangs, so don't double count the shading effect
+      return nil, nil
+    elsif [HPXML::ExteriorShadingTypeBuilding].include?(window.exterior_shading_type) && hpxml_bldg.neighbor_buildings.size > 0
+      # Explicitly modeling neighboring building, so don't double count the shading effect
+      return nil, nil
     end
 
-    ext_sf_summer = ext_sf_summer.round(4) unless ext_sf_summer.nil?
-    ext_sf_winter = ext_sf_winter.round(4) unless ext_sf_winter.nil?
+    c_map = {
+      HPXML::ExteriorShadingTypeExternalOverhangs => 0.0, # Assume fully opaque
+      HPXML::ExteriorShadingTypeAwnings => 0.0, # Assume fully opaque
+      HPXML::ExteriorShadingTypeBuilding => 0.0, # Assume fully opaque
+      HPXML::ExteriorShadingTypeDeciduousTree => 0.0, # Assume fully opaque
+      HPXML::ExteriorShadingTypeEvergreenTree => 0.0, # Assume fully opaque
+      HPXML::ExteriorShadingTypeOther => 0.5, # Assume half opaque
+      HPXML::ExteriorShadingTypeSolarFilm => 0.3, # Based on MulTEA engineering manual
+      HPXML::ExteriorShadingTypeSolarScreens => 0.7, # Based on MulTEA engineering manual
+    }
+
+    ext_sf_summer = c_map[window.exterior_shading_type]
+    ext_sf_winter = c_map[window.exterior_shading_type]
+
+    # Apply fraction of window area covered
+    summer_frac_covered = window.exterior_shading_coverage_summer
+    winter_frac_covered = window.exterior_shading_coverage_winter
+    ext_sf_summer = summer_frac_covered * ext_sf_summer + (1 - summer_frac_covered) * 1.0
+    ext_sf_winter = winter_frac_covered * ext_sf_winter + (1 - winter_frac_covered) * 1.0
 
     return ext_sf_summer, ext_sf_winter
   end
