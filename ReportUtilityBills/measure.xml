@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_utility_bills</name>
   <uid>ca88a425-e59a-4bc4-af51-c7e7d1e960fe</uid>
-  <version_id>057900e7-7e6b-4ea7-976a-3818a92bdde4</version_id>
-  <version_modified>2024-09-20T18:14:01Z</version_modified>
+  <version_id>a6dfb299-82dd-41c3-884f-4f4bd3198b7f</version_id>
+  <version_modified>2024-09-25T16:46:40Z</version_modified>
   <xml_checksum>15BF4E57</xml_checksum>
   <class_name>ReportUtilityBills</class_name>
   <display_name>Utility Bills Report</display_name>
@@ -181,12 +181,6 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>93B04330</checksum>
-    </file>
-    <file>
-      <filename>detailed_rates/Adams Electric Cooperative Inc - Rate Schedule T1 TOD (Effective 2013-02-01).json</filename>
-      <filetype>json</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8E644347</checksum>
     </file>
     <file>
       <filename>detailed_rates/README.md</filename>

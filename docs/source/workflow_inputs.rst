@@ -843,7 +843,7 @@ Additional inputs for ACCA Manual J design loads, used for sizing HVAC equipment
          This default represents loads that normally occur during the early evening in mid-summer.
          Additional adjustments or custom internal loads can instead be specified here.
   .. [#] If NumberofOccupants not provided, defaults to the sum of conditioned spaces' NumberofOccupants values if provided (see :ref:`zones_spaces`).
-         Otherwise defaults to the number of bedrooms plus one per Manual J.
+         Otherwise defaults to the the larger of NumberofBedrooms+1 and NumberofResidents (if provided).
          Each occupant produces an additional 230 Btu/hr sensible load and 200 Btu/hr latent load.
   .. [#] If InfiltrationShieldingClass not provided defaults to class 4 with these adjustments:
          +1 if ShieldingofHome="well-shielded", -1 if ShieldingofHome="exposed", +1 if SiteType="urban", -1 if SiteType="rural".
