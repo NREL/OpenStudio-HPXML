@@ -2338,7 +2338,7 @@ module Waterheater
   # @param plantloop_map [TODO] TODO
   # @param showers_peak_flows [TODO] TODO
   # @return [TODO] TODO
-  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, showers_peak_flows)
+  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, _showers_peak_flows)
     return if water_heating_systems.empty?
 
     # EMS sensors
@@ -2357,8 +2357,8 @@ module Waterheater
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet loads program')
-    program.addLine('Set ShowerE = 0') # Init
-    program.addLine('Set ShowerSagTime = 0') # Init
+    program.addLine('Set ShowerUnmetTime = 0') # Init
+    program.addLine('Set ShowerTime = 0') # Init
     program.addLine('If WarmupFlag == 0') # Prevent unmet hours in the first hour because of the warmup period
 
     water_heating_systems.each do |water_heating_system|
@@ -2383,13 +2383,15 @@ module Waterheater
       wh_temp_sensor.setKeyName("#{tank.name}")
 
       program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
-      program.addLine('Set ShowerSagTime = 1')
-      program.addLine("Set ShowerE = ShowerE + ( #{water_heating_system.fraction_dhw_load_served} * #{shower_flow_sensor.name} * #{showers_peak_flows[water_heating_system.id]} * 990 * 4183 * (3600 / #{model.getTimestep.numberOfTimestepsPerHour}) * (#{mixed_setpoint_sensor.name} - #{wh_temp_sensor.name}) )") # assume specific heat of 4183 J/kg-K and density of 990 kg/m^3
+      program.addLine('Set ShowerUnmetTime = 1')
       program.addLine('EndIf')
     end
 
-    program.addLine('If (ShowerSagTime > 0)')
-    program.addLine('Set ShowerSagTime = SystemTimeStep')
+    program.addLine('If (ShowerUnmetTime > 0)')
+    program.addLine('Set ShowerUnmetTime = SystemTimeStep')
+    program.addLine('EndIf')
+    program.addLine("If (#{shower_flow_sensor.name} > 0)")
+    program.addLine('Set ShowerTime = SystemTimeStep')
     program.addLine('EndIf')
     program.addLine('EndIf')
 
@@ -2399,11 +2401,11 @@ module Waterheater
     manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
     manager.addProgram(program)
 
-    shower_e_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerE")
-    shower_sag_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerSagTime")
-    shower_e_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerE)
-    shower_sag_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerSagTime)
-    program.addLine("Set #{shower_e_var.name} = ShowerE")
-    program.addLine("Set #{shower_sag_time_var.name} = ShowerSagTime")
+    shower_unmet_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerUnmetTime")
+    shower_unmet_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerUnmetTime)
+    shower_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerTime")
+    shower_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerTime)
+    program.addLine("Set #{shower_unmet_time_var.name} = ShowerUnmetTime")
+    program.addLine("Set #{shower_time_var.name} = ShowerTime")
   end
 end

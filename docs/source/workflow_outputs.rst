@@ -321,23 +321,11 @@ Annual unmet hours are listed below.
   =========================  =====
   Unmet Hours: Heating (hr)  Number of hours where the heating setpoint is not maintained.
   Unmet Hours: Cooling (hr)  Number of hours where the cooling setpoint is not maintained.
+  Unmet Hours: Showers (hr)  TODO
+  Unmet Hours: Showers (%)   TODO
   =========================  =====
 
 These numbers reflect the number of hours during the heating/cooling season when the conditioned space temperature deviates more than 0.2 deg-C (0.36 deg-F) from the heating/cooling setpoint.
-
-Annual Unmet Loads
-~~~~~~~~~~~~~~~~~~
-
-Annual unmet loads are listed below.
-
-  ========================================  =====
-  Type                                      Notes
-  ========================================  =====
-  Unmet Loads: Hot Water Shower Energy (J)  TODO
-  Unmet Loads: Hot Water Shower Time (hr)   TODO
-  ========================================  =====
-
-TODO
 
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~

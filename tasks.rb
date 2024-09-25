@@ -2085,12 +2085,6 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
                                            water_heating_system_idref: nil, # Apply to all water heaters
                                            solar_fraction: 0.65)
     end
-    if ['base-dhw-multiple-undersized.xml'].include? hpxml_file
-      hpxml_bldg.water_heating_systems.each do |water_heating_system|
-        water_heating_system.heating_capacity = 5000 if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-        water_heating_system.temperature = 100.0 if [HPXML::WaterHeaterTypeHeatPump, HPXML::WaterHeaterTypeTankless].include?(water_heating_system.water_heater_type)
-      end
-    end
     if ['base-dhw-low-flow-fixtures.xml'].include? hpxml_file
       hpxml_bldg.water_fixtures[0].count = 2
       hpxml_bldg.water_fixtures[1].low_flow = nil

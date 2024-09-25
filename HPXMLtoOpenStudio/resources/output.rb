@@ -113,13 +113,7 @@ module UHT
   # Unmet Hours Types
   Heating = 'Heating'
   Cooling = 'Cooling'
-end
-
-# TODO
-module ULT
-  # Unmet Loads Types
-  HotWaterShowerE = 'Hot Water Shower Energy'
-  HotWaterShowerTime = 'Hot Water Shower Time'
+  HotWaterShower = 'Showers'
 end
 
 # TODO
@@ -928,31 +922,36 @@ module Outputs
     return if hpxml_osm_map.select { |hpxml_bldg, _unit_model| !hpxml_bldg.water_heating_systems.empty? }.empty?
 
     # Retrieve objects
-    shower_e_vars = []
-    shower_sag_time_vars = []
+    shower_unmet_time_vars = []
+    shower_time_vars = []
     unit_multipliers = []
     hpxml_osm_map.each do |hpxml_bldg, unit_model|
-      shower_e_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerE }
-      shower_sag_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerSagTime }
+      shower_unmet_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerUnmetTime }
+      shower_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerTime }
+
       unit_multipliers << hpxml_bldg.building_construction.number_of_units
     end
 
     # EMS program
-    total_shower_e = 'total_shower_e'
-    total_shower_sag_time = 'total_shower_sag_time'
-    unit_shower_sag_time = 'unit_shower_sag_time'
+    total_shower_unmet_time = 'total_shower_unmet_time'
+    total_shower_time = 'total_shower_time'
+    unit_shower_unmet_time = 'unit_shower_unmet_time'
+    unit_shower_time = 'unit_shower_time'
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('unmet loads program')
     program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsProgram)
-    program.addLine("Set #{total_shower_e} = 0")
-    program.addLine("Set #{total_shower_sag_time} = 0")
-    shower_e_vars.each_with_index do |shower_e_var, i|
-      program.addLine("Set total_shower_e = total_shower_e + (#{shower_e_var.name} * #{unit_multipliers[i]})")
+    program.addLine("Set #{total_shower_unmet_time} = 0")
+    program.addLine("Set #{total_shower_time} = 0")
+    shower_unmet_time_vars.each_with_index do |shower_unmet_time_var, _i|
+      program.addLine("Set #{unit_shower_unmet_time} = #{shower_unmet_time_var.name}")
+      program.addLine("  If #{unit_shower_unmet_time} > #{total_shower_unmet_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_unmet_time} = #{unit_shower_unmet_time}")
+      program.addLine('  EndIf')
     end
-    shower_sag_time_vars.each_with_index do |shower_sag_time_var, _i|
-      program.addLine("Set #{unit_shower_sag_time} = #{shower_sag_time_var.name}")
-      program.addLine("  If #{unit_shower_sag_time} > #{total_shower_sag_time}") # Use max hourly value across all units
-      program.addLine("    Set #{total_shower_sag_time} = #{unit_shower_sag_time}")
+    shower_time_vars.each_with_index do |shower_time_var, _i|
+      program.addLine("Set #{unit_shower_time} = #{shower_time_var.name}")
+      program.addLine("  If #{unit_shower_time} > #{total_shower_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_time} = #{unit_shower_time}")
       program.addLine('  EndIf')
     end
 

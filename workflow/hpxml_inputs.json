@@ -1386,9 +1386,6 @@
   "sample_files/base-dhw-multiple.xml": {
     "parent_hpxml": "sample_files/base-hvac-boiler-gas-only.xml"
   },
-  "sample_files/base-dhw-multiple-undersized.xml": {
-    "parent_hpxml": "sample_files/base-dhw-multiple.xml"
-  },
   "sample_files/base-dhw-none.xml": {
     "parent_hpxml": "sample_files/base.xml",
     "water_heater_type": "none",
@@ -1504,10 +1501,6 @@
     "water_heater_tank_volume": 80,
     "water_heater_efficiency": 2.3
   },
-  "sample_files/base-dhw-tank-heat-pump-undersized.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
-    "water_heater_setpoint_temperature": 100.0
-  },
   "sample_files/base-dhw-tank-heat-pump-outside.xml": {
     "parent_hpxml": "sample_files/base-dhw-tank-heat-pump.xml",
     "water_heater_location": "other exterior"
@@ -1579,10 +1572,6 @@
     "water_heater_fuel_type": "natural gas",
     "water_heater_efficiency": 0.82
   },
-  "sample_files/base-dhw-tankless-gas-undersized.xml": {
-    "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
-    "water_heater_setpoint_temperature": 100.0
-  },
   "sample_files/base-dhw-tankless-gas-uef.xml": {
     "parent_hpxml": "sample_files/base-dhw-tankless-gas.xml",
     "water_heater_efficiency_type": "UniformEnergyFactor",
@@ -1614,7 +1603,8 @@
   },
   "sample_files/base-dhw-undersized.xml": {
     "parent_hpxml": "sample_files/base.xml",
-    "water_heater_heating_capacity": 1100.0
+    "water_heater_heating_capacity": 1100.0,
+    "schedules_filepaths": "../../HPXMLtoOpenStudio/resources/schedule_files/occupancy-stochastic.csv"
   },
   "sample_files/base-enclosure-2stories.xml": {
     "parent_hpxml": "sample_files/base.xml",
