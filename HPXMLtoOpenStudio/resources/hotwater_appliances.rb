@@ -194,7 +194,7 @@ module HotWaterAndAppliances
     # Freezer(s) energy
     hpxml_bldg.freezers.each do |freezer|
       fz_space, fz_schedule = Geometry.get_space_or_schedule_from_location(freezer.location, model, spaces)
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_fridge_or_freezer_energy(freezer, fz_space.nil?)
+      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_fridge_or_freezer_energy(runner, freezer, fz_space.nil?)
 
       # Create schedule
       freezer_schedule = nil
