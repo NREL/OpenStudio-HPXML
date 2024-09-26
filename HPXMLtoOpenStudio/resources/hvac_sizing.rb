@@ -4175,7 +4175,7 @@ module HVACSizing
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param leakiness_description [String] Leakiness description to look up the infiltration ach value
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
-  # @return [Array<Float, Float>] Heating and cooling ACH values from Manual J Table 5A/5B
+  # @return [Array<Double, Double>] Heating and cooling ACH values from Manual J Table 5A/5B
   def self.get_mj_default_ach_values(hpxml_bldg, leakiness_description, cfa)
     ncfl_ag = hpxml_bldg.building_construction.number_of_conditioned_floors_above_grade
     # Manual J Table 5A

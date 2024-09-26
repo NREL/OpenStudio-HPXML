@@ -15,7 +15,7 @@ require 'fileutils'
 # @param measures [Hash] Map of OpenStudio-HPXML measure directory name => List of measure argument hashes
 # @param measures_dir [String] Parent directory path of all OpenStudio-HPXML measures
 # @param debug [Boolean] If true, reports info statements from the runner results
-# @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping forward transation and the simulation
+# @param run_measures_only [Boolean] True applies only OpenStudio Model measures, skipping forward translation and the simulation
 # @param ep_input_format [String] EnergyPlus input file format (idf, epjson)
 # @param suppress_print [Boolean] True reduces printed workflow output
 # @return [Hash] Map of 'success' and 'runner' results
@@ -384,7 +384,7 @@ end
 # Get the value from an OpenStudio Workflow step.
 #
 # @param step_value [OpenStudio::WorkflowStepValue] OpenStudio WorkflowStepValue
-# @return [Boolean or Float or Integer or String] the step value
+# @return [Boolean or Double or Integer or String] the step value
 def get_value_from_workflow_step_value(step_value)
   variant_type = step_value.variantType
   if variant_type == 'Boolean'.to_VariantType
