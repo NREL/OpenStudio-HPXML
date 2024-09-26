@@ -1460,9 +1460,9 @@ module HVAC
 
   # TODO
   #
-  # @param hvac_control [TODO] TODO
+  # @param hvac_control [HPXML::HVACControl] The HPXML HVAC control of interest
   # @param year [Integer] the calendar year
-  # @param offset_db [Float] On-off thermostat deadband (F)
+  # @param offset_db [Double] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_heating_setpoints(hvac_control, year, offset_db)
     num_days = Calendar.num_days_in_year(year)
@@ -1502,11 +1502,11 @@ module HVAC
 
   # TODO
   #
-  # @param hvac_control [TODO] TODO
+  # @param [HPXML::HVACControl] The HPXML HVAC control of interest
   # @param has_ceiling_fan [TODO] TODO
   # @param year [Integer] the calendar year
   # @param weather [WeatherFile] Weather object containing EPW information
-  # @param offset_db [Float] On-off thermostat deadband (F)
+  # @param offset_db [Double] On-off thermostat deadband (F)
   # @return [TODO] TODO
   def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather, offset_db)
     num_days = Calendar.num_days_in_year(year)
@@ -3659,8 +3659,8 @@ module HVAC
 
   # Return the time needed to reach full capacity based on c_d assumption, used for degradation EMS program.
   #
-  # @param c_d [Float] Degradation coefficient
-  # @return [Float] Time to reach full capacity (minutes)
+  # @param c_d [Double] Degradation coefficient
+  # @return [Double] Time to reach full capacity (minutes)
   def self.calc_time_to_full_cap(c_d)
     # assuming a linear relationship between points we have data for: 2 minutes at 0.08 and 5 minutes at 0.23
     time = (20.0 * c_d + 0.4).round
@@ -5092,10 +5092,10 @@ module HVAC
   #
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @param design_airflow [Float] Heat pump design air flow rate [cfm]
-  # @param max_heating_airflow [Float] Maximum heat pump heating air flow rate [cfm]
-  # @param fan_watts_per_cfm [Float] Heat pump watts per cfm [W/cfm]
-  # @return [Array<Float, Float>] Calculated delivered cooling q_dot and compressor power p_dot [W]
+  # @param design_airflow [Double] Heat pump design air flow rate [cfm]
+  # @param max_heating_airflow [Double] Maximum heat pump heating air flow rate [cfm]
+  # @param fan_watts_per_cfm [Double] Heat pump watts per cfm [W/cfm]
+  # @return [Array<Double, Double>] Calculated delivered cooling q_dot and compressor power p_dot [W]
   def self.calculate_heat_pump_defrost_load_power_watts(heat_pump, unit_multiplier, design_airflow, max_heating_airflow, fan_watts_per_cfm)
     # Calculate q_dot and p_dot
     # q_dot is used for EMS program to account for introduced cooling load and supp coil power consumption by actuating other equipment objects
@@ -5140,7 +5140,7 @@ module HVAC
   # @param conditioned_space [OpenStudio::Model::Space]  OpenStudio Space object for conditioned zone
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @param heat_pump [HPXML::HeatPump] HPXML Heat Pump object
-  # @param q_dot_defrost [Float] Calculated delivered cooling q_dot [W]
+  # @param q_dot_defrost [Double] Calculated delivered cooling q_dot [W]
   # @return [nil]
   def self.apply_advanced_defrost(model, htg_coil, air_loop_unitary, conditioned_space, htg_supp_coil, heat_pump, q_dot_defrost)
     if htg_supp_coil.nil?

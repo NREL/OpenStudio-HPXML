@@ -4096,17 +4096,17 @@ module HPXMLFile
     return true
   end
 
-  # Check if unavailable period already exists for given begin/end times
+  # Check if unavailable period already exists for given name and begin/end times.
   #
   # @param hpxml [HPXML] HPXML object
-  # @param column_name [TODO] TODO
-  # @param begin_month [TODO] TODO
-  # @param begin_day [TODO] TODO
-  # @param begin_hour [TODO] TODO
-  # @param end_month [TODO] TODO
-  # @param end_day [TODO] TODO
-  # @param end_hour [TODO] TODO
-  # @param natvent_availability [TODO] TODO
+  # @param column_name [String] Column name associated with unavailable_periods.csv
+  # @param begin_month [Integer] Unavailable period begin month
+  # @param begin_day [Integer] Unavailable period begin day
+  # @param begin_hour [Integer] Unavailable period begin hour
+  # @param end_month [Integer] Unavailable period end month
+  # @param end_day [Integer] Unavailable period end day
+  # @param end_hour [Integer] Unavailable period end hour
+  # @param natvent_availability [String] Natural ventilation availability (HXPML::ScheduleXXX)
   # @return [Boolean] True if the unavailability period already exists
   def self.unavailable_period_exists(hpxml, column_name, begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability = nil)
     natvent_availability = HPXML::ScheduleUnavailable if natvent_availability.nil?

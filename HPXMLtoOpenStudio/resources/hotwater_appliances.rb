@@ -2,7 +2,7 @@
 
 # Collection of methods related to hot water use and appliances.
 module HotWaterAndAppliances
-  # TODO
+  # Adds HPXML HotWaterDistribution, WaterFixtures, and Appliances to the OpenStudio model.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -11,10 +11,9 @@ module HotWaterAndAppliances
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param plantloop_map [TODO] TODO
-  # @return [TODO] TODO
+  # @param plantloop_map [Hash] Map of HPXML System ID => OpenStudio PlantLoop objects
+  # @return [nil]
   def self.apply(runner, model, weather, spaces, hpxml_bldg, hpxml_header, schedules_file, plantloop_map)
-    @runner = runner
     cfa = hpxml_bldg.building_construction.conditioned_floor_area
     ncfl = hpxml_bldg.building_construction.number_of_conditioned_floors
     has_uncond_bsmnt = hpxml_bldg.has_location(HPXML::LocationBasementUnconditioned)
@@ -57,7 +56,7 @@ module HotWaterAndAppliances
     # Clothes washer energy
     if not clothes_washer.nil?
       cw_space = Geometry.get_space_from_location(clothes_washer.location, spaces)
-      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, cw_space.nil?, n_occ)
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(runner, eri_version, nbeds, clothes_washer, cw_space.nil?, n_occ)
 
       # Create schedule
       cw_power_schedule = nil
@@ -88,7 +87,7 @@ module HotWaterAndAppliances
     # Clothes dryer energy
     if not clothes_dryer.nil?
       cd_space = Geometry.get_space_from_location(clothes_dryer.location, spaces)
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, cd_space.nil?, n_occ)
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(runner, eri_version, nbeds, clothes_dryer, clothes_washer, cd_space.nil?, n_occ)
 
       # Create schedule
       cd_schedule = nil
@@ -122,7 +121,7 @@ module HotWaterAndAppliances
     # Dishwasher energy
     if not dishwasher.nil?
       dw_space = Geometry.get_space_from_location(dishwasher.location, spaces)
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dw_space.nil?, n_occ)
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(runner, eri_version, nbeds, dishwasher, dw_space.nil?, n_occ)
 
       # Create schedule
       dw_power_schedule = nil
@@ -153,7 +152,7 @@ module HotWaterAndAppliances
     # Refrigerator(s) energy
     hpxml_bldg.refrigerators.each do |refrigerator|
       rf_space, rf_schedule = Geometry.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_fridge_or_freezer_energy(refrigerator, rf_space.nil?)
+      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_fridge_or_freezer_energy(runner, refrigerator, rf_space.nil?)
 
       # Create schedule
       fridge_schedule = nil
@@ -237,7 +236,7 @@ module HotWaterAndAppliances
     # Cooking Range energy
     if not cooking_range.nil?
       cook_space = Geometry.get_space_from_location(cooking_range.location, spaces)
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds_eq, cooking_range, oven, cook_space.nil?)
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(runner, nbeds_eq, cooking_range, oven, cook_space.nil?)
 
       # Create schedule
       cook_schedule = nil
@@ -302,7 +301,7 @@ module HotWaterAndAppliances
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
       hpxml_bldg.water_heating_systems.each do |water_heating_system|
         wh_setpoint = water_heating_system.temperature
-        wh_setpoint = Waterheater.get_default_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
+        wh_setpoint = HPXMLDefaults.get_default_water_heater_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
@@ -457,20 +456,13 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @return [TODO] TODO
-  def self.get_range_oven_default_values()
-    return { is_induction: false,
-             is_convection: false }
-  end
-
-  # TODO
-  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
   # @param cooking_range [TODO] TODO
   # @param oven [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_range_oven_energy(nbeds_eq, cooking_range, oven, is_outside = false)
+  def self.calc_range_oven_energy(runner, nbeds_eq, cooking_range, oven, is_outside = false)
     if cooking_range.is_induction
       burner_ef = 0.91
     else
@@ -506,8 +498,8 @@ module HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    if not @runner.nil?
-      @runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    if not runner.nil?
+      runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
     end
     annual_kwh = 0.0 if annual_kwh < 0
     annual_therm = 0.0 if annual_therm < 0
@@ -517,35 +509,14 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_dishwasher_default_values(eri_version)
-    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
-      return { rated_annual_kwh: 467.0, # kWh/yr
-               label_electric_rate: 0.12, # $/kWh
-               label_gas_rate: 1.09, # $/therm
-               label_annual_gas_cost: 33.12, # $
-               label_usage: 4.0, # cyc/week
-               place_setting_capacity: 12.0 }
-    else
-      return { rated_annual_kwh: 467.0, # kWh/yr
-               label_electric_rate: 999, # unused
-               label_gas_rate: 999, # unused
-               label_annual_gas_cost: 999, # unused
-               label_usage: 999, # unused
-               place_setting_capacity: 12.0 }
-    end
-  end
-
-  # TODO
-  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param dishwasher [TODO] TODO
   # @param is_outside [TODO] TODO
   # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
-  def self.calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, is_outside = false, n_occ = nil)
+  def self.calc_dishwasher_energy_gpd(runner, eri_version, nbeds, dishwasher, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       if dishwasher.rated_annual_kwh.nil?
         dishwasher.rated_annual_kwh = calc_dishwasher_annual_kwh_from_ef(dishwasher.energy_factor)
@@ -587,9 +558,9 @@ module HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    if not @runner.nil?
-      @runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
-      @runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
+    if not runner.nil?
+      runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
     end
     annual_kwh = 0.0 if annual_kwh < 0
     gpd = 0.0 if gpd < 0
@@ -615,47 +586,7 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @return [TODO] TODO
-  def self.get_refrigerator_default_values(nbeds)
-    return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_extra_refrigerator_default_values
-    return { rated_annual_kwh: 243.6 } # kWh/yr
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_freezer_default_values
-    return { rated_annual_kwh: 319.8 } # kWh/yr
-  end
-
-  # TODO
-  #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param fuel_type [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_clothes_dryer_default_values(eri_version, fuel_type)
-    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
-      return { combined_energy_factor: 3.01 }
-    else
-      if fuel_type == HPXML::FuelTypeElectricity
-        return { combined_energy_factor: 2.62,
-                 control_type: HPXML::ClothesDryerControlTypeTimer }
-      else
-        return { combined_energy_factor: 2.32,
-                 control_type: HPXML::ClothesDryerControlTypeTimer }
-      end
-    end
-  end
-
-  # TODO
-  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param clothes_dryer [TODO] TODO
@@ -663,7 +594,7 @@ module HotWaterAndAppliances
   # @param is_outside [TODO] TODO
   # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
-  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false, n_occ = nil)
+  def self.calc_clothes_dryer_energy(runner, eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
         clothes_dryer.combined_energy_factor = calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
@@ -722,8 +653,8 @@ module HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    if not @runner.nil?
-      @runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    if not runner.nil?
+      runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
     end
     annual_kwh = 0.0 if annual_kwh < 0
     annual_therm = 0.0 if annual_therm < 0
@@ -749,37 +680,14 @@ module HotWaterAndAppliances
 
   # TODO
   #
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_clothes_washer_default_values(eri_version)
-    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
-      return { integrated_modified_energy_factor: 1.0, # ft3/(kWh/cyc)
-               rated_annual_kwh: 400.0, # kWh/yr
-               label_electric_rate: 0.12, # $/kWh
-               label_gas_rate: 1.09, # $/therm
-               label_annual_gas_cost: 27.0, # $
-               capacity: 3.0, # ft^3
-               label_usage: 6.0 } # cyc/week
-    else
-      return { integrated_modified_energy_factor: 0.331, # ft3/(kWh/cyc)
-               rated_annual_kwh: 704.0, # kWh/yr
-               label_electric_rate: 0.08, # $/kWh
-               label_gas_rate: 0.58, # $/therm
-               label_annual_gas_cost: 23.0, # $
-               capacity: 2.874, # ft^3
-               label_usage: 999 } # unused
-    end
-  end
-
-  # TODO
-  #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @param clothes_washer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @param n_occ [Double] Number of occupants in the dwelling unit
   # @return [TODO] TODO
-  def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, is_outside = false, n_occ = nil)
+  def self.calc_clothes_washer_energy_gpd(runner, eri_version, nbeds, clothes_washer, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       gas_h20 = 0.3914 # (gal/cyc) per (therm/y)
       elec_h20 = 0.0178 # (gal/cyc) per (kWh/y)
@@ -817,9 +725,9 @@ module HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    if not @runner.nil?
-      @runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
-      @runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
+    if not runner.nil?
+      runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
     end
     annual_kwh = 0.0 if annual_kwh < 0
     gpd = 0.0 if gpd < 0
@@ -845,10 +753,11 @@ module HotWaterAndAppliances
 
   # TODO
   #
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param fridge_or_freezer [TODO] TODO
   # @param is_outside [TODO] TODO
   # @return [TODO] TODO
-  def self.calc_fridge_or_freezer_energy(fridge_or_freezer, is_outside = false)
+  def self.calc_fridge_or_freezer_energy(runner, fridge_or_freezer, is_outside = false)
     # Get values
     annual_kwh = fridge_or_freezer.rated_annual_kwh
     annual_kwh *= fridge_or_freezer.usage_multiplier
@@ -860,8 +769,8 @@ module HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    if not @runner.nil?
-      @runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+    if not runner.nil?
+      runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
     end
     annual_kwh = 0.0 if annual_kwh < 0
 
@@ -930,59 +839,6 @@ module HotWaterAndAppliances
     schedule_pcm.addProgram(schedule_program)
 
     return schedule
-  end
-
-  # TODO
-  #
-  # @param has_uncond_bsmnt [TODO] TODO
-  # @param has_cond_bsmnt [TODO] TODO
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
-  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
-  # @return [TODO] TODO
-  def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-    bsmnt = 0
-    if has_uncond_bsmnt && (not has_cond_bsmnt)
-      bsmnt = 1
-    end
-
-    return 2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt # Eq. 4.2-13 (refPipeL)
-  end
-
-  # TODO
-  #
-  # @param std_pipe_length [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_recirc_loop_length(std_pipe_length)
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-    return 2.0 * std_pipe_length - 20.0 # Eq. 4.2-17 (refLoopL)
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_recirc_branch_loop_length()
-    return 10.0 # ft
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_recirc_pump_power()
-    return 50.0 # Watts
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_shared_recirc_pump_power()
-    # From ANSI/RESNET 301-2019 Equation 4.2-15b
-    pump_horsepower = 0.25
-    motor_efficiency = 0.85
-    pump_kw = pump_horsepower * 0.746 / motor_efficiency
-    return UnitConversions.convert(pump_kw, 'kW', 'W')
   end
 
   # TODO
@@ -1284,7 +1140,7 @@ module HotWaterAndAppliances
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       p_ratio = hot_water_distribution.recirculation_branch_piping_length / 10.0
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
-      ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+      ref_pipe_l = HPXMLDefaults.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
       p_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     end
 
@@ -1303,26 +1159,5 @@ module HotWaterAndAppliances
     mw_gpd = f_eff * (o_w_gpd + s_w_gpd * wd_eff) # Eq. 4.2-11
 
     return mw_gpd * fixtures_usage_multiplier
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
-  def self.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
-    extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
-                                             HPXML::LocationBasementUnconditioned,
-                                             HPXML::LocationBasementConditioned,
-                                             HPXML::LocationConditionedSpace]
-
-    extra_refrigerator_location = nil
-    extra_refrigerator_location_hierarchy.each do |location|
-      if hpxml_bldg.has_location(location)
-        extra_refrigerator_location = location
-        break
-      end
-    end
-
-    return extra_refrigerator_location
   end
 end

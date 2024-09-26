@@ -1656,7 +1656,7 @@ class SchedulesFile
 
   # Convert detailed setpoint schedule values from F to C.
   #
-  # @param offset_db [Float] On-off thermostat deadband
+  # @param offset_db [Double] On-off thermostat deadband
   # @return [nil]
   def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }

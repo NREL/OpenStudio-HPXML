@@ -882,7 +882,7 @@ module HPXMLDefaults
       hpxml_bldg.building_construction.conditioned_building_volume_isdefaulted = true
     end
     if hpxml_bldg.building_construction.number_of_bathrooms.nil?
-      hpxml_bldg.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i
+      hpxml_bldg.building_construction.number_of_bathrooms = Float(get_default_num_bathrooms(nbeds)).to_i
       hpxml_bldg.building_construction.number_of_bathrooms_isdefaulted = true
     end
     if hpxml_bldg.building_construction.number_of_units.nil?
@@ -985,7 +985,7 @@ module HPXMLDefaults
       vented_attics.each do |vented_attic|
         next unless (vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?)
 
-        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic.vented_attic_sla = get_default_vented_attic_sla()
         vented_attic.vented_attic_sla_isdefaulted = true
       end
       if vented_attics.map { |a| a.vented_attic_sla }.uniq.size != 1
@@ -1048,7 +1048,7 @@ module HPXMLDefaults
       vented_crawls.each do |vented_crawl|
         next unless vented_crawl.vented_crawlspace_sla.nil?
 
-        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl.vented_crawlspace_sla = get_default_vented_crawl_sla()
         vented_crawl.vented_crawlspace_sla_isdefaulted = true
       end
       if vented_crawls.map { |f| f.vented_crawlspace_sla }.uniq.size != 1
@@ -1150,7 +1150,7 @@ module HPXMLDefaults
         fnd_type_fracs[foundation_type] /= sum_fnd_area unless sum_fnd_area == 0.0
       end
 
-      ach50 = Airflow.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
+      ach50 = get_default_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz, fnd_type_fracs, duct_loc_fracs, infil_measurement.leakiness_description)
       infil_measurement.house_pressure = 50
       infil_measurement.house_pressure_isdefaulted = true
       infil_measurement.unit_of_measure = HPXML::UnitsACH
@@ -1643,7 +1643,7 @@ module HPXMLDefaults
         end
       end
       if window.fraction_operable.nil?
-        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
+        window.fraction_operable = get_default_fraction_of_windows_operable()
         window.fraction_operable_isdefaulted = true
       end
       next unless window.insect_screen_present
@@ -2598,7 +2598,7 @@ module HPXMLDefaults
       hvac_distribution.ducts.each do |ducts|
         next unless ducts.duct_effective_r_value.nil?
 
-        ducts.duct_effective_r_value = Airflow.get_duct_effective_r_value(ducts.duct_insulation_r_value,
+        ducts.duct_effective_r_value = get_default_duct_effective_r_value(ducts.duct_insulation_r_value,
                                                                           ducts.duct_type,
                                                                           ducts.duct_buried_insulation_level,
                                                                           ducts.duct_fraction_rectangular)
@@ -2670,7 +2670,7 @@ module HPXMLDefaults
         elsif dist_type == HPXML::HVACDistributionTypeHydronic
           # Assume same default logic as a water heater
           iecc_zone = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty? ? nil : hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
-          hvac_system.location = Waterheater.get_default_location(hpxml_bldg, iecc_zone)
+          hvac_system.location = get_default_water_heater_location(hpxml_bldg, iecc_zone)
         elsif dist_type == HPXML::HVACDistributionTypeDSE
           # DSE=1 implies distribution system in conditioned space
           has_dse_of_one = true
@@ -2716,12 +2716,13 @@ module HPXMLDefaults
           fail 'Defaulting flow rates for multiple mechanical ventilation systems is currently not supported.'
         end
 
-        vent_fan.rated_flow_rate = Airflow.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, eri_version).round(1)
+        vent_fan.rated_flow_rate = get_default_mech_vent_flow_rate_for_vent_fan(hpxml_bldg, vent_fan, weather, eri_version).round(1)
         vent_fan.rated_flow_rate_isdefaulted = true
       end
 
       if vent_fan.fan_power.nil?
-        vent_fan.fan_power = (vent_fan.flow_rate * Airflow.get_default_mech_vent_fan_power(vent_fan, eri_version)).round(1)
+        fan_w_per_cfm = get_default_mech_vent_fan_efficiency(vent_fan, eri_version)
+        vent_fan.fan_power = (vent_fan.flow_rate * fan_w_per_cfm).round(1)
         vent_fan.fan_power_isdefaulted = true
       end
       next unless vent_fan.fan_type == HPXML::MechVentTypeCFIS
@@ -2818,11 +2819,11 @@ module HPXMLDefaults
       end
       schedules_file_includes_water_heater_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:WaterHeaterSetpoint].name))
       if water_heating_system.temperature.nil? && !schedules_file_includes_water_heater_setpoint_temp
-        water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
+        water_heating_system.temperature = get_default_water_heater_temperature(eri_version)
         water_heating_system.temperature_isdefaulted = true
       end
       if water_heating_system.performance_adjustment.nil?
-        water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
+        water_heating_system.performance_adjustment = get_default_water_heater_performance_adjustment(water_heating_system)
         water_heating_system.performance_adjustment_isdefaulted = true
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss_value.nil?
@@ -2838,15 +2839,15 @@ module HPXMLDefaults
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
-          water_heating_system.heating_capacity = (Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, nbeds, hpxml_bldg.water_heating_systems.size, hpxml_bldg.building_construction.number_of_bathrooms) * 1000.0).round
+          water_heating_system.heating_capacity = (get_default_water_heater_heating_capacity(water_heating_system.fuel_type, nbeds, hpxml_bldg.water_heating_systems.size, hpxml_bldg.building_construction.number_of_bathrooms) * 1000.0).round
           water_heating_system.heating_capacity_isdefaulted = true
         end
         if water_heating_system.tank_volume.nil?
-          water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml_bldg.building_construction.number_of_bathrooms)
+          water_heating_system.tank_volume = get_default_water_heater_tank_volume(water_heating_system.fuel_type, nbeds, hpxml_bldg.building_construction.number_of_bathrooms)
           water_heating_system.tank_volume_isdefaulted = true
         end
         if water_heating_system.recovery_efficiency.nil?
-          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
+          water_heating_system.recovery_efficiency = get_default_water_heater_recovery_efficiency(water_heating_system)
           water_heating_system.recovery_efficiency_isdefaulted = true
         end
         if water_heating_system.tank_model_type.nil?
@@ -2863,13 +2864,13 @@ module HPXMLDefaults
       end
       if water_heating_system.location.nil?
         iecc_zone = hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs.empty? ? nil : hpxml_bldg.climate_and_risk_zones.climate_zone_ieccs[0].zone
-        water_heating_system.location = Waterheater.get_default_location(hpxml_bldg, iecc_zone)
+        water_heating_system.location = get_default_water_heater_location(hpxml_bldg, iecc_zone)
         water_heating_system.location_isdefaulted = true
       end
       next unless water_heating_system.usage_bin.nil? && (not water_heating_system.uniform_energy_factor.nil?) # FHR & UsageBin only applies to UEF
 
       if not water_heating_system.first_hour_rating.nil?
-        water_heating_system.usage_bin = Waterheater.get_usage_bin_from_first_hour_rating(water_heating_system.first_hour_rating)
+        water_heating_system.usage_bin = get_default_water_heater_usage_bin(water_heating_system.first_hour_rating)
       else
         water_heating_system.usage_bin = HPXML::WaterHeaterUsageBinMedium
       end
@@ -2912,27 +2913,27 @@ module HPXMLDefaults
 
     if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
       if hot_water_distribution.standard_piping_length.nil?
-        hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+        hot_water_distribution.standard_piping_length = get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
         hot_water_distribution.standard_piping_length_isdefaulted = true
       end
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       if hot_water_distribution.recirculation_piping_loop_length.nil?
-        hot_water_distribution.recirculation_piping_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl))
+        hot_water_distribution.recirculation_piping_loop_length = get_default_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
         hot_water_distribution.recirculation_piping_loop_length_isdefaulted = true
       end
       if hot_water_distribution.recirculation_branch_piping_length.nil?
-        hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()
+        hot_water_distribution.recirculation_branch_piping_length = get_default_recirc_branch_length()
         hot_water_distribution.recirculation_branch_piping_length_isdefaulted = true
       end
       if hot_water_distribution.recirculation_pump_power.nil?
-        hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
+        hot_water_distribution.recirculation_pump_power = get_default_recirc_pump_power()
         hot_water_distribution.recirculation_pump_power_isdefaulted = true
       end
     end
 
     if hot_water_distribution.has_shared_recirculation
       if hot_water_distribution.shared_recirculation_pump_power.nil?
-        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
+        hot_water_distribution.shared_recirculation_pump_power = get_default_shared_recirc_pump_power()
         hot_water_distribution.shared_recirculation_pump_power_isdefaulted = true
       end
     end
@@ -3026,7 +3027,7 @@ module HPXMLDefaults
         solar_thermal_system.collector_orientation_isdefaulted = true
       end
       if solar_thermal_system.storage_volume.nil? && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-        solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(solar_thermal_system.collector_area)
+        solar_thermal_system.storage_volume = calc_default_solar_thermal_system_storage_volume(solar_thermal_system.collector_area)
         solar_thermal_system.storage_volume_isdefaulted = true
       end
     end
@@ -3175,7 +3176,7 @@ module HPXMLDefaults
         clothes_washer.location_isdefaulted = true
       end
       if clothes_washer.rated_annual_kwh.nil?
-        default_values = HotWaterAndAppliances.get_clothes_washer_default_values(eri_version)
+        default_values = get_clothes_washer_default_values(eri_version)
         clothes_washer.integrated_modified_energy_factor = default_values[:integrated_modified_energy_factor]
         clothes_washer.integrated_modified_energy_factor_isdefaulted = true
         clothes_washer.rated_annual_kwh = default_values[:rated_annual_kwh]
@@ -3213,6 +3214,7 @@ module HPXMLDefaults
     # Default clothes dryer
     if hpxml_bldg.clothes_dryers.size > 0
       clothes_dryer = hpxml_bldg.clothes_dryers[0]
+      default_values = get_clothes_dryer_default_values(eri_version, clothes_dryer.fuel_type)
       if clothes_dryer.is_shared_appliance.nil?
         clothes_dryer.is_shared_appliance = false
         clothes_dryer.is_shared_appliance_isdefaulted = true
@@ -3222,12 +3224,10 @@ module HPXMLDefaults
         clothes_dryer.location_isdefaulted = true
       end
       if clothes_dryer.combined_energy_factor.nil? && clothes_dryer.energy_factor.nil?
-        default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(eri_version, clothes_dryer.fuel_type)
         clothes_dryer.combined_energy_factor = default_values[:combined_energy_factor]
         clothes_dryer.combined_energy_factor_isdefaulted = true
       end
       if clothes_dryer.control_type.nil?
-        default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(eri_version, clothes_dryer.fuel_type)
         clothes_dryer.control_type = default_values[:control_type]
         clothes_dryer.control_type_isdefaulted = true
       end
@@ -3270,7 +3270,7 @@ module HPXMLDefaults
         dishwasher.location_isdefaulted = true
       end
       if dishwasher.place_setting_capacity.nil?
-        default_values = HotWaterAndAppliances.get_dishwasher_default_values(eri_version)
+        default_values = get_dishwasher_default_values(eri_version)
         dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
         dishwasher.rated_annual_kwh_isdefaulted = true
         dishwasher.label_electric_rate = default_values[:label_electric_rate]
@@ -3312,11 +3312,11 @@ module HPXMLDefaults
       schedules_includes_fractions_multipliers = (!refrigerator.weekday_fractions.nil? || !refrigerator.weekend_fractions.nil? || !refrigerator.monthly_multipliers.nil?)
       if not refrigerator.primary_indicator # extra refrigerator
         if refrigerator.location.nil?
-          refrigerator.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
+          refrigerator.location = get_default_freezer_or_extra_fridge_location(hpxml_bldg)
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
-          default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values
+          default_values = get_extra_refrigerator_default_values()
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
@@ -3352,7 +3352,7 @@ module HPXMLDefaults
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
-          default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
+          default_values = get_refrigerator_default_values(nbeds)
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
@@ -3392,11 +3392,11 @@ module HPXMLDefaults
     # Default freezer
     hpxml_bldg.freezers.each do |freezer|
       if freezer.location.nil?
-        freezer.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml_bldg)
+        freezer.location = get_default_freezer_or_extra_fridge_location(hpxml_bldg)
         freezer.location_isdefaulted = true
       end
       if freezer.rated_annual_kwh.nil?
-        default_values = HotWaterAndAppliances.get_freezer_default_values
+        default_values = get_freezer_default_values()
         freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
         freezer.rated_annual_kwh_isdefaulted = true
       end
@@ -3430,7 +3430,7 @@ module HPXMLDefaults
         cooking_range.location_isdefaulted = true
       end
       if cooking_range.is_induction.nil?
-        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        default_values = get_range_oven_default_values()
         cooking_range.is_induction = default_values[:is_induction]
         cooking_range.is_induction_isdefaulted = true
       end
@@ -3457,7 +3457,7 @@ module HPXMLDefaults
     if hpxml_bldg.ovens.size > 0
       oven = hpxml_bldg.ovens[0]
       if oven.is_convection.nil?
-        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        default_values = get_range_oven_default_values()
         oven.is_convection = default_values[:is_convection]
         oven.is_convection_isdefaulted = true
       end
@@ -3950,7 +3950,18 @@ module HPXMLDefaults
     return all_zone_loads, all_space_loads
   end
 
-  # Converts an HPXML orientation to an HPXML azimuth.
+  # Removes any zones/spaces that were automatically created in the add_zones_spaces_if_needed method.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [nil]
+  def self.cleanup_zones_spaces(hpxml_bldg)
+    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants::AutomaticallyAdded }
+    auto_space.delete if not auto_space.nil?
+    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants::AutomaticallyAdded }
+    auto_zone.delete if not auto_zone.nil?
+  end
+
+  # Gets the HPXML azimuth corresponding to an HPXML orientation.
   #
   # @param orientation [String] HPXML orientation enumeration
   # @return [Integer] Azimuth (degrees)
@@ -3978,7 +3989,7 @@ module HPXMLDefaults
     fail "Unexpected orientation: #{orientation}."
   end
 
-  # Converts an HPXML azimuth to a closest HPXML orientation.
+  # Gets the closest HPXML orientation corresponding to an HPXML azimuth.
   #
   # @param azimuth [Integer] (degrees)
   # @return [String] HPXML orientation enumeration
@@ -4247,18 +4258,7 @@ module HPXMLDefaults
     return weather.header.StateProvinceRegion.upcase
   end
 
-  # Removes any zones/spaces that were automatically created in the add_zones_spaces_if_needed method.
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [nil]
-  def self.cleanup_zones_spaces(hpxml_bldg)
-    auto_space = hpxml_bldg.conditioned_spaces.find { |space| space.id.start_with? Constants::AutomaticallyAdded }
-    auto_space.delete if not auto_space.nil?
-    auto_zone = hpxml_bldg.conditioned_zones.find { |zone| zone.id.start_with? Constants::AutomaticallyAdded }
-    auto_zone.delete if not auto_zone.nil?
-  end
-
-  # Get the default weekday/weekend schedule fractions and monthly multipliers for each end use.
+  # Gets the default weekday/weekend schedule fractions and monthly multipliers for each end use.
   #
   # @return [Hash] { schedule_name => { element => values, ... }, ... }
   def self.get_default_schedules_csv_data()
@@ -4296,10 +4296,10 @@ module HPXMLDefaults
     return $zip_csv_data
   end
 
-  # Get the default TMY3 EPW weather station for the specified zipcode. If the exact
+  # Gets the default TMY3 EPW weather station for the specified zipcode. If the exact
   # zipcode is not found, we find the closest zipcode that shares the first 3 digits.
   #
-  # @param zipcode [string] Zipcode of interest
+  # @param zipcode [String] Zipcode of interest
   # @return [Hash] Mapping with keys for every column name in zipcode_weather_stations.csv
   def self.lookup_weather_data_from_zipcode(zipcode)
     begin
@@ -4348,9 +4348,9 @@ module HPXMLDefaults
     return weather_station
   end
 
-  # Get the default TMY3 EPW weather station for the specified WMO.
+  # Gets the default TMY3 EPW weather station for the specified WMO.
   #
-  # @param wmo [string] Weather station World Meteorological Organization (WMO) number
+  # @param wmo [String] Weather station World Meteorological Organization (WMO) number
   # @return [Hash or nil] Mapping with keys for every column name in zipcode_weather_stations.csv if WMO is found, otherwise nil
   def self.lookup_weather_data_from_wmo(wmo)
     zip_csv_data = get_weather_station_csv_data()
@@ -4377,5 +4377,674 @@ module HPXMLDefaults
     end
 
     return
+  end
+
+  # Gets the default number of bathrooms in the dwelling unit.
+  #
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Number of bathrooms
+  def self.get_default_num_bathrooms(nbeds)
+    nbaths = nbeds / 2.0 + 0.5 # From BA HSP
+    return nbaths
+  end
+
+  # Gets the default properties for cooking ranges/ovens.
+  #
+  # @return [Hash] Map of property type => value
+  def self.get_range_oven_default_values()
+    return { is_induction: false,
+             is_convection: false }
+  end
+
+  # Gets the default properties for dishwashers.
+  #
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Hash] Map of property type => value
+  def self.get_dishwasher_default_values(eri_version)
+    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
+      return { rated_annual_kwh: 467.0, # kWh/yr
+               label_electric_rate: 0.12, # $/kWh
+               label_gas_rate: 1.09, # $/therm
+               label_annual_gas_cost: 33.12, # $
+               label_usage: 4.0, # cyc/week
+               place_setting_capacity: 12.0 }
+    else
+      return { rated_annual_kwh: 467.0, # kWh/yr
+               label_electric_rate: 999, # unused
+               label_gas_rate: 999, # unused
+               label_annual_gas_cost: 999, # unused
+               label_usage: 999, # unused
+               place_setting_capacity: 12.0 }
+    end
+  end
+
+  # Gets the default properties for refrigerators.
+  #
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Hash] Map of property type => value
+  def self.get_refrigerator_default_values(nbeds)
+    return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
+  end
+
+  # Gets the default properties for extra refrigerators.
+  #
+  # @return [Hash] Map of property type => value
+  def self.get_extra_refrigerator_default_values()
+    return { rated_annual_kwh: 243.6 } # kWh/yr
+  end
+
+  # Gets the default properties for freezers.
+  #
+  # @return [Hash] Map of property type => value
+  def self.get_freezer_default_values()
+    return { rated_annual_kwh: 319.8 } # kWh/yr
+  end
+
+  # Gets the default properties for clothes dryers.
+  #
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param fuel_type [String] HPXML fuel type (HPXML::FuelTypeXXX)
+  # @return [Hash] Map of property type => value
+  def self.get_clothes_dryer_default_values(eri_version, fuel_type)
+    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
+      return { combined_energy_factor: 3.01 }
+    else
+      if fuel_type == HPXML::FuelTypeElectricity
+        return { combined_energy_factor: 2.62,
+                 control_type: HPXML::ClothesDryerControlTypeTimer }
+      else
+        return { combined_energy_factor: 2.32,
+                 control_type: HPXML::ClothesDryerControlTypeTimer }
+      end
+    end
+  end
+
+  # Gets the default properties for clothes washers.
+  #
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Hash] Map of property type => value
+  def self.get_clothes_washer_default_values(eri_version)
+    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
+      return { integrated_modified_energy_factor: 1.0, # ft3/(kWh/cyc)
+               rated_annual_kwh: 400.0, # kWh/yr
+               label_electric_rate: 0.12, # $/kWh
+               label_gas_rate: 1.09, # $/therm
+               label_annual_gas_cost: 27.0, # $
+               capacity: 3.0, # ft^3
+               label_usage: 6.0 } # cyc/week
+    else
+      return { integrated_modified_energy_factor: 0.331, # ft3/(kWh/cyc)
+               rated_annual_kwh: 704.0, # kWh/yr
+               label_electric_rate: 0.08, # $/kWh
+               label_gas_rate: 0.58, # $/therm
+               label_annual_gas_cost: 23.0, # $
+               capacity: 2.874, # ft^3
+               label_usage: 999 } # unused
+    end
+  end
+
+  # Gets the default piping length for a standard hot water distribution system.
+  #
+  # Per ANSI 301-2022, the length of hot water piping from the hot water heater to the farthest
+  # hot water fixture, measured longitudinally from plans, assuming the hot water piping does
+  # not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for
+  # unconditioned basements (if any).
+  #
+  # @param has_uncond_bsmnt [Boolean] Whether the dwelling unit has an unconditioned basement
+  # @param has_cond_bsmnt [Boolean] Whether the dwelling unit has a conditioned basement
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @return [Double] Piping length (ft)
+  def self.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+    bsmnt = 0
+    if has_uncond_bsmnt && (not has_cond_bsmnt)
+      bsmnt = 1
+    end
+
+    return 2.0 * (cfa / ncfl)**0.5 + 10.0 * ncfl + 5.0 * bsmnt # PipeL in ANSI 301
+  end
+
+  # Gets the default loop piping length for a recirculation hot water distribution system.
+  #
+  # Per ANSI 301-2022, the recirculation loop length including both supply and return sides,
+  # measured longitudinally from plans, assuming the hot water piping does not run diagonally,
+  # plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for
+  # unconditioned basements.
+  #
+  # @param has_uncond_bsmnt [Boolean] Whether the dwelling unit has an unconditioned basement
+  # @param has_cond_bsmnt [Boolean] Whether the dwelling unit has a conditioned basement
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
+  # @return [Double] Piping length (ft)
+  def self.get_default_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+    std_pipe_length = get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+    return 2.0 * std_pipe_length - 20.0 # refLoopL in ANSI 301
+  end
+
+  # Gets the default branch piping length for a recirculation hot water distribution system.
+  #
+  # Per ANSI 301-2022, the length of the branch hot water piping from the recirculation loop
+  # to the farthest hot water fixture from the recirculation loop, measured longitudinally
+  # from plans, assuming the branch hot water piping does not run diagonally.
+  #
+  # @return [Double] Piping length (ft)
+  def self.get_default_recirc_branch_length()
+    return 10.0 # See pRatio in ANSI 301
+  end
+
+  # Gets the default pump power for a recirculation system.
+  #
+  # @return [Double] Pump power (W)
+  def self.get_default_recirc_pump_power()
+    return 50.0 # See pumpW in ANSI 301
+  end
+
+  # Gets the default pump power for a shared recirculation system.
+  #
+  # @return [Double] Pump power (W)
+  def self.get_default_shared_recirc_pump_power()
+    # From ANSI/RESNET 301-2019 Equation 4.2-15b
+    pump_horsepower = 0.25
+    motor_efficiency = 0.85
+    pump_kw = pump_horsepower * 0.746 / motor_efficiency
+    return UnitConversions.convert(pump_kw, 'kW', 'W')
+  end
+
+  # Gets the default location for a freezer or extra refrigerator.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [String] Appliance location (HPXML::LocationXXX)
+  def self.get_default_freezer_or_extra_fridge_location(hpxml_bldg)
+    extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
+                                             HPXML::LocationBasementUnconditioned,
+                                             HPXML::LocationBasementConditioned,
+                                             HPXML::LocationConditionedSpace]
+
+    extra_refrigerator_location = nil
+    extra_refrigerator_location_hierarchy.each do |location|
+      if hpxml_bldg.has_location(location)
+        extra_refrigerator_location = location
+        break
+      end
+    end
+
+    return extra_refrigerator_location
+  end
+
+  # Gets the default fraction of window area that is associated with operable windows.
+  #
+  # If a HPXML Window represents a single window, the value should be 0 or 1. If a HPXML
+  # Window represents multiple windows, the value is calculated as the total window area
+  # for any operable windows divided by the total window area.
+  #
+  # @return [Double] Operable fraction (frac)
+  def self.get_default_fraction_of_windows_operable()
+    return 0.67 # 67% per ANSI 301-2025
+  end
+
+  # Gets the default specific leakage area (SLA) for a vented attic.
+  # SLA is the effective leakage area (ELA) divided by the floor area.
+  #
+  # @return [Double] Specific leakage area (frac)
+  def self.get_default_vented_attic_sla()
+    return (1.0 / 300.0).round(6) # ANSI 301, Table 4.2.2(1) - Attics
+  end
+
+  # Gets the default specific leakage area (SLA) for a vented crawlspace.
+  # SLA is the effective leakage area (ELA) divided by the floor area.
+  #
+  # @return [Double] Specific leakage area (frac)
+  def self.get_default_vented_crawl_sla()
+    return (1.0 / 150.0).round(6) # ANSI 301, Table 4.2.2(1) - Crawlspaces
+  end
+
+  # Gets the default whole-home mechanical ventilation fan flow rate required to
+  # meet ASHRAE 62.2 for the given HPXML VentilationFan.
+  #
+  # The required fan flow rate, combined with an infiltration credit, will equal
+  # the ASHRAE 62.2 total air exchange rate requirement.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param vent_fan [HPXML::VentilationFan] The HPXML ventilation fan of interest
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Double] Fan flow rate (cfm)
+  def self.get_default_mech_vent_flow_rate_for_vent_fan(hpxml_bldg, vent_fan, weather, eri_version)
+    # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
+    cfa = hpxml_bldg.building_construction.conditioned_floor_area
+    nbeds = hpxml_bldg.building_construction.number_of_bedrooms
+    infil_values = Airflow.get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
+    bldg_type = hpxml_bldg.building_construction.residential_facility_type
+
+    nl = Airflow.get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
+    q_inf = Airflow.get_infiltration_Qinf_from_NL(nl, weather, cfa)
+    q_tot = Airflow.get_mech_vent_qtot_cfm(nbeds, cfa)
+    if vent_fan.is_balanced
+      is_balanced, frac_imbal = true, 0.0
+    else
+      is_balanced, frac_imbal = false, 1.0
+    end
+    q_fan = Airflow.get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, infil_values[:a_ext], bldg_type, eri_version, vent_fan.hours_in_operation)
+    return q_fan
+  end
+
+  # Gets the default whole-home mechanical ventilation fan efficiency.
+  #
+  # @param vent_fan [HPXML::VentilationFan] The HPXML ventilation fan of interest
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Double] Fan efficiency (W/cfm)
+  def self.get_default_mech_vent_fan_efficiency(vent_fan, eri_version)
+    # Returns fan power in W/cfm, based on ANSI 301
+    if vent_fan.is_shared_system
+      return 1.00 # Table 4.2.2(1) Note (n)
+    elsif [HPXML::MechVentTypeSupply, HPXML::MechVentTypeExhaust].include? vent_fan.fan_type
+      return 0.35
+    elsif [HPXML::MechVentTypeBalanced].include? vent_fan.fan_type
+      return 0.70
+    elsif [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_fan.fan_type
+      return 1.00
+    elsif [HPXML::MechVentTypeCFIS].include? vent_fan.fan_type
+      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
+        return 0.58
+      else
+        return 0.50
+      end
+    else
+      fail "Unexpected fan_type: '#{fan_type}'."
+    end
+  end
+
+  # Gets the default infiltration ACH50 based on the provided leakiness description.
+  #
+  # Uses a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into
+  # account IECC zone, # cfa, year built, foundation type, duct location, etc. The leakiness
+  # description is then used to further adjust the default (average) infiltration rate.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param ncfl_ag [Double] Number of conditioned floors above grade
+  # @param year_built [Integer] Year the dwelling unit is built
+  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
+  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
+  # @param iecc_cz [String] IECC climate zone
+  # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
+  # @param duct_loc_fracs [Hash] Map of duct location => area fraction
+  # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
+  # @param air_sealed [Boolean] True if the dwelling unit was professionally air sealed (intended to be used by Home Energy Score)
+  # @return [Double] Calculated ACH50 value
+  def self.get_default_infiltration_ach50(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
+                                          fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)
+    # Constants
+    c_floor_area = -0.002078
+    c_height = 0.06375
+    # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
+    leakage_multiplier_map = { HPXML::LeakinessVeryTight => 0.355,
+                               HPXML::LeakinessTight => 0.686,
+                               HPXML::LeakinessAverage => 1.0,
+                               HPXML::LeakinessLeaky => 1.549,
+                               HPXML::LeakinessVeryLeaky => 2.085 }
+    leakage_multiplier = leakiness_description.nil? ? 1.0 : leakage_multiplier_map[leakiness_description]
+    c_sealed = is_sealed ? -0.288 : 0.0
+
+    # Vintage
+    c_vintage = nil
+    if year_built < 1960
+      c_vintage = -0.2498
+    elsif year_built <= 1969
+      c_vintage = -0.4327
+    elsif year_built <= 1979
+      c_vintage = -0.4521
+    elsif year_built <= 1989
+      c_vintage = -0.6536
+    elsif year_built <= 1999
+      c_vintage = -0.9152
+    elsif year_built >= 2000
+      c_vintage = -1.058
+    else
+      fail "Unexpected vintage: #{year_built}"
+    end
+
+    # Climate zone
+    c_iecc = nil
+    if (iecc_cz == '1A') || (iecc_cz == '2A')
+      c_iecc = 0.4727
+    elsif iecc_cz == '3A'
+      c_iecc = 0.2529
+    elsif iecc_cz == '4A'
+      c_iecc = 0.3261
+    elsif iecc_cz == '5A'
+      c_iecc = 0.1118
+    elsif (iecc_cz == '6A') || (iecc_cz == '7')
+      c_iecc = 0.0
+    elsif (iecc_cz == '2B') || (iecc_cz == '3B')
+      c_iecc = -0.03755
+    elsif (iecc_cz == '4B') || (iecc_cz == '5B')
+      c_iecc = -0.008774
+    elsif iecc_cz == '6B'
+      c_iecc = 0.01944
+    elsif iecc_cz == '3C'
+      c_iecc = 0.04827
+    elsif iecc_cz == '4C'
+      c_iecc = 0.2584
+    elsif iecc_cz == '8'
+      c_iecc = -0.5119
+    else
+      fail "Unexpected IECC climate zone: #{c_iecc}"
+    end
+
+    # Foundation type (weight by area)
+    c_foundation = 0.0
+    fnd_type_fracs.each do |foundation_type, area_fraction|
+      case foundation_type
+      when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
+        c_foundation -= 0.036992 * area_fraction
+      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeCrawlspaceConditioned
+        c_foundation += 0.108713 * area_fraction
+      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
+        c_foundation += 0.180352 * area_fraction
+      else
+        fail "Unexpected foundation type: #{foundation_type}"
+      end
+    end
+
+    c_duct = 0.0
+    duct_loc_fracs.each do |duct_location, area_fraction|
+      if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
+        c_duct -= 0.12381 * area_fraction
+      elsif [HPXML::LocationAtticUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationGarage, HPXML::LocationCrawlspaceUnvented].include? duct_location
+        c_duct += 0.07126 * area_fraction
+      elsif HPXML::vented_locations.include? duct_location
+        c_duct += 0.18072 * area_fraction
+      else
+        fail "Unexpected duct location: #{duct_location}"
+      end
+    end
+
+    floor_area_m2 = UnitConversions.convert(cfa, 'ft^2', 'm^2')
+    height_m = UnitConversions.convert(ncfl_ag * avg_ceiling_height, 'ft', 'm') + 0.5
+
+    # Normalized leakage
+    nl = Math.exp(floor_area_m2 * c_floor_area + height_m * c_height +
+                  c_sealed + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
+
+    # Specific Leakage Area
+    sla = nl / (1000.0 * ncfl_ag**0.3)
+
+    ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
+
+    return ach50
+  end
+
+  # Gets the default effective R-value for an air distribution duct.
+  #
+  # The duct effective R-value is used in the actual duct heat transfer calculation. It includes all
+  # effects (i.e., interior/exterior air films, adjustments for presence of round ducts, and adjustments
+  # when buried in loose-fill attic insulation)
+  #
+  # @param r_nominal [Double] Duct nominal insulation R-value (hr-ft2-F/Btu)
+  # @param side [String] Whether the duct is on the supply or return side (HPXML::DuctTypeXXX)
+  # @param buried_level [String] How deeply the duct is buried in loose-fill insulation (HPXML::DuctBuriedInsulationXXX)
+  # @param f_rect [Double] The fraction of duct length that is rectangular (not round)
+  # @return [Double] Duct effective R-value (hr-ft2-F/Btu)
+  def self.get_default_duct_effective_r_value(r_nominal, side, buried_level, f_rect)
+    # This methodology has been proposed by NREL for ANSI 301-2025.
+    if buried_level == HPXML::DuctBuriedInsulationNone
+      if r_nominal <= 0
+        # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
+        return 1.7
+      else
+        # Insulated duct equations based on "True R-Values of Round Residential Ductwork"
+        # by Palmiter & Kruse 2006.
+        if side == HPXML::DuctTypeSupply
+          d_round = 6.0 # in, assumed average diameter
+        elsif side == HPXML::DuctTypeReturn
+          d_round = 14.0 # in, assumed average diameter
+        end
+        f_round = 1.0 - f_rect # Fraction of duct length for round ducts (not rectangular)
+        r_ext = 0.667 # Exterior film R-value
+        r_int_rect = 0.333 # Interior film R-value for rectangular ducts
+        r_int_round = 0.3429 * (d_round**0.1974) # Interior film R-value for round ducts
+        k_ins = 2.8 # Thermal resistivity of duct insulation (R-value per inch, assumed fiberglass)
+        t = r_nominal / k_ins # Duct insulation thickness
+        r_actual = r_nominal / t * (d_round / 2.0) * Math::log(1.0 + (2.0 * t) / d_round) # Actual R-value for round duct
+        r_rect = r_int_rect + r_nominal + r_ext # Total R-value for rectangular ducts, including air films
+        r_round = r_int_round + r_actual + r_ext * (d_round / (d_round + 2 * t)) # Total R-value for round ducts, including air films
+        r_effective = 1.0 / (f_rect / r_rect + f_round / r_round) # Combined effective R-value
+        return r_effective.round(2)
+      end
+    else
+      if side == HPXML::DuctTypeSupply
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 6-in supply diameter
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return (4.28 + 0.65 * r_nominal).round(2)
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return (6.22 + 0.89 * r_nominal).round(2)
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return (13.41 + 0.63 * r_nominal).round(2)
+        end
+      elsif side == HPXML::DuctTypeReturn
+        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # assuming 14-in return diameter
+        if buried_level == HPXML::DuctBuriedInsulationPartial
+          return (4.62 + 1.31 * r_nominal).round(2)
+        elsif buried_level == HPXML::DuctBuriedInsulationFull
+          return (8.91 + 1.29 * r_nominal).round(2)
+        elsif buried_level == HPXML::DuctBuriedInsulationDeep
+          return (18.64 + 1.0 * r_nominal).round(2)
+        end
+      end
+    end
+  end
+
+  # Gets the default location for a water heater based on the IECC climate zone (if available).
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param iecc_zone [String] IECC climate zone
+  # @return [String] Water heater location (HPXML::LocationXXX)
+  def self.get_default_water_heater_location(hpxml_bldg, iecc_zone = nil)
+    # ANSI/RESNET/ICC 301-2022C
+    if ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].include? iecc_zone
+      location_hierarchy = [HPXML::LocationGarage,
+                            HPXML::LocationConditionedSpace]
+    elsif ['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].include? iecc_zone
+      location_hierarchy = [HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationBasementConditioned,
+                            HPXML::LocationConditionedSpace]
+    elsif iecc_zone.nil?
+      location_hierarchy = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationConditionedSpace]
+    end
+    location_hierarchy.each do |location|
+      if hpxml_bldg.has_location(location)
+        return location
+      end
+    end
+  end
+
+  # Gets the default setpoint temperature for a water heater.
+  #
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Double] Water heater setpoint temperature (F)
+  def self.get_default_water_heater_temperature(eri_version)
+    if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2014A')
+      # 2014 w/ Addendum A or newer
+      return 125.0
+    else
+      return 120.0
+    end
+  end
+
+  # Gets the default performance adjustment for a tankless water heater. Multiplier on efficiency
+  # to account for cycling.
+  #
+  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
+  # @return [Double] Water heater performance adjustment (frac)
+  def self.get_default_water_heater_performance_adjustment(water_heating_system)
+    return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+    if not water_heating_system.energy_factor.nil?
+      return 0.92 # Applies to EF, ANSI 301-2019
+    elsif not water_heating_system.uniform_energy_factor.nil?
+      return 0.94 # Applies to UEF, ANSI 301-2019
+    end
+  end
+
+  # Gets the default heating capacity for the water heater based on fuel type and number of bedrooms
+  # and bathrooms in the home.
+  #
+  # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
+  #
+  # @param fuel [String] Water heater fuel type (HPXML::FuelTypeXXX)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param num_water_heaters [Integer] Number of water heaters serving the dwelling unit
+  # @param nbaths [Integer] Number of bathrooms in the dwelling unit
+  # @return [Double] Water heater heating capacity (kBtu/hr)
+  def self.get_default_water_heater_heating_capacity(fuel, nbeds, num_water_heaters, nbaths = nil)
+    if nbaths.nil?
+      nbaths = HPXMLDefaults.get_default_num_bathrooms(nbeds)
+    end
+
+    # Adjust the heating capacity if there are multiple water heaters in the home
+    nbaths /= num_water_heaters.to_f
+
+    if fuel != HPXML::FuelTypeElectricity
+      if nbeds <= 3
+        cap_kbtuh = 36.0
+      elsif nbeds == 4
+        cap_kbtuh = 38.0
+      elsif nbeds == 5
+        cap_kbtuh = 48.0
+      else
+        cap_kbtuh = 50.0
+      end
+      return cap_kbtuh
+    else
+      if nbeds == 1
+        cap_kw = 2.5
+      elsif nbeds == 2
+        if nbaths <= 1.5
+          cap_kw = 3.5
+        else
+          cap_kw = 4.5
+        end
+      elsif nbeds == 3
+        if nbaths <= 1.5
+          cap_kw = 4.5
+        else
+          cap_kw = 5.5
+        end
+      else
+        cap_kw = 5.5
+      end
+      return UnitConversions.convert(cap_kw, 'kW', 'kBtu/hr')
+    end
+  end
+
+  # Gets the default tank volume for a storage water heater based on fuel type and number of bedrooms
+  # and bathrooms in the home.
+  #
+  # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
+  #
+  # @param fuel [String] Water heater fuel type (HPXML::FuelTypeXXX)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param nbaths [Integer] Number of bathrooms in the dwelling unit
+  # @return [Double] Water heater tank volume (gal)
+  def self.get_default_water_heater_tank_volume(fuel, nbeds, nbaths = nil)
+    if nbaths.nil?
+      nbaths = HPXMLDefaults.get_default_num_bathrooms(nbeds)
+    end
+
+    if fuel != HPXML::FuelTypeElectricity # Non-electric tank WHs
+      if nbeds <= 2
+        return 30.0
+      elsif nbeds == 3
+        if nbaths <= 1.5
+          return 30.0
+        else
+          return 40.0
+        end
+      elsif nbeds == 4
+        if nbaths <= 2.5
+          return 40.0
+        else
+          return 50.0
+        end
+      else
+        return 50.0
+      end
+    else
+      if nbeds == 1
+        return 30.0
+      elsif nbeds == 2
+        if nbaths <= 1.5
+          return 30.0
+        else
+          return 40.0
+        end
+      elsif nbeds == 3
+        if nbaths <= 1.5
+          return 40.0
+        else
+          return 50.0
+        end
+      elsif nbeds == 4
+        if nbaths <= 2.5
+          return 50.0
+        else
+          return 66.0
+        end
+      elsif nbeds == 5
+        return 66.0
+      else
+        return 80.0
+      end
+    end
+  end
+
+  # Gets the default recovery efficiency for the water heater based on fuel type and efficiency.
+  #
+  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
+  # @return [Double] Water heater recovery efficiency (frac)
+  def self.get_default_water_heater_recovery_efficiency(water_heating_system)
+    if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
+      return 0.98
+    else
+      # FUTURE: Develop a separate algorithm specific to UEF.
+      ef = water_heating_system.energy_factor
+      if ef.nil?
+        ef = calc_ef_from_uef(water_heating_system)
+      end
+      # Based on a regression of AHRI certified water heaters
+      if ef >= 0.75 # Condensing water heater
+        re = 0.561 * ef + 0.439
+      else
+        re = 0.252 * ef + 0.608
+      end
+      return re
+    end
+  end
+
+  # Gets the default UEF usage bin for a water heater, based on its first hour rating (FHR).
+  #
+  # @param first_hour_rating [Double] First hour rating (gal/hr)
+  # @return [String] UEF usage bin (HPXML::WaterHeaterUsageBinXXX)
+  def self.get_default_water_heater_usage_bin(first_hour_rating)
+    if first_hour_rating < 18.0
+      return HPXML::WaterHeaterUsageBinVerySmall
+    elsif first_hour_rating < 51.0
+      return HPXML::WaterHeaterUsageBinLow
+    elsif first_hour_rating < 75.0
+      return HPXML::WaterHeaterUsageBinMedium
+    else
+      return HPXML::WaterHeaterUsageBinHigh
+    end
+  end
+
+  # Gets the default storage volume for a solar hot water system.
+  #
+  # @param collector_area [Double] Area of the collector (ft2)
+  # @return [Double] Solar thermal storage volume (gal)
+  def self.calc_default_solar_thermal_system_storage_volume(collector_area)
+    return 1.5 * collector_area # Assumption; 1.5 gal for every sqft of collector area
   end
 end

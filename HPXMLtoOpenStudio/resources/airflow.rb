@@ -148,59 +148,8 @@ module Airflow
   # TODO
   #
   # @return [TODO] TODO
-  def self.get_default_fraction_of_windows_operable()
-    # Combining the value below with the assumption that 50% of
-    # the area of an operable window can be open produces the
-    # Building America assumption that "Thirty-three percent of
-    # the window area ... can be opened for natural ventilation"
-    return 0.67 # 67%
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_vented_attic_sla()
-    return (1.0 / 300.0).round(6) # Table 4.2.2(1) - Attics
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_vented_crawl_sla()
-    return (1.0 / 150.0).round(6) # Table 4.2.2(1) - Crawlspaces
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
   def self.get_default_unvented_space_ach()
     return 0.1 # Assumption
-  end
-
-  # TODO
-  #
-  # @param vent_fan [TODO] TODO
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_default_mech_vent_fan_power(vent_fan, eri_version)
-    # Returns fan power in W/cfm, based on ANSI 301
-    if vent_fan.is_shared_system
-      return 1.00 # Table 4.2.2(1) Note (n)
-    elsif [HPXML::MechVentTypeSupply, HPXML::MechVentTypeExhaust].include? vent_fan.fan_type
-      return 0.35
-    elsif [HPXML::MechVentTypeBalanced].include? vent_fan.fan_type
-      return 0.70
-    elsif [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_fan.fan_type
-      return 1.00
-    elsif [HPXML::MechVentTypeCFIS].include? vent_fan.fan_type
-      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
-        return 0.58
-      else
-        return 0.50
-      end
-    else
-      fail "Unexpected fan_type: '#{fan_type}'."
-    end
   end
 
   # Returns the single infiltration measurement object of interest, from all possible infiltration measurements
@@ -284,152 +233,6 @@ module Airflow
     a_ext = 1.0 if a_ext.nil?
 
     return { sla: sla, ach50: ach50, nach: nach, volume: infil_volume, height: infil_height, a_ext: a_ext }
-  end
-
-  # Calculate ACH50 for annual energy simulation when only leakiness description is provided.
-  #
-  # Uses a regression developed by LBNL using ResDB data (https://resdb.lbl.gov) that takes into account IECC zone,
-  # cfa, year built, foundation type, duct location, etc. The leakiness description is then used to further adjust
-  # the default (average) infiltration rate.
-  #
-  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
-  # @param ncfl_ag [Double] Number of conditioned floors above grade
-  # @param year_built [Integer] Year the dwelling unit is built
-  # @param avg_ceiling_height [Double] Average floor to ceiling height within conditioned space (ft2)
-  # @param infil_volume [Double] Volume of space most impacted by the blower door test (ft3)
-  # @param iecc_cz [String] IECC climate zone
-  # @param fnd_type_fracs [Hash] Map of foundation type => area fraction
-  # @param duct_loc_fracs [Hash] Map of duct location => area fraction
-  # @param leakiness_description [String] Leakiness description to qualitatively describe the dwelling unit infiltration
-  # @param air_sealed [Boolean] True if the dwelling unit was professionally air sealed (intended to be used by Home Energy Score)
-  # @return [Double] Calculated ACH50 value
-  def self.calc_ach50_from_leakiness_description(cfa, ncfl_ag, year_built, avg_ceiling_height, infil_volume, iecc_cz,
-                                                 fnd_type_fracs, duct_loc_fracs, leakiness_description = nil, is_sealed = false)
-    # Constants
-    c_floor_area = -0.002078
-    c_height = 0.06375
-    # Multiplier summarized from Manual J 5A & 5B tables, average of all (values at certain leakiness description / average leakiness)
-    leakage_multiplier_map = { HPXML::LeakinessVeryTight => 0.355,
-                               HPXML::LeakinessTight => 0.686,
-                               HPXML::LeakinessAverage => 1.0,
-                               HPXML::LeakinessLeaky => 1.549,
-                               HPXML::LeakinessVeryLeaky => 2.085 }
-    leakage_multiplier = leakiness_description.nil? ? 1.0 : leakage_multiplier_map[leakiness_description]
-    c_sealed = is_sealed ? -0.288 : 0.0
-
-    # Vintage
-    c_vintage = nil
-    if year_built < 1960
-      c_vintage = -0.2498
-    elsif year_built <= 1969
-      c_vintage = -0.4327
-    elsif year_built <= 1979
-      c_vintage = -0.4521
-    elsif year_built <= 1989
-      c_vintage = -0.6536
-    elsif year_built <= 1999
-      c_vintage = -0.9152
-    elsif year_built >= 2000
-      c_vintage = -1.058
-    else
-      fail "Unexpected vintage: #{year_built}"
-    end
-
-    # Climate zone
-    c_iecc = nil
-    if (iecc_cz == '1A') || (iecc_cz == '2A')
-      c_iecc = 0.4727
-    elsif iecc_cz == '3A'
-      c_iecc = 0.2529
-    elsif iecc_cz == '4A'
-      c_iecc = 0.3261
-    elsif iecc_cz == '5A'
-      c_iecc = 0.1118
-    elsif (iecc_cz == '6A') || (iecc_cz == '7')
-      c_iecc = 0.0
-    elsif (iecc_cz == '2B') || (iecc_cz == '3B')
-      c_iecc = -0.03755
-    elsif (iecc_cz == '4B') || (iecc_cz == '5B')
-      c_iecc = -0.008774
-    elsif iecc_cz == '6B'
-      c_iecc = 0.01944
-    elsif iecc_cz == '3C'
-      c_iecc = 0.04827
-    elsif iecc_cz == '4C'
-      c_iecc = 0.2584
-    elsif iecc_cz == '8'
-      c_iecc = -0.5119
-    else
-      fail "Unexpected IECC climate zone: #{c_iecc}"
-    end
-
-    # Foundation type (weight by area)
-    c_foundation = 0.0
-    fnd_type_fracs.each do |foundation_type, area_fraction|
-      case foundation_type
-      when HPXML::FoundationTypeSlab, HPXML::FoundationTypeAboveApartment
-        c_foundation -= 0.036992 * area_fraction
-      when HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeCrawlspaceConditioned
-        c_foundation += 0.108713 * area_fraction
-      when HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBellyAndWing, HPXML::FoundationTypeAmbient
-        c_foundation += 0.180352 * area_fraction
-      else
-        fail "Unexpected foundation type: #{foundation_type}"
-      end
-    end
-
-    c_duct = 0.0
-    duct_loc_fracs.each do |duct_location, area_fraction|
-      if (HPXML::conditioned_locations + HPXML::multifamily_common_space_locations + [HPXML::LocationUnderSlab, HPXML::LocationExteriorWall, HPXML::LocationOutside, HPXML::LocationRoofDeck, HPXML::LocationManufacturedHomeBelly]).include? duct_location
-        c_duct -= 0.12381 * area_fraction
-      elsif [HPXML::LocationAtticUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationGarage, HPXML::LocationCrawlspaceUnvented].include? duct_location
-        c_duct += 0.07126 * area_fraction
-      elsif HPXML::vented_locations.include? duct_location
-        c_duct += 0.18072 * area_fraction
-      else
-        fail "Unexpected duct location: #{duct_location}"
-      end
-    end
-
-    floor_area_m2 = UnitConversions.convert(cfa, 'ft^2', 'm^2')
-    height_m = UnitConversions.convert(ncfl_ag * avg_ceiling_height, 'ft', 'm') + 0.5
-
-    # Normalized leakage
-    nl = Math.exp(floor_area_m2 * c_floor_area + height_m * c_height +
-                  c_sealed + c_vintage + c_iecc + c_foundation + c_duct) * leakage_multiplier
-
-    # Specific Leakage Area
-    sla = nl / (1000.0 * ncfl_ag**0.3)
-
-    ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
-
-    return ach50
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param vent_fan [TODO] TODO
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_default_mech_vent_flow_rate(hpxml_bldg, vent_fan, weather, eri_version)
-    # Calculates Qfan cfm requirement per ASHRAE 62.2 / ANSI 301
-    cfa = hpxml_bldg.building_construction.conditioned_floor_area
-    nbeds = hpxml_bldg.building_construction.number_of_bedrooms
-    infil_values = get_values_from_air_infiltration_measurements(hpxml_bldg, weather)
-    bldg_type = hpxml_bldg.building_construction.residential_facility_type
-
-    nl = get_infiltration_NL_from_SLA(infil_values[:sla], infil_values[:height])
-    q_inf = get_infiltration_Qinf_from_NL(nl, weather, cfa)
-    q_tot = get_mech_vent_qtot_cfm(nbeds, cfa)
-    if vent_fan.is_balanced
-      is_balanced, frac_imbal = true, 0.0
-    else
-      is_balanced, frac_imbal = false, 1.0
-    end
-    q_fan = get_mech_vent_qfan_cfm(q_tot, q_inf, is_balanced, frac_imbal, infil_values[:a_ext], bldg_type, eri_version, vent_fan.hours_in_operation)
-    return q_fan
   end
 
   # TODO
@@ -2673,63 +2476,6 @@ module Airflow
     return q_old * (p_new / p_old)**n_i
   end
 
-  # TODO
-  #
-  # @param r_nominal [TODO] TODO
-  # @param side [TODO] TODO
-  # @param buried_level [TODO] TODO
-  # @param f_rect [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_duct_effective_r_value(r_nominal, side, buried_level, f_rect)
-    if buried_level == HPXML::DuctBuriedInsulationNone
-      if r_nominal <= 0
-        # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
-        return 1.7
-      else
-        # Insulated duct equations based on "True R-Values of Round Residential Ductwork"
-        # by Palmiter & Kruse 2006.
-        if side == HPXML::DuctTypeSupply
-          d_round = 6.0 # in, assumed average diameter
-        elsif side == HPXML::DuctTypeReturn
-          d_round = 14.0 # in, assumed average diameter
-        end
-        f_round = 1.0 - f_rect # Fraction of duct length for round ducts (not rectangular)
-        r_ext = 0.667 # Exterior film R-value
-        r_int_rect = 0.333 # Interior film R-value for rectangular ducts
-        r_int_round = 0.3429 * (d_round**0.1974) # Interior film R-value for round ducts
-        k_ins = 2.8 # Thermal resistivity of duct insulation (R-value per inch, assumed fiberglass)
-        t = r_nominal / k_ins # Duct insulation thickness
-        r_actual = r_nominal / t * (d_round / 2.0) * Math::log(1.0 + (2.0 * t) / d_round) # Actual R-value for round duct
-        r_rect = r_int_rect + r_nominal + r_ext # Total R-value for rectangular ducts, including air films
-        r_round = r_int_round + r_actual + r_ext * (d_round / (d_round + 2 * t)) # Total R-value for round ducts, including air films
-        r_effective = 1.0 / (f_rect / r_rect + f_round / r_round) # Combined effective R-value
-        return r_effective.round(2)
-      end
-    else
-      if side == HPXML::DuctTypeSupply
-        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
-        # assuming 6-in supply diameter
-        if buried_level == HPXML::DuctBuriedInsulationPartial
-          return (4.28 + 0.65 * r_nominal).round(2)
-        elsif buried_level == HPXML::DuctBuriedInsulationFull
-          return (6.22 + 0.89 * r_nominal).round(2)
-        elsif buried_level == HPXML::DuctBuriedInsulationDeep
-          return (13.41 + 0.63 * r_nominal).round(2)
-        end
-      elsif side == HPXML::DuctTypeReturn
-        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
-        # assuming 14-in return diameter
-        if buried_level == HPXML::DuctBuriedInsulationPartial
-          return (4.62 + 1.31 * r_nominal).round(2)
-        elsif buried_level == HPXML::DuctBuriedInsulationFull
-          return (8.91 + 1.29 * r_nominal).round(2)
-        elsif buried_level == HPXML::DuctBuriedInsulationDeep
-          return (18.64 + 1.0 * r_nominal).round(2)
-        end
-      end
-    end
-  end
-
   # Returns Qtot cfm per ASHRAE 62.2.
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
@@ -2918,15 +2664,15 @@ end
 
 # TODO
 class Duct
-  # @param side [TODO] TODO
+  # @param side [String] Whether the duct is on the supply or return side (HPXML::DuctTypeXXX)
   # @param loc_space [TODO] TODO
   # @param loc_schedule [TODO] TODO
   # @param leakage_frac [TODO] TODO
   # @param leakage_cfm25 [TODO] TODO
   # @param leakage_cfm50 [TODO] TODO
   # @param area [TODO] TODO
-  # @param effective_rvalue [TODO] TODO
-  # @param buried_level [TODO] TODO
+  # @param effective_rvalue [Double] Duct effective R-value, accounting for air films and adjusted for round/buried ducts (hr-ft2-F/Btu)
+  # @param buried_level [String] How deeply the duct is buried in loose-fill insulation (HPXML::DuctBuriedInsulationXXX)
   def initialize(side, loc_space, loc_schedule, leakage_frac, leakage_cfm25, leakage_cfm50, area, effective_rvalue, buried_level)
     @side = side
     @loc_space = loc_space

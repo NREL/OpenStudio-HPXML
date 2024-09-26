@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b64fef97-ee7b-4d17-af62-8bfa548b3a0f</version_id>
-  <version_modified>2024-09-24T17:54:15Z</version_modified>
+  <version_id>be5d741b-ea49-4d8b-8f39-7942e929a186</version_id>
+  <version_modified>2024-09-26T23:31:26Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,7 +189,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>02AD803C</checksum>
+      <checksum>66EFD7B9</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
@@ -345,7 +345,7 @@
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>12F8E8D4</checksum>
+      <checksum>0DB4616F</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B87BD99E</checksum>
+      <checksum>EDA90990</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D60E72E2</checksum>
+      <checksum>A0A63DA8</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -591,7 +591,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>14BD47A8</checksum>
+      <checksum>4972AE8B</checksum>
     </file>
     <file>
       <filename>simcontrols.rb</filename>
@@ -627,7 +627,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>51541A42</checksum>
+      <checksum>F4A7DA88</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -651,7 +651,7 @@
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3A5212A2</checksum>
+      <checksum>A3DC4692</checksum>
     </file>
     <file>
       <filename>test_battery.rb</filename>
