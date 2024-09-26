@@ -4292,7 +4292,7 @@ module HPXMLDefaults
     zipcode_csv_filepath = File.join(File.dirname(__FILE__), 'data', 'zipcode_weather_stations.csv')
 
     if $zip_csv_data.nil?
-      # Don't use the CSV library because it's much slower
+      # Note: We don't use the CSV library here because it's slow for large files
       $zip_csv_data = File.readlines(zipcode_csv_filepath).map(&:strip)
     end
 
