@@ -1817,6 +1817,7 @@ module Geometry
                                                        name: 'htg_spt',
                                                        output_var_or_meter_name: 'Schedule Value',
                                                        key_name: htg_sch.name)
+        space_values[:temp_min] = space_values[:temp_min].name.to_s
       else
         # No HVAC system; use the defaulted heating setpoint.
         space_values[:temp_min] = default_htg_sp # F
