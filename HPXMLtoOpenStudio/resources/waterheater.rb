@@ -900,31 +900,15 @@ module Waterheater
   # @return [TODO] TODO
   def self.setup_hpwh_dxcoil(model, runner, water_heating_system, elevation, obj_name, airflow_rate, unit_multiplier)
     # Curves
-    hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
-    hpwh_cap.setName('HPWH-Cap-fT')
-    hpwh_cap.setCoefficient1Constant(0.563)
-    hpwh_cap.setCoefficient2x(0.0437)
-    hpwh_cap.setCoefficient3xPOW2(0.000039)
-    hpwh_cap.setCoefficient4y(0.0055)
-    hpwh_cap.setCoefficient5yPOW2(-0.000148)
-    hpwh_cap.setCoefficient6xTIMESY(-0.000145)
-    hpwh_cap.setMinimumValueofx(0)
-    hpwh_cap.setMaximumValueofx(100)
-    hpwh_cap.setMinimumValueofy(0)
-    hpwh_cap.setMaximumValueofy(100)
+    hpwh_cap = Model.add_curve_biquadratic(model,
+                                           name: 'HPWH-Cap-fT',
+                                           coeff: [0.563, 0.0437, 0.000039, 0.0055, -0.000148, -0.000145],
+                                           min_x: 0, max_x: 100, min_y: 0, max_y: 100)
 
-    hpwh_cop = OpenStudio::Model::CurveBiquadratic.new(model)
-    hpwh_cop.setName('HPWH-COP-fT')
-    hpwh_cop.setCoefficient1Constant(1.1332)
-    hpwh_cop.setCoefficient2x(0.063)
-    hpwh_cop.setCoefficient3xPOW2(-0.0000979)
-    hpwh_cop.setCoefficient4y(-0.00972)
-    hpwh_cop.setCoefficient5yPOW2(-0.0000214)
-    hpwh_cop.setCoefficient6xTIMESY(-0.000686)
-    hpwh_cop.setMinimumValueofx(0)
-    hpwh_cop.setMaximumValueofx(100)
-    hpwh_cop.setMinimumValueofy(0)
-    hpwh_cop.setMaximumValueofy(100)
+    hpwh_cop = Model.add_curve_biquadratic(model,
+                                           name: 'HPWH-COP-fT',
+                                           coeff: [1.1332, 0.063, -0.0000979, -0.00972, -0.0000214, -0.000686],
+                                           min_x: 0, max_x: 100, min_y: 0, max_y: 100)
 
     # Assumptions and values
     cap = 0.5 * unit_multiplier # kW

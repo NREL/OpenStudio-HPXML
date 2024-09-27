@@ -875,12 +875,13 @@ module Geometry
         surface.additionalProperties.setFeature('Width', total_width)
 
         # Assign curb construction
-        curb_assembly_r_value = [skylight.curb_assembly_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
-        curb_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(curb_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
-        curb_mat.setName('SkylightCurbMaterial')
-        curb_const = OpenStudio::Model::Construction.new(model)
-        curb_const.setName('SkylightCurbConstruction')
-        curb_const.insertLayer(0, curb_mat)
+        curb_assembly_r = [skylight.curb_assembly_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
+        curb_mat = Model.add_massless_material(model,
+                                               name: 'SkylightCurbMaterial',
+                                               rvalue: UnitConversions.convert(curb_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w'))
+        curb_const = Model.add_construction(model,
+                                            name: 'SkylightCurbConstruction',
+                                            layers: [curb_mat])
         surface.setConstruction(curb_const)
       else
         # Create parent surface slightly bigger than skylight
@@ -934,12 +935,13 @@ module Geometry
       surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
       # Apply construction
-      shaft_assembly_r_value = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
-      shaft_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', UnitConversions.convert(shaft_assembly_r_value, 'hr*ft^2*f/btu', 'm^2*k/w'))
-      shaft_mat.setName('SkylightShaftMaterial')
-      shaft_const = OpenStudio::Model::Construction.new(model)
-      shaft_const.setName('SkylightShaftConstruction')
-      shaft_const.insertLayer(0, shaft_mat)
+      shaft_assembly_r = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
+      shaft_mat = Model.add_massless_material(model,
+                                              name: 'SkylightShaftMaterial',
+                                              rvalue: UnitConversions.convert(shaft_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w'))
+      shaft_const = Model.add_construction(model,
+                                           name: 'SkylightShaftConstruction',
+                                           layers: [shaft_mat])
       surface.setConstruction(shaft_const)
     end
 

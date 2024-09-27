@@ -2,6 +2,138 @@
 
 # Collection of methods related to generic OpenStudio Model object operations.
 module Model
+  # Adds a SimpleGlazing object to the OpenStudio model.
+  #
+  # The SimpleGlazing object models a window where only SHGC/U-factor are known.
+  # It is an alternative to a layer-by-layer model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param ufactor [Double] Overall heat transfer coefficient (W/m^2-K)
+  # @param shgc [Double] Solar heat gain coefficient
+  # @return [OpenStudio::Model::SimpleGlazing] The model object
+  def self.add_simple_glazing(model, name:, ufactor:, shgc:)
+    # Material already exists?
+    tolerance = 0.0001
+    model.getSimpleGlazings.each do |mat|
+      next unless mat.name.to_s.start_with? name
+      next if (mat.uFactor - ufactor).abs > tolerance
+      next if (mat.solarHeatGainCoefficient - shgc).abs > tolerance
+
+      return mat
+    end
+
+    mat = OpenStudio::Model::SimpleGlazing.new(model)
+    mat.setName(name)
+    mat.setUFactor(ufactor)
+    mat.setSolarHeatGainCoefficient(shgc)
+    return mat
+  end
+
+  # Adds a StandardOpaqueMaterial object to the OpenStudio model.
+  #
+  # The StandardOpaqueMaterial object models a construction material when
+  # the four main thermal properties (thickness, conductivity, density, and
+  # specific heat) are known.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param thickness [Double] Thickness (m)
+  # @param conductivity [Double] Thermal conductivity (W/m-K)
+  # @param density [Double] Density (kg/m^3)
+  # @param specific_heat [Double] Specific heat (J/kg-K)
+  # @param thermal_abs [Double] Thermal absorptance (emittance)
+  # @param solar_abs [Double] Solar absorptance
+  # @param roughness [String] Roughness for convection (Rough, Smooth, etc.)
+  # @return [OpenStudio::Model::StandardOpaqueMaterial] The model object
+  def self.add_opaque_material(model, name:, thickness:, conductivity:, density:, specific_heat:, thermal_abs: nil, solar_abs: nil, roughness: 'Rough')
+    # Material already exists?
+    tolerance = 0.0001
+    model.getStandardOpaqueMaterials.each do |mat|
+      next unless mat.name.to_s.start_with? name
+      next if mat.roughness.downcase.to_s != roughness.downcase
+      next if (mat.thickness - thickness).abs > tolerance
+      next if (mat.conductivity - conductivity).abs > tolerance
+      next if (mat.density - density).abs > tolerance
+      next if (mat.specificHeat - specific_heat).abs > tolerance
+      next if (mat.thermalAbsorptance - thermal_abs.to_f).abs > tolerance
+      next if (mat.solarAbsorptance - solar_abs.to_f).abs > tolerance
+
+      return mat
+    end
+
+    # New material
+    mat = OpenStudio::Model::StandardOpaqueMaterial.new(model)
+    mat.setName(name)
+    mat.setRoughness(roughness)
+    mat.setThickness(thickness)
+    mat.setConductivity(conductivity)
+    mat.setDensity(density)
+    mat.setSpecificHeat(specific_heat)
+    if not thermal_abs.nil?
+      mat.setThermalAbsorptance(thermal_abs)
+    end
+    if not solar_abs.nil?
+      mat.setSolarAbsorptance(solar_abs)
+      mat.setVisibleAbsorptance(solar_abs)
+    end
+    return mat
+  end
+
+  # Adds a MasslessOpaqueMaterial object to the OpenStudio model.
+  #
+  # The MasslessOpaqueMaterial object models a construction material when
+  # only the R-value is known.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param rvalue [Double] Thermal resistance (m^2-K/W)
+  # @param thermal_abs [Double] Thermal absorptance (emittance)
+  # @param solar_abs [Double] Solar absorptance
+  # @param roughness [String] Roughness for convection (Rough, Smooth, etc.)
+  # @return [OpenStudio::Model::MasslessOpaqueMaterial] The model object
+  def self.add_massless_material(model, name:, rvalue:, thermal_abs: nil, solar_abs: nil, roughness: 'Rough')
+    # Material already exists?
+    tolerance = 0.0001
+    model.getStandardOpaqueMaterials.each do |mat|
+      next unless mat.name.to_s.start_with? name
+      next if mat.roughness.downcase.to_s != roughness.downcase
+      next if (mat.thermalResistance - rvalue).abs > tolerance
+      next if (mat.thermalAbsorptance - thermal_abs.to_f).abs > tolerance
+      next if (mat.solarAbsorptance - solar_abs.to_f).abs > tolerance
+
+      return mat
+    end
+
+    # New material
+    mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, roughness, rvalue)
+    mat.setName(name)
+    if not thermal_abs.nil?
+      mat.setThermalAbsorptance(thermal_abs)
+    end
+    if not solar_abs.nil?
+      mat.setSolarAbsorptance(solar_abs)
+      mat.setVisibleAbsorptance(solar_abs)
+    end
+    return mat
+  end
+
+  # Adds a Construction object to the OpenStudio model.
+  #
+  # The Construction object is a set of materials, listed from outside to inside,
+  # that applies to surfaces or subsurfaces (walls, roofs, windows, doors, etc.).
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param layers [TODO] TODO
+  # @return [OpenStudio::Model::Construction] The model object
+  def self.add_construction(model, name:, layers:)
+    constr = OpenStudio::Model::Construction.new(model)
+    constr.setName(name)
+    constr.setLayers(layers)
+    return constr
+  end
+
   # Adds a WaterUseEquipment object to the OpenStudio model.
   #
   # The WaterUseEquipment object is a generalized object for simulating all (hot and cold)
@@ -137,6 +269,152 @@ module Model
     return ltg
   end
 
+  # Adds a CurveQuadratic object to the OpenStudio model.
+  #
+  # y = C1 + C2*x + C3*x^2
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @param min_x [Double] Minimum allowable value for x
+  # @param max_x [Double] Maximum allowable value for x
+  # @param min_y [Double] Minimum allowable value for y
+  # @param max_y [Double] Maximum allowable value for y
+  # @return [OpenStudio::Model::CurveQuadratic] The model object
+  def self.add_curve_quadratic(model, name:, coeff:, min_x: nil, max_x: nil, min_y: nil, max_y: nil)
+    curve = OpenStudio::Model::CurveQuadratic.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2x(coeff[1])
+    curve.setCoefficient3xPOW2(coeff[2])
+    curve.setMinimumValueofx(min_x) unless min_x.nil?
+    curve.setMaximumValueofx(max_x) unless max_x.nil?
+    curve.setMinimumCurveOutput(min_y) unless min_y.nil?
+    curve.setMaximumCurveOutput(max_y) unless max_y.nil?
+    return curve
+  end
+
+  # Adds a CurveBiquadratic object to the OpenStudio model.
+  #
+  # z = C1 + C2*x + C3*x^2 + C4*y + C5*y^2 + C6*x*y
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @param min_x [Double] Minimum allowable value for x
+  # @param max_x [Double] Maximum allowable value for x
+  # @param min_y [Double] Minimum allowable value for y
+  # @param max_y [Double] Maximum allowable value for y
+  # @return [OpenStudio::Model::CurveBiquadratic] The model object
+  def self.add_curve_biquadratic(model, name:, coeff:, min_x: nil, max_x: nil, min_y: nil, max_y: nil)
+    curve = OpenStudio::Model::CurveBiquadratic.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2x(coeff[1])
+    curve.setCoefficient3xPOW2(coeff[2])
+    curve.setCoefficient4y(coeff[3])
+    curve.setCoefficient5yPOW2(coeff[4])
+    curve.setCoefficient6xTIMESY(coeff[5])
+    curve.setMinimumValueofx(min_x) unless min_x.nil?
+    curve.setMaximumValueofx(max_x) unless max_x.nil?
+    curve.setMinimumValueofy(min_y) unless min_y.nil?
+    curve.setMaximumValueofy(max_y) unless max_y.nil?
+    return curve
+  end
+
+  # Adds a CurveCubic object to the OpenStudio model.
+  #
+  # y = C1 + C2*x + C3*x^2 + C4*x^3
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @param min_x [Double] Minimum allowable value for x
+  # @param max_x [Double] Maximum allowable value for x
+  # @return [OpenStudio::Model::CurveCubic] The model object
+  def self.add_curve_cubic(model, name:, coeff:, min_x: nil, max_x: nil)
+    curve = OpenStudio::Model::CurveCubic.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2x(coeff[1])
+    curve.setCoefficient3xPOW2(coeff[2])
+    curve.setCoefficient4xPOW3(coeff[3])
+    curve.setMinimumValueofx(min_x) unless min_x.nil?
+    curve.setMaximumValueofx(max_x) unless max_x.nil?
+    return curve
+  end
+
+  # Adds a CurveBicubic object to the OpenStudio model.
+  #
+  # z = C1 + C2*x + C3*x^2 + C4*y+ C5*y^2 + C6*x*y + C7*x3 + C8*y^3 + C9*x^2*y + C10*x*y^2
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @param min_x [Double] Minimum allowable value for x
+  # @param max_x [Double] Maximum allowable value for x
+  # @param min_y [Double] Minimum allowable value for y
+  # @param max_y [Double] Maximum allowable value for y
+  # @return [OpenStudio::Model::CurveBicubic] The model object
+  def self.add_curve_bicubic(model, name:, coeff:, min_x: nil, max_x: nil, min_y: nil, max_y: nil)
+    curve = OpenStudio::Model::CurveBicubic.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2x(coeff[1])
+    curve.setCoefficient3xPOW2(coeff[2])
+    curve.setCoefficient4y(coeff[3])
+    curve.setCoefficient5yPOW2(coeff[4])
+    curve.setCoefficient6xTIMESY(coeff[5])
+    curve.setCoefficient7xPOW3(coeff[6])
+    curve.setCoefficient8yPOW3(coeff[7])
+    curve.setCoefficient9xPOW2TIMESY(coeff[8])
+    curve.setCoefficient10xTIMESYPOW2(coeff[9])
+    curve.setMinimumValueofx(min_x) unless min_x.nil?
+    curve.setMaximumValueofx(max_x) unless max_x.nil?
+    curve.setMinimumValueofy(min_y) unless min_y.nil?
+    curve.setMaximumValueofy(max_y) unless max_y.nil?
+    return curve
+  end
+
+  # Adds a CurveQuadLinear object to the OpenStudio model.
+  #
+  # y = C1 + C2*w + C3*x + C4*y + C5*z
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @return [OpenStudio::Model::CurveQuadLinear] The model object
+  def self.add_curve_quad_linear(model, name:, coeff:)
+    curve = OpenStudio::Model::CurveQuadLinear.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2w(coeff[1])
+    curve.setCoefficient3x(coeff[2])
+    curve.setCoefficient4y(coeff[3])
+    curve.setCoefficient5z(coeff[4])
+    return curve
+  end
+
+  # Adds a CurveQuintLinear object to the OpenStudio model.
+  #
+  # y = C1 + C2*v + C3*w + C4*x + C5*y + C6*z
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param coeff [Array<Double>] Coefficients for the above equation
+  # @return [OpenStudio::Model::CurveQuintLinear] The model object
+  def self.add_curve_quint_linear(model, name:, coeff:)
+    curve = OpenStudio::Model::CurveQuintLinear.new(model)
+    curve.setName(name)
+    curve.setCoefficient1Constant(coeff[0])
+    curve.setCoefficient2v(coeff[1])
+    curve.setCoefficient3w(coeff[2])
+    curve.setCoefficient4x(coeff[3])
+    curve.setCoefficient5y(coeff[4])
+    curve.setCoefficient6z(coeff[5])
+    return curve
+  end
+
   # Adds an EnergyManagementSystemSensor to the OpenStudio model.
   #
   # The EnergyManagementSystemSensor object gets information during the simulation
@@ -148,22 +426,9 @@ module Model
   # @param key_name [OpenStudio::Model::XXX] Model object name or 'Environment' or nil
   # @return [OpenStudio::Model::EnergyManagementSystemSensor] The model object
   def self.add_ems_sensor(model, name:, output_var_or_meter_name:, key_name:)
-    key_name = key_name.to_s
-
-    # Check for identical sensor and return it if found
-    # TODO: Does this make the simulations any faster? If not, we should remove
-    # this because it can make EMS programs a bit more confusing if, e.g.,
-    # a refrigerator program is referencing a duct sensor or vice versa.
-    model.getEnergyManagementSystemSensors.each do |sensor|
-      next if sensor.outputVariableOrMeterName != output_var_or_meter_name
-      next if sensor.keyName.to_s != key_name
-
-      return sensor
-    end
-
     sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, output_var_or_meter_name)
     sensor.setName(ems_friendly_name(name))
-    sensor.setKeyName(key_name) unless key_name.nil?
+    sensor.setKeyName(key_name.to_s) unless key_name.nil?
     return sensor
   end
 

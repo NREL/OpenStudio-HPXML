@@ -638,12 +638,13 @@ module Airflow
 
     ra_space.surfaces.each do |surface|
       if adiabatic_const.nil?
-        adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', 176.1)
-        adiabatic_mat.setName('Adiabatic')
+        adiabatic_mat = Model.add_massless_material(model,
+                                                    name: 'Adiabatic',
+                                                    rvalue: 176.1)
 
-        adiabatic_const = OpenStudio::Model::Construction.new(model)
-        adiabatic_const.setName('AdiabaticConst')
-        adiabatic_const.insertLayer(0, adiabatic_mat)
+        adiabatic_const = Model.add_construction(model,
+                                                 name: 'AdiabaticConst',
+                                                 layers: [adiabatic_mat])
       end
 
       surface.setConstruction(adiabatic_const)

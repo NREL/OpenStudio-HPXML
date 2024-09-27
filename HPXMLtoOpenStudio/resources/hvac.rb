@@ -603,9 +603,15 @@ module HVAC
     geothermal_loop.num_bore_holes *= unit_multiplier
 
     # Cooling Coil
-    clg_total_cap_curve = create_curve_quad_linear(model, hp_ap.cool_cap_curve_spec[0], obj_name + ' clg total cap curve')
-    clg_sens_cap_curve = create_curve_quint_linear(model, hp_ap.cool_sh_curve_spec[0], obj_name + ' clg sens cap curve')
-    clg_power_curve = create_curve_quad_linear(model, hp_ap.cool_power_curve_spec[0], obj_name + ' clg power curve')
+    clg_total_cap_curve = Model.add_curve_quad_linear(model,
+                                                      name: "#{obj_name} clg total cap curve",
+                                                      coeff: hp_ap.cool_cap_curve_spec[0])
+    clg_sens_cap_curve = Model.add_curve_quint_linear(model,
+                                                      name: "#{obj_name} clg sens cap curve",
+                                                      coeff: hp_ap.cool_sh_curve_spec[0])
+    clg_power_curve = Model.add_curve_quad_linear(model,
+                                                  name: "#{obj_name} clg power curve",
+                                                  coeff: hp_ap.cool_power_curve_spec[0])
     clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model, clg_total_cap_curve, clg_sens_cap_curve, clg_power_curve)
     clg_coil.setName(obj_name + ' clg coil')
     clg_coil.setRatedCoolingCoefficientofPerformance(hp_ap.cool_rated_cops[0])
@@ -621,8 +627,12 @@ module HVAC
     clg_coil.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
 
     # Heating Coil
-    htg_cap_curve = create_curve_quad_linear(model, hp_ap.heat_cap_curve_spec[0], obj_name + ' htg cap curve')
-    htg_power_curve = create_curve_quad_linear(model, hp_ap.heat_power_curve_spec[0], obj_name + ' htg power curve')
+    htg_cap_curve = Model.add_curve_quad_linear(model,
+                                                name: "#{obj_name} htg cap curve",
+                                                coeff: hp_ap.heat_cap_curve_spec[0])
+    htg_power_curve = Model.add_curve_quad_linear(model,
+                                                  name: "#{obj_name} htg power curve",
+                                                  coeff: hp_ap.heat_power_curve_spec[0])
     htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model, htg_cap_curve, htg_power_curve)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedHeatingCoefficientofPerformance(hp_ap.heat_rated_cops[0])
@@ -789,8 +799,12 @@ module HVAC
     clg_coil = nil
 
     # Heating Coil (model w/ constant efficiency)
-    constant_biquadratic = create_curve_biquadratic_constant(model)
-    constant_quadratic = create_curve_quadratic_constant(model)
+    constant_biquadratic = Model.add_curve_biquadratic(model,
+                                                       name: 'ConstantBiquadratic',
+                                                       coeff: [1, 0, 0, 0, 0, 0])
+    constant_quadratic = Model.add_curve_quadratic(model,
+                                                   name: 'ConstantQuadratic',
+                                                   coeff: [1, 0, 0])
     htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_biquadratic, constant_quadratic, constant_biquadratic, constant_quadratic, constant_quadratic)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
@@ -890,11 +904,17 @@ module HVAC
       boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
       boiler.setNominalThermalEfficiency(boilerEff_Design)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('EnteringBoiler')
-      boiler_eff_curve = create_curve_biquadratic(model, [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723], 'CondensingBoilerEff', 0.2, 1.0, 30.0, 85.0)
+      boiler_eff_curve = Model.add_curve_biquadratic(model,
+                                                     name: 'CondensingBoilerEff',
+                                                     coeff: [1.058343061, -0.052650153, -0.0087272, -0.001742217, 0.00000333715, 0.000513723],
+                                                     min_x: 0.2, max_x: 1.0, min_y: 30.0, max_y: 85.0)
     else
       boiler.setNominalThermalEfficiency(heating_system.heating_efficiency_afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
-      boiler_eff_curve = create_curve_bicubic(model, [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05], 'NonCondensingBoilerEff', 0.1, 1.0, 20.0, 80.0)
+      boiler_eff_curve = Model.add_curve_bicubic(model,
+                                                 name: 'NonCondensingBoilerEff',
+                                                 coeff: [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05],
+                                                 min_x: 0.1, max_x: 1.0, min_y: 20.0, max_y: 80.0)
     end
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
     boiler.setMinimumPartLoadRatio(0.0)
@@ -1227,9 +1247,18 @@ module HVAC
     relative_humidity_setpoint_sch.setName("#{obj_name} rh setpoint")
     relative_humidity_setpoint_sch.setValue(rh_setpoint)
 
-    capacity_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-CAP-fT', -100, 100, -100, 100)
-    energy_factor_curve = create_curve_biquadratic(model, ef_coeff, 'DXDH-EF-fT', -100, 100, -100, 100)
-    part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
+    capacity_curve = Model.add_curve_biquadratic(model,
+                                                 name: 'DXDH-CAP-fT',
+                                                 coeff: w_coeff,
+                                                 min_x: -100, max_x: 100, min_y: -100, max_y: 100)
+    energy_factor_curve = Model.add_curve_biquadratic(model,
+                                                      name: 'DXDH-EF-fT',
+                                                      coeff: ef_coeff,
+                                                      min_x: -100, max_x: 100, min_y: -100, max_y: 100)
+    part_load_frac_curve = Model.add_curve_quadratic(model,
+                                                     name: 'DXDH-PLF-fPLR',
+                                                     coeff: pl_coeff,
+                                                     min_x: 0, max_x: 1, min_y: 0.7, max_y: 1)
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
     air_flow_rate = 2.75 * total_capacity
@@ -2877,7 +2906,7 @@ module HVAC
   #
   # @param coeff [TODO] TODO
   # @return [TODO] TODO
-  def self.convert_curve_biquadratic(coeff)
+  def self.convert_biquadratic_coeff_to_si(coeff)
     # Convert IP curves to SI curves
     si_coeff = []
     si_coeff << coeff[0] + 32.0 * (coeff[1] + coeff[3]) + 1024.0 * (coeff[2] + coeff[4] + coeff[5])
@@ -2921,166 +2950,6 @@ module HVAC
     table.setMaximumOutput(output_max) unless output_max.nil?
     table.setOutputValues(output_values)
     return table
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
-  def self.create_curve_biquadratic_constant(model)
-    curve = OpenStudio::Model::CurveBiquadratic.new(model)
-    curve.setName('ConstantBiquadratic')
-    curve.setCoefficient1Constant(1)
-    curve.setCoefficient2x(0)
-    curve.setCoefficient3xPOW2(0)
-    curve.setCoefficient4y(0)
-    curve.setCoefficient5yPOW2(0)
-    curve.setCoefficient6xTIMESY(0)
-    curve.setMinimumValueofx(-100)
-    curve.setMaximumValueofx(100)
-    curve.setMinimumValueofy(-100)
-    curve.setMaximumValueofy(100)
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
-  def self.create_curve_quadratic_constant(model)
-    curve = OpenStudio::Model::CurveQuadratic.new(model)
-    curve.setName('ConstantQuadratic')
-    curve.setCoefficient1Constant(1)
-    curve.setCoefficient2x(0)
-    curve.setCoefficient3xPOW2(0)
-    curve.setMinimumValueofx(-100)
-    curve.setMaximumValueofx(100)
-    curve.setMinimumCurveOutput(-100)
-    curve.setMaximumCurveOutput(100)
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param coeff [TODO] TODO
-  # @param name [TODO] TODO
-  # @param min_x [TODO] TODO
-  # @param max_x [TODO] TODO
-  # @param min_y [TODO] TODO
-  # @param max_y [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_curve_biquadratic(model, coeff, name, min_x, max_x, min_y, max_y)
-    curve = OpenStudio::Model::CurveBiquadratic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setCoefficient4y(coeff[3])
-    curve.setCoefficient5yPOW2(coeff[4])
-    curve.setCoefficient6xTIMESY(coeff[5])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    curve.setMinimumValueofy(min_y)
-    curve.setMaximumValueofy(max_y)
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param coeff [TODO] TODO
-  # @param name [TODO] TODO
-  # @param min_x [TODO] TODO
-  # @param max_x [TODO] TODO
-  # @param min_y [TODO] TODO
-  # @param max_y [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_curve_bicubic(model, coeff, name, min_x, max_x, min_y, max_y)
-    curve = OpenStudio::Model::CurveBicubic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setCoefficient4y(coeff[3])
-    curve.setCoefficient5yPOW2(coeff[4])
-    curve.setCoefficient6xTIMESY(coeff[5])
-    curve.setCoefficient7xPOW3(coeff[6])
-    curve.setCoefficient8yPOW3(coeff[7])
-    curve.setCoefficient9xPOW2TIMESY(coeff[8])
-    curve.setCoefficient10xTIMESYPOW2(coeff[9])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    curve.setMinimumValueofy(min_y)
-    curve.setMaximumValueofy(max_y)
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param coeff [TODO] TODO
-  # @param name [TODO] TODO
-  # @param min_x [TODO] TODO
-  # @param max_x [TODO] TODO
-  # @param min_y [TODO] TODO
-  # @param max_y [TODO] TODO
-  # @param is_dimensionless [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_curve_quadratic(model, coeff, name, min_x, max_x, min_y, max_y, is_dimensionless = false)
-    curve = OpenStudio::Model::CurveQuadratic.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2x(coeff[1])
-    curve.setCoefficient3xPOW2(coeff[2])
-    curve.setMinimumValueofx(min_x)
-    curve.setMaximumValueofx(max_x)
-    if not min_y.nil?
-      curve.setMinimumCurveOutput(min_y)
-    end
-    if not max_y.nil?
-      curve.setMaximumCurveOutput(max_y)
-    end
-    if is_dimensionless
-      curve.setInputUnitTypeforX('Dimensionless')
-      curve.setOutputUnitType('Dimensionless')
-    end
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param coeff [TODO] TODO
-  # @param name [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_curve_quad_linear(model, coeff, name)
-    curve = OpenStudio::Model::CurveQuadLinear.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2w(coeff[1])
-    curve.setCoefficient3x(coeff[2])
-    curve.setCoefficient4y(coeff[3])
-    curve.setCoefficient5z(coeff[4])
-    return curve
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param coeff [TODO] TODO
-  # @param name [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_curve_quint_linear(model, coeff, name)
-    curve = OpenStudio::Model::CurveQuintLinear.new(model)
-    curve.setName(name)
-    curve.setCoefficient1Constant(coeff[0])
-    curve.setCoefficient2v(coeff[1])
-    curve.setCoefficient3w(coeff[2])
-    curve.setCoefficient4x(coeff[3])
-    curve.setCoefficient5y(coeff[4])
-    curve.setCoefficient6z(coeff[5])
-    return curve
   end
 
   # TODO
@@ -3441,22 +3310,38 @@ module HVAC
         cap_ft_curve = create_table_lookup(model, "Cool-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values, 0.0)
         eir_ft_curve = create_table_lookup(model, "Cool-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values, 0.0)
       else
-        cap_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_cap_ft_spec[i])
-        eir_ft_spec_si = convert_curve_biquadratic(clg_ap.cool_eir_ft_spec[i])
-        cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Cool-CAP-fT#{i + 1}", -100, 100, -100, 100)
-        eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Cool-EIR-fT#{i + 1}", -100, 100, -100, 100)
+        cap_ft_curve = Model.add_curve_biquadratic(model,
+                                                   name: "Cool-CAP-fT#{i + 1}",
+                                                   coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_cap_ft_spec[i]),
+                                                   min_x: -100, max_x: 100, min_y: -100, max_y: 100)
+        eir_ft_curve = Model.add_curve_biquadratic(model,
+                                                   name: "Cool-EIR-fT#{i + 1}",
+                                                   coeff: convert_biquadratic_coeff_to_si(clg_ap.cool_eir_ft_spec[i]),
+                                                   min_x: -100, max_x: 100, min_y: -100, max_y: 100)
       end
-      cap_fff_curve = create_curve_quadratic(model, clg_ap.cool_cap_fflow_spec[i], "Cool-CAP-fFF#{i + 1}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, clg_ap.cool_eir_fflow_spec[i], "Cool-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+      cap_fff_curve = Model.add_curve_quadratic(model,
+                                                name: "Cool-CAP-fFF#{i + 1}",
+                                                coeff: clg_ap.cool_cap_fflow_spec[i],
+                                                min_x: 0, max_x: 2, min_y: 0, max_y: 2)
+      eir_fff_curve = Model.add_curve_quadratic(model,
+                                                name: "Cool-EIR-fFF#{i + 1}",
+                                                coeff: clg_ap.cool_eir_fflow_spec[i],
+                                                min_x: 0, max_x: 2, min_y: 0, max_y: 2)
       if i == 0
         cap_fff_curve_0 = cap_fff_curve
         eir_fff_curve_0 = eir_fff_curve
       end
       if is_ddb_control
         # Zero out impact of part load ratio
-        plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], "Cool-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
+        plf_fplr_curve = Model.add_curve_quadratic(model,
+                                                   name: "Cool-PLF-fPLR#{i + 1}",
+                                                   coeff: [1.0, 0.0, 0.0],
+                                                   min_x: 0, max_x: 1, min_y: 0.7, max_y: 1)
       else
-        plf_fplr_curve = create_curve_quadratic(model, clg_ap.cool_plf_fplr_spec[i], "Cool-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
+        plf_fplr_curve = Model.add_curve_quadratic(model,
+                                                   name: "Cool-PLF-fPLR#{i + 1}",
+                                                   coeff: clg_ap.cool_plf_fplr_spec[i],
+                                                   min_x: 0, max_x: 1, min_y: 0.7, max_y: 1)
       end
 
       if num_speeds == 1
@@ -3488,7 +3373,9 @@ module HVAC
           clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(CrankcaseHeaterTemp, 'F', 'C')) if cooling_system.crankcase_heater_watts.to_f > 0.0 # From RESNET Publication No. 002-2017
-          constant_biquadratic = create_curve_biquadratic_constant(model)
+          constant_biquadratic = Model.add_curve_biquadratic(model,
+                                                             name: 'ConstantBiquadratic',
+                                                             coeff: [1, 0, 0, 0, 0, 0])
         end
         stage = OpenStudio::Model::CoilCoolingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedCoolingCOP(clg_ap.cool_rated_cops[i])
@@ -3567,22 +3454,38 @@ module HVAC
         cap_ft_curve = create_table_lookup(model, "Heat-CAP-fT#{i + 1}", cap_ft_independent_vars, cap_ft_output_values, 0)
         eir_ft_curve = create_table_lookup(model, "Heat-EIR-fT#{i + 1}", eir_ft_independent_vars, eir_ft_output_values, 0)
       else
-        cap_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_cap_ft_spec[i])
-        eir_ft_spec_si = convert_curve_biquadratic(htg_ap.heat_eir_ft_spec[i])
-        cap_ft_curve = create_curve_biquadratic(model, cap_ft_spec_si, "Heat-CAP-fT#{i + 1}", -100, 100, -100, 100)
-        eir_ft_curve = create_curve_biquadratic(model, eir_ft_spec_si, "Heat-EIR-fT#{i + 1}", -100, 100, -100, 100)
+        cap_ft_curve = Model.add_curve_biquadratic(model,
+                                                   name: "Heat-CAP-fT#{i + 1}",
+                                                   coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_cap_ft_spec[i]),
+                                                   min_x: -100, max_x: 100, min_y: -100, max_y: 100)
+        eir_ft_curve = Model.add_curve_biquadratic(model,
+                                                   name: "Heat-EIR-fT#{i + 1}",
+                                                   coeff: convert_biquadratic_coeff_to_si(htg_ap.heat_eir_ft_spec[i]),
+                                                   min_x: -100, max_x: 100, min_y: -100, max_y: 100)
       end
-      cap_fff_curve = create_curve_quadratic(model, htg_ap.heat_cap_fflow_spec[i], "Heat-CAP-fFF#{i + 1}", 0, 2, 0, 2)
-      eir_fff_curve = create_curve_quadratic(model, htg_ap.heat_eir_fflow_spec[i], "Heat-EIR-fFF#{i + 1}", 0, 2, 0, 2)
+      cap_fff_curve = Model.add_curve_quadratic(model,
+                                                name: "Heat-CAP-fFF#{i + 1}",
+                                                coeff: htg_ap.heat_cap_fflow_spec[i],
+                                                min_x: 0, max_x: 2, min_y: 0, max_y: 2)
+      eir_fff_curve = Model.add_curve_quadratic(model,
+                                                name: "Heat-EIR-fFF#{i + 1}",
+                                                coeff: htg_ap.heat_eir_fflow_spec[i],
+                                                min_x: 0, max_x: 2, min_y: 0, max_y: 2)
       if i == 0
         cap_fff_curve_0 = cap_fff_curve
         eir_fff_curve_0 = eir_fff_curve
       end
       if is_ddb_control
         # Zero out impact of part load ratio
-        plf_fplr_curve = create_curve_quadratic(model, [1.0, 0.0, 0.0], "Heat-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
+        plf_fplr_curve = Model.add_curve_quadratic(model,
+                                                   name: "Heat-PLF-fPLR#{i + 1}",
+                                                   coeff: [1.0, 0.0, 0.0],
+                                                   min_x: 0, max_x: 1, min_y: 0.7, max_y: 1)
       else
-        plf_fplr_curve = create_curve_quadratic(model, htg_ap.heat_plf_fplr_spec[i], "Heat-PLF-fPLR#{i + 1}", 0, 1, 0.7, 1)
+        plf_fplr_curve = Model.add_curve_quadratic(model,
+                                                   name: "Heat-PLF-fPLR#{i + 1}",
+                                                   coeff: htg_ap.heat_plf_fplr_spec[i],
+                                                   min_x: 0, max_x: 1, min_y: 0.7, max_y: 1)
       end
 
       if num_speeds == 1
@@ -3601,7 +3504,9 @@ module HVAC
           htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-          constant_biquadratic = create_curve_biquadratic_constant(model)
+          constant_biquadratic = Model.add_curve_biquadratic(model,
+                                                             name: 'ConstantBiquadratic',
+                                                             coeff: [1, 0, 0, 0, 0, 0])
         end
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedHeatingCOP(htg_ap.heat_rated_cops[i])
@@ -3622,7 +3527,13 @@ module HVAC
       htg_coil.setDefrostTimePeriodFraction(defrost_time_fraction)
       htg_coil.setResistiveDefrostHeaterCapacity(p_dot_defrost)
     elsif defrost_model_type == HPXML::AdvancedResearchDefrostModelTypeStandard
-      defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
+
+      # Heating defrost curve for reverse cycle
+      defrost_eir_curve = Model.add_curve_biquadratic(model,
+                                                      name: 'Defrosteir',
+                                                      coeff: [0.1528, 0, 0, 0, 0, 0],
+                                                      min_x: -100, max_x: 100, min_y: -100, max_y: 100)
+
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')
     else
