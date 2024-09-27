@@ -949,7 +949,6 @@ module Airflow
       else # shouldn't get here, should only have schedule/thermal zone/nil assigned
         fail 'Unexpected duct zone type passed'
       end
-      dz_t_sensor.setName("#{dz_t_var.name} s")
 
       # Duct zone humidity ratio
       dz_w_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DZ W")
