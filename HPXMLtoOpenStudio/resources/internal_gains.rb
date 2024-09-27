@@ -123,11 +123,28 @@ module InternalGains
         runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil?
         runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
       end
-      water_sens_obj_name = Constants::ObjectTypeGeneralWaterUseSensible
-      Model.add_other_equipment(model, water_sens_obj_name, water_sens_obj_name, spaces[HPXML::LocationConditionedSpace], water_design_level_sens, 1, 0, 0, water_schedule, nil)
 
-      water_lat_obj_name = Constants::ObjectTypeGeneralWaterUseLatent
-      Model.add_other_equipment(model, water_lat_obj_name, water_lat_obj_name, spaces[HPXML::LocationConditionedSpace], water_design_level_lat, 0, 1, 0, water_schedule, nil)
+      Model.add_other_equipment(model,
+                                name: Constants::ObjectTypeGeneralWaterUseSensible,
+                                end_use: Constants::ObjectTypeGeneralWaterUseSensible,
+                                space: spaces[HPXML::LocationConditionedSpace],
+                                design_level: water_design_level_sens,
+                                frac_radiant: 1,
+                                frac_latent: 0,
+                                frac_lost: 0,
+                                schedule: water_schedule,
+                                fuel_type: nil)
+
+      Model.add_other_equipment(model,
+                                name: Constants::ObjectTypeGeneralWaterUseLatent,
+                                end_use: Constants::ObjectTypeGeneralWaterUseLatent,
+                                space: spaces[HPXML::LocationConditionedSpace],
+                                design_level: water_design_level_lat,
+                                frac_radiant: 0,
+                                frac_latent: 1,
+                                frac_lost: 0,
+                                schedule: water_schedule,
+                                fuel_type: nil)
     end
   end
 

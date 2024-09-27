@@ -428,9 +428,15 @@ module Airflow
     whf_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWholeHouseFan)
 
     # Whole house fan electricity consumption
-    space = conditioned_space # no heat gain, so assign the equipment to an arbitrary space
-    obj_name = Constants::ObjectTypeWholeHouseFan
-    whf_equip = Model.add_electric_equipment(model, obj_name, obj_name, space, nil, 0, 0, 1, model.alwaysOnDiscreteSchedule)
+    whf_equip = Model.add_electric_equipment(model,
+                                             name: Constants::ObjectTypeWholeHouseFan,
+                                             end_use: Constants::ObjectTypeWholeHouseFan,
+                                             space: conditioned_space, # no heat gain, so assign the equipment to an arbitrary space
+                                             design_level: nil, # will be EMS-actuated
+                                             frac_radiant: 0,
+                                             frac_latent: 0,
+                                             frac_lost: 1,
+                                             schedule: model.alwaysOnDiscreteSchedule)
 
     whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower, whf_equip.space.get)
     whf_elec_actuator.setName("#{whf_equip.name} act")
@@ -628,35 +634,6 @@ module Airflow
     end
 
     return ra_duct_zone, adiabatic_const
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param name [TODO] TODO
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param frac_lat [TODO] TODO
-  # @param frac_lost [TODO] TODO
-  # @param hpxml_fuel_type [String] HPXML fuel type (HPXML::FuelTypeXXX)
-  # @param end_use [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_other_equipment_object_and_actuator(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil)
-    other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    other_equip_def.setName("#{name} equip")
-    other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
-    other_equip.setName(other_equip_def.name.to_s)
-    other_equip.setFuelType(EPlus.fuel_type(hpxml_fuel_type))
-    if not end_use.nil?
-      other_equip.setEndUseSubcategory(end_use)
-    end
-    other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-    other_equip.setSpace(space)
-    other_equip_def.setFractionLost(frac_lost)
-    other_equip_def.setFractionLatent(frac_lat)
-    other_equip_def.setFractionRadiant(0.0)
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
-    actuator.setName("#{other_equip.name} act")
-    return actuator
   end
 
   # TODO
@@ -1050,7 +1027,18 @@ module Airflow
           if not is_cfis
             duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
           end
-          duct_actuators[var_name] = create_other_equipment_object_and_actuator(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, end_use: end_use)
+          other_equip = Model.add_other_equipment(model,
+                                                  name: object_name,
+                                                  end_use: end_use,
+                                                  space: space,
+                                                  design_level: nil,
+                                                  frac_radiant: 0,
+                                                  frac_latent: frac_lat,
+                                                  frac_lost: frac_lost,
+                                                  schedule: model.alwaysOnDiscreteSchedule,
+                                                  fuel_type: nil)
+          duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
+          duct_actuators[var_name].setName("#{other_equip.name} act")
         end
       end
 
@@ -1540,10 +1528,15 @@ module Airflow
     obj_sch_sensor.setName("#{obj_name} sch s")
     obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
 
-    space = spaces[HPXML::LocationConditionedSpace] # no heat gain, so assign the equipment to an arbitrary space
-    design_level = vent_object.fan_power * vent_object.count
-
-    Model.add_electric_equipment(model, obj_name, Constants::ObjectTypeMechanicalVentilation, space, design_level, 0, 0, 1, obj_sch.schedule)
+    Model.add_electric_equipment(model,
+                                 name: obj_name,
+                                 end_use: Constants::ObjectTypeMechanicalVentilation,
+                                 space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
+                                 design_level: vent_object.fan_power * vent_object.count,
+                                 frac_radiant: 0,
+                                 frac_latent: 0,
+                                 frac_lost: 1,
+                                 schedule: obj_sch.schedule)
 
     return obj_sch_sensor
   end
@@ -1812,7 +1805,15 @@ module Airflow
     # Availability Schedule
     avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
 
-    equip = Model.add_electric_equipment(model, obj_name, Constants::ObjectTypeMechanicalVentilation, spaces[HPXML::LocationConditionedSpace], tot_fans_w, 0, 0, fan_heat_lost_fraction, avail_sch.schedule)
+    equip = Model.add_electric_equipment(model,
+                                         name: obj_name,
+                                         end_use: Constants::ObjectTypeMechanicalVentilation,
+                                         space: spaces[HPXML::LocationConditionedSpace],
+                                         design_level: tot_fans_w,
+                                         frac_radiant: 0,
+                                         frac_latent: 0,
+                                         frac_lost: fan_heat_lost_fraction,
+                                         schedule: avail_sch.schedule)
 
     equip_actuator = nil
     if [Constants::ObjectTypeMechanicalVentilationHouseFanCFIS,
@@ -1835,11 +1836,31 @@ module Airflow
     conditioned_space = spaces[HPXML::LocationConditionedSpace]
 
     # Actuators for mech vent fan
-    sens_name = "#{Constants::ObjectTypeMechanicalVentilationHouseFan} sensible load"
-    fan_sens_load_actuator = create_other_equipment_object_and_actuator(model: model, name: sens_name, space: conditioned_space, frac_lat: 0.0, frac_lost: 0.0, end_use: Constants::ObjectTypeMechanicalVentilationHouseFan)
+    sens_equip = Model.add_other_equipment(model,
+                                           name: "#{Constants::ObjectTypeMechanicalVentilationHouseFan} sensible load",
+                                           end_use: Constants::ObjectTypeMechanicalVentilationHouseFan,
+                                           space: conditioned_space,
+                                           design_level: nil,
+                                           frac_radiant: 0,
+                                           frac_latent: 0,
+                                           frac_lost: 0,
+                                           schedule: model.alwaysOnDiscreteSchedule,
+                                           fuel_type: nil)
+    fan_sens_load_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sens_equip, *EPlus::EMSActuatorOtherEquipmentPower, sens_equip.space.get)
+    fan_sens_load_actuator.setName("#{sens_equip.name} act")
 
-    lat_name = "#{Constants::ObjectTypeMechanicalVentilationHouseFan} latent load"
-    fan_lat_load_actuator = create_other_equipment_object_and_actuator(model: model, name: lat_name, space: conditioned_space, frac_lat: 1.0, frac_lost: 0.0, end_use: Constants::ObjectTypeMechanicalVentilationHouseFan)
+    lat_equip = Model.add_other_equipment(model,
+                                          name: "#{Constants::ObjectTypeMechanicalVentilationHouseFan} latent load",
+                                          end_use: Constants::ObjectTypeMechanicalVentilationHouseFan,
+                                          space: conditioned_space,
+                                          design_level: nil,
+                                          frac_radiant: 0,
+                                          frac_latent: 1,
+                                          frac_lost: 0,
+                                          schedule: model.alwaysOnDiscreteSchedule,
+                                          fuel_type: nil)
+    fan_lat_load_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(lat_equip, *EPlus::EMSActuatorOtherEquipmentPower, lat_equip.space.get)
+    fan_lat_load_actuator.setName("#{lat_equip.name} act")
 
     program.addLine("Set #{fan_sens_load_actuator.name} = 0.0")
     program.addLine("Set #{fan_lat_load_actuator.name} = 0.0")
@@ -2068,9 +2089,22 @@ module Airflow
     end
     vent_fans[:mech_preheat].each_with_index do |f_preheat, i|
       infil_program.addLine("If (OASupInTemp < HtgStp) && (#{clg_ssn_sensor.name} < 1)")
+
       cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPreheating }.size # Ensure unique meter for each preheating system
-      htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: conditioned_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: "#{Constants::ObjectTypeMechanicalVentilationPreheating}#{cnt + 1}")
+      other_equip = Model.add_other_equipment(model,
+                                              name: "shared mech vent preheating energy #{i}",
+                                              end_use: "#{Constants::ObjectTypeMechanicalVentilationPreheating}#{cnt + 1}",
+                                              space: conditioned_space,
+                                              design_level: nil,
+                                              frac_radiant: 0,
+                                              frac_latent: 0,
+                                              frac_lost: 1,
+                                              schedule: model.alwaysOnDiscreteSchedule,
+                                              fuel_type: f_preheat.preheating_fuel)
+      htg_energy_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
+      htg_energy_actuator.setName("#{other_equip.name} act")
       htg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_preheat.id) # Used by reporting measure
+
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
         vent_mech_erv_hrv_tot = [f_preheat]
@@ -2094,9 +2128,22 @@ module Airflow
     end
     vent_fans[:mech_precool].each_with_index do |f_precool, i|
       infil_program.addLine("If (OASupInTemp > ClgStp) && (#{clg_ssn_sensor.name} > 0)")
+
       cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeMechanicalVentilationPrecooling }.size # Ensure unique meter for each precooling system
-      clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: conditioned_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: "#{Constants::ObjectTypeMechanicalVentilationPrecooling}#{cnt + 1}")
+      other_equip = Model.add_other_equipment(model,
+                                              name: "shared mech vent precooling energy #{i}",
+                                              end_use: "#{Constants::ObjectTypeMechanicalVentilationPrecooling}#{cnt + 1}",
+                                              space: conditioned_space,
+                                              design_level: nil,
+                                              frac_radiant: 0,
+                                              frac_latent: 0,
+                                              frac_lost: 1,
+                                              schedule: model.alwaysOnDiscreteSchedule,
+                                              fuel_type: f_precool.precooling_fuel)
+      clg_energy_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
+      clg_energy_actuator.setName("#{other_equip.name} act")
       clg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_precool.id) # Used by reporting measure
+
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
       if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
         vent_mech_erv_hrv_tot = [f_precool]

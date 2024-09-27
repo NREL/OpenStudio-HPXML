@@ -744,11 +744,16 @@ module HVAC
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
       design_level = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
-      space = control_zone.spaces[0] # no heat gain, so assign the equipment to an arbitrary space
-      obj_name = Constants::ObjectTypeGSHPSharedPump
 
-      equip = Model.add_electric_equipment(model, obj_name, obj_name, space, design_level, 0, 0, 1, model.alwaysOnDiscreteSchedule)
-
+      equip = Model.add_electric_equipment(model,
+                                           name: Constants::ObjectTypeGSHPSharedPump,
+                                           end_use: Constants::ObjectTypeGSHPSharedPump,
+                                           space: control_zone.spaces[0], # no heat gain, so assign the equipment to an arbitrary space
+                                           design_level: design_level,
+                                           frac_radiant: 0,
+                                           frac_latent: 0,
+                                           frac_lost: 1,
+                                           schedule: model.alwaysOnDiscreteSchedule)
       equip.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
 
@@ -1308,7 +1313,15 @@ module HVAC
       runner.registerWarning("Both '#{ceiling_fan_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !ceiling_fan.monthly_multipliers.nil?
     end
 
-    Model.add_electric_equipment(model, obj_name, obj_name, spaces[HPXML::LocationConditionedSpace], ceiling_fan_design_level, 0.558, 0, 0, ceiling_fan_sch)
+    Model.add_electric_equipment(model,
+                                 name: obj_name,
+                                 end_use: obj_name,
+                                 space: spaces[HPXML::LocationConditionedSpace],
+                                 design_level: ceiling_fan_design_level,
+                                 frac_radiant: 0.558,
+                                 frac_latent: 0,
+                                 frac_lost: 0,
+                                 schedule: ceiling_fan_sch)
   end
 
   # Adds an HPXML HVAC Control to the OpenStudio model.
@@ -2432,17 +2445,16 @@ module HVAC
     dehumidifier_power.setKeyName(zone_hvac.name.to_s)
 
     # actuator
-    dehumidifier_load_adj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    dehumidifier_load_adj_def.setName("#{zone_hvac.name} sens htg adj def")
-    dehumidifier_load_adj_def.setDesignLevel(0)
-    dehumidifier_load_adj_def.setFractionRadiant(0)
-    dehumidifier_load_adj_def.setFractionLatent(0)
-    dehumidifier_load_adj_def.setFractionLost(0)
-    dehumidifier_load_adj = OpenStudio::Model::OtherEquipment.new(dehumidifier_load_adj_def)
-    dehumidifier_load_adj.setName("#{zone_hvac.name} sens htg adj")
-    dehumidifier_load_adj.setSpace(conditioned_space)
-    dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
-
+    dehumidifier_load_adj = Model.add_other_equipment(model,
+                                                      name: "#{zone_hvac.name} sens htg adj",
+                                                      end_use: nil,
+                                                      space: conditioned_space,
+                                                      design_level: 0,
+                                                      frac_radiant: 0,
+                                                      frac_latent: 0,
+                                                      frac_lost: 0,
+                                                      schedule: model.alwaysOnDiscreteSchedule,
+                                                      fuel_type: nil)
     dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower, dehumidifier_load_adj.space.get)
     dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
 
@@ -5156,33 +5168,30 @@ module HVAC
       end
     end
     # other equipment actuator
-    defrost_heat_load_oed = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    defrost_heat_load_oed.setName("#{air_loop_unitary.name} defrost heat load def")
-    defrost_heat_load_oed.setDesignLevel(0)
-    defrost_heat_load_oed.setFractionRadiant(0)
-    defrost_heat_load_oed.setFractionLatent(0)
-    defrost_heat_load_oed.setFractionLost(0)
-    defrost_heat_load_oe = OpenStudio::Model::OtherEquipment.new(defrost_heat_load_oed)
-    defrost_heat_load_oe.setName("#{air_loop_unitary.name} defrost heat load")
-    defrost_heat_load_oe.setSpace(conditioned_space)
-    defrost_heat_load_oe.setSchedule(model.alwaysOnDiscreteSchedule)
 
+    defrost_heat_load_oe = Model.add_other_equipment(model,
+                                                     name: "#{air_loop_unitary.name} defrost heat load",
+                                                     end_use: nil,
+                                                     space: conditioned_space,
+                                                     design_level: 0,
+                                                     frac_radiant: 0,
+                                                     frac_latent: 0,
+                                                     frac_lost: 0,
+                                                     schedule: model.alwaysOnDiscreteSchedule,
+                                                     fuel_type: nil)
     defrost_heat_load_oe_act = OpenStudio::Model::EnergyManagementSystemActuator.new(defrost_heat_load_oe, *EPlus::EMSActuatorOtherEquipmentPower, defrost_heat_load_oe.space.get)
     defrost_heat_load_oe_act.setName("#{defrost_heat_load_oe.name} act")
 
-    energyplus_fuel = EPlus.fuel_type(supp_sys_fuel)
-    defrost_supp_heat_energy_oed = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    defrost_supp_heat_energy_oed.setName("#{air_loop_unitary.name} supp heat energy def")
-    defrost_supp_heat_energy_oed.setDesignLevel(0)
-    defrost_supp_heat_energy_oed.setFractionRadiant(0)
-    defrost_supp_heat_energy_oed.setFractionLatent(0)
-    defrost_supp_heat_energy_oed.setFractionLost(1)
-    defrost_supp_heat_energy_oe = OpenStudio::Model::OtherEquipment.new(defrost_supp_heat_energy_oed)
-    defrost_supp_heat_energy_oe.setName("#{air_loop_unitary.name} defrost supp heat energy")
-    defrost_supp_heat_energy_oe.setSpace(conditioned_space)
-    defrost_supp_heat_energy_oe.setFuelType(energyplus_fuel)
-    defrost_supp_heat_energy_oe.setSchedule(model.alwaysOnDiscreteSchedule)
-    defrost_supp_heat_energy_oe.setEndUseSubcategory(Constants::ObjectTypeBackupSuppHeat)
+    defrost_supp_heat_energy_oe = Model.add_other_equipment(model,
+                                                            name: "#{air_loop_unitary.name} defrost supp heat energy",
+                                                            end_use: Constants::ObjectTypeBackupSuppHeat,
+                                                            space: conditioned_space,
+                                                            design_level: 0,
+                                                            frac_radiant: 0,
+                                                            frac_latent: 0,
+                                                            frac_lost: 1,
+                                                            schedule: model.alwaysOnDiscreteSchedule,
+                                                            fuel_type: supp_sys_fuel)
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 

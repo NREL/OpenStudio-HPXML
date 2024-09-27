@@ -9,24 +9,21 @@ module Model
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
+  # @param end_use [String] Name of the end use subcategory for output processing
   # @param peak_flow_rate [Double] Water peak flow rate (m^3/s)
   # @param flow_rate_schedule [OpenStudio::Model::Schedule] Schedule fraction that applies to the peak flow rate
   # @param water_use_connections [OpenStudio::Model::WaterUseConnections] Grouping of water use equipment objects
-  # @param unit_multiplier [Integer] Number of similar dwelling units
   # @param target_temperature_schedule [OpenStudio::Model::Schedule] The target water temperature schedule (F)
   # @return [OpenStudio::Model::WaterUseEquipment] The newly created model object
-  def self.add_water_use_equipment(model, name, peak_flow_rate, flow_rate_schedule, water_use_connections, unit_multiplier, target_temperature_schedule = nil)
+  def self.add_water_use_equipment(model, name:, end_use:, peak_flow_rate:, flow_rate_schedule:, water_use_connections:, target_temperature_schedule:)
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
     wu.setName(name)
     wu_def.setName(name)
-    # Not in a thermal zone, so needs to be explicitly multiplied
-    wu_def.setPeakFlowRate(peak_flow_rate * unit_multiplier)
-    wu_def.setEndUseSubcategory(name)
+    wu_def.setPeakFlowRate(peak_flow_rate)
+    wu_def.setEndUseSubcategory(end_use) unless end_use.nil?
     wu.setFlowRateFractionSchedule(flow_rate_schedule)
-    if not target_temperature_schedule.nil?
-      wu_def.setTargetTemperatureSchedule(target_temperature_schedule)
-    end
+    wu_def.setTargetTemperatureSchedule(target_temperature_schedule) unless target_temperature_schedule.nil?
     water_use_connections.addWaterUseEquipment(wu)
     return wu
   end
@@ -38,65 +35,106 @@ module Model
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
-  # @param end_use_subcategory [String] Name of the end use subcategory for output processing
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param end_use [String] Name of the end use subcategory for output processing
+  # @param space [OpenStudio::Model::Space] The space the object is added to
   # @param design_level [Double] Maximum electrical power (W)
   # @param frac_radiant [Double] Fraction of energy consumption that is long-wave radiant heat to the zone
   # @param frac_latent [Double] Fraction of energy consumption that is latent heat to the zone
   # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
   # @return [OpenStudio::Model::ElectricEquipment] The newly created model object
-  def self.add_electric_equipment(model, name, end_use_subcategory, space, design_level, frac_radiant, frac_latent, frac_lost, schedule)
-    return if design_level == 0.0
-
+  def self.add_electric_equipment(model, name:, end_use:, space:, design_level:, frac_radiant:, frac_latent:, frac_lost:, schedule:)
     ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
     ee.setName(name)
-    ee.setEndUseSubcategory(end_use_subcategory)
+    ee.setEndUseSubcategory(end_use) unless end_use.nil?
     ee.setSpace(space)
     ee_def.setName(name)
-    ee_def.setDesignLevel(design_level) unless design_level.nil?
+    ee_def.setDesignLevel(design_level) unless design_level.nil? # EMS-actuated if nil
     ee_def.setFractionRadiant(frac_radiant)
     ee_def.setFractionLatent(frac_latent)
     ee_def.setFractionLost(frac_lost)
     ee.setSchedule(schedule)
-
     return ee
   end
 
   # Adds an OtherEquipment object to the OpenStudio model.
-  # 
+  #
   # The OtherEquipment object models a heat gain/loss directly to the zone. Fuel consumption may
   # or may not be associated with the heat.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
-  # @param end_use_subcategory [String] Name of the end use subcategory for output processing
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param end_use [String] Name of the end use subcategory for output processing
+  # @param space [OpenStudio::Model::Space] The space the object is added to
   # @param design_level [Double] Maximum energy input (W)
   # @param frac_radiant [Double] Fraction of energy consumption that is long-wave radiant heat to the zone
   # @param frac_latent [Double] Fraction of energy consumption that is latent heat to the zone
   # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @param fuel_type [String] Fuel type (HPXML::FuelTypeXXX)
+  # @param fuel_type [String] Fuel type if the equipment consumes fuel (HPXML::FuelTypeXXX)
   # @return [OpenStudio::Model::OtherEquipment] The newly created model object
-  def self.add_other_equipment(model, name, end_use_subcategory, space, design_level, frac_radiant, frac_latent, frac_lost, schedule, fuel_type)
-    return if design_level == 0.0 # Negative values intentionally allowed, e.g. for water sensible
-
+  def self.add_other_equipment(model, name:, end_use:, space:, design_level:, frac_radiant:, frac_latent:, frac_lost:, schedule:, fuel_type:)
     oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     oe = OpenStudio::Model::OtherEquipment.new(oe_def)
     oe.setName(name)
-    oe.setEndUseSubcategory(end_use_subcategory)
-    oe.setFuelType(EPlus.fuel_type(fuel_type))
+    oe.setEndUseSubcategory(end_use) unless end_use.nil?
+    oe.setFuelType(EPlus.fuel_type(fuel_type)) unless fuel_type.nil?
     oe.setSpace(space)
     oe_def.setName(name)
-    oe_def.setDesignLevel(design_level)
+    oe_def.setDesignLevel(design_level) unless design_level.nil? # EMS-actuated if nil
     oe_def.setFractionRadiant(frac_radiant)
     oe_def.setFractionLatent(frac_latent)
     oe_def.setFractionLost(frac_lost)
     oe.setSchedule(schedule)
-
     return oe
+  end
+
+  # Adds a Lights object to the OpenStudio model.
+  #
+  # The Lights object models electric lighting in a zone.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param end_use [String] Name of the end use subcategory for output processing
+  # @param space [OpenStudio::Model::Space] The space the object is added to
+  # @param design_level [Double] Maximum electrical power input (W)
+  # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
+  # @return [OpenStudio::Model::Lights] The newly created model object
+  def self.add_lights(model, name:, end_use:, space:, design_level:, schedule:)
+    ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+    ltg = OpenStudio::Model::Lights.new(ltg_def)
+    ltg.setName(name)
+    ltg.setSpace(space)
+    ltg.setEndUseSubcategory(end_use)
+    ltg_def.setName(name)
+    ltg_def.setLightingLevel(design_level)
+    ltg_def.setFractionRadiant(0.6)
+    ltg_def.setFractionVisible(0.2)
+    ltg_def.setReturnAirFraction(0.0)
+    ltg.setSchedule(schedule)
+    return ltg
+  end
+
+  # Adds an ExteriorLights object to the OpenStudio model.
+  #
+  # The ExteriorLights object models lighting outside the building.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param end_use [String] Name of the end use subcategory for output processing
+  # @param design_level [Double] Maximum electrical power input (W)
+  # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
+  # @return [OpenStudio::Model::ExteriorLights] The newly created model object
+  def self.add_exterior_lights(model, name:, end_use:, design_level:, schedule:)
+    ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
+    ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
+    ltg.setName(name)
+    ltg.setEndUseSubcategory(end_use)
+    ltg_def.setName(name)
+    ltg_def.setDesignLevel(design_level)
+    ltg.setSchedule(schedule)
+    return ltg
   end
 
   # Resets the existing model if it already has objects in it.

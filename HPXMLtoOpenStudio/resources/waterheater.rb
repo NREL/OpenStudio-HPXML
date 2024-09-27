@@ -1147,31 +1147,29 @@ module Waterheater
 
     if not loc_space.nil? # If located in space
       # Add in other equipment objects for sensible/latent gains
-      hpwh_sens_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-      hpwh_sens_def.setName("#{obj_name_hpwh} sens")
-      hpwh_sens = OpenStudio::Model::OtherEquipment.new(hpwh_sens_def)
-      hpwh_sens.setName(hpwh_sens_def.name.to_s)
-      hpwh_sens.setSpace(loc_space)
-      hpwh_sens_def.setDesignLevel(0)
-      hpwh_sens_def.setFractionRadiant(0)
-      hpwh_sens_def.setFractionLatent(0)
-      hpwh_sens_def.setFractionLost(0)
-      hpwh_sens.setSchedule(model.alwaysOnDiscreteSchedule)
-
-      hpwh_lat_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-      hpwh_lat_def.setName("#{obj_name_hpwh} lat")
-      hpwh_lat = OpenStudio::Model::OtherEquipment.new(hpwh_lat_def)
-      hpwh_lat.setName(hpwh_lat_def.name.to_s)
-      hpwh_lat.setSpace(loc_space)
-      hpwh_lat_def.setDesignLevel(0)
-      hpwh_lat_def.setFractionRadiant(0)
-      hpwh_lat_def.setFractionLatent(1)
-      hpwh_lat_def.setFractionLost(0)
-      hpwh_lat.setSchedule(model.alwaysOnDiscreteSchedule)
-
+      hpwh_sens = Model.add_other_equipment(model,
+                                            name: "#{obj_name_hpwh} sens",
+                                            end_use: nil,
+                                            space: loc_space,
+                                            design_level: 0,
+                                            frac_radiant: 0,
+                                            frac_latent: 0,
+                                            frac_lost: 0,
+                                            schedule: model.alwaysOnDiscreteSchedule,
+                                            fuel_type: nil)
       sens_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_sens, *EPlus::EMSActuatorOtherEquipmentPower, hpwh_sens.space.get)
       sens_act_actuator.setName("#{hpwh_sens.name} act")
 
+      hpwh_lat = Model.add_other_equipment(model,
+                                           name: "#{obj_name_hpwh} lat",
+                                           end_use: nil,
+                                           space: loc_space,
+                                           design_level: 0,
+                                           frac_radiant: 0,
+                                           frac_latent: 1,
+                                           frac_lost: 0,
+                                           schedule: model.alwaysOnDiscreteSchedule,
+                                           fuel_type: nil)
       lat_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_lat, *EPlus::EMSActuatorOtherEquipmentPower, hpwh_lat.space.get)
       lat_act_actuator.setName("#{hpwh_lat.name} act")
     end
@@ -1589,8 +1587,16 @@ module Waterheater
 
     # Add an other equipment object for water heating that will get actuated, has a small initial load but gets overwritten by EMS
     cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeWaterHeaterAdjustment }.size # Ensure unique meter for each water heater
-    obj_name = "#{Constants::ObjectTypeWaterHeaterAdjustment}#{cnt + 1}"
-    ec_adj_object = Model.add_other_equipment(model, obj_name, obj_name, loc_space, 0.01, 0, 0, 1, model.alwaysOnDiscreteSchedule, fuel_type)
+    ec_adj_object = Model.add_other_equipment(model,
+                                              name: "#{Constants::ObjectTypeWaterHeaterAdjustment}#{cnt + 1}",
+                                              end_use: "#{Constants::ObjectTypeWaterHeaterAdjustment}#{cnt + 1}",
+                                              space: loc_space,
+                                              design_level: 0.01,
+                                              frac_radiant: 0,
+                                              frac_latent: 0,
+                                              frac_lost: 1,
+                                              schedule: model.alwaysOnDiscreteSchedule,
+                                              fuel_type: fuel_type)
     ec_adj_object.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
     # EMS for calculating the EC_adj
