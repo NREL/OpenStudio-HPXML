@@ -2752,8 +2752,8 @@ end
 # TODO
 class Duct
   # @param side [String] Whether the duct is on the supply or return side (HPXML::DuctTypeXXX)
-  # @param loc_space [TODO] TODO
-  # @param loc_schedule [TODO] TODO
+  # @param loc_space [OpenStudio::Model::Space] The space where duct is located
+  # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule for where the duct is located, if not in a space
   # @param leakage_frac [TODO] TODO
   # @param leakage_cfm25 [TODO] TODO
   # @param leakage_cfm50 [TODO] TODO

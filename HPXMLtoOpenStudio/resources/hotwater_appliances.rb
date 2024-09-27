@@ -204,7 +204,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           rf_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
-          rf_schedule = fridge_or_freezer_coefficients_schedule(model, rf_col_name, rf_obj_name, refrigerator, rf_space, rf_loc_schedule, rf_unavailable_periods)
+          rf_schedule = get_fridge_or_freezer_coefficients_schedule(model, rf_col_name, rf_obj_name, refrigerator, rf_space, rf_loc_schedule, rf_unavailable_periods)
         elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
           rf_weekday_sch = refrigerator.weekday_fractions
           rf_weekend_sch = refrigerator.weekend_fractions
@@ -254,7 +254,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !freezer.constant_coefficients.nil? && !freezer.temperature_coefficients.nil?
           fz_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
-          fz_schedule = fridge_or_freezer_coefficients_schedule(model, fz_col_name, fz_obj_name, freezer, fz_space, fz_loc_schedule, fz_unavailable_periods)
+          fz_schedule = get_fridge_or_freezer_coefficients_schedule(model, fz_col_name, fz_obj_name, freezer, fz_space, fz_loc_schedule, fz_unavailable_periods)
         elsif !freezer.weekday_fractions.nil? && !freezer.weekend_fractions.nil? && !freezer.monthly_multipliers.nil?
           fz_weekday_sch = freezer.weekday_fractions
           fz_weekend_sch = freezer.weekend_fractions
@@ -557,14 +557,14 @@ module HotWaterAndAppliances
     end
   end
 
-  # TODO
+  # Calculates cooking range/oven annual energy use.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
-  # @param cooking_range [TODO] TODO
-  # @param oven [TODO] TODO
-  # @param is_outside [TODO] TODO
-  # @return [TODO] TODO
+  # @param cooking_range [HPXML::CookingRange] The HPXML cooking range of interest
+  # @param oven [HPXML::Oven] The HPXML oven of interest
+  # @param is_outside [Boolean] Whether the appliance is located outside the dwelling unit
+  # @return [Array<Double, Double, Double, Double>] Annual electricity use (kWh), annual fuel use (therm), sensible/latent fractions
   def self.calc_range_oven_energy(runner, nbeds_eq, cooking_range, oven, is_outside = false)
     if cooking_range.is_induction
       burner_ef = 0.91
@@ -610,15 +610,15 @@ module HotWaterAndAppliances
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
-  # TODO
+  # Calculates dishwasher annual energy use and daily hot water use.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param dishwasher [TODO] TODO
-  # @param is_outside [TODO] TODO
+  # @param dishwasher [HPXML::Dishwasher] The HPXML dishwasher of interest
+  # @param is_outside [Boolean] Whether the appliance is located outside the dwelling unit
   # @param n_occ [Double] Number of occupants in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double, Double, Double, Double>] Annual electricity use (kWh), sensible/latent fractions, hot water use (gal/day)
   def self.calc_dishwasher_energy_gpd(runner, eri_version, nbeds, dishwasher, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       if dishwasher.rated_annual_kwh.nil?
@@ -671,32 +671,34 @@ module HotWaterAndAppliances
     return annual_kwh, frac_sens, frac_lat, gpd
   end
 
-  # TODO
+  # Converts dishwasher rated annual use (kWh) to energy factor (EF).
   #
-  # @param annual_kwh [TODO] TODO
-  # @return [TODO] TODO
+  # @param annual_kwh [Double] Rated annual kWh
+  # @return [Double] Energy factor
   def self.calc_dishwasher_ef_from_annual_kwh(annual_kwh)
+    # Per ANSI/RESNET/ICC 301
     return 215.0 / annual_kwh
   end
 
-  # TODO
+  # Converts dishwasher energy factor (EF) to rated annual use (kWh).
   #
-  # @param ef [TODO] TODO
-  # @return [TODO] TODO
+  # @param ef [Double] Energy factor
+  # @return [Double] Rated annual use (kWh)
   def self.calc_dishwasher_annual_kwh_from_ef(ef)
+    # Per ANSI/RESNET/ICC 301
     return 215.0 / ef
   end
 
-  # TODO
+  # Calculates clothes dryer annual energy use.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param clothes_dryer [TODO] TODO
-  # @param clothes_washer [TODO] TODO
-  # @param is_outside [TODO] TODO
+  # @param clothes_dryer [HPXML::ClothesDryer] The HPXML clothes dryer of interest
+  # @param clothes_washer [HPXML::ClothesWasher] The related HPXML clothes washer, which affects dryer use
+  # @param is_outside [Boolean] Whether the appliance is located outside the dwelling unit
   # @param n_occ [Double] Number of occupants in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double, Double, Double, Double>] Annual electricity use (kWh), annual fuel use (therm), sensible/latent fractions
   def self.calc_clothes_dryer_energy(runner, eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
@@ -765,31 +767,31 @@ module HotWaterAndAppliances
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
-  # TODO
+  # Converts clothes dryer energy factor (EF) to combined energy factor (CEF).
   #
-  # @param ef [TODO] TODO
-  # @return [TODO] TODO
+  # @param ef [Double] Energy factor
+  # @return [Double] Combined energy factor
   def self.calc_clothes_dryer_cef_from_ef(ef)
     return ef / 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
 
-  # TODO
+  # Converts clothes dryer combined energy factor (CEF) to energy factor (EF).
   #
-  # @param cef [TODO] TODO
-  # @return [TODO] TODO
+  # @param cef [Double] Combined energy factor
+  # @return [Double] Energy factor
   def self.calc_clothes_dryer_ef_from_cef(cef)
     return cef * 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
 
-  # TODO
+  # Calculates clothes washer annual energy use and daily hot water use.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param clothes_washer [TODO] TODO
-  # @param is_outside [TODO] TODO
+  # @param clothes_washer [HPXML::ClothesWasher] The HPXML clothes washer of interest
+  # @param is_outside [Boolean] Whether the appliance is located outside the dwelling unit
   # @param n_occ [Double] Number of occupants in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double, Double, Double, Double>] Annual electricity use (kWh), sensible/latent fractions, hot water use (gal/day)
   def self.calc_clothes_washer_energy_gpd(runner, eri_version, nbeds, clothes_washer, is_outside = false, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       gas_h20 = 0.3914 # (gal/cyc) per (therm/y)
@@ -838,28 +840,28 @@ module HotWaterAndAppliances
     return annual_kwh, frac_sens, frac_lat, gpd
   end
 
-  # TODO
+  # Converts clothes washer modified energy factor (MEF) to integrated modified energy factor (IMEF).
   #
-  # @param mef [TODO] TODO
-  # @return [TODO] TODO
+  # @param mef [Double] Modified energy factor
+  # @return [Double] Integrated modified energy factor
   def self.calc_clothes_washer_imef_from_mef(mef)
     return (mef - 0.503) / 0.95 # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
 
-  # TODO
+  # Converts clothes washer integrated modified energy factor (IMEF) to modified energy factor (MEF).
   #
-  # @param imef [TODO] TODO
-  # @return [TODO] TODO
+  # @param mef [Double] Modified energy factor
+  # @return [Double] Integrated modified energy factor
   def self.calc_clothes_washer_mef_from_imef(imef)
     return 0.503 + 0.95 * imef # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
 
-  # TODO
+  # Calculates refrigerator annual energy use.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param fridge_or_freezer [TODO] TODO
-  # @param is_outside [TODO] TODO
-  # @return [TODO] TODO
+  # @param fridge_or_freezer [HPXML::Refrigerator or HPXML::Freezer] The HPXML refrigerator/freezer of interest
+  # @param is_outside [Boolean] Whether the appliance is located outside the dwelling unit
+  # @return [Array<Double, Double, Double>] Annual electricity use (kWh), sensible/latent fractions
   def self.calc_fridge_or_freezer_energy(runner, fridge_or_freezer, is_outside = false)
     # Get values
     annual_kwh = fridge_or_freezer.rated_annual_kwh
@@ -880,17 +882,18 @@ module HotWaterAndAppliances
     return annual_kwh, frac_sens, frac_lat
   end
 
-  # TODO
+  # Returns an EMS-actuated schedule in which the hourly refrigerator energy use is calculated
+  # based on the temperature of the ambient space using the schedule coefficients.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param col_name [TODO] TODO
+  # @param col_name [String] The column header of the detailed schedule
   # @param obj_name [String] Name for the OpenStudio object
-  # @param fridge_or_freezer [TODO] TODO
-  # @param loc_space [TODO] TODO
-  # @param loc_schedule [TODO] TODO
+  # @param fridge_or_freezer [HPXML::Refrigerator or HPXML::Freezer] The HPXML refrigerator/freezer of interest
+  # @param loc_space [OpenStudio::Model::Space] The space where the refrigerator/freezer is located
+  # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule for where the refrigerator/freezer is located, if not in a space
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [TODO] TODO
-  def self.fridge_or_freezer_coefficients_schedule(model, col_name, obj_name, fridge_or_freezer, loc_space, loc_schedule, unavailable_periods)
+  # @return [OpenStudio::Model::ScheduleConstant] EMS-actuated refrigerator schedule
+  def self.get_fridge_or_freezer_coefficients_schedule(model, col_name, obj_name, fridge_or_freezer, loc_space, loc_schedule, unavailable_periods)
     # Create availability sensor
     if not unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, col_name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
@@ -947,12 +950,12 @@ module HotWaterAndAppliances
     return schedule
   end
 
-  # TODO
+  # Calculates Drain Water Heat Recovery (DWHR) factors per ANSI/RESNET/ICC 301.
   #
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
-  # @param hot_water_distribution [TODO] TODO
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO
+  # @param hot_water_distribution [HPXML::HotWaterDistribution] The HPXML hot water distribution system of interest
+  # @param frac_low_flow_fixtures [Double] The fraction of fixtures considered low-flow
+  # @return [Array<Double, Double, Double, Double, Double>] Effectiveness (frac), fraction of water impacted by DWHR, piping loss coefficient, location factor, fixture factor
   def self.get_dwhr_factors(nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
@@ -986,16 +989,18 @@ module HotWaterAndAppliances
     return eff_adj, iFrac, plc, locF, fixF
   end
 
-  # TODO
+  # Calculates daily water heater inlet temperatures, which includes an adjustment if
+  # there is a drain water heat recovery device.
   #
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
-  # @param hot_water_distribution [TODO] TODO
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO
+  # @param hot_water_distribution [HPXML::HotWaterDistribution] The HPXML hot water distribution system of interest
+  # @param frac_low_flow_fixtures [Double] The fraction of fixtures considered low-flow
+  # @return [Array<Double>] Daily water heater inlet temperatures (F)
   def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
     wh_temps_daily = weather.data.MainsDailyTemps.dup
     if (not hot_water_distribution.dwhr_efficiency.nil?)
+      # Per ANSI/RESNET/ICC 301
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
       # Adjust inlet temperatures
       dwhr_inT = 97.0 # F
@@ -1005,35 +1010,39 @@ module HotWaterAndAppliances
       end
     else
       for day in 0..wh_temps_daily.size - 1
-        wh_temps_daily[day] = (wh_temps_daily[day]).round(3)
+        wh_temps_daily[day] = wh_temps_daily[day].round(3)
       end
     end
 
     return wh_temps_daily
   end
 
-  # TODO
+  # Calculates the daily mixed water adjustment fractions. These fractions convert from
+  # gallons of mixed water to gallons of hot water that needs to be served by the water heater.
   #
-  # @param daily_wh_inlet_temperatures [TODO] TODO
-  # @param tHot [TODO] TODO
-  # @param tMix [TODO] TODO
-  # @return [TODO] TODO
-  def self.calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, tHot, tMix)
-    adjFmix = []
+  # @param daily_wh_inlet_temperatures [Array<Double>] Daily water heater inlet temperatures (F)
+  # @param t_set [Double] Water heater setpoint temperature (F)
+  # @param t_use [Double] Temperature of mixed water at fixtures (F)
+  # @return [Array<Double>] Daily mixed water adjustment fractions
+  def self.calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, t_set, t_use)
+    # Per ANSI/RESNET/ICC 301
+    adj_f_mix = []
     for day in 0..daily_wh_inlet_temperatures.size - 1
-      adjFmix << (1.0 - ((tHot - tMix) / (tHot - daily_wh_inlet_temperatures[day]))).round(4)
+      adj_f_mix << (1.0 - ((t_set - t_use) / (t_set - daily_wh_inlet_temperatures[day]))).round(4)
     end
 
-    return adjFmix
+    return adj_f_mix
   end
 
-  # TODO
+  # Calculates annual energy use for a recirculation (or shared recirculation) hot water
+  # distribution system.
   #
-  # @param hot_water_distribution [TODO] TODO
-  # @param fixtures_usage_multiplier [TODO] TODO
+  # @param hot_water_distribution [HPXML::HotWaterDistribution] The HPXML hot water distribution system of interest
+  # @param fixtures_usage_multiplier [Double] Occupant usage multiplier
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Annual electricity use (kWh)
   def self.get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
+    # Per ANSI/RESNET/ICC 301
     dist_pump_annual_kwh = 0.0
 
     # Annual electricity consumption factor for hot water recirculation system pumps
@@ -1078,24 +1087,25 @@ module HotWaterAndAppliances
     return dist_pump_annual_kwh
   end
 
-  # TODO
+  # Calculates the fixtures effectiveness due to the presence of low-flow fixtures.
   #
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @return [TODO] TODO
+  # @param frac_low_flow_fixtures [Double] The fraction of fixtures considered low-flow
+  # @return [Double] Effectiveness (frac)
   def self.get_fixtures_effectiveness(frac_low_flow_fixtures)
+    # ANSI/RESNET/ICC 301 specifies 0.95 if all shower/faucet fixtures are low-flow (<= 2 gal/min)
     f_eff = 1.0 - 0.05 * frac_low_flow_fixtures
     return f_eff
   end
 
-  # TODO
+  # Calculates water fixtures mixed (not hot) water use.
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @param daily_mw_fractions [TODO] TODO
-  # @param fixtures_usage_multiplier [TODO] TODO
+  # @param frac_low_flow_fixtures [Double] The fraction of fixtures considered low-flow
+  # @param daily_mw_fractions [Array<Double>] Daily mixed water adjustment fractions
+  # @param fixtures_usage_multiplier [Double] Occupant usage multiplier
   # @param n_occ [Double] Number of occupants in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Mixed water use (gal/day)
   def self.get_fixtures_gpd(eri_version, nbeds, frac_low_flow_fixtures, daily_mw_fractions, fixtures_usage_multiplier = 1.0, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2014A')
       # ANSI/RESNET 301-2014 Addendum A-2015
@@ -1115,19 +1125,19 @@ module HotWaterAndAppliances
     end
   end
 
-  # TODO
+  # Calculates the equivalent daily mixed (not hot) water use associated with the distribution system.
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @param has_uncond_bsmnt [TODO] TODO
-  # @param has_cond_bsmnt [TODO] TODO
+  # @param has_uncond_bsmnt [Boolean] Whether the dwelling unit has an unconditioned basement
+  # @param has_cond_bsmnt [Boolean] Whether the dwelling unit has a conditioned basement
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param ncfl [Double] Total number of conditioned floors in the dwelling unit
-  # @param hot_water_distribution [TODO] TODO
-  # @param frac_low_flow_fixtures [TODO] TODO
-  # @param fixtures_usage_multiplier [TODO] TODO
+  # @param hot_water_distribution [HPXML::HotWaterDistribution] The HPXML hot water distribution system of interest
+  # @param frac_low_flow_fixtures [Double] The fraction of fixtures considered low-flow
+  # @param fixtures_usage_multiplier [Double] Occupant usage multiplier
   # @param n_occ [Double] Number of occupants in the dwelling unit
-  # @return [TODO] TODO
+  # @return [Double] Mixed water use (gal/day)
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl, hot_water_distribution,
                               frac_low_flow_fixtures, fixtures_usage_multiplier = 1.0, n_occ = nil)
     if Constants::ERIVersions.index(eri_version) <= Constants::ERIVersions.index('2014')
