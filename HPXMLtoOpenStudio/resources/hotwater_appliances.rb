@@ -187,10 +187,11 @@ module HotWaterAndAppliances
 
     # Refrigerator(s) energy
     hpxml_bldg.refrigerators.each do |refrigerator|
-      rf_space, rf_schedule = Geometry.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
+      rf_space, rf_loc_schedule = Geometry.get_space_or_schedule_from_location(refrigerator.location, model, spaces)
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_fridge_or_freezer_energy(runner, refrigerator, rf_space.nil?)
 
       # Create schedule
+      rf_schedule = nil
       rf_col_name = refrigerator.primary_indicator ? SchedulesFile::Columns[:Refrigerator].name : SchedulesFile::Columns[:ExtraRefrigerator].name
       rf_obj_name = Constants::ObjectTypeRefrigerator
       if not schedules_file.nil?
@@ -203,7 +204,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
           rf_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
-          rf_schedule = fridge_or_freezer_coefficients_schedule(model, rf_col_name, rf_obj_name, refrigerator, rf_space, rf_schedule, rf_unavailable_periods)
+          rf_schedule = fridge_or_freezer_coefficients_schedule(model, rf_col_name, rf_obj_name, refrigerator, rf_space, rf_loc_schedule, rf_unavailable_periods)
         elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
           rf_weekday_sch = refrigerator.weekday_fractions
           rf_weekend_sch = refrigerator.weekend_fractions
@@ -236,10 +237,11 @@ module HotWaterAndAppliances
 
     # Freezer(s) energy
     hpxml_bldg.freezers.each do |freezer|
-      fz_space, fz_schedule = Geometry.get_space_or_schedule_from_location(freezer.location, model, spaces)
+      fz_space, fz_loc_schedule = Geometry.get_space_or_schedule_from_location(freezer.location, model, spaces)
       fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_fridge_or_freezer_energy(runner, freezer, fz_space.nil?)
 
       # Create schedule
+      fz_schedule = nil
       fz_col_name = SchedulesFile::Columns[:Freezer].name
       fz_obj_name = Constants::ObjectTypeFreezer
       if not schedules_file.nil?
@@ -252,7 +254,7 @@ module HotWaterAndAppliances
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !freezer.constant_coefficients.nil? && !freezer.temperature_coefficients.nil?
           fz_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
-          fz_schedule = fridge_or_freezer_coefficients_schedule(model, fz_col_name, fz_obj_name, freezer, fz_space, fz_schedule, fz_unavailable_periods)
+          fz_schedule = fridge_or_freezer_coefficients_schedule(model, fz_col_name, fz_obj_name, freezer, fz_space, fz_loc_schedule, fz_unavailable_periods)
         elsif !freezer.weekday_fractions.nil? && !freezer.weekend_fractions.nil? && !freezer.monthly_multipliers.nil?
           fz_weekday_sch = freezer.weekday_fractions
           fz_weekend_sch = freezer.weekend_fractions
