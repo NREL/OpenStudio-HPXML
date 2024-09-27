@@ -427,17 +427,11 @@ module Airflow
     whf_flow_actuator.setName("#{whf_flow.name} act")
     whf_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWholeHouseFan)
 
-    # Electric Equipment (for whole house fan electricity consumption)
-    whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    whf_equip_def.setName(Constants::ObjectTypeWholeHouseFan)
-    whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
-    whf_equip.setName(Constants::ObjectTypeWholeHouseFan)
-    whf_equip.setSpace(conditioned_space) # no heat gain, so assign the equipment to an arbitrary space
-    whf_equip_def.setFractionRadiant(0)
-    whf_equip_def.setFractionLatent(0)
-    whf_equip_def.setFractionLost(1)
-    whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-    whf_equip.setEndUseSubcategory(Constants::ObjectTypeWholeHouseFan)
+    # Whole house fan electricity consumption
+    space = conditioned_space # no heat gain, so assign the equipment to an arbitrary space
+    obj_name = Constants::ObjectTypeWholeHouseFan
+    whf_equip = Model.add_electric_equipment(model, obj_name, obj_name, space, nil, 0, 0, 1, model.alwaysOnDiscreteSchedule)
+
     whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower, whf_equip.space.get)
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
@@ -988,7 +982,7 @@ module Airflow
 
       # Other equipment objects to cancel out the supply air leakage directly into the return plenum
       equip_act_infos << ['supply_sens_lk_to_cond', 'SupSensLkToCond', Constants::ObjectTypeDuctLoad, conditioned_space, 0.0, f_regain]
-      equip_act_infos << ['supply_lat_lk_to_cond', 'SupLatLkToCond', Constants::ObjectTypeDuctLoad, conditioned_space, 1.0 - f_regain, f_regain]
+      equip_act_infos << ['supply_lat_lk_to_cond', 'SupLatLkToCond', Constants::ObjectTypeDuctLoad, conditioned_space, 1 - f_regain, f_regain]
 
       # Supply duct conduction load added to the conditioned space
       equip_act_infos << ['supply_cond_to_cond', 'SupCondToLv', Constants::ObjectTypeDuctLoad, conditioned_space, 0.0, f_regain]
@@ -1000,7 +994,7 @@ module Airflow
       equip_act_infos << ['return_sens_lk_to_rp', 'RetSensLkToRP', Constants::ObjectTypeDuctLoad, ra_duct_space, 0.0, f_regain]
 
       # Return duct latent leakage impact on the return plenum
-      equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', Constants::ObjectTypeDuctLoad, ra_duct_space, 1.0 - f_regain, f_regain]
+      equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', Constants::ObjectTypeDuctLoad, ra_duct_space, 1 - f_regain, f_regain]
 
       # Supply duct conduction impact on the duct zone
       if not duct_location.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
@@ -1546,17 +1540,10 @@ module Airflow
     obj_sch_sensor.setName("#{obj_name} sch s")
     obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
 
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(obj_name)
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(obj_name)
-    equip.setSpace(spaces[HPXML::LocationConditionedSpace]) # no heat gain, so assign the equipment to an arbitrary space
-    equip_def.setDesignLevel(vent_object.fan_power * vent_object.count)
-    equip_def.setFractionRadiant(0)
-    equip_def.setFractionLatent(0)
-    equip_def.setFractionLost(1)
-    equip.setSchedule(obj_sch.schedule)
-    equip.setEndUseSubcategory(Constants::ObjectTypeMechanicalVentilation)
+    space = spaces[HPXML::LocationConditionedSpace] # no heat gain, so assign the equipment to an arbitrary space
+    design_level = vent_object.fan_power * vent_object.count
+
+    Model.add_electric_equipment(model, obj_name, Constants::ObjectTypeMechanicalVentilation, space, design_level, 0, 0, 1, obj_sch.schedule)
 
     return obj_sch_sensor
   end
@@ -1824,26 +1811,14 @@ module Airflow
 
     # Availability Schedule
     avail_sch = ScheduleConstant.new(model, obj_name + ' schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
-    avail_sch = avail_sch.schedule
 
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(obj_name)
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(obj_name)
-    equip.setSpace(spaces[HPXML::LocationConditionedSpace])
-    equip_def.setFractionRadiant(0)
-    equip_def.setFractionLatent(0)
-    equip.setSchedule(avail_sch)
-    equip.setEndUseSubcategory(Constants::ObjectTypeMechanicalVentilation)
-    equip_def.setFractionLost(fan_heat_lost_fraction)
+    equip = Model.add_electric_equipment(model, obj_name, Constants::ObjectTypeMechanicalVentilation, spaces[HPXML::LocationConditionedSpace], tot_fans_w, 0, 0, fan_heat_lost_fraction, avail_sch.schedule)
+
     equip_actuator = nil
     if [Constants::ObjectTypeMechanicalVentilationHouseFanCFIS,
         Constants::ObjectTypeMechanicalVentilationHouseFanCFISSupplFan].include? obj_name # actuate its power level in EMS
       equip_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower, equip.space.get)
       equip_actuator.setName("#{equip.name} act")
-    end
-    if not tot_fans_w.nil?
-      equip_def.setDesignLevel(tot_fans_w)
     end
 
     return equip_actuator

@@ -2,32 +2,109 @@
 
 # Collection of methods related to generic OpenStudio Model object operations.
 module Model
-  # Map of IDD objects => OSM classes
-  UniqueObjectsMap = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
-                       'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
-                       'OS:OutputControl:Files' => 'OutputControlFiles',
-                       'OS:Output:Diagnostics' => 'OutputDiagnostics',
-                       'OS:Output:JSON' => 'OutputJSON',
-                       'OS:PerformancePrecisionTradeoffs' => 'PerformancePrecisionTradeoffs',
-                       'OS:RunPeriod' => 'RunPeriod',
-                       'OS:RunPeriodControl:DaylightSavingTime' => 'RunPeriodControlDaylightSavingTime',
-                       'OS:ShadowCalculation' => 'ShadowCalculation',
-                       'OS:SimulationControl' => 'SimulationControl',
-                       'OS:Site' => 'Site',
-                       'OS:Site:GroundTemperature:Deep' => 'SiteGroundTemperatureDeep',
-                       'OS:Site:GroundTemperature:Shallow' => 'SiteGroundTemperatureShallow',
-                       'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
-                       'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
-                       'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
-                       'OS:Timestep' => 'Timestep' }
+  # Adds a WaterUseEquipment object to the OpenStudio model.
+  #
+  # The WaterUseEquipment object is a generalized object for simulating all (hot and cold)
+  # water end uses.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param peak_flow_rate [Double] Water peak flow rate (m^3/s)
+  # @param flow_rate_schedule [OpenStudio::Model::Schedule] Schedule fraction that applies to the peak flow rate
+  # @param water_use_connections [OpenStudio::Model::WaterUseConnections] Grouping of water use equipment objects
+  # @param unit_multiplier [Integer] Number of similar dwelling units
+  # @param target_temperature_schedule [OpenStudio::Model::Schedule] The target water temperature schedule (F)
+  # @return [OpenStudio::Model::WaterUseEquipment] The newly created model object
+  def self.add_water_use_equipment(model, name, peak_flow_rate, flow_rate_schedule, water_use_connections, unit_multiplier, target_temperature_schedule = nil)
+    wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
+    wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
+    wu.setName(name)
+    wu_def.setName(name)
+    # Not in a thermal zone, so needs to be explicitly multiplied
+    wu_def.setPeakFlowRate(peak_flow_rate * unit_multiplier)
+    wu_def.setEndUseSubcategory(name)
+    wu.setFlowRateFractionSchedule(flow_rate_schedule)
+    if not target_temperature_schedule.nil?
+      wu_def.setTargetTemperatureSchedule(target_temperature_schedule)
+    end
+    water_use_connections.addWaterUseEquipment(wu)
+    return wu
+  end
 
-  # Tear down the existing model if it exists.
+  # Adds an ElectricEquipment object to the OpenStudio model.
+  #
+  # The ElectricEquipment object models equipment in a zone that consumes electricity (e.g.,
+  # TVs, cooking, etc.). All the energy becomes a heat gain to the zone or is lost (exhausted).
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param end_use_subcategory [String] Name of the end use subcategory for output processing
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param design_level [Double] Maximum electrical power (W)
+  # @param frac_radiant [Double] Fraction of energy consumption that is long-wave radiant heat to the zone
+  # @param frac_latent [Double] Fraction of energy consumption that is latent heat to the zone
+  # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
+  # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
+  # @return [OpenStudio::Model::ElectricEquipment] The newly created model object
+  def self.add_electric_equipment(model, name, end_use_subcategory, space, design_level, frac_radiant, frac_latent, frac_lost, schedule)
+    return if design_level == 0.0
+
+    ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
+    ee.setName(name)
+    ee.setEndUseSubcategory(end_use_subcategory)
+    ee.setSpace(space)
+    ee_def.setName(name)
+    ee_def.setDesignLevel(design_level) unless design_level.nil?
+    ee_def.setFractionRadiant(frac_radiant)
+    ee_def.setFractionLatent(frac_latent)
+    ee_def.setFractionLost(frac_lost)
+    ee.setSchedule(schedule)
+
+    return ee
+  end
+
+  # Adds an OtherEquipment object to the OpenStudio model.
+  # 
+  # The OtherEquipment object models a heat gain/loss directly to the zone. Fuel consumption may
+  # or may not be associated with the heat.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param end_use_subcategory [String] Name of the end use subcategory for output processing
+  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
+  # @param design_level [Double] Maximum energy input (W)
+  # @param frac_radiant [Double] Fraction of energy consumption that is long-wave radiant heat to the zone
+  # @param frac_latent [Double] Fraction of energy consumption that is latent heat to the zone
+  # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
+  # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
+  # @param fuel_type [String] Fuel type (HPXML::FuelTypeXXX)
+  # @return [OpenStudio::Model::OtherEquipment] The newly created model object
+  def self.add_other_equipment(model, name, end_use_subcategory, space, design_level, frac_radiant, frac_latent, frac_lost, schedule, fuel_type)
+    return if design_level == 0.0 # Negative values intentionally allowed, e.g. for water sensible
+
+    oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    oe = OpenStudio::Model::OtherEquipment.new(oe_def)
+    oe.setName(name)
+    oe.setEndUseSubcategory(end_use_subcategory)
+    oe.setFuelType(EPlus.fuel_type(fuel_type))
+    oe.setSpace(space)
+    oe_def.setName(name)
+    oe_def.setDesignLevel(design_level)
+    oe_def.setFractionRadiant(frac_radiant)
+    oe_def.setFractionLatent(frac_latent)
+    oe_def.setFractionLost(frac_lost)
+    oe.setSchedule(schedule)
+
+    return oe
+  end
+
+  # Resets the existing model if it already has objects in it.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @return [nil]
-  def self.tear_down(model:,
-                     runner:)
+  def self.reset(model, runner)
     handles = OpenStudio::UUIDVector.new
     model.objects.each do |obj|
       handles << obj.handle
@@ -47,12 +124,31 @@ module Model
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [nil]
   def self.merge_unit_models(model, hpxml_osm_map)
+    # Map of OpenStudio IDD objects => OSM class names
+    unique_object_map = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
+                          'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
+                          'OS:OutputControl:Files' => 'OutputControlFiles',
+                          'OS:Output:Diagnostics' => 'OutputDiagnostics',
+                          'OS:Output:JSON' => 'OutputJSON',
+                          'OS:PerformancePrecisionTradeoffs' => 'PerformancePrecisionTradeoffs',
+                          'OS:RunPeriod' => 'RunPeriod',
+                          'OS:RunPeriodControl:DaylightSavingTime' => 'RunPeriodControlDaylightSavingTime',
+                          'OS:ShadowCalculation' => 'ShadowCalculation',
+                          'OS:SimulationControl' => 'SimulationControl',
+                          'OS:Site' => 'Site',
+                          'OS:Site:GroundTemperature:Deep' => 'SiteGroundTemperatureDeep',
+                          'OS:Site:GroundTemperature:Shallow' => 'SiteGroundTemperatureShallow',
+                          'OS:Site:WaterMainsTemperature' => 'SiteWaterMainsTemperature',
+                          'OS:SurfaceConvectionAlgorithm:Inside' => 'InsideSurfaceConvectionAlgorithm',
+                          'OS:SurfaceConvectionAlgorithm:Outside' => 'OutsideSurfaceConvectionAlgorithm',
+                          'OS:Timestep' => 'Timestep' }
+
     # Handle unique objects first: Grab one from the first model we find the
     # object on (may not be the first unit).
     unit_model_objects = []
     unique_handles_to_skip = []
     uuid_regex = /\{(.*?)\}/
-    UniqueObjectsMap.each do |idd_obj, osm_class|
+    unique_object_map.each do |idd_obj, osm_class|
       first_model_object_by_type = nil
       hpxml_osm_map.values.each do |unit_model|
         next if unit_model.getObjectsByType(idd_obj.to_IddObjectType).empty?
@@ -88,7 +184,7 @@ module Model
 
     hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
       Geometry.shift_surfaces(unit_model, unit_number)
-      prefix_objects(unit_model, unit_number)
+      prefix_object_names(unit_model, unit_number)
 
       # Handle remaining (non-unique) objects now
       unit_model.objects.each do |obj|
@@ -107,8 +203,17 @@ module Model
   # @param unit_model [OpenStudio::Model::Model] OpenStudio Model object (corresponding to one of multiple dwelling units)
   # @param unit_number [Integer] index number corresponding to an HPXML Building object
   # @return [nil]
-  def self.prefix_objects(unit_model, unit_number)
+  def self.prefix_object_names(unit_model, unit_number)
     # FUTURE: Create objects with unique names up front so we don't have to do this
+
+    # Create a new OpenStudio object name by prefixing the old with "unit" plus the unit number.
+    #
+    # @param obj_name [String] the OpenStudio object name
+    # @param unit_number [Integer] index number corresponding to an HPXML Building object
+    # @return [String] the new OpenStudio object name with unique unit prefix
+    def self.make_variable_name(obj_name, unit_number)
+      return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
+    end
 
     # EMS objects
     ems_map = {}
@@ -182,14 +287,5 @@ module Model
 
       model_object.setName(make_variable_name(model_object.name, unit_number))
     end
-  end
-
-  # Create a new OpenStudio object name by prefixing the old with "unit" plus the unit number.
-  #
-  # @param obj_name [String] the OpenStudio object name
-  # @param unit_number [Integer] index number corresponding to an HPXML Building object
-  # @return [String] the new OpenStudio object name with unique unit prefix
-  def self.make_variable_name(obj_name, unit_number)
-    return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
   end
 end

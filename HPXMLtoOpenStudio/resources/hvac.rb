@@ -743,18 +743,12 @@ module HVAC
 
     if heat_pump.is_shared_system
       # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
-      shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
-      equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      equip_def.setName(Constants::ObjectTypeGSHPSharedPump)
-      equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-      equip.setName(equip_def.name.to_s)
-      equip.setSpace(control_zone.spaces[0]) # no heat gain, so assign the equipment to an arbitrary space
-      equip_def.setDesignLevel(shared_pump_w)
-      equip_def.setFractionRadiant(0)
-      equip_def.setFractionLatent(0)
-      equip_def.setFractionLost(1)
-      equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      equip.setEndUseSubcategory(Constants::ObjectTypeGSHPSharedPump)
+      design_level = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
+      space = control_zone.spaces[0] # no heat gain, so assign the equipment to an arbitrary space
+      obj_name = Constants::ObjectTypeGSHPSharedPump
+
+      equip = Model.add_electric_equipment(model, obj_name, obj_name, space, design_level, 0, 0, 1, model.alwaysOnDiscreteSchedule)
+
       equip.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     end
 
@@ -1314,17 +1308,7 @@ module HVAC
       runner.registerWarning("Both '#{ceiling_fan_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !ceiling_fan.monthly_multipliers.nil?
     end
 
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(obj_name)
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(equip_def.name.to_s)
-    equip.setSpace(spaces[HPXML::LocationConditionedSpace])
-    equip_def.setDesignLevel(ceiling_fan_design_level)
-    equip_def.setFractionRadiant(0.558)
-    equip_def.setFractionLatent(0)
-    equip_def.setFractionLost(0)
-    equip.setEndUseSubcategory(obj_name)
-    equip.setSchedule(ceiling_fan_sch)
+    Model.add_electric_equipment(model, obj_name, obj_name, spaces[HPXML::LocationConditionedSpace], ceiling_fan_design_level, 0.558, 0, 0, ceiling_fan_sch)
   end
 
   # Adds an HPXML HVAC Control to the OpenStudio model.

@@ -123,8 +123,11 @@ module InternalGains
         runner.registerWarning("Both '#{water_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_weekend_fractions.nil?
         runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
       end
-      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseSensible, spaces[HPXML::LocationConditionedSpace], water_design_level_sens, 1.0, 0.0, water_schedule, nil)
-      HotWaterAndAppliances.add_other_equipment(model, Constants::ObjectTypeGeneralWaterUseLatent, spaces[HPXML::LocationConditionedSpace], water_design_level_lat, 0.0, 1.0, water_schedule, nil)
+      water_sens_obj_name = Constants::ObjectTypeGeneralWaterUseSensible
+      Model.add_other_equipment(model, water_sens_obj_name, water_sens_obj_name, spaces[HPXML::LocationConditionedSpace], water_design_level_sens, 1, 0, 0, water_schedule, nil)
+
+      water_lat_obj_name = Constants::ObjectTypeGeneralWaterUseLatent
+      Model.add_other_equipment(model, water_lat_obj_name, water_lat_obj_name, spaces[HPXML::LocationConditionedSpace], water_design_level_lat, 0, 1, 0, water_schedule, nil)
     end
   end
 

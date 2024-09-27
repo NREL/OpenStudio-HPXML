@@ -109,7 +109,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     Version.check_openstudio_version()
-    Model.tear_down(model: model, runner: runner)
+    Model.reset(model, runner)
 
     args = runner.getArgumentValues(arguments(model), user_arguments)
     set_file_paths(args)

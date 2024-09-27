@@ -1589,7 +1589,8 @@ module Waterheater
 
     # Add an other equipment object for water heating that will get actuated, has a small initial load but gets overwritten by EMS
     cnt = model.getOtherEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeWaterHeaterAdjustment }.size # Ensure unique meter for each water heater
-    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, "#{Constants::ObjectTypeWaterHeaterAdjustment}#{cnt + 1}", loc_space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    obj_name = "#{Constants::ObjectTypeWaterHeaterAdjustment}#{cnt + 1}"
+    ec_adj_object = Model.add_other_equipment(model, obj_name, obj_name, loc_space, 0.01, 0, 0, 1, model.alwaysOnDiscreteSchedule, fuel_type)
     ec_adj_object.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
     # EMS for calculating the EC_adj
@@ -2072,7 +2073,7 @@ module Waterheater
     name = 'dhw loop'
 
     if t_set_c.nil?
-      t_set_c = UnitConversions.convert(HPXMLDefaults.get_default_water_heater_hot_water_temperature(eri_version), 'F', 'C')
+      t_set_c = UnitConversions.convert(HPXMLDefaults.get_default_water_heater_temperature(eri_version), 'F', 'C')
     end
 
     loop = OpenStudio::Model::PlantLoop.new(model)

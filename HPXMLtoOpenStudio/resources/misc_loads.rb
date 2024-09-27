@@ -87,18 +87,7 @@ module MiscLoads
       rad_frac = 0.6 * sens_frac
     end
 
-    # Add electric equipment for the mel
-    mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-    mel.setName(obj_name)
-    mel.setEndUseSubcategory(obj_name)
-    mel.setSpace(spaces[HPXML::LocationConditionedSpace])
-    mel_def.setName(obj_name)
-    mel_def.setDesignLevel(space_design_level)
-    mel_def.setFractionRadiant(rad_frac)
-    mel_def.setFractionLatent(lat_frac)
-    mel_def.setFractionLost(1 - sens_frac - lat_frac)
-    mel.setSchedule(sch)
+    Model.add_electric_equipment(model, obj_name, obj_name, spaces[HPXML::LocationConditionedSpace], space_design_level, rad_frac, lat_frac, 1 - sens_frac - lat_frac, sch)
   end
 
   # Adds any HPXML Fuel Loads to the OpenStudio model.
@@ -263,17 +252,9 @@ module MiscLoads
         heater_sch = heater_sch.schedule
       end
 
-      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-      mel.setName(obj_name)
-      mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(spaces[HPXML::LocationConditionedSpace]) # no heat gain, so assign the equipment to an arbitrary space
-      mel_def.setName(obj_name)
-      mel_def.setDesignLevel(space_design_level)
-      mel_def.setFractionRadiant(0)
-      mel_def.setFractionLatent(0)
-      mel_def.setFractionLost(1)
-      mel.setSchedule(heater_sch)
+      space = spaces[HPXML::LocationConditionedSpace] # no heat gain, so assign the equipment to an arbitrary space
+
+      Model.add_electric_equipment(model, obj_name, obj_name, space, space_design_level, 0, 0, 1, heater_sch)
     end
 
     if heater_therm > 0
@@ -346,17 +327,9 @@ module MiscLoads
       pump_sch = pump_sch.schedule
     end
 
-    mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-    mel.setName(obj_name)
-    mel.setEndUseSubcategory(obj_name)
-    mel.setSpace(spaces[HPXML::LocationConditionedSpace]) # no heat gain, so assign the equipment to an arbitrary space
-    mel_def.setName(obj_name)
-    mel_def.setDesignLevel(space_design_level)
-    mel_def.setFractionRadiant(0)
-    mel_def.setFractionLatent(0)
-    mel_def.setFractionLost(1)
-    mel.setSchedule(pump_sch)
+    space = spaces[HPXML::LocationConditionedSpace] # no heat gain, so assign the equipment to an arbitrary space
+
+    Model.add_electric_equipment(model, obj_name, obj_name, space, space_design_level, 0, 0, 1, pump_sch)
   end
 
   # Returns the default residual miscellaneous electric (plug) load energy use

@@ -81,7 +81,7 @@ module HotWaterAndAppliances
       end
 
       cw_space = conditioned_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cw_object_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_power_schedule)
+      Model.add_electric_equipment(model, cw_object_name, cw_object_name, cw_space, cw_design_level_w, 0.6 * cw_frac_sens, cw_frac_lat, 1 - cw_frac_sens - cw_frac_lat, cw_power_schedule)
     end
 
     # Clothes dryer energy
@@ -114,8 +114,8 @@ module HotWaterAndAppliances
       end
 
       cd_space = conditioned_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cd_obj_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule)
-      add_other_equipment(model, cd_obj_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
+      Model.add_electric_equipment(model, cd_obj_name, cd_obj_name, cd_space, cd_design_level_e, 0.6 * cd_frac_sens, cd_frac_lat, 1 - cd_frac_sens - cd_frac_lat, cd_schedule)
+      Model.add_other_equipment(model, cd_obj_name, cd_obj_name, cd_space, cd_design_level_f, 0.6 * cd_frac_sens, cd_frac_lat, 1 - cd_frac_sens - cd_frac_lat, cd_schedule, clothes_dryer.fuel_type)
     end
 
     # Dishwasher energy
@@ -146,7 +146,7 @@ module HotWaterAndAppliances
       end
 
       dw_space = conditioned_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, dw_obj_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_power_schedule)
+      Model.add_electric_equipment(model, dw_obj_name, dw_obj_name, dw_space, dw_design_level_w, 0.6 * dw_frac_sens, dw_frac_lat, 1 - dw_frac_sens - dw_frac_lat, dw_power_schedule)
     end
 
     # Refrigerator(s) energy
@@ -155,40 +155,39 @@ module HotWaterAndAppliances
       rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_fridge_or_freezer_energy(runner, refrigerator, rf_space.nil?)
 
       # Create schedule
-      fridge_schedule = nil
-      fridge_col_name = refrigerator.primary_indicator ? SchedulesFile::Columns[:Refrigerator].name : SchedulesFile::Columns[:ExtraRefrigerator].name
-      fridge_obj_name = Constants::ObjectTypeRefrigerator
+      rf_col_name = refrigerator.primary_indicator ? SchedulesFile::Columns[:Refrigerator].name : SchedulesFile::Columns[:ExtraRefrigerator].name
+      rf_obj_name = Constants::ObjectTypeRefrigerator
       if not schedules_file.nil?
-        fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fridge_col_name, annual_kwh: rf_annual_kwh)
-        fridge_schedule = schedules_file.create_schedule_file(model, col_name: fridge_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
+        rf_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: rf_col_name, annual_kwh: rf_annual_kwh)
+        rf_schedule = schedules_file.create_schedule_file(model, col_name: rf_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
       end
-      if fridge_schedule.nil?
-        fridge_unavailable_periods = Schedule.get_unavailable_periods(runner, fridge_col_name, hpxml_header.unavailable_periods)
+      if rf_schedule.nil?
+        rf_unavailable_periods = Schedule.get_unavailable_periods(runner, rf_col_name, hpxml_header.unavailable_periods)
 
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !refrigerator.constant_coefficients.nil? && !refrigerator.temperature_coefficients.nil?
-          fridge_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
-          fridge_schedule = fridge_or_freezer_coefficients_schedule(model, fridge_col_name, fridge_obj_name, refrigerator, rf_space, rf_schedule, fridge_unavailable_periods)
+          rf_design_level = UnitConversions.convert(rf_annual_kwh / 8760.0, 'kW', 'W')
+          rf_schedule = fridge_or_freezer_coefficients_schedule(model, rf_col_name, rf_obj_name, refrigerator, rf_space, rf_schedule, rf_unavailable_periods)
         elsif !refrigerator.weekday_fractions.nil? && !refrigerator.weekend_fractions.nil? && !refrigerator.monthly_multipliers.nil?
-          fridge_weekday_sch = refrigerator.weekday_fractions
-          fridge_weekend_sch = refrigerator.weekend_fractions
-          fridge_monthly_sch = refrigerator.monthly_multipliers
+          rf_weekday_sch = refrigerator.weekday_fractions
+          rf_weekend_sch = refrigerator.weekend_fractions
+          rf_monthly_sch = refrigerator.monthly_multipliers
 
-          fridge_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fridge_obj_name + ' schedule', fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: fridge_unavailable_periods)
-          fridge_design_level = fridge_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
-          fridge_schedule = fridge_schedule_obj.schedule
+          rf_schedule_obj = MonthWeekdayWeekendSchedule.new(model, rf_obj_name + ' schedule', rf_weekday_sch, rf_weekend_sch, rf_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: rf_unavailable_periods)
+          rf_design_level = rf_schedule_obj.calc_design_level_from_daily_kwh(rf_annual_kwh / 365.0)
+          rf_schedule = rf_schedule_obj.schedule
         end
       else
-        runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !refrigerator.weekday_fractions.nil?
-        runner.registerWarning("Both '#{fridge_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !refrigerator.weekend_fractions.nil?
-        runner.registerWarning("Both '#{fridge_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !refrigerator.monthly_multipliers.nil?
-        runner.registerWarning("Both '#{fridge_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !refrigerator.constant_coefficients.nil?
-        runner.registerWarning("Both '#{fridge_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !refrigerator.temperature_coefficients.nil?
+        runner.registerWarning("Both '#{rf_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !refrigerator.weekday_fractions.nil?
+        runner.registerWarning("Both '#{rf_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !refrigerator.weekend_fractions.nil?
+        runner.registerWarning("Both '#{rf_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !refrigerator.monthly_multipliers.nil?
+        runner.registerWarning("Both '#{rf_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !refrigerator.constant_coefficients.nil?
+        runner.registerWarning("Both '#{rf_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !refrigerator.temperature_coefficients.nil?
       end
 
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      add_electric_equipment(model, fridge_obj_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
+      Model.add_electric_equipment(model, rf_obj_name, rf_obj_name, rf_space, rf_design_level, 0.6 * rf_frac_sens, rf_frac_lat, 1 - rf_frac_sens - rf_frac_lat, rf_schedule)
     end
 
     # Freezer(s) energy
@@ -197,40 +196,39 @@ module HotWaterAndAppliances
       fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_fridge_or_freezer_energy(runner, freezer, fz_space.nil?)
 
       # Create schedule
-      freezer_schedule = nil
-      freezer_col_name = SchedulesFile::Columns[:Freezer].name
-      freezer_obj_name = Constants::ObjectTypeFreezer
+      fz_col_name = SchedulesFile::Columns[:Freezer].name
+      fz_obj_name = Constants::ObjectTypeFreezer
       if not schedules_file.nil?
-        freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: freezer_col_name, annual_kwh: fz_annual_kwh)
-        freezer_schedule = schedules_file.create_schedule_file(model, col_name: freezer_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
+        fz_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: fz_col_name, annual_kwh: fz_annual_kwh)
+        fz_schedule = schedules_file.create_schedule_file(model, col_name: fz_col_name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
       end
-      if freezer_schedule.nil?
-        freezer_unavailable_periods = Schedule.get_unavailable_periods(runner, freezer_col_name, hpxml_header.unavailable_periods)
+      if fz_schedule.nil?
+        fz_unavailable_periods = Schedule.get_unavailable_periods(runner, fz_col_name, hpxml_header.unavailable_periods)
 
         # if both weekday_fractions/weekend_fractions/monthly_multipliers and constant_coefficients/temperature_coefficients provided, ignore the former
         if !freezer.constant_coefficients.nil? && !freezer.temperature_coefficients.nil?
-          freezer_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
-          freezer_schedule = fridge_or_freezer_coefficients_schedule(model, freezer_col_name, freezer_obj_name, freezer, fz_space, fz_schedule, freezer_unavailable_periods)
+          fz_design_level = UnitConversions.convert(fz_annual_kwh / 8760.0, 'kW', 'W')
+          fz_schedule = fridge_or_freezer_coefficients_schedule(model, fz_col_name, fz_obj_name, freezer, fz_space, fz_schedule, fz_unavailable_periods)
         elsif !freezer.weekday_fractions.nil? && !freezer.weekend_fractions.nil? && !freezer.monthly_multipliers.nil?
-          freezer_weekday_sch = freezer.weekday_fractions
-          freezer_weekend_sch = freezer.weekend_fractions
-          freezer_monthly_sch = freezer.monthly_multipliers
+          fz_weekday_sch = freezer.weekday_fractions
+          fz_weekend_sch = freezer.weekend_fractions
+          fz_monthly_sch = freezer.monthly_multipliers
 
-          freezer_schedule_obj = MonthWeekdayWeekendSchedule.new(model, freezer_obj_name + ' schedule', freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: freezer_unavailable_periods)
-          freezer_design_level = freezer_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
-          freezer_schedule = freezer_schedule_obj.schedule
+          fz_schedule_obj = MonthWeekdayWeekendSchedule.new(model, fz_obj_name + ' schedule', fz_weekday_sch, fz_weekend_sch, fz_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: fz_unavailable_periods)
+          fz_design_level = fz_schedule_obj.calc_design_level_from_daily_kwh(fz_annual_kwh / 365.0)
+          fz_schedule = fz_schedule_obj.schedule
         end
       else
-        runner.registerWarning("Both '#{freezer_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !freezer.weekday_fractions.nil?
-        runner.registerWarning("Both '#{freezer_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !freezer.weekend_fractions.nil?
-        runner.registerWarning("Both '#{freezer_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !freezer.monthly_multipliers.nil?
-        runner.registerWarning("Both '#{freezer_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !freezer.constant_coefficients.nil?
-        runner.registerWarning("Both '#{freezer_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !freezer.temperature_coefficients.nil?
+        runner.registerWarning("Both '#{fz_col_name}' schedule file and weekday fractions provided; the latter will be ignored.") if !freezer.weekday_fractions.nil?
+        runner.registerWarning("Both '#{fz_col_name}' schedule file and weekend fractions provided; the latter will be ignored.") if !freezer.weekend_fractions.nil?
+        runner.registerWarning("Both '#{fz_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !freezer.monthly_multipliers.nil?
+        runner.registerWarning("Both '#{fz_col_name}' schedule file and constant coefficients provided; the latter will be ignored.") if !freezer.constant_coefficients.nil?
+        runner.registerWarning("Both '#{fz_col_name}' schedule file and temperature coefficients provided; the latter will be ignored.") if !freezer.temperature_coefficients.nil?
       end
 
       fz_space = conditioned_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      add_electric_equipment(model, freezer_obj_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
+      Model.add_electric_equipment(model, fz_obj_name, fz_obj_name, fz_space, fz_design_level, 0.6 * fz_frac_sens, fz_frac_lat, 1 - fz_frac_sens - fz_frac_lat, fz_schedule)
     end
 
     # Cooking Range energy
@@ -263,8 +261,8 @@ module HotWaterAndAppliances
       end
 
       cook_space = conditioned_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cook_obj_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
-      add_other_equipment(model, cook_obj_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
+      Model.add_electric_equipment(model, cook_obj_name, cook_obj_name, cook_space, cook_design_level_e, 0.6 * cook_frac_sens, cook_frac_lat, 1 - cook_frac_sens - cook_frac_lat, cook_schedule)
+      Model.add_other_equipment(model, cook_obj_name, cook_obj_name, cook_space, cook_design_level_f, 0.6 * cook_frac_sens, cook_frac_lat, 1 - cook_frac_sens - cook_frac_lat, cook_schedule, cooking_range.fuel_type)
     end
 
     if hpxml_bldg.hot_water_distributions.size > 0
@@ -301,7 +299,7 @@ module HotWaterAndAppliances
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
       hpxml_bldg.water_heating_systems.each do |water_heating_system|
         wh_setpoint = water_heating_system.temperature
-        wh_setpoint = HPXMLDefaults.get_default_water_heater_hot_water_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
+        wh_setpoint = HPXMLDefaults.get_default_water_heater_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
@@ -363,11 +361,11 @@ module HotWaterAndAppliances
         end
 
         # Fixtures (showers, sinks, baths)
-        add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
+        Model.add_water_use_equipment(model, fixtures_obj_name, fx_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
 
         # Distribution waste (primary driven by fixture draws)
         waste_obj_name = Constants::ObjectTypeDistributionWaste
-        add_water_use_equipment(model, waste_obj_name, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
+        Model.add_water_use_equipment(model, waste_obj_name, dist_water_peak_flow * gpd_frac * non_solar_fraction, fixtures_schedule, water_use_connections[water_heating_system.id], unit_multiplier, mw_temp_schedule)
 
         # Recirculation pump
         recirc_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
@@ -396,7 +394,8 @@ module HotWaterAndAppliances
           end
           if recirc_pump_design_level * gpd_frac != 0
             cnt = model.getElectricEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHotWaterRecircPump }.size # Ensure unique meter for each water heater
-            recirc_pump = add_electric_equipment(model, "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}", conditioned_space, recirc_pump_design_level * gpd_frac, 0.0, 0.0, recirc_pump_sch)
+            obj_name = "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}"
+            recirc_pump = Model.add_electric_equipment(model, obj_name, obj_name, conditioned_space, recirc_pump_design_level * gpd_frac, 0, 0, 1, recirc_pump_sch)
             recirc_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
         end
@@ -423,7 +422,7 @@ module HotWaterAndAppliances
             cw_peak_flow = cw_schedule_obj.calc_design_level_from_daily_gpm(cw_gpd)
             water_cw_schedule = cw_schedule_obj.schedule
           end
-          add_water_use_equipment(model, cw_object_name, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
+          Model.add_water_use_equipment(model, cw_object_name, cw_peak_flow * gpd_frac * non_solar_fraction, water_cw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
         end
       end
 
@@ -450,7 +449,7 @@ module HotWaterAndAppliances
         dw_peak_flow = dw_schedule_obj.calc_design_level_from_daily_gpm(dw_gpd)
         water_dw_schedule = dw_schedule_obj.schedule
       end
-      add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
+      Model.add_water_use_equipment(model, dw_obj_name, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, water_use_connections[water_heating_system.id], unit_multiplier)
     end
   end
 
@@ -839,91 +838,6 @@ module HotWaterAndAppliances
     schedule_pcm.addProgram(schedule_program)
 
     return schedule
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param obj_name [String] Name for the OpenStudio object
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param design_level_w [TODO] TODO
-  # @param frac_sens [TODO] TODO
-  # @param frac_lat [TODO] TODO
-  # @param schedule [TODO] TODO
-  # @return [TODO] TODO
-  def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
-    return if design_level_w == 0.0
-
-    ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
-    ee.setName(obj_name)
-    ee.setEndUseSubcategory(obj_name)
-    ee.setSpace(space)
-    ee_def.setName(obj_name)
-    ee_def.setDesignLevel(design_level_w)
-    ee_def.setFractionRadiant(0.6 * frac_sens)
-    ee_def.setFractionLatent(frac_lat)
-    ee_def.setFractionLost(1.0 - frac_sens - frac_lat)
-    ee.setSchedule(schedule)
-
-    return ee
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param obj_name [String] Name for the OpenStudio object
-  # @param space [OpenStudio::Model::Space] an OpenStudio::Model::Space object
-  # @param design_level_w [TODO] TODO
-  # @param frac_sens [TODO] TODO
-  # @param frac_lat [TODO] TODO
-  # @param schedule [TODO] TODO
-  # @param fuel_type [TODO] TODO
-  # @return [TODO] TODO
-  def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
-    return if design_level_w == 0.0 # Negative values intentionally allowed, e.g. for water sensible
-
-    oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    oe = OpenStudio::Model::OtherEquipment.new(oe_def)
-    oe.setName(obj_name)
-    oe.setEndUseSubcategory(obj_name)
-    oe.setFuelType(EPlus.fuel_type(fuel_type))
-    oe.setSpace(space)
-    oe_def.setName(obj_name)
-    oe_def.setDesignLevel(design_level_w)
-    oe_def.setFractionRadiant(0.6 * frac_sens)
-    oe_def.setFractionLatent(frac_lat)
-    oe_def.setFractionLost(1.0 - frac_sens - frac_lat)
-    oe.setSchedule(schedule)
-
-    return oe
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param obj_name [String] Name for the OpenStudio object
-  # @param peak_flow [TODO] TODO
-  # @param schedule [TODO] TODO
-  # @param water_use_connections [TODO] TODO
-  # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @param mw_temp_schedule [TODO] TODO
-  # @return [TODO] TODO
-  def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, water_use_connections, unit_multiplier, mw_temp_schedule = nil)
-    wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
-    wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
-    wu.setName(obj_name)
-    wu_def.setName(obj_name)
-    # Not in a thermal zone, so needs to be explicitly multiplied
-    wu_def.setPeakFlowRate(peak_flow * unit_multiplier)
-    wu_def.setEndUseSubcategory(obj_name)
-    wu.setFlowRateFractionSchedule(schedule)
-    if not mw_temp_schedule.nil?
-      wu_def.setTargetTemperatureSchedule(mw_temp_schedule)
-    end
-    water_use_connections.addWaterUseEquipment(wu)
-
-    return wu
   end
 
   # TODO
