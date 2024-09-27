@@ -75,9 +75,10 @@ module Airflow
     # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round).
     _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
     clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), default_cooling_months, EPlus::ScheduleTypeLimitsFraction)
-    clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_ssn_sensor.setName('cool_season')
-    clg_ssn_sensor.setKeyName(clg_season_sch.schedule.name.to_s)
+    clg_ssn_sensor = Model.add_ems_sensor(model,
+                                          name: 'cool_season',
+                                          output_var_or_meter_name: 'Schedule Value',
+                                          key_name: clg_season_sch.schedule.name)
 
     # Natural ventilation and whole house fans
     apply_natural_ventilation_and_whole_house_fan(runner, model, spaces, hpxml_bldg, hpxml_header, vent_fans, clg_ssn_sensor, infil_values, sensors)
@@ -108,26 +109,35 @@ module Airflow
 
     sensors = {}
 
-    sensors[:pbar] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
-    sensors[:pbar].setName('out pb s')
+    sensors[:pbar] = Model.add_ems_sensor(model,
+                                          name: 'out pb s',
+                                          output_var_or_meter_name: 'Site Outdoor Air Barometric Pressure',
+                                          key_name: nil)
 
-    sensors[:w_out] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-    sensors[:w_out].setName('out wt s')
+    sensors[:w_out] = Model.add_ems_sensor(model,
+                                           name: 'out wt s',
+                                           output_var_or_meter_name: 'Site Outdoor Air Humidity Ratio',
+                                           key_name: nil)
 
-    sensors[:w_in] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')
-    sensors[:w_in].setName('win s')
-    sensors[:w_in].setKeyName(conditioned_zone.name.to_s)
+    sensors[:w_in] = Model.add_ems_sensor(model,
+                                          name: 'win s',
+                                          output_var_or_meter_name: 'Zone Air Humidity Ratio',
+                                          key_name: conditioned_zone.name)
 
-    sensors[:v_wind] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
-    sensors[:v_wind].setName('site vw s')
+    sensors[:v_wind] = Model.add_ems_sensor(model,
+                                            name: 'site vw s',
+                                            output_var_or_meter_name: 'Site Wind Speed',
+                                            key_name: nil)
 
-    sensors[:t_in] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    sensors[:t_in].setName('tin s')
-    sensors[:t_in].setKeyName(conditioned_zone.name.to_s)
+    sensors[:t_in] = Model.add_ems_sensor(model,
+                                          name: 'tin s',
+                                          output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                          key_name: conditioned_zone.name)
 
-    sensors[:t_out] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
-    sensors[:t_out].setName('tout s')
-    sensors[:t_out].setKeyName(conditioned_zone.name.to_s)
+    sensors[:t_out] = Model.add_ems_sensor(model,
+                                           name: 'tout s',
+                                           output_var_or_meter_name: 'Zone Outdoor Air Drybulb Temperature',
+                                           key_name: conditioned_zone.name)
 
     # Create HVAC availability sensor
     sensors[:hvac_avail] = nil
@@ -136,9 +146,10 @@ module Airflow
     if (not heating_unavailable_periods.empty?) || (not cooling_unavailable_periods.empty?)
       avail_sch = ScheduleConstant.new(model, 'hvac availability schedule', 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: heating_unavailable_periods + cooling_unavailable_periods)
 
-      sensors[:hvac_avail] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      sensors[:hvac_avail].setName("#{avail_sch.schedule.name} s")
-      sensors[:hvac_avail].setKeyName(avail_sch.schedule.name.to_s)
+      sensors[:hvac_avail] = Model.add_ems_sensor(model,
+                                                  name: "#{avail_sch.schedule.name} s",
+                                                  output_var_or_meter_name: 'Schedule Value',
+                                                  key_name: avail_sch.schedule.name)
       sensors[:hvac_avail].additionalProperties.setFeature('ObjectType', Constants::ObjectTypeHVACAvailabilitySensor)
     end
 
@@ -334,12 +345,14 @@ module Airflow
       uncond_infil_flow.setName("#{space_name} duct leakage imbalance infil flow")
       uncond_infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
       uncond_infil_flow.setSpace(space)
-      uncond_infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(uncond_infil_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
-      uncond_infil_flow_actuator.setName("#{uncond_infil_flow.name} act")
+
+      uncond_infil_flow_actuator = Model.add_ems_actuator(name: "#{uncond_infil_flow.name} act",
+                                                          model_object: uncond_infil_flow,
+                                                          comp_type_and_control: EPlus::EMSActuatorZoneInfiltrationFlowRate)
 
       # Unconditioned Space Duct Leakage Imbalance Induced Infiltration Program
-      uncond_infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      uncond_infil_program.setName("#{space_name} duct leakage imbalance infil program")
+      uncond_infil_program = Model.add_ems_program(model,
+                                                   name: "#{space_name} duct leakage imbalance infil program")
       uncond_infil_program.addLine('Set Qducts = 0')
       duct_lk_imbals.each do |values|
         duct_location, duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var = values
@@ -350,10 +363,10 @@ module Airflow
       end
       uncond_infil_program.addLine("Set #{uncond_infil_flow_actuator.name} = (@Abs(Qducts))")
 
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName("#{uncond_infil_program.name} calling manager")
-      program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-      program_calling_manager.addProgram(uncond_infil_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{uncond_infil_program.name} calling manager",
+                                            calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                            ems_programs: [uncond_infil_program])
     end
   end
 
@@ -378,9 +391,10 @@ module Airflow
     # NV Availability Schedule
     nv_avail_sch = create_nv_and_whf_avail_sch(model, Constants::ObjectTypeNaturalVentilation, hpxml_bldg.header.natvent_days_per_week, hpxml_header.unavailable_periods)
 
-    nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    nv_avail_sensor.setName("#{Constants::ObjectTypeNaturalVentilation} s")
-    nv_avail_sensor.setKeyName(nv_avail_sch.name.to_s)
+    nv_avail_sensor = Model.add_ems_sensor(model,
+                                           name: "#{Constants::ObjectTypeNaturalVentilation} s",
+                                           output_var_or_meter_name: 'Schedule Value',
+                                           key_name: nv_avail_sch.name)
 
     # Availability Schedules paired with vent fan class
     # If whf_num_days_per_week is exposed, can handle multiple fans with different days of operation
@@ -391,23 +405,25 @@ module Airflow
       whf_unavailable_periods = Schedule.get_unavailable_periods(runner, SchedulesFile::Columns[:WholeHouseFan].name, hpxml_header.unavailable_periods)
       whf_avail_sch = create_nv_and_whf_avail_sch(model, obj_name, whf_num_days_per_week, whf_unavailable_periods)
 
-      whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      whf_avail_sensor.setName("#{obj_name} s")
-      whf_avail_sensor.setKeyName(whf_avail_sch.name.to_s)
-      whf_avail_sensors[vent_whf.id] = whf_avail_sensor
+      whf_avail_sensors[vent_whf.id] = Model.add_ems_sensor(model,
+                                                            name: "#{obj_name} s",
+                                                            output_var_or_meter_name: 'Schedule Value',
+                                                            key_name: whf_avail_sch.name)
     end
 
     # Sensors
     if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
 
-      htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      htg_sp_sensor.setName('htg sp s')
-      htg_sp_sensor.setKeyName(thermostat.heatingSetpointTemperatureSchedule.get.name.to_s)
+      htg_sp_sensor = Model.add_ems_sensor(model,
+                                           name: 'htg sp s',
+                                           output_var_or_meter_name: 'Schedule Value',
+                                           key_name: thermostat.heatingSetpointTemperatureSchedule.get.name)
 
-      clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      clg_sp_sensor.setName('clg sp s')
-      clg_sp_sensor.setKeyName(thermostat.coolingSetpointTemperatureSchedule.get.name.to_s)
+      clg_sp_sensor = Model.add_ems_sensor(model,
+                                           name: 'clg sp s',
+                                           output_var_or_meter_name: 'Schedule Value',
+                                           key_name: thermostat.coolingSetpointTemperatureSchedule.get.name)
     end
 
     # Actuators
@@ -415,17 +431,21 @@ module Airflow
     nv_flow.setName(Constants::ObjectTypeNaturalVentilation + ' flow')
     nv_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     nv_flow.setSpace(conditioned_space)
-    nv_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(nv_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
-    nv_flow_actuator.setName("#{nv_flow.name} act")
     nv_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeNaturalVentilation)
+
+    nv_flow_actuator = Model.add_ems_actuator(name: "#{nv_flow.name} act",
+                                              model_object: nv_flow,
+                                              comp_type_and_control: EPlus::EMSActuatorZoneInfiltrationFlowRate)
 
     whf_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     whf_flow.setName(Constants::ObjectTypeWholeHouseFan + ' flow')
     whf_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     whf_flow.setSpace(conditioned_space)
-    whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
-    whf_flow_actuator.setName("#{whf_flow.name} act")
     whf_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWholeHouseFan)
+
+    whf_flow_actuator = Model.add_ems_actuator(name: "#{whf_flow.name} act",
+                                               model_object: whf_flow,
+                                               comp_type_and_control: EPlus::EMSActuatorZoneInfiltrationFlowRate)
 
     # Whole house fan electricity consumption
     whf_equip = Model.add_electric_equipment(model,
@@ -438,8 +458,9 @@ module Airflow
                                              frac_lost: 1,
                                              schedule: model.alwaysOnDiscreteSchedule)
 
-    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, *EPlus::EMSActuatorElectricEquipmentPower, whf_equip.space.get)
-    whf_elec_actuator.setName("#{whf_equip.name} act")
+    whf_elec_actuator = Model.add_ems_actuator(name: "#{whf_equip.name} act",
+                                               model_object: whf_equip,
+                                               comp_type_and_control: EPlus::EMSActuatorElectricEquipmentPower)
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
     whf_zone = nil
@@ -453,8 +474,10 @@ module Airflow
       zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
       zone_mixing.setName("#{Constants::ObjectTypeWholeHouseFan} mix")
       zone_mixing.setSourceZone(conditioned_zone)
-      cond_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
-      cond_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
+
+      cond_to_zone_flow_rate_actuator = Model.add_ems_actuator(name: "#{zone_mixing.name} act",
+                                                               model_object: zone_mixing,
+                                                               comp_type_and_control: EPlus::EMSActuatorZoneMixingFlowRate)
     end
 
     # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
@@ -470,9 +493,9 @@ module Airflow
     max_oa_hr = 0.0115 # From ANSI 301-2022
 
     # Program
-    vent_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    vent_program = Model.add_ems_program(model,
+                                         name: "#{Constants::ObjectTypeNaturalVentilation} program")
     vent_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeNaturalVentilation)
-    vent_program.setName(Constants::ObjectTypeNaturalVentilation + ' program')
     vent_program.addLine("Set Tin = #{sensors[:t_in].name}")
     vent_program.addLine("Set Tout = #{sensors[:t_out].name}")
     vent_program.addLine("Set Wout = #{sensors[:w_out].name}")
@@ -542,14 +565,14 @@ module Airflow
     vent_program.addLine("Set #{nv_flow_actuator.name} = Qnv")
     vent_program.addLine("Set #{whf_flow_actuator.name} = Qwhf")
 
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{vent_program.name} calling manager")
-    manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-    manager.addProgram(vent_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{vent_program.name} calling manager",
+                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                          ems_programs: [vent_program])
 
     # EMS global variables for output reporting
-    q_nv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{vent_program.name}_Qnv")
-    q_whf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{vent_program.name}_Qwhf")
+    q_nv_var = Model.add_ems_global_var(model, var_name: "#{vent_program.name} Qnv")
+    q_whf_var = Model.add_ems_global_var(model, var_name: "#{vent_program.name} Qwhf")
     q_nv_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeNaturalVentilation)
     q_whf_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWholeHouseFan)
     vent_program.addLine("Set #{q_nv_var.name} = Qnv")
@@ -661,24 +684,24 @@ module Airflow
         cfis_data[:airloop][vent_mech.id] = airloop_map[cfis_id]
       end
 
-      cfis_data[:t_sum_open_var][vent_mech.id] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants::ObjectTypeMechanicalVentilation.gsub(' ', '_')}_cfis_t_sum_open_#{index}") # Sums the time during an hour the CFIS damper has been open
-      cfis_data[:f_damper_extra_open_var][vent_mech.id] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants::ObjectTypeMechanicalVentilation.gsub(' ', '_')}_cfis_f_extra_damper_open_#{index}") # Fraction of timestep the CFIS blower is running while hvac is not operating. Used by infiltration and duct leakage programs
+      cfis_data[:t_sum_open_var][vent_mech.id] = Model.add_ems_global_var(model, var_name: "#{Constants::ObjectTypeMechanicalVentilation} cfis t sum open #{index}") # Sums the time during an hour the CFIS damper has been open
+      cfis_data[:f_damper_extra_open_var][vent_mech.id] = Model.add_ems_global_var(model, var_name: "#{Constants::ObjectTypeMechanicalVentilation} cfis f extra damper open #{index}") # Fraction of timestep the CFIS blower is running while hvac is not operating. Used by infiltration and duct leakage programs
 
       # CFIS Initialization Program
-      cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      cfis_program.setName(Constants::ObjectTypeMechanicalVentilation + " cfis init program #{index}")
+      cfis_program = Model.add_ems_program(model,
+                                           name: "#{Constants::ObjectTypeMechanicalVentilation} cfis init program #{index}")
       cfis_program.addLine("Set #{cfis_data[:t_sum_open_var][vent_mech.id].name} = 0")
       cfis_program.addLine("Set #{cfis_data[:f_damper_extra_open_var][vent_mech.id].name} = 0")
 
-      manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      manager.setName("#{cfis_program.name} calling manager")
-      manager.setCallingPoint('BeginNewEnvironment')
-      manager.addProgram(cfis_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{cfis_program.name} calling manager",
+                                            calling_point: 'BeginNewEnvironment',
+                                            ems_programs: [cfis_program])
 
-      manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      manager.setName("#{cfis_program.name} calling manager2")
-      manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
-      manager.addProgram(cfis_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{cfis_program.name} calling manager2",
+                                            calling_point: 'AfterNewEnvironmentWarmUpIsComplete',
+                                            ems_programs: [cfis_program])
 
       index += 1
     end
@@ -707,12 +730,13 @@ module Airflow
       fail 'Unexpected object type.'
     end
 
-    fan_data[:rtf_var][osm_object] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{osm_object.name} Fan RTF".gsub(' ', '_'))
+    fan_data[:rtf_var][osm_object] = Model.add_ems_global_var(model, var_name: "#{osm_object.name} Fan RTF")
 
     # Supply fan maximum mass flow rate
-    fan_data[:mfr_max_var][osm_object] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, EPlus::EMSIntVarFanMFR)
-    fan_data[:mfr_max_var][osm_object].setName("#{osm_object.name} max sup fan mfr")
-    fan_data[:mfr_max_var][osm_object].setInternalDataIndexKeyName(supply_fan.name.to_s)
+    fan_data[:mfr_max_var][osm_object] = Model.add_ems_internal_var(model,
+                                                                    name: "#{osm_object.name} max sup fan mfr",
+                                                                    model_object: supply_fan,
+                                                                    type: EPlus::EMSIntVarFanMFR)
 
     if supply_fan.to_FanSystemModel.is_initialized
       fan_data[:rtf_sensor][osm_object] = []
@@ -723,10 +747,10 @@ module Airflow
         else
           var_name = "Fan Runtime Fraction Speed #{i}"
         end
-        rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var_name)
-        rtf_sensor.setName("#{fan_data[:rtf_var][osm_object].name} s")
-        rtf_sensor.setKeyName(supply_fan.name.to_s)
-        fan_data[:rtf_sensor][osm_object] << rtf_sensor
+        fan_data[:rtf_sensor][osm_object] << Model.add_ems_sensor(model,
+                                                                  name: "#{fan_data[:rtf_var][osm_object].name} s",
+                                                                  output_var_or_meter_name: var_name,
+                                                                  key_name: supply_fan.name)
       end
     else
       fail "Unexpected fan: #{supply_fan.name}"
@@ -835,28 +859,32 @@ module Airflow
     # -- Sensors --
 
     # Air handler mass flow rate
-    ah_mfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} AH MFR".gsub(' ', '_'))
-    ah_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Mass Flow Rate')
-    ah_mfr_sensor.setName("#{ah_mfr_var.name} s")
-    ah_mfr_sensor.setKeyName(inlet_node.name.to_s)
+    ah_mfr_var = Model.add_ems_global_var(model, var_name: "#{object.name} AH MFR")
+    ah_mfr_sensor = Model.add_ems_sensor(model,
+                                         name: "#{ah_mfr_var.name} s",
+                                         output_var_or_meter_name: 'System Node Mass Flow Rate',
+                                         key_name: inlet_node.name)
 
     # Air handler volume flow rate
-    ah_vfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} AH VFR".gsub(' ', '_'))
-    ah_vfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Current Density Volume Flow Rate')
-    ah_vfr_sensor.setName("#{ah_vfr_var.name} s")
-    ah_vfr_sensor.setKeyName(inlet_node.name.to_s)
+    ah_vfr_var = Model.add_ems_global_var(model, var_name: "#{object.name} AH VFR")
+    ah_vfr_sensor = Model.add_ems_sensor(model,
+                                         name: "#{ah_vfr_var.name} s",
+                                         output_var_or_meter_name: 'System Node Current Density Volume Flow Rate',
+                                         key_name: inlet_node.name)
 
     # Air handler outlet temperature
-    ah_tout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} AH Tout".gsub(' ', '_'))
-    ah_tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
-    ah_tout_sensor.setName("#{ah_tout_var.name} s")
-    ah_tout_sensor.setKeyName(inlet_node.name.to_s)
+    ah_tout_var = Model.add_ems_global_var(model, var_name: "#{object.name} AH Tout")
+    ah_tout_sensor = Model.add_ems_sensor(model,
+                                          name: "#{ah_tout_var.name} s",
+                                          output_var_or_meter_name: 'System Node Temperature',
+                                          key_name: inlet_node.name)
 
     # Air handler outlet humidity ratio
-    ah_wout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} AH Wout".gsub(' ', '_'))
-    ah_wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Humidity Ratio')
-    ah_wout_sensor.setName("#{ah_wout_var.name} s")
-    ah_wout_sensor.setKeyName(inlet_node.name.to_s)
+    ah_wout_var = Model.add_ems_global_var(model, var_name: "#{object.name} AH Wout")
+    ah_wout_sensor = Model.add_ems_sensor(model,
+                                          name: "#{ah_wout_var.name} s",
+                                          output_var_or_meter_name: 'System Node Humidity Ratio',
+                                          key_name: inlet_node.name)
 
     conditioned_zone_return_air_node = nil
     conditioned_zone.returnAirModelObjects.each do |return_air_model_obj|
@@ -866,25 +894,28 @@ module Airflow
     end
 
     # Return air temperature
-    ra_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} RA T".gsub(' ', '_'))
+    ra_t_var = Model.add_ems_global_var(model, var_name: "#{object.name} RA T")
     if not conditioned_zone_return_air_node.nil?
-      ra_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
-      ra_t_sensor.setName("#{ra_t_var.name} s")
-      ra_t_sensor.setKeyName(conditioned_zone_return_air_node.name.to_s)
+      ra_t_sensor = Model.add_ems_sensor(model,
+                                         name: "#{ra_t_var.name} s",
+                                         output_var_or_meter_name: 'System Node Temperature',
+                                         key_name: conditioned_zone_return_air_node.name)
     else
       ra_t_sensor = sensors[:t_in]
     end
 
     # Return air humidity ratio
-    ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object.name} Ra W".gsub(' ', '_'))
+    ra_w_var = Model.add_ems_global_var(model, var_name: "#{object.name} Ra W")
     if not conditioned_zone_return_air_node.nil?
-      ra_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Humidity Ratio')
-      ra_w_sensor.setName("#{ra_w_var.name} s")
-      ra_w_sensor.setKeyName(conditioned_zone_return_air_node.name.to_s)
+      ra_w_sensor = Model.add_ems_sensor(model,
+                                         name: "#{ra_w_var.name} s",
+                                         output_var_or_meter_name: 'System Node Humidity Ratio',
+                                         key_name: conditioned_zone_return_air_node.name)
     else
-      ra_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-      ra_w_sensor.setName("#{ra_w_var.name} s")
-      ra_w_sensor.setKeyName(conditioned_zone.name.to_s)
+      ra_w_sensor = Model.add_ems_sensor(model,
+                                         name: "#{ra_w_var.name} s",
+                                         output_var_or_meter_name: 'Zone Mean Air Humidity Ratio',
+                                         key_name: conditioned_zone.name)
     end
 
     # Get duct located zone or ambient temperature schedule objects
@@ -899,49 +930,65 @@ module Airflow
       # -- Sensors --
 
       # Duct zone temperature
-      dz_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DZ T".gsub(' ', '_'))
+      dz_t_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DZ T")
       if duct_location.is_a? OpenStudio::Model::ThermalZone
-        dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-        dz_t_sensor.setKeyName(duct_location.name.to_s)
+        dz_t_sensor = Model.add_ems_sensor(model,
+                                           name: 'dz_temp',
+                                           output_var_or_meter_name: 'Zone Air Temperature',
+                                           key_name: duct_location.name)
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant
-        dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        dz_t_sensor.setKeyName(duct_location.name.to_s)
+        dz_t_sensor = Model.add_ems_sensor(model,
+                                           name: 'dz_temp',
+                                           output_var_or_meter_name: 'Schedule Value',
+                                           key_name: duct_location.name)
       elsif duct_location.nil? # Outside
-        dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-        dz_t_sensor.setKeyName('Environment')
+        dz_t_sensor = Model.add_ems_sensor(model,
+                                           name: 'dz_temp',
+                                           output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                           key_name: 'Environment')
       else # shouldn't get here, should only have schedule/thermal zone/nil assigned
         fail 'Unexpected duct zone type passed'
       end
       dz_t_sensor.setName("#{dz_t_var.name} s")
 
       # Duct zone humidity ratio
-      dz_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DZ W".gsub(' ', '_'))
+      dz_w_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DZ W")
       if duct_location.is_a? OpenStudio::Model::ThermalZone
-        dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-        dz_w_sensor.setKeyName(duct_location.name.to_s)
-        dz_w_sensor.setName("#{dz_w_var.name} s")
+        dz_w_sensor = Model.add_ems_sensor(model,
+                                           name: "#{dz_w_var.name} s",
+                                           output_var_or_meter_name: 'Zone Mean Air Humidity Ratio',
+                                           key_name: duct_location.name)
         dz_w = "#{dz_w_sensor.name}"
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant # Outside or scheduled temperature
         if duct_location.name.to_s == HPXML::LocationOtherNonFreezingSpace
-          dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-          dz_w_sensor.setName("#{dz_w_var.name} s")
+          dz_w_sensor = Model.add_ems_sensor(model,
+                                             name: "#{dz_w_var.name} s",
+                                             output_var_or_meter_name: 'Site Outdoor Air Humidity Ratio',
+                                             key_name: nil)
           dz_w = "#{dz_w_sensor.name}"
         elsif duct_location.name.to_s == HPXML::LocationOtherHousingUnit
-          dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-          dz_w_sensor.setKeyName(conditioned_zone.name.to_s)
-          dz_w_sensor.setName("#{dz_w_var.name} s")
+          dz_w_sensor = Model.add_ems_sensor(model,
+                                             name: "#{dz_w_var.name} s",
+                                             output_var_or_meter_name: 'Zone Mean Air Humidity Ratio',
+                                             key_name: conditioned_zone.name)
           dz_w = "#{dz_w_sensor.name}"
         else
-          dz_w_sensor1 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-          dz_w_sensor1.setName("#{dz_w_var.name} s 1")
-          dz_w_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-          dz_w_sensor2.setName("#{dz_w_var.name} s 2")
-          dz_w_sensor2.setKeyName(conditioned_zone.name.to_s)
+          dz_w_sensor1 = Model.add_ems_sensor(model,
+                                              name: "#{dz_w_var.name} s 1",
+                                              output_var_or_meter_name: 'Site Outdoor Air Humidity Ratio',
+                                              key_name: nil)
+
+          dz_w_sensor2 = Model.add_ems_sensor(model,
+                                              name: "#{dz_w_var.name} s 2",
+                                              output_var_or_meter_name: 'Zone Mean Air Humidity Ratio',
+                                              key_name: conditioned_zone.name)
           dz_w = "(#{dz_w_sensor1.name} + #{dz_w_sensor2.name}) / 2"
         end
       else
-        dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-        dz_w_sensor.setName("#{dz_w_var.name} s")
+        dz_w_sensor = Model.add_ems_sensor(model,
+                                           name: "#{dz_w_var.name} s",
+                                           output_var_or_meter_name: 'Site Outdoor Air Humidity Ratio',
+                                           key_name: nil)
         dz_w = "#{dz_w_sensor.name}"
       end
 
@@ -1013,7 +1060,7 @@ module Airflow
         end
         equip_act_infos.each do |act_info|
           var_name = "#{prefix}#{act_info[0]}"
-          object_name = "#{object_name_idx} #{prefix}#{act_info[1]}".gsub(' ', '_')
+          object_name = "#{object_name_idx} #{prefix}#{act_info[1]}"
           end_use = act_info[2]
           space = act_info[3]
           if is_cfis && (space == ra_duct_space)
@@ -1025,7 +1072,7 @@ module Airflow
           frac_lat = act_info[4]
           frac_lost = act_info[5]
           if not is_cfis
-            duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
+            duct_vars[var_name] = Model.add_ems_global_var(model, var_name: object_name)
           end
           other_equip = Model.add_other_equipment(model,
                                                   name: object_name,
@@ -1037,8 +1084,10 @@ module Airflow
                                                   frac_lost: frac_lost,
                                                   schedule: model.alwaysOnDiscreteSchedule,
                                                   fuel_type: nil)
-          duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
-          duct_actuators[var_name].setName("#{other_equip.name} act")
+
+          duct_actuators[var_name] = Model.add_ems_actuator(name: "#{other_equip.name} act",
+                                                            model_object: other_equip,
+                                                            comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
         end
       end
 
@@ -1065,29 +1114,31 @@ module Airflow
         end
         mix_act_infos.each do |act_info|
           var_name = "#{prefix}#{act_info[0]}"
-          object_name = "#{object_name_idx} #{prefix}#{act_info[1]}".gsub(' ', '_')
+          object_name = "#{object_name_idx} #{prefix}#{act_info[1]}"
           dest_zone = act_info[2]
           source_zone = act_info[3]
 
           if not is_cfis
-            duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
+            duct_vars[var_name] = Model.add_ems_global_var(model, var_name: object_name)
           end
           zone_mixing = OpenStudio::Model::ZoneMixing.new(dest_zone)
           zone_mixing.setName("#{object_name} mix")
           zone_mixing.setSourceZone(source_zone)
-          duct_actuators[var_name] = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, *EPlus::EMSActuatorZoneMixingFlowRate)
-          duct_actuators[var_name].setName("#{zone_mixing.name} act")
           zone_mixing.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeDuctLoad)
+
+          duct_actuators[var_name] = Model.add_ems_actuator(name: "#{zone_mixing.name} act",
+                                                            model_object: zone_mixing,
+                                                            comp_type_and_control: EPlus::EMSActuatorZoneMixingFlowRate)
         end
       end
 
       # -- Global Variables --
-      duct_lk_supply_fan_equiv_cond_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DuctImbalLkSupFanEquivCond".gsub(' ', '_'))
-      duct_lk_exhaust_fan_equiv_cond_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DuctImbalLkExhFanEquivCond".gsub(' ', '_'))
+      duct_lk_supply_fan_equiv_cond_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DuctImbalLkSupFanEquivCond")
+      duct_lk_exhaust_fan_equiv_cond_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DuctImbalLkExhFanEquivCond")
       duct_lk_imbals << [conditioned_zone.name.to_s, duct_lk_supply_fan_equiv_cond_var, duct_lk_exhaust_fan_equiv_cond_var]
       if not duct_location.nil?
-        duct_lk_supply_fan_equiv_dz_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DuctImbalLkSupFanEquivDZ".gsub(' ', '_'))
-        duct_lk_exhaust_fan_equiv_dz_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{object_name_idx} DuctImbalLkExhFanEquivDZ".gsub(' ', '_'))
+        duct_lk_supply_fan_equiv_dz_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DuctImbalLkSupFanEquivDZ")
+        duct_lk_exhaust_fan_equiv_dz_var = Model.add_ems_global_var(model, var_name: "#{object_name_idx} DuctImbalLkExhFanEquivDZ")
         duct_lk_imbals << [duct_location.name.to_s, duct_lk_supply_fan_equiv_dz_var, duct_lk_exhaust_fan_equiv_dz_var]
       end
 
@@ -1124,8 +1175,8 @@ module Airflow
       end
 
       # Duct Subroutine
-      duct_subroutine = OpenStudio::Model::EnergyManagementSystemSubroutine.new(model)
-      duct_subroutine.setName("#{object_name_idx} duct subroutine")
+      duct_subroutine = Model.add_ems_subroutine(model,
+                                                 name: "#{object_name_idx} duct subroutine")
       duct_subroutine.addLine("Set AH_MFR = #{ah_mfr_var.name} / #{unit_multiplier}")
       duct_subroutine.addLine('If AH_MFR > 0')
       duct_subroutine.addLine("  Set AH_Tout = #{ah_tout_var.name}")
@@ -1281,8 +1332,8 @@ module Airflow
 
       # Duct Program
 
-      duct_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      duct_program.setName(object_name_idx + ' duct program')
+      duct_program = Model.add_ems_program(model,
+                                           name: "#{object_name_idx} duct program")
       duct_program.addLine("Set #{ah_mfr_var.name} = #{ah_mfr_sensor.name}")
       duct_program.addLine("Set #{fan_data[:rtf_var][object].name} = 0")
       fan_data[:rtf_sensor][object].each do |rtf_sensor|
@@ -1366,10 +1417,10 @@ module Airflow
 
       end
 
-      manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      manager.setName("#{duct_program.name} calling manager")
-      manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
-      manager.addProgram(duct_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{duct_program.name} calling manager",
+                                            calling_point: 'EndOfSystemTimestepAfterHVACReporting',
+                                            ems_programs: [duct_program])
     end
 
     return adiabatic_const
@@ -1524,9 +1575,10 @@ module Airflow
       remaining_hrs -= 1
     end
     obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, EPlus::ScheduleTypeLimitsFraction, false, unavailable_periods: unavailable_periods)
-    obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    obj_sch_sensor.setName("#{obj_name} sch s")
-    obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
+    obj_sch_sensor = Model.add_ems_sensor(model,
+                                          name: "#{obj_name} sch s",
+                                          output_var_or_meter_name: 'Schedule Value',
+                                          key_name: obj_sch.schedule.name)
 
     Model.add_electric_equipment(model,
                                  name: obj_name,
@@ -1570,9 +1622,10 @@ module Airflow
       full_load_hrs = Schedule.annual_equivalent_full_load_hrs(hpxml_header.sim_calendar_year, obj_sch)
     end
 
-    obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    obj_sch_sensor.setName("#{obj_name} sch s")
-    obj_sch_sensor.setKeyName(obj_sch_name)
+    obj_sch_sensor = Model.add_ems_sensor(model,
+                                          name: "#{obj_name} sch s",
+                                          output_var_or_meter_name: 'Schedule Value',
+                                          key_name: obj_sch_name)
 
     return obj_sch_sensor, 0 if full_load_hrs == 0
 
@@ -1818,8 +1871,9 @@ module Airflow
     equip_actuator = nil
     if [Constants::ObjectTypeMechanicalVentilationHouseFanCFIS,
         Constants::ObjectTypeMechanicalVentilationHouseFanCFISSupplFan].include? obj_name # actuate its power level in EMS
-      equip_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, *EPlus::EMSActuatorElectricEquipmentPower, equip.space.get)
-      equip_actuator.setName("#{equip.name} act")
+      equip_actuator = Model.add_ems_actuator(name: "#{equip.name} act",
+                                              model_object: equip,
+                                              comp_type_and_control: EPlus::EMSActuatorElectricEquipmentPower)
     end
 
     return equip_actuator
@@ -1846,8 +1900,10 @@ module Airflow
                                            frac_lost: 0,
                                            schedule: model.alwaysOnDiscreteSchedule,
                                            fuel_type: nil)
-    fan_sens_load_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sens_equip, *EPlus::EMSActuatorOtherEquipmentPower, sens_equip.space.get)
-    fan_sens_load_actuator.setName("#{sens_equip.name} act")
+
+    fan_sens_load_actuator = Model.add_ems_actuator(name: "#{sens_equip.name} act",
+                                                    model_object: sens_equip,
+                                                    comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     lat_equip = Model.add_other_equipment(model,
                                           name: "#{Constants::ObjectTypeMechanicalVentilationHouseFan} latent load",
@@ -1859,8 +1915,10 @@ module Airflow
                                           frac_lost: 0,
                                           schedule: model.alwaysOnDiscreteSchedule,
                                           fuel_type: nil)
-    fan_lat_load_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(lat_equip, *EPlus::EMSActuatorOtherEquipmentPower, lat_equip.space.get)
-    fan_lat_load_actuator.setName("#{lat_equip.name} act")
+
+    fan_lat_load_actuator = Model.add_ems_actuator(name: "#{lat_equip.name} act",
+                                                   model_object: lat_equip,
+                                                   comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     program.addLine("Set #{fan_sens_load_actuator.name} = 0.0")
     program.addLine("Set #{fan_lat_load_actuator.name} = 0.0")
@@ -1994,8 +2052,8 @@ module Airflow
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
 
     # EMS global variables for output reporting
-    q_inf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{infil_program.name}_Qinf")
-    q_fan_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{infil_program.name}_Qfan")
+    q_inf_var = Model.add_ems_global_var(model, var_name: "#{infil_program.name} Qinf")
+    q_fan_var = Model.add_ems_global_var(model, var_name: "#{infil_program.name} Qfan")
     q_inf_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeInfiltration)
     q_fan_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeMechanicalVentilation)
     infil_program.addLine("Set #{q_inf_var.name} = Qinf_adj")
@@ -2076,15 +2134,17 @@ module Airflow
     # Preconditioning
     # Assume introducing no sensible loads to zone if preconditioned
     if not vent_fans[:mech_preheat].empty?
-      htg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
-      htg_stp_sensor.setName('htg stp s')
-      htg_stp_sensor.setKeyName(conditioned_zone.name.to_s)
+      htg_stp_sensor = Model.add_ems_sensor(model,
+                                            name: 'htg stp s',
+                                            output_var_or_meter_name: 'Zone Thermostat Heating Setpoint Temperature',
+                                            key_name: conditioned_zone.name)
       infil_program.addLine("Set HtgStp = #{htg_stp_sensor.name}") # heating thermostat setpoint
     end
     if not vent_fans[:mech_precool].empty?
-      clg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Cooling Setpoint Temperature')
-      clg_stp_sensor.setName('clg stp s')
-      clg_stp_sensor.setKeyName(conditioned_zone.name.to_s)
+      clg_stp_sensor = Model.add_ems_sensor(model,
+                                            name: 'clg stp s',
+                                            output_var_or_meter_name: 'Zone Thermostat Cooling Setpoint Temperature',
+                                            key_name: conditioned_zone.name)
       infil_program.addLine("Set ClgStp = #{clg_stp_sensor.name}") # cooling thermostat setpoint
     end
     vent_fans[:mech_preheat].each_with_index do |f_preheat, i|
@@ -2101,8 +2161,10 @@ module Airflow
                                               frac_lost: 1,
                                               schedule: model.alwaysOnDiscreteSchedule,
                                               fuel_type: f_preheat.preheating_fuel)
-      htg_energy_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
-      htg_energy_actuator.setName("#{other_equip.name} act")
+
+      htg_energy_actuator = Model.add_ems_actuator(name: "#{other_equip.name} act",
+                                                   model_object: other_equip,
+                                                   comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
       htg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_preheat.id) # Used by reporting measure
 
       infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -2140,8 +2202,10 @@ module Airflow
                                               frac_lost: 1,
                                               schedule: model.alwaysOnDiscreteSchedule,
                                               fuel_type: f_precool.precooling_fuel)
-      clg_energy_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, *EPlus::EMSActuatorOtherEquipmentPower, other_equip.space.get)
-      clg_energy_actuator.setName("#{other_equip.name} act")
+
+      clg_energy_actuator = Model.add_ems_actuator(name: "#{other_equip.name} act",
+                                                   model_object: other_equip,
+                                                   comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
       clg_energy_actuator.actuatedComponent.get.additionalProperties.setFeature('HPXML_ID', f_precool.id) # Used by reporting measure
 
       infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_unit_flow_rate, 'cfm', 'm^3/s').round(4)}")
@@ -2220,14 +2284,16 @@ module Airflow
     infil_flow.setName(Constants::ObjectTypeInfiltration + ' flow')
     infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
     infil_flow.setSpace(spaces[HPXML::LocationConditionedSpace])
-    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, *EPlus::EMSActuatorZoneInfiltrationFlowRate)
-    infil_flow_actuator.setName("#{infil_flow.name} act")
+
+    infil_flow_actuator = Model.add_ems_actuator(name: "#{infil_flow.name} act",
+                                                 model_object: infil_flow,
+                                                 comp_type_and_control: EPlus::EMSActuatorZoneInfiltrationFlowRate)
     infil_flow.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeInfiltration)
 
     # Conditioned Space Infiltration Calculation/Program
-    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    infil_program = Model.add_ems_program(model,
+                                          name: "#{Constants::ObjectTypeInfiltration} program")
     infil_program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeInfiltration)
-    infil_program.setName(Constants::ObjectTypeInfiltration + ' program')
 
     # Calculate infiltration without adjustment by ventilation
     apply_infiltration_to_conditioned(spaces, hpxml_bldg, hpxml_header, infil_program, weather, infil_values, sensors)
@@ -2259,10 +2325,10 @@ module Airflow
     # Address preconditioning
     calculate_precond_loads(model, spaces, infil_program, vent_fans, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, clg_ssn_sensor)
 
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{infil_program.name} calling manager")
-    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-    program_calling_manager.addProgram(infil_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{infil_program.name} calling manager",
+                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                          ems_programs: [infil_program])
   end
 
   # TODO

@@ -19,6 +19,7 @@ module EPlus
   EMSActuatorFanTotalEfficiency = 'Fan', 'Fan Total Efficiency'
   EMSActuatorCurveResult = 'Curve', 'Curve Result'
   EMSActuatorUnitarySystemCoilSpeedLevel = 'Coil Speed Control', 'Unitary System DX Coil Speed Value'
+  EMSActuatorUnitarySystemSuppCoilSpeedLevel = 'Coil Speed Control', 'Unitary System Supplemental Coil Stage Level'
   EMSActuatorScheduleConstantValue = 'Schedule:Constant', 'Schedule Value'
   EMSActuatorScheduleYearValue = 'Schedule:Year', 'Schedule Value'
   EMSActuatorScheduleFileValue = 'Schedule:File', 'Schedule Value'

@@ -213,11 +213,10 @@ module Waterheater
     hpwh_ctrl_program = add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, top_element_setpoint_schedule, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
 
     # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{obj_name_hpwh} ProgramManager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(hpwh_ctrl_program)
-    program_calling_manager.addProgram(hpwh_inlet_air_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{obj_name_hpwh} ProgramManager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [hpwh_ctrl_program, hpwh_inlet_air_program])
 
     add_ec_adj(model, hpxml_bldg, hpwh, loc_space, water_heating_system, unit_multiplier)
 
@@ -429,25 +428,34 @@ module Waterheater
         water_heater = c.to_WaterHeaterMixed.get
         tank_volume = water_heater.tankVolume.get
         deadband = water_heater.deadbandTemperatureDifference
+
         # Sensors and actuators related to OS water heater object
-        tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Tank Temperature')
-        tank_temp_sensor.setName("#{combi_sys_id} Tank Temp")
-        tank_temp_sensor.setKeyName(water_heater.name.to_s)
-        tank_loss_energy_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
-        tank_loss_energy_sensor.setName("#{combi_sys_id} Tank Loss Energy")
-        tank_loss_energy_sensor.setKeyName(water_heater.name.to_s)
-        tank_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        tank_spt_sensor.setName("#{combi_sys_id} Setpoint Temperature")
-        tank_spt_sensor.setKeyName(water_heater.setpointTemperatureSchedule.get.name.to_s)
+        tank_temp_sensor = Model.add_ems_sensor(model,
+                                                name: "#{combi_sys_id} Tank Temp",
+                                                output_var_or_meter_name: 'Water Heater Tank Temperature',
+                                                key_name: water_heater.name)
+
+        tank_loss_energy_sensor = Model.add_ems_sensor(model,
+                                                       name: "#{combi_sys_id} Tank Loss Energy",
+                                                       output_var_or_meter_name: 'Water Heater Heat Loss Energy',
+                                                       key_name: water_heater.name)
+
+        tank_spt_sensor = Model.add_ems_sensor(model,
+                                               name: "#{combi_sys_id} Setpoint Temperature",
+                                               output_var_or_meter_name: 'Schedule Value',
+                                               key_name: water_heater.setpointTemperatureSchedule.get.name)
+
         alt_spt_sch = water_heater.indirectAlternateSetpointTemperatureSchedule.get
         if alt_spt_sch.to_ScheduleConstant.is_initialized
-          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleConstantValue)
+          comp_type_and_control = EPlus::EMSActuatorScheduleConstantValue
         elsif alt_spt_sch.to_ScheduleRuleset.is_initialized
-          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleYearValue)
+          comp_type_and_control = EPlus::EMSActuatorScheduleYearValue
         else
-          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, *EPlus::EMSActuatorScheduleFileValue)
+          comp_type_and_control = EPlus::EMSActuatorScheduleFileValue
         end
-        altsch_actuator.setName("#{combi_sys_id} AltSchedOverride")
+        altsch_actuator = Model.add_ems_actuator(name: "#{combi_sys_id} AltSchedOverride",
+                                                 model_object: alt_spt_sch,
+                                                 comp_type_and_control: comp_type_and_control)
       end
       plant_loop.components.each do |c|
         next unless c.to_WaterUseConnections.is_initialized
@@ -457,21 +465,24 @@ module Waterheater
           # water use equipment peak mass flow rate
           wu_peak = wu.waterUseEquipmentDefinition.peakFlowRate
           equipment_peaks[wu.name.to_s] = wu_peak
+
           # mfr fraction schedule sensors
-          wu_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-          wu_sch_sensor.setName("#{wu.name} sch value")
-          wu_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          equipment_sch_sensors[wu.name.to_s] = wu_sch_sensor
+          equipment_sch_sensors[wu.name.to_s] = Model.add_ems_sensor(model,
+                                                                     name: "#{wu.name} sch value",
+                                                                     output_var_or_meter_name: 'Schedule Value',
+                                                                     key_name: wu.flowRateFractionSchedule.get.name)
+
           # water use equipment target temperature schedule sensors
           if wu.waterUseEquipmentDefinition.targetTemperatureSchedule.is_initialized
             target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
           else
             target_temp_sch = water_heater.setpointTemperatureSchedule.get
           end
-          target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-          target_temp_sensor.setName("#{wu.name} target temp")
-          target_temp_sensor.setKeyName(target_temp_sch.name.to_s)
-          equipment_target_temp_sensors[wu.name.to_s] = target_temp_sensor
+
+          equipment_target_temp_sensors[wu.name.to_s] = Model.add_ems_sensor(model,
+                                                                             name: "#{wu.name} target temp",
+                                                                             output_var_or_meter_name: 'Schedule Value',
+                                                                             key_name: target_temp_sch.name)
         end
       end
       dhw_source_loop = model.getPlantLoops.find { |l| l.demandComponents.include? water_heater }
@@ -479,8 +490,9 @@ module Waterheater
         next unless c.to_PumpVariableSpeed.is_initialized
 
         pump = c.to_PumpVariableSpeed.get
-        pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, *EPlus::EMSActuatorPumpMassFlowRate)
-        pump_actuator.setName("#{combi_sys_id} Pump MFR")
+        pump_actuator = Model.add_ems_actuator(name: "#{combi_sys_id} Pump MFR",
+                                               model_object: pump,
+                                               comp_type_and_control: EPlus::EMSActuatorPumpMassFlowRate)
       end
       dhw_source_loop.supplyOutletNode.setpointManagers.each do |setpoint_manager|
         if setpoint_manager.to_SetpointManagerScheduled.is_initialized
@@ -488,13 +500,14 @@ module Waterheater
         end
       end
 
-      mains_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Mains Water Temperature')
-      mains_temp_sensor.setName('Mains Temperature')
-      mains_temp_sensor.setKeyName('Environment')
+      mains_temp_sensor = Model.add_ems_sensor(model,
+                                               name: 'Mains Temperature',
+                                               output_var_or_meter_name: 'Site Mains Water Temperature',
+                                               key_name: 'Environment')
 
       # Program
-      combi_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      combi_ctrl_program.setName("#{combi_sys_id} Source MFR Control")
+      combi_ctrl_program = Model.add_ems_program(model,
+                                                 name: "#{combi_sys_id} Source MFR Control")
       combi_ctrl_program.addLine("Set Rho = @RhoH2O #{tank_temp_sensor.name}")
       combi_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
       combi_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
@@ -503,7 +516,7 @@ module Waterheater
       combi_ctrl_program.addLine("Set WU_Cold_Temp = #{mains_temp_sensor.name}")
       combi_ctrl_program.addLine('Set Tank_Use_Total_MFR = 0.0')
       equipment_peaks.each do |wu_name, peak|
-        wu_id = wu_name.gsub(' ', '_')
+        wu_id = Model.ems_friendly_name(wu_name)
         combi_ctrl_program.addLine("Set #{wu_id}_Peak = #{peak}")
         combi_ctrl_program.addLine("Set #{wu_id}_MFR_Total = #{wu_id}_Peak * #{equipment_sch_sensors[wu_name].name} * Rho")
         combi_ctrl_program.addLine("If #{equipment_target_temp_sensors[wu_name].name} > WU_Hot_Temp")
@@ -528,10 +541,10 @@ module Waterheater
       combi_ctrl_program.addLine('EndIf')
 
       # ProgramCallingManagers
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName("#{combi_sys_id} ProgramManager")
-      program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-      program_calling_manager.addProgram(combi_ctrl_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{combi_sys_id} ProgramManager",
+                                            calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                            ems_programs: [combi_ctrl_program])
     end
   end
 
@@ -797,21 +810,24 @@ module Waterheater
 
     # Add EMS code for SWH control (keeps the WH for the last hour if there's useful energy that can be delivered, E+ wouldn't always do this by default)
     # Sensors
-    coll_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
-    coll_sensor.setName("#{obj_name} Collector Outlet")
-    coll_sensor.setKeyName("#{collector_plate.outletModelObject.get.to_Node.get.name}")
+    coll_sensor = Model.add_ems_sensor(model,
+                                       name: "#{obj_name} Collector Outlet",
+                                       output_var_or_meter_name: 'System Node Temperature',
+                                       key_name: collector_plate.outletModelObject.get.to_Node.get.name)
 
-    tank_source_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
-    tank_source_sensor.setName("#{obj_name} Tank Source Inlet")
-    tank_source_sensor.setKeyName("#{storage_tank.demandOutletModelObject.get.to_Node.get.name}")
+    tank_source_sensor = Model.add_ems_sensor(model,
+                                              name: "#{obj_name} Tank Source Inlet",
+                                              output_var_or_meter_name: 'System Node Temperature',
+                                              key_name: storage_tank.demandOutletModelObject.get.to_Node.get.name)
 
     # Actuators
-    swh_pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, *EPlus::EMSActuatorPumpMassFlowRate)
-    swh_pump_actuator.setName("#{obj_name}_pump")
+    swh_pump_actuator = Model.add_ems_actuator(name: "#{obj_name}_pump",
+                                               model_object: pump,
+                                               comp_type_and_control: EPlus::EMSActuatorPumpMassFlowRate)
 
     # Program
-    swh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    swh_program.setName("#{obj_name} Controller")
+    swh_program = Model.add_ems_program(model,
+                                        name: "#{obj_name} Controller")
     swh_program.addLine("If #{coll_sensor.name} > #{tank_source_sensor.name}")
     swh_program.addLine("Set #{swh_pump_actuator.name} = 100 * #{unit_multiplier}")
     swh_program.addLine('Else')
@@ -819,10 +835,10 @@ module Waterheater
     swh_program.addLine('EndIf')
 
     # ProgramCallingManager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{obj_name} Control")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(swh_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{obj_name} Control",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [swh_program])
   end
 
   # TODO
@@ -1077,48 +1093,51 @@ module Waterheater
   def self.get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, conditioned_zone)
     rh_sensors = []
     if not loc_schedule.nil?
-      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
-      amb_temp_sensor.setKeyName(loc_schedule.name.to_s)
+      amb_temp_sensor = Model.add_ems_sensor(model,
+                                             name: "#{obj_name_hpwh} amb temp",
+                                             output_var_or_meter_name: 'Schedule Value',
+                                             key_name: loc_schedule.name)
 
       if loc_schedule.name.get == HPXML::LocationOtherNonFreezingSpace
-        amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
-        amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-        amb_rh_sensor.setKeyName('Environment')
-        rh_sensors << amb_rh_sensor
+        rh_sensors << Model.add_ems_sensor(model,
+                                           name: "#{obj_name_hpwh} amb rh",
+                                           output_var_or_meter_name: 'Site Outdoor Air Relative Humidity',
+                                           key_name: 'Environment')
       elsif loc_schedule.name.get == HPXML::LocationOtherHousingUnit
-        amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
-        amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-        amb_rh_sensor.setKeyName(conditioned_zone.name.to_s)
-        rh_sensors << amb_rh_sensor
+        rh_sensors << Model.add_ems_sensor(model,
+                                           name: "#{obj_name_hpwh} amb rh",
+                                           output_var_or_meter_name: 'Zone Air Relative Humidity',
+                                           key_name: conditioned_zone.name)
       else
-        amb_rh_sensor1 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
-        amb_rh_sensor1.setName("#{obj_name_hpwh} amb1 rh")
-        amb_rh_sensor1.setKeyName('Environment')
-        amb_rh_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
-        amb_rh_sensor2.setName("#{obj_name_hpwh} amb2 rh")
-        amb_rh_sensor2.setKeyName(conditioned_zone.name.to_s)
-        rh_sensors << amb_rh_sensor1
-        rh_sensors << amb_rh_sensor2
+        rh_sensors << Model.add_ems_sensor(model,
+                                           name: "#{obj_name_hpwh} amb1 rh",
+                                           output_var_or_meter_name: 'Site Outdoor Air Relative Humidity',
+                                           key_name: 'Environment')
+        rh_sensors << Model.add_ems_sensor(model,
+                                           name: "#{obj_name_hpwh} amb2 rh",
+                                           output_var_or_meter_name: 'Zone Air Relative Humidity',
+                                           key_name: conditioned_zone.name)
       end
     elsif not loc_space.nil?
-      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-      amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
-      amb_temp_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
+      amb_temp_sensor = Model.add_ems_sensor(model,
+                                             name: "#{obj_name_hpwh} amb temp",
+                                             output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                             key_name: loc_space.thermalZone.get.name)
 
-      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
-      amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-      amb_rh_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
-      rh_sensors << amb_rh_sensor
+      rh_sensors << Model.add_ems_sensor(model,
+                                         name: "#{obj_name_hpwh} amb rh",
+                                         output_var_or_meter_name: 'Zone Air Relative Humidity',
+                                         key_name: loc_space.thermalZone.get.name)
     else # Located outside
-      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-      amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
-      amb_temp_sensor.setKeyName('Environment')
+      amb_temp_sensor = Model.add_ems_sensor(model,
+                                             name: "#{obj_name_hpwh} amb temp",
+                                             output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                             key_name: 'Environment')
 
-      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
-      amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-      amb_rh_sensor.setKeyName('Environment')
-      rh_sensors << amb_rh_sensor
+      rh_sensors << Model.add_ems_sensor(model,
+                                         name: "#{obj_name_hpwh} amb rh",
+                                         output_var_or_meter_name: 'Site Outdoor Air Relative Humidity',
+                                         key_name: 'Environment')
     end
     return amb_temp_sensor, rh_sensors
   end
@@ -1139,11 +1158,13 @@ module Waterheater
   # @return [TODO] TODO
   def self.add_hpwh_inlet_air_and_zone_heat_gain_program(model, obj_name_hpwh, loc_space, hpwh_tamb, hpwh_rhamb, tank, coil, fan, amb_temp_sensor, amb_rh_sensors, unit_multiplier)
     # EMS Actuators: Inlet T & RH, sensible and latent gains to the space
-    tamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_tamb, *EPlus::EMSActuatorScheduleConstantValue)
-    tamb_act_actuator.setName("#{obj_name_hpwh} Tamb act")
+    tamb_act_actuator = Model.add_ems_actuator(name: "#{obj_name_hpwh} Tamb act",
+                                               model_object: hpwh_tamb,
+                                               comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
-    rhamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_rhamb, *EPlus::EMSActuatorScheduleConstantValue)
-    rhamb_act_actuator.setName("#{obj_name_hpwh} RHamb act")
+    rhamb_act_actuator = Model.add_ems_actuator(name: "#{obj_name_hpwh} RHamb act",
+                                                model_object: hpwh_rhamb,
+                                                comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     if not loc_space.nil? # If located in space
       # Add in other equipment objects for sensible/latent gains
@@ -1157,8 +1178,9 @@ module Waterheater
                                             frac_lost: 0,
                                             schedule: model.alwaysOnDiscreteSchedule,
                                             fuel_type: nil)
-      sens_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_sens, *EPlus::EMSActuatorOtherEquipmentPower, hpwh_sens.space.get)
-      sens_act_actuator.setName("#{hpwh_sens.name} act")
+      sens_act_actuator = Model.add_ems_actuator(name: "#{hpwh_sens.name} act",
+                                                 model_object: hpwh_sens,
+                                                 comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
       hpwh_lat = Model.add_other_equipment(model,
                                            name: "#{obj_name_hpwh} lat",
@@ -1170,29 +1192,34 @@ module Waterheater
                                            frac_lost: 0,
                                            schedule: model.alwaysOnDiscreteSchedule,
                                            fuel_type: nil)
-      lat_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_lat, *EPlus::EMSActuatorOtherEquipmentPower, hpwh_lat.space.get)
-      lat_act_actuator.setName("#{hpwh_lat.name} act")
+      lat_act_actuator = Model.add_ems_actuator(name: "#{hpwh_lat.name} act",
+                                                model_object: hpwh_lat,
+                                                comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
     end
 
     # EMS Sensors: HP sens and latent loads, tank losses, fan power
-    tl_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Rate')
-    tl_sensor.setName("#{obj_name_hpwh} tl")
-    tl_sensor.setKeyName(tank.name.to_s)
+    tl_sensor = Model.add_ems_sensor(model,
+                                     name: "#{obj_name_hpwh} tl",
+                                     output_var_or_meter_name: 'Water Heater Heat Loss Rate',
+                                     key_name: tank.name)
 
-    sens_cool_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Sensible Cooling Rate')
-    sens_cool_sensor.setName("#{obj_name_hpwh} sens cool")
-    sens_cool_sensor.setKeyName(coil.name.to_s)
+    sens_cool_sensor = Model.add_ems_sensor(model,
+                                            name: "#{obj_name_hpwh} sens cool",
+                                            output_var_or_meter_name: 'Cooling Coil Sensible Cooling Rate',
+                                            key_name: coil.name)
 
-    lat_cool_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Latent Cooling Rate')
-    lat_cool_sensor.setName("#{obj_name_hpwh} lat cool")
-    lat_cool_sensor.setKeyName(coil.name.to_s)
+    lat_cool_sensor = Model.add_ems_sensor(model,
+                                           name: "#{obj_name_hpwh} lat cool",
+                                           output_var_or_meter_name: 'Cooling Coil Latent Cooling Rate',
+                                           key_name: coil.name)
 
-    fan_power_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Rate")
-    fan_power_sensor.setName("#{obj_name_hpwh} fan pwr")
-    fan_power_sensor.setKeyName(fan.name.to_s)
+    fan_power_sensor = Model.add_ems_sensor(model,
+                                            name: "#{obj_name_hpwh} fan pwr",
+                                            output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+                                            key_name: fan.name)
 
-    hpwh_inlet_air_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    hpwh_inlet_air_program.setName("#{obj_name_hpwh} InletAir")
+    hpwh_inlet_air_program = Model.add_ems_program(model,
+                                                   name: "#{obj_name_hpwh} InletAir")
     hpwh_inlet_air_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
     # Average relative humidity for mf spaces: other multifamily buffer space & other heated space
     hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = 0")
@@ -1225,25 +1252,30 @@ module Waterheater
   # @return [TODO] TODO
   def self.add_hpwh_control_program(model, runner, obj_name_hpwh, amb_temp_sensor, hpwh_top_element_sp, hpwh_bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
     # Lower element is enabled if the ambient air temperature prevents the HP from running
-    leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
-    leschedoverride_actuator.setName("#{obj_name_hpwh} LESchedOverride")
+    leschedoverride_actuator = Model.add_ems_actuator(name: "#{obj_name_hpwh} LESchedOverride",
+                                                      model_object: hpwh_bottom_element_sp,
+                                                      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     # Upper element is enabled unless mode is HP_only
-    ueschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_top_element_sp, *EPlus::EMSActuatorScheduleConstantValue)
-    ueschedoverride_actuator.setName("#{obj_name_hpwh} UESchedOverride")
+    ueschedoverride_actuator = Model.add_ems_actuator(name: "#{obj_name_hpwh} UESchedOverride",
+                                                      model_object: hpwh_top_element_sp,
+                                                      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     # Actuator for setpoint schedule
     if control_setpoint_schedule.to_ScheduleConstant.is_initialized
-      hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleConstantValue)
+      comp_type_and_control = EPlus::EMSActuatorScheduleConstantValue
     elsif control_setpoint_schedule.to_ScheduleRuleset.is_initialized
-      hpwhschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(control_setpoint_schedule, *EPlus::EMSActuatorScheduleYearValue)
+      comp_type_and_control = EPlus::EMSActuatorScheduleYearValue
     end
-    hpwhschedoverride_actuator.setName("#{obj_name_hpwh} HPWHSchedOverride")
+    hpwhschedoverride_actuator = Model.add_ems_actuator(name: "#{obj_name_hpwh} HPWHSchedOverride",
+                                                        model_object: control_setpoint_schedule,
+                                                        comp_type_and_control: comp_type_and_control)
 
     # EMS for the HPWH control logic
-    t_set_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    t_set_sensor.setName("#{obj_name_hpwh} T_set")
-    t_set_sensor.setKeyName(setpoint_schedule.name.to_s)
+    t_set_sensor = Model.add_ems_sensor(model,
+                                        name: "#{obj_name_hpwh} T_set",
+                                        output_var_or_meter_name: 'Schedule Value',
+                                        key_name: setpoint_schedule.name)
 
     op_mode_schedule = nil
     if not schedules_file.nil?
@@ -1254,9 +1286,10 @@ module Waterheater
     if not op_mode_schedule.nil?
       Schedule.set_schedule_type_limits(model, op_mode_schedule, EPlus::ScheduleTypeLimitsFraction)
 
-      op_mode_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      op_mode_sensor.setName("#{obj_name_hpwh} op_mode")
-      op_mode_sensor.setKeyName(op_mode_schedule.name.to_s)
+      op_mode_sensor = Model.add_ems_sensor(model,
+                                            name: "#{obj_name_hpwh} op_mode",
+                                            output_var_or_meter_name: 'Schedule Value',
+                                            key_name: op_mode_schedule.name)
 
       runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterOperatingMode].name}' schedule file and operating mode provided; the latter will be ignored.") if !op_mode.nil?
     end
@@ -1265,8 +1298,8 @@ module Waterheater
     min_temp_c = UnitConversions.convert(min_temp, 'F', 'C').round(2)
     max_temp_c = UnitConversions.convert(max_temp, 'F', 'C').round(2)
 
-    hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
+    hpwh_ctrl_program = Model.add_ems_program(model,
+                                              name: "#{obj_name_hpwh} Control")
     hpwh_ctrl_program.addLine("Set #{hpwhschedoverride_actuator.name} = #{t_set_sensor.name}")
     # If in HP only mode: still enable elements if ambient temperature is out of bounds, otherwise disable elements
     if op_mode == HPXML::WaterHeaterOperatingModeHeatPumpOnly
@@ -1603,37 +1636,44 @@ module Waterheater
 
     # Sensors
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
-      ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler #{EPlus.fuel_type(fuel_type)} Rate")
-      ec_adj_sensor_boiler.setName("#{combi_boiler.name} energy")
-      ec_adj_sensor_boiler.setKeyName(combi_boiler.name.to_s)
+      ec_adj_sensor_boiler = Model.add_ems_sensor(model,
+                                                  name: "#{combi_boiler.name} energy",
+                                                  output_var_or_meter_name: "Boiler #{EPlus.fuel_type(fuel_type)} Rate",
+                                                  key_name: combi_boiler.name)
     else
-      ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater #{EPlus.fuel_type(fuel_type)} Rate")
-      ec_adj_sensor.setName("#{tank.name} energy")
-      ec_adj_sensor.setKeyName(tank.name.to_s)
+      ec_adj_sensor = Model.add_ems_sensor(model,
+                                           name: "#{tank.name} energy",
+                                           output_var_or_meter_name: "Water Heater #{EPlus.fuel_type(fuel_type)} Rate",
+                                           key_name: tank.name)
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-        ec_adj_hp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Rate")
-        ec_adj_hp_sensor.setName("#{heater.dXCoil.name} energy")
-        ec_adj_hp_sensor.setKeyName(heater.dXCoil.name.to_s)
-        ec_adj_fan_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Rate")
-        ec_adj_fan_sensor.setName("#{heater.fan.name} energy")
-        ec_adj_fan_sensor.setKeyName(heater.fan.name.to_s)
+        ec_adj_hp_sensor = Model.add_ems_sensor(model,
+                                                name: "#{heater.dXCoil.name} energy",
+                                                output_var_or_meter_name: "Cooling Coil Water Heating #{EPlus::FuelTypeElectricity} Rate",
+                                                key_name: heater.dXCoil.name)
+        ec_adj_fan_sensor = Model.add_ems_sensor(model,
+                                                 name: "#{heater.fan.name} energy",
+                                                 output_var_or_meter_name: "Fan #{EPlus::FuelTypeElectricity} Rate",
+                                                 key_name: heater.fan.name)
       end
     end
 
-    ec_adj_oncyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate")
-    ec_adj_oncyc_sensor.setName("#{tank.name} on cycle parasitic")
-    ec_adj_oncyc_sensor.setKeyName(tank.name.to_s)
-    ec_adj_offcyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate")
-    ec_adj_offcyc_sensor.setName("#{tank.name} off cycle parasitic")
-    ec_adj_offcyc_sensor.setKeyName(tank.name.to_s)
+    ec_adj_oncyc_sensor = Model.add_ems_sensor(model,
+                                               name: "#{tank.name} on cycle parasitic",
+                                               output_var_or_meter_name: "Water Heater On Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+                                               key_name: tank.name)
+    ec_adj_offcyc_sensor = Model.add_ems_sensor(model,
+                                                name: "#{tank.name} off cycle parasitic",
+                                                output_var_or_meter_name: "Water Heater Off Cycle Parasitic #{EPlus::FuelTypeElectricity} Rate",
+                                                key_name: tank.name)
 
     # Actuators
-    ec_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(ec_adj_object, *EPlus::EMSActuatorOtherEquipmentPower, loc_space)
-    ec_adj_actuator.setName("#{heater.name} ec_adj_act")
+    ec_adj_actuator = Model.add_ems_actuator(name: "#{heater.name} ec adj act",
+                                             model_object: ec_adj_object,
+                                             comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     # Program
-    ec_adj_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    ec_adj_program.setName("#{heater.name} EC_adj")
+    ec_adj_program = Model.add_ems_program(model,
+                                           name: "#{heater.name} EC_adj")
     ec_adj_program.addLine('If WarmupFlag == 0') # Prevent a non-zero adjustment in the first hour because of the warmup period
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
       ec_adj_program.addLine("Set dhw_e_cons = #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
@@ -1651,10 +1691,10 @@ module Waterheater
     ec_adj_program.addLine('EndIf')
 
     # Program Calling Manager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
-    program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    program_calling_manager.addProgram(ec_adj_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{heater.name} EC_adj ProgramManager",
+                                          calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+                                          ems_programs: [ec_adj_program])
   end
 
   # TODO

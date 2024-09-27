@@ -2206,19 +2206,23 @@ module HVAC
     # system will be operating instead.
 
     # Sensors
-    tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-    tout_db_sensor.setKeyName('Environment')
+    tout_db_sensor = Model.add_ems_sensor(model,
+                                          name: 'tout_db',
+                                          output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                          key_name: 'Environment')
 
     # Actuators
-    fan_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanPressureRise)
-    fan_pressure_rise_act.setName("#{fan.name} pressure rise act")
+    fan_pressure_rise_act = Model.add_ems_actuator(name: "#{fan.name} pressure rise act",
+                                                   model_object: fan,
+                                                   comp_type_and_control: EPlus::EMSActuatorFanPressureRise)
 
-    fan_total_efficiency_act = OpenStudio::Model::EnergyManagementSystemActuator.new(fan, *EPlus::EMSActuatorFanTotalEfficiency)
-    fan_total_efficiency_act.setName("#{fan.name} total efficiency act")
+    fan_total_efficiency_act = Model.add_ems_actuator(name: "#{fan.name} total efficiency act",
+                                                      model_object: fan,
+                                                      comp_type_and_control: EPlus::EMSActuatorFanTotalEfficiency)
 
     # Program
-    fan_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    fan_program.setName("#{fan.name} power program")
+    fan_program = Model.add_ems_program(model,
+                                        name: "#{fan.name} power program")
     fan_program.addLine("If #{tout_db_sensor.name} < #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)}")
     fan_program.addLine("  Set #{fan_pressure_rise_act.name} = 0")
     fan_program.addLine("  Set #{fan_total_efficiency_act.name} = 1")
@@ -2228,10 +2232,10 @@ module HVAC
     fan_program.addLine('EndIf')
 
     # Calling Point
-    fan_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    fan_program_calling_manager.setName("#{fan.name} power program calling manager")
-    fan_program_calling_manager.setCallingPoint('AfterPredictorBeforeHVACManagers')
-    fan_program_calling_manager.addProgram(fan_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{fan_program.name} calling manager",
+                                          calling_point: 'AfterPredictorBeforeHVACManagers',
+                                          ems_programs: [fan_program])
   end
 
   # TODO
@@ -2248,32 +2252,37 @@ module HVAC
 
     # Sensors
     if heating_object.is_a? OpenStudio::Model::BoilerHotWater
-      heating_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
-      heating_plr_sensor.setName("#{heating_object.name} plr s")
-      heating_plr_sensor.setKeyName(heating_object.name.to_s)
+      heating_plr_sensor = Model.add_ems_sensor(model,
+                                                name: "#{heating_object.name} plr s",
+                                                output_var_or_meter_name: 'Boiler Part Load Ratio',
+                                                key_name: heating_object.name)
     elsif heating_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-      heating_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Part Load Ratio')
-      heating_plr_sensor.setName("#{heating_object.name} plr s")
-      heating_plr_sensor.setKeyName(heating_object.name.to_s)
+      heating_plr_sensor = Model.add_ems_sensor(model,
+                                                name: "#{heating_object.name} plr s",
+                                                output_var_or_meter_name: 'Unitary System Part Load Ratio',
+                                                key_name: heating_object.name)
     end
 
-    pump_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Mass Flow Rate')
-    pump_mfr_sensor.setName("#{pump.name} mfr s")
-    pump_mfr_sensor.setKeyName(pump.name.to_s)
+    pump_mfr_sensor = Model.add_ems_sensor(model,
+                                           name: "#{pump.name} mfr s",
+                                           output_var_or_meter_name: 'Pump Mass Flow Rate',
+                                           key_name: pump.name)
 
     # Internal variable
-    pump_rated_mfr_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, EPlus::EMSIntVarPumpMFR)
-    pump_rated_mfr_var.setName("#{pump.name} rated mfr")
-    pump_rated_mfr_var.setInternalDataIndexKeyName(pump.name.to_s)
+    pump_rated_mfr_var = Model.add_ems_internal_var(model,
+                                                    name: "#{pump.name} rated mfr",
+                                                    model_object: pump,
+                                                    type: EPlus::EMSIntVarPumpMFR)
 
     # Actuator
-    pump_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, *EPlus::EMSActuatorPumpPressureRise)
-    pump_pressure_rise_act.setName("#{pump.name} pressure rise act")
+    pump_pressure_rise_act = Model.add_ems_actuator(name: "#{pump.name} pressure rise act",
+                                                    model_object: pump,
+                                                    comp_type_and_control: EPlus::EMSActuatorPumpPressureRise)
 
     # Program
     # See https://bigladdersoftware.com/epx/docs/9-3/ems-application-guide/hvac-systems-001.html#pump
-    pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    pump_program.setName("#{pump.name} power program")
+    pump_program = Model.add_ems_program(model,
+                                         name: "#{pump.name} power program")
     pump_program.addLine("Set heating_plr = #{heating_plr_sensor.name}")
     pump_program.addLine("Set pump_total_eff = #{pump_rated_mfr_var.name} / 1000 * #{pump.ratedPumpHead} / #{pump.ratedPowerConsumption.get}")
     pump_program.addLine("Set pump_vfr = #{pump_mfr_sensor.name} / 1000")
@@ -2284,10 +2293,10 @@ module HVAC
     pump_program.addLine('EndIf')
 
     # Calling Point
-    pump_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    pump_program_calling_manager.setName("#{pump.name} power program calling manager")
-    pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    pump_program_calling_manager.addProgram(pump_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{pump_program.name} calling manager",
+                                          calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+                                          ems_programs: [pump_program])
   end
 
   # TODO
@@ -2305,17 +2314,20 @@ module HVAC
     sys_id = hpxml_object.id
 
     if fan_or_pump.is_a? OpenStudio::Model::FanSystemModel
-      fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
+      var = "Fan #{EPlus::FuelTypeElectricity} Energy"
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
-      fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Pump #{EPlus::FuelTypeElectricity} Energy")
+      var = "Pump #{EPlus::FuelTypeElectricity} Energy"
     elsif fan_or_pump.is_a? OpenStudio::Model::ElectricEquipment
-      fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Electric Equipment #{EPlus::FuelTypeElectricity} Energy")
+      var = "Electric Equipment #{EPlus::FuelTypeElectricity} Energy"
     else
       fail "Unexpected fan/pump object '#{fan_or_pump.name}'."
     end
-    fan_or_pump_sensor.setName("#{fan_or_pump.name} s")
-    fan_or_pump_sensor.setKeyName(fan_or_pump.name.to_s)
-    fan_or_pump_var = fan_or_pump.name.to_s.gsub(' ', '_')
+    fan_or_pump_sensor = Model.add_ems_sensor(model,
+                                              name: "#{fan_or_pump.name} s",
+                                              output_var_or_meter_name: var,
+                                              key_name: fan_or_pump.name)
+
+    fan_or_pump_var = Model.ems_friendly_name(fan_or_pump.name)
 
     if clg_object.nil?
       clg_object_sensor = nil
@@ -2325,9 +2337,11 @@ module HVAC
       else
         var = 'Cooling Coil Total Cooling Energy'
       end
-      clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-      clg_object_sensor.setName("#{clg_object.name} s")
-      clg_object_sensor.setKeyName(clg_object.name.to_s)
+
+      clg_object_sensor = Model.add_ems_sensor(model,
+                                               name: "#{clg_object.name} s",
+                                               output_var_or_meter_name: var,
+                                               key_name: clg_object.name)
     end
 
     if htg_object.nil?
@@ -2341,9 +2355,10 @@ module HVAC
         var = 'Heating Coil Heating Energy'
       end
 
-      htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-      htg_object_sensor.setName("#{htg_object.name} s")
-      htg_object_sensor.setKeyName(htg_object.name.to_s)
+      htg_object_sensor = Model.add_ems_sensor(model,
+                                               name: "#{htg_object.name} s",
+                                               output_var_or_meter_name: var,
+                                               key_name: htg_object.name)
     end
 
     if backup_htg_object.nil?
@@ -2355,9 +2370,10 @@ module HVAC
         var = 'Heating Coil Heating Energy'
       end
 
-      backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-      backup_htg_object_sensor.setName("#{backup_htg_object.name} s")
-      backup_htg_object_sensor.setKeyName(backup_htg_object.name.to_s)
+      backup_htg_object_sensor = Model.add_ems_sensor(model,
+                                                      name: "#{backup_htg_object.name} s",
+                                                      output_var_or_meter_name: var,
+                                                      key_name: backup_htg_object.name)
     end
 
     sensors = { 'clg' => clg_object_sensor,
@@ -2366,8 +2382,9 @@ module HVAC
     sensors = sensors.select { |_m, s| !s.nil? }
 
     # Disaggregate electric fan/pump energy
-    fan_or_pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
+    fan_or_pump_program = Model.add_ems_program(model,
+                                                name: "#{fan_or_pump_var} disaggregate program")
+
     if htg_object.is_a?(OpenStudio::Model::ZoneHVACBaseboardConvectiveWater) || htg_object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
       # Pump may occasionally run when baseboard isn't, so just assign all pump energy here
       mode, _sensor = sensors.first
@@ -2404,14 +2421,15 @@ module HVAC
       fan_or_pump_program.addLine('EndIf')
     end
 
-    fan_or_pump_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    fan_or_pump_program_calling_manager.setName("#{fan_or_pump.name} disaggregate program calling manager")
-    fan_or_pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    fan_or_pump_program_calling_manager.addProgram(fan_or_pump_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{fan_or_pump.name} disaggregate program calling manager",
+                                          calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+                                          ems_programs: [fan_or_pump_program])
 
     sensors.each do |mode, sensor|
       next if sensor.nil?
 
+      # TODO: Create Model.add_ems_output_var() method
       fan_or_pump_ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_#{mode}")
       object_type = { 'clg' => Constants::ObjectTypeFanPumpDisaggregateCool,
                       'primary_htg' => Constants::ObjectTypeFanPumpDisaggregatePrimaryHeat,
@@ -2437,12 +2455,15 @@ module HVAC
     # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
 
     # sensor
-    dehumidifier_sens_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Sensible Heating Rate')
-    dehumidifier_sens_htg.setName("#{zone_hvac.name} sens htg")
-    dehumidifier_sens_htg.setKeyName(zone_hvac.name.to_s)
-    dehumidifier_power = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Dehumidifier #{EPlus::FuelTypeElectricity} Rate")
-    dehumidifier_power.setName("#{zone_hvac.name} power htg")
-    dehumidifier_power.setKeyName(zone_hvac.name.to_s)
+    dehumidifier_sens_htg = Model.add_ems_sensor(model,
+                                                 name: "#{zone_hvac.name} sens htg",
+                                                 output_var_or_meter_name: 'Zone Dehumidifier Sensible Heating Rate',
+                                                 key_name: zone_hvac.name)
+
+    dehumidifier_power = Model.add_ems_sensor(model,
+                                              name: "#{zone_hvac.name} power htg",
+                                              output_var_or_meter_name: "Zone Dehumidifier #{EPlus::FuelTypeElectricity} Rate",
+                                              key_name: zone_hvac.name)
 
     # actuator
     dehumidifier_load_adj = Model.add_other_equipment(model,
@@ -2455,22 +2476,23 @@ module HVAC
                                                       frac_lost: 0,
                                                       schedule: model.alwaysOnDiscreteSchedule,
                                                       fuel_type: nil)
-    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, *EPlus::EMSActuatorOtherEquipmentPower, dehumidifier_load_adj.space.get)
-    dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
+    dehumidifier_load_adj_act = Model.add_ems_actuator(name: "#{zone_hvac.name} sens htg adj act",
+                                                       model_object: dehumidifier_load_adj,
+                                                       comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     # EMS program
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{zone_hvac.name} load adj program")
+    program = Model.add_ems_program(model,
+                                    name: "#{zone_hvac.name} load adj program")
     program.addLine("If #{dehumidifier_sens_htg.name} > 0")
     program.addLine("  Set #{dehumidifier_load_adj_act.name} = - (#{dehumidifier_sens_htg.name} - #{dehumidifier_power.name}) * (1 - #{fraction_served})")
     program.addLine('Else')
     program.addLine("  Set #{dehumidifier_load_adj_act.name} = 0")
     program.addLine('EndIf')
 
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName(program.name.to_s + 'calling manager')
-    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-    program_calling_manager.addProgram(program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{program.name} calling manager",
+                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                          ems_programs: [program])
   end
 
   # TODO
@@ -3679,8 +3701,8 @@ module HVAC
   # @param htg_supp_coil [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingElectricMultiStage] OpenStudio Supplemental Heating Coil object
   # @return [Array<OpenStudio::Model::EnergyManagementSystemActuator, OpenStudio::Model::EnergyManagementSystemGlobalVariable>] OpenStudio EMS Actuator and Global Variable objects for supplemental coil availability schedule
   def self.get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
-    actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') }
-    global_var_supp_avail = model.getEnergyManagementSystemGlobalVariables.find { |var| var.name.get.include? htg_supp_coil.name.get.gsub(' ', '_') }
+    actuator = model.getEnergyManagementSystemActuators.find { |act| act.name.get.include? Model.ems_friendly_name(htg_supp_coil.availabilitySchedule.name) }
+    global_var_supp_avail = model.getEnergyManagementSystemGlobalVariables.find { |var| var.name.get.include? Model.ems_friendly_name(htg_supp_coil.name) }
 
     return actuator, global_var_supp_avail unless actuator.nil?
 
@@ -3691,18 +3713,21 @@ module HVAC
     supp_avail_sch.setName("#{htg_supp_coil.name} avail sch")
     htg_supp_coil.setAvailabilitySchedule(supp_avail_sch)
 
-    supp_coil_avail_act = OpenStudio::Model::EnergyManagementSystemActuator.new(htg_supp_coil.availabilitySchedule, *EPlus::EMSActuatorScheduleConstantValue)
-    supp_coil_avail_act.setName(htg_supp_coil.availabilitySchedule.name.get.gsub(' ', '_') + ' act')
+    supp_coil_avail_act = Model.add_ems_actuator(name: "#{htg_supp_coil.availabilitySchedule.name} act",
+                                                 model_object: htg_supp_coil.availabilitySchedule,
+                                                 comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     # global variable to integrate different EMS program actuating the same schedule
-    global_var_supp_avail = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{htg_supp_coil.name.get.gsub(' ', '_') + '_avail_global'}")
-    global_var_supp_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    global_var_supp_avail_program.setName("#{global_var_supp_avail.name} init program")
+    global_var_supp_avail = Model.add_ems_global_var(model, var_name: "#{htg_supp_coil.name} avail global")
+
+    global_var_supp_avail_program = Model.add_ems_program(model,
+                                                          name: "#{global_var_supp_avail.name} init program")
     global_var_supp_avail_program.addLine("Set #{global_var_supp_avail.name} = 1")
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{global_var_supp_avail_program.name} calling manager")
-    manager.setCallingPoint('BeginZoneTimestepBeforeInitHeatBalance')
-    manager.addProgram(global_var_supp_avail_program)
+
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{global_var_supp_avail_program.name} calling manager",
+                                          calling_point: 'BeginZoneTimestepBeforeInitHeatBalance',
+                                          ems_programs: [global_var_supp_avail_program])
     return supp_coil_avail_act, global_var_supp_avail
   end
 
@@ -3723,40 +3748,44 @@ module HVAC
     return if htg_supp_coil.is_a? OpenStudio::Model::CoilHeatingElectricMultiStage
 
     # Sensors
-    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    tin_sensor.setName('zone air temp')
-    tin_sensor.setKeyName(control_zone.name.to_s)
+    tin_sensor = Model.add_ems_sensor(model,
+                                      name: 'zone air temp',
+                                      output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                      key_name: control_zone.name)
 
     htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    htg_sp_ss.setName('htg_setpoint')
-    htg_sp_ss.setKeyName(htg_sch.name.to_s)
+    htg_sp_ss = Model.add_ems_sensor(model,
+                                     name: 'htg_setpoint',
+                                     output_var_or_meter_name: 'Schedule Value',
+                                     key_name: htg_sch.name)
 
-    supp_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
-    supp_coil_energy.setName('supp coil electric energy')
-    supp_coil_energy.setKeyName(htg_supp_coil.name.get)
+    supp_coil_energy = Model.add_ems_sensor(model,
+                                            name: 'supp coil electric energy',
+                                            output_var_or_meter_name: 'Heating Coil Electricity Energy',
+                                            key_name: htg_supp_coil.name)
 
-    htg_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electricity Energy')
-    htg_coil_energy.setName('hp htg coil electric energy')
-    htg_coil_energy.setKeyName(htg_coil.name.get)
+    htg_coil_energy = Model.add_ems_sensor(model,
+                                           name: 'hp htg coil electric energy',
+                                           output_var_or_meter_name: 'Heating Coil Electricity Energy',
+                                           key_name: htg_coil.name)
 
-    # Trend variable
-    supp_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, supp_coil_energy)
-    supp_energy_trend.setName("#{supp_coil_energy.name} Trend")
-    supp_energy_trend.setNumberOfTimestepsToBeLogged(1)
+    # Trend variables
+    supp_energy_trend = Model.add_ems_trend_var(model,
+                                                ems_object: supp_coil_energy,
+                                                num_timesteps_logged: 1)
 
-    # Trend variable
-    htg_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, htg_coil_energy)
-    htg_energy_trend.setName("#{htg_coil_energy.name} Trend")
-    htg_energy_trend.setNumberOfTimestepsToBeLogged(5)
+    htg_energy_trend = Model.add_ems_trend_var(model,
+                                               ems_object: htg_coil_energy,
+                                               num_timesteps_logged: 5)
 
     # Actuators
     supp_coil_avail_act, global_var_supp_avail = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
+
     # Program
-    supp_coil_avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    supp_coil_avail_program.setName("#{htg_supp_coil.name.get} control program")
+    supp_coil_avail_program = Model.add_ems_program(model,
+                                                    name: "#{htg_supp_coil.name} control program")
     supp_coil_avail_program.addLine("If #{global_var_supp_avail.name} == 0") # Other EMS set it to be 0.0, keep the logic
     supp_coil_avail_program.addLine("  Set #{supp_coil_avail_act.name} = 0")
     supp_coil_avail_program.addLine('Else') # global variable = 1
@@ -3764,14 +3793,13 @@ module HVAC
     supp_coil_avail_program.addLine("  Set htg_sp_l = #{htg_sp_ss.name}")
     supp_coil_avail_program.addLine("  Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
     supp_coil_avail_program.addLine("  If (@TRENDVALUE #{supp_energy_trend.name} 1) > 0") # backup coil is turned on, keep it on until reaching upper end of ddb in case of high frequency oscillations
-
     supp_coil_avail_program.addLine('    If living_t > htg_sp_h')
     supp_coil_avail_program.addLine("      Set #{global_var_supp_avail.name} = 0")
     supp_coil_avail_program.addLine("      Set #{supp_coil_avail_act.name} = 0")
     supp_coil_avail_program.addLine('    Else')
     supp_coil_avail_program.addLine("      Set #{supp_coil_avail_act.name} = 1")
     supp_coil_avail_program.addLine('    EndIf')
-    supp_coil_avail_program.addLine('  Else') # Only turn on the backup coil when temprature is below lower end of ddb.
+    supp_coil_avail_program.addLine('  Else') # Only turn on the backup coil when temperature is below lower end of ddb.
     r_s_a = ["#{htg_energy_trend.name} > 0"]
     # Observe 5 mins before turning on supp coil
     for t_i in 1..4
@@ -3792,10 +3820,10 @@ module HVAC
     supp_coil_avail_program.addLine('EndIf')
 
     # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{supp_coil_avail_program.name} ProgramManager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(supp_coil_avail_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{supp_coil_avail_program.name} calling manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [supp_coil_avail_program])
   end
 
   # Apply capacity degradation EMS to account for realistic start-up losses.
@@ -3825,32 +3853,40 @@ module HVAC
     number_of_timestep_logged = calc_time_to_full_cap(c_d)
 
     # Sensors
-    cap_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    cap_curve_var_in.setName("#{cap_fff_curve.name.get.gsub('-', '_')} Var")
-    cap_curve_var_in.setKeyName(cap_fff_curve.name.get)
+    cap_curve_var_in = Model.add_ems_sensor(model,
+                                            name: "#{cap_fff_curve.name.get.gsub('-', '_')} Var",
+                                            output_var_or_meter_name: 'Performance Curve Input Variable 1 Value',
+                                            key_name: cap_fff_curve.name)
 
-    eir_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-    eir_curve_var_in.setName("#{eir_fff_curve.name.get.gsub('-', '_')} Var")
-    eir_curve_var_in.setKeyName(eir_fff_curve.name.get)
+    eir_curve_var_in = Model.add_ems_sensor(model,
+                                            name: "#{eir_fff_curve.name.get.gsub('-', '_')} Var",
+                                            output_var_or_meter_name: 'Performance Curve Input Variable 1 Value',
+                                            key_name: eir_fff_curve.name)
 
-    coil_power_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, ss_var_name)
-    coil_power_ss.setName("#{coil_name} electric energy")
-    coil_power_ss.setKeyName(coil_name)
+    coil_power_ss = Model.add_ems_sensor(model,
+                                         name: "#{coil_name} electric energy",
+                                         output_var_or_meter_name: ss_var_name,
+                                         key_name: coil_name)
+
     # Trend variable
-    coil_power_ss_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_power_ss)
-    coil_power_ss_trend.setName("#{coil_power_ss.name} Trend")
-    coil_power_ss_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    coil_power_ss_trend = Model.add_ems_trend_var(model,
+                                                  ems_object: coil_power_ss,
+                                                  num_timesteps_logged: number_of_timestep_logged)
 
     # Actuators
-    cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, *EPlus::EMSActuatorCurveResult)
-    cc_actuator.setName("#{cap_fff_curve.name.get.gsub('-', '_')} value")
-    ec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_fff_curve, *EPlus::EMSActuatorCurveResult)
-    ec_actuator.setName("#{eir_fff_curve.name.get.gsub('-', '_')} value")
+    cc_actuator = Model.add_ems_actuator(name: "#{cap_fff_curve.name} value",
+                                         model_object: cap_fff_curve,
+                                         comp_type_and_control: EPlus::EMSActuatorCurveResult)
+
+    ec_actuator = Model.add_ems_actuator(name: "#{eir_fff_curve.name} value",
+                                         model_object: eir_fff_curve,
+                                         comp_type_and_control: EPlus::EMSActuatorCurveResult)
 
     # Program
-    cycling_degrad_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    cycling_degrad_program = Model.add_ems_program(model,
+                                                   name: "#{coil_name} cycling degradation program")
+
     # Check values within min/max limits
-    cycling_degrad_program.setName("#{coil_name} cycling degradation program")
     cycling_degrad_program.addLine("If #{cap_curve_var_in.name} < #{cap_fff_curve.minimumValueofx}")
     cycling_degrad_program.addLine("  Set #{cap_curve_var_in.name} = #{cap_fff_curve.minimumValueofx}")
     cycling_degrad_program.addLine("ElseIf #{cap_curve_var_in.name} > #{cap_fff_curve.maximumValueofx}")
@@ -3908,10 +3944,10 @@ module HVAC
     cycling_degrad_program.addLine("Set #{ec_actuator.name} = ec_out / cc_mult")
 
     # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{cycling_degrad_program.name} ProgramManager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(cycling_degrad_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{cycling_degrad_program.name} calling manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [cycling_degrad_program])
   end
 
   # Apply time-based realistic staging EMS program for two speed system.
@@ -3935,51 +3971,59 @@ module HVAC
 
     # Sensors
     if not htg_supp_coil.nil?
-      backup_coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Energy')
-      backup_coil_energy.setName("#{htg_supp_coil.name} heating energy")
-      backup_coil_energy.setKeyName(htg_supp_coil.name.get)
+      backup_coil_energy = Model.add_ems_sensor(model,
+                                                name: "#{htg_supp_coil.name} heating energy",
+                                                output_var_or_meter_name: 'Heating Coil Heating Energy',
+                                                key_name: htg_supp_coil.name)
 
       # Trend variable
-      backup_energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, backup_coil_energy)
-      backup_energy_trend.setName("#{backup_coil_energy.name} Trend")
-      backup_energy_trend.setNumberOfTimestepsToBeLogged(1)
+      backup_energy_trend = Model.add_ems_trend_var(model,
+                                                    ems_object: backup_coil_energy,
+                                                    num_timesteps_logged: 1)
 
       supp_coil_avail_act, global_var_supp_avail = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     end
     # Sensors
-    living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-    living_temp_ss.setName("#{control_zone.name} temp")
-    living_temp_ss.setKeyName(control_zone.name.to_s)
+    living_temp_ss = Model.add_ems_sensor(model,
+                                          name: "#{control_zone.name} temp",
+                                          output_var_or_meter_name: 'Zone Air Temperature',
+                                          key_name: control_zone.name)
 
     htg_sch = control_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
     clg_sch = control_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
 
-    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    htg_sp_ss.setName("#{control_zone.name} htg setpoint")
-    htg_sp_ss.setKeyName(htg_sch.name.to_s)
+    htg_sp_ss = Model.add_ems_sensor(model,
+                                     name: "#{control_zone.name} htg setpoint",
+                                     output_var_or_meter_name: 'Schedule Value',
+                                     key_name: htg_sch.name)
 
-    clg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    clg_sp_ss.setName("#{control_zone.name} clg setpoint")
-    clg_sp_ss.setKeyName(clg_sch.name.to_s)
+    clg_sp_ss = Model.add_ems_sensor(model,
+                                     name: "#{control_zone.name} clg setpoint",
+                                     output_var_or_meter_name: 'Schedule Value',
+                                     key_name: clg_sch.name)
 
-    unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
-    unitary_var.setName(unitary_system.name.get + ' speed level')
-    unitary_var.setKeyName(unitary_system.name.get)
+    unitary_var = Model.add_ems_sensor(model,
+                                       name: "#{unitary_system.name}  speed level",
+                                       output_var_or_meter_name: 'Unitary System DX Coil Speed Level',
+                                       key_name: unitary_system.name)
 
     # Actuators
-    unitary_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System DX Coil Speed Value')
-    unitary_actuator.setName(unitary_system.name.get + ' speed override')
+    unitary_actuator = Model.add_ems_actuator(name: "#{unitary_system.name} speed override",
+                                              model_object: unitary_system,
+                                              comp_type_and_control: EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
 
     # Trend variable
-    unitary_speed_var_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_var)
-    unitary_speed_var_trend.setName("#{unitary_var.name} Trend")
-    unitary_speed_var_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    unitary_speed_var_trend = Model.add_ems_trend_var(model,
+                                                      ems_object: unitary_var,
+                                                      num_timesteps_logged: number_of_timestep_logged)
 
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
+
     # Program
-    realistic_cycling_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    realistic_cycling_program = Model.add_ems_program(model,
+                                                      name: "#{unitary_system.name} realistic cycling")
+
     # Check values within min/max limits
-    realistic_cycling_program.setName("#{unitary_system.name.get} realistic cycling")
     realistic_cycling_program.addLine("Set living_t = #{living_temp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_l = #{htg_sp_ss.name}")
     realistic_cycling_program.addLine("Set htg_sp_h = #{htg_sp_ss.name} + #{ddb}")
@@ -4033,11 +4077,12 @@ module HVAC
         realistic_cycling_program.addLine('EndIf')
       end
     end
+
     # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{realistic_cycling_program.name} Program Manager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(realistic_cycling_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{realistic_cycling_program.name} Program Manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [realistic_cycling_program])
   end
 
   # Apply maximum power ratio schedule for variable speed system.
@@ -4079,52 +4124,63 @@ module HVAC
     return if (clg_coil.nil? && htg_coil.nil?)
 
     # sensors
-    pow_ratio_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    pow_ratio_sensor.setName("#{air_loop_unitary.name} power_ratio")
-    pow_ratio_sensor.setKeyName(max_pow_ratio_sch.name.to_s)
-    indoor_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-    indoor_temp_sensor.setName("#{control_zone.name} indoor_temp")
-    indoor_temp_sensor.setKeyName(control_zone.name.to_s)
-    htg_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
-    htg_spt_sensor.setName("#{control_zone.name} htg_spt_temp")
-    htg_spt_sensor.setKeyName(control_zone.name.to_s)
-    clg_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Cooling Setpoint Temperature')
-    clg_spt_sensor.setName("#{control_zone.name} clg_spt_temp")
-    clg_spt_sensor.setKeyName(control_zone.name.to_s)
-    load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Predicted Sensible Load to Setpoint Heat Transfer Rate')
-    load_sensor.setName("#{air_loop_unitary.name} sens load")
-    load_sensor.setKeyName(air_loop_unitary.name.to_s)
+    pow_ratio_sensor = Model.add_ems_sensor(model,
+                                            name: "#{air_loop_unitary.name} power_ratio",
+                                            output_var_or_meter_name: 'Schedule Value',
+                                            key_name: max_pow_ratio_sch.name)
+
+    indoor_temp_sensor = Model.add_ems_sensor(model,
+                                              name: "#{control_zone.name} indoor_temp",
+                                              output_var_or_meter_name: 'Zone Air Temperature',
+                                              key_name: control_zone.name)
+
+    htg_spt_sensor = Model.add_ems_sensor(model,
+                                          name: "#{control_zone.name} htg_spt_temp",
+                                          output_var_or_meter_name: 'Zone Thermostat Heating Setpoint Temperature',
+                                          key_name: control_zone.name)
+
+    clg_spt_sensor = Model.add_ems_sensor(model,
+                                          name: "#{control_zone.name} clg_spt_temp",
+                                          output_var_or_meter_name: 'Zone Thermostat Cooling Setpoint Temperature',
+                                          key_name: control_zone.name)
+
+    load_sensor = Model.add_ems_sensor(model,
+                                       name: "#{air_loop_unitary.name} sens load",
+                                       output_var_or_meter_name: 'Unitary System Predicted Sensible Load to Setpoint Heat Transfer Rate',
+                                       key_name: air_loop_unitary.name)
 
     # global variable
-    temp_offset_signal = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_unitary.name.to_s.gsub(' ', '_')}_temp_offset")
+    temp_offset_signal = Model.add_ems_global_var(model, var_name: "#{air_loop_unitary.name} temp offset")
 
     # Temp offset Initialization Program
     # Temperature offset signal used to see if the hvac is recovering temperature to setpoint.
     # If abs (indoor temperature - setpoint) > offset, then hvac and backup is allowed to operate without cap to recover temperature until it reaches setpoint
-    temp_offset_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    temp_offset_program.setName("#{air_loop_unitary.name} temp offset init program")
+    temp_offset_program = Model.add_ems_program(model,
+                                                name: "#{air_loop_unitary.name} temp offset init program")
     temp_offset_program.addLine("Set #{temp_offset_signal.name} = 0")
 
     # calling managers
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{temp_offset_program.name} calling manager")
-    manager.setCallingPoint('BeginNewEnvironment')
-    manager.addProgram(temp_offset_program)
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{temp_offset_program.name} calling manager2")
-    manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
-    manager.addProgram(temp_offset_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{temp_offset_program.name} calling manager",
+                                          calling_point: 'BeginNewEnvironment',
+                                          ems_programs: [temp_offset_program])
+
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{temp_offset_program.name} calling manager2",
+                                          calling_point: 'AfterNewEnvironmentWarmUpIsComplete',
+                                          ems_programs: [temp_offset_program])
 
     # actuator
-    coil_speed_act = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_unitary, *EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
-    coil_speed_act.setName("#{air_loop_unitary.name} coil speed level")
+    coil_speed_act = Model.add_ems_actuator(name: "#{air_loop_unitary.name} coil speed level",
+                                            model_object: air_loop_unitary,
+                                            comp_type_and_control: EPlus::EMSActuatorUnitarySystemCoilSpeedLevel)
     if not htg_supp_coil.nil?
       supp_coil_avail_act, global_var_supp_avail = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
     end
 
     # EMS program
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{air_loop_unitary.name} max power ratio program")
+    program = Model.add_ems_program(model,
+                                    name: "#{air_loop_unitary.name} max power ratio program")
     program.addLine('Set clg_mode = 0')
     program.addLine('Set htg_mode = 0')
     program.addLine("If #{load_sensor.name} > 0")
@@ -4157,12 +4213,20 @@ module HVAC
         mode_s = 'If htg_mode > 0'
 
         # Outdoor sensors added to calculate defrost adjustment for heating
-        outdoor_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-        outdoor_db_sensor.setName('outdoor_db')
-        outdoor_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-        outdoor_w_sensor.setName('outdoor_w')
-        outdoor_bp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
-        outdoor_bp_sensor.setName('outdoor_bp')
+        outdoor_db_sensor = Model.add_ems_sensor(model,
+                                                 name: 'outdoor_db',
+                                                 output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                                 key_name: nil)
+
+        outdoor_w_sensor = Model.add_ems_sensor(model,
+                                                name: 'outdoor_w',
+                                                output_var_or_meter_name: 'Site Outdoor Air Humidity Ratio',
+                                                key_name: nil)
+
+        outdoor_bp_sensor = Model.add_ems_sensor(model,
+                                                 name: 'outdoor_bp',
+                                                 output_var_or_meter_name: 'Site Outdoor Air Barometric Pressure',
+                                                 key_name: nil)
 
         # Calculate capacity and eirs for later use of full-load power calculations at each stage
         # Equations from E+ source code
@@ -4187,12 +4251,15 @@ module HVAC
         mode_s = 'If clg_mode > 0'
 
         # cooling coil cooling rate sensors to calculate real time SHR
-        clg_tot_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Rate')
-        clg_tot_sensor.setName("#{coil.name} total cooling rate")
-        clg_tot_sensor.setKeyName(coil.name.to_s)
-        clg_sens_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Sensible Cooling Rate')
-        clg_sens_sensor.setName("#{coil.name} sens cooling rate")
-        clg_sens_sensor.setKeyName(coil.name.to_s)
+        clg_tot_sensor = Model.add_ems_sensor(model,
+                                              name: "#{coil.name} total cooling rate",
+                                              output_var_or_meter_name: 'Cooling Coil Total Cooling Rate',
+                                              key_name: coil.name)
+
+        clg_sens_sensor = Model.add_ems_sensor(model,
+                                               name: "#{coil.name} sens cooling rate",
+                                               output_var_or_meter_name: 'Cooling Coil Sensible Cooling Rate',
+                                               key_name: coil.name)
 
         program.addLine('If clg_mode > 0')
         program.addLine("  If #{clg_tot_sensor.name} > 0")
@@ -4204,26 +4271,30 @@ module HVAC
       end
       # Heating and cooling performance curve sensors that need to be added
       coil.stages.each_with_index do |stage, i|
-        stage_cap_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_cap_fff_sensor.setName("#{coil.name} cap stage #{i} fff")
-        stage_cap_fff_sensor.setKeyName(stage.send(cap_fff_curve_name).name.to_s)
-        coil_cap_stage_fff_sensors << stage_cap_fff_sensor
-        stage_cap_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_cap_ft_sensor.setName("#{coil.name} cap stage #{i} ft")
-        stage_cap_ft_sensor.setKeyName(stage.send(cap_ft_curve_name).name.to_s)
-        coil_cap_stage_ft_sensors << stage_cap_ft_sensor
-        stage_eir_fff_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_eir_fff_sensor.setName("#{coil.name} eir stage #{i} fff")
-        stage_eir_fff_sensor.setKeyName(stage.energyInputRatioFunctionofFlowFractionCurve.name.to_s)
-        coil_eir_stage_fff_sensors << stage_eir_fff_sensor
-        stage_eir_ft_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_eir_ft_sensor.setName("#{coil.name} eir stage #{i} ft")
-        stage_eir_ft_sensor.setKeyName(stage.energyInputRatioFunctionofTemperatureCurve.name.to_s)
-        coil_eir_stage_ft_sensors << stage_eir_ft_sensor
-        stage_eir_plf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Output Value')
-        stage_eir_plf_sensor.setName("#{coil.name} eir stage #{i} fplr")
-        stage_eir_plf_sensor.setKeyName(stage.partLoadFractionCorrelationCurve.name.to_s)
-        coil_eir_stage_plf_sensors << stage_eir_plf_sensor
+        coil_cap_stage_fff_sensors << Model.add_ems_sensor(model,
+                                                           name: "#{coil.name} cap stage #{i} fff",
+                                                           output_var_or_meter_name: 'Performance Curve Output Value',
+                                                           key_name: stage.send(cap_fff_curve_name).name)
+
+        coil_cap_stage_ft_sensors << Model.add_ems_sensor(model,
+                                                          name: "#{coil.name} cap stage #{i} ft",
+                                                          output_var_or_meter_name: 'Performance Curve Output Value',
+                                                          key_name: stage.send(cap_ft_curve_name).name)
+
+        coil_eir_stage_fff_sensors << Model.add_ems_sensor(model,
+                                                           name: "#{coil.name} eir stage #{i} fff",
+                                                           output_var_or_meter_name: 'Performance Curve Output Value',
+                                                           key_name: stage.energyInputRatioFunctionofFlowFractionCurve.name)
+
+        coil_eir_stage_ft_sensors << Model.add_ems_sensor(model,
+                                                          name: "#{coil.name} eir stage #{i} ft",
+                                                          output_var_or_meter_name: 'Performance Curve Output Value',
+                                                          key_name: stage.energyInputRatioFunctionofTemperatureCurve.name)
+
+        coil_eir_stage_plf_sensors << Model.add_ems_sensor(model,
+                                                           name: "#{coil.name} eir stage #{i} fplr",
+                                                           output_var_or_meter_name: 'Performance Curve Output Value',
+                                                           key_name: stage.partLoadFractionCorrelationCurve.name)
       end
       # Calculate the target speed ratio that operates at the target power output
       program.addLine(mode_s)
@@ -4295,10 +4366,10 @@ module HVAC
     program.addLine('EndIf')
 
     # calling manager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName(program.name.to_s + ' calling manager')
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{program.name} calling manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [program])
   end
 
   # Apply time-based realistic staging EMS program for integrated multi-stage backup system.
@@ -4319,48 +4390,58 @@ module HVAC
     ddb = model.getThermostatSetpointDualSetpoints[0].temperatureDifferenceBetweenCutoutAndSetpoint
 
     # Sensors
-    living_temp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    living_temp_ss.setName('living temp')
-    living_temp_ss.setKeyName(control_zone.name.get)
+    living_temp_ss = Model.add_ems_sensor(model,
+                                          name: 'living temp',
+                                          output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                          key_name: control_zone.name)
 
-    htg_sp_ss = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
-    htg_sp_ss.setName('htg_setpoint')
-    htg_sp_ss.setKeyName(control_zone.name.get)
+    htg_sp_ss = Model.add_ems_sensor(model,
+                                     name: 'htg_setpoint',
+                                     output_var_or_meter_name: 'Zone Thermostat Heating Setpoint Temperature',
+                                     key_name: control_zone.name)
 
-    backup_coil_htg_rate = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Heating Rate')
-    backup_coil_htg_rate.setName('supp coil heating rate')
-    backup_coil_htg_rate.setKeyName(htg_supp_coil.name.get)
+    backup_coil_htg_rate = Model.add_ems_sensor(model,
+                                                name: 'supp coil heating rate',
+                                                output_var_or_meter_name: 'Heating Coil Heating Rate',
+                                                key_name: htg_supp_coil.name)
 
     # Need to use availability actuator because there's a bug in E+ that didn't handle the speed level = 0 correctly.See: https://github.com/NREL/EnergyPlus/pull/9392#discussion_r1578624175
     supp_coil_avail_act, global_var_supp_avail = get_supp_coil_avail_sch_actuator(model, htg_supp_coil)
 
-    # Trend variable
-    zone_temp_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, living_temp_ss)
-    zone_temp_trend.setName("#{living_temp_ss.name} Trend")
-    zone_temp_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
-    setpoint_temp_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, htg_sp_ss)
-    setpoint_temp_trend.setName("#{htg_sp_ss.name} Trend")
-    setpoint_temp_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
-    backup_coil_htg_rate_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, backup_coil_htg_rate)
-    backup_coil_htg_rate_trend.setName("#{backup_coil_htg_rate.name} Trend")
-    backup_coil_htg_rate_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+    # Trend variables
+    zone_temp_trend = Model.add_ems_trend_var(model,
+                                              ems_object: living_temp_ss,
+                                              num_timesteps_logged: number_of_timestep_logged)
+
+    setpoint_temp_trend = Model.add_ems_trend_var(model,
+                                                  ems_object: htg_sp_ss,
+                                                  num_timesteps_logged: number_of_timestep_logged)
+
+    backup_coil_htg_rate_trend = Model.add_ems_trend_var(model,
+                                                         ems_object: backup_coil_htg_rate,
+                                                         num_timesteps_logged: number_of_timestep_logged)
+
     if max_htg_coil_stage > 1
-      unitary_var = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System DX Coil Speed Level')
-      unitary_var.setName(unitary_system.name.get + ' speed level')
-      unitary_var.setKeyName(unitary_system.name.get)
-      unitary_speed_var_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, unitary_var)
-      unitary_speed_var_trend.setName("#{unitary_var.name} Trend")
-      unitary_speed_var_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
+      unitary_var = Model.add_ems_sensor(model,
+                                         name: "#{unitary_system.name} speed level",
+                                         output_var_or_meter_name: 'Unitary System DX Coil Speed Level',
+                                         key_name: unitary_system.name)
+
+      unitary_speed_var_trend = Model.add_ems_trend_var(model,
+                                                        ems_object: unitary_var,
+                                                        num_timesteps_logged: number_of_timestep_logged)
     end
 
     # Actuators
-    supp_stage_act = OpenStudio::Model::EnergyManagementSystemActuator.new(unitary_system, 'Coil Speed Control', 'Unitary System Supplemental Coil Stage Level')
-    supp_stage_act.setName(unitary_system.name.get + ' backup stage level')
+    supp_stage_act = Model.add_ems_actuator(name: "#{unitary_system.name} backup stage level",
+                                            model_object: unitary_system,
+                                            comp_type_and_control: EPlus::EMSActuatorUnitarySystemSuppCoilSpeedLevel)
 
-    # staging Program
-    supp_staging_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    # Staging Program
+    supp_staging_program = Model.add_ems_program(model,
+                                                 name: "#{unitary_system.name} backup staging")
+
     # Check values within min/max limits
-    supp_staging_program.setName("#{unitary_system.name.get} backup staging")
 
     s_trend = []
     (1..number_of_timestep_logged).each do |t_i|
@@ -4415,11 +4496,12 @@ module HVAC
     end
     supp_staging_program.addLine('  EndIf')
     supp_staging_program.addLine('EndIf')
+
     # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{supp_staging_program.name} Program Manager")
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(supp_staging_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{supp_staging_program.name} Program Manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [supp_staging_program])
   end
 
   # TODO
@@ -4661,32 +4743,36 @@ module HVAC
       max_heating_temp = heating_system.primary_heat_pump.additional_properties.supp_max_temp
 
       # Sensor
-      tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-      tout_db_sensor.setKeyName('Environment')
+      tout_db_sensor = Model.add_ems_sensor(model,
+                                            name: 'tout db',
+                                            output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                            key_name: 'Environment')
 
       # Actuator
       if heating_sch.is_a? OpenStudio::Model::ScheduleConstant
-        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(heating_sch, *EPlus::EMSActuatorScheduleConstantValue)
+        comp_type_and_control = EPlus::EMSActuatorScheduleConstantValue
       elsif heating_sch.is_a? OpenStudio::Model::ScheduleRuleset
-        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(heating_sch, *EPlus::EMSActuatorScheduleYearValue)
+        comp_type_and_control = EPlus::EMSActuatorScheduleYearValue
       else
         fail "Unexpected heating schedule type: #{heating_sch.class}."
       end
-      actuator.setName("#{heating_sch.name.to_s.gsub(' ', '_')}_act")
+      actuator = Model.add_ems_actuator(name: "#{heating_sch.name} act",
+                                        model_object: heating_sch,
+                                        comp_type_and_control: comp_type_and_control)
 
       # Program
-      temp_override_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      temp_override_program.setName("#{heating_sch.name} program")
+      temp_override_program = Model.add_ems_program(model,
+                                                    name: "#{heating_sch.name} program")
       temp_override_program.addLine("If #{tout_db_sensor.name} > #{UnitConversions.convert(max_heating_temp, 'F', 'C')}")
       temp_override_program.addLine("  Set #{actuator.name} = 0")
       temp_override_program.addLine('Else')
       temp_override_program.addLine("  Set #{actuator.name} = NULL") # Allow normal operation
       temp_override_program.addLine('EndIf')
 
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName("#{heating_sch.name} program manager")
-      program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-      program_calling_manager.addProgram(temp_override_program)
+      Model.add_ems_program_calling_manager(model,
+                                            name: "#{heating_sch.name} program manager",
+                                            calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                            ems_programs: [temp_override_program])
     end
   end
 
@@ -4855,16 +4941,22 @@ module HVAC
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.totalCoolingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
         eir_pow_fff_curves = [clg_or_htg_coil.coolingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+
         # variables are the same for eir and cap curve
-        var1_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-        var1_sensor.setName('Cool Cap Curve Var 1')
-        var1_sensor.setKeyName(cap_fff_curves[0].name.to_s)
-        var2_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 2 Value')
-        var2_sensor.setName('Cool Cap Curve Var 2')
-        var2_sensor.setKeyName(cap_fff_curves[0].name.to_s)
-        var4_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 4 Value')
-        var4_sensor.setName('Cool Cap Curve Var 4')
-        var4_sensor.setKeyName(cap_fff_curves[0].name.to_s)
+        var1_sensor = Model.add_ems_sensor(model,
+                                           name: 'Cool Cap Curve Var 1',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 1 Value',
+                                           key_name: cap_fff_curves[0].name)
+
+        var2_sensor = Model.add_ems_sensor(model,
+                                           name: 'Cool Cap Curve Var 2',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 2 Value',
+                                           key_name: cap_fff_curves[0].name)
+
+        var4_sensor = Model.add_ems_sensor(model,
+                                           name: 'Cool Cap Curve Var 4',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 4 Value',
+                                           key_name: cap_fff_curves[0].name)
       else
         fail 'cooling coil not supported'
       end
@@ -4886,16 +4978,22 @@ module HVAC
         num_speeds = 1
         cap_fff_curves = [clg_or_htg_coil.heatingCapacityCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
         eir_pow_fff_curves = [clg_or_htg_coil.heatingPowerConsumptionCurve.to_CurveQuadLinear.get] # quadlinear curve, only forth term is for airflow
+
         # variables are the same for eir and cap curve
-        var1_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
-        var1_sensor.setName('Heat Cap Curve Var 1')
-        var1_sensor.setKeyName(cap_fff_curves[0].name.to_s)
-        var2_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 2 Value')
-        var2_sensor.setName('Heat Cap Curve Var 2')
-        var2_sensor.setKeyName(cap_fff_curves[0].name.to_s)
-        var4_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 4 Value')
-        var4_sensor.setName('Heat Cap Curve Var 4')
-        var4_sensor.setKeyName(cap_fff_curves[0].name.to_s)
+        var1_sensor = Model.add_ems_sensor(model,
+                                           name: 'Heat Cap Curve Var 1',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 1 Value',
+                                           key_name: cap_fff_curves[0].name)
+
+        var2_sensor = Model.add_ems_sensor(model,
+                                           name: 'Heat Cap Curve Var 2',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 2 Value',
+                                           key_name: cap_fff_curves[0].name)
+
+        var4_sensor = Model.add_ems_sensor(model,
+                                           name: 'Heat Cap Curve Var 4',
+                                           output_var_or_meter_name: 'Performance Curve Input Variable 4 Value',
+                                           key_name: cap_fff_curves[0].name)
       else
         fail 'heating coil not supported'
       end
@@ -4947,12 +5045,14 @@ module HVAC
 
     for speed in 0..(num_speeds - 1)
       cap_fff_curve = cap_fff_curves[speed]
-      cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, *EPlus::EMSActuatorCurveResult)
-      cap_fff_act.setName("#{obj_name} cap act #{suffix}")
+      cap_fff_act = Model.add_ems_actuator(name: "#{obj_name} cap act #{suffix}",
+                                           model_object: cap_fff_curve,
+                                           comp_type_and_control: EPlus::EMSActuatorCurveResult)
 
       eir_pow_fff_curve = eir_pow_fff_curves[speed]
-      eir_pow_act = OpenStudio::Model::EnergyManagementSystemActuator.new(eir_pow_fff_curve, *EPlus::EMSActuatorCurveResult)
-      eir_pow_act.setName("#{obj_name} eir pow act #{suffix}")
+      eir_pow_act = Model.add_ems_actuator(name: "#{obj_name} eir pow act #{suffix}",
+                                           model_object: eir_pow_fff_curve,
+                                           comp_type_and_control: EPlus::EMSActuatorCurveResult)
 
       fault_program.addLine("Set FF_AF_#{suffix} = 1.0 + (#{airflow_rated_defect_ratio[speed].round(3)})")
       fault_program.addLine("Set q_AF_CH_#{suffix} = (a1_AF_Qgr_#{suffix}) + ((a2_AF_Qgr_#{suffix})*FF_CH) + ((a3_AF_Qgr_#{suffix})*FF_CH*FF_CH)")
@@ -5056,16 +5156,18 @@ module HVAC
 
     obj_name = "#{unitary_system.name} IQ"
 
-    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    tin_sensor.setName("#{obj_name} tin s")
-    tin_sensor.setKeyName(control_zone.name.to_s)
+    tin_sensor = Model.add_ems_sensor(model,
+                                      name: "#{obj_name} tin s",
+                                      output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                      key_name: control_zone.name)
 
-    tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
-    tout_sensor.setName("#{obj_name} tt s")
-    tout_sensor.setKeyName(control_zone.name.to_s)
+    tout_sensor = Model.add_ems_sensor(model,
+                                       name: "#{obj_name} tt s",
+                                       output_var_or_meter_name: 'Zone Outdoor Air Drybulb Temperature',
+                                       key_name: control_zone.name)
 
-    fault_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    fault_program.setName("#{obj_name} program")
+    fault_program = Model.add_ems_program(model,
+                                          name: "#{obj_name} program")
 
     f_chg = charge_defect_ratio.to_f
     fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
@@ -5077,10 +5179,11 @@ module HVAC
     if not heat_airflow_rated_defect_ratio.empty?
       add_install_quality_calculations(fault_program, tin_sensor, tout_sensor, heat_airflow_rated_defect_ratio, htg_coil, model, f_chg, obj_name, :htg, heat_airflow_defect_ratio, htg_ap)
     end
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-    program_calling_manager.addProgram(fault_program)
+
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{obj_name} program manager",
+                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                          ems_programs: [fault_program])
   end
 
   # Calculate delivered cooling load and compressor power during defrost when using
@@ -5179,8 +5282,9 @@ module HVAC
                                                      frac_lost: 0,
                                                      schedule: model.alwaysOnDiscreteSchedule,
                                                      fuel_type: nil)
-    defrost_heat_load_oe_act = OpenStudio::Model::EnergyManagementSystemActuator.new(defrost_heat_load_oe, *EPlus::EMSActuatorOtherEquipmentPower, defrost_heat_load_oe.space.get)
-    defrost_heat_load_oe_act.setName("#{defrost_heat_load_oe.name} act")
+    defrost_heat_load_oe_act = Model.add_ems_actuator(name: "#{defrost_heat_load_oe.name} act",
+                                                      model_object: defrost_heat_load_oe,
+                                                      comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     defrost_supp_heat_energy_oe = Model.add_other_equipment(model,
                                                             name: "#{air_loop_unitary.name} defrost supp heat energy",
@@ -5195,21 +5299,25 @@ module HVAC
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('HPXML_ID', heat_pump.id) # Used by reporting measure
     defrost_supp_heat_energy_oe.additionalProperties.setFeature('IsHeatPumpBackup', true) # Used by reporting measure
 
-    defrost_supp_heat_energy_oe_act = OpenStudio::Model::EnergyManagementSystemActuator.new(defrost_supp_heat_energy_oe, *EPlus::EMSActuatorOtherEquipmentPower, defrost_supp_heat_energy_oe.space.get)
-    defrost_supp_heat_energy_oe_act.setName("#{defrost_supp_heat_energy_oe.name} act")
+    defrost_supp_heat_energy_oe_act = Model.add_ems_actuator(name: "#{defrost_supp_heat_energy_oe.name} act",
+                                                             model_object: defrost_supp_heat_energy_oe,
+                                                             comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
     # Sensors
-    tout_db_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-    tout_db_sensor.setName("#{air_loop_unitary.name} tout s")
-    tout_db_sensor.setKeyName('Environment')
-    htg_coil_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Runtime Fraction')
-    htg_coil_rtf_sensor.setName("#{htg_coil.name} rtf s")
-    htg_coil_rtf_sensor.setKeyName("#{htg_coil.name}")
+    tout_db_sensor = Model.add_ems_sensor(model,
+                                          name: "#{air_loop_unitary.name} tout s",
+                                          output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                          key_name: 'Environment')
+
+    htg_coil_rtf_sensor = Model.add_ems_sensor(model,
+                                               name: "#{htg_coil.name} rtf s",
+                                               output_var_or_meter_name: 'Heating Coil Runtime Fraction',
+                                               key_name: htg_coil.name)
 
     # EMS program
     max_oat_defrost = htg_coil.maximumOutdoorDryBulbTemperatureforDefrostOperation
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{air_loop_unitary.name} defrost program")
+    program = Model.add_ems_program(model,
+                                    name: "#{air_loop_unitary.name} defrost program")
     program.addLine("If #{tout_db_sensor.name} <= #{max_oat_defrost}")
     program.addLine("  Set hp_defrost_time_fraction = #{htg_coil.defrostTimePeriodFraction}")
     program.addLine("  Set supp_design_level = #{supp_sys_power_level}")
@@ -5224,10 +5332,10 @@ module HVAC
     program.addLine("  Set #{defrost_supp_heat_energy_oe_act.name} = 0")
     program.addLine('EndIf')
 
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName(program.name.to_s + 'calling manager')
-    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
-    program_calling_manager.addProgram(program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{program.name} calling manager",
+                                          calling_point: 'InsideHVACSystemIterationLoop',
+                                          ems_programs: [program])
   end
 
   # TODO

@@ -895,32 +895,35 @@ module HotWaterAndAppliances
     if not unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, col_name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
 
-      availability_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      availability_sensor.setName("#{col_name} availability s")
-      availability_sensor.setKeyName(avail_sch.schedule.name.to_s)
+      availability_sensor = Model.add_ems_sensor(model,
+                                                 name: "#{col_name} availability s",
+                                                 output_var_or_meter_name: 'Schedule Value',
+                                                 key_name: avail_sch.schedule.name)
     end
 
     schedule = OpenStudio::Model::ScheduleConstant.new(model)
     schedule.setName(obj_name + ' schedule')
 
     if not loc_space.nil?
-      temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-      temperature_sensor.setName(obj_name + ' tin s')
-      temperature_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
+      temperature_sensor = Model.add_ems_sensor(model,
+                                                name: "#{obj_name} tin s",
+                                                output_var_or_meter_name: 'Zone Mean Air Temperature',
+                                                key_name: loc_space.thermalZone.get.name)
     elsif not loc_schedule.nil?
-      temperature_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      temperature_sensor.setName(obj_name + ' tin s')
-      temperature_sensor.setKeyName(loc_schedule.name.to_s)
+      temperature_sensor = Model.add_ems_sensor(model,
+                                                name: "#{obj_name} tin s",
+                                                output_var_or_meter_name: 'Schedule Value',
+                                                key_name: loc_schedule.name)
     end
 
-    schedule_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(schedule, *EPlus::EMSActuatorScheduleConstantValue)
-    schedule_actuator.setName("#{schedule.name} act")
+    schedule_actuator = Model.add_ems_actuator(name: "#{schedule.name} act",
+                                               model_object: schedule,
+                                               comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     constant_coefficients = fridge_or_freezer.constant_coefficients.split(',').map { |i| i.to_f }
     temperature_coefficients = fridge_or_freezer.temperature_coefficients.split(',').map { |i| i.to_f }
 
-    schedule_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    schedule_program.setName("#{schedule.name} program")
+    schedule_program = Model.add_ems_program(model, name: "#{schedule.name} program")
     schedule_program.addLine("Set Tin = #{temperature_sensor.name}*(9.0/5.0)+32.0") # C to F
     schedule_program.addLine("Set #{schedule_actuator.name} = 0")
     constant_coefficients.zip(temperature_coefficients).each_with_index do |constant_temperature, i|
@@ -936,10 +939,10 @@ module HotWaterAndAppliances
     end
     schedule_program.addLine('EndIf')
 
-    schedule_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    schedule_pcm.setName("#{schedule.name} program calling manager")
-    schedule_pcm.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
-    schedule_pcm.addProgram(schedule_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{schedule.name} program calling manager",
+                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+                                          ems_programs: [schedule_program])
 
     return schedule
   end

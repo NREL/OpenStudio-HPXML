@@ -578,7 +578,7 @@ module Geometry
         garage_attic_space.remove
 
         # remove other unused surfaces
-        # TODO: remove this once geometry methods are fixed in openstudio 3.x
+        # FUTURE: remove this once geometry methods are fixed in openstudio 3.x
         attic_space.surfaces.each do |surface1|
           next if surface1.surfaceType != EPlus::SurfaceTypeRoofCeiling
 

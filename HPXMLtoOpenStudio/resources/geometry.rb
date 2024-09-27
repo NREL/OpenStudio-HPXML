@@ -1813,10 +1813,10 @@ module Geometry
       if spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
         # Create a sensor to get dynamic heating setpoint
         htg_sch = spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-        sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        sensor_htg_spt.setName('htg_spt')
-        sensor_htg_spt.setKeyName(htg_sch.name.to_s)
-        space_values[:temp_min] = sensor_htg_spt.name.to_s
+        space_values[:temp_min] = Model.add_ems_sensor(model,
+                                                       name: 'htg_spt',
+                                                       output_var_or_meter_name: 'Schedule Value',
+                                                       key_name: htg_sch.name)
       else
         # No HVAC system; use the defaulted heating setpoint.
         space_values[:temp_min] = default_htg_sp # F
@@ -1834,29 +1834,35 @@ module Geometry
         # No HVAC system; use the average of defaulted heating/cooling setpoints.
         sensor_ia = UnitConversions.convert((default_htg_sp + default_clg_sp) / 2.0, 'F', 'C')
       else
-        sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-        sensor_ia.setName('cond_zone_temp')
-        sensor_ia.setKeyName(spaces[HPXML::LocationConditionedSpace].thermalZone.get.name.to_s)
+        sensor_ia = Model.add_ems_sensor(model,
+                                         name: 'cond_zone_temp',
+                                         output_var_or_meter_name: 'Zone Air Temperature',
+                                         key_name: spaces[HPXML::LocationConditionedSpace].thermalZone.get.name)
         sensor_ia = sensor_ia.name
       end
     end
 
     if space_values[:outdoor_weight] > 0
-      sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-      sensor_oa.setName('oa_temp')
+      sensor_oa = Model.add_ems_sensor(model,
+                                       name: 'oa_temp',
+                                       output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+                                       key_name: nil)
     end
 
     if space_values[:ground_weight] > 0
-      sensor_gnd = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Surface Ground Temperature')
-      sensor_gnd.setName('ground_temp')
+      sensor_gnd = Model.add_ems_sensor(model,
+                                        name: 'ground_temp',
+                                        output_var_or_meter_name: 'Site Surface Ground Temperature',
+                                        key_name: nil)
     end
 
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, *EPlus::EMSActuatorScheduleConstantValue)
-    actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
+    actuator = Model.add_ems_actuator(name: "#{location} temp sch",
+                                      model_object: sch,
+                                      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
 
     # EMS to actuate schedule
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{location.gsub('-', '_')} Temperature Program")
+    program = Model.add_ems_program(model,
+                                    name: "#{location} Temperature Program")
     program.addLine("Set #{actuator.name} = 0.0")
     if not sensor_ia.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia} * #{space_values[:indoor_weight]})")
@@ -1878,10 +1884,10 @@ module Geometry
       program.addLine('EndIf')
     end
 
-    program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_cm.setName("#{program.name} calling manager")
-    program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
-    program_cm.addProgram(program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: "#{program.name} calling manager",
+                                          calling_point: 'EndOfSystemTimestepAfterHVACReporting',
+                                          ems_programs: [program])
 
     return sch
   end

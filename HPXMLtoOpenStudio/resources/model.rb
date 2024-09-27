@@ -14,7 +14,7 @@ module Model
   # @param flow_rate_schedule [OpenStudio::Model::Schedule] Schedule fraction that applies to the peak flow rate
   # @param water_use_connections [OpenStudio::Model::WaterUseConnections] Grouping of water use equipment objects
   # @param target_temperature_schedule [OpenStudio::Model::Schedule] The target water temperature schedule (F)
-  # @return [OpenStudio::Model::WaterUseEquipment] The newly created model object
+  # @return [OpenStudio::Model::WaterUseEquipment] The model object
   def self.add_water_use_equipment(model, name:, end_use:, peak_flow_rate:, flow_rate_schedule:, water_use_connections:, target_temperature_schedule:)
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
@@ -42,7 +42,7 @@ module Model
   # @param frac_latent [Double] Fraction of energy consumption that is latent heat to the zone
   # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @return [OpenStudio::Model::ElectricEquipment] The newly created model object
+  # @return [OpenStudio::Model::ElectricEquipment] The model object
   def self.add_electric_equipment(model, name:, end_use:, space:, design_level:, frac_radiant:, frac_latent:, frac_lost:, schedule:)
     ee_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     ee = OpenStudio::Model::ElectricEquipment.new(ee_def)
@@ -73,7 +73,7 @@ module Model
   # @param frac_lost [Double] Fraction of energy consumption that is not heat to the zone (for example, vented to the atmosphere)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
   # @param fuel_type [String] Fuel type if the equipment consumes fuel (HPXML::FuelTypeXXX)
-  # @return [OpenStudio::Model::OtherEquipment] The newly created model object
+  # @return [OpenStudio::Model::OtherEquipment] The model object
   def self.add_other_equipment(model, name:, end_use:, space:, design_level:, frac_radiant:, frac_latent:, frac_lost:, schedule:, fuel_type:)
     oe_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     oe = OpenStudio::Model::OtherEquipment.new(oe_def)
@@ -100,7 +100,7 @@ module Model
   # @param space [OpenStudio::Model::Space] The space the object is added to
   # @param design_level [Double] Maximum electrical power input (W)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @return [OpenStudio::Model::Lights] The newly created model object
+  # @return [OpenStudio::Model::Lights] The model object
   def self.add_lights(model, name:, end_use:, space:, design_level:, schedule:)
     ltg_def = OpenStudio::Model::LightsDefinition.new(model)
     ltg = OpenStudio::Model::Lights.new(ltg_def)
@@ -125,7 +125,7 @@ module Model
   # @param end_use [String] Name of the end use subcategory for output processing
   # @param design_level [Double] Maximum electrical power input (W)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @return [OpenStudio::Model::ExteriorLights] The newly created model object
+  # @return [OpenStudio::Model::ExteriorLights] The model object
   def self.add_exterior_lights(model, name:, end_use:, design_level:, schedule:)
     ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
     ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
@@ -135,6 +135,162 @@ module Model
     ltg_def.setDesignLevel(design_level)
     ltg.setSchedule(schedule)
     return ltg
+  end
+
+  # Adds an EnergyManagementSystemSensor to the OpenStudio model.
+  #
+  # The EnergyManagementSystemSensor object gets information during the simulation
+  # that can be used in custom calculations.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param output_var_or_meter_name [String] EnergyPlus Output:Variable or Output:Meter name
+  # @param key_name [OpenStudio::Model::XXX] Model object name or 'Environment' or nil
+  # @return [OpenStudio::Model::EnergyManagementSystemSensor] The model object
+  def self.add_ems_sensor(model, name:, output_var_or_meter_name:, key_name:)
+    key_name = key_name.to_s
+
+    # Check for identical sensor and return it if found
+    model.getEnergyManagementSystemSensors.each do |sensor|
+      next if sensor.outputVariableOrMeterName != output_var_or_meter_name
+      next if sensor.keyName.to_s != key_name
+
+      return sensor
+    end
+
+    sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, output_var_or_meter_name)
+    sensor.setName(name)
+    sensor.setKeyName(key_name) unless key_name.nil?
+    return sensor
+  end
+
+  # Adds an EnergyManagementSystemGlobalVariable to the OpenStudio model.
+  #
+  # The EnergyManagementSystemGlobalVariable object allows an EMS variable to be
+  # global such that it can be used across EMS programs/subroutines.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param var_name [String] Name of the EMS variable
+  # @return [OpenStudio::Model::EnergyManagementSystemGlobalVariable] The model object
+  def self.add_ems_global_var(model, var_name:)
+    return OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, ems_friendly_name(var_name))
+  end
+
+  # Adds an EnergyManagementSystemTrendVariable to the OpenStudio model.
+  #
+  # The EnergyManagementSystemTrendVariable object creates a global EMS variable
+  # that stores the recent history of an EMS variable for use in a calculation.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param ems_object [OpenStudio::Model::EnergyManagementSystemXXX] The EMS object to track
+  # @param num_timesteps_logged [Integer] How much data to be held in the trend variable
+  # @return [OpenStudio::Model::EnergyManagementSystemTrendVariable] The model object
+  def self.add_ems_trend_var(model, ems_object:, num_timesteps_logged:)
+    tvar = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, ems_object)
+    tvar.setName("#{ems_object.name} trend var")
+    tvar.setNumberOfTimestepsToBeLogged(num_timesteps_logged)
+    return tvar
+  end
+
+  # Adds an EnergyManagementSystemInternalVariable to the OpenStudio model.
+  #
+  # The EnergyManagementSystemInternalVariable object is used to obtain static data from
+  # elsewhere in the model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param model_object [OpenStudio::Model::XXX] The OpenStudio model object to get data from
+  # @param type [String] Data type of interest
+  # @return [OpenStudio::Model::EnergyManagementSystemInternalVariable] The model object
+  def self.add_ems_internal_var(model, name:, model_object:, type:)
+    ivar = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, type)
+    ivar.setName(name)
+    ivar.setInternalDataIndexKeyName(model_object.name.to_s)
+    return ivar
+  end
+
+  # Adds an EnergyManagementSystemActuator to the OpenStudio model.
+  #
+  # The EnergyManagementSystemActuator object specifies the properties or controls
+  # of an EnergyPlus object that is to be overridden during the simulation.
+  #
+  # @param name [String] Name for the OpenStudio object
+  # @param model_object [OpenStudio::Model::XXX] The OpenStudio model object to actuate
+  # @param comp_type_and_control [Array<String, String>] The type of component and its control type
+  # @return [OpenStudio::Model::EnergyManagementSystemActuator] The model object
+  def self.add_ems_actuator(name:, model_object:, comp_type_and_control:)
+    if model_object.to_SpaceLoadInstance.is_initialized
+      act = OpenStudio::Model::EnergyManagementSystemActuator.new(model_object, *comp_type_and_control, model_object.space.get)
+    else
+      act = OpenStudio::Model::EnergyManagementSystemActuator.new(model_object, *comp_type_and_control)
+    end
+    act.setName(ems_friendly_name(name))
+    return act
+  end
+
+  # Adds an EnergyManagementSystemProgram to the OpenStudio model.
+  #
+  # The EnergyManagementSystemProgram object allows custom calculations to be
+  # performed within the EnergyPlus simulation in order to override the properties
+  # or controls of an EnergyPlus object.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param lines [Array<String>] The program lines to be executed
+  # @return [OpenStudio::Model::EnergyManagementSystemProgram] The model object
+  def self.add_ems_program(model, name:, lines: nil)
+    prg = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    prg.setName(name)
+    prg.setLines(lines) unless lines.nil?
+    return prg
+  end
+
+  # Adds an EnergyManagementSystemSubroutine to the OpenStudio model.
+  #
+  # The EnergyManagementSystemSubroutine object allows EMS code to be reused
+  # across multiple EMS programs.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param lines [Array<String>] The subroutine lines to be executed
+  # @return [OpenStudio::Model::EnergyManagementSystemSubroutine] The model object
+  def self.add_ems_subroutine(model, name:, lines: nil)
+    sbrt = OpenStudio::Model::EnergyManagementSystemSubroutine.new(model)
+    sbrt.setName(name)
+    sbrt.setLines(lines) unless lines.nil?
+    return sbrt
+  end
+
+  # Adds an EnergyManagementSystemProgramCallingManager to the OpenStudio model.
+  #
+  # The EnergyManagementSystemProgramCallingManager object is used to specify when
+  # an EMS program is run during the simulation.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param calling_point [String] When the EMS program is called
+  # @param ems_programs [Array<OpenStudio::Model::EnergyManagementSystemProgram>] The EMS programs to be managed
+  # @return [OpenStudio::Model::EnergyManagementSystemProgramCallingManager] The model object
+  def self.add_ems_program_calling_manager(model, name:, calling_point:, ems_programs:)
+    pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    pcm.setName(name)
+    pcm.setCallingPoint(calling_point)
+    ems_programs.each do |ems_program|
+      pcm.addProgram(ems_program)
+    end
+    return pcm
+  end
+
+  # Converts existing string to EMS friendly string.
+  #
+  # Source: openstudio-standards
+  #
+  # @param name [String] Original name
+  # @return [String] The resulting EMS friendly string
+  def self.ems_friendly_name(name)
+    # replace white space and special characters with underscore
+    # \W is equivalent to [^a-zA-Z0-9_]
+    return name.to_s.gsub(/\W/, '_')
   end
 
   # Resets the existing model if it already has objects in it.
@@ -250,7 +406,7 @@ module Model
     # @param unit_number [Integer] index number corresponding to an HPXML Building object
     # @return [String] the new OpenStudio object name with unique unit prefix
     def self.make_variable_name(obj_name, unit_number)
-      return "unit#{unit_number + 1}_#{obj_name}".gsub(' ', '_').gsub('-', '_')
+      return ems_friendly_name("unit#{unit_number + 1}_#{obj_name}")
     end
 
     # EMS objects

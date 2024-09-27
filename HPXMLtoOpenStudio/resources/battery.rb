@@ -176,13 +176,15 @@ module Battery
 
     # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
     # Replace this when the first item in https://github.com/NREL/EnergyPlus/issues/9176 is fixed.
-    charge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Charge Energy')
-    charge_sensor.setName('battery_charge')
-    charge_sensor.setKeyName(elcs.name.to_s)
+    charge_sensor = Model.add_ems_sensor(model,
+                                         name: 'battery_charge',
+                                         output_var_or_meter_name: 'Electric Storage Charge Energy',
+                                         key_name: elcs.name)
 
-    discharge_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Storage Discharge Energy')
-    discharge_sensor.setName('battery_discharge')
-    discharge_sensor.setKeyName(elcs.name.to_s)
+    discharge_sensor = Model.add_ems_sensor(model,
+                                            name: 'battery_discharge',
+                                            output_var_or_meter_name: 'Electric Storage Discharge Energy',
+                                            key_name: elcs.name)
 
     loss_adj_object = Model.add_other_equipment(model,
                                                 name: Constants::ObjectTypeBatteryLossesAdjustment,
@@ -196,20 +198,21 @@ module Battery
                                                 fuel_type: HPXML::FuelTypeElectricity)
     loss_adj_object.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryLossesAdjustment)
 
-    battery_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(loss_adj_object, *EPlus::EMSActuatorOtherEquipmentPower, loss_adj_object.space.get)
-    battery_adj_actuator.setName('battery loss_adj_act')
+    battery_adj_actuator = Model.add_ems_actuator(name: 'battery loss adj act',
+                                                  model_object: loss_adj_object,
+                                                  comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
 
-    battery_losses_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    battery_losses_program.setName('battery_losses')
+    battery_losses_program = Model.add_ems_program(model,
+                                                   name: 'battery losses')
     battery_losses_program.addLine("Set charge_losses = (-1 * #{charge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))) / #{unit_multiplier}")
     battery_losses_program.addLine("Set discharge_losses = (-1 * #{discharge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))) / #{unit_multiplier}")
     battery_losses_program.addLine('Set losses = charge_losses + discharge_losses')
     battery_losses_program.addLine("Set #{battery_adj_actuator.name} = -1 * losses / ( 3600 * SystemTimeStep )")
 
-    battery_losses_pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    battery_losses_pcm.setName('battery_losses')
-    battery_losses_pcm.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-    battery_losses_pcm.addProgram(battery_losses_program)
+    Model.add_ems_program_calling_manager(model,
+                                          name: 'battery losses calling manager',
+                                          calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+                                          ems_programs: [battery_losses_program])
 
     elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('HPXML_ID', battery.id)

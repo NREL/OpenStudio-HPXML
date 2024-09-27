@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>cfe51e5b-0186-4ddf-8e76-72a91fe55d4e</version_id>
-  <version_modified>2024-09-27T03:58:17Z</version_modified>
+  <version_id>8f3f2f10-fdc0-4db5-89ed-002df7984e4d</version_id>
+  <version_modified>2024-09-27T18:06:55Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -189,13 +189,13 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>75466EF1</checksum>
+      <checksum>0DA952E6</checksum>
     </file>
     <file>
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>16BC6859</checksum>
+      <checksum>52428557</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -327,7 +327,7 @@
       <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>102BE9DA</checksum>
+      <checksum>D268F72E</checksum>
     </file>
     <file>
       <filename>generator.rb</filename>
@@ -339,13 +339,13 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>06644542</checksum>
+      <checksum>1C25AF67</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A3226A9A</checksum>
+      <checksum>52627170</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DEE68AC1</checksum>
+      <checksum>B08E9BCA</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -447,13 +447,13 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>21A66158</checksum>
+      <checksum>0A2D2293</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>94DB6377</checksum>
+      <checksum>5F3C2222</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -627,7 +627,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FD2B6E78</checksum>
+      <checksum>505E0A1F</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -759,7 +759,7 @@
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>71ED3EE3</checksum>
+      <checksum>D320CA51</checksum>
     </file>
   </files>
 </measure>
