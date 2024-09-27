@@ -1,164 +1,11 @@
 # frozen_string_literal: true
 
-# TODO
-module TE
-  # Total Energy
-  Total = 'Total'
-  Net = 'Net'
-end
-
-# TODO
-module FT
-  # Fuel Types
-  Elec = 'Electricity'
-  Gas = 'Natural Gas'
-  Oil = 'Fuel Oil'
-  Propane = 'Propane'
-  WoodCord = 'Wood Cord'
-  WoodPellets = 'Wood Pellets'
-  Coal = 'Coal'
-end
-
-# TODO
-module EUT
-  # End Use Types
-  Heating = 'Heating'
-  HeatingFanPump = 'Heating Fans/Pumps'
-  HeatingHeatPumpBackup = 'Heating Heat Pump Backup'
-  HeatingHeatPumpBackupFanPump = 'Heating Heat Pump Backup Fans/Pumps'
-  Cooling = 'Cooling'
-  CoolingFanPump = 'Cooling Fans/Pumps'
-  HotWater = 'Hot Water'
-  HotWaterRecircPump = 'Hot Water Recirc Pump'
-  HotWaterSolarThermalPump = 'Hot Water Solar Thermal Pump'
-  LightsInterior = 'Lighting Interior'
-  LightsGarage = 'Lighting Garage'
-  LightsExterior = 'Lighting Exterior'
-  MechVent = 'Mech Vent'
-  MechVentPreheat = 'Mech Vent Preheating'
-  MechVentPrecool = 'Mech Vent Precooling'
-  WholeHouseFan = 'Whole House Fan'
-  Refrigerator = 'Refrigerator'
-  Freezer = 'Freezer'
-  Dehumidifier = 'Dehumidifier'
-  Dishwasher = 'Dishwasher'
-  ClothesWasher = 'Clothes Washer'
-  ClothesDryer = 'Clothes Dryer'
-  RangeOven = 'Range/Oven'
-  CeilingFan = 'Ceiling Fan'
-  Television = 'Television'
-  PlugLoads = 'Plug Loads'
-  Vehicle = 'Electric Vehicle Charging'
-  WellPump = 'Well Pump'
-  PoolHeater = 'Pool Heater'
-  PoolPump = 'Pool Pump'
-  PermanentSpaHeater = 'Permanent Spa Heater'
-  PermanentSpaPump = 'Permanent Spa Pump'
-  Grill = 'Grill'
-  Lighting = 'Lighting'
-  Fireplace = 'Fireplace'
-  PV = 'PV'
-  Generator = 'Generator'
-  Battery = 'Battery'
-end
-
-# TODO
-module HWT
-  # Hot Water Types
-  ClothesWasher = 'Clothes Washer'
-  Dishwasher = 'Dishwasher'
-  Fixtures = 'Fixtures'
-  DistributionWaste = 'Distribution Waste'
-end
-
-# TODO
-module LT
-  # Load Types
-  Heating = 'Heating: Delivered'
-  HeatingHeatPumpBackup = 'Heating: Heat Pump Backup' # Needed for ERI calculation for dual-fuel heat pumps
-  Cooling = 'Cooling: Delivered'
-  HotWaterDelivered = 'Hot Water: Delivered'
-  HotWaterTankLosses = 'Hot Water: Tank Losses'
-  HotWaterDesuperheater = 'Hot Water: Desuperheater'
-  HotWaterSolarThermal = 'Hot Water: Solar Thermal'
-end
-
-# TODO
-module CLT
-  # Component Load Types
-  Roofs = 'Roofs'
-  Ceilings = 'Ceilings'
-  Walls = 'Walls'
-  RimJoists = 'Rim Joists'
-  FoundationWalls = 'Foundation Walls'
-  Doors = 'Doors'
-  WindowsConduction = 'Windows Conduction'
-  WindowsSolar = 'Windows Solar'
-  SkylightsConduction = 'Skylights Conduction'
-  SkylightsSolar = 'Skylights Solar'
-  Floors = 'Floors'
-  Slabs = 'Slabs'
-  InternalMass = 'Internal Mass'
-  Infiltration = 'Infiltration'
-  NaturalVentilation = 'Natural Ventilation'
-  MechanicalVentilation = 'Mechanical Ventilation'
-  WholeHouseFan = 'Whole House Fan'
-  Ducts = 'Ducts'
-  InternalGains = 'Internal Gains'
-  Lighting = 'Lighting'
-end
-
-# TODO
-module UHT
-  # Unmet Hours Types
-  Heating = 'Heating'
-  Cooling = 'Cooling'
-end
-
-# TODO
-module RT
-  # Resilience Types
-  Battery = 'Battery'
-end
-
-# TODO
-module PLT
-  # Peak Load Types
-  Heating = 'Heating: Delivered'
-  Cooling = 'Cooling: Delivered'
-end
-
-# TODO
-module PFT
-  # Peak Fuel Types
-  Summer = 'Summer'
-  Winter = 'Winter'
-  Annual = 'Annual'
-end
-
-# TODO
-module AFT
-  # Airflow Types
-  Infiltration = 'Infiltration'
-  MechanicalVentilation = 'Mechanical Ventilation'
-  NaturalVentilation = 'Natural Ventilation'
-  WholeHouseFan = 'Whole House Fan'
-end
-
-# TODO
-module WT
-  # Weather Types
-  DrybulbTemp = 'Drybulb Temperature'
-  WetbulbTemp = 'Wetbulb Temperature'
-  RelativeHumidity = 'Relative Humidity'
-  WindSpeed = 'Wind Speed'
-  DiffuseSolar = 'Diffuse Solar Radiation'
-  DirectSolar = 'Direct Solar Radiation'
-end
-
-# TODO
+# Collection of methods related to output reporting or writing output files.
 module Outputs
-  # TODO
+  # Add EMS programs for output reporting. In the case where a whole SFA/MF building is
+  # being simulated, these programs are added to the whole building (merged) model, not
+  # the individual dwelling unit models.
+  #
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
@@ -174,14 +21,17 @@ module Outputs
     Outputs.apply_total_airflows_ems_program(model, hpxml_osm_map)
   end
 
-  # We do our own unmet hours calculation via EMS so that we can incorporate,
+  # Creates an EMS program that calculates heating and cooling unmet hours (number
+  # of hours where the heating or cooling setpoint is not maintained).
+  #
+  # Note: We do our own unmet hours calculation via EMS so that we can incorporate,
   # e.g., heating/cooling seasons into the logic. The calculation layers on top
   # of the built-in EnergyPlus unmet hours output.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @return [Hash] TODO
+  # @return [Hash] Mapping of unit index => heating/cooling season begin and end dates for use by subsequent programs
   def self.apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
     # Create sensors and gather data
     htg_sensors, clg_sensors = {}, {}
@@ -304,12 +154,13 @@ module Outputs
     return season_day_nums
   end
 
-  # TODO
+  # Creates an EMS program that calculates total heating and cooling loads delivered
+  # by the HVAC system(s).
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
-  # @return [TODO] TODO
+  # @return [Array] Misc collection of things for use in the component loads EMS program
   def self.apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
     # Create sensors and gather data
     htg_cond_load_sensors, clg_cond_load_sensors = {}, {}
@@ -432,15 +283,17 @@ module Outputs
                                           calling_point: 'EndOfZoneTimestepAfterZoneReporting',
                                           ems_programs: [program])
 
-    return htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors
+    loads_data = [htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors]
+    return loads_data
   end
 
-  # TODO
+  # Creates an EMS program that calculates component heating and cooling loads (e.g., loads
+  # attributes to walls, windows, infiltration, ducts, internal gains, etc.).
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
-  # @param loads_data [TODO] TODO
-  # @param season_day_nums [TODO] TODO
+  # @param loads_data [Array] Misc collection of things from the total loads EMS program
+  # @param season_day_nums [Hash] Mapping of unit index => heating/cooling season begin and end dates
   # @return [nil]
   def self.apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
     htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors = loads_data
@@ -973,7 +826,7 @@ module Outputs
   # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @param hpxml_path [String] Path to the HPXML file
   # @param building_id [String] HPXML Building ID
-  # @param hpxml_defaults_path [TODO] TODO
+  # @param hpxml_defaults_path [String] Path to the HPXML defaults (in.xml) file
   # @return [nil]
   def self.apply_additional_properties(model, hpxml, hpxml_osm_map, hpxml_path, building_id, hpxml_defaults_path)
     additionalProperties = model.getBuilding.additionalProperties
@@ -994,7 +847,10 @@ module Outputs
     additionalProperties.setFeature('is_southern_hemisphere', hpxml_osm_map.keys[0].latitude < 0)
   end
 
-  # TODO
+  # Requests very detailed EMS output files to help debug EMS programs line-by-line.
+  #
+  # Note: The call to this method is commented out by default as this is slow and produces
+  # huge output files. It should only be enabled temporarily for debugging purposes.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @return [nil]
@@ -1005,7 +861,7 @@ module Outputs
     oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  # TODO
+  # Writes OSM & EPW files to the output directory when in debug mode.
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
@@ -1026,10 +882,11 @@ module Outputs
     FileUtils.cp(epw_path, epw_output_path)
   end
 
-  # TODO
+  # Calculates total HVAC capacities (across all HVAC systems) for a given HPXML Building.
+  # These capacities will be reported in the annual output file.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double, Double, Double>] Total heating capacity, total cooling capacity, total heat pump backup capacity (Btu/hr)
   def self.get_total_hvac_capacities(hpxml_bldg)
     htg_cap, clg_cap, hp_backup_cap = 0.0, 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -1056,10 +913,10 @@ module Outputs
     return htg_cap, clg_cap, hp_backup_cap
   end
 
-  # TODO
+  # Calculates total HVAC airflow rates (across all HVAC systems) for a given HPXML Building.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
+  # @return [Array<Double, Double>] Total heating airflow rate, total cooling airflow rate (cfm)
   def self.get_total_hvac_airflows(hpxml_bldg)
     htg_cfm, clg_cfm = 0.0, 0.0
     unit_multiplier = hpxml_bldg.building_construction.number_of_units
@@ -1079,11 +936,11 @@ module Outputs
     return htg_cfm, clg_cfm
   end
 
-  # TODO
+  # Appends HVAC sizing results to the provided array for use in writing output files.
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @param results_out [TODO] TODO
-  # @return [TODO] TODO
+  # @param results_out [Array] Rows of output data
+  # @return [Array>] Rows of output data, with HVAC sizing results appended
   def self.append_sizing_results(hpxml_bldgs, results_out)
     line_break = nil
 
@@ -1218,13 +1075,13 @@ module Outputs
     return results_out
   end
 
-  # TODO
+  # Writes an output file for the given rows of output data.
   #
-  # @param results_out [TODO] TODO
-  # @param output_format [TODO] TODO
-  # @param output_file_path [TODO] TODO
-  # @param mode [TODO] TODO
-  # @return [TODO] TODO
+  # @param results_out [Array] Rows of output data
+  # @param output_format [String] Type of output file (csv, json, or msgpack)
+  # @param output_file_path [String] Path for the output file
+  # @param mode [String] File opening mode (e.g., write or append)
+  # @return [nil]
   def self.write_results_out_to_file(results_out, output_format, output_file_path, mode = 'w')
     line_break = nil
     if ['csv'].include? output_format

@@ -152,7 +152,7 @@ module Model
 
     # Check for identical sensor and return it if found
     # TODO: Does this make the simulations any faster? If not, we should remove
-    # this because it can make EMS programs a bit more confusing if, e.g., 
+    # this because it can make EMS programs a bit more confusing if, e.g.,
     # a refrigerator program is referencing a duct sensor or vice versa.
     model.getEnergyManagementSystemSensors.each do |sensor|
       next if sensor.outputVariableOrMeterName != output_var_or_meter_name

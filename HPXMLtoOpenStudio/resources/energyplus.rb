@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# FUTURE: Delete this file and move code into model.rb
+# FUTURE: Delete this file and move code into model.rb and constants.rb
 
 # Collection of methods related to the EnergyPlus simulation.
 module EPlus
