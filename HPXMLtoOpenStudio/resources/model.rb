@@ -159,7 +159,7 @@ module Model
     end
 
     sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, output_var_or_meter_name)
-    sensor.setName(name)
+    sensor.setName(ems_friendly_name(name))
     sensor.setKeyName(key_name) unless key_name.nil?
     return sensor
   end
@@ -187,7 +187,7 @@ module Model
   # @return [OpenStudio::Model::EnergyManagementSystemTrendVariable] The model object
   def self.add_ems_trend_var(model, ems_object:, num_timesteps_logged:)
     tvar = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, ems_object)
-    tvar.setName("#{ems_object.name} trend var")
+    tvar.setName(ems_friendly_name("#{ems_object.name} trend var"))
     tvar.setNumberOfTimestepsToBeLogged(num_timesteps_logged)
     return tvar
   end
@@ -204,7 +204,7 @@ module Model
   # @return [OpenStudio::Model::EnergyManagementSystemInternalVariable] The model object
   def self.add_ems_internal_var(model, name:, model_object:, type:)
     ivar = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, type)
-    ivar.setName(name)
+    ivar.setName(ems_friendly_name(name))
     ivar.setInternalDataIndexKeyName(model_object.name.to_s)
     return ivar
   end
@@ -240,7 +240,7 @@ module Model
   # @return [OpenStudio::Model::EnergyManagementSystemProgram] The model object
   def self.add_ems_program(model, name:, lines: nil)
     prg = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    prg.setName(name)
+    prg.setName(ems_friendly_name(name))
     prg.setLines(lines) unless lines.nil?
     return prg
   end
@@ -256,7 +256,7 @@ module Model
   # @return [OpenStudio::Model::EnergyManagementSystemSubroutine] The model object
   def self.add_ems_subroutine(model, name:, lines: nil)
     sbrt = OpenStudio::Model::EnergyManagementSystemSubroutine.new(model)
-    sbrt.setName(name)
+    sbrt.setName(ems_friendly_name(name))
     sbrt.setLines(lines) unless lines.nil?
     return sbrt
   end
@@ -273,7 +273,7 @@ module Model
   # @return [OpenStudio::Model::EnergyManagementSystemProgramCallingManager] The model object
   def self.add_ems_program_calling_manager(model, name:, calling_point:, ems_programs:)
     pcm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    pcm.setName(name)
+    pcm.setName(ems_friendly_name(name))
     pcm.setCallingPoint(calling_point)
     ems_programs.each do |ems_program|
       pcm.addProgram(ems_program)
