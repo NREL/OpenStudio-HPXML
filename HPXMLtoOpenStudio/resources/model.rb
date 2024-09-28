@@ -366,7 +366,8 @@ module Model
     pump.setRatedPowerConsumption(rated_power)
     pump.setRatedPumpHead(20000)
     pump_eff = 0.75 # Overall efficiency of the pump
-    pump.setRatedFlowRate([pump_eff * rated_power / pump.ratedPumpHead, 0.0001].max)
+    flow_rate = pump_eff * rated_power / pump.ratedPumpHead
+    pump.setRatedFlowRate([flow_rate, 0.00001].max)
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
