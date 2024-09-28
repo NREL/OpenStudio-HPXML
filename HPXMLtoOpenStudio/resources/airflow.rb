@@ -1047,21 +1047,21 @@ module Airflow
       if duct_location.is_a? OpenStudio::Model::ThermalZone
         dz_t_sensor = Model.add_ems_sensor(
           model,
-          name: 'dz_temp',
+          name: "#{dz_t_var.name} s",
           output_var_or_meter_name: 'Zone Air Temperature',
           key_name: duct_location.name
         )
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant
         dz_t_sensor = Model.add_ems_sensor(
           model,
-          name: 'dz_temp',
+          name: "#{dz_t_var.name} s",
           output_var_or_meter_name: 'Schedule Value',
           key_name: duct_location.name
         )
       elsif duct_location.nil? # Outside
         dz_t_sensor = Model.add_ems_sensor(
           model,
-          name: 'dz_temp',
+          name: "#{dz_t_var.name} s",
           output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
           key_name: 'Environment'
         )
