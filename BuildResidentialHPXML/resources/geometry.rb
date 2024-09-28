@@ -230,7 +230,7 @@ module Geometry
       assign_indexes(model: model, footprint_polygon: conditioned_polygon, space: conditioned_space)
 
       if floor > 0
-        conditioned_space_name = "#{HPXML::LocationConditionedSpace}|story #{floor + 1}"
+        conditioned_space_name = "#{HPXML::LocationConditionedSpace} story #{floor + 1}"
       else
         conditioned_space_name = HPXML::LocationConditionedSpace
       end

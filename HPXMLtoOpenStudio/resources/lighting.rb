@@ -97,12 +97,14 @@ module Lighting
         runner.registerWarning("Both '#{interior_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.interior_monthly_multipliers.nil?
       end
 
-      Model.add_lights(model,
-                       name: interior_obj_name,
-                       end_use: interior_obj_name,
-                       space: spaces[HPXML::LocationConditionedSpace],
-                       design_level: design_level,
-                       schedule: interior_sch)
+      Model.add_lights(
+        model,
+        name: interior_obj_name,
+        end_use: interior_obj_name,
+        space: spaces[HPXML::LocationConditionedSpace],
+        design_level: design_level,
+        schedule: interior_sch
+      )
     end
 
     # Add lighting to garage space
@@ -127,12 +129,14 @@ module Lighting
         runner.registerWarning("Both '#{garage_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.garage_monthly_multipliers.nil?
       end
 
-      Model.add_lights(model,
-                       name: garage_obj_name,
-                       end_use: garage_obj_name,
-                       space: spaces[HPXML::LocationGarage],
-                       design_level: design_level,
-                       schedule: garage_sch)
+      Model.add_lights(
+        model,
+        name: garage_obj_name,
+        end_use: garage_obj_name,
+        space: spaces[HPXML::LocationGarage],
+        design_level: design_level,
+        schedule: garage_sch
+      )
     end
 
     # Add exterior lighting
@@ -157,11 +161,13 @@ module Lighting
         runner.registerWarning("Both '#{exterior_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
       end
 
-      Model.add_exterior_lights(model,
-                                name: exterior_obj_name,
-                                end_use: exterior_obj_name,
-                                design_level: design_level,
-                                schedule: exterior_sch)
+      Model.add_exterior_lights(
+        model,
+        name: exterior_obj_name,
+        end_use: exterior_obj_name,
+        design_level: design_level,
+        schedule: exterior_sch
+      )
     end
 
     # Add exterior holiday lighting
@@ -187,11 +193,13 @@ module Lighting
         runner.registerWarning("Both '#{exterior_holiday_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
       end
 
-      Model.add_exterior_lights(model,
-                                name: exterior_holiday_obj_name,
-                                end_use: exterior_holiday_obj_name,
-                                design_level: design_level,
-                                schedule: exterior_holiday_sch)
+      Model.add_exterior_lights(
+        model,
+        name: exterior_holiday_obj_name,
+        end_use: exterior_holiday_obj_name,
+        design_level: design_level,
+        schedule: exterior_holiday_sch
+      )
     end
   end
 

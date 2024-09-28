@@ -82,15 +82,17 @@ module HotWaterAndAppliances
 
       cw_space = conditioned_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: cw_object_name,
-                                   end_use: cw_object_name,
-                                   space: cw_space,
-                                   design_level: cw_design_level_w,
-                                   frac_radiant: 0.6 * cw_frac_sens,
-                                   frac_latent: cw_frac_lat,
-                                   frac_lost: 1 - cw_frac_sens - cw_frac_lat,
-                                   schedule: cw_power_schedule)
+      Model.add_electric_equipment(
+        model,
+        name: cw_object_name,
+        end_use: cw_object_name,
+        space: cw_space,
+        design_level: cw_design_level_w,
+        frac_radiant: 0.6 * cw_frac_sens,
+        frac_latent: cw_frac_lat,
+        frac_lost: 1 - cw_frac_sens - cw_frac_lat,
+        schedule: cw_power_schedule
+      )
     end
 
     # Clothes dryer energy
@@ -124,25 +126,29 @@ module HotWaterAndAppliances
 
       cd_space = conditioned_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: cd_obj_name,
-                                   end_use: cd_obj_name,
-                                   space: cd_space,
-                                   design_level: cd_design_level_e,
-                                   frac_radiant: 0.6 * cd_frac_sens,
-                                   frac_latent: cd_frac_lat,
-                                   frac_lost: 1 - cd_frac_sens - cd_frac_lat,
-                                   schedule: cd_schedule)
-      Model.add_other_equipment(model,
-                                name: cd_obj_name,
-                                end_use: cd_obj_name,
-                                space: cd_space,
-                                design_level: cd_design_level_f,
-                                frac_radiant: 0.6 * cd_frac_sens,
-                                frac_latent: cd_frac_lat,
-                                frac_lost: 1 - cd_frac_sens - cd_frac_lat,
-                                schedule: cd_schedule,
-                                fuel_type: clothes_dryer.fuel_type)
+      Model.add_electric_equipment(
+        model,
+        name: cd_obj_name,
+        end_use: cd_obj_name,
+        space: cd_space,
+        design_level: cd_design_level_e,
+        frac_radiant: 0.6 * cd_frac_sens,
+        frac_latent: cd_frac_lat,
+        frac_lost: 1 - cd_frac_sens - cd_frac_lat,
+        schedule: cd_schedule
+      )
+      Model.add_other_equipment(
+        model,
+        name: cd_obj_name,
+        end_use: cd_obj_name,
+        space: cd_space,
+        design_level: cd_design_level_f,
+        frac_radiant: 0.6 * cd_frac_sens,
+        frac_latent: cd_frac_lat,
+        frac_lost: 1 - cd_frac_sens - cd_frac_lat,
+        schedule: cd_schedule,
+        fuel_type: clothes_dryer.fuel_type
+      )
     end
 
     # Dishwasher energy
@@ -174,15 +180,17 @@ module HotWaterAndAppliances
 
       dw_space = conditioned_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: dw_obj_name,
-                                   end_use: dw_obj_name,
-                                   space: dw_space,
-                                   design_level: dw_design_level_w,
-                                   frac_radiant: 0.6 * dw_frac_sens,
-                                   frac_latent: dw_frac_lat,
-                                   frac_lost: 1 - dw_frac_sens - dw_frac_lat,
-                                   schedule: dw_power_schedule)
+      Model.add_electric_equipment(
+        model,
+        name: dw_obj_name,
+        end_use: dw_obj_name,
+        space: dw_space,
+        design_level: dw_design_level_w,
+        frac_radiant: 0.6 * dw_frac_sens,
+        frac_latent: dw_frac_lat,
+        frac_lost: 1 - dw_frac_sens - dw_frac_lat,
+        schedule: dw_power_schedule
+      )
     end
 
     # Refrigerator(s) energy
@@ -224,15 +232,17 @@ module HotWaterAndAppliances
 
       rf_space = conditioned_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: rf_obj_name,
-                                   end_use: rf_obj_name,
-                                   space: rf_space,
-                                   design_level: rf_design_level,
-                                   frac_radiant: 0.6 * rf_frac_sens,
-                                   frac_latent: rf_frac_lat,
-                                   frac_lost: 1 - rf_frac_sens - rf_frac_lat,
-                                   schedule: rf_schedule)
+      Model.add_electric_equipment(
+        model,
+        name: rf_obj_name,
+        end_use: rf_obj_name,
+        space: rf_space,
+        design_level: rf_design_level,
+        frac_radiant: 0.6 * rf_frac_sens,
+        frac_latent: rf_frac_lat,
+        frac_lost: 1 - rf_frac_sens - rf_frac_lat,
+        schedule: rf_schedule
+      )
     end
 
     # Freezer(s) energy
@@ -274,15 +284,17 @@ module HotWaterAndAppliances
 
       fz_space = conditioned_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: fz_obj_name,
-                                   end_use: fz_obj_name,
-                                   space: fz_space,
-                                   design_level: fz_design_level,
-                                   frac_radiant: 0.6 * fz_frac_sens,
-                                   frac_latent: fz_frac_lat,
-                                   frac_lost: 1 - fz_frac_sens - fz_frac_lat,
-                                   schedule: fz_schedule)
+      Model.add_electric_equipment(
+        model,
+        name: fz_obj_name,
+        end_use: fz_obj_name,
+        space: fz_space,
+        design_level: fz_design_level,
+        frac_radiant: 0.6 * fz_frac_sens,
+        frac_latent: fz_frac_lat,
+        frac_lost: 1 - fz_frac_sens - fz_frac_lat,
+        schedule: fz_schedule
+      )
     end
 
     # Cooking Range energy
@@ -316,25 +328,29 @@ module HotWaterAndAppliances
 
       cook_space = conditioned_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
 
-      Model.add_electric_equipment(model,
-                                   name: cook_obj_name,
-                                   end_use: cook_obj_name,
-                                   space: cook_space,
-                                   design_level: cook_design_level_e,
-                                   frac_radiant: 0.6 * cook_frac_sens,
-                                   frac_latent: cook_frac_lat,
-                                   frac_lost: 1 - cook_frac_sens - cook_frac_lat,
-                                   schedule: cook_schedule)
-      Model.add_other_equipment(model,
-                                name: cook_obj_name,
-                                end_use: cook_obj_name,
-                                space: cook_space,
-                                design_level: cook_design_level_f,
-                                frac_radiant: 0.6 * cook_frac_sens,
-                                frac_latent: cook_frac_lat,
-                                frac_lost: 1 - cook_frac_sens - cook_frac_lat,
-                                schedule: cook_schedule,
-                                fuel_type: cooking_range.fuel_type)
+      Model.add_electric_equipment(
+        model,
+        name: cook_obj_name,
+        end_use: cook_obj_name,
+        space: cook_space,
+        design_level: cook_design_level_e,
+        frac_radiant: 0.6 * cook_frac_sens,
+        frac_latent: cook_frac_lat,
+        frac_lost: 1 - cook_frac_sens - cook_frac_lat,
+        schedule: cook_schedule
+      )
+      Model.add_other_equipment(
+        model,
+        name: cook_obj_name,
+        end_use: cook_obj_name,
+        space: cook_space,
+        design_level: cook_design_level_f,
+        frac_radiant: 0.6 * cook_frac_sens,
+        frac_latent: cook_frac_lat,
+        frac_lost: 1 - cook_frac_sens - cook_frac_lat,
+        schedule: cook_schedule,
+        fuel_type: cooking_range.fuel_type
+      )
     end
 
     if hpxml_bldg.hot_water_distributions.size > 0
@@ -388,9 +404,11 @@ module HotWaterAndAppliances
       schedule_tmains.setName('mains temperature schedule')
       model.getSiteWaterMainsTemperature.setTemperatureSchedule(schedule_tmains)
 
-      mw_temp_schedule = Model.add_schedule_constant(model,
-                                                     name: 'mixed water temperature schedule',
-                                                     value: UnitConversions.convert(t_mix, 'F', 'C'))
+      mw_temp_schedule = Model.add_schedule_constant(
+        model,
+        name: 'mixed water temperature schedule',
+        value: UnitConversions.convert(t_mix, 'F', 'C')
+      )
       Schedule.set_schedule_type_limits(model, mw_temp_schedule, EPlus::ScheduleTypeLimitsTemperature)
 
       # Create schedule
@@ -434,22 +452,26 @@ module HotWaterAndAppliances
         end
 
         # Fixtures (showers, sinks, baths)
-        Model.add_water_use_equipment(model,
-                                      name: fixtures_obj_name,
-                                      end_use: fixtures_obj_name,
-                                      peak_flow_rate: unit_multiplier * fx_peak_flow * gpd_frac * non_solar_fraction,
-                                      flow_rate_schedule: fixtures_schedule,
-                                      water_use_connections: water_use_connections[water_heating_system.id],
-                                      target_temperature_schedule: mw_temp_schedule)
+        Model.add_water_use_equipment(
+          model,
+          name: fixtures_obj_name,
+          end_use: fixtures_obj_name,
+          peak_flow_rate: unit_multiplier * fx_peak_flow * gpd_frac * non_solar_fraction,
+          flow_rate_schedule: fixtures_schedule,
+          water_use_connections: water_use_connections[water_heating_system.id],
+          target_temperature_schedule: mw_temp_schedule
+        )
 
         # Distribution waste (primary driven by fixture draws)
-        Model.add_water_use_equipment(model,
-                                      name: Constants::ObjectTypeDistributionWaste,
-                                      end_use: Constants::ObjectTypeDistributionWaste,
-                                      peak_flow_rate: unit_multiplier * dist_water_peak_flow * gpd_frac * non_solar_fraction,
-                                      flow_rate_schedule: fixtures_schedule,
-                                      water_use_connections: water_use_connections[water_heating_system.id],
-                                      target_temperature_schedule: mw_temp_schedule)
+        Model.add_water_use_equipment(
+          model,
+          name: Constants::ObjectTypeDistributionWaste,
+          end_use: Constants::ObjectTypeDistributionWaste,
+          peak_flow_rate: unit_multiplier * dist_water_peak_flow * gpd_frac * non_solar_fraction,
+          flow_rate_schedule: fixtures_schedule,
+          water_use_connections: water_use_connections[water_heating_system.id],
+          target_temperature_schedule: mw_temp_schedule
+        )
 
         # Recirculation pump
         recirc_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution, fixtures_usage_multiplier, nbeds)
@@ -478,15 +500,17 @@ module HotWaterAndAppliances
           end
           if recirc_pump_design_level * gpd_frac != 0
             cnt = model.getElectricEquipments.select { |e| e.endUseSubcategory.start_with? Constants::ObjectTypeHotWaterRecircPump }.size # Ensure unique meter for each water heater
-            recirc_pump = Model.add_electric_equipment(model,
-                                                       name: "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}",
-                                                       end_use: "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}",
-                                                       space: conditioned_space,
-                                                       design_level: recirc_pump_design_level * gpd_frac,
-                                                       frac_radiant: 0,
-                                                       frac_latent: 0,
-                                                       frac_lost: 1,
-                                                       schedule: recirc_pump_sch)
+            recirc_pump = Model.add_electric_equipment(
+              model,
+              name: "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}",
+              end_use: "#{Constants::ObjectTypeHotWaterRecircPump}#{cnt + 1}",
+              space: conditioned_space,
+              design_level: recirc_pump_design_level * gpd_frac,
+              frac_radiant: 0,
+              frac_latent: 0,
+              frac_lost: 1,
+              schedule: recirc_pump_sch
+            )
             recirc_pump.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
           end
         end
@@ -514,13 +538,15 @@ module HotWaterAndAppliances
             water_cw_schedule = cw_schedule_obj.schedule
           end
 
-          Model.add_water_use_equipment(model,
-                                        name: cw_object_name,
-                                        end_use: cw_object_name,
-                                        peak_flow_rate: unit_multiplier * cw_peak_flow * gpd_frac * non_solar_fraction,
-                                        flow_rate_schedule: water_cw_schedule,
-                                        water_use_connections: water_use_connections[water_heating_system.id],
-                                        target_temperature_schedule: nil)
+          Model.add_water_use_equipment(
+            model,
+            name: cw_object_name,
+            end_use: cw_object_name,
+            peak_flow_rate: unit_multiplier * cw_peak_flow * gpd_frac * non_solar_fraction,
+            flow_rate_schedule: water_cw_schedule,
+            water_use_connections: water_use_connections[water_heating_system.id],
+            target_temperature_schedule: nil
+          )
         end
       end
 
@@ -548,13 +574,15 @@ module HotWaterAndAppliances
         water_dw_schedule = dw_schedule_obj.schedule
       end
 
-      Model.add_water_use_equipment(model,
-                                    name: dw_obj_name,
-                                    end_use: dw_obj_name,
-                                    peak_flow_rate: unit_multiplier * dw_peak_flow * gpd_frac * non_solar_fraction,
-                                    flow_rate_schedule: water_dw_schedule,
-                                    water_use_connections: water_use_connections[water_heating_system.id],
-                                    target_temperature_schedule: nil)
+      Model.add_water_use_equipment(
+        model,
+        name: dw_obj_name,
+        end_use: dw_obj_name,
+        peak_flow_rate: unit_multiplier * dw_peak_flow * gpd_frac * non_solar_fraction,
+        flow_rate_schedule: water_dw_schedule,
+        water_use_connections: water_use_connections[water_heating_system.id],
+        target_temperature_schedule: nil
+      )
     end
   end
 
@@ -899,36 +927,49 @@ module HotWaterAndAppliances
     if not unavailable_periods.empty?
       avail_sch = ScheduleConstant.new(model, col_name, 1.0, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: unavailable_periods)
 
-      availability_sensor = Model.add_ems_sensor(model,
-                                                 name: "#{col_name} availability s",
-                                                 output_var_or_meter_name: 'Schedule Value',
-                                                 key_name: avail_sch.schedule.name)
+      availability_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{col_name} availability s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: avail_sch.schedule.name
+      )
     end
 
-    schedule = Model.add_schedule_constant(model,
-                                           name: "#{obj_name} schedule",
-                                           value: nil)
+    schedule = Model.add_schedule_constant(
+      model,
+      name: "#{obj_name} schedule",
+      value: nil
+    )
 
     if not loc_space.nil?
-      temperature_sensor = Model.add_ems_sensor(model,
-                                                name: "#{obj_name} tin s",
-                                                output_var_or_meter_name: 'Zone Mean Air Temperature',
-                                                key_name: loc_space.thermalZone.get.name)
+      temperature_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{obj_name} tin s",
+        output_var_or_meter_name: 'Zone Mean Air Temperature',
+        key_name: loc_space.thermalZone.get.name
+      )
     elsif not loc_schedule.nil?
-      temperature_sensor = Model.add_ems_sensor(model,
-                                                name: "#{obj_name} tin s",
-                                                output_var_or_meter_name: 'Schedule Value',
-                                                key_name: loc_schedule.name)
+      temperature_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{obj_name} tin s",
+        output_var_or_meter_name: 'Schedule Value',
+        key_name: loc_schedule.name
+      )
     end
 
-    schedule_actuator = Model.add_ems_actuator(name: "#{schedule.name} act",
-                                               model_object: schedule,
-                                               comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
+    schedule_actuator = Model.add_ems_actuator(
+      name: "#{schedule.name} act",
+      model_object: schedule,
+      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue
+    )
 
     constant_coefficients = fridge_or_freezer.constant_coefficients.split(',').map { |i| i.to_f }
     temperature_coefficients = fridge_or_freezer.temperature_coefficients.split(',').map { |i| i.to_f }
 
-    schedule_program = Model.add_ems_program(model, name: "#{schedule.name} program")
+    schedule_program = Model.add_ems_program(
+      model,
+      name: "#{schedule.name} program"
+    )
     schedule_program.addLine("Set Tin = #{temperature_sensor.name}*(9.0/5.0)+32.0") # C to F
     schedule_program.addLine("Set #{schedule_actuator.name} = 0")
     constant_coefficients.zip(temperature_coefficients).each_with_index do |constant_temperature, i|
@@ -944,10 +985,12 @@ module HotWaterAndAppliances
     end
     schedule_program.addLine('EndIf')
 
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{schedule.name} program calling manager",
-                                          calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
-                                          ems_programs: [schedule_program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{schedule.name} program calling manager",
+      calling_point: 'BeginZoneTimestepAfterInitHeatBalance',
+      ems_programs: [schedule_program]
+    )
 
     return schedule
   end

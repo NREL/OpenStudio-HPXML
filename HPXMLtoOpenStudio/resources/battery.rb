@@ -176,43 +176,55 @@ module Battery
 
     # Apply round trip efficiency as EMS program b/c E+ input is not hooked up.
     # Replace this when the first item in https://github.com/NREL/EnergyPlus/issues/9176 is fixed.
-    charge_sensor = Model.add_ems_sensor(model,
-                                         name: 'battery_charge',
-                                         output_var_or_meter_name: 'Electric Storage Charge Energy',
-                                         key_name: elcs.name)
+    charge_sensor = Model.add_ems_sensor(
+      model,
+      name: 'battery_charge',
+      output_var_or_meter_name: 'Electric Storage Charge Energy',
+      key_name: elcs.name
+    )
 
-    discharge_sensor = Model.add_ems_sensor(model,
-                                            name: 'battery_discharge',
-                                            output_var_or_meter_name: 'Electric Storage Discharge Energy',
-                                            key_name: elcs.name)
+    discharge_sensor = Model.add_ems_sensor(
+      model,
+      name: 'battery_discharge',
+      output_var_or_meter_name: 'Electric Storage Discharge Energy',
+      key_name: elcs.name
+    )
 
-    loss_adj_object = Model.add_other_equipment(model,
-                                                name: Constants::ObjectTypeBatteryLossesAdjustment,
-                                                end_use: Constants::ObjectTypeBatteryLossesAdjustment,
-                                                space: space,
-                                                design_level: 0.01,
-                                                frac_radiant: 0,
-                                                frac_latent: 0,
-                                                frac_lost: frac_lost,
-                                                schedule: model.alwaysOnDiscreteSchedule,
-                                                fuel_type: HPXML::FuelTypeElectricity)
+    loss_adj_object = Model.add_other_equipment(
+      model,
+      name: Constants::ObjectTypeBatteryLossesAdjustment,
+      end_use: Constants::ObjectTypeBatteryLossesAdjustment,
+      space: space,
+      design_level: 0.01,
+      frac_radiant: 0,
+      frac_latent: 0,
+      frac_lost: frac_lost,
+      schedule: model.alwaysOnDiscreteSchedule,
+      fuel_type: HPXML::FuelTypeElectricity
+    )
     loss_adj_object.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeBatteryLossesAdjustment)
 
-    battery_adj_actuator = Model.add_ems_actuator(name: 'battery loss adj act',
-                                                  model_object: loss_adj_object,
-                                                  comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower)
+    battery_adj_actuator = Model.add_ems_actuator(
+      name: 'battery loss adj act',
+      model_object: loss_adj_object,
+      comp_type_and_control: EPlus::EMSActuatorOtherEquipmentPower
+    )
 
-    battery_losses_program = Model.add_ems_program(model,
-                                                   name: 'battery losses')
+    battery_losses_program = Model.add_ems_program(
+      model,
+      name: 'battery losses'
+    )
     battery_losses_program.addLine("Set charge_losses = (-1 * #{charge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))) / #{unit_multiplier}")
     battery_losses_program.addLine("Set discharge_losses = (-1 * #{discharge_sensor.name} * (1 - (#{battery.round_trip_efficiency} ^ 0.5))) / #{unit_multiplier}")
     battery_losses_program.addLine('Set losses = charge_losses + discharge_losses')
     battery_losses_program.addLine("Set #{battery_adj_actuator.name} = -1 * losses / ( 3600 * SystemTimeStep )")
 
-    Model.add_ems_program_calling_manager(model,
-                                          name: 'battery losses calling manager',
-                                          calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
-                                          ems_programs: [battery_losses_program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: 'battery losses calling manager',
+      calling_point: 'EndOfSystemTimestepBeforeHVACReporting',
+      ems_programs: [battery_losses_program]
+    )
 
     elcd.additionalProperties.setFeature('HPXML_ID', battery.id)
     elcs.additionalProperties.setFeature('HPXML_ID', battery.id)

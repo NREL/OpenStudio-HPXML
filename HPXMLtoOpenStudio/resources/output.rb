@@ -44,15 +44,19 @@ module Outputs
       conditioned_zone_name = conditioned_zone.name.to_s
 
       # EMS sensors
-      htg_sensors[unit] = Model.add_ems_sensor(model,
-                                               name: "#{conditioned_zone_name} htg unmet s",
-                                               output_var_or_meter_name: 'Zone Heating Setpoint Not Met Time',
-                                               key_name: conditioned_zone_name)
+      htg_sensors[unit] = Model.add_ems_sensor(
+        model,
+        name: "#{conditioned_zone_name} htg unmet s",
+        output_var_or_meter_name: 'Zone Heating Setpoint Not Met Time',
+        key_name: conditioned_zone_name
+      )
 
-      clg_sensors[unit] = Model.add_ems_sensor(model,
-                                               name: "#{conditioned_zone_name} clg unmet s",
-                                               output_var_or_meter_name: 'Zone Cooling Setpoint Not Met Time',
-                                               key_name: conditioned_zone_name)
+      clg_sensors[unit] = Model.add_ems_sensor(
+        model,
+        name: "#{conditioned_zone_name} clg unmet s",
+        output_var_or_meter_name: 'Zone Cooling Setpoint Not Met Time',
+        key_name: conditioned_zone_name
+      )
 
       total_heat_load_serveds[unit] = hpxml_bldg.total_fraction_heat_load_served
       total_cool_load_serveds[unit] = hpxml_bldg.total_fraction_cool_load_served
@@ -61,22 +65,28 @@ module Outputs
       next if hvac_control.nil?
 
       if (onoff_deadbands > 0)
-        zone_air_temp_sensors[unit] = Model.add_ems_sensor(model,
-                                                           name: "#{conditioned_zone_name} space temp",
-                                                           output_var_or_meter_name: 'Zone Air Temperature',
-                                                           key_name: conditioned_zone_name)
+        zone_air_temp_sensors[unit] = Model.add_ems_sensor(
+          model,
+          name: "#{conditioned_zone_name} space temp",
+          output_var_or_meter_name: 'Zone Air Temperature',
+          key_name: conditioned_zone_name
+        )
 
         htg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-        htg_spt_sensors[unit] = Model.add_ems_sensor(model,
-                                                     name: "#{htg_sch.name} sch value",
-                                                     output_var_or_meter_name: 'Schedule Value',
-                                                     key_name: htg_sch.name)
+        htg_spt_sensors[unit] = Model.add_ems_sensor(
+          model,
+          name: "#{htg_sch.name} sch value",
+          output_var_or_meter_name: 'Schedule Value',
+          key_name: htg_sch.name
+        )
 
         clg_sch = conditioned_zone.thermostatSetpointDualSetpoint.get.coolingSetpointTemperatureSchedule.get
-        clg_spt_sensors[unit] = Model.add_ems_sensor(model,
-                                                     name: "#{clg_sch.name} sch value",
-                                                     output_var_or_meter_name: 'Schedule Value',
-                                                     key_name: clg_sch.name)
+        clg_spt_sensors[unit] = Model.add_ems_sensor(
+          model,
+          name: "#{clg_sch.name} sch value",
+          output_var_or_meter_name: 'Schedule Value',
+          key_name: clg_sch.name
+        )
       end
 
       sim_year = hpxml_header.sim_calendar_year
@@ -95,8 +105,10 @@ module Outputs
     htg_hrs = 'htg_unmet_hours'
     unit_clg_hrs = 'unit_clg_unmet_hours'
     unit_htg_hrs = 'unit_htg_unmet_hours'
-    program = Model.add_ems_program(model,
-                                    name: 'unmet hours program')
+    program = Model.add_ems_program(
+      model,
+      name: 'unmet hours program'
+    )
     program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetHoursProgram)
     program.addLine("Set #{htg_hrs} = 0")
     program.addLine("Set #{clg_hrs} = 0")
@@ -146,10 +158,12 @@ module Outputs
     end
 
     # EMS calling manager
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{program.name} calling manager",
-                                          calling_point: 'EndOfZoneTimestepBeforeZoneReporting',
-                                          ems_programs: [program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepBeforeZoneReporting',
+      ems_programs: [program]
+    )
 
     return season_day_nums
   end
@@ -185,29 +199,37 @@ module Outputs
       end
 
       # Energy transferred in conditioned zone, used for determining heating (winter) vs cooling (summer)
-      htg_cond_load_sensors[unit] = Model.add_ems_sensor(model,
-                                                         name: 'htg_load_cond',
-                                                         output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
-                                                         key_name: nil)
+      htg_cond_load_sensors[unit] = Model.add_ems_sensor(
+        model,
+        name: 'htg_load_cond',
+        output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
+        key_name: nil
+      )
 
-      clg_cond_load_sensors[unit] = Model.add_ems_sensor(model,
-                                                         name: 'clg_load_cond',
-                                                         output_var_or_meter_name: "Cooling:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
-                                                         key_name: nil)
+      clg_cond_load_sensors[unit] = Model.add_ems_sensor(
+        model,
+        name: 'clg_load_cond',
+        output_var_or_meter_name: "Cooling:EnergyTransfer:Zone:#{conditioned_zone_name.upcase}",
+        key_name: nil
+      )
 
       # Energy transferred in duct zone(s)
       htg_duct_load_sensors[unit] = []
       clg_duct_load_sensors[unit] = []
       duct_zone_names.each do |duct_zone_name|
-        htg_duct_load_sensors[unit] << Model.add_ems_sensor(model,
-                                                            name: 'htg_load_duct',
-                                                            output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}",
-                                                            key_name: nil)
+        htg_duct_load_sensors[unit] << Model.add_ems_sensor(
+          model,
+          name: 'htg_load_duct',
+          output_var_or_meter_name: "Heating:EnergyTransfer:Zone:#{duct_zone_name.upcase}",
+          key_name: nil
+        )
 
-        clg_duct_load_sensors[unit] << Model.add_ems_sensor(model,
-                                                            name: 'clg_load_duct',
-                                                            output_var_or_meter_name: "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}",
-                                                            key_name: nil)
+        clg_duct_load_sensors[unit] << Model.add_ems_sensor(
+          model,
+          name: 'clg_load_duct',
+          output_var_or_meter_name: "Cooling:EnergyTransfer:Zone:#{duct_zone_name.upcase}",
+          key_name: nil
+        )
       end
 
       next if dehumidifier_name.nil?
@@ -216,33 +238,46 @@ module Outputs
       # We also offset the dehumidifier load by one timestep so that it aligns with the EnergyTransfer meters.
 
       # Global Variable
-      dehumidifier_global_vars[unit] = Model.add_ems_global_var(model, var_name: "prev #{dehumidifier_name}")
+      dehumidifier_global_vars[unit] = Model.add_ems_global_var(
+        model,
+        var_name: "prev #{dehumidifier_name}"
+      )
 
       # Initialization Program
-      timestep_offset_program = Model.add_ems_program(model,
-                                                      name: "#{dehumidifier_name} timestep offset init program")
+      timestep_offset_program = Model.add_ems_program(
+        model,
+        name: "#{dehumidifier_name} timestep offset init program"
+      )
       timestep_offset_program.addLine("Set #{dehumidifier_global_vars[unit].name} = 0")
 
       # calling managers
-      Model.add_ems_program_calling_manager(model,
-                                            name: "#{timestep_offset_program.name} calling manager",
-                                            calling_point: 'BeginNewEnvironment',
-                                            ems_programs: [timestep_offset_program])
+      Model.add_ems_program_calling_manager(
+        model,
+        name: "#{timestep_offset_program.name} calling manager",
+        calling_point: 'BeginNewEnvironment',
+        ems_programs: [timestep_offset_program]
+      )
 
-      Model.add_ems_program_calling_manager(model,
-                                            name: "#{timestep_offset_program.name} calling manager2",
-                                            calling_point: 'AfterNewEnvironmentWarmUpIsComplete',
-                                            ems_programs: [timestep_offset_program])
+      Model.add_ems_program_calling_manager(
+        model,
+        name: "#{timestep_offset_program.name} calling manager2",
+        calling_point: 'AfterNewEnvironmentWarmUpIsComplete',
+        ems_programs: [timestep_offset_program]
+      )
 
-      dehumidifier_sensors[unit] = Model.add_ems_sensor(model,
-                                                        name: 'ig_dehumidifier',
-                                                        output_var_or_meter_name: 'Zone Dehumidifier Sensible Heating Energy',
-                                                        key_name: dehumidifier_name)
+      dehumidifier_sensors[unit] = Model.add_ems_sensor(
+        model,
+        name: 'ig_dehumidifier',
+        output_var_or_meter_name: 'Zone Dehumidifier Sensible Heating Energy',
+        key_name: dehumidifier_name
+      )
     end
 
     # EMS program
-    program = Model.add_ems_program(model,
-                                    name: 'total loads program')
+    program = Model.add_ems_program(
+      model,
+      name: 'total loads program'
+    )
     program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeTotalLoadsProgram)
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
@@ -278,10 +313,12 @@ module Outputs
     end
 
     # EMS calling manager
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{program.name} calling manager",
-                                          calling_point: 'EndOfZoneTimestepAfterZoneReporting',
-                                          ems_programs: [program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepAfterZoneReporting',
+      ems_programs: [program]
+    )
 
     loads_data = [htg_cond_load_sensors, clg_cond_load_sensors, total_heat_load_serveds, total_cool_load_serveds, dehumidifier_sensors]
     return loads_data
@@ -310,8 +347,10 @@ module Outputs
                   'skylights_solar', 'internal_mass']
 
     # EMS program
-    program = Model.add_ems_program(model,
-                                    name: 'component loads program')
+    program = Model.add_ems_program(
+      model,
+      name: 'component loads program'
+    )
     program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeComponentLoadsProgram)
 
     # Initialize
@@ -367,10 +406,12 @@ module Outputs
 
           vars.each do |var, name|
             surfaces_sensors[key] << []
-            surfaces_sensors[key][-1] << Model.add_ems_sensor(model,
-                                                              name: name,
-                                                              output_var_or_meter_name: var,
-                                                              key_name: ss.name)
+            surfaces_sensors[key][-1] << Model.add_ems_sensor(
+              model,
+              name: name,
+              output_var_or_meter_name: var,
+              key_name: ss.name
+            )
           end
 
           # Solar (windows, skylights)
@@ -386,10 +427,12 @@ module Outputs
 
           surfaces_sensors[key] << []
           vars.each do |var, name|
-            surfaces_sensors[key][-1] << Model.add_ems_sensor(model,
-                                                              name: name,
-                                                              output_var_or_meter_name: var,
-                                                              key_name: ss.name)
+            surfaces_sensors[key][-1] << Model.add_ems_sensor(
+              model,
+              name: name,
+              output_var_or_meter_name: var,
+              key_name: ss.name
+            )
           end
         end
 
@@ -413,10 +456,12 @@ module Outputs
           'Surface Inside Face Solar Radiation Heat Gain Energy' => 's_sol',
           'Surface Inside Face Lights Radiation Heat Gain Energy' => 's_lgt',
           'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 's_surf' }.each do |var, name|
-          surfaces_sensors[key][-1] << Model.add_ems_sensor(model,
-                                                            name: name,
-                                                            output_var_or_meter_name: var,
-                                                            key_name: s.name)
+          surfaces_sensors[key][-1] << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: s.name
+          )
         end
       end
 
@@ -429,10 +474,12 @@ module Outputs
           'Surface Inside Face Solar Radiation Heat Gain Energy' => 'im_sol',
           'Surface Inside Face Lights Radiation Heat Gain Energy' => 'im_lgt',
           'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'im_surf' }.each do |var, name|
-          surfaces_sensors[:internal_mass][-1] << Model.add_ems_sensor(model,
-                                                                       name: name,
-                                                                       output_var_or_meter_name: var,
-                                                                       key_name: m.name)
+          surfaces_sensors[:internal_mass][-1] << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: m.name
+          )
         end
       end
 
@@ -445,10 +492,12 @@ module Outputs
 
         { 'Infiltration Sensible Heat Gain Energy' => 'airflow_gain',
           'Infiltration Sensible Heat Loss Energy' => 'airflow_loss' }.each do |var, name|
-          airflow_sensor = Model.add_ems_sensor(model,
-                                                name: name,
-                                                output_var_or_meter_name: var,
-                                                key_name: i.name)
+          airflow_sensor = Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: i.name
+          )
 
           if object_type == Constants::ObjectTypeInfiltration
             infil_sensors << airflow_sensor
@@ -468,10 +517,12 @@ module Outputs
         objects_already_processed << o
         { 'Electric Equipment Convective Heating Energy' => 'mv_conv',
           'Electric Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
-          mechvents_sensors << Model.add_ems_sensor(model,
-                                                    name: name,
-                                                    output_var_or_meter_name: var,
-                                                    key_name: o.name)
+          mechvents_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: o.name
+          )
         end
       end
       unit_model.getOtherEquipments.sort.each do |o|
@@ -480,10 +531,12 @@ module Outputs
         objects_already_processed << o
         { 'Other Equipment Convective Heating Energy' => 'mv_conv',
           'Other Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
-          mechvents_sensors << Model.add_ems_sensor(model,
-                                                    name: name,
-                                                    output_var_or_meter_name: var,
-                                                    key_name: o.name)
+          mechvents_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: o.name
+          )
         end
       end
 
@@ -495,15 +548,19 @@ module Outputs
         object_type = zone_mix.additionalProperties.getFeatureAsString('ObjectType').to_s
         next unless object_type == Constants::ObjectTypeDuctLoad
 
-        ducts_mix_gain_sensor = Model.add_ems_sensor(model,
-                                                     name: 'duct_mix_gain',
-                                                     output_var_or_meter_name: 'Zone Mixing Sensible Heat Gain Energy',
-                                                     key_name: conditioned_zone.name)
+        ducts_mix_gain_sensor = Model.add_ems_sensor(
+          model,
+          name: 'duct_mix_gain',
+          output_var_or_meter_name: 'Zone Mixing Sensible Heat Gain Energy',
+          key_name: conditioned_zone.name
+        )
 
-        ducts_mix_loss_sensor = Model.add_ems_sensor(model,
-                                                     name: 'duct_mix_loss',
-                                                     output_var_or_meter_name: 'Zone Mixing Sensible Heat Loss Energy',
-                                                     key_name: conditioned_zone.name)
+        ducts_mix_loss_sensor = Model.add_ems_sensor(
+          model,
+          name: 'duct_mix_loss',
+          output_var_or_meter_name: 'Zone Mixing Sensible Heat Loss Energy',
+          key_name: conditioned_zone.name
+        )
       end
       unit_model.getOtherEquipments.sort.each do |o|
         next if objects_already_processed.include? o
@@ -512,10 +569,12 @@ module Outputs
         objects_already_processed << o
         { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
           'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-          ducts_sensors << Model.add_ems_sensor(model,
-                                                name: name,
-                                                output_var_or_meter_name: var,
-                                                key_name: o.name)
+          ducts_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: o.name
+          )
         end
       end
 
@@ -527,10 +586,12 @@ module Outputs
         { 'Lights Convective Heating Energy' => 'ig_lgt_conv',
           'Lights Radiant Heating Energy' => 'ig_lgt_rad',
           'Lights Visible Radiation Heating Energy' => 'ig_lgt_vis' }.each do |var, name|
-          lightings_sensors << Model.add_ems_sensor(model,
-                                                    name: name,
-                                                    output_var_or_meter_name: var,
-                                                    key_name: e.name)
+          lightings_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: e.name
+          )
         end
       end
 
@@ -542,10 +603,12 @@ module Outputs
 
         { 'Electric Equipment Convective Heating Energy' => 'ig_ee_conv',
           'Electric Equipment Radiant Heating Energy' => 'ig_ee_rad' }.each do |var, name|
-          intgains_sensors << Model.add_ems_sensor(model,
-                                                   name: name,
-                                                   output_var_or_meter_name: var,
-                                                   key_name: o.name)
+          intgains_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: o.name
+          )
         end
       end
 
@@ -555,10 +618,12 @@ module Outputs
 
         { 'Other Equipment Convective Heating Energy' => 'ig_oe_conv',
           'Other Equipment Radiant Heating Energy' => 'ig_oe_rad' }.each do |var, name|
-          intgains_sensors << Model.add_ems_sensor(model,
-                                                   name: name,
-                                                   output_var_or_meter_name: var,
-                                                   key_name: o.name)
+          intgains_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: o.name
+          )
         end
       end
 
@@ -567,10 +632,12 @@ module Outputs
 
         { 'People Convective Heating Energy' => 'ig_ppl_conv',
           'People Radiant Heating Energy' => 'ig_ppl_rad' }.each do |var, name|
-          intgains_sensors << Model.add_ems_sensor(model,
-                                                   name: name,
-                                                   output_var_or_meter_name: var,
-                                                   key_name: e.name)
+          intgains_sensors << Model.add_ems_sensor(
+            model,
+            name: name,
+            output_var_or_meter_name: var,
+            key_name: e.name
+          )
         end
       end
 
@@ -584,10 +651,12 @@ module Outputs
         next unless wh.ambientTemperatureThermalZone.is_initialized
         next unless wh.ambientTemperatureThermalZone.get.name.to_s == conditioned_zone.name.to_s
 
-        dhw_sensor = Model.add_ems_sensor(model,
-                                          name: 'dhw_loss',
-                                          output_var_or_meter_name: 'Water Heater Heat Loss Energy',
-                                          key_name: wh.name)
+        dhw_sensor = Model.add_ems_sensor(
+          model,
+          name: 'dhw_loss',
+          output_var_or_meter_name: 'Water Heater Heat Loss Energy',
+          key_name: wh.name
+        )
 
         if wh.is_a? OpenStudio::Model::WaterHeaterMixed
           oncycle_loss = wh.onCycleLossFractiontoThermalZone
@@ -597,10 +666,12 @@ module Outputs
           offcycle_loss = wh.offCycleFlueLossFractiontoZone
         end
 
-        dhw_rtf_sensor = Model.add_ems_sensor(model,
-                                              name: 'dhw_rtf',
-                                              output_var_or_meter_name: 'Water Heater Runtime Fraction',
-                                              key_name: wh.name)
+        dhw_rtf_sensor = Model.add_ems_sensor(
+          model,
+          name: 'dhw_rtf',
+          output_var_or_meter_name: 'Water Heater Runtime Fraction',
+          key_name: wh.name
+        )
 
         intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
       end
@@ -656,24 +727,30 @@ module Outputs
       end
 
       # EMS Sensors: Indoor temperature, setpoints
-      tin_sensor = Model.add_ems_sensor(model,
-                                        name: 'tin s',
-                                        output_var_or_meter_name: 'Zone Mean Air Temperature',
-                                        key_name: conditioned_zone.name)
+      tin_sensor = Model.add_ems_sensor(
+        model,
+        name: 'tin s',
+        output_var_or_meter_name: 'Zone Mean Air Temperature',
+        key_name: conditioned_zone.name
+      )
 
       thermostat = nil
       if conditioned_zone.thermostatSetpointDualSetpoint.is_initialized
         thermostat = conditioned_zone.thermostatSetpointDualSetpoint.get
 
-        htg_sp_sensor = Model.add_ems_sensor(model,
-                                             name: 'htg sp s',
-                                             output_var_or_meter_name: 'Schedule Value',
-                                             key_name: thermostat.heatingSetpointTemperatureSchedule.get.name)
+        htg_sp_sensor = Model.add_ems_sensor(
+          model,
+          name: 'htg sp s',
+          output_var_or_meter_name: 'Schedule Value',
+          key_name: thermostat.heatingSetpointTemperatureSchedule.get.name
+        )
 
-        clg_sp_sensor = Model.add_ems_sensor(model,
-                                             name: 'clg sp s',
-                                             output_var_or_meter_name: 'Schedule Value',
-                                             key_name: thermostat.coolingSetpointTemperatureSchedule.get.name)
+        clg_sp_sensor = Model.add_ems_sensor(
+          model,
+          name: 'clg sp s',
+          output_var_or_meter_name: 'Schedule Value',
+          key_name: thermostat.coolingSetpointTemperatureSchedule.get.name
+        )
       end
 
       # EMS program: Heating vs Cooling logic
@@ -736,10 +813,12 @@ module Outputs
     end
 
     # EMS calling manager
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{program.name} calling manager",
-                                          calling_point: 'EndOfZoneTimestepAfterZoneReporting',
-                                          ems_programs: [program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepAfterZoneReporting',
+      ems_programs: [program]
+    )
   end
 
   # Creates airflow outputs (for infiltration, ventilation, etc.) that sum across all individual dwelling
@@ -764,8 +843,10 @@ module Outputs
     end
 
     # EMS program
-    program = Model.add_ems_program(model,
-                                    name: 'total airflows program')
+    program = Model.add_ems_program(
+      model,
+      name: 'total airflows program'
+    )
     program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeTotalAirflowsProgram)
     program.addLine('Set total_infil_flow_rate = 0')
     program.addLine('Set total_mechvent_flow_rate = 0')
@@ -785,10 +866,12 @@ module Outputs
     end
 
     # EMS calling manager
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{program.name} calling manager",
-                                          calling_point: 'EndOfZoneTimestepAfterZoneReporting',
-                                          ems_programs: [program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepAfterZoneReporting',
+      ems_programs: [program]
+    )
   end
 
   # Populate fields of both unique OpenStudio objects OutputJSON and OutputControlFiles based on the debug argument.

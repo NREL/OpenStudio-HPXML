@@ -2125,12 +2125,14 @@ module Constructions
   # @return [TODO] TODO
   def self.create_insulation_material(model, name, rvalue)
     rigid_mat = BaseMaterial.InsulationRigid
-    mat = Model.add_opaque_material(model,
-                                    name: name,
-                                    thickness: UnitConversions.convert(rvalue * rigid_mat.k_in, 'in', 'm'),
-                                    conductivity: UnitConversions.convert(rigid_mat.k_in, 'Btu*in/(hr*ft^2*R)', 'W/(m*K)'),
-                                    density: UnitConversions.convert(rigid_mat.rho, 'lbm/ft^3', 'kg/m^3'),
-                                    specific_heat: UnitConversions.convert(rigid_mat.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
+    mat = Model.add_opaque_material(
+      model,
+      name: name,
+      thickness: UnitConversions.convert(rvalue * rigid_mat.k_in, 'in', 'm'),
+      conductivity: UnitConversions.convert(rigid_mat.k_in, 'Btu*in/(hr*ft^2*R)', 'W/(m*K)'),
+      density: UnitConversions.convert(rigid_mat.rho, 'lbm/ft^3', 'kg/m^3'),
+      specific_heat: UnitConversions.convert(rigid_mat.cp, 'Btu/(lbm*R)', 'J/(kg*K)')
+    )
     return mat
   end
 
@@ -2250,9 +2252,11 @@ module Constructions
       if shading_schedules[sf_values].nil?
         sch_name = "trans schedule winter=#{sf_winter} summer=#{sf_summer}"
         if sf_values.flatten.uniq.size == 1
-          sf_sch = Model.add_schedule_constant(model,
-                                               name: sch_name,
-                                               value: sf_values[0][0])
+          sf_sch = Model.add_schedule_constant(
+            model,
+            name: sch_name,
+            value: sf_values[0][0]
+          )
         else
           sf_sch = HourlyByDaySchedule.new(model, sch_name, sf_values, sf_values, EPlus::ScheduleTypeLimitsFraction, false).schedule
         end
@@ -3033,9 +3037,11 @@ class Construction
     materials = construct_materials(model)
 
     # Create OpenStudio construction and assign to surface
-    constr = Model.add_construction(model,
-                                    name: @name,
-                                    layers: materials)
+    constr = Model.add_construction(
+      model,
+      name: @name,
+      layers: materials
+    )
     revconstr = nil
 
     # Assign constructions to surfaces
@@ -3267,19 +3273,23 @@ class Construction
   # @return [TODO] TODO
   def create_os_material(model, material)
     if material.is_a? GlazingMaterial
-      mat = Model.add_simple_glazing(model,
-                                     name: material.name,
-                                     ufactor: UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'),
-                                     shgc: material.shgc)
+      mat = Model.add_simple_glazing(
+        model,
+        name: material.name,
+        ufactor: UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'),
+        shgc: material.shgc
+      )
     else
-      mat = Model.add_opaque_material(model,
-                                      name: material.name,
-                                      thickness: UnitConversions.convert(material.thick_in, 'in', 'm'),
-                                      conductivity: UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'),
-                                      density: UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'),
-                                      specific_heat: UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'),
-                                      thermal_abs: material.tAbs,
-                                      solar_abs: material.sAbs)
+      mat = Model.add_opaque_material(
+        model,
+        name: material.name,
+        thickness: UnitConversions.convert(material.thick_in, 'in', 'm'),
+        conductivity: UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'),
+        density: UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'),
+        specific_heat: UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'),
+        thermal_abs: material.tAbs,
+        solar_abs: material.sAbs
+      )
     end
     return mat
   end

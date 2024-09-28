@@ -32,9 +32,11 @@ class ScheduleConstant
       elsif val == 0.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == EPlus::ScheduleTypeLimitsOnOff)
         schedule = model.alwaysOffDiscreteSchedule
       else
-        schedule = Model.add_schedule_constant(model,
-                                               name: sch_name,
-                                               value: val)
+        schedule = Model.add_schedule_constant(
+          model,
+          name: sch_name,
+          value: val
+        )
 
         Schedule.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
       end

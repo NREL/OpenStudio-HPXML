@@ -87,15 +87,17 @@ module MiscLoads
       rad_frac = 0.6 * sens_frac
     end
 
-    Model.add_electric_equipment(model,
-                                 name: obj_name,
-                                 end_use: obj_name,
-                                 space: spaces[HPXML::LocationConditionedSpace],
-                                 design_level: space_design_level,
-                                 frac_radiant: rad_frac,
-                                 frac_latent: lat_frac,
-                                 frac_lost: 1 - sens_frac - lat_frac,
-                                 schedule: sch)
+    Model.add_electric_equipment(
+      model,
+      name: obj_name,
+      end_use: obj_name,
+      space: spaces[HPXML::LocationConditionedSpace],
+      design_level: space_design_level,
+      frac_radiant: rad_frac,
+      frac_latent: lat_frac,
+      frac_lost: 1 - sens_frac - lat_frac,
+      schedule: sch
+    )
   end
 
   # Adds any HPXML Fuel Loads to the OpenStudio model.
@@ -171,16 +173,18 @@ module MiscLoads
     sens_frac = fuel_load.frac_sensible
     lat_frac = fuel_load.frac_latent
 
-    Model.add_other_equipment(model,
-                              name: obj_name,
-                              end_use: obj_name,
-                              space: spaces[HPXML::LocationConditionedSpace],
-                              design_level: space_design_level,
-                              frac_radiant: 0.6 * sens_frac,
-                              frac_latent: lat_frac,
-                              frac_lost: 1 - sens_frac - lat_frac,
-                              schedule: sch,
-                              fuel_type: fuel_load.fuel_type)
+    Model.add_other_equipment(
+      model,
+      name: obj_name,
+      end_use: obj_name,
+      space: spaces[HPXML::LocationConditionedSpace],
+      design_level: space_design_level,
+      frac_radiant: 0.6 * sens_frac,
+      frac_latent: lat_frac,
+      frac_lost: 1 - sens_frac - lat_frac,
+      schedule: sch,
+      fuel_type: fuel_load.fuel_type
+    )
   end
 
   # Adds any HPXML Pools and Permanent Spas to the OpenStudio model.
@@ -257,15 +261,17 @@ module MiscLoads
         heater_sch = heater_sch.schedule
       end
 
-      Model.add_electric_equipment(model,
-                                   name: obj_name,
-                                   end_use: obj_name,
-                                   space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
-                                   design_level: space_design_level,
-                                   frac_radiant: 0,
-                                   frac_latent: 0,
-                                   frac_lost: 1,
-                                   schedule: heater_sch)
+      Model.add_electric_equipment(
+        model,
+        name: obj_name,
+        end_use: obj_name,
+        space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
+        design_level: space_design_level,
+        frac_radiant: 0,
+        frac_latent: 0,
+        frac_lost: 1,
+        schedule: heater_sch
+      )
 
     end
 
@@ -278,16 +284,18 @@ module MiscLoads
         heater_sch = heater_sch.schedule
       end
 
-      Model.add_other_equipment(model,
-                                name: obj_name,
-                                end_use: obj_name,
-                                space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
-                                design_level: space_design_level,
-                                frac_radiant: 0,
-                                frac_latent: 0,
-                                frac_lost: 1,
-                                schedule: heater_sch,
-                                fuel_type: HPXML::FuelTypeNaturalGas)
+      Model.add_other_equipment(
+        model,
+        name: obj_name,
+        end_use: obj_name,
+        space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
+        design_level: space_design_level,
+        frac_radiant: 0,
+        frac_latent: 0,
+        frac_lost: 1,
+        schedule: heater_sch,
+        fuel_type: HPXML::FuelTypeNaturalGas
+      )
     end
   end
 
@@ -337,15 +345,17 @@ module MiscLoads
       pump_sch = pump_sch.schedule
     end
 
-    Model.add_electric_equipment(model,
-                                 name: obj_name,
-                                 end_use: obj_name,
-                                 space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
-                                 design_level: space_design_level,
-                                 frac_radiant: 0,
-                                 frac_latent: 0,
-                                 frac_lost: 1,
-                                 schedule: pump_sch)
+    Model.add_electric_equipment(
+      model,
+      name: obj_name,
+      end_use: obj_name,
+      space: spaces[HPXML::LocationConditionedSpace], # no heat gain, so assign the equipment to an arbitrary space
+      design_level: space_design_level,
+      frac_radiant: 0,
+      frac_latent: 0,
+      frac_lost: 1,
+      schedule: pump_sch
+    )
   end
 
   # Returns the default residual miscellaneous electric (plug) load energy use

@@ -125,7 +125,7 @@ module Model
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
-  # @param layers [TODO] TODO
+  # @param layers [Array<OpenStudio::Model::Material>] Set of material layers
   # @return [OpenStudio::Model::Construction] The model object
   def self.add_construction(model, name:, layers:)
     constr = OpenStudio::Model::Construction.new(model)
@@ -267,6 +267,83 @@ module Model
     ltg_def.setDesignLevel(design_level)
     ltg.setSchedule(schedule)
     return ltg
+  end
+
+  # Adds a SpaceInfiltrationDesignFlowRate object to the OpenStudio model.
+  #
+  # Infiltration = FlowRate * [A + B*ABS(Tzone−Todb) +C*WindSpeed +D*Windspeed^2]
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param space [OpenStudio::Model::Space] The space to add infiltration
+  # @param ach [Double] Air changes per hour
+  # @param const_coeff [Double] Coeff A in the equation above
+  # @param temp_coeff [Double] Coeff B in the equation above
+  # @param wind_coeff [Double] Coeff C in the equation above
+  # @param wind2_coeff [Double] Coeff D in the equation above
+  # @return [OpenStudio::Model::SpaceInfiltrationDesignFlowRate] The model object
+  def self.add_infiltration_flow_rate(model, name:, space:, ach:, const_coeff: 1, temp_coeff: 0, wind_coeff: 0, wind2_coeff: 0)
+    infil = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    infil.setName(name)
+    infil.setSpace(space)
+    infil.setSchedule(model.alwaysOnDiscreteSchedule)
+    infil.setAirChangesperHour(ach) unless ach.nil? # EMS-actuated if nil
+    infil.setConstantTermCoefficient(const_coeff)
+    infil.setTemperatureTermCoefficient(temp_coeff)
+    infil.setVelocityTermCoefficient(wind_coeff)
+    infil.setVelocitySquaredTermCoefficient(wind2_coeff)
+    return infil
+  end
+
+  # Adds a SpaceInfiltrationEffectiveLeakageArea object to the OpenStudio model.
+  #
+  # The SpaceInfiltrationEffectiveLeakageArea object uses the ASHRAE Basic
+  # (Sherman Grimsrud) model.
+  #
+  # Infiltration = ELA/1000 * (C_s*ABS(Tzone−Todb) + C_w*Windspeed^2)^0.5
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param space [OpenStudio::Model::Space] The space to add infiltration
+  # @param ela [Double] Effective leakage area at 4 Pa (cm^2)
+  # @param stack_coeff [Double] Coeff C_S in the equation above
+  # @param wind_coeff [Double] Coeff C_w in the equation above
+  # @return [OpenStudio::Model::SpaceInfiltrationEffectiveLeakageArea] The model object
+  def self.add_infiltration_ela(model, name:, space:, ela:, stack_coeff:, wind_coeff:)
+    infil = OpenStudio::Model::SpaceInfiltrationEffectiveLeakageArea.new(model)
+    infil.setName(name)
+    infil.setSpace(space)
+    infil.setSchedule(model.alwaysOnDiscreteSchedule)
+    infil.setEffectiveAirLeakageArea(ela) unless ela.nil? # EMS-actuated if nil
+    infil.setStackCoefficient(stack_coeff)
+    infil.setWindCoefficient(wind_coeff)
+    return infil
+  end
+
+  # Adds a CoilHeatingElectric or CoilHeatingGas object to the OpenStudio
+  # model, depending on the fuel type.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param efficiency [Double] Equipment efficiency
+  # @param capacity [Double] Heating capacity (W)
+  # @param fuel_type [String] Fuel type (HPXML::FuelTypeXXX)
+  # @param off_cycle_gas_load [Double] Off-cycle parasitic gas load (W)
+  # @return [OpenStudio::Model::CoilHeatingElectric or OpenStudio::Model::CoilHeatingGas] The model object
+  def self.add_coil_heating(model, name:, efficiency:, capacity:, fuel_type:, off_cycle_gas_load: 0)
+    if fuel_type == HPXML::FuelTypeElectricity
+      coil = OpenStudio::Model::CoilHeatingElectric.new(model)
+      coil.setEfficiency(efficiency)
+    else
+      coil = OpenStudio::Model::CoilHeatingGas.new(model)
+      coil.setFuelType(EPlus.fuel_type(fuel_type))
+      coil.setGasBurnerEfficiency(efficiency)
+      coil.setOnCycleParasiticElectricLoad(0)
+      coil.setOffCycleParasiticGasLoad(off_cycle_gas_load)
+    end
+    coil.setName(name)
+    coil.setNominalCapacity(capacity)
+    return coil
   end
 
   # Adds a FanSystemModel object to the OpenStudio model.

@@ -876,12 +876,16 @@ module Geometry
 
         # Assign curb construction
         curb_assembly_r = [skylight.curb_assembly_r_value - Material.AirFilmVertical.rvalue - Material.AirFilmOutside.rvalue, 0.1].max
-        curb_mat = Model.add_massless_material(model,
-                                               name: 'SkylightCurbMaterial',
-                                               rvalue: UnitConversions.convert(curb_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w'))
-        curb_const = Model.add_construction(model,
-                                            name: 'SkylightCurbConstruction',
-                                            layers: [curb_mat])
+        curb_mat = Model.add_massless_material(
+          model,
+          name: 'SkylightCurbMaterial',
+          rvalue: UnitConversions.convert(curb_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w')
+        )
+        curb_const = Model.add_construction(
+          model,
+          name: 'SkylightCurbConstruction',
+          layers: [curb_mat]
+        )
         surface.setConstruction(curb_const)
       else
         # Create parent surface slightly bigger than skylight
@@ -936,12 +940,16 @@ module Geometry
 
       # Apply construction
       shaft_assembly_r = [skylight.shaft_assembly_r_value - 2 * Material.AirFilmVertical.rvalue, 0.1].max
-      shaft_mat = Model.add_massless_material(model,
-                                              name: 'SkylightShaftMaterial',
-                                              rvalue: UnitConversions.convert(shaft_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w'))
-      shaft_const = Model.add_construction(model,
-                                           name: 'SkylightShaftConstruction',
-                                           layers: [shaft_mat])
+      shaft_mat = Model.add_massless_material(
+        model,
+        name: 'SkylightShaftMaterial',
+        rvalue: UnitConversions.convert(shaft_assembly_r, 'hr*ft^2*f/btu', 'm^2*k/w')
+      )
+      shaft_const = Model.add_construction(
+        model,
+        name: 'SkylightShaftConstruction',
+        layers: [shaft_mat]
+      )
       surface.setConstruction(shaft_const)
     end
 
@@ -1791,9 +1799,11 @@ module Geometry
       return sch
     end
 
-    sch = Model.add_schedule_constant(model,
-                                      name: location,
-                                      value: nil)
+    sch = Model.add_schedule_constant(
+      model,
+      name: location,
+      value: nil
+    )
     sch.additionalProperties.setFeature('ObjectType', location)
 
     space_values = get_temperature_scheduled_space_values(location)
@@ -1816,10 +1826,12 @@ module Geometry
       if spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.is_initialized
         # Create a sensor to get dynamic heating setpoint
         htg_sch = spaces[HPXML::LocationConditionedSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
-        space_values[:temp_min] = Model.add_ems_sensor(model,
-                                                       name: 'htg_spt',
-                                                       output_var_or_meter_name: 'Schedule Value',
-                                                       key_name: htg_sch.name)
+        space_values[:temp_min] = Model.add_ems_sensor(
+          model,
+          name: 'htg_spt',
+          output_var_or_meter_name: 'Schedule Value',
+          key_name: htg_sch.name
+        )
         space_values[:temp_min] = space_values[:temp_min].name.to_s
       else
         # No HVAC system; use the defaulted heating setpoint.
@@ -1838,35 +1850,45 @@ module Geometry
         # No HVAC system; use the average of defaulted heating/cooling setpoints.
         sensor_ia = UnitConversions.convert((default_htg_sp + default_clg_sp) / 2.0, 'F', 'C')
       else
-        sensor_ia = Model.add_ems_sensor(model,
-                                         name: 'cond_zone_temp',
-                                         output_var_or_meter_name: 'Zone Air Temperature',
-                                         key_name: spaces[HPXML::LocationConditionedSpace].thermalZone.get.name)
+        sensor_ia = Model.add_ems_sensor(
+          model,
+          name: 'cond_zone_temp',
+          output_var_or_meter_name: 'Zone Air Temperature',
+          key_name: spaces[HPXML::LocationConditionedSpace].thermalZone.get.name
+        )
         sensor_ia = sensor_ia.name
       end
     end
 
     if space_values[:outdoor_weight] > 0
-      sensor_oa = Model.add_ems_sensor(model,
-                                       name: 'oa_temp',
-                                       output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
-                                       key_name: nil)
+      sensor_oa = Model.add_ems_sensor(
+        model,
+        name: 'oa_temp',
+        output_var_or_meter_name: 'Site Outdoor Air Drybulb Temperature',
+        key_name: nil
+      )
     end
 
     if space_values[:ground_weight] > 0
-      sensor_gnd = Model.add_ems_sensor(model,
-                                        name: 'ground_temp',
-                                        output_var_or_meter_name: 'Site Surface Ground Temperature',
-                                        key_name: nil)
+      sensor_gnd = Model.add_ems_sensor(
+        model,
+        name: 'ground_temp',
+        output_var_or_meter_name: 'Site Surface Ground Temperature',
+        key_name: nil
+      )
     end
 
-    actuator = Model.add_ems_actuator(name: "#{location} temp sch",
-                                      model_object: sch,
-                                      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue)
+    actuator = Model.add_ems_actuator(
+      name: "#{location} temp sch",
+      model_object: sch,
+      comp_type_and_control: EPlus::EMSActuatorScheduleConstantValue
+    )
 
     # EMS to actuate schedule
-    program = Model.add_ems_program(model,
-                                    name: "#{location} Temperature Program")
+    program = Model.add_ems_program(
+      model,
+      name: "#{location} Temperature Program"
+    )
     program.addLine("Set #{actuator.name} = 0.0")
     if not sensor_ia.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia} * #{space_values[:indoor_weight]})")
@@ -1888,10 +1910,12 @@ module Geometry
       program.addLine('EndIf')
     end
 
-    Model.add_ems_program_calling_manager(model,
-                                          name: "#{program.name} calling manager",
-                                          calling_point: 'EndOfSystemTimestepAfterHVACReporting',
-                                          ems_programs: [program])
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfSystemTimestepAfterHVACReporting',
+      ems_programs: [program]
+    )
 
     return sch
   end

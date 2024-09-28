@@ -48,9 +48,11 @@ module InternalGains
     end
 
     # Create schedule
-    activity_sch = Model.add_schedule_constant(model,
-                                               name: "#{Constants::ObjectTypeOccupants} activity schedule",
-                                               value: activity_per_person)
+    activity_sch = Model.add_schedule_constant(
+      model,
+      name: "#{Constants::ObjectTypeOccupants} activity schedule",
+      value: activity_per_person
+    )
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
@@ -124,27 +126,31 @@ module InternalGains
         runner.registerWarning("Both '#{water_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !hpxml_bldg.building_occupancy.general_water_use_monthly_multipliers.nil?
       end
 
-      Model.add_other_equipment(model,
-                                name: Constants::ObjectTypeGeneralWaterUseSensible,
-                                end_use: Constants::ObjectTypeGeneralWaterUseSensible,
-                                space: spaces[HPXML::LocationConditionedSpace],
-                                design_level: water_design_level_sens,
-                                frac_radiant: 0.6, # FIXME: This should probably be zero
-                                frac_latent: 0,
-                                frac_lost: 0,
-                                schedule: water_schedule,
-                                fuel_type: nil)
+      Model.add_other_equipment(
+        model,
+        name: Constants::ObjectTypeGeneralWaterUseSensible,
+        end_use: Constants::ObjectTypeGeneralWaterUseSensible,
+        space: spaces[HPXML::LocationConditionedSpace],
+        design_level: water_design_level_sens,
+        frac_radiant: 0.6, # FIXME: This should probably be zero
+        frac_latent: 0,
+        frac_lost: 0,
+        schedule: water_schedule,
+        fuel_type: nil
+      )
 
-      Model.add_other_equipment(model,
-                                name: Constants::ObjectTypeGeneralWaterUseLatent,
-                                end_use: Constants::ObjectTypeGeneralWaterUseLatent,
-                                space: spaces[HPXML::LocationConditionedSpace],
-                                design_level: water_design_level_lat,
-                                frac_radiant: 0,
-                                frac_latent: 1,
-                                frac_lost: 0,
-                                schedule: water_schedule,
-                                fuel_type: nil)
+      Model.add_other_equipment(
+        model,
+        name: Constants::ObjectTypeGeneralWaterUseLatent,
+        end_use: Constants::ObjectTypeGeneralWaterUseLatent,
+        space: spaces[HPXML::LocationConditionedSpace],
+        design_level: water_design_level_lat,
+        frac_radiant: 0,
+        frac_latent: 1,
+        frac_lost: 0,
+        schedule: water_schedule,
+        fuel_type: nil
+      )
     end
   end
 

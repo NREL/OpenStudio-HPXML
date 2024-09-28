@@ -45,12 +45,16 @@ module Generator
     efficiency = output_w / input_w
     fail if efficiency > 1.0 # EPvalidator.xml should prevent this
 
-    curve_biquadratic_constant = Model.add_curve_biquadratic(model,
-                                                             name: 'ConstantBiquadratic',
-                                                             coeff: [1, 0, 0, 0, 0, 0])
-    curve_cubic_constant = Model.add_curve_cubic(model,
-                                                 name: 'ConstantCubic',
-                                                 coeff: [1, 0, 0, 0])
+    curve_biquadratic_constant = Model.add_curve_biquadratic(
+      model,
+      name: 'ConstantBiquadratic',
+      coeff: [1, 0, 0, 0, 0, 0]
+    )
+    curve_cubic_constant = Model.add_curve_cubic(
+      model,
+      name: 'ConstantCubic',
+      coeff: [1, 0, 0, 0]
+    )
 
     gmt = OpenStudio::Model::GeneratorMicroTurbine.new(model)
     gmt.setName("#{obj_name} generator")
