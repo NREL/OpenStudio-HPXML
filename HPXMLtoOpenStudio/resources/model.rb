@@ -222,50 +222,35 @@ module Model
     return oe
   end
 
-  # Adds a Lights object to the OpenStudio model.
+  # Adds a Lights or ExteriorLights object to the OpenStudio model.
   #
-  # The Lights object models electric lighting in a zone.
+  # The Lights/ExteriorLights objects model electric lighting in a zone or outside.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param name [String] Name for the OpenStudio object
   # @param end_use [String] Name of the end use subcategory for output processing
-  # @param space [OpenStudio::Model::Space] The space the object is added to
+  # @param space [OpenStudio::Model::Space] The space the object is added to, or nil if exterior lighting
   # @param design_level [Double] Maximum electrical power input (W)
   # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @return [OpenStudio::Model::Lights] The model object
+  # @return [OpenStudio::Model::Lights or OpenStudio::Model::ExteriorLights] The model object
   def self.add_lights(model, name:, end_use:, space:, design_level:, schedule:)
-    ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-    ltg = OpenStudio::Model::Lights.new(ltg_def)
-    ltg.setName(name)
-    ltg.setSpace(space)
-    ltg.setEndUseSubcategory(end_use)
-    ltg_def.setName(name)
-    ltg_def.setLightingLevel(design_level)
-    ltg_def.setFractionRadiant(0.6)
-    ltg_def.setFractionVisible(0.2)
-    ltg_def.setReturnAirFraction(0.0)
-    ltg.setSchedule(schedule)
-    return ltg
-  end
-
-  # Adds an ExteriorLights object to the OpenStudio model.
-  #
-  # The ExteriorLights object models lighting outside the building.
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param name [String] Name for the OpenStudio object
-  # @param end_use [String] Name of the end use subcategory for output processing
-  # @param design_level [Double] Maximum electrical power input (W)
-  # @param schedule [OpenStudio::Model::Schedule] Schedule fraction (or multiplier) that applies to the design level
-  # @return [OpenStudio::Model::ExteriorLights] The model object
-  def self.add_exterior_lights(model, name:, end_use:, design_level:, schedule:)
-    ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
-    ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
+    if space.nil?
+      ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
+      ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
+      ltg_def.setDesignLevel(design_level)
+    else
+      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+      ltg = OpenStudio::Model::Lights.new(ltg_def)
+      ltg.setSpace(space)
+      ltg_def.setLightingLevel(design_level)
+      ltg_def.setFractionRadiant(0.6)
+      ltg_def.setFractionVisible(0.2)
+      ltg_def.setReturnAirFraction(0.0)
+    end
     ltg.setName(name)
     ltg.setEndUseSubcategory(end_use)
-    ltg_def.setName(name)
-    ltg_def.setDesignLevel(design_level)
     ltg.setSchedule(schedule)
+    ltg_def.setName(name)
     return ltg
   end
 

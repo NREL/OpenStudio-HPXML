@@ -161,10 +161,11 @@ module Lighting
         runner.registerWarning("Both '#{exterior_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
       end
 
-      Model.add_exterior_lights(
+      Model.add_lights(
         model,
         name: exterior_obj_name,
         end_use: exterior_obj_name,
+        space: nil,
         design_level: design_level,
         schedule: exterior_sch
       )
@@ -193,10 +194,11 @@ module Lighting
         runner.registerWarning("Both '#{exterior_holiday_col_name}' schedule file and monthly multipliers provided; the latter will be ignored.") if !lighting.exterior_monthly_multipliers.nil?
       end
 
-      Model.add_exterior_lights(
+      Model.add_lights(
         model,
         name: exterior_holiday_obj_name,
         end_use: exterior_holiday_obj_name,
+        space: nil,
         design_level: design_level,
         schedule: exterior_holiday_sch
       )
