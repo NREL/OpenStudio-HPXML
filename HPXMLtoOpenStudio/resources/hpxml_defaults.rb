@@ -418,7 +418,7 @@ module HPXMLDefaults
     if hpxml_bldg.header.shading_summer_begin_month.nil? || hpxml_bldg.header.shading_summer_begin_day.nil? || hpxml_bldg.header.shading_summer_end_month.nil? || hpxml_bldg.header.shading_summer_end_day.nil?
       if not weather.nil?
         # Default based on Building America seasons
-        _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
+        _, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
         begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(default_cooling_months, hpxml_header.sim_calendar_year)
         if not begin_month.nil? # Check if no summer
           hpxml_bldg.header.shading_summer_begin_month = begin_month
@@ -1210,10 +1210,10 @@ module HPXMLDefaults
         roof.roof_color_isdefaulted = true
       end
       if roof.roof_color.nil?
-        roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
+        roof.roof_color = get_default_roof_color(roof)
         roof.roof_color_isdefaulted = true
       elsif roof.solar_absorptance.nil?
-        roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
+        roof.solar_absorptance = get_default_roof_solar_absorptance(roof)
         roof.solar_absorptance_isdefaulted = true
       end
       if roof.interior_finish_type.nil?
@@ -1263,10 +1263,10 @@ module HPXMLDefaults
         rim_joist.color_isdefaulted = true
       end
       if rim_joist.color.nil?
-        rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
+        rim_joist.color = get_default_wall_color(rim_joist)
         rim_joist.color_isdefaulted = true
       elsif rim_joist.solar_absorptance.nil?
-        rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
+        rim_joist.solar_absorptance = get_default_wall_solar_absorptance(rim_joist)
         rim_joist.solar_absorptance_isdefaulted = true
       end
     end
@@ -1301,10 +1301,10 @@ module HPXMLDefaults
           wall.color_isdefaulted = true
         end
         if wall.color.nil?
-          wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
+          wall.color = get_default_wall_color(wall)
           wall.color_isdefaulted = true
         elsif wall.solar_absorptance.nil?
-          wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
+          wall.solar_absorptance = get_default_wall_solar_absorptance(wall)
           wall.solar_absorptance_isdefaulted = true
         end
       end
@@ -1545,7 +1545,7 @@ module HPXMLDefaults
           end
         end
         # Now lookup U/SHGC based on properties
-        ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(window, 'window')
+        ufactor, shgc = get_default_window_ufactor_shgc(window)
         if window.ufactor.nil?
           window.ufactor = ufactor
           window.ufactor_isdefaulted = true
@@ -1738,7 +1738,7 @@ module HPXMLDefaults
         end
       end
       # Now lookup U/SHGC based on properties
-      ufactor, shgc = Constructions.get_default_window_skylight_ufactor_shgc(skylight, 'skylight')
+      ufactor, shgc = get_default_window_ufactor_shgc(skylight)
       if skylight.ufactor.nil?
         skylight.ufactor = ufactor
         skylight.ufactor_isdefaulted = true
@@ -1906,13 +1906,13 @@ module HPXMLDefaults
     hpxml_bldg.cooling_systems.each do |cooling_system|
       next unless cooling_system.compressor_type.nil?
 
-      cooling_system.compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_system_type, cooling_system.cooling_efficiency_seer)
+      cooling_system.compressor_type = get_default_hvac_compressor_type(cooling_system.cooling_system_type, cooling_system.cooling_efficiency_seer)
       cooling_system.compressor_type_isdefaulted = true
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       next unless heat_pump.compressor_type.nil?
 
-      heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
+      heat_pump.compressor_type = get_default_hvac_compressor_type(heat_pump.heat_pump_type, heat_pump.cooling_efficiency_seer)
       heat_pump.compressor_type_isdefaulted = true
     end
 
@@ -1988,7 +1988,7 @@ module HPXMLDefaults
       next unless heating_system.electric_auxiliary_energy.nil?
 
       heating_system.electric_auxiliary_energy_isdefaulted = true
-      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+      heating_system.electric_auxiliary_energy = get_default_boiler_eae(heating_system)
       heating_system.shared_loop_watts = nil
       heating_system.shared_loop_motor_efficiency = nil
       heating_system.fan_coil_watts = nil
@@ -2046,7 +2046,7 @@ module HPXMLDefaults
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       next unless heat_pump.pump_watts_per_ton.nil?
 
-      heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
+      heat_pump.pump_watts_per_ton = get_default_gshp_pump_power()
       heat_pump.pump_watts_per_ton_isdefaulted = true
     end
 
@@ -2504,8 +2504,8 @@ module HPXMLDefaults
         # Default both duct location(s) and duct surface area(s)
         [supply_ducts, return_ducts].each do |ducts|
           ducts.each do |duct|
-            primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
-            primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(hpxml_bldg)
+            primary_duct_area, secondary_duct_area = get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
+            primary_duct_location, secondary_duct_location = get_default_duct_locations(hpxml_bldg)
             if primary_duct_location.nil? # If a home doesn't have any unconditioned spaces, place all ducts in conditioned space.
               duct.duct_surface_area = primary_duct_area + secondary_duct_area
               duct.duct_surface_area_isdefaulted = true
@@ -2533,7 +2533,7 @@ module HPXMLDefaults
         # Default duct surface area(s)
         [supply_ducts, return_ducts].each do |ducts|
           ducts.each do |duct|
-            total_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).sum()
+            total_duct_area = get_default_duct_surface_area(duct.duct_type, ncfl_ag, cfa_served, n_returns).sum()
             duct.duct_surface_area = total_duct_area * duct.duct_fraction_area
             duct.duct_surface_area_isdefaulted = true
           end
@@ -3067,13 +3067,13 @@ module HPXMLDefaults
         pv_system.module_type_isdefaulted = true
       end
       if pv_system.system_losses_fraction.nil?
-        pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
+        pv_system.system_losses_fraction = get_default_pv_system_losses(pv_system.year_modules_manufactured)
         pv_system.system_losses_fraction_isdefaulted = true
       end
     end
     hpxml_bldg.inverters.each do |inverter|
       if inverter.inverter_efficiency.nil?
-        inverter.inverter_efficiency = PV.get_default_inv_eff()
+        inverter.inverter_efficiency = 0.96 # PVWatts default inverter efficiency
         inverter.inverter_efficiency_isdefaulted = true
       end
     end
@@ -3575,11 +3575,11 @@ module HPXMLDefaults
 
     ceiling_fan = hpxml_bldg.ceiling_fans[0]
     if ceiling_fan.efficiency.nil? && ceiling_fan.label_energy_use.nil?
-      ceiling_fan.label_energy_use = HVAC.get_default_ceiling_fan_power()
+      ceiling_fan.label_energy_use = get_default_ceiling_fan_power()
       ceiling_fan.label_energy_use_isdefaulted = true
     end
     if ceiling_fan.count.nil?
-      ceiling_fan.count = HVAC.get_default_ceiling_fan_quantity(nbeds)
+      ceiling_fan.count = get_default_ceiling_fan_quantity(nbeds)
       ceiling_fan.count_isdefaulted = true
     end
     schedules_file_includes_ceiling_fan = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CeilingFan].name))
@@ -5049,5 +5049,349 @@ module HPXMLDefaults
   # @return [Double] Solar thermal storage volume (gal)
   def self.calc_default_solar_thermal_system_storage_volume(collector_area)
     return 1.5 * collector_area # Assumption; 1.5 gal for every sqft of collector area
+  end
+
+  # Get the default system losses for a PV system.
+  #
+  # @param year_modules_manufactured [Integer] year of manufacture of the modules
+  # @return [Double] System losses (frac)
+  def self.get_default_pv_system_losses(year_modules_manufactured = nil)
+    default_loss_fraction = 0.14 # PVWatts default system losses
+    if not year_modules_manufactured.nil?
+      return PV.calc_losses_fraction_from_year(year_modules_manufactured, default_loss_fraction)
+    else
+      return default_loss_fraction
+    end
+  end
+
+  # Gets the default color for a roof.
+  #
+  # @param roof [HPXML::Roof] The HPXML roof of interest
+  # @return [String] Roof color (HPXML::ColorXXX)
+  def self.get_default_roof_color(roof)
+    map = Constructions.get_roof_color_and_solar_absorptance_map
+    color_map = {}
+    map.each do |key, value|
+      next unless key[1] == roof.roof_type
+
+      color_map[key[0]] = value
+    end
+    color = color_map.min_by { |_k, v| (v - roof.solar_absorptance).abs }[0]
+    return color
+  end
+
+  # Gets the default solar absorptance for a roof.
+  #
+  # @param roof [HPXML::Roof] The HPXML roof of interest
+  # @return [Double] Roof solar absorptance (frac)
+  def self.get_default_roof_solar_absorptance(roof)
+    map = Constructions.get_roof_color_and_solar_absorptance_map
+    return map[[roof.roof_color, roof.roof_type]]
+  end
+
+  # Gets the default color for a wall.
+  #
+  # @param wall [HPXML::Wall or HPXML::RimJoist] The HPXML wall of interest
+  # @return [String] The wall color (HPXML::ColorXXX)
+  def self.get_default_wall_color(wall)
+    map = Constructions.get_wall_color_and_solar_absorptance_map
+    color = map.min_by { |_k, v| (v - wall.solar_absorptance).abs }[0]
+    return color
+  end
+
+  # Gets the default solar absorptance for a wall.
+  #
+  # @param wall [HPXML::Wall or HPXML::RimJoist] The HPXML wall of interest
+  # @return [Double] Wall solar absorptance (frac)
+  def self.get_default_wall_solar_absorptance(wall)
+    map = Constructions.get_wall_color_and_solar_absorptance_map
+    return map[wall.color]
+  end
+
+  # Gets the default U-factor and SHGC from window physical properties.
+  #
+  # @param window [HPXML::Window or HPXML::Skylight] The HPXML window of interest
+  # @return [Array<Double, Double>] Window U-factor, SHGC
+  def self.get_default_window_ufactor_shgc(window)
+    type = window.is_a?(HPXML::Window) ? 'window' : 'skylight'
+
+    if window.glass_layers == HPXML::WindowLayersSinglePane
+      n_panes = 1
+    elsif window.glass_layers == HPXML::WindowLayersDoublePane
+      n_panes = 2
+    elsif window.glass_layers == HPXML::WindowLayersTriplePane
+      n_panes = 3
+    elsif window.glass_layers == HPXML::WindowLayersGlassBlock
+      return [0.6, 0.6] # From https://www.federalregister.gov/documents/2016/06/17/2016-13547/energy-conservation-standards-for-manufactured-housing
+    end
+
+    if [HPXML::WindowFrameTypeAluminum,
+        HPXML::WindowFrameTypeMetal].include? window.frame_type
+      is_metal_frame = true
+    elsif [HPXML::WindowFrameTypeWood,
+           HPXML::WindowFrameTypeVinyl,
+           HPXML::WindowFrameTypeFiberglass].include? window.frame_type
+      is_metal_frame = false
+    else
+      fail "Unexpected #{type.downcase} frame type."
+    end
+
+    if [HPXML::WindowGlassTypeClear,
+        HPXML::WindowGlassTypeReflective].include? window.glass_type
+      glass_type = 'clear'
+    elsif [HPXML::WindowGlassTypeTinted,
+           HPXML::WindowGlassTypeTintedReflective].include? window.glass_type
+      glass_type = 'tinted'
+    elsif [HPXML::WindowGlassTypeLowE,
+           HPXML::WindowGlassTypeLowEHighSolarGain].include? window.glass_type
+      glass_type = 'low_e_insulating'
+    elsif [HPXML::WindowGlassTypeLowELowSolarGain].include? window.glass_type
+      glass_type = 'low_e_solar_control'
+    else
+      fail "Unexpected #{type.downcase} glass type."
+    end
+
+    if window.glass_layers == HPXML::WindowLayersSinglePane
+      gas_fill = 'none'
+    elsif [HPXML::WindowGasAir].include? window.gas_fill
+      gas_fill = 'air'
+    elsif [HPXML::WindowGasArgon,
+           HPXML::WindowGasKrypton,
+           HPXML::WindowGasXenon,
+           HPXML::WindowGasNitrogen,
+           HPXML::WindowGasOther].include? window.gas_fill
+      gas_fill = 'gas'
+    else
+      fail "Unexpected #{type.downcase} gas type."
+    end
+
+    # Lookup values
+    # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-skylight-construction-types
+    key = [is_metal_frame, window.thermal_break, n_panes, glass_type, gas_fill]
+    if type.downcase == 'window'
+      vals = { [true, false, 1, 'clear', 'none'] => [1.27, 0.75], # Single-pane, clear, aluminum frame
+               [false, nil, 1, 'clear', 'none'] => [0.89, 0.64], # Single-pane, clear, wood or vinyl frame
+               [true, false, 1, 'tinted', 'none'] => [1.27, 0.64], # Single-pane, tinted, aluminum frame
+               [false, nil, 1, 'tinted', 'none'] => [0.89, 0.54], # Single-pane, tinted, wood or vinyl frame
+               [true, false, 2, 'clear', 'air'] => [0.81, 0.67], # Double-pane, clear, aluminum frame
+               [true, true, 2, 'clear', 'air'] => [0.60, 0.67], # Double-pane, clear, aluminum frame w/ thermal break
+               [false, nil, 2, 'clear', 'air'] => [0.51, 0.56], # Double-pane, clear, wood or vinyl frame
+               [true, false, 2, 'tinted', 'air'] => [0.81, 0.55], # Double-pane, tinted, aluminum frame
+               [true, true, 2, 'tinted', 'air'] => [0.60, 0.55], # Double-pane, tinted, aluminum frame w/ thermal break
+               [false, nil, 2, 'tinted', 'air'] => [0.51, 0.46], # Double-pane, tinted, wood or vinyl frame
+               [false, nil, 2, 'low_e_insulating', 'air'] => [0.42, 0.52], # Double-pane, insulating low-E, wood or vinyl frame
+               [true, true, 2, 'low_e_insulating', 'gas'] => [0.47, 0.62], # Double-pane, insulating low-E, argon gas fill, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e_insulating', 'gas'] => [0.39, 0.52], # Double-pane, insulating low-E, argon gas fill, wood or vinyl frame
+               [true, false, 2, 'low_e_solar_control', 'air'] => [0.67, 0.37], # Double-pane, solar-control low-E, aluminum frame
+               [true, true, 2, 'low_e_solar_control', 'air'] => [0.47, 0.37], # Double-pane, solar-control low-E, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e_solar_control', 'air'] => [0.39, 0.31], # Double-pane, solar-control low-E, wood or vinyl frame
+               [false, nil, 2, 'low_e_solar_control', 'gas'] => [0.36, 0.31], # Double-pane, solar-control low-E, argon gas fill, wood or vinyl frame
+               [false, nil, 3, 'low_e_insulating', 'gas'] => [0.27, 0.31] }[key] # Triple-pane, insulating low-E, argon gas fill, wood or vinyl frame
+    elsif type.downcase == 'skylight'
+      vals = { [true, false, 1, 'clear', 'none'] => [1.98, 0.75], # Single-pane, clear, aluminum frame
+               [false, nil, 1, 'clear', 'none'] => [1.47, 0.64], # Single-pane, clear, wood or vinyl frame
+               [true, false, 1, 'tinted', 'none'] => [1.98, 0.64], # Single-pane, tinted, aluminum frame
+               [false, nil, 1, 'tinted', 'none'] => [1.47, 0.54], # Single-pane, tinted, wood or vinyl frame
+               [true, false, 2, 'clear', 'air'] => [1.30, 0.67], # Double-pane, clear, aluminum frame
+               [true, true, 2, 'clear', 'air'] => [1.10, 0.67], # Double-pane, clear, aluminum frame w/ thermal break
+               [false, nil, 2, 'clear', 'air'] => [0.84, 0.56], # Double-pane, clear, wood or vinyl frame
+               [true, false, 2, 'tinted', 'air'] => [1.30, 0.55], # Double-pane, tinted, aluminum frame
+               [true, true, 2, 'tinted', 'air'] => [1.10, 0.55], # Double-pane, tinted, aluminum frame w/ thermal break
+               [false, nil, 2, 'tinted', 'air'] => [0.84, 0.46], # Double-pane, tinted, wood or vinyl frame
+               [false, nil, 2, 'low_e_insulating', 'air'] => [0.74, 0.52], # Double-pane, insulating low-E, wood or vinyl frame
+               [true, true, 2, 'low_e_insulating', 'gas'] => [0.95, 0.62], # Double-pane, insulating low-E, argon gas fill, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e_insulating', 'gas'] => [0.68, 0.52], # Double-pane, insulating low-E, argon gas fill, wood or vinyl frame
+               [true, false, 2, 'low_e_solar_control', 'air'] => [1.17, 0.37], # Double-pane, solar-control low-E, aluminum frame
+               [true, true, 2, 'low_e_solar_control', 'air'] => [0.98, 0.37], # Double-pane, solar-control low-E, aluminum frame w/ thermal break
+               [false, nil, 2, 'low_e_solar_control', 'air'] => [0.71, 0.31], # Double-pane, solar-control low-E, wood or vinyl frame
+               [false, nil, 2, 'low_e_solar_control', 'gas'] => [0.65, 0.31], # Double-pane, solar-control low-E, argon gas fill, wood or vinyl frame
+               [false, nil, 3, 'low_e_insulating', 'gas'] => [0.47, 0.31] }[key] # Triple-pane, insulating low-E, argon gas fill, wood or vinyl frame
+    else
+      fail 'Unexpected type.'
+    end
+    return vals if not vals.nil?
+
+    fail "Could not lookup UFactor and SHGC for #{type.downcase} '#{window.id}'."
+  end
+
+  # Gets the default compressor type for a HVAC system.
+  #
+  # @param hvac_type [String] The type of cooling system or heat pump (HPXML::HVACTypeXXX)
+  # @param seer [Double] Cooling efficiency
+  # @return [String] Compressor type (HPXML::HVACCompressorTypeXXX)
+  def self.get_default_hvac_compressor_type(hvac_type, seer)
+    if [HPXML::HVACTypeCentralAirConditioner,
+        HPXML::HVACTypeHeatPumpAirToAir].include? hvac_type
+      if seer <= 15
+        return HPXML::HVACCompressorTypeSingleStage
+      elsif seer <= 21
+        return HPXML::HVACCompressorTypeTwoStage
+      elsif seer > 21
+        return HPXML::HVACCompressorTypeVariableSpeed
+      end
+    elsif [HPXML::HVACTypeMiniSplitAirConditioner,
+           HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_type
+      return HPXML::HVACCompressorTypeVariableSpeed
+    elsif [HPXML::HVACTypePTAC,
+           HPXML::HVACTypeHeatPumpPTHP,
+           HPXML::HVACTypeHeatPumpRoom,
+           HPXML::HVACTypeRoomAirConditioner].include? hvac_type
+      return HPXML::HVACCompressorTypeSingleStage
+    end
+    return
+  end
+
+  # Gets the default fan power for a ceiling fan.
+  #
+  # @return [Double] Fan power (W)
+  def self.get_default_ceiling_fan_power()
+    # Per ANSI/RESNET/ICC 301
+    return 42.6
+  end
+
+  # Gets the default quantity of ceiling fans.
+  #
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Integer] Number of ceiling fans
+  def self.get_default_ceiling_fan_quantity(nbeds)
+    # Per ANSI/RESNET/ICC 301
+    return nbeds + 1
+  end
+
+  # Gets the default primary/secondary locations for a duct.
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @return [Array<String, String>] Duct primary/secondary location (HPXML::LocationXXX)
+  def self.get_default_duct_locations(hpxml_bldg)
+    primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
+                                       HPXML::LocationBasementUnconditioned,
+                                       HPXML::LocationCrawlspaceConditioned,
+                                       HPXML::LocationCrawlspaceVented,
+                                       HPXML::LocationCrawlspaceUnvented,
+                                       HPXML::LocationAtticVented,
+                                       HPXML::LocationAtticUnvented,
+                                       HPXML::LocationGarage]
+
+    primary_duct_location = nil
+    primary_duct_location_hierarchy.each do |location|
+      if hpxml_bldg.has_location(location)
+        primary_duct_location = location
+        break
+      end
+    end
+    secondary_duct_location = HPXML::LocationConditionedSpace
+
+    return primary_duct_location, secondary_duct_location
+  end
+
+  # Gets the default supply/return surface areas for a duct.
+  #
+  # @param duct_type [String] Whether the duct is on the supply or return side (HPXML::DuctTypeXXX)
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @param cfa_served [Double] Dwelling unit conditioned floor area served by this distribution system (ft^2)
+  # @param n_returns [Integer] Number of return registers
+  # @return [Array<Double, Double>] Primary/secondary duct surface areas (ft^2)
+  def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
+    # Equations based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+
+    # Fraction of primary ducts (ducts outside conditioned space)
+    f_out = get_default_duct_outside_fraction(ncfl_ag)
+
+    if duct_type == HPXML::DuctTypeSupply
+      primary_duct_area = 0.27 * cfa_served * f_out
+      secondary_duct_area = 0.27 * cfa_served * (1.0 - f_out)
+    elsif duct_type == HPXML::DuctTypeReturn
+      b_r = (n_returns < 6) ? (0.05 * n_returns) : 0.25
+      primary_duct_area = b_r * cfa_served * f_out
+      secondary_duct_area = b_r * cfa_served * (1.0 - f_out)
+    end
+
+    return primary_duct_area, secondary_duct_area
+  end
+
+  # Gets the default fraction of duct surface area outside conditioned space.
+  #
+  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
+  # @return [Double] Fraction outside conditioned space
+  def self.get_default_duct_outside_fraction(ncfl_ag)
+    # Equation based on ASHRAE 152
+    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
+    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
+    return f_out
+  end
+
+  # Gets the default pump power for a ground-source heat pump.
+  #
+  # @return [Double] Pump power (W/ton)
+  def self.get_default_gshp_pump_power()
+    # ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
+    return 30.0
+  end
+
+  # Gets the default Electric Auxiliary Energy (EAE) for a boiler.
+  #
+  # @param heating_system [HPXML::HeatingSystem] The HPXML heating system of interest
+  # @return [Double or nil] EAE annual consumption if applicable (kWh/yr)
+  def self.get_default_boiler_eae(heating_system)
+    if heating_system.heating_system_type != HPXML::HVACTypeBoiler
+      return
+    end
+    if not heating_system.electric_auxiliary_energy.nil?
+      return heating_system.electric_auxiliary_energy
+    end
+
+    # From ANSI/RESNET/ICC 301-2019 Standard
+    fuel = heating_system.heating_system_fuel
+
+    if heating_system.is_shared_system
+      distribution_system = heating_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
+
+      if not heating_system.shared_loop_watts.nil?
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+        if distribution_system.air_type == HPXML::AirTypeFanCoil
+          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+        else
+          aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+        return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
+      elsif distribution_type == HPXML::HVACDistributionTypeHydronic
+        # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop # Shared boiler w/ WLHP
+          return 265.0
+        else # Shared boiler w/ baseboard/radiators/etc
+          return 220.0
+        end
+      elsif distribution_type == HPXML::HVACDistributionTypeAir
+        if distribution_system.air_type == HPXML::AirTypeFanCoil # Shared boiler w/ fan coil
+          return 438.0
+        end
+      end
+
+    else # In-unit boilers
+
+      if [HPXML::FuelTypeNaturalGas,
+          HPXML::FuelTypePropane,
+          HPXML::FuelTypeElectricity,
+          HPXML::FuelTypeWoodCord,
+          HPXML::FuelTypeWoodPellets].include? fuel
+        return 170.0 # kWh/yr
+      elsif [HPXML::FuelTypeOil,
+             HPXML::FuelTypeOil1,
+             HPXML::FuelTypeOil2,
+             HPXML::FuelTypeOil4,
+             HPXML::FuelTypeOil5or6,
+             HPXML::FuelTypeDiesel,
+             HPXML::FuelTypeKerosene,
+             HPXML::FuelTypeCoal,
+             HPXML::FuelTypeCoalAnthracite,
+             HPXML::FuelTypeCoalBituminous,
+             HPXML::FuelTypeCoke].include? fuel
+        return 330.0 # kWh/yr
+      end
+    end
   end
 end

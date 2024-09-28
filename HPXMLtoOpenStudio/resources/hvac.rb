@@ -2094,54 +2094,10 @@ module HVAC
 
   # TODO
   #
-  # @param hvac_type [TODO] TODO
-  # @param seer [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_compressor_type(hvac_type, seer)
-    if [HPXML::HVACTypeCentralAirConditioner,
-        HPXML::HVACTypeHeatPumpAirToAir].include? hvac_type
-      if seer <= 15
-        return HPXML::HVACCompressorTypeSingleStage
-      elsif seer <= 21
-        return HPXML::HVACCompressorTypeTwoStage
-      elsif seer > 21
-        return HPXML::HVACCompressorTypeVariableSpeed
-      end
-    elsif [HPXML::HVACTypeMiniSplitAirConditioner,
-           HPXML::HVACTypeHeatPumpMiniSplit].include? hvac_type
-      return HPXML::HVACCompressorTypeVariableSpeed
-    elsif [HPXML::HVACTypePTAC,
-           HPXML::HVACTypeHeatPumpPTHP,
-           HPXML::HVACTypeHeatPumpRoom,
-           HPXML::HVACTypeRoomAirConditioner].include? hvac_type
-      return HPXML::HVACCompressorTypeSingleStage
-    end
-    return
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_ceiling_fan_power()
-    # Per ANSI/RESNET/ICC 301
-    return 42.6 # W
-  end
-
-  # TODO
-  #
   # @return [TODO] TODO
   def self.get_default_ceiling_fan_medium_cfm()
     # From ANSI 301-2019
     return 3000.0 # cfm
-  end
-
-  # TODO
-  #
-  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
-  # @return [TODO] TODO
-  def self.get_default_ceiling_fan_quantity(nbeds)
-    # Per ANSI/RESNET/ICC 301
-    return nbeds + 1
   end
 
   # Return a 12-element array of 1s and 0s that reflects months for which the average drybulb temperature is greater than 63F.
@@ -2164,7 +2120,7 @@ module HVAC
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param latitude [TODO] TODO
   # @return [TODO] TODO
-  def self.get_default_heating_and_cooling_seasons(weather, latitude)
+  def self.get_building_america_hvac_seasons(weather, latitude)
     # Calculates heating/cooling seasons from BAHSP definition
 
     monthly_temps = weather.data.MonthlyAvgDrybulbs
@@ -2803,72 +2759,6 @@ module HVAC
     water_removal_rate_input = water_removal_rate / water_removal_curve_value_ief * curve_value_ef
 
     return ef_input, water_removal_rate_input
-  end
-
-  # TODO
-  #
-  # @param heating_system [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_boiler_eae(heating_system)
-    if heating_system.heating_system_type != HPXML::HVACTypeBoiler
-      return
-    end
-    if not heating_system.electric_auxiliary_energy.nil?
-      return heating_system.electric_auxiliary_energy
-    end
-
-    # From ANSI/RESNET/ICC 301-2019 Standard
-    fuel = heating_system.heating_system_fuel
-
-    if heating_system.is_shared_system
-      distribution_system = heating_system.distribution_system
-      distribution_type = distribution_system.distribution_system_type
-
-      if not heating_system.shared_loop_watts.nil?
-        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-        n_dweq = heating_system.number_of_units_served.to_f
-        if distribution_system.air_type == HPXML::AirTypeFanCoil
-          aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-        else
-          aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
-        end
-        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-        return (((sp_kw / n_dweq) + aux_in) * 2080.0).round(2) # kWh/yr
-      elsif distribution_type == HPXML::HVACDistributionTypeHydronic
-        # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-        if distribution_system.hydronic_type == HPXML::HydronicTypeWaterLoop # Shared boiler w/ WLHP
-          return 265.0
-        else # Shared boiler w/ baseboard/radiators/etc
-          return 220.0
-        end
-      elsif distribution_type == HPXML::HVACDistributionTypeAir
-        if distribution_system.air_type == HPXML::AirTypeFanCoil # Shared boiler w/ fan coil
-          return 438.0
-        end
-      end
-
-    else # In-unit boilers
-
-      if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane,
-          HPXML::FuelTypeElectricity,
-          HPXML::FuelTypeWoodCord,
-          HPXML::FuelTypeWoodPellets].include? fuel
-        return 170.0 # kWh/yr
-      elsif [HPXML::FuelTypeOil,
-             HPXML::FuelTypeOil1,
-             HPXML::FuelTypeOil2,
-             HPXML::FuelTypeOil4,
-             HPXML::FuelTypeOil5or6,
-             HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene,
-             HPXML::FuelTypeCoal,
-             HPXML::FuelTypeCoalAnthracite,
-             HPXML::FuelTypeCoalBituminous,
-             HPXML::FuelTypeCoke].include? fuel
-        return 330.0 # kWh/yr
-      end
-    end
   end
 
   # TODO
@@ -4910,69 +4800,6 @@ module HVAC
 
   # TODO
   #
-  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
-  # @return [TODO] TODO
-  def self.get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
-    # Equation based on ASHRAE 152
-    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
-    f_out = (ncfl_ag <= 1) ? 1.0 : 0.75
-    return f_out
-  end
-
-  # TODO
-  #
-  # @param duct_type [TODO] TODO
-  # @param ncfl_ag [Double] Number of conditioned floors above grade in the dwelling unit
-  # @param cfa_served [TODO] TODO
-  # @param n_returns [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_duct_surface_area(duct_type, ncfl_ag, cfa_served, n_returns)
-    # Equations based on ASHRAE 152
-    # https://www.energy.gov/eere/buildings/downloads/ashrae-standard-152-spreadsheet
-
-    # Fraction of primary ducts (ducts outside conditioned space)
-    f_out = get_default_duct_fraction_outside_conditioned_space(ncfl_ag)
-
-    if duct_type == HPXML::DuctTypeSupply
-      primary_duct_area = 0.27 * cfa_served * f_out
-      secondary_duct_area = 0.27 * cfa_served * (1.0 - f_out)
-    elsif duct_type == HPXML::DuctTypeReturn
-      b_r = (n_returns < 6) ? (0.05 * n_returns) : 0.25
-      primary_duct_area = b_r * cfa_served * f_out
-      secondary_duct_area = b_r * cfa_served * (1.0 - f_out)
-    end
-
-    return primary_duct_area, secondary_duct_area
-  end
-
-  # TODO
-  #
-  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
-  # @return [TODO] TODO
-  def self.get_default_duct_locations(hpxml_bldg)
-    primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
-                                       HPXML::LocationBasementUnconditioned,
-                                       HPXML::LocationCrawlspaceConditioned,
-                                       HPXML::LocationCrawlspaceVented,
-                                       HPXML::LocationCrawlspaceUnvented,
-                                       HPXML::LocationAtticVented,
-                                       HPXML::LocationAtticUnvented,
-                                       HPXML::LocationGarage]
-
-    primary_duct_location = nil
-    primary_duct_location_hierarchy.each do |location|
-      if hpxml_bldg.has_location(location)
-        primary_duct_location = location
-        break
-      end
-    end
-    secondary_duct_location = HPXML::LocationConditionedSpace
-
-    return primary_duct_location, secondary_duct_location
-  end
-
-  # TODO
-  #
   # @param f_chg [TODO] TODO
   # @return [TODO] TODO
   def self.get_charge_fault_cooling_coeff(f_chg)
@@ -5471,13 +5298,6 @@ module HVAC
       calling_point: 'InsideHVACSystemIterationLoop',
       ems_programs: [program]
     )
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_gshp_pump_power()
-    return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
   # TODO

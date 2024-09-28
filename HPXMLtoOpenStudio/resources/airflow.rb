@@ -7,6 +7,7 @@ module Airflow
   InfilPressureExponent = 0.65
   AssumedInsideTemp = 73.5 # (F)
   Gravity = 32.174 # acceleration of gravity (ft/s2)
+  UnventedSpaceACH = 0.1 # Assumption
 
   # Adds HPXML Air Infiltration and HPXML HVAC Distribution to the OpenStudio model.
   # TODO for adding more description (e.g., around checks and warnings)
@@ -73,7 +74,7 @@ module Airflow
     # Cooling season schedule
     # Applies to natural ventilation, not HVAC equipment.
     # Uses BAHSP cooling season, not user-specified cooling season (which may be, e.g., year-round).
-    _, default_cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, hpxml_bldg.latitude)
+    _, default_cooling_months = HVAC.get_building_america_hvac_seasons(weather, hpxml_bldg.latitude)
     clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), default_cooling_months, EPlus::ScheduleTypeLimitsFraction)
     clg_ssn_sensor = Model.add_ems_sensor(
       model,
@@ -170,13 +171,6 @@ module Airflow
     end
 
     return sensors
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_unvented_space_ach()
-    return 0.1 # Assumption
   end
 
   # Returns the single infiltration measurement object of interest, from all possible infiltration measurements
@@ -1623,7 +1617,7 @@ module Airflow
     return if spaces[HPXML::LocationBasementUnconditioned].nil?
 
     space = spaces[HPXML::LocationBasementUnconditioned]
-    ach = get_default_unvented_space_ach()
+    ach = UnventedSpaceACH
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
   end
 
@@ -1656,7 +1650,7 @@ module Airflow
     return if spaces[HPXML::LocationCrawlspaceUnvented].nil?
 
     space = spaces[HPXML::LocationCrawlspaceUnvented]
-    ach = get_default_unvented_space_ach()
+    ach = UnventedSpaceACH
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
   end
 
@@ -1712,7 +1706,7 @@ module Airflow
     return if spaces[HPXML::LocationAtticUnvented].nil?
 
     space = spaces[HPXML::LocationAtticUnvented]
-    ach = get_default_unvented_space_ach()
+    ach = UnventedSpaceACH
     apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil, duct_lk_imbals)
   end
 

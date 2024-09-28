@@ -207,23 +207,6 @@ module Lighting
 
   # TODO
   #
-  # @return [TODO] TODO
-  def self.get_default_fractions()
-    ltg_fracs = {}
-    [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
-      [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
-        if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
-          ltg_fracs[[location, lighting_type]] = 0.1
-        else
-          ltg_fracs[[location, lighting_type]] = 0
-        end
-      end
-    end
-    return ltg_fracs
-  end
-
-  # TODO
-  #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
   # @param f_int_cfl [TODO] TODO

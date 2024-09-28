@@ -6185,7 +6185,7 @@ module HPXMLFile
       if ducts_supply_location == HPXML::LocationConditionedSpace
         args[:ducts_supply_surface_area_fraction] = 1.0
       else
-        args[:ducts_supply_surface_area_fraction] = HVAC.get_default_duct_fraction_outside_conditioned_space(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_supply_surface_area_fraction] = HPXMLDefaults.get_default_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
       end
     end
 
@@ -6194,7 +6194,7 @@ module HPXMLFile
       if ducts_return_location == HPXML::LocationConditionedSpace
         args[:ducts_return_surface_area_fraction] = 1.0
       else
-        args[:ducts_return_surface_area_fraction] = HVAC.get_default_duct_fraction_outside_conditioned_space(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_return_surface_area_fraction] = HPXMLDefaults.get_default_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
       end
     end
 
@@ -6303,7 +6303,7 @@ module HPXMLFile
       if not args[:hvac_control_heating_season_period].nil?
         hvac_control_heating_season_period = args[:hvac_control_heating_season_period]
         if hvac_control_heating_season_period == Constants::BuildingAmerica
-          heating_months, _cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
+          heating_months, _cooling_months = HVAC.get_building_america_hvac_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(heating_months, sim_calendar_year)
         else
@@ -6332,7 +6332,7 @@ module HPXMLFile
       if not args[:hvac_control_cooling_season_period].nil?
         hvac_control_cooling_season_period = args[:hvac_control_cooling_season_period]
         if hvac_control_cooling_season_period == Constants::BuildingAmerica
-          _heating_months, cooling_months = HVAC.get_default_heating_and_cooling_seasons(weather, latitude)
+          _heating_months, cooling_months = HVAC.get_building_america_hvac_seasons(weather, latitude)
           sim_calendar_year = Location.get_sim_calendar_year(hpxml.header.sim_calendar_year, weather)
           begin_month, begin_day, end_month, end_day = Calendar.get_begin_and_end_dates_from_monthly_array(cooling_months, sim_calendar_year)
         else
