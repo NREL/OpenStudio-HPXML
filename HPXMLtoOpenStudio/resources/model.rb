@@ -345,7 +345,7 @@ module Model
     fan.setEndUseSubcategory(end_use)
     fan.setSpeedControlMethod('Discrete')
     fan.setDesignPowerSizingMethod('PowerPerFlow')
-    fan.setElectricPowerPerUnitFlowRate(power_per_flow)
+    fan.setElectricPowerPerUnitFlowRate([power_per_flow, 0.000001].max)
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirStreamFraction(1.0)
@@ -785,7 +785,7 @@ module Model
         unit_model_objects << obj
       end
     end
-    
+
     model_size = model.to_s.size
     model.addObjects(unit_model_objects, true)
     if model.to_s.size == model_size
@@ -794,7 +794,7 @@ module Model
         n = model.to_s.size
         model.addObject(o)
         if model.to_s.size == n
-          fail "object not successfully merged:\n\n#{o.to_s}"
+          fail "object not successfully merged:\n\n#{o}"
         end
       end
     end
