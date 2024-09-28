@@ -273,10 +273,10 @@ module Model
     infil.setSpace(space)
     infil.setSchedule(model.alwaysOnDiscreteSchedule)
     infil.setAirChangesperHour(ach) unless ach.nil? # EMS-actuated if nil
-    infil.setConstantTermCoefficient(const_coeff)
-    infil.setTemperatureTermCoefficient(temp_coeff)
-    infil.setVelocityTermCoefficient(wind_coeff)
-    infil.setVelocitySquaredTermCoefficient(wind2_coeff)
+    infil.setConstantTermCoefficient(const_coeff) unless ach.nil?
+    infil.setTemperatureTermCoefficient(temp_coeff) unless ach.nil?
+    infil.setVelocityTermCoefficient(wind_coeff) unless ach.nil?
+    infil.setVelocitySquaredTermCoefficient(wind2_coeff) unless ach.nil?
     return infil
   end
 
@@ -364,10 +364,15 @@ module Model
     pump.setName(name)
     pump.setMotorEfficiency(0.85)
     pump.setRatedPowerConsumption(rated_power)
-    pump.setRatedPumpHead(20000)
     pump_eff = 0.75 # Overall efficiency of the pump
-    flow_rate = pump_eff * rated_power / pump.ratedPumpHead
-    pump.setRatedFlowRate([flow_rate, 0.00001].max)
+    if rated_power > 0
+      pump.setRatedPumpHead(20000)
+      flow_rate = pump_eff * rated_power / pump.ratedPumpHead
+      pump.setRatedFlowRate([flow_rate, 0.00001].max)
+    else
+      pump.setRatedPumpHead(1)
+      pump.setRatedFlowRate(0.01)
+    end
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
