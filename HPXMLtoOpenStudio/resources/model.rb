@@ -785,8 +785,19 @@ module Model
         unit_model_objects << obj
       end
     end
-
+    
+    model_size = model.to_s.size
     model.addObjects(unit_model_objects, true)
+    if model.to_s.size == model_size
+      # Objects not added, check for the culprit
+      unit_model_objects.each do |o|
+        n = model.to_s.size
+        model.addObject(o)
+        if model.to_s.size == n
+          fail "object not successfully merged:\n\n#{o.to_s}"
+        end
+      end
+    end
   end
 
   # Prefix all object names using using a provided unit number.
