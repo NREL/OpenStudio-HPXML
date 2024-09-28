@@ -2250,9 +2250,9 @@ module Constructions
       if shading_schedules[sf_values].nil?
         sch_name = "trans schedule winter=#{sf_winter} summer=#{sf_summer}"
         if sf_values.flatten.uniq.size == 1
-          sf_sch = OpenStudio::Model::ScheduleConstant.new(model)
-          sf_sch.setValue(sf_values[0][0])
-          sf_sch.setName(sch_name)
+          sf_sch = Model.add_schedule_constant(model,
+                                               name: sch_name,
+                                               value: sf_values[0][0])
         else
           sf_sch = HourlyByDaySchedule.new(model, sch_name, sf_values, sf_values, EPlus::ScheduleTypeLimitsFraction, false).schedule
         end

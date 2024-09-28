@@ -709,38 +709,28 @@ module HVAC
     setpoint_mgr_follow_ground_temp.addToNode(plant_loop.supplyOutletNode)
 
     # Pump
-    pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-    pump.setName(obj_name + ' pump')
-    pump.setMotorEfficiency(0.85)
-    pump.setRatedPumpHead(20000)
-    pump.setFractionofMotorInefficienciestoFluidStream(0)
-    pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
-    pump.setCoefficient3ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient4ofthePartLoadPerformanceCurve(0)
-    pump.setMinimumFlowRate(0)
-    pump.setPumpControlType('Intermittent')
-    pump.addToNode(plant_loop.supplyInletNode)
     if heat_pump.cooling_capacity > 1.0
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.cooling_capacity, 'Btu/hr', 'ton')
     else
       pump_w = heat_pump.pump_watts_per_ton * UnitConversions.convert(heat_pump.heating_capacity, 'Btu/hr', 'ton')
     end
     pump_w = [pump_w, 1.0].max # prevent error if zero
-    pump.setRatedPowerConsumption(pump_w)
-    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
+    pump = Model.add_pump_variable_speed(model,
+                                         name: "#{obj_name} pump",
+                                         rated_power: pump_w)
+    pump.addToNode(plant_loop.supplyInletNode)
     disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Pipes
-    chiller_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    chiller_bypass_pipe = Model.add_pipe_adiabatic(model)
     plant_loop.addSupplyBranchForComponent(chiller_bypass_pipe)
-    coil_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    coil_bypass_pipe = Model.add_pipe_adiabatic(model)
     plant_loop.addDemandBranchForComponent(coil_bypass_pipe)
-    supply_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    supply_outlet_pipe = Model.add_pipe_adiabatic(model)
     supply_outlet_pipe.addToNode(plant_loop.supplyOutletNode)
-    demand_inlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    demand_inlet_pipe = Model.add_pipe_adiabatic(model)
     demand_inlet_pipe.addToNode(plant_loop.demandInletNode)
-    demand_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    demand_outlet_pipe = Model.add_pipe_adiabatic(model)
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
     # Fan
@@ -874,18 +864,9 @@ module HVAC
     # Pump
     pump_w = heating_system.electric_auxiliary_energy / 2.08
     pump_w = [pump_w, 1.0].max # prevent error if zero
-    pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-    pump.setName(obj_name + ' hydronic pump')
-    pump.setRatedPowerConsumption(pump_w)
-    pump.setMotorEfficiency(0.85)
-    pump.setRatedPumpHead(20000)
-    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
-    pump.setFractionofMotorInefficienciestoFluidStream(0)
-    pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
-    pump.setCoefficient3ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient4ofthePartLoadPerformanceCurve(0)
-    pump.setPumpControlType('Intermittent')
+    pump = Model.add_pump_variable_speed(model,
+                                         name: "#{obj_name} hydronic pump",
+                                         rated_power: pump_w)
     pump.addToNode(plant_loop.supplyInletNode)
 
     # Boiler
@@ -941,24 +922,24 @@ module HVAC
       setpoint_manager_oar.addToNode(plant_loop.supplyOutletNode)
     end
 
-    hydronic_heat_supply_setpoint = OpenStudio::Model::ScheduleConstant.new(model)
-    hydronic_heat_supply_setpoint.setName(obj_name + ' hydronic heat supply setpoint')
-    hydronic_heat_supply_setpoint.setValue(UnitConversions.convert(design_temp, 'F', 'C'))
+    supply_setpoint = Model.add_schedule_constant(model,
+                                                  name: "#{obj_name} hydronic heat supply setpoint",
+                                                  value: UnitConversions.convert(design_temp, 'F', 'C'))
 
-    setpoint_manager_scheduled = OpenStudio::Model::SetpointManagerScheduled.new(model, hydronic_heat_supply_setpoint)
-    setpoint_manager_scheduled.setName(obj_name + ' hydronic heat loop setpoint manager')
-    setpoint_manager_scheduled.setControlVariable('Temperature')
-    setpoint_manager_scheduled.addToNode(plant_loop.supplyOutletNode)
+    setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, supply_setpoint)
+    setpoint_manager.setName(obj_name + ' hydronic heat loop setpoint manager')
+    setpoint_manager.setControlVariable('Temperature')
+    setpoint_manager.addToNode(plant_loop.supplyOutletNode)
 
-    pipe_supply_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_supply_bypass = Model.add_pipe_adiabatic(model)
     plant_loop.addSupplyBranchForComponent(pipe_supply_bypass)
-    pipe_supply_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_supply_outlet = Model.add_pipe_adiabatic(model)
     pipe_supply_outlet.addToNode(plant_loop.supplyOutletNode)
-    pipe_demand_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_bypass = Model.add_pipe_adiabatic(model)
     plant_loop.addDemandBranchForComponent(pipe_demand_bypass)
-    pipe_demand_inlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_inlet = Model.add_pipe_adiabatic(model)
     pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
-    pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_outlet = Model.add_pipe_adiabatic(model)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
     bb_ua = UnitConversions.convert(heating_system.heating_capacity, 'Btu/hr', 'W') / UnitConversions.convert(UnitConversions.convert(loop_sizing.designLoopExitTemperature, 'C', 'F') - 10.0 - 95.0, 'deltaF', 'deltaC') * 3.0 # W/K
@@ -1243,9 +1224,9 @@ module HVAC
     obj_name = Constants::ObjectTypeDehumidifier
 
     rh_setpoint = dehumidifiers[0].rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
-    relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    relative_humidity_setpoint_sch.setName("#{obj_name} rh setpoint")
-    relative_humidity_setpoint_sch.setValue(rh_setpoint)
+    rh_setpoint_sch = Model.add_schedule_constant(model,
+                                                  name: "#{obj_name} rh setpoint",
+                                                  value: rh_setpoint)
 
     capacity_curve = Model.add_curve_biquadratic(model,
                                                  name: 'DXDH-CAP-fT',
@@ -1266,8 +1247,8 @@ module HVAC
     # Humidity Setpoint
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
     humidistat.setName(obj_name + ' humidistat')
-    humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
-    humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
+    humidistat.setHumidifyingRelativeHumiditySetpointSchedule(rh_setpoint_sch)
+    humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(rh_setpoint_sch)
     control_zone.setZoneControlHumidistat(humidistat)
 
     # Availability Schedule
@@ -2607,17 +2588,12 @@ module HVAC
   # @return [TODO] TODO
   def self.create_supply_fan(model, obj_name, fan_watts_per_cfm, fan_cfms)
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
-    fan = OpenStudio::Model::FanSystemModel.new(model)
-    fan.setSpeedControlMethod('Discrete')
-    fan.setDesignPowerSizingMethod('TotalEfficiencyAndPressure')
-    fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    set_fan_power(fan, fan_watts_per_cfm)
-    fan.setName(obj_name + ' supply fan')
-    fan.setEndUseSubcategory('supply fan')
-    fan.setMotorEfficiency(1.0)
-    fan.setMotorInAirStreamFraction(1.0)
     max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
-    fan.setDesignMaximumAirFlowRate(UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
+    fan = Model.add_fan_system_model(model,
+                                     name: "#{obj_name} supply fan",
+                                     end_use: 'supply fan',
+                                     power_per_flow: fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'),
+                                     max_flow_rate: UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
 
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
@@ -2640,23 +2616,6 @@ module HVAC
 
   # TODO
   #
-  # @param fan [TODO] TODO
-  # @param fan_watts_per_cfm [TODO] TODO
-  # @return [TODO] TODO
-  def self.set_fan_power(fan, fan_watts_per_cfm)
-    if fan_watts_per_cfm > 0
-      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-      pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
-    else
-      fan_eff = 1
-      pressure_rise = 0.000001
-    end
-    fan.setFanTotalEfficiency(fan_eff)
-    fan.setDesignPressureRise(pressure_rise)
-  end
-
-  # TODO
-  #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param obj_name [String] Name for the OpenStudio object
   # @param fan [TODO] TODO
@@ -2668,10 +2627,10 @@ module HVAC
   # @param supp_max_temp [TODO] TODO
   # @return [OpenStudio::Model::AirLoopHVACUnitarySystem] OpenStudio Air Loop HVAC Unitary System object
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp = nil)
-    cycle_fan_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    cycle_fan_sch.setName(obj_name + ' auto fan schedule')
+    cycle_fan_sch = Model.add_schedule_constant(model,
+                                                name: "#{obj_name} auto fan schedule",
+                                                value: 0) # 0 denotes that fan cycles on and off to meet the load (i.e., AUTO fan) as opposed to continuous operation
     Schedule.set_schedule_type_limits(model, cycle_fan_sch, EPlus::ScheduleTypeLimitsOnOff)
-    cycle_fan_sch.setValue(0) # 0 denotes that fan cycles on and off to meet the load (i.e., AUTO fan) as opposed to continuous operation
 
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + ' unitary system')
@@ -4511,18 +4470,6 @@ module HVAC
         hvac_ap.fan_power_rated = 0.25 + (0.18 - 0.25) * (hvac_system.cooling_efficiency_seer - 14.0) / 2.0 # W/cfm
       end
     end
-  end
-
-  # TODO
-  #
-  # @param pump_eff [TODO] TODO
-  # @param pump_w [TODO] TODO
-  # @param pump_head_pa [TODO] TODO
-  # @return [TODO] TODO
-  def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
-    # Calculate needed pump rated flow rate to achieve a given pump power with an assumed
-    # efficiency and pump head.
-    return pump_eff * pump_w / pump_head_pa # m3/s
   end
 
   # TODO

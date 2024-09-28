@@ -269,6 +269,60 @@ module Model
     return ltg
   end
 
+  # Adds a FanSystemModel object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param end_use [String] Name of the end use subcategory for output processing
+  # @param power_per_flow [Double] Electric power per flow rate (W/(m^3/s))
+  # @param max_flow_rate [Double] Design volume flow rate (m^3/s)
+  # @return [OpenStudio::Model::FanSystemModel] The model object
+  def self.add_fan_system_model(model, name:, end_use:, power_per_flow:, max_flow_rate:)
+    fan = OpenStudio::Model::FanSystemModel.new(model)
+    fan.setName(name)
+    fan.setEndUseSubcategory(end_use)
+    fan.setSpeedControlMethod('Discrete')
+    fan.setDesignPowerSizingMethod('PowerPerFlow')
+    fan.setElectricPowerPerUnitFlowRate(power_per_flow)
+    fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    fan.setMotorEfficiency(1.0)
+    fan.setMotorInAirStreamFraction(1.0)
+    fan.setDesignMaximumAirFlowRate(max_flow_rate)
+    return fan
+  end
+
+  # Adds a PumpVariableSpeed object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param rated_power [Double] Design power consumption (W)
+  # @return [OpenStudio::Model::PumpVariableSpeed] The model object
+  def self.add_pump_variable_speed(model, name:, rated_power:)
+    pump = OpenStudio::Model::PumpVariableSpeed.new(model)
+    pump.setName(name)
+    pump.setMotorEfficiency(0.85)
+    pump.setRatedPowerConsumption(rated_power)
+    pump.setRatedPumpHead(20000)
+    pump_eff = 0.75 # Overall efficiency of the pump
+    pump.setRatedFlowRate([pump_eff * rated_power / pump.ratedPumpHead, 0.01].max)
+    pump.setFractionofMotorInefficienciestoFluidStream(0)
+    pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
+    pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
+    pump.setCoefficient3ofthePartLoadPerformanceCurve(0)
+    pump.setCoefficient4ofthePartLoadPerformanceCurve(0)
+    pump.setMinimumFlowRate(0)
+    pump.setPumpControlType('Intermittent')
+    return pump
+  end
+
+  # Adds a PipeAdiabatic object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @return [OpenStudio::Model::PipeAdiabatic] The model object
+  def self.add_pipe_adiabatic(model)
+    return OpenStudio::Model::PipeAdiabatic.new(model)
+  end
+
   # Adds a CurveQuadratic object to the OpenStudio model.
   #
   # y = C1 + C2*x + C3*x^2
@@ -413,6 +467,19 @@ module Model
     curve.setCoefficient5y(coeff[4])
     curve.setCoefficient6z(coeff[5])
     return curve
+  end
+
+  # Adds a ScheduleConstant object to the OpenStudio model.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param name [String] Name for the OpenStudio object
+  # @param value [Double] Constant value for the year
+  # @return [OpenStudio::Model::ScheduleConstant] The model object
+  def self.add_schedule_constant(model, name:, value:)
+    sch = OpenStudio::Model::ScheduleConstant.new(model)
+    sch.setName(name)
+    sch.setValue(value) unless value.nil? # EMS-actuated if nil
+    return sch
   end
 
   # Adds an EnergyManagementSystemSensor to the OpenStudio model.

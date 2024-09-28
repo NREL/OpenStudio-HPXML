@@ -387,9 +387,10 @@ module HotWaterAndAppliances
       schedule_tmains = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_tmains, model).get
       schedule_tmains.setName('mains temperature schedule')
       model.getSiteWaterMainsTemperature.setTemperatureSchedule(schedule_tmains)
-      mw_temp_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-      mw_temp_schedule.setName('mixed water temperature schedule')
-      mw_temp_schedule.setValue(UnitConversions.convert(t_mix, 'F', 'C'))
+
+      mw_temp_schedule = Model.add_schedule_constant(model,
+                                                     name: 'mixed water temperature schedule',
+                                                     value: UnitConversions.convert(t_mix, 'F', 'C'))
       Schedule.set_schedule_type_limits(model, mw_temp_schedule, EPlus::ScheduleTypeLimitsTemperature)
 
       # Create schedule
@@ -904,8 +905,9 @@ module HotWaterAndAppliances
                                                  key_name: avail_sch.schedule.name)
     end
 
-    schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    schedule.setName(obj_name + ' schedule')
+    schedule = Model.add_schedule_constant(model,
+                                           name: "#{obj_name} schedule",
+                                           value: nil)
 
     if not loc_space.nil?
       temperature_sensor = Model.add_ems_sensor(model,

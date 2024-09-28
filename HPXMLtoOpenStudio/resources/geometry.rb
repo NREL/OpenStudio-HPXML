@@ -1791,8 +1791,9 @@ module Geometry
       return sch
     end
 
-    sch = OpenStudio::Model::ScheduleConstant.new(model)
-    sch.setName(location)
+    sch = Model.add_schedule_constant(model,
+                                      name: location,
+                                      value: nil)
     sch.additionalProperties.setFeature('ObjectType', location)
 
     space_values = get_temperature_scheduled_space_values(location)

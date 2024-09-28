@@ -48,9 +48,9 @@ module InternalGains
     end
 
     # Create schedule
-    activity_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    activity_sch.setValue(activity_per_person)
-    activity_sch.setName(Constants::ObjectTypeOccupants + ' activity schedule')
+    activity_sch = Model.add_schedule_constant(model,
+                                               name: "#{Constants::ObjectTypeOccupants} activity schedule",
+                                               value: activity_per_person)
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)

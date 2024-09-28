@@ -149,19 +149,21 @@ module Waterheater
     h_tank = 0.0188 * water_heating_system.tank_volume + 0.0935 # Linear relationship that gets GE height at 50 gal and AO Smith height at 80 gal
 
     # Add in schedules for Tamb, RHamb, and the compressor
-    hpwh_tamb = OpenStudio::Model::ScheduleConstant.new(model)
-    hpwh_tamb.setName("#{obj_name} Tamb act")
-    hpwh_tamb.setValue(23)
+    hpwh_tamb = Model.add_schedule_constant(model,
+                                            name: "#{obj_name} Tamb act",
+                                            value: 23)
 
-    hpwh_rhamb = OpenStudio::Model::ScheduleConstant.new(model)
-    hpwh_rhamb.setName("#{obj_name} RHamb act")
-    hpwh_rhamb.setValue(0.5)
+    hpwh_rhamb = Model.add_schedule_constant(model,
+                                             name: "#{obj_name} RHamb act",
+                                             value: 0.5)
 
     # Note: These get overwritten by EMS later, see HPWH Control program
-    top_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    top_element_setpoint_schedule.setName("#{obj_name} TopElementSetpoint")
-    bottom_element_setpoint_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    bottom_element_setpoint_schedule.setName("#{obj_name} BottomElementSetpoint")
+    top_element_sp = Model.add_schedule_constant(model,
+                                                 name: "#{obj_name} TopElementSetpoint",
+                                                 value: nil)
+    bottom_element_sp = Model.add_schedule_constant(model,
+                                                    name: "#{obj_name} BottomElementSetpoint",
+                                                    value: nil)
 
     setpoint_schedule = nil
     if not schedules_file.nil?
@@ -193,13 +195,20 @@ module Waterheater
     coil = setup_hpwh_dxcoil(model, runner, water_heating_system, hpxml_bldg.elevation, obj_name, airflow_rate, unit_multiplier)
 
     # WaterHeater:Stratified
-    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name, h_tank, solar_fraction, hpwh_tamb, bottom_element_setpoint_schedule, top_element_setpoint_schedule, unit_multiplier, hpxml_bldg.building_construction.number_of_bedrooms)
+    tank = setup_hpwh_stratified_tank(model, water_heating_system, obj_name, h_tank, solar_fraction, hpwh_tamb, bottom_element_sp, top_element_sp, unit_multiplier, hpxml_bldg.building_construction.number_of_bedrooms)
     loop.addSupplyBranchForComponent(tank)
 
     add_desuperheater(model, runner, water_heating_system, tank, loc_space, loc_schedule, loop, unit_multiplier)
 
     # Fan:SystemModel
-    fan = setup_hpwh_fan(model, water_heating_system, obj_name, airflow_rate, unit_multiplier)
+    fan_power = 0.0462 # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
+    fan = Model.add_fan_system_model(model,
+                                     name: "#{obj_name} fan",
+                                     end_use: 'Domestic Hot Water',
+                                     power_per_flow: fan_power / UnitConversions.convert(1.0, 'cfm', 'm^3/s'),
+                                     max_flow_rate: UnitConversions.convert(airflow_rate * unit_multiplier, 'ft^3/min', 'm^3/s'))
+    fan.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
+    fan.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWaterHeater) # Used by reporting measure
 
     # WaterHeater:HeatPump:WrappedCondenser
     hpwh = setup_hpwh_wrapped_condenser(model, obj_name, coil, tank, fan, h_tank, airflow_rate, hpwh_tamb, hpwh_rhamb, min_temp, max_temp, control_setpoint_schedule, unit_multiplier)
@@ -210,7 +219,7 @@ module Waterheater
 
     # EMS for the HPWH control logic
     op_mode = water_heating_system.operating_mode
-    hpwh_ctrl_program = add_hpwh_control_program(model, runner, obj_name, amb_temp_sensor, top_element_setpoint_schedule, bottom_element_setpoint_schedule, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
+    hpwh_ctrl_program = add_hpwh_control_program(model, runner, obj_name, amb_temp_sensor, top_element_sp, bottom_element_sp, min_temp, max_temp, op_mode, setpoint_schedule, control_setpoint_schedule, schedules_file)
 
     # ProgramCallingManagers
     Model.add_ems_program_calling_manager(model,
@@ -285,12 +294,12 @@ module Waterheater
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
     # Create setpoint schedule to specify source side temperature
-    source_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    source_stp_sch.setName("#{obj_name_combi} Source Spt")
+    # tank source side inlet temperature, degree C
     boiler_spt_mngr = model.getSetpointManagerScheduleds.find { |spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode }
     boiler_heating_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
-    # tank source side inlet temperature, degree C
-    source_stp_sch.setValue(boiler_heating_spt)
+    source_stp_sch = Model.add_schedule_constant(model,
+                                                 name: "#{obj_name_combi} Source Spt",
+                                                 value: boiler_heating_spt)
     # reset dhw boiler setpoint
     boiler_spt_mngr.to_SetpointManagerScheduled.get.setSchedule(source_stp_sch)
     boiler_plant_loop.autosizeMaximumLoopFlowRate()
@@ -738,11 +747,11 @@ module Waterheater
 
     plant_loop.addSupplyBranchForComponent(collector_plate)
 
-    pipe_supply_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
-    pipe_supply_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
-    pipe_demand_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
-    pipe_demand_inlet = OpenStudio::Model::PipeAdiabatic.new(model)
-    pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_supply_bypass = Model.add_pipe_adiabatic(model)
+    pipe_supply_outlet = Model.add_pipe_adiabatic(model)
+    pipe_demand_bypass = Model.add_pipe_adiabatic(model)
+    pipe_demand_inlet = Model.add_pipe_adiabatic(model)
+    pipe_demand_outlet = Model.add_pipe_adiabatic(model)
 
     plant_loop.addSupplyBranchForComponent(pipe_supply_bypass)
     pump.addToNode(plant_loop.supplyInletNode)
@@ -1038,32 +1047,6 @@ module Waterheater
     tank.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
 
     return tank
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
-  # @param obj_name [String] Name for the OpenStudio object
-  # @param airflow_rate [TODO] TODO
-  # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @return [TODO] TODO
-  def self.setup_hpwh_fan(model, water_heating_system, obj_name, airflow_rate, unit_multiplier)
-    fan_power = 0.0462 # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
-    fan = OpenStudio::Model::FanSystemModel.new(model)
-    fan.setSpeedControlMethod('Discrete')
-    fan.setDesignPowerSizingMethod('PowerPerFlow')
-    fan.setElectricPowerPerUnitFlowRate(fan_power / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
-    fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    fan.setName(obj_name + ' fan')
-    fan.setEndUseSubcategory('Domestic Hot Water')
-    fan.setMotorEfficiency(1.0)
-    fan.setMotorInAirStreamFraction(1.0)
-    fan.setDesignMaximumAirFlowRate(UnitConversions.convert(airflow_rate * unit_multiplier, 'ft^3/min', 'm^3/s'))
-    fan.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
-    fan.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeWaterHeater) # Used by reporting measure
-
-    return fan
   end
 
   # TODO
@@ -1455,11 +1438,11 @@ module Waterheater
     tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
 
     # Create a schedule for desuperheater
-    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    new_schedule.setName("#{desuperheater_name} setpoint schedule")
     # Preheat tank desuperheater setpoint set to be the same as main water heater
     dsh_setpoint = get_t_set_c(water_heating_system.temperature, HPXML::WaterHeaterTypeStorage)
-    new_schedule.setValue(dsh_setpoint)
+    new_schedule = Model.add_schedule_constant(model,
+                                               name: "#{desuperheater_name} setpoint schedule",
+                                               value: dsh_setpoint)
 
     # create a desuperheater object
     desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
@@ -1844,38 +1827,6 @@ module Waterheater
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @return [TODO] TODO
-  def self.create_new_pump(model)
-    # Add a pump to the new DHW loop
-    pump = OpenStudio::Model::PumpVariableSpeed.new(model)
-    pump.setRatedFlowRate(0.01)
-    pump.setFractionofMotorInefficienciestoFluidStream(0)
-    pump.setMotorEfficiency(1)
-    pump.setRatedPowerConsumption(0)
-    pump.setRatedPumpHead(1)
-    pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
-    pump.setCoefficient3ofthePartLoadPerformanceCurve(0)
-    pump.setCoefficient4ofthePartLoadPerformanceCurve(0)
-    pump.setPumpControlType('Intermittent')
-    return pump
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param t_set_c [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_new_schedule_manager(model, t_set_c)
-    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-    new_schedule.setName('dhw temp')
-    new_schedule.setValue(t_set_c)
-    OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
-  end
-
-  # TODO
-  #
   # @param name [TODO] TODO
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @param act_vol [TODO] TODO
@@ -2113,17 +2064,22 @@ module Waterheater
     loop.setPlantLoopVolume(0.003 * unit_multiplier) # ~1 gal
     loop.setMaximumLoopFlowRate(0.01 * unit_multiplier) # This size represents the physical limitations to flow due to losses in the piping system. We assume that the pipes are always adequately sized.
 
-    bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
-    out_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    bypass_pipe = Model.add_pipe_adiabatic(model)
+    out_pipe = Model.add_pipe_adiabatic(model)
 
     loop.addSupplyBranchForComponent(bypass_pipe)
     out_pipe.addToNode(loop.supplyOutletNode)
 
-    new_pump = create_new_pump(model)
-    new_pump.addToNode(loop.supplyInletNode)
+    pump = Model.add_pump_variable_speed(model,
+                                         name: "#{name} pump",
+                                         rated_power: 0)
+    pump.addToNode(loop.supplyInletNode)
 
-    new_manager = create_new_schedule_manager(model, t_set_c)
-    new_manager.addToNode(loop.supplyOutletNode)
+    temp_schedule = Model.add_schedule_constant(model,
+                                                name: 'dhw temp',
+                                                value: t_set_c)
+    setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, temp_schedule)
+    setpoint_manager.addToNode(loop.supplyOutletNode)
 
     return loop
   end
