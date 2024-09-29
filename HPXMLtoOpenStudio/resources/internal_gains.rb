@@ -85,7 +85,7 @@ module InternalGains
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
 
     if not hpxml_header.apply_ashrae140_assumptions
-      water_sens_btu, water_lat_btu = HPXMLDefaults.get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier)
+      water_sens_btu, water_lat_btu = HPXMLDefaults.get_default_water_use_internal_gains(nbeds_eq, general_water_use_usage_multiplier)
 
       # Create schedule
       water_schedule = nil
