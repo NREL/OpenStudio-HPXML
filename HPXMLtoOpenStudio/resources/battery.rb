@@ -231,24 +231,6 @@ module Battery
     elcs.additionalProperties.setFeature('UsableCapacity_kWh', Float(usable_capacity_kwh))
   end
 
-  # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.
-  #
-  # @param has_garage [Boolean] whether the HPXML Building object has a garage
-  # @return [Hash] map of battery properties to default values
-  def self.get_battery_default_values(has_garage = false)
-    if has_garage
-      location = HPXML::LocationGarage
-    else
-      location = HPXML::LocationOutside
-    end
-    return { location: location,
-             lifetime_model: HPXML::BatteryLifetimeModelNone,
-             nominal_capacity_kwh: 10.0,
-             nominal_voltage: 50.0,
-             round_trip_efficiency: 0.925, # Based on Tesla Powerwall round trip efficiency (new)
-             usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
-  end
-
   # Get nominal capacity (amp-hours) from nominal capacity (kWh) and voltage (V).
   #
   # @param nominal_capacity_kwh [Double] nominal (total) capacity (kWh)

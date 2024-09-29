@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>09aba25d-b8fc-4457-b6b7-95b22cb82ea3</version_id>
-  <version_modified>2024-09-29T18:12:38Z</version_modified>
+  <version_id>395de649-c92d-476c-9cc5-6343e7a53433</version_id>
+  <version_modified>2024-09-29T18:51:20Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -195,7 +195,7 @@
       <filename>battery.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>68403C33</checksum>
+      <checksum>3062E4E6</checksum>
     </file>
     <file>
       <filename>calendar.rb</filename>
@@ -357,7 +357,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6BE44CD3</checksum>
+      <checksum>2FCCB729</checksum>
     </file>
     <file>
       <filename>hpxml_schema/HPXML.xsd</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B180E18D</checksum>
+      <checksum>EFD5373B</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -399,7 +399,7 @@
       <filename>internal_gains.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E961E25C</checksum>
+      <checksum>0D942C28</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -441,7 +441,7 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F79FDE6C</checksum>
+      <checksum>ABD35A7F</checksum>
     </file>
     <file>
       <filename>model.rb</filename>

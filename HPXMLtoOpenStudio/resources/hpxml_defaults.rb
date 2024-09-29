@@ -3030,7 +3030,7 @@ module HPXMLDefaults
         solar_thermal_system.collector_orientation_isdefaulted = true
       end
       if solar_thermal_system.storage_volume.nil? && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
-        solar_thermal_system.storage_volume = calc_default_solar_thermal_system_storage_volume(solar_thermal_system.collector_area)
+        solar_thermal_system.storage_volume = get_default_solar_thermal_system_storage_volume(solar_thermal_system.collector_area)
         solar_thermal_system.storage_volume_isdefaulted = true
       end
     end
@@ -3097,7 +3097,7 @@ module HPXMLDefaults
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_batteries(hpxml_bldg)
-    default_values = Battery.get_battery_default_values(hpxml_bldg.has_location(HPXML::LocationGarage))
+    default_values = get_default_battery_values(hpxml_bldg.has_location(HPXML::LocationGarage))
     hpxml_bldg.batteries.each do |battery|
       if battery.location.nil?
         battery.location = default_values[:location]
@@ -3179,7 +3179,7 @@ module HPXMLDefaults
         clothes_washer.location_isdefaulted = true
       end
       if clothes_washer.rated_annual_kwh.nil?
-        default_values = get_clothes_washer_default_values(eri_version)
+        default_values = get_default_clothes_washer_values(eri_version)
         clothes_washer.integrated_modified_energy_factor = default_values[:integrated_modified_energy_factor]
         clothes_washer.integrated_modified_energy_factor_isdefaulted = true
         clothes_washer.rated_annual_kwh = default_values[:rated_annual_kwh]
@@ -3217,7 +3217,7 @@ module HPXMLDefaults
     # Default clothes dryer
     if hpxml_bldg.clothes_dryers.size > 0
       clothes_dryer = hpxml_bldg.clothes_dryers[0]
-      default_values = get_clothes_dryer_default_values(eri_version, clothes_dryer.fuel_type)
+      default_values = get_default_clothes_dryer_values(eri_version, clothes_dryer.fuel_type)
       if clothes_dryer.is_shared_appliance.nil?
         clothes_dryer.is_shared_appliance = false
         clothes_dryer.is_shared_appliance_isdefaulted = true
@@ -3273,7 +3273,7 @@ module HPXMLDefaults
         dishwasher.location_isdefaulted = true
       end
       if dishwasher.place_setting_capacity.nil?
-        default_values = get_dishwasher_default_values(eri_version)
+        default_values = get_default_dishwasher_values(eri_version)
         dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
         dishwasher.rated_annual_kwh_isdefaulted = true
         dishwasher.label_electric_rate = default_values[:label_electric_rate]
@@ -3319,7 +3319,7 @@ module HPXMLDefaults
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
-          default_values = get_extra_refrigerator_default_values()
+          default_values = get_default_extra_refrigerator_values()
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
@@ -3355,7 +3355,7 @@ module HPXMLDefaults
           refrigerator.location_isdefaulted = true
         end
         if refrigerator.rated_annual_kwh.nil?
-          default_values = get_refrigerator_default_values(nbeds)
+          default_values = get_default_refrigerator_values(nbeds)
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
           refrigerator.rated_annual_kwh_isdefaulted = true
         end
@@ -3399,7 +3399,7 @@ module HPXMLDefaults
         freezer.location_isdefaulted = true
       end
       if freezer.rated_annual_kwh.nil?
-        default_values = get_freezer_default_values()
+        default_values = get_default_freezer_values()
         freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
         freezer.rated_annual_kwh_isdefaulted = true
       end
@@ -3433,7 +3433,7 @@ module HPXMLDefaults
         cooking_range.location_isdefaulted = true
       end
       if cooking_range.is_induction.nil?
-        default_values = get_range_oven_default_values()
+        default_values = get_default_range_oven_values()
         cooking_range.is_induction = default_values[:is_induction]
         cooking_range.is_induction_isdefaulted = true
       end
@@ -3460,7 +3460,7 @@ module HPXMLDefaults
     if hpxml_bldg.ovens.size > 0
       oven = hpxml_bldg.ovens[0]
       if oven.is_convection.nil?
-        default_values = get_range_oven_default_values()
+        default_values = get_default_range_oven_values()
         oven.is_convection = default_values[:is_convection]
         oven.is_convection_isdefaulted = true
       end
@@ -3611,7 +3611,7 @@ module HPXMLDefaults
       if pool.pump_type != HPXML::TypeNone
         # Pump
         if pool.pump_kwh_per_year.nil?
-          pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds_eq)
+          pool.pump_kwh_per_year = get_default_pool_pump_annual_energy(cfa, nbeds_eq)
           pool.pump_kwh_per_year_isdefaulted = true
         end
         if pool.pump_usage_multiplier.nil?
@@ -3637,7 +3637,7 @@ module HPXMLDefaults
 
       # Heater
       if pool.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds_eq, pool.heater_type)
+        default_heater_load_units, default_heater_load_value = get_default_pool_heater_annual_energy(cfa, nbeds_eq, pool.heater_type)
         pool.heater_load_units = default_heater_load_units
         pool.heater_load_value = default_heater_load_value
         pool.heater_load_value_isdefaulted = true
@@ -3667,7 +3667,7 @@ module HPXMLDefaults
       if spa.pump_type != HPXML::TypeNone
         # Pump
         if spa.pump_kwh_per_year.nil?
-          spa.pump_kwh_per_year = MiscLoads.get_permanent_spa_pump_default_values(cfa, nbeds_eq)
+          spa.pump_kwh_per_year = get_default_permanent_spa_pump_annual_energy(cfa, nbeds_eq)
           spa.pump_kwh_per_year_isdefaulted = true
         end
         if spa.pump_usage_multiplier.nil?
@@ -3693,7 +3693,7 @@ module HPXMLDefaults
 
       # Heater
       if spa.heater_load_value.nil?
-        default_heater_load_units, default_heater_load_value = MiscLoads.get_permanent_spa_heater_default_values(cfa, nbeds_eq, spa.heater_type)
+        default_heater_load_units, default_heater_load_value = get_default_permanent_spa_heater_annual_energy(cfa, nbeds_eq, spa.heater_type)
         spa.heater_load_units = default_heater_load_units
         spa.heater_load_value = default_heater_load_value
         spa.heater_load_value_isdefaulted = true
@@ -3731,7 +3731,7 @@ module HPXMLDefaults
     unit_type = hpxml_bldg.building_construction.residential_facility_type
     hpxml_bldg.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(cfa, num_occ, unit_type)
+        default_annual_kwh, default_sens_frac, default_lat_frac = get_default_residual_mels_values(cfa, num_occ, unit_type)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3758,7 +3758,7 @@ module HPXMLDefaults
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds, num_occ, unit_type)
+        default_annual_kwh, default_sens_frac, default_lat_frac = get_default_televisions_values(cfa, nbeds, num_occ, unit_type)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3785,7 +3785,7 @@ module HPXMLDefaults
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
-        default_annual_kwh = MiscLoads.get_electric_vehicle_charging_default_values
+        default_annual_kwh = get_default_electric_vehicle_charging_annual_energy
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3812,7 +3812,7 @@ module HPXMLDefaults
           plug_load.monthly_multipliers_isdefaulted = true
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds_eq)
+        default_annual_kwh = get_detault_well_pump_annual_energy(cfa, nbeds_eq)
         if plug_load.kwh_per_year.nil?
           plug_load.kwh_per_year = default_annual_kwh
           plug_load.kwh_per_year_isdefaulted = true
@@ -3857,7 +3857,7 @@ module HPXMLDefaults
     hpxml_bldg.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds_eq)
+          fuel_load.therm_per_year = get_default_gas_grill_annual_energy(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -3883,7 +3883,7 @@ module HPXMLDefaults
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds_eq)
+          fuel_load.therm_per_year = get_detault_gas_lighting_annual_energy(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -3909,7 +3909,7 @@ module HPXMLDefaults
         end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         if fuel_load.therm_per_year.nil?
-          fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds_eq)
+          fuel_load.therm_per_year = get_default_gas_fireplace_annual_energy(cfa, nbeds_eq)
           fuel_load.therm_per_year_isdefaulted = true
         end
         if fuel_load.frac_sensible.nil?
@@ -4394,7 +4394,7 @@ module HPXMLDefaults
   # Gets the default properties for cooking ranges/ovens.
   #
   # @return [Hash] Map of property type => value
-  def self.get_range_oven_default_values()
+  def self.get_default_range_oven_values()
     return { is_induction: false,
              is_convection: false }
   end
@@ -4403,7 +4403,7 @@ module HPXMLDefaults
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [Hash] Map of property type => value
-  def self.get_dishwasher_default_values(eri_version)
+  def self.get_default_dishwasher_values(eri_version)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       return { rated_annual_kwh: 467.0, # kWh/yr
                label_electric_rate: 0.12, # $/kWh
@@ -4425,21 +4425,21 @@ module HPXMLDefaults
   #
   # @param nbeds [Integer] Number of bedrooms in the dwelling unit
   # @return [Hash] Map of property type => value
-  def self.get_refrigerator_default_values(nbeds)
+  def self.get_default_refrigerator_values(nbeds)
     return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
   end
 
   # Gets the default properties for extra refrigerators.
   #
   # @return [Hash] Map of property type => value
-  def self.get_extra_refrigerator_default_values()
+  def self.get_default_extra_refrigerator_values()
     return { rated_annual_kwh: 243.6 } # kWh/yr
   end
 
   # Gets the default properties for freezers.
   #
   # @return [Hash] Map of property type => value
-  def self.get_freezer_default_values()
+  def self.get_default_freezer_values()
     return { rated_annual_kwh: 319.8 } # kWh/yr
   end
 
@@ -4448,7 +4448,7 @@ module HPXMLDefaults
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @param fuel_type [String] HPXML fuel type (HPXML::FuelTypeXXX)
   # @return [Hash] Map of property type => value
-  def self.get_clothes_dryer_default_values(eri_version, fuel_type)
+  def self.get_default_clothes_dryer_values(eri_version, fuel_type)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       return { combined_energy_factor: 3.01 }
     else
@@ -4466,7 +4466,7 @@ module HPXMLDefaults
   #
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
   # @return [Hash] Map of property type => value
-  def self.get_clothes_washer_default_values(eri_version)
+  def self.get_default_clothes_washer_values(eri_version)
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2019A')
       return { integrated_modified_energy_factor: 1.0, # ft3/(kWh/cyc)
                rated_annual_kwh: 400.0, # kWh/yr
@@ -5047,7 +5047,7 @@ module HPXMLDefaults
   #
   # @param collector_area [Double] Area of the collector (ft2)
   # @return [Double] Solar thermal storage volume (gal)
-  def self.calc_default_solar_thermal_system_storage_volume(collector_area)
+  def self.get_default_solar_thermal_system_storage_volume(collector_area)
     return 1.5 * collector_area # Assumption; 1.5 gal for every sqft of collector area
   end
 
@@ -5488,5 +5488,244 @@ module HPXMLDefaults
       months[m] = 1
     end
     return months
+  end
+
+  # Get default location, lifetime model, nominal capacity/voltage, round trip efficiency, and usable fraction for a battery.
+  #
+  # @param has_garage [Boolean] Whether the dwelling unit has a garage
+  # @return [Hash] Map of battery properties to default values
+  def self.get_default_battery_values(has_garage)
+    if has_garage
+      location = HPXML::LocationGarage
+    else
+      location = HPXML::LocationOutside
+    end
+    return { location: location,
+             lifetime_model: HPXML::BatteryLifetimeModelNone,
+             nominal_capacity_kwh: 10.0,
+             nominal_voltage: 50.0,
+             round_trip_efficiency: 0.925, # Based on Tesla Powerwall round trip efficiency (new)
+             usable_fraction: 0.9 } # Fraction of usable capacity to nominal capacity
+  end
+
+  # Gets the default values for a dehumidifier
+  # Used by OS-ERI. FUTURE: Change OS-HPXML inputs to be optional and use these.
+  #
+  # @param capacity [Double] Capacity (pints/day)
+  # @return [Hash] Relative humidity, Integrated Energy Factor (IEF)
+  def self.get_default_dehumidifier_values(capacity)
+    rh_setpoint = 0.6
+    if capacity <= 25.0
+      ief = 0.79
+    elsif capacity <= 35.0
+      ief = 0.95
+    elsif capacity <= 54.0
+      ief = 1.04
+    elsif capacity < 75.0
+      ief = 1.20
+    else
+      ief = 1.82
+    end
+
+    return { rh_setpoint: rh_setpoint, ief: ief }
+  end
+
+  # Gets the default values associated with occupant internal gains.
+  #
+  # @return [Array<Double, Double, Double, Double>] Heat gain (Btu/person/hr), Hours per day, sensible/latent fractions
+  def self.get_default_occupancy_values()
+    # ANSI/RESNET/ICC 301 - Table 4.2.2(3). Internal Gains for Reference Homes
+    hrs_per_day = 16.5 # hrs/day
+    sens_gains = 3716.0 # Btu/person/day
+    lat_gains = 2884.0 # Btu/person/day
+    tot_gains = sens_gains + lat_gains
+    heat_gain = tot_gains / hrs_per_day # Btu/person/hr
+    sens_frac = sens_gains / tot_gains
+    lat_frac = lat_gains / tot_gains
+    return heat_gain, hrs_per_day, sens_frac, lat_frac
+  end
+
+  # Gets the default residual miscellaneous electric (plug) load energy use
+  # and sensible/latent fractions.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param num_occ [Double] Number of occupants in the dwelling unit
+  # @param unit_type [String] HPXML::ResidentialTypeXXX type of dwelling unit
+  # @return [Array<Double, Double, Double>] Plug loads annual use (kWh), sensible/latent fractions
+  def self.get_default_residual_mels_values(cfa, num_occ = nil, unit_type = nil)
+    if num_occ.nil? # Asset calculation
+      # ANSI/RESNET/ICC 301
+      annual_kwh = 0.91 * cfa
+    else # Operational calculation
+      # RECS 2020
+      if unit_type == HPXML::ResidentialTypeSFD
+        annual_kwh = 786.9 + 241.8 * num_occ + 0.33 * cfa
+      elsif unit_type == HPXML::ResidentialTypeSFA
+        annual_kwh = 654.9 + 206.5 * num_occ + 0.21 * cfa
+      elsif unit_type == HPXML::ResidentialTypeApartment
+        annual_kwh = 706.6 + 149.3 * num_occ + 0.10 * cfa
+      elsif unit_type == HPXML::ResidentialTypeManufactured
+        annual_kwh = 1795.1 # No good relationship found in RECS, so just using a constant value
+      end
+    end
+    frac_lost = 0.10
+    frac_sens = (1.0 - frac_lost) * 0.95
+    frac_lat = 1.0 - frac_sens - frac_lost
+    return annual_kwh, frac_sens, frac_lat
+  end
+
+  # Gets the default television energy use and sensible/latent fractions.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param num_occ [Double] Number of occupants in the dwelling unit
+  # @param unit_type [String] HPXML::ResidentialTypeXXX type of dwelling unit
+  # @return [Array<Double, Double, Double>] Television annual use (kWh), sensible/latent fractions
+  def self.get_default_televisions_values(cfa, nbeds, num_occ = nil, unit_type = nil)
+    if num_occ.nil? # Asset calculation
+      # ANSI/RESNET/ICC 301
+      annual_kwh = 413.0 + 69.0 * nbeds
+    else # Operational calculation
+      # RECS 2020
+      # Note: If we know # of televisions, we could use these better relationships instead:
+      # - SFD: 67.7 + 243.4 * num_tv
+      # - SFA: 13.3 + 251.3 * num_tv
+      # - MF:  11.4 + 250.7 * num_tv
+      # - MH:  12.6 + 287.5 * num_tv
+      if unit_type == HPXML::ResidentialTypeSFD
+        annual_kwh = 334.0 + 92.2 * num_occ + 0.06 * cfa
+      elsif unit_type == HPXML::ResidentialTypeSFA
+        annual_kwh = 283.9 + 80.1 * num_occ + 0.07 * cfa
+      elsif unit_type == HPXML::ResidentialTypeApartment
+        annual_kwh = 190.3 + 81.0 * num_occ + 0.11 * cfa
+      elsif unit_type == HPXML::ResidentialTypeManufactured
+        annual_kwh = 99.9 + 129.6 * num_occ + 0.21 * cfa
+      end
+    end
+    frac_lost = 0.0
+    frac_sens = (1.0 - frac_lost) * 1.0
+    frac_lat = 1.0 - frac_sens - frac_lost
+    return annual_kwh, frac_sens, frac_lat
+  end
+
+  # Gets the default pool pump annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (kWh/yr)
+  def self.get_default_pool_pump_annual_energy(cfa, nbeds)
+    return 158.6 / 0.070 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+  end
+
+  # Gets the default pool heater annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param type [String] Type of heater (HPXML::HeaterTypeXXX)
+  # @return [Array<String, Double>] Energy units (HPXML::UnitsXXX), annual energy use (kWh/yr or therm/yr)
+  def self.get_default_pool_heater_annual_energy(cfa, nbeds, type)
+    load_units = nil
+    load_value = nil
+    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include? type
+      load_units = HPXML::UnitsKwhPerYear
+      load_value = 8.3 / 0.004 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+      if type == HPXML::HeaterTypeHeatPump
+        load_value /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
+      end
+    elsif type == HPXML::HeaterTypeGas
+      load_units = HPXML::UnitsThermPerYear
+      load_value = 3.0 / 0.014 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+    end
+    return load_units, load_value
+  end
+
+  # Gets the default permanent spa pump annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (kWh/yr)
+  def self.get_default_permanent_spa_pump_annual_energy(cfa, nbeds)
+    return 59.5 / 0.059 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  # Gets the default permanent spa heater annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @param type [String] Type of heater (HPXML::HeaterTypeXXX)
+  # @return [Array<String, Double>] Energy units (HPXML::UnitsXXX), annual energy use (kWh/yr or therm/yr)
+  def self.get_default_permanent_spa_heater_annual_energy(cfa, nbeds, type)
+    load_units = nil
+    load_value = nil
+    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include? type
+      load_units = HPXML::UnitsKwhPerYear
+      load_value = 49.0 / 0.048 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+      if type == HPXML::HeaterTypeHeatPump
+        load_value /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
+      end
+    elsif type == HPXML::HeaterTypeGas
+      load_units = HPXML::UnitsThermPerYear
+      load_value = 0.87 / 0.011 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+    end
+    return load_units, load_value
+  end
+
+  # Gets the default electric vehicle charging annual energy use.
+  #
+  # @return [Double] Annual energy use (kWh/yr)
+  def self.get_default_electric_vehicle_charging_annual_energy()
+    ev_charger_efficiency = 0.9
+    ev_battery_efficiency = 0.9
+    vehicle_annual_miles_driven = 4500.0
+    vehicle_kWh_per_mile = 0.3
+    return vehicle_annual_miles_driven * vehicle_kWh_per_mile / (ev_charger_efficiency * ev_battery_efficiency)
+  end
+
+  # Gets the default well pump annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (kWh/yr)
+  def self.get_detault_well_pump_annual_energy(cfa, nbeds)
+    return 50.8 / 0.127 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+  end
+
+  # Gets the default gas grill annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (therm/yr)
+  def self.get_default_gas_grill_annual_energy(cfa, nbeds)
+    return 0.87 / 0.029 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+  end
+
+  # Gets the default gas lighting annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (therm/yr)
+  def self.get_detault_gas_lighting_annual_energy(cfa, nbeds)
+    return 0.22 / 0.012 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+  end
+
+  # Gets the default gas fireplace annual energy use.
+  #
+  # @param cfa [Double] Conditioned floor area in the dwelling unit (ft2)
+  # @param nbeds [Integer] Number of bedrooms in the dwelling unit
+  # @return [Double] Annual energy use (therm/yr)
+  def self.get_default_gas_fireplace_annual_energy(cfa, nbeds)
+    return 1.95 / 0.032 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0)
+  end
+
+  # Gets the default values associated with general water use internal gains.
+  #
+  # @param nbeds_eq [Integer] Number of bedrooms (or equivalent bedrooms, as adjusted by the number of occupants) in the dwelling unit
+  # @param general_water_use_usage_multiplier [Double] Usage multiplier on internal gains
+  # @return [Array<Double, Double>] Sensible/latent internal gains (Btu/yr)
+  def self.get_water_gains_sens_lat(nbeds_eq, general_water_use_usage_multiplier = 1.0)
+    # ANSI/RESNET/ICC 301 - Table 4.2.2(3). Internal Gains for Reference Homes
+    sens_gains = (-1227.0 - 409.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
+    lat_gains = (1245.0 + 415.0 * nbeds_eq) * general_water_use_usage_multiplier # Btu/day
+    return sens_gains * 365.0, lat_gains * 365.0
   end
 end
