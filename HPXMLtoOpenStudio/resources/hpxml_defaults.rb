@@ -1594,7 +1594,15 @@ module HPXMLDefaults
             window.interior_shading_blinds_winter_closed_or_open_isdefaulted = true
           end
         end
-        default_int_sf_summer, default_int_sf_winter = get_default_window_interior_shading_factors(window, eri_version)
+        default_int_sf_summer, default_int_sf_winter = get_default_window_interior_shading_factors(
+          window.interior_shading_type,
+          window.shgc,
+          window.interior_shading_coverage_summer,
+          window.interior_shading_coverage_winter,
+          window.interior_shading_blinds_summer_closed_or_open,
+          window.interior_shading_blinds_winter_closed_or_open,
+          eri_version
+        )
         if window.interior_shading_factor_summer.nil? && (not default_int_sf_summer.nil?)
           window.interior_shading_factor_summer = default_int_sf_summer
           window.interior_shading_factor_summer_isdefaulted = true
@@ -4090,20 +4098,25 @@ module HPXMLDefaults
   end
 
   # Gets the default summer/winter interior shading factors for the window.
+  # Note: We can't just pass the window object because OS-ERI needs to define individual arguments.
   #
-  # @param window [HPXML::Window] The window of interest
+  # @param type [String] Shading type (HPXML::InteriorShadingTypeXXX)
+  # @param shgc [Double] Solar heat gain coefficient
+  # @param coverage_summer [Double] Fraction of window area covered in summer
+  # @param coverage_winter [Double] Fraction of window area covered in winter
+  # @param blinds_summer [String] Blinds position in summer (HPXML::BlindsXXX)
+  # @param blinds_winter [String] Blinds position in winter (HPXML::BlindsXXX)
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @param shgc [Double] Solar heat gain coefficient, overrides window.shgc if provided (used by OS-ERI)
   # @return [Array<Double, Double>] The interior summer and winter shading factors
-  def self.get_default_window_interior_shading_factors(window, eri_version, shgc = nil)
-    return 1.0, 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
+  def self.get_default_window_interior_shading_factors(type, shgc, coverage_summer, coverage_winter, blinds_summer, blinds_winter, eri_version)
+    return 1.0, 1.0 if type == HPXML::InteriorShadingTypeNone
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
       # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
       # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
       if [HPXML::InteriorShadingTypeDarkBlinds,
           HPXML::InteriorShadingTypeMediumBlinds,
-          HPXML::InteriorShadingTypeLightBlinds].include? window.interior_shading_type
+          HPXML::InteriorShadingTypeLightBlinds].include? type
         # Shading type, blinds position => c1/c2
         c_map = {
           [HPXML::InteriorShadingTypeDarkBlinds, HPXML::BlindsClosed] => [0.98, 0.25],
@@ -4116,8 +4129,8 @@ module HPXMLDefaults
           [HPXML::InteriorShadingTypeMediumBlinds, HPXML::BlindsOpen] => [0.98, 0.0],
           [HPXML::InteriorShadingTypeLightBlinds, HPXML::BlindsOpen] => [0.98, 0.0],
         }
-        c1_summer, c2_summer = c_map[[window.interior_shading_type, window.interior_shading_blinds_summer_closed_or_open]]
-        c1_winter, c2_winter = c_map[[window.interior_shading_type, window.interior_shading_blinds_winter_closed_or_open]]
+        c1_summer, c2_summer = c_map[[type, blinds_summer]]
+        c1_winter, c2_winter = c_map[[type, blinds_winter]]
       else
         # Shading type => c1/c2
         c_map = {
@@ -4129,18 +4142,16 @@ module HPXMLDefaults
           HPXML::InteriorShadingTypeLightShades => [0.82, 0.42],
           HPXML::InteriorShadingTypeOther => [0.5, 0.0],
         }
-        c1_summer, c2_summer = c_map[window.interior_shading_type]
-        c1_winter, c2_winter = c_map[window.interior_shading_type]
+        c1_summer, c2_summer = c_map[type]
+        c1_winter, c2_winter = c_map[type]
       end
-
-      shgc = window.shgc if shgc.nil?
 
       int_sf_summer = c1_summer - (c2_summer * shgc)
       int_sf_winter = c1_winter - (c2_winter * shgc)
 
       # Apply fraction of window area covered
-      int_sf_summer = apply_shading_coverage(int_sf_summer, window.interior_shading_coverage_summer)
-      int_sf_winter = apply_shading_coverage(int_sf_winter, window.interior_shading_coverage_winter)
+      int_sf_summer = apply_shading_coverage(int_sf_summer, coverage_summer)
+      int_sf_winter = apply_shading_coverage(int_sf_winter, coverage_winter)
     else
       int_sf_summer = 0.70
       int_sf_winter = 0.85
