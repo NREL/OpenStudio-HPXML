@@ -387,7 +387,7 @@ module HotWaterAndAppliances
       avg_setpoint_temp = 0.0 # WH Setpoint: Weighted average by fraction DHW load served
       hpxml_bldg.water_heating_systems.each do |water_heating_system|
         wh_setpoint = water_heating_system.temperature
-        wh_setpoint = HPXMLDefaults.get_default_water_heater_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
+        wh_setpoint = Defaults.get_water_heater_temperature(eri_version) if wh_setpoint.nil? # using detailed schedules
         avg_setpoint_temp += wh_setpoint * water_heating_system.fraction_dhw_load_served
       end
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds_eq, hot_water_distribution, frac_low_flow_fixtures)
@@ -1216,7 +1216,7 @@ module HotWaterAndAppliances
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       p_ratio = hot_water_distribution.recirculation_branch_piping_length / 10.0
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
-      ref_pipe_l = HPXMLDefaults.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+      ref_pipe_l = Defaults.get_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
       p_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     end
 

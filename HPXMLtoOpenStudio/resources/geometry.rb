@@ -11,7 +11,7 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml_header)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     walls_top, _foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.roofs.each do |roof|
@@ -134,7 +134,7 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.apply_walls(runner, model, spaces, hpxml_bldg, hpxml_header)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.walls.each do |wall|
@@ -216,7 +216,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_rim_joists(runner, model, spaces, hpxml_bldg)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.rim_joists.each do |rim_joist|
@@ -299,7 +299,7 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.apply_floors(runner, model, spaces, hpxml_bldg, hpxml_header)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     hpxml_bldg.floors.each do |floor|
@@ -392,7 +392,7 @@ module Geometry
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
   def self.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml_header, schedules_file)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
 
     foundation_types = hpxml_bldg.slabs.map { |s| s.interior_adjacent_to }.uniq
     foundation_types.each do |foundation_type|
@@ -846,7 +846,7 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
   def self.apply_skylights(model, spaces, hpxml_bldg, hpxml_header)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     walls_top, _foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     surfaces = []
@@ -965,7 +965,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
   def self.apply_conditioned_floor_area(model, spaces, hpxml_bldg)
-    default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
+    default_azimuths = Defaults.get_azimuths(hpxml_bldg)
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
     sum_cfa = 0.0
@@ -1808,14 +1808,14 @@ module Geometry
 
     space_values = get_temperature_scheduled_space_values(location)
 
-    htg_weekday_setpoints, htg_weekend_setpoints = HPXMLDefaults.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    htg_weekday_setpoints, htg_weekend_setpoints = Defaults.get_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
     if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
       default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f # F
     else
       fail 'Unexpected heating setpoints.'
     end
 
-    clg_weekday_setpoints, clg_weekend_setpoints = HPXMLDefaults.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    clg_weekday_setpoints, clg_weekend_setpoints = Defaults.get_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
     if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
       default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f # F
     else

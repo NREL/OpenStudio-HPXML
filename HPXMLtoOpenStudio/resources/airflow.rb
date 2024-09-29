@@ -547,8 +547,8 @@ module Airflow
       vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2")
     else
       # No HVAC system; use the average of defaulted heating/cooling setpoints.
-      htg_weekday_setpoints, htg_weekend_setpoints = HPXMLDefaults.get_default_heating_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
-      clg_weekday_setpoints, clg_weekend_setpoints = HPXMLDefaults.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
+      htg_weekday_setpoints, htg_weekend_setpoints = Defaults.get_heating_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
+      clg_weekday_setpoints, clg_weekend_setpoints = Defaults.get_cooling_setpoint(HPXML::HVACControlTypeManual, hpxml_header.eri_calculation_version)
       if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
         default_htg_sp = UnitConversions.convert(htg_weekend_setpoints.split(', ').uniq[0].to_f, 'F', 'C')
       else

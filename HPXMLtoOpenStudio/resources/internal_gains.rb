@@ -19,7 +19,7 @@ module InternalGains
     end
     return if num_occ <= 0
 
-    occ_gain, _hrs_per_day, sens_frac, _lat_frac = HPXMLDefaults.get_default_occupancy_values()
+    occ_gain, _hrs_per_day, sens_frac, _lat_frac = Defaults.get_occupancy_values()
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
 
     # Hard-coded convective, radiative, latent, and lost fractions
@@ -85,7 +85,7 @@ module InternalGains
     nbeds_eq = hpxml_bldg.building_construction.additional_properties.equivalent_number_of_bedrooms
 
     if not hpxml_header.apply_ashrae140_assumptions
-      water_sens_btu, water_lat_btu = HPXMLDefaults.get_default_water_use_internal_gains(nbeds_eq, general_water_use_usage_multiplier)
+      water_sens_btu, water_lat_btu = Defaults.get_water_use_internal_gains(nbeds_eq, general_water_use_usage_multiplier)
 
       # Create schedule
       water_schedule = nil

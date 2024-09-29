@@ -2244,7 +2244,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_tank_volume', false)
     arg.setDisplayName('Water Heater: Tank Volume')
-    arg.setDescription("Nominal volume of water heater tank. Only applies to #{HPXML::WaterHeaterTypeStorage}, #{HPXML::WaterHeaterTypeHeatPump}, and #{HPXML::WaterHeaterTypeCombiStorage}. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>, <a href='#{docs_base_url}#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>) is used.")
+    arg.setDescription("Nominal volume of water heater tank. If not provided, the OS-HPXML default (see <a href='#{docs_base_url}#conventional-storage'>Conventional Storage</a>, <a href='#{docs_base_url}#heat-pump'>Heat Pump</a>, <a href='#{docs_base_url}#combi-boiler-w-storage'>Combi Boiler w/ Storage</a>) is used.")
     arg.setUnits('gal')
     args << arg
 
@@ -3569,7 +3569,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     epw_path = args[:weather_station_epw_filepath]
     if epw_path.nil?
       # Get EPW path from zip code
-      epw_path = HPXMLDefaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
+      epw_path = Defaults.lookup_weather_data_from_zipcode(args[:site_zip_code])[:station_filename]
     end
 
     # Create EpwFile object
@@ -3967,7 +3967,7 @@ module HPXMLFile
         return false
       end
 
-      HPXMLDefaults.apply(runner, hpxml, hpxml_bldg, weather)
+      Defaults.apply(runner, hpxml, hpxml_bldg, weather)
       hpxml_doc = hpxml.to_doc()
       hpxml.set_unique_hpxml_ids(hpxml_doc, true) if hpxml.buildings.size > 1
       XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -6185,7 +6185,7 @@ module HPXMLFile
       if ducts_supply_location == HPXML::LocationConditionedSpace
         args[:ducts_supply_surface_area_fraction] = 1.0
       else
-        args[:ducts_supply_surface_area_fraction] = HPXMLDefaults.get_default_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_supply_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
       end
     end
 
@@ -6194,7 +6194,7 @@ module HPXMLFile
       if ducts_return_location == HPXML::LocationConditionedSpace
         args[:ducts_return_surface_area_fraction] = 1.0
       else
-        args[:ducts_return_surface_area_fraction] = HPXMLDefaults.get_default_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
+        args[:ducts_return_surface_area_fraction] = Defaults.get_duct_outside_fraction(args[:geometry_unit_num_floors_above_grade])
       end
     end
 
@@ -6286,7 +6286,7 @@ module HPXMLFile
   def self.set_hvac_control(hpxml, hpxml_bldg, args, weather)
     return if (args[:heating_system_type] == Constants::None) && (args[:cooling_system_type] == Constants::None) && (args[:heat_pump_type] == Constants::None)
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
 
     # Heating
     if hpxml_bldg.total_fraction_heat_load_served > 0
@@ -6716,7 +6716,7 @@ module HPXMLFile
       collector_loop_type = args[:solar_thermal_collector_loop_type]
       collector_type = args[:solar_thermal_collector_type]
       collector_azimuth = args[:solar_thermal_collector_azimuth]
-      latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
+      latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
       collector_tilt = Geometry.get_absolute_tilt(tilt_str: args[:solar_thermal_collector_tilt], roof_pitch: args[:geometry_roof_pitch], latitude: latitude)
       collector_rated_optical_efficiency = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_rated_thermal_losses = args[:solar_thermal_collector_rated_thermal_losses]
@@ -6766,7 +6766,7 @@ module HPXMLFile
       end
     end
 
-    latitude = HPXMLDefaults.get_default_latitude(args[:site_latitude], weather) unless weather.nil?
+    latitude = Defaults.get_latitude(args[:site_latitude], weather) unless weather.nil?
 
     hpxml_bldg.pv_systems.add(id: "PVSystem#{hpxml_bldg.pv_systems.size + 1}",
                               location: args[:pv_system_location],

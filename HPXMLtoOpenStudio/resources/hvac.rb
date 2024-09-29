@@ -1325,7 +1325,7 @@ module HVAC
     ceiling_fan_sch = nil
     ceiling_fan_col_name = SchedulesFile::Columns[:CeilingFan].name
     if not schedules_file.nil?
-      annual_kwh *= HPXMLDefaults.get_default_ceiling_fan_months(weather).map(&:to_f).sum(0.0) / 12.0
+      annual_kwh *= Defaults.get_ceiling_fan_months(weather).map(&:to_f).sum(0.0) / 12.0
       ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: ceiling_fan_col_name, annual_kwh: annual_kwh)
       ceiling_fan_sch = schedules_file.create_schedule_file(model, col_name: ceiling_fan_col_name)
     end
@@ -1568,7 +1568,7 @@ module HVAC
     if has_ceiling_fan
       clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
       if not clg_ceiling_fan_offset.nil?
-        months = HPXMLDefaults.get_default_ceiling_fan_months(weather)
+        months = Defaults.get_ceiling_fan_months(weather)
         Calendar.months_to_days(year, months).each_with_index do |operation, d|
           next if operation != 1
 
@@ -3039,7 +3039,7 @@ module HVAC
       indoor_t = [50.0, rated_t_i, 80.0]
     else
       # default capacity retention for single speed
-      retention_temp, retention_fraction = HPXMLDefaults.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
+      retention_temp, retention_fraction = Defaults.get_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]

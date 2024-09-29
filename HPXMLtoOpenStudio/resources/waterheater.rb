@@ -364,10 +364,10 @@ module Waterheater
     ocd_eff = 0.0
     sew_fact = ew_fact - oew_fact
     if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
-      ref_pipe_l = HPXMLDefaults.get_default_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+      ref_pipe_l = Defaults.get_std_pipe_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
       pe_ratio = hot_water_distribution.standard_piping_length / ref_pipe_l
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
-      ref_loop_l = HPXMLDefaults.get_default_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
+      ref_loop_l = Defaults.get_recirc_loop_length(has_uncond_bsmnt, has_cond_bsmnt, cfa, ncfl)
       pe_ratio = hot_water_distribution.recirculation_piping_loop_length / ref_loop_l
     end
     e_waste = oew_fact * (1.0 - ocd_eff) + sew_fact * pe_ratio
@@ -2176,7 +2176,7 @@ module Waterheater
     name = 'dhw loop'
 
     if t_set_c.nil?
-      t_set_c = UnitConversions.convert(HPXMLDefaults.get_default_water_heater_temperature(eri_version), 'F', 'C')
+      t_set_c = UnitConversions.convert(Defaults.get_water_heater_temperature(eri_version), 'F', 'C')
     end
 
     loop = OpenStudio::Model::PlantLoop.new(model)
