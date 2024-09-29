@@ -1808,14 +1808,14 @@ module Geometry
 
     space_values = get_temperature_scheduled_space_values(location)
 
-    htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    htg_weekday_setpoints, htg_weekend_setpoints = HPXMLDefaults.get_default_heating_setpoint(HPXML::HVACControlTypeManual, @eri_version)
     if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
       default_htg_sp = htg_weekend_setpoints.split(', ').uniq[0].to_f # F
     else
       fail 'Unexpected heating setpoints.'
     end
 
-    clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
+    clg_weekday_setpoints, clg_weekend_setpoints = HPXMLDefaults.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, @eri_version)
     if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
       default_clg_sp = clg_weekend_setpoints.split(', ').uniq[0].to_f # F
     else

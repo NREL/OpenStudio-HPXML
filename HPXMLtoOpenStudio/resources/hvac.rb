@@ -1317,7 +1317,7 @@ module HVAC
     if !label_energy_use.nil? # priority if both provided
       annual_kwh = UnitConversions.convert(count * label_energy_use * hrs_per_day * 365.0, 'Wh', 'kWh')
     elsif !cfm_per_w.nil?
-      medium_cfm = get_default_ceiling_fan_medium_cfm()
+      medium_cfm = 3000.0 # cfm, per ANSI 301-2019
       annual_kwh = UnitConversions.convert(count * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
     end
 
@@ -1585,68 +1585,6 @@ module HVAC
     clg_we_setpoints = clg_we_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
 
     return clg_wd_setpoints, clg_we_setpoints
-  end
-
-  # TODO
-  #
-  # @param control_type [TODO] TODO
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_default_heating_setpoint(control_type, eri_version)
-    # Per ANSI/RESNET/ICC 301
-    htg_wd_setpoints = '68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68'
-    htg_we_setpoints = '68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68'
-    if control_type == HPXML::HVACControlTypeProgrammable
-      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
-        htg_wd_setpoints = '66, 66, 66, 66, 66, 67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
-        htg_we_setpoints = '66, 66, 66, 66, 66, 67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
-      else
-        htg_wd_setpoints = '66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
-        htg_we_setpoints = '66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
-      end
-    elsif control_type != HPXML::HVACControlTypeManual
-      fail "Unexpected control type #{control_type}."
-    end
-    return htg_wd_setpoints, htg_we_setpoints
-  end
-
-  # TODO
-  #
-  # @param control_type [TODO] TODO
-  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
-  # @return [TODO] TODO
-  def self.get_default_cooling_setpoint(control_type, eri_version)
-    # Per ANSI/RESNET/ICC 301
-    clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-    clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-    if control_type == HPXML::HVACControlTypeProgrammable
-      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
-        clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 79, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-        clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 79, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-      else
-        clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-        clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 78, 78, 78, 78'
-      end
-    elsif control_type != HPXML::HVACControlTypeManual
-      fail "Unexpected control type #{control_type}."
-    end
-    return clg_wd_setpoints, clg_we_setpoints
-  end
-
-  # TODO
-  #
-  # @param compressor_type [TODO] TODO
-  # @param hspf [TODO] TODO
-  # @return [TODO] TODO
-  def self.get_default_heating_capacity_retention(compressor_type, hspf = nil)
-    retention_temp = 5.0
-    if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? compressor_type
-      retention_fraction = 0.425
-    elsif [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
-      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
-      retention_fraction = (0.0461 * hspf + 0.1594).round(4)
-    end
-    return retention_temp, retention_fraction
   end
 
   # TODO
@@ -2090,29 +2028,6 @@ module HVAC
 
     hp_ap.cool_rated_cops = [1.0 / cool_eir]
     hp_ap.heat_rated_cops = [1.0 / heat_eir]
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_default_ceiling_fan_medium_cfm()
-    # From ANSI 301-2019
-    return 3000.0 # cfm
-  end
-
-  # Return a 12-element array of 1s and 0s that reflects months for which the average drybulb temperature is greater than 63F.
-  #
-  # @param weather [WeatherFile] Weather object containing EPW information
-  # @return [Array<Integer>] monthly array of 1s and 0s
-  def self.get_default_ceiling_fan_months(weather)
-    # Per ANSI/RESNET/ICC 301
-    months = [0] * 12
-    weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-      next unless val > 63.0 # F
-
-      months[m] = 1
-    end
-    return months
   end
 
   # TODO
@@ -3124,7 +3039,7 @@ module HVAC
       indoor_t = [50.0, rated_t_i, 80.0]
     else
       # default capacity retention for single speed
-      retention_temp, retention_fraction = get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
+      retention_temp, retention_fraction = HPXMLDefaults.get_default_heating_capacity_retention(HPXML::HVACCompressorTypeSingleStage)
       cap_ft_spec_ss, eir_ft_spec_ss = get_heat_cap_eir_ft_spec(HPXML::HVACCompressorTypeSingleStage, retention_temp, retention_fraction)
       rated_t_i = HVAC::AirSourceHeatRatedIDB
       indoor_t = [60.0, rated_t_i, 80.0]

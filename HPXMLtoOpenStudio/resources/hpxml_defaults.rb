@@ -791,7 +791,7 @@ module HPXMLDefaults
         # Shielding Class 5 is ACCA MJ8 default for Table 5B/5E for townhouses and condos
         hpxml_bldg.site.shielding_of_home = HPXML::ShieldingWellShielded
       else
-        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET 301 default
+        # Shielding Class 4 is ACCA MJ8 default for Table 5A/5D and ANSI/RESNET/ICC 301 default
         hpxml_bldg.site.shielding_of_home = HPXML::ShieldingNormal
       end
       hpxml_bldg.site.shielding_of_home_isdefaulted = true
@@ -1923,7 +1923,7 @@ module HPXMLDefaults
       next if [HPXML::HVACTypeHeatPumpGroundToAir, HPXML::HVACTypeHeatPumpWaterLoopToAir].include? heat_pump.heat_pump_type
       next unless heat_pump.heating_detailed_performance_data.empty? # set after hvac sizing
 
-      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = HVAC.get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
+      heat_pump.heating_capacity_retention_temp, heat_pump.heating_capacity_retention_fraction = get_default_heating_capacity_retention(heat_pump.compressor_type, heat_pump.heating_efficiency_hspf)
       heat_pump.heating_capacity_retention_fraction_isdefaulted = true
       heat_pump.heating_capacity_retention_temp_isdefaulted = true
     end
@@ -2419,7 +2419,7 @@ module HPXMLDefaults
       schedules_file_includes_heating_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:HeatingSetpoint].name))
       if hvac_control.heating_setpoint_temp.nil? && hvac_control.weekday_heating_setpoints.nil? && !schedules_file_includes_heating_setpoint_temp
         # No heating setpoints; set a default heating setpoint for, e.g., natural ventilation
-        htg_weekday_setpoints, htg_weekend_setpoints = HVAC.get_default_heating_setpoint(HPXML::HVACControlTypeManual, eri_version)
+        htg_weekday_setpoints, htg_weekend_setpoints = get_default_heating_setpoint(HPXML::HVACControlTypeManual, eri_version)
         if htg_weekday_setpoints.split(', ').uniq.size == 1 && htg_weekend_setpoints.split(', ').uniq.size == 1 && htg_weekday_setpoints.split(', ').uniq == htg_weekend_setpoints.split(', ').uniq
           hvac_control.heating_setpoint_temp = htg_weekend_setpoints.split(', ').uniq[0].to_f
         else
@@ -2431,7 +2431,7 @@ module HPXMLDefaults
       schedules_file_includes_cooling_setpoint_temp = (schedules_file.nil? ? false : schedules_file.includes_col_name(SchedulesFile::Columns[:CoolingSetpoint].name))
       if hvac_control.cooling_setpoint_temp.nil? && hvac_control.weekday_cooling_setpoints.nil? && !schedules_file_includes_cooling_setpoint_temp
         # No cooling setpoints; set a default cooling setpoint for, e.g., natural ventilation
-        clg_weekday_setpoints, clg_weekend_setpoints = HVAC.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, eri_version)
+        clg_weekday_setpoints, clg_weekend_setpoints = HPXMLDefaults.get_default_cooling_setpoint(HPXML::HVACControlTypeManual, eri_version)
         if clg_weekday_setpoints.split(', ').uniq.size == 1 && clg_weekend_setpoints.split(', ').uniq.size == 1 && clg_weekday_setpoints.split(', ').uniq == clg_weekend_setpoints.split(', ').uniq
           hvac_control.cooling_setpoint_temp = clg_weekend_setpoints.split(', ').uniq[0].to_f
         else
@@ -4546,7 +4546,7 @@ module HPXMLDefaults
   #
   # @return [Double] Pump power (W)
   def self.get_default_shared_recirc_pump_power()
-    # From ANSI/RESNET 301-2019 Equation 4.2-15b
+    # From ANSI/RESNET/ICC 301-2019 Equation 4.2-15b
     pump_horsepower = 0.25
     motor_efficiency = 0.85
     pump_kw = pump_horsepower * 0.746 / motor_efficiency
@@ -5393,5 +5393,100 @@ module HPXMLDefaults
         return 330.0 # kWh/yr
       end
     end
+  end
+
+  # Gets the default interior/garage/exterior lighting fractions per ANSI/RESNET/ICC 301.
+  # Used by OS-ERI, OS-HEScore, etc.
+  #
+  # @return [Hash] Map of [HPXML::LocationXXX, HPXML::LightingTypeXXX] => lighting fraction
+  def self.get_default_lighting_fractions()
+    ltg_fracs = {}
+    [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
+      [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
+        if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
+          ltg_fracs[[location, lighting_type]] = 0.1
+        else
+          ltg_fracs[[location, lighting_type]] = 0
+        end
+      end
+    end
+    return ltg_fracs
+  end
+
+  # Gets the default heating setpoints per ANSI/RESNET/ICC 301.
+  #
+  # @param control_type [String] Thermostat control type (HPXML::HVACControlTypeXXX)
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Array<String, String>] 24 hourly comma-separated weekday and weekend setpoints
+  def self.get_default_heating_setpoint(control_type, eri_version)
+    # Per ANSI/RESNET/ICC 301
+    htg_wd_setpoints = '68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68'
+    htg_we_setpoints = '68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68'
+    if control_type == HPXML::HVACControlTypeProgrammable
+      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
+        htg_wd_setpoints = '66, 66, 66, 66, 66, 67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
+        htg_we_setpoints = '66, 66, 66, 66, 66, 67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
+      else
+        htg_wd_setpoints = '66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
+        htg_we_setpoints = '66, 66, 66, 66, 66, 66, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 66'
+      end
+    elsif control_type != HPXML::HVACControlTypeManual
+      fail "Unexpected control type #{control_type}."
+    end
+    return htg_wd_setpoints, htg_we_setpoints
+  end
+
+  # Gets the default cooling setpoints per ANSI/RESNET/ICC 301.
+  #
+  # @param control_type [String] Thermostat control type (HPXML::HVACControlTypeXXX)
+  # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @return [Array<String, String>] 24 hourly comma-separated weekday and weekend setpoints
+  def self.get_default_cooling_setpoint(control_type, eri_version)
+    # Per ANSI/RESNET/ICC 301
+    clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+    clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+    if control_type == HPXML::HVACControlTypeProgrammable
+      if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022')
+        clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 79, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+        clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 79, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+      else
+        clg_wd_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+        clg_we_setpoints = '78, 78, 78, 78, 78, 78, 78, 78, 78, 80, 80, 80, 80, 80, 80, 78, 78, 78, 78, 78, 78, 78, 78, 78'
+      end
+    elsif control_type != HPXML::HVACControlTypeManual
+      fail "Unexpected control type #{control_type}."
+    end
+    return clg_wd_setpoints, clg_we_setpoints
+  end
+
+  # Gets the default heating capacity retention at 5F for a heat pump.
+  #
+  # @param compressor_type [String] Type of compressor (HPXML::HVACCompressorTypeXXX)
+  # @param hspf [Double] Heat pump efficiency
+  # @return [Array<Double, Double>] Temperature (F), heating capacity retention at the temperature (frac)
+  def self.get_default_heating_capacity_retention(compressor_type, hspf = nil)
+    retention_temp = 5.0
+    if [HPXML::HVACCompressorTypeSingleStage, HPXML::HVACCompressorTypeTwoStage].include? compressor_type
+      retention_fraction = 0.425
+    elsif [HPXML::HVACCompressorTypeVariableSpeed].include? compressor_type
+      # Default maximum capacity maintenance based on NEEP data for all var speed heat pump types, if not provided
+      retention_fraction = (0.0461 * hspf + 0.1594).round(4)
+    end
+    return retention_temp, retention_fraction
+  end
+
+  # Gets a 12-element array of 1s and 0s that reflects months for which the ceiling fan operates
+  # (i.e., when the average drybulb temperature is greater than 63F, per ANSI/RESNET/ICC 301).
+  #
+  # @param weather [WeatherFile] Weather object containing EPW information
+  # @return [Array<Integer>] monthly array of 1s and 0s
+  def self.get_default_ceiling_fan_months(weather)
+    months = [0] * 12
+    weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
+      next unless val > 63.0 # F
+
+      months[m] = 1
+    end
+    return months
   end
 end
