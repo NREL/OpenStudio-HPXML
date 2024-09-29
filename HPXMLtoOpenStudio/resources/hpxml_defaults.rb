@@ -4093,8 +4093,9 @@ module HPXMLDefaults
   #
   # @param window [HPXML::Window] The window of interest
   # @param eri_version [String] Version of the ANSI/RESNET/ICC 301 Standard to use for equations/assumptions
+  # @param shgc [Double] Solar heat gain coefficient, overrides window.shgc if provided (used by OS-ERI)
   # @return [Array<Double, Double>] The interior summer and winter shading factors
-  def self.get_default_window_interior_shading_factors(window, eri_version)
+  def self.get_default_window_interior_shading_factors(window, eri_version, shgc = nil)
     return 1.0, 1.0 if window.interior_shading_type == HPXML::InteriorShadingTypeNone
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
@@ -4132,8 +4133,10 @@ module HPXMLDefaults
         c1_winter, c2_winter = c_map[window.interior_shading_type]
       end
 
-      int_sf_summer = c1_summer - (c2_summer * window.shgc)
-      int_sf_winter = c1_winter - (c2_winter * window.shgc)
+      shgc = window.shgc if shgc.nil?
+
+      int_sf_summer = c1_summer - (c2_summer * shgc)
+      int_sf_winter = c1_winter - (c2_winter * shgc)
 
       # Apply fraction of window area covered
       int_sf_summer = apply_shading_coverage(int_sf_summer, window.interior_shading_coverage_summer)
