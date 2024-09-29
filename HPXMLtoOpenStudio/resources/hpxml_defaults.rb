@@ -3592,7 +3592,7 @@ module HPXMLDefaults
       ceiling_fan.weekend_fractions_isdefaulted = true
     end
     if ceiling_fan.monthly_multipliers.nil? && !schedules_file_includes_ceiling_fan
-      ceiling_fan.monthly_multipliers = HVAC.get_default_ceiling_fan_months(weather).join(', ')
+      ceiling_fan.monthly_multipliers = HPXMLDefaults.get_default_ceiling_fan_months(weather).join(', ')
       ceiling_fan.monthly_multipliers_isdefaulted = true
     end
   end
