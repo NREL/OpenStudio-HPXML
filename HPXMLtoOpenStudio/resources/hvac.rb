@@ -1680,7 +1680,7 @@ module HVAC
   # @return [TODO] TODO
   def self.set_cool_curves_central_air_source(cooling_system, use_eer = false)
     clg_ap = cooling_system.additional_properties
-    clg_ap.cool_rated_cfm_per_ton = get_default_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
+    clg_ap.cool_rated_cfm_per_ton = get_cool_cfm_per_ton(cooling_system.compressor_type, use_eer)
     clg_ap.cool_capacity_ratios = get_cool_capacity_ratios(cooling_system)
     set_cool_c_d(cooling_system)
 
@@ -1746,7 +1746,7 @@ module HVAC
   # @return [TODO] TODO
   def self.set_heat_curves_central_air_source(heating_system, use_cop = false)
     htg_ap = heating_system.additional_properties
-    htg_ap.heat_rated_cfm_per_ton = get_default_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
+    htg_ap.heat_rated_cfm_per_ton = get_heat_cfm_per_ton(heating_system.compressor_type, use_cop)
     htg_ap.heat_cap_fflow_spec, htg_ap.heat_eir_fflow_spec = get_heat_cap_eir_fflow_spec(heating_system.compressor_type)
     htg_ap.heat_capacity_ratios = get_heat_capacity_ratios(heating_system)
     set_heat_c_d(heating_system)
@@ -1950,7 +1950,7 @@ module HVAC
   # @param compressor_type [TODO] TODO
   # @param use_eer [TODO] TODO
   # @return [TODO] TODO
-  def self.get_default_cool_cfm_per_ton(compressor_type, use_eer = false)
+  def self.get_cool_cfm_per_ton(compressor_type, use_eer = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       if not use_eer
@@ -1972,7 +1972,7 @@ module HVAC
   # @param compressor_type [TODO] TODO
   # @param use_cop_or_htg_sys [TODO] TODO
   # @return [TODO] TODO
-  def self.get_default_heat_cfm_per_ton(compressor_type, use_cop_or_htg_sys = false)
+  def self.get_heat_cfm_per_ton(compressor_type, use_cop_or_htg_sys = false)
     # cfm/ton of rated capacity
     if compressor_type == HPXML::HVACCompressorTypeSingleStage
       if not use_cop_or_htg_sys
