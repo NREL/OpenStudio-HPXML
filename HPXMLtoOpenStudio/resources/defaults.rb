@@ -5040,7 +5040,7 @@ module Defaults
       # FUTURE: Develop a separate algorithm specific to UEF.
       ef = water_heating_system.energy_factor
       if ef.nil?
-        ef = calc_ef_from_uef(water_heating_system)
+        ef = Waterheater.calc_ef_from_uef(water_heating_system)
       end
       # Based on a regression of AHRI certified water heaters
       if ef >= 0.75 # Condensing water heater
