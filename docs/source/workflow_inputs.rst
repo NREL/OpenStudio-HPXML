@@ -1619,6 +1619,7 @@ HPXML Exterior Shading
 ~~~~~~~~~~~~~~~~~~~~~~
 
 If exterior shading is specified, additional information is entered in ``ExteriorShading``.
+Either winter/summer shading coefficients can be directly provided, or they can be defaulted from the other inputs.
 
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
@@ -1663,6 +1664,7 @@ HPXML Interior Shading
 ~~~~~~~~~~~~~~~~~~~~~~
 
 If interior shading is specified, additional information is entered in ``InteriorShading``.
+Either winter/summer shading coefficients can be directly provided, or they can be defaulted from the other inputs.
 
   ============================  ======  =====  ===========  ========  =========  =============================================================
   Element                       Type    Units  Constraints  Required  Default    Notes
@@ -1733,6 +1735,7 @@ HPXML Insect Screen
 ~~~~~~~~~~~~~~~~~~~
 
 If an insect screen is specified, additional information is entered in ``InsectScreen``.
+Either winter/summer shading coefficients can be directly provided, or they can be defaulted from the other inputs.
 
   ============================  ========  ======  ===========  ========  ========  ========================================================
   Element                       Type      Units   Constraints  Required  Default   Notes
@@ -4045,7 +4048,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``WaterHeaterType``                            string                           heat pump water heater  Yes                    Type of water heater
   ``Location``                                   string                           See [#]_                No        See [#]_     Water heater location
   ``IsSharedSystem``                             boolean                                                  No        false        Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double            gal            > 0                     Yes                    Nominal tank volume
+  ``TankVolume``                                 double            gal            > 0                     No        See [#]_     Nominal tank volume
   ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                    Fraction of hot water load served [#]_
   ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                    EnergyGuide label rated efficiency
   ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto  Operating mode [#]_
@@ -4064,6 +4067,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
 
+  .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
@@ -4093,7 +4097,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
   ``WaterHeaterType``                            string                 space-heating boiler with storage tank  Yes                     Type of water heater
   ``Location``                                   string                 See [#]_                                No            See [#]_  Water heater location
   ``IsSharedSystem``                             boolean                                                        No            false     Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double   gal           > 0                                     Yes                     Nominal volume of the storage tank
+  ``TankVolume``                                 double   gal           > 0                                     No            See [#]_  Nominal volume of the storage tank
   ``FractionDHWLoadServed``                      double   frac          >= 0, <= 1 [#]_                         Yes                     Fraction of hot water load served [#]_
   ``WaterHeaterInsulation/Jacket/JacketRValue``  double   F-ft2-hr/Btu  >= 0                                    No            0         R-value of additional storage tank insulation wrap
   ``StandbyLoss[Units="F/hr"]/Value``            double   F/hr          > 0                                     No            See [#]_  Storage tank standby losses
@@ -4110,6 +4114,7 @@ Each combination boiler w/ storage tank (sometimes referred to as an indirect wa
          
          \- **IECC zones 3-8, unknown**: "basement - unconditioned", "basement - conditioned", "conditioned space"
          
+  .. [#] If TankVolume not provided, defaults based on Table 8 in the `2014 BAHSP <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf>`_.
   .. [#] The sum of all ``FractionDHWLoadServed`` (across all WaterHeatingSystems) must equal to 1.
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
