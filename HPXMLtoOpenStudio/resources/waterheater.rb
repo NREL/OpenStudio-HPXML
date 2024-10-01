@@ -2226,32 +2226,38 @@ module Waterheater
     return solar_fraction.to_f
   end
 
-  # TODO
+  # Add an EMS program for calculating unmet showers using sensors on mixed water temperature,
+  # shower volume, and water heater use side outlet temperature schedules.
   #
-  # @param model [TODO] TODO
-  # @param water_heating_systems [TODO] TODO
-  # @param plantloop_map [TODO] TODO
-  # @param showers_peak_flows [TODO] TODO
-  # @return [TODO] TODO
-  def self.unmet_wh_loads_program(model, water_heating_systems, plantloop_map, _showers_peak_flows)
-    return if water_heating_systems.empty?
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param water_heating_systems [Array<HPXML::WaterHeatingSystem>] The HPXML water heaters of interest
+  # @param plantloop_map [Hash] Map of HPXML System ID => OpenStudio PlantLoop objects
+  # @param mw_temp_schedule [OpenStudio::Model::ScheduleConstant] The mixed water temperature schedule
+  # @param showers_schedule_name [String] The name of the shower schedule
+  # @return [nil]
+  def self.unmet_showers_program(model, water_heating_systems, plantloop_map, mw_temp_schedule, showers_schedule_name)
+    return if water_heating_systems.empty? || mw_temp_schedule.nil?
 
     # EMS sensors
-    mixed_setpoint_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    mixed_setpoint_sensor.setName('res_shower_mixsp')
-    mixed_setpoint_sensor.setKeyName('mixed water temperature schedule')
+    mixed_setpoint_sensor = Model.add_ems_sensor(
+      model,
+      name: 'res_shower_mixsp',
+      output_var_or_meter_name: 'Schedule Value',
+      key_name: mw_temp_schedule.name
+    )
 
-    shower_flow_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    shower_flow_sensor.setName('Shower Volume')
-    (model.getScheduleRulesets + model.getScheduleFiles).each do |schedule|
-      next if !schedule.name.to_s.include?(Constants::ObjectTypeShowers)
-
-      shower_flow_sensor.setKeyName(schedule.name.to_s)
-    end
+    shower_flow_sensor = Model.add_ems_sensor(
+      model,
+      name: 'shower_volume',
+      output_var_or_meter_name: 'Schedule Value',
+      key_name: showers_schedule_name
+    )
 
     # EMS program
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName('unmet loads program')
+    program = Model.add_ems_program(
+      model,
+      name: 'unmet showers program'
+    )
     program.addLine('Set ShowerUnmetTime = 0') # Init
     program.addLine('Set ShowerTime = 0') # Init
     program.addLine('If WarmupFlag == 0') # Prevent unmet hours in the first hour because of the warmup period
@@ -2273,9 +2279,12 @@ module Waterheater
         end
       end
 
-      wh_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Use Side Outlet Temperature')
-      wh_temp_sensor.setName("#{tank.name} Outlet Temperature")
-      wh_temp_sensor.setKeyName("#{tank.name}")
+      wh_temp_sensor = Model.add_ems_sensor(
+        model,
+        name: "#{tank.name} Outlet Temperature",
+        output_var_or_meter_name: 'Water Heater Use Side Outlet Temperature',
+        key_name: tank.name
+      )
 
       program.addLine("If (#{shower_flow_sensor.name} > 0) && (#{wh_temp_sensor.name} < #{mixed_setpoint_sensor.name})")
       program.addLine('Set ShowerUnmetTime = 1')
@@ -2291,15 +2300,27 @@ module Waterheater
     program.addLine('EndIf')
 
     # EMS calling manager
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{program.name} calling manager")
-    manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
-    manager.addProgram(program)
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfSystemTimestepAfterHVACReporting',
+      ems_programs: [program]
+    )
 
-    shower_unmet_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerUnmetTime")
+    # Global variable
+    shower_unmet_time_var = Model.add_ems_global_var(
+      model,
+      var_name: "#{program.name}_ShowerUnmetTime"
+    )
     shower_unmet_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerUnmetTime)
-    shower_time_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{program.name}_ShowerTime")
+
+    # Global variable
+    shower_time_var = Model.add_ems_global_var(
+      model,
+      var_name: "#{program.name}_ShowerTime"
+    )
     shower_time_var.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsShowerTime)
+
     program.addLine("Set #{shower_unmet_time_var.name} = ShowerUnmetTime")
     program.addLine("Set #{shower_time_var.name} = ShowerTime")
   end

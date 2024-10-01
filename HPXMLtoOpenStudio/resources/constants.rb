@@ -79,7 +79,7 @@ module Constants
   ObjectTypeTotalLoadsProgram = 'total loads program'
   ObjectTypeUnitHeater = 'unit heater'
   ObjectTypeUnmetHoursProgram = 'unmet hours program'
-  ObjectTypeUnmetLoadsProgram = 'unmet loads program'
+  ObjectTypeUnmetShowersProgram = 'unmet showers program'
   ObjectTypeUnmetLoadsShowerUnmetTime = 'unmet loads shower unmet time'
   ObjectTypeUnmetLoadsShowerTime = 'unmet loads shower time'
   ObjectTypeWaterHeater = 'water heater'

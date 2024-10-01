@@ -14,12 +14,12 @@ module Outputs
   # @return [nil]
   def self.apply_ems_programs(model, hpxml_osm_map, hpxml_header, add_component_loads)
     season_day_nums = Outputs.apply_unmet_hours_ems_program(model, hpxml_osm_map, hpxml_header)
+    Outputs.add_unmet_showers_ems_program(model, hpxml_osm_map)
     loads_data = Outputs.apply_total_loads_ems_program(model, hpxml_osm_map, hpxml_header)
     if add_component_loads
       Outputs.apply_component_loads_ems_program(model, hpxml_osm_map, loads_data, season_day_nums)
     end
     Outputs.apply_total_airflows_ems_program(model, hpxml_osm_map)
-    Outputs.add_unmet_loads_output(model, hpxml_osm_map)
   end
 
   # Creates an EMS program that calculates heating and cooling unmet hours (number
@@ -167,6 +167,57 @@ module Outputs
     )
 
     return season_day_nums
+  end
+
+  # Creates unmet showers outputs that use max hourly value across all individual dwelling
+  # units for output reporting.
+  #
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
+  # @return [void]
+  def self.add_unmet_showers_ems_program(model, hpxml_osm_map)
+    return if hpxml_osm_map.select { |hpxml_bldg, _unit_model| !hpxml_bldg.water_heating_systems.empty? }.empty?
+
+    # Retrieve objects
+    shower_unmet_time_vars = []
+    shower_time_vars = []
+    hpxml_osm_map.each do |_hpxml_bldg, unit_model|
+      shower_unmet_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerUnmetTime }
+      shower_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerTime }
+    end
+
+    # EMS program
+    total_shower_unmet_time = 'total_shower_unmet_time'
+    total_shower_time = 'total_shower_time'
+    unit_shower_unmet_time = 'unit_shower_unmet_time'
+    unit_shower_time = 'unit_shower_time'
+    program = Model.add_ems_program(
+      model,
+      name: 'unmet showers program'
+    )
+    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetShowersProgram)
+    program.addLine("Set #{total_shower_unmet_time} = 0")
+    program.addLine("Set #{total_shower_time} = 0")
+    shower_unmet_time_vars.each_with_index do |shower_unmet_time_var, _i|
+      program.addLine("Set #{unit_shower_unmet_time} = #{shower_unmet_time_var.name}")
+      program.addLine("  If #{unit_shower_unmet_time} > #{total_shower_unmet_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_unmet_time} = #{unit_shower_unmet_time}")
+      program.addLine('  EndIf')
+    end
+    shower_time_vars.each_with_index do |shower_time_var, _i|
+      program.addLine("Set #{unit_shower_time} = #{shower_time_var.name}")
+      program.addLine("  If #{unit_shower_time} > #{total_shower_time}") # Use max hourly value across all units
+      program.addLine("    Set #{total_shower_time} = #{unit_shower_time}")
+      program.addLine('  EndIf')
+    end
+
+    # EMS calling manager
+    Model.add_ems_program_calling_manager(
+      model,
+      name: "#{program.name} calling manager",
+      calling_point: 'EndOfZoneTimestepAfterZoneReporting',
+      ems_programs: [program]
+    )
   end
 
   # Creates an EMS program that calculates total heating and cooling loads delivered
@@ -873,55 +924,6 @@ module Outputs
       calling_point: 'EndOfZoneTimestepAfterZoneReporting',
       ems_programs: [program]
     )
-  end
-
-  # TODO
-  #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
-  # @return [void]
-  def self.add_unmet_loads_output(model, hpxml_osm_map)
-    return if hpxml_osm_map.select { |hpxml_bldg, _unit_model| !hpxml_bldg.water_heating_systems.empty? }.empty?
-
-    # Retrieve objects
-    shower_unmet_time_vars = []
-    shower_time_vars = []
-    unit_multipliers = []
-    hpxml_osm_map.each do |hpxml_bldg, unit_model|
-      shower_unmet_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerUnmetTime }
-      shower_time_vars << unit_model.getEnergyManagementSystemGlobalVariables.find { |v| v.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetLoadsShowerTime }
-
-      unit_multipliers << hpxml_bldg.building_construction.number_of_units
-    end
-
-    # EMS program
-    total_shower_unmet_time = 'total_shower_unmet_time'
-    total_shower_time = 'total_shower_time'
-    unit_shower_unmet_time = 'unit_shower_unmet_time'
-    unit_shower_time = 'unit_shower_time'
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName('unmet loads program')
-    program.additionalProperties.setFeature('ObjectType', Constants::ObjectTypeUnmetLoadsProgram)
-    program.addLine("Set #{total_shower_unmet_time} = 0")
-    program.addLine("Set #{total_shower_time} = 0")
-    shower_unmet_time_vars.each_with_index do |shower_unmet_time_var, _i|
-      program.addLine("Set #{unit_shower_unmet_time} = #{shower_unmet_time_var.name}")
-      program.addLine("  If #{unit_shower_unmet_time} > #{total_shower_unmet_time}") # Use max hourly value across all units
-      program.addLine("    Set #{total_shower_unmet_time} = #{unit_shower_unmet_time}")
-      program.addLine('  EndIf')
-    end
-    shower_time_vars.each_with_index do |shower_time_var, _i|
-      program.addLine("Set #{unit_shower_time} = #{shower_time_var.name}")
-      program.addLine("  If #{unit_shower_time} > #{total_shower_time}") # Use max hourly value across all units
-      program.addLine("    Set #{total_shower_time} = #{unit_shower_time}")
-      program.addLine('  EndIf')
-    end
-
-    # EMS calling manager
-    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    manager.setName("#{program.name} calling manager")
-    manager.setCallingPoint('EndOfZoneTimestepAfterZoneReporting')
-    manager.addProgram(program)
   end
 
   # Populate fields of both unique OpenStudio objects OutputJSON and OutputControlFiles based on the debug argument.
