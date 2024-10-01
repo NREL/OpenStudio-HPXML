@@ -447,7 +447,7 @@ module HotWaterAndAppliances
         showers_weekend_sch = @default_schedules_csv_data[showers_col_name]['ShowersWeekendScheduleFractions']
         showers_monthly_sch = @default_schedules_csv_data[showers_col_name]['ShowersMonthlyScheduleMultipliers']
         showers_schedule_obj = MonthWeekdayWeekendSchedule.new(model, showers_obj_name + ' schedule', showers_weekday_sch, showers_weekend_sch, showers_monthly_sch, EPlus::ScheduleTypeLimitsFraction, unavailable_periods: showers_unavailable_periods)
-        showers_schedule_name = showers_schedule_obj.name
+        showers_schedule_name = showers_schedule_obj.schedule.name
       end
 
       # Add unmet showers calculation
