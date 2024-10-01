@@ -1047,15 +1047,14 @@ def _verify_outputs(rundir, hpxml_path, results, hpxml, unit_multiplier)
   # Check unmet hours
   unmet_hours_htg = results.select { |k, _v| k.include? 'Unmet Hours: Heating' }.values.sum(0.0)
   unmet_hours_clg = results.select { |k, _v| k.include? 'Unmet Hours: Cooling' }.values.sum(0.0)
-  # Check unmet loads
-  unmet_loads_hw_shw_energy = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Energy' }.values.sum(0.0)
-  unmet_loads_hw_shw_time = results.select { |k, _v| k.include? 'Unmet Loads: Hot Water Shower Time' }.values.sum(0.0)
+  unmet_hours_shw_hr = results.select { |k, _v| k.include? 'Unmet Hours: Showers (hr)' }.values.sum(0.0)
+  unmet_hours_shw_pc = results.select { |k, _v| k.include? 'Unmet Hours: Showers (%)' }.values.sum(0.0)
   if hpxml_path.include? 'base-hvac-undersized.xml'
     assert_operator(unmet_hours_htg, :>, 1000)
     assert_operator(unmet_hours_clg, :>, 1000)
   elsif hpxml_path.include?('dhw') && hpxml_path.include?('undersized')
-    assert_operator(unmet_loads_hw_shw_energy, :>, 0) # FIXME
-    assert_operator(unmet_loads_hw_shw_time, :>, 0) # FIXME
+    assert_operator(unmet_hours_shw_hr, :>, 0)
+    assert_operator(unmet_hours_shw_pc, :>, 0)
   else
     if hpxml_bldg.total_fraction_heat_load_served == 0
       assert_equal(0, unmet_hours_htg)
@@ -1116,14 +1115,6 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       # Check that the unmet hours difference is less than 10 hrs
       abs_delta_tol = 10
       abs_frac_tol = nil
-    elsif key.include?('Unmet Loads: Hot Water Shower Time')
-      # Check that the unmet loads difference is less than 10 hrs
-      abs_delta_tol = 10
-      abs_frac_tol = nil
-    elsif key.include?('Unmet Loads: Hot Water Shower Energy')
-      # Check that the unmet loads difference is less than 20000 Btu or less than 10% # FIXME
-      abs_delta_tol = 20000
-      abs_frac_tol = 0.1
     elsif key.include?('HVAC Capacity:') || key.include?('HVAC Design Load:') || key.include?('HVAC Design Temperature:') || key.include?('Weather:') || key.include?('HVAC Geothermal Loop:')
       # Check that there is no difference
       abs_delta_tol = 0
@@ -1180,7 +1171,6 @@ def _check_unit_multiplier_results(xml, hpxml_bldg, annual_results_1x, annual_re
       vals_1x.zip(vals_10x).each_with_index do |(val_1x, val_10x), i|
         period = is_timeseries ? Date::ABBR_MONTHNAMES[i + 1] : 'Annual'
         if not (key.include?('Unmet Hours') ||
-                key.include?('Unmet Loads: Hot Water Shower Time') ||
                 key.include?('HVAC Design Temperature') ||
                 key.include?('Weather') ||
                 key.include?('HVAC Geothermal Loop: Borehole/Trench Length'))
@@ -1238,7 +1228,7 @@ def _write_results(results, csv_out, output_groups_filter: [])
     'energy' => ['Energy Use', 'Fuel Use', 'End Use'],
     'loads' => ['Load', 'Component Load'],
     'hvac' => ['HVAC Design Temperature', 'HVAC Capacity', 'HVAC Design Load'],
-    'misc' => ['Unmet Hours', 'Unmet Loads', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
+    'misc' => ['Unmet Hours', 'Hot Water', 'Peak Electricity', 'Peak Load', 'Resilience'],
     'bills' => ['Utility Bills'],
   }
 
