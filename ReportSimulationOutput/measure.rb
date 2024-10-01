@@ -822,7 +822,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @unmet_hours.each do |key, unmet_hour|
       unmet_hour.annual_output = get_report_variable_data_annual(['EMS'], ["#{unmet_hour.ems_variable}_annual_outvar"], 1.0)
       if key == UHT::HotWaterShower + '%'
-        unmet_hour.annual_output = @unmet_hours[UHT::HotWaterShower + 'Time'].annual_output * 100.0 / unmet_hour.annual_output
+        if unmet_hour.annual_output > 0
+          unmet_hour.annual_output = @unmet_hours[UHT::HotWaterShower + 'Time'].annual_output * 100.0 / unmet_hour.annual_output
+        else
+          unmet_hour.annual_output = 0.0
+        end
       end
       next unless args[:include_timeseries_unmet_hours]
 
