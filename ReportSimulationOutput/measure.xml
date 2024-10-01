@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>report_simulation_output</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>a5176e52-177e-4d89-a724-40d4582d4bcb</version_id>
-  <version_modified>2024-10-01T19:55:55Z</version_modified>
+  <version_id>7fd8f111-dd45-49fd-a92c-1d25107b1ab7</version_id>
+  <version_modified>2024-10-01T21:24:08Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>ReportSimulationOutput</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -193,7 +193,7 @@
     <argument>
       <name>include_annual_unmet_hours</name>
       <display_name>Generate Annual Output: Unmet Hours</display_name>
-      <description>Generates annual unmet hours for heating and cooling.</description>
+      <description>Generates annual unmet hours for heating, cooling, and hot water showers.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -547,7 +547,7 @@
     <argument>
       <name>include_timeseries_unmet_hours</name>
       <display_name>Generate Timeseries Output: Unmet Hours</display_name>
-      <description>Generates timeseries unmet hours for heating and cooling.</description>
+      <description>Generates timeseries unmet hours for heating, cooling, and hot water showers.</description>
       <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -1926,7 +1926,7 @@
       <filename>README.md</filename>
       <filetype>md</filetype>
       <usage_type>readme</usage_type>
-      <checksum>0F08AA29</checksum>
+      <checksum>EEBED446</checksum>
     </file>
     <file>
       <filename>README.md.erb</filename>
@@ -1943,13 +1943,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D45C564C</checksum>
+      <checksum>661A0231</checksum>
     </file>
     <file>
       <filename>test_report_sim_output.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D77CD362</checksum>
+      <checksum>58D94FF9</checksum>
     </file>
   </files>
 </measure>
