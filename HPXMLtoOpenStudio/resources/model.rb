@@ -718,10 +718,8 @@ module Model
   # Then bulk add all modified objects to the main OpenStudio Model object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
-  # @param common_surface_id_map [Hash] map of HPXML id and OpenStudio surface handle (within OpenStudio Model objects for each dwelling unit)
   # @return [nil]
-  def self.merge_unit_models(model, hpxml_osm_map, common_surface_id_map)
+  def self.merge_unit_models(model, hpxml_osm_map)
     # Map of OpenStudio IDD objects => OSM class names
     unique_object_map = { 'OS:ConvergenceLimits' => 'ConvergenceLimits',
                           'OS:Foundation:Kiva:Settings' => 'FoundationKivaSettings',
@@ -779,31 +777,14 @@ module Model
       end
     end
 
-    unit_surface_to_obj_index_map = {} # map of unit model surface handle to whole building model object index
-    unit_model_map = {} # map of OS surface handle to OS adjacent surface handle (at unit model workspace)
-    hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit_number|
+    hpxml_osm_map.values.each_with_index do |unit_model, unit_number|
       Geometry.shift_surfaces(unit_model, unit_number)
       prefix_object_names(unit_model, unit_number)
-      hpxml_bldg.surfaces.each do |surface|
-        next if surface.sameas_id.nil?
-        # Should be stored in the map, store the unit model object mapping
-        next unless common_surface_id_map.keys.include? surface.id
-        next unless common_surface_id_map.keys.include? surface.sameas_id
-
-        current_surface_handle = common_surface_id_map[surface.id]
-        adjacent_surface_handle = common_surface_id_map[surface.sameas_id]
-        unit_model_map[current_surface_handle] = adjacent_surface_handle
-      end
 
       # Handle remaining (non-unique) objects now
       unit_model.objects.each do |obj|
         next if unit_number > 0 && obj.to_Building.is_initialized
         next if unique_handles_to_skip.include? obj.handle.to_s
-
-        unit_model_obj_index = unit_model_objects.size
-        if common_surface_id_map.values.include? obj.handle
-          unit_surface_to_obj_index_map[obj.handle] = unit_model_obj_index
-        end
 
         unit_model_objects << obj
       end
@@ -821,15 +802,17 @@ module Model
         end
       end
     end
-    return if unit_surface_to_obj_index_map.empty?
 
-    model_objects.each_with_index do |obj, index|
-      next unless unit_surface_to_obj_index_map.values.include? index
+    model_objects.each_with_index do |obj, _index|
+      next unless obj.to_Surface.is_initialized
 
-      unit_surface_handle = unit_model_objects[index].handle
       surface = obj.to_Surface.get
-      adjacent_surface_index = unit_surface_to_obj_index_map[unit_model_map[unit_surface_handle]]
-      adjacent_surface = model_objects[adjacent_surface_index].to_Surface.get
+      hpxml_sameas_id = surface.additionalProperties.getFeatureAsString('HPXMLSameasID')
+      next unless hpxml_sameas_id.is_initialized
+
+      hpxml_sameas_id = hpxml_sameas_id.to_s
+      adjacent_surface = model_objects.find { |obj| obj.to_Surface.is_initialized && obj.to_Surface.get.additionalProperties.getFeatureAsString('HPXMLID').is_initialized && obj.to_Surface.get.additionalProperties.getFeatureAsString('HPXMLID').to_s == hpxml_sameas_id }.to_Surface.get
+
       next if surface.adjacentSurface.is_initialized
 
       surface.setAdjacentSurface(adjacent_surface)
