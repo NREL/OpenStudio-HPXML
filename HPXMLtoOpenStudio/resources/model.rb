@@ -779,8 +779,8 @@ module Model
       end
     end
 
-    unit_surface_to_obj_index_map = {}
-    unit_model_mapping = {}
+    unit_surface_to_obj_index_map = {} # map of unit model surface handle to whole building model object index
+    unit_model_map = {} # map of OS surface handle to OS adjacent surface handle (at unit model workspace)
     hpxml_osm_map.each_with_index do |(hpxml_bldg, unit_model), unit_number|
       Geometry.shift_surfaces(unit_model, unit_number)
       prefix_object_names(unit_model, unit_number)
@@ -789,15 +789,17 @@ module Model
         # Should be stored in the map, store the unit model object mapping
         next unless common_surface_id_map.keys.include? surface.id
         next unless common_surface_id_map.keys.include? surface.sameas_id
+
         current_surface_handle = common_surface_id_map[surface.id]
         adjacent_surface_handle = common_surface_id_map[surface.sameas_id]
-        unit_model_mapping[current_surface_handle] = adjacent_surface_handle
+        unit_model_map[current_surface_handle] = adjacent_surface_handle
       end
 
       # Handle remaining (non-unique) objects now
       unit_model.objects.each do |obj|
         next if unit_number > 0 && obj.to_Building.is_initialized
         next if unique_handles_to_skip.include? obj.handle.to_s
+
         unit_model_obj_index = unit_model_objects.size
         if common_surface_id_map.values.include? obj.handle
           unit_surface_to_obj_index_map[obj.handle] = unit_model_obj_index
@@ -819,13 +821,17 @@ module Model
         end
       end
     end
+    return if unit_surface_to_obj_index_map.empty?
+
     model_objects.each_with_index do |obj, index|
       next unless unit_surface_to_obj_index_map.values.include? index
+
       unit_surface_handle = unit_model_objects[index].handle
       surface = obj.to_Surface.get
-      adjacent_surface_index = unit_surface_to_obj_index_map[unit_model_mapping[unit_surface_handle]]
+      adjacent_surface_index = unit_surface_to_obj_index_map[unit_model_map[unit_surface_handle]]
       adjacent_surface = model_objects[adjacent_surface_index].to_Surface.get
       next if surface.adjacentSurface.is_initialized
+
       surface.setAdjacentSurface(adjacent_surface)
       # Need to set the same construction to make OS working
       adjacent_surface.setConstruction(surface.construction.get)
