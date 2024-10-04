@@ -32,9 +32,11 @@ class ScheduleConstant
       elsif val == 0.0 && (schedule_type_limits_name.nil? || schedule_type_limits_name == EPlus::ScheduleTypeLimitsOnOff)
         schedule = model.alwaysOffDiscreteSchedule
       else
-        schedule = OpenStudio::Model::ScheduleConstant.new(model)
-        schedule.setName(sch_name)
-        schedule.setValue(val)
+        schedule = Model.add_schedule_constant(
+          model,
+          name: sch_name,
+          value: val
+        )
 
         Schedule.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
       end
@@ -1287,7 +1289,8 @@ class SchedulesFile
     num_hrs_in_year = Calendar.num_hours_in_year(@year)
     @schedules = {}
     schedules_paths.each do |schedules_path|
-      columns = CSV.read(schedules_path).transpose
+      # Note: We don't use the CSV library here because it's slow for large files
+      columns = File.readlines(schedules_path).map(&:strip).map { |r| r.split(',') }.transpose
       columns.each do |col|
         col_name = col[0]
         column = Columns.values.find { |c| c.name == col_name }
@@ -1348,11 +1351,11 @@ class SchedulesFile
   def export()
     return false if @output_schedules_path.nil?
 
-    CSV.open(@output_schedules_path, 'wb') do |csv|
-      csv << @tmp_schedules.keys
-      rows = @tmp_schedules.values.transpose
-      rows.each do |row|
-        csv << row
+    # Note: We don't use the CSV library here because it's slow for large files
+    File.open(@output_schedules_path, 'w') do |csv|
+      csv << "#{@tmp_schedules.keys.join(',')}\n"
+      @tmp_schedules.values.transpose.each do |row|
+        csv << "#{row.join(',')}\n"
       end
     end
 
@@ -1656,7 +1659,7 @@ class SchedulesFile
 
   # Convert detailed setpoint schedule values from F to C.
   #
-  # @param offset_db [Float] On-off thermostat deadband
+  # @param offset_db [Double] On-off thermostat deadband
   # @return [nil]
   def convert_setpoints(offset_db)
     setpoint_col_names = Columns.values.select { |c| c.type == :setpoint }.map { |c| c.name }
