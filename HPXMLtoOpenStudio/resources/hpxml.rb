@@ -3855,6 +3855,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof.
   class Roof < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
+             :sameas_id,                      # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                           # [Double] Area (ft2)
@@ -4125,6 +4126,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist.
   class RimJoist < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
+             :sameas_id,                      # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4242,6 +4244,7 @@ class HPXML < Object
       rim_joist = XMLHelper.add_element(rim_joists, 'RimJoist')
       sys_id = XMLHelper.add_element(rim_joist, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(rim_joist, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -4297,6 +4300,7 @@ class HPXML < Object
       return if rim_joist.nil?
 
       @id = HPXML::get_id(rim_joist)
+      @sameas_id = HPXML::get_sameas_id(rim_joist)
       @exterior_adjacent_to = XMLHelper.get_value(rim_joist, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(rim_joist, 'InteriorAdjacentTo', :string)
       @area = XMLHelper.get_value(rim_joist, 'Area', :float)
@@ -4353,6 +4357,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall.
   class Wall < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
+             :sameas_id,                      # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4510,6 +4515,7 @@ class HPXML < Object
       wall = XMLHelper.add_element(walls, 'Wall')
       sys_id = XMLHelper.add_element(wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(wall, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -4583,6 +4589,7 @@ class HPXML < Object
       return if wall.nil?
 
       @id = HPXML::get_id(wall)
+      @sameas_id = HPXML::get_sameas_id(wall)
       @exterior_adjacent_to = XMLHelper.get_value(wall, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(wall, 'InteriorAdjacentTo', :string)
       @attic_wall_type = XMLHelper.get_value(wall, 'AtticWallType', :string)
@@ -4654,6 +4661,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall.
   class FoundationWall < BaseElement
     ATTRS = [:id,                                     # [String] SystemIdentifier/@id
+             :sameas_id,                              # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,                # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,                   # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,                   # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -4858,6 +4866,7 @@ class HPXML < Object
       foundation_wall = XMLHelper.add_element(foundation_walls, 'FoundationWall')
       sys_id = XMLHelper.add_element(foundation_wall, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(foundation_wall, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -4919,6 +4928,7 @@ class HPXML < Object
       return if foundation_wall.nil?
 
       @id = HPXML::get_id(foundation_wall)
+      @sameas_id = HPXML::get_sameas_id(foundation_wall)
       @exterior_adjacent_to = XMLHelper.get_value(foundation_wall, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(foundation_wall, 'InteriorAdjacentTo', :string)
       @type = XMLHelper.get_value(foundation_wall, 'Type', :string)
@@ -4984,6 +4994,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/Floors/Floor.
   class Floor < BaseElement
     ATTRS = [:id,                             # [String] SystemIdentifier/@id
+             :sameas_id,                      # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,        # [String] AttachedToSpace/@idref
              :exterior_adjacent_to,           # [String] ExteriorAdjacentTo (HPXML::LocationXXX)
              :interior_adjacent_to,           # [String] InteriorAdjacentTo (HPXML::LocationXXX)
@@ -5153,6 +5164,7 @@ class HPXML < Object
       floor = XMLHelper.add_element(floors, 'Floor')
       sys_id = XMLHelper.add_element(floor, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_attribute(sys_id, 'sameas', @sameas_id) unless @sameas_id.nil?
       if not @attached_to_space_idref.nil?
         space_attached = XMLHelper.add_element(floor, 'AttachedToSpace')
         XMLHelper.add_attribute(space_attached, 'idref', @attached_to_space_idref)
@@ -5217,6 +5229,7 @@ class HPXML < Object
       return if floor.nil?
 
       @id = HPXML::get_id(floor)
+      @sameas_id = HPXML::get_sameas_id(floor)
       @exterior_adjacent_to = XMLHelper.get_value(floor, 'ExteriorAdjacentTo', :string)
       @interior_adjacent_to = XMLHelper.get_value(floor, 'InteriorAdjacentTo', :string)
       @floor_or_ceiling = XMLHelper.get_value(floor, 'FloorOrCeiling', :string)
@@ -5279,6 +5292,7 @@ class HPXML < Object
   # Object for /HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab.
   class Slab < BaseElement
     ATTRS = [:id,                                               # [String] SystemIdentifier/@id
+             :sameas_id,                                        # [String] SystemIdentifier/@sameas
              :attached_to_space_idref,                          # [String] AttachedToSpace/@idref
              :interior_adjacent_to,                             # [String] InteriorAdjacentTo (HPXML::LocationXXX)
              :area,                                             # [Double] Area (ft2)
@@ -11339,6 +11353,15 @@ class HPXML < Object
   # @return [String] The element ID attribute
   def self.get_id(parent, element_name = 'SystemIdentifier')
     return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
+  end
+
+  # Gets the sameas attribute for the given element.
+  #
+  # @param parent [Oga::XML::Element] The parent HPXML element
+  # @param element_name [String] The name of the child element with the sameas attribute
+  # @return [String] The element sameas attribute
+  def self.get_sameas_id(parent, element_name = 'SystemIdentifier')
+    return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'sameas')
   end
 
   # Gets the IDREF attribute for the given element.

@@ -133,7 +133,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.apply_walls(runner, model, spaces, hpxml_bldg, hpxml_header)
+  def self.apply_walls(runner, model, spaces, hpxml_bldg, hpxml_header, common_surface_id_map)
     default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
@@ -171,7 +171,7 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, wall, hpxml_bldg, common_surface_id_map)
         if wall.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
@@ -215,7 +215,7 @@ module Geometry
   # @param spaces [Hash] Map of HPXML locations => OpenStudio Space objects
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @return [nil]
-  def self.apply_rim_joists(runner, model, spaces, hpxml_bldg)
+  def self.apply_rim_joists(runner, model, spaces, hpxml_bldg, common_surface_id_map)
     default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
     _walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
@@ -251,7 +251,7 @@ module Geometry
         end
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, rim_joist, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, rim_joist, hpxml_bldg, common_surface_id_map)
         if rim_joist.is_interior
           surface.setSunExposure(EPlus::SurfaceSunExposureNo)
           surface.setWindExposure(EPlus::SurfaceWindExposureNo)
@@ -298,7 +298,7 @@ module Geometry
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @return [nil]
-  def self.apply_floors(runner, model, spaces, hpxml_bldg, hpxml_header)
+  def self.apply_floors(runner, model, spaces, hpxml_bldg, hpxml_header, common_surface_id_map)
     default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
     walls_top, foundation_top = get_foundation_and_walls_top(hpxml_bldg)
 
@@ -325,7 +325,7 @@ module Geometry
       end
       surface.additionalProperties.setFeature('Tilt', 0.0)
       set_surface_interior(model, spaces, surface, floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, floor, hpxml_bldg, common_surface_id_map)
       surface.setName(floor.id)
       if floor.is_interior
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
@@ -391,7 +391,7 @@ module Geometry
   # @param hpxml_header [HPXML::Header] HPXML Header object (one per HPXML file)
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def self.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml_header, schedules_file)
+  def self.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml_header, schedules_file, common_surface_id_map)
     default_azimuths = HPXMLDefaults.get_default_azimuths(hpxml_bldg)
 
     foundation_types = hpxml_bldg.slabs.map { |s| s.interior_adjacent_to }.uniq
@@ -470,7 +470,7 @@ module Geometry
         surface.setName(fnd_wall.id)
         surface.setSurfaceType(EPlus::SurfaceTypeWall)
         set_surface_interior(model, spaces, surface, fnd_wall, hpxml_bldg)
-        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg)
+        set_surface_exterior(model, spaces, surface, fnd_wall, hpxml_bldg, common_surface_id_map)
         surface.setSunExposure(EPlus::SurfaceSunExposureNo)
         surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
@@ -540,7 +540,7 @@ module Geometry
     surface.setName(foundation_wall.id)
     surface.setSurfaceType(EPlus::SurfaceTypeWall)
     set_surface_interior(model, spaces, surface, foundation_wall, hpxml_bldg)
-    set_surface_exterior(model, spaces, surface, foundation_wall, hpxml_bldg)
+    set_surface_exterior(model, spaces, surface, foundation_wall, hpxml_bldg, nil)
 
     assembly_r = foundation_wall.insulation_assembly_r_value
     mat_int_finish = Material.InteriorFinishMaterial(foundation_wall.interior_finish_type, foundation_wall.interior_finish_thickness)
@@ -922,7 +922,7 @@ module Geometry
       surface.setName("surface #{skylight.id} shaft")
       surface.setSurfaceType(EPlus::SurfaceTypeWall)
       set_surface_interior(model, spaces, surface, skylight.floor, hpxml_bldg)
-      set_surface_exterior(model, spaces, surface, skylight.floor, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, skylight.floor, hpxml_bldg, nil)
       surface.setSunExposure(EPlus::SurfaceSunExposureNo)
       surface.setWindExposure(EPlus::SurfaceWindExposureNo)
 
@@ -954,6 +954,7 @@ module Geometry
     sum_cfa = 0.0
     hpxml_bldg.floors.each do |floor|
       next unless floor.is_floor
+      # FIXME: If the hpxml Building that represents an unconditioned space (without HVACPlant), does the hpxml_bldg.building_construction.conditioned_floor_area accounts to the total cfa? Is E+ reporting the correct total cfa? (Need to double-check)
       next unless [HPXML::LocationConditionedSpace, HPXML::LocationBasementConditioned].include?(floor.interior_adjacent_to) ||
                   [HPXML::LocationConditionedSpace, HPXML::LocationBasementConditioned].include?(floor.exterior_adjacent_to)
 
@@ -1703,9 +1704,18 @@ module Geometry
   # @param surface [OpenStudio::Model::Surface] an OpenStudio::Model::Surface object
   # @param hpxml_surface [HPXML::Wall or HPXML::Roof or HPXML::RimJoist or HPXML::FoundationWall or HPXML::Slab] any HPXML surface
   # @return [nil]
-  def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
+  def self.set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg, common_surface_id_map)
     exterior_adjacent_to = hpxml_surface.exterior_adjacent_to
     is_adiabatic = hpxml_surface.is_adiabatic
+    if not hpxml_surface.sameas_id.nil?
+      if common_surface_id_map.nil?
+        fail "unexpected surface sameas attribute assigned: #{surface.sameas_id}."
+      else
+        # Store surface id and OS surface object mapping, process later
+        common_surface_id_map[hpxml_surface.id] = surface.handle
+        return
+      end
+    end
     if [HPXML::LocationOutside, HPXML::LocationManufacturedHomeUnderBelly].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
     elsif exterior_adjacent_to == HPXML::LocationGround
@@ -1737,7 +1747,7 @@ module Geometry
     if hpxml_surface.exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition(EPlus::BoundaryConditionOutdoors)
     else
-      set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg)
+      set_surface_exterior(model, spaces, surface, hpxml_surface, hpxml_bldg, nil)
     end
   end
 

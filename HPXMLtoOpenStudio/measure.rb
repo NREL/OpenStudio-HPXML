@@ -128,22 +128,23 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       # Create OpenStudio unit model(s)
       hpxml_osm_map = {}
+      common_surface_id_map = {}
       hpxml.buildings.each do |hpxml_bldg|
         # Create the model for this single unit
         # If we're running a whole SFA/MF building, all the unit models will be merged later
         if hpxml.buildings.size > 1
           unit_model = OpenStudio::Model::Model.new
-          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
+          create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, hpxml_sch_map[hpxml_bldg], common_surface_id_map)
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
+          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg], nil)
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
 
       # Merge unit models into final model
       if hpxml.buildings.size > 1
-        Model.merge_unit_models(model, hpxml_osm_map)
+        Model.merge_unit_models(model, hpxml_osm_map, common_surface_id_map)
       end
 
       # Create EnergyPlus outputs
@@ -314,7 +315,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # @param weather [WeatherFile] Weather object containing EPW information
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @return [nil]
-  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, schedules_file)
+  def create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, schedules_file, common_surface_id_map)
     init(model, hpxml_bldg, hpxml.header)
     SimControls.apply(model, hpxml.header)
     Location.apply(model, weather, hpxml_bldg, hpxml.header, epw_path)
@@ -326,10 +327,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Geometry & Enclosure
     Geometry.apply_roofs(runner, model, spaces, hpxml_bldg, hpxml.header)
-    Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header)
-    Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg)
-    Geometry.apply_floors(runner, model, spaces, hpxml_bldg, hpxml.header)
-    Geometry.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file)
+    Geometry.apply_walls(runner, model, spaces, hpxml_bldg, hpxml.header, common_surface_id_map)
+    Geometry.apply_rim_joists(runner, model, spaces, hpxml_bldg, common_surface_id_map)
+    Geometry.apply_floors(runner, model, spaces, hpxml_bldg, hpxml.header, common_surface_id_map)
+    Geometry.apply_foundation_walls_slabs(runner, model, spaces, weather, hpxml_bldg, hpxml.header, schedules_file, common_surface_id_map)
     Geometry.apply_windows(model, spaces, hpxml_bldg, hpxml.header)
     Geometry.apply_doors(model, spaces, hpxml_bldg)
     Geometry.apply_skylights(model, spaces, hpxml_bldg, hpxml.header)
