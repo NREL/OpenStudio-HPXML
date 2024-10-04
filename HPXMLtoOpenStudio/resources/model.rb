@@ -718,6 +718,7 @@ module Model
   # Then bulk add all modified objects to the main OpenStudio Model object.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param hpxml_osm_map [Hash] Map of HPXML::Building objects => OpenStudio Model objects for each dwelling unit
   # @return [nil]
   def self.merge_unit_models(model, hpxml_osm_map)
     # Map of OpenStudio IDD objects => OSM class names
@@ -803,7 +804,7 @@ module Model
       end
     end
 
-    model_objects.each_with_index do |obj, _index|
+    model_objects.each do |obj|
       next unless obj.to_Surface.is_initialized
 
       surface = obj.to_Surface.get

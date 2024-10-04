@@ -136,7 +136,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
           create_unit_model(hpxml, hpxml_bldg, runner, unit_model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
           hpxml_osm_map[hpxml_bldg] = unit_model
         else
-          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg], nil)
+          create_unit_model(hpxml, hpxml_bldg, runner, model, epw_path, weather, hpxml_sch_map[hpxml_bldg])
           hpxml_osm_map[hpxml_bldg] = model
         end
       end
