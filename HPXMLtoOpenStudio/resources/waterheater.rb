@@ -911,7 +911,7 @@ module Waterheater
     hpwh = OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser.new(model, coil, tank, fan, setpoint_schedule, model.alwaysOnDiscreteSchedule)
     hpwh.setName("#{obj_name} hpwh")
     hpwh.setDeadBandTemperatureDifference(3.89)
-    hpwh.setCondenserBottomLocation(0.01) # bottom node
+    hpwh.setCondenserBottomLocation((1.0 - (12 - 0.5) / 12.0) * tank.tankHeight.get) # in the 12th node of a 12-node tank (counting from top)
     hpwh.setCondenserTopLocation((1.0 - (6 - 0.5) / 12.0) * tank.tankHeight.get) # in the 6th node of a 12-node tank (counting from top)
     hpwh.setEvaporatorAirFlowRate(UnitConversions.convert(airflow_rate * unit_multiplier, 'ft^3/min', 'm^3/s'))
     hpwh.setInletAirConfiguration('Schedule')
@@ -2000,8 +2000,8 @@ module Waterheater
       new_heater.setUseSideDesignFlowRate(UnitConversions.convert(act_vol, 'gal', 'm^3') / 60.1)
       new_heater.setSourceSideDesignFlowRate(0)
       new_heater.setSourceSideFlowControlMode('')
-      new_heater.setSourceSideInletHeight(0)
-      new_heater.setSourceSideOutletHeight(0)
+      new_heater.setSourceSideInletHeight((1.0 - (1 - 0.5) / 15) * h_tank) # in the 1st node of a 15-node tank (counting from top)
+      new_heater.setSourceSideOutletHeight((1.0 - (15 - 0.5) / 15) * h_tank) # in the 15th node of a 15-node tank (counting from top)
       new_heater.setSkinLossFractiontoZone(1.0 / unit_multiplier) # Tank losses are multiplied by E+ zone multiplier, so need to compensate here
       new_heater.setOffCycleFlueLossFractiontoZone(1.0 / unit_multiplier)
       set_stratified_tank_ua(new_heater, u, unit_multiplier)
