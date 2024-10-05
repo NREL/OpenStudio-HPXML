@@ -51,7 +51,8 @@ module InternalGains
     activity_sch = Model.add_schedule_constant(
       model,
       name: "#{Constants::ObjectTypeOccupants} activity schedule",
-      value: activity_per_person
+      value: activity_per_person,
+      limits: nil
     )
 
     # Add people definition for the occ

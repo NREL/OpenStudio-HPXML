@@ -150,35 +150,37 @@ module Waterheater
     hpwh_tamb = Model.add_schedule_constant(
       model,
       name: "#{obj_name} Tamb act",
-      value: 23
+      value: 23,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
     hpwh_rhamb = Model.add_schedule_constant(
       model,
       name: "#{obj_name} RHamb act",
-      value: 0.5
+      value: 0.5,
+      limits: EPlus::ScheduleTypeLimitsFraction
     )
 
     # Note: These get overwritten by EMS later, see HPWH Control program
     top_element_sp = Model.add_schedule_constant(
       model,
       name: "#{obj_name} TopElementSetpoint",
-      value: nil
+      value: nil,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
     bottom_element_sp = Model.add_schedule_constant(
       model,
       name: "#{obj_name} BottomElementSetpoint",
-      value: nil
+      value: nil,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
     setpoint_schedule = nil
     if not schedules_file.nil?
       # To handle variable setpoints, need one schedule that gets sensed and a new schedule that gets actuated
       # Sensed schedule
-      setpoint_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterSetpoint].name)
+      setpoint_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterSetpoint].name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsTemperature)
       if not setpoint_schedule.nil?
-        Schedule.set_schedule_type_limits(model, setpoint_schedule, EPlus::ScheduleTypeLimitsTemperature)
-
         # Actuated schedule
         control_setpoint_schedule = ScheduleConstant.new(model, "#{obj_name} ControlSetpoint", 0.0, EPlus::ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)
         control_setpoint_schedule = control_setpoint_schedule.schedule
@@ -310,7 +312,8 @@ module Waterheater
     source_stp_sch = Model.add_schedule_constant(
       model,
       name: "#{obj_name_combi} Source Spt",
-      value: boiler_heating_spt
+      value: boiler_heating_spt,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
     # reset dhw boiler setpoint
     boiler_spt_mngr.to_SetpointManagerScheduled.get.setSchedule(source_stp_sch)
@@ -1332,13 +1335,11 @@ module Waterheater
 
     op_mode_schedule = nil
     if not schedules_file.nil?
-      op_mode_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterOperatingMode].name)
+      op_mode_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterOperatingMode].name, schedule_type_limits_name: EPlus::ScheduleTypeLimitsFraction)
     end
 
     # Sensor on op_mode_schedule
     if not op_mode_schedule.nil?
-      Schedule.set_schedule_type_limits(model, op_mode_schedule, EPlus::ScheduleTypeLimitsFraction)
-
       op_mode_sensor = Model.add_ems_sensor(
         model,
         name: "#{obj_name} op_mode",
@@ -1533,7 +1534,8 @@ module Waterheater
     new_schedule = Model.add_schedule_constant(
       model,
       name: "#{desuperheater_name} setpoint schedule",
-      value: dsh_setpoint
+      value: dsh_setpoint,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
 
     # create a desuperheater object
@@ -2192,7 +2194,8 @@ module Waterheater
     temp_schedule = Model.add_schedule_constant(
       model,
       name: 'dhw temp',
-      value: t_set_c
+      value: t_set_c,
+      limits: EPlus::ScheduleTypeLimitsTemperature
     )
     setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, temp_schedule)
     setpoint_manager.addToNode(loop.supplyOutletNode)
