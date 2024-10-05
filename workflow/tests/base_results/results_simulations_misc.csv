@@ -204,7 +204,7 @@ base-hvac-air-to-air-heat-pump-2-speed-research-features.xml,0.0,0.0,1354.7,998.
 base-hvac-air-to-air-heat-pump-2-speed.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,7067.1,3208.0,7067.1,24.675,17.153,0.0
 base-hvac-air-to-air-heat-pump-var-speed-autosize-maxload.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4175.1,2921.5,4175.1,22.454,15.609,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-advanced-defrost.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3203.8,2926.5,3203.8,22.934,17.734,0.0
-base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3209.5,2994.7,3209.5,22.934,17.728,0.0
+base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-hvac-seasons.xml,25.0,4.0,1354.7,998.0,11171.5,2563.5,3209.5,2994.7,3209.5,22.934,17.728,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler-switchover-temperature.xml,160.0,4.0,1354.7,998.0,11171.6,2563.5,3297.3,3264.0,3297.3,31.627,17.728,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-boiler.xml,1.0,4.0,1354.7,998.0,11171.5,2563.5,3212.5,2926.5,3212.5,22.934,17.734,0.0
 base-hvac-air-to-air-heat-pump-var-speed-backup-furnace-autosize-factor.xml,1.0,0.0,1354.7,998.0,11171.6,2563.5,3337.3,2938.8,3337.3,30.33,16.793,0.0
@@ -326,7 +326,7 @@ base-hvac-room-ac-only-research-features.xml,0.0,0.0,1354.7,998.0,11171.8,2563.6
 base-hvac-room-ac-only.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,1924.5,3451.5,3451.5,0.0,11.827,0.0
 base-hvac-room-ac-with-heating.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,5887.1,3815.0,5887.1,16.748,12.045,0.0
 base-hvac-room-ac-with-reverse-cycle.xml,0.0,0.0,1354.7,998.0,11171.6,2563.5,4859.0,3364.3,4859.0,16.748,12.045,0.0
-base-hvac-seasons.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2082.5,3485.7,3485.7,23.71,18.736,0.0
+base-hvac-seasons.xml,24.0,0.0,1354.7,998.0,11171.5,2563.5,2082.5,3485.7,3485.7,23.71,18.736,0.0
 base-hvac-setpoints-daily-schedules.xml,103.0,39.0,1354.7,998.0,11171.5,2563.5,2123.8,3728.5,3728.5,35.224,21.227,0.0
 base-hvac-setpoints-daily-setbacks.xml,0.0,12.0,1354.7,998.0,11171.6,2563.5,2090.6,3873.9,3873.9,32.297,21.204,0.0
 base-hvac-setpoints.xml,0.0,0.0,1354.7,998.0,11171.5,2563.5,2032.2,3206.1,3206.1,18.069,15.967,0.0
