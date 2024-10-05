@@ -1802,8 +1802,7 @@ module Geometry
     sch = Model.add_schedule_constant(
       model,
       name: location,
-      value: nil,
-      limits: EPlus::ScheduleTypeLimitsTemperature
+      value: nil
     )
     sch.additionalProperties.setFeature('ObjectType', location)
 

@@ -1241,8 +1241,7 @@ module HVAC
     rh_setpoint_sch = Model.add_schedule_constant(
       model,
       name: "#{obj_name} rh setpoint",
-      value: rh_setpoint,
-      limits: nil
+      value: rh_setpoint
     )
 
     capacity_curve = Model.add_curve_biquadratic(

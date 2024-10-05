@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5ae03fb1-a496-41f9-8da5-4e85a23550d1</version_id>
-  <version_modified>2024-10-05T04:07:26Z</version_modified>
+  <version_id>33102396-2989-4820-8fb7-0aa399d80344</version_id>
+  <version_modified>2024-10-05T04:28:40Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -345,13 +345,13 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6C147EFE</checksum>
+      <checksum>18098922</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3D172FC9</checksum>
+      <checksum>4A5DFE48</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -387,7 +387,7 @@
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4DAA4792</checksum>
+      <checksum>D78CE661</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -399,7 +399,7 @@
       <filename>internal_gains.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9351BDC1</checksum>
+      <checksum>94B4EA05</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -447,7 +447,7 @@
       <filename>model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EB33A522</checksum>
+      <checksum>5D3674E4</checksum>
     </file>
     <file>
       <filename>output.rb</filename>
@@ -627,7 +627,7 @@
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>31337FBC</checksum>
+      <checksum>4A4D4D35</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>

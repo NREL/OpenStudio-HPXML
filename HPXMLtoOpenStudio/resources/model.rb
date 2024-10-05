@@ -544,7 +544,7 @@ module Model
   # @param value [Double] Constant value for the year
   # @param limits [String] Data type for the values contained in the schedule (EPlus::ScheduleTypeXXX)
   # @return [OpenStudio::Model::ScheduleConstant] The model object
-  def self.add_schedule_constant(model, name:, value:, limits:)
+  def self.add_schedule_constant(model, name:, value:, limits: nil)
     sch = OpenStudio::Model::ScheduleConstant.new(model)
     sch.setName(name)
     sch.setValue(value) unless value.nil? # EMS-actuated if nil
@@ -558,7 +558,7 @@ module Model
   # @param name [String] Name for the OpenStudio object
   # @param limits [String] Data type for the values contained in the schedule (EPlus::ScheduleTypeXXX)
   # @return [OpenStudio::Model::ScheduleRuleset] The model object
-  def self.add_schedule_ruleset(model, name:, limits:)
+  def self.add_schedule_ruleset(model, name:, limits: nil)
     sch = OpenStudio::Model::ScheduleRuleset.new(model)
     sch.setName(name)
     sch.defaultDaySchedule.setName("#{name} default day")
@@ -635,7 +635,7 @@ module Model
   # @param mins_per_item [Integer] Number of minutes associated with each line of the file
   # @param limits [String] Data type for the values contained in the schedule (EPlus::ScheduleTypeXXX)
   # @return [OpenStudio::Model::ScheduleFile] The model object
-  def self.add_schedule_file(model, name:, file_path:, col_num:, rows_to_skip:, num_hours:, mins_per_item:, limits:)
+  def self.add_schedule_file(model, name:, file_path:, col_num:, rows_to_skip:, num_hours:, mins_per_item:, limits: nil)
     file_dir = File.dirname(file_path)
     if not model.workflowJSON.filePaths.map(&:to_s).include?(file_dir)
       model.workflowJSON.addFilePath(file_dir)

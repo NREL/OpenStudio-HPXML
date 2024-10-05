@@ -2194,8 +2194,7 @@ module Waterheater
     temp_schedule = Model.add_schedule_constant(
       model,
       name: 'dhw temp',
-      value: t_set_c,
-      limits: nil
+      value: t_set_c
     )
     setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, temp_schedule)
     setpoint_manager.addToNode(loop.supplyOutletNode)

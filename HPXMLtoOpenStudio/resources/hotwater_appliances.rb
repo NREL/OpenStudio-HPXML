@@ -938,8 +938,7 @@ module HotWaterAndAppliances
     schedule = Model.add_schedule_constant(
       model,
       name: "#{obj_name} schedule",
-      value: nil,
-      limits: nil
+      value: nil
     )
 
     if not loc_space.nil?
