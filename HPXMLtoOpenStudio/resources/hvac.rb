@@ -1242,7 +1242,7 @@ module HVAC
       model,
       name: "#{obj_name} rh setpoint",
       value: rh_setpoint,
-      limits: EPlus::ScheduleTypeLimitsFraction
+      limits: nil
     )
 
     capacity_curve = Model.add_curve_biquadratic(
