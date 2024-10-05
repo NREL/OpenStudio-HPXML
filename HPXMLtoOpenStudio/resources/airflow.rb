@@ -660,8 +660,7 @@ module Airflow
       hourly_values: [1] * 24
     )
 
-    year = model.getYearDescription.assumedYear
-    Schedule.set_unavailable_periods(avail_sch, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, avail_sch, sch_name, unavailable_periods)
     return avail_sch
   end
 

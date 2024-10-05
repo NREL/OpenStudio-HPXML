@@ -4605,7 +4605,7 @@ module HVAC
       s = s.schedule
     else
       s = Schedule.create_ruleset_from_daily_season(model, sch_name, values)
-      Schedule.set_unavailable_periods(s, sch_name, unavailable_periods, model.getYearDescription.assumedYear)
+      Schedule.set_unavailable_periods(model, s, sch_name, unavailable_periods)
     end
 
     return s

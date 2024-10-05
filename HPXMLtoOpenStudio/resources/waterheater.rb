@@ -2,6 +2,8 @@
 
 # Collection of methods related to water heating systems.
 module Waterheater
+  DefaultTankHeight = 4.0 # ft, assumption from BEopt
+
   # TODO
   #
   # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
@@ -425,7 +427,7 @@ module Waterheater
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param water_heating_systems [Array<HPXML::WaterHeatingSystem>] The HPXML water heaters of interest
   # @param plantloop_map [Hash] Map of HPXML System ID => OpenStudio PlantLoop objects
-  # @return [TODO] TODO
+  # @return [nil]
   def self.apply_combi_system_EMS(model, water_heating_systems, plantloop_map)
     water_heating_systems.select { |wh|
       [HPXML::WaterHeaterTypeCombiStorage,
@@ -1394,7 +1396,7 @@ module Waterheater
   # @param tank [TODO] TODO
   # @param u_tank [TODO] TODO
   # @param unit_multiplier [Integer] Number of similar dwelling units
-  # @return [TODO] TODO
+  # @return [nil]
   def self.set_stratified_tank_ua(tank, u_tank, unit_multiplier)
     node_ua = [0] * 12 # Max number of nodes in E+ stratified tank model
     if unit_multiplier == 1
@@ -1555,19 +1557,6 @@ module Waterheater
 
   # TODO
   #
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param name [TODO] TODO
-  # @return [TODO] TODO
-  def self.create_new_hx(model, name)
-    hx = OpenStudio::Model::HeatExchangerFluidToFluid.new(model)
-    hx.setName(name)
-    hx.setControlType('OperationSchemeModulated')
-
-    return hx
-  end
-
-  # TODO
-  #
   # @param water_heating_system [HPXML::WaterHeatingSystem] The HPXML water heating system of interest
   # @return [TODO] TODO
   def self.calc_ef_from_uef(water_heating_system)
@@ -1597,7 +1586,7 @@ module Waterheater
   # @return [TODO] TODO
   def self.calc_tank_areas(act_vol, height = nil)
     if height.nil?
-      height = get_tank_height()
+      height = DefaultTankHeight
     end
     diameter = 2.0 * (UnitConversions.convert(act_vol, 'gal', 'ft^3') / (height * Math::PI))**0.5 # feet
     a_top = Math::PI * diameter**2.0 / 4.0 # sqft
@@ -1605,13 +1594,6 @@ module Waterheater
     surface_area = 2.0 * a_top + a_side # sqft
 
     return surface_area, a_side
-  end
-
-  # TODO
-  #
-  # @return [TODO] TODO
-  def self.get_tank_height()
-    return 4.0 # feet, assumption from BEopt
   end
 
   # TODO
@@ -1980,7 +1962,7 @@ module Waterheater
     act_vol *= unit_multiplier
 
     if tank_model_type == HPXML::WaterHeaterTankModelTypeStratified
-      h_tank = UnitConversions.convert(get_tank_height(), 'ft', 'm')
+      h_tank = UnitConversions.convert(DefaultTankHeight, 'ft', 'm')
 
       # Add a WaterHeater:Stratified to the model
       new_heater = OpenStudio::Model::WaterHeaterStratified.new(model)
@@ -1989,7 +1971,6 @@ module Waterheater
       new_heater.setTankHeight(h_tank)
       new_heater.setMaximumTemperatureLimit(90)
       new_heater.setHeaterPriorityControl('MasterSlave')
-      configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
       new_heater.setHeater1Capacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
       new_heater.setHeater1Height((1.0 - (4 - 0.5) / 15) * h_tank) # in the 4th node of a 15-node tank (counting from top); height of upper element based on TRNSYS assumptions for an ERWH
       new_heater.setHeater1DeadbandTemperatureDifference(5.556)
@@ -2011,7 +1992,6 @@ module Waterheater
       new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
       new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
       new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
-      configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
       new_heater.setMaximumTemperatureLimit(99.0)
       if [HPXML::WaterHeaterTypeTankless, HPXML::WaterHeaterTypeCombiTankless].include? tank_type
         new_heater.setHeaterControlType('Modulate')
@@ -2051,6 +2031,8 @@ module Waterheater
       new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     end
 
+    assign_water_heater_setpoint(runner, model, new_heater, schedules_file, t_set_c, unavailable_periods)
+
     if not water_heating_system.nil?
       new_heater.additionalProperties.setFeature('HPXML_ID', water_heating_system.id) # Used by reporting measure
     end
@@ -2078,7 +2060,7 @@ module Waterheater
   # @param loc_space [OpenStudio::Model::Space] The space where the water heater is located
   # @param loc_schedule [OpenStudio::Model::ScheduleConstant] The temperature schedule for where the water heater is located, if not in a space
   # @param wh_obj [TODO] TODO
-  # @return [TODO] TODO
+  # @return [nil]
   def self.set_wh_ambient(loc_space, loc_schedule, wh_obj)
     if wh_obj.ambientTemperatureSchedule.is_initialized
       wh_obj.ambientTemperatureSchedule.get.remove
@@ -2095,54 +2077,35 @@ module Waterheater
 
   # TODO
   #
-  # @param new_heater [TODO] TODO
+  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
+  # @param model [OpenStudio::Model::Model] OpenStudio Model object
+  # @param water_heater [TODO] TODO
   # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
   # @param t_set_c [TODO] TODO
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
   # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [TODO] TODO
-  def self.configure_mixed_tank_setpoint_schedule(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
-    new_schedule = nil
+  # @return [nil]
+  def self.assign_water_heater_setpoint(runner, model, water_heater, schedules_file, t_set_c, unavailable_periods)
+    setpoint_sch = nil
     if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterSetpoint].name)
+      setpoint_sch = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterSetpoint].name)
     end
-    if new_schedule.nil? # constant
-      new_schedule = ScheduleConstant.new(model, Constants::ObjectTypeWaterHeaterSetpoint, t_set_c, EPlus::ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)
-      new_schedule = new_schedule.schedule
+    if setpoint_sch.nil? # constant
+      setpoint_sch = ScheduleConstant.new(model, Constants::ObjectTypeWaterHeaterSetpoint, t_set_c, EPlus::ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)
+      setpoint_sch = setpoint_sch.schedule
     else
       runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterSetpoint].name}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
     end
-    if new_heater.setpointTemperatureSchedule.is_initialized
-      new_heater.setpointTemperatureSchedule.get.remove
+    if water_heater.is_a? OpenStudio::Model::WaterHeaterStratified
+      water_heater.heater1SetpointTemperatureSchedule.remove
+      water_heater.heater2SetpointTemperatureSchedule.remove
+      water_heater.setHeater1SetpointTemperatureSchedule(setpoint_sch)
+      water_heater.setHeater2SetpointTemperatureSchedule(setpoint_sch)
+    elsif water_heater.is_a? OpenStudio::Model::WaterHeaterMixed
+      if water_heater.setpointTemperatureSchedule.is_initialized
+        water_heater.setpointTemperatureSchedule.get.remove
+      end
+      water_heater.setSetpointTemperatureSchedule(setpoint_sch)
     end
-    new_heater.setSetpointTemperatureSchedule(new_schedule)
-  end
-
-  # TODO
-  #
-  # @param new_heater [TODO] TODO
-  # @param schedules_file [SchedulesFile] SchedulesFile wrapper class instance of detailed schedule files
-  # @param t_set_c [TODO] TODO
-  # @param model [OpenStudio::Model::Model] OpenStudio Model object
-  # @param runner [OpenStudio::Measure::OSRunner] Object typically used to display warnings
-  # @param unavailable_periods [HPXML::UnavailablePeriods] Object that defines periods for, e.g., power outages or vacancies
-  # @return [TODO] TODO
-  def self.configure_stratified_tank_setpoint_schedules(new_heater, schedules_file, t_set_c, model, runner, unavailable_periods)
-    new_schedule = nil
-    if not schedules_file.nil?
-      new_schedule = schedules_file.create_schedule_file(model, col_name: SchedulesFile::Columns[:WaterHeaterSetpoint].name)
-    end
-    if new_schedule.nil? # constant
-      new_schedule = ScheduleConstant.new(model, Constants::ObjectTypeWaterHeaterSetpoint, t_set_c, EPlus::ScheduleTypeLimitsTemperature, unavailable_periods: unavailable_periods)
-      new_schedule = new_schedule.schedule
-    else
-      runner.registerWarning("Both '#{SchedulesFile::Columns[:WaterHeaterSetpoint].name}' schedule file and setpoint temperature provided; the latter will be ignored.") if !t_set_c.nil?
-    end
-    new_heater.heater1SetpointTemperatureSchedule.remove
-    new_heater.heater2SetpointTemperatureSchedule.remove
-    new_heater.setHeater1SetpointTemperatureSchedule(new_schedule)
-    new_heater.setHeater2SetpointTemperatureSchedule(new_schedule)
   end
 
   # TODO
