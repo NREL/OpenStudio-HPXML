@@ -676,7 +676,7 @@ module Model
         stl.setUpperLimitValue(1)
         stl.setNumericType('Discrete')
       elsif limits == EPlus::ScheduleTypeLimitsTemperature
-        stl.setNumericType('Continuous')
+        stl.setUnitType('Temperature')
       else
         fail "Unexpected schedule type limits: #{limits}"
       end
