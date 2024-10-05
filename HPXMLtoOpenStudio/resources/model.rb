@@ -583,7 +583,7 @@ module Model
 
     # Allow for either 0-based or 1-based array for now
     # FUTURE: Restrict to 0-based
-    if (not hourly_values.is_a? Array) || (hourly_values.size != 24) || (hourly_values.size != 25)
+    if (not hourly_values.is_a? Array) || (hourly_values.size != 24 && hourly_values.size != 25)
       fail 'Unexpected hourly_values.'
     end
 

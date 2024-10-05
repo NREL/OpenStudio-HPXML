@@ -2195,7 +2195,7 @@ module Waterheater
       model,
       name: 'dhw temp',
       value: t_set_c,
-      limits: EPlus::ScheduleTypeLimitsTemperature
+      limits: nil
     )
     setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, temp_schedule)
     setpoint_manager.addToNode(loop.supplyOutletNode)
