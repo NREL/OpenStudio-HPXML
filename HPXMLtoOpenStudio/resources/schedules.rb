@@ -1210,7 +1210,7 @@ class SchedulesFile
     schedule_file = Model.add_schedule_file(
       model,
       name: col_name,
-      file_path: File.basename(@output_schedules_path),
+      file_path: @output_schedules_path,
       col_num: get_col_index(col_name: col_name) + 1,
       rows_to_skip: rows_to_skip,
       num_hours: num_hrs_in_year.to_i,
