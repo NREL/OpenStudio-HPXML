@@ -699,7 +699,7 @@ module Schedule
           schedule,
           start_date: date_s,
           end_date: date_e,
-          hourly_values: [0..23].map { |h| (h < period.begin_hour) || (h >= period.end_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+          hourly_values: (0..23).map { |h| (h < period.begin_hour) || (h >= period.end_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
         )
       else # outage is at least 1 calendar day
         if period.begin_hour == 0 && period.end_hour == 24 # 1 outage rule
@@ -707,7 +707,7 @@ module Schedule
             schedule,
             start_date: date_s,
             end_date: date_e,
-            hourly_values: [h] * 24
+            hourly_values: [value] * 24
           )
         elsif (period.begin_hour == 0 && period.end_hour != 24) || (period.begin_hour != 0 && period.end_hour == 24) # 2 outage rules
           if period.begin_hour == 0 && period.end_hour != 24
@@ -716,7 +716,7 @@ module Schedule
               schedule,
               start_date: date_e,
               end_date: date_e,
-              hourly_values: [0..23].map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+              hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
             )
 
             # all other days
@@ -724,7 +724,7 @@ module Schedule
               schedule,
               start_date: date_s,
               end_date: OpenStudio::Date::fromDayOfYear(day_e - 1, year),
-              hourly_values: [h] * 24
+              hourly_values: [value] * 24
             )
           elsif period.begin_hour != 0 && period.end_hour == 24
             # first day
@@ -732,7 +732,7 @@ module Schedule
               schedule,
               start_date: date_s,
               end_date: date_s,
-              hourly_values: [0..23].map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+              hourly_values: (0..23).map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
             )
 
             # all other days
@@ -740,7 +740,7 @@ module Schedule
               schedule,
               start_date: OpenStudio::Date::fromDayOfYear(day_s + 1, year),
               end_date: date_e,
-              hourly_values: [h] * 24
+              hourly_values: [value] * 24
             )
           end
         else # 3 outage rules
@@ -749,7 +749,7 @@ module Schedule
             schedule,
             start_date: date_s,
             end_date: date_s,
-            hourly_values: [0..23].map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            hourly_values: (0..23).map { |h| (h < period.begin_hour) ? begin_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
           )
 
           # all other days
@@ -757,7 +757,7 @@ module Schedule
             schedule,
             start_date: OpenStudio::Date::fromDayOfYear(day_s + 1, year),
             end_date: OpenStudio::Date::fromDayOfYear(day_e - 1, year),
-            hourly_values: [h] * 24
+            hourly_values: [value] * 24
           )
 
           # last day
@@ -765,7 +765,7 @@ module Schedule
             schedule,
             start_date: date_e,
             end_date: date_e,
-            hourly_values: [0..23].map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
+            hourly_values: (0..23).map { |h| (h >= period.end_hour) ? end_day_schedule.getValue(OpenStudio::Time.new(0, h + 1, 0, 0)) : value }
           )
         end
       end
