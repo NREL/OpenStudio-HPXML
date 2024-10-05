@@ -663,7 +663,7 @@ module Schedule
     return if unavailable_periods.nil?
 
     # Add off rule(s), will override previous rules
-    unavailable_periods.each_with_index do |period, _i|
+    unavailable_periods.each do |period|
       # Special Values
       # FUTURE: Assign an object type to the schedules and use that to determine what
       # kind of schedule each is, rather than looking at object names. That would
@@ -791,7 +791,7 @@ module Schedule
       i += 1
       next unless value != start_value || i == values.length
 
-      rule = Model.add_schedule_ruleset_rule(
+      Model.add_schedule_ruleset_rule(
         schedule,
         start_date: start_date,
         end_date: OpenStudio::Date::fromDayOfYear(i - 1, year),
