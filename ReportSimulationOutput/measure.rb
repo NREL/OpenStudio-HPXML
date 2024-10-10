@@ -97,7 +97,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_annual_unmet_hours', false)
     arg.setDisplayName('Generate Annual Output: Unmet Hours')
-    arg.setDescription('Generates annual unmet hours for heating and cooling.')
+    arg.setDescription('Generates annual unmet hours for heating, cooling, and hot water showers.')
     arg.setDefaultValue(true)
     args << arg
 
@@ -211,7 +211,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_unmet_hours', false)
     arg.setDisplayName('Generate Timeseries Output: Unmet Hours')
-    arg.setDescription('Generates timeseries unmet hours for heating and cooling.')
+    arg.setDescription('Generates timeseries unmet hours for heating, cooling, and hot water showers.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -353,9 +353,11 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     unmet_hours_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetHoursProgram }
+    unmet_showers_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeUnmetShowersProgram }
     total_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalLoadsProgram }
     comp_loads_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeComponentLoadsProgram }
     total_airflows_program = @model.getEnergyManagementSystemPrograms.find { |p| p.additionalProperties.getFeatureAsString('ObjectType').to_s == Constants::ObjectTypeTotalAirflowsProgram }
+
     heated_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('heated_zones').get)
     cooled_zones = eval(@model.getBuilding.additionalProperties.getFeatureAsString('cooled_zones').get)
 
@@ -451,12 +453,18 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_load.report},2,#{peak_load.ems_variable}_peakload_outvar,Maximum;").get
     end
 
-    # Unmet Hours (annual only)
-    @unmet_hours.each do |_key, unmet_hour|
-      result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_hour.ems_variable}_annual_outvar,#{unmet_hour.ems_variable},Summed,ZoneTimestep,#{unmet_hours_program.name},hr;").get
+    # Unmet Hours
+    @unmet_hours.each do |key, unmet_hour|
+      unmet_program = unmet_hours_program
+      if key.include?(UHT::HotWaterShower)
+        unmet_program = unmet_showers_program
+      end
+      next if unmet_program.nil?
+
+      result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_hour.ems_variable}_annual_outvar,#{unmet_hour.ems_variable},Summed,ZoneTimestep,#{unmet_program.name},hr;").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_hour.ems_variable}_annual_outvar,runperiod;").get
       if args[:include_timeseries_unmet_hours]
-        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_hour.ems_variable}_timeseries_outvar,#{unmet_hour.ems_variable},Summed,ZoneTimestep,#{unmet_hours_program.name},hr;").get
+        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{unmet_hour.ems_variable}_timeseries_outvar,#{unmet_hour.ems_variable},Summed,ZoneTimestep,#{unmet_program.name},hr;").get
         result << OpenStudio::IdfObject.load("Output:Variable,*,#{unmet_hour.ems_variable}_timeseries_outvar,#{args[:timeseries_frequency]};").get
       end
     end
@@ -811,10 +819,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     end
 
     # Unmet Hours
-    @unmet_hours.each do |_key, unmet_hour|
+    @unmet_hours.each do |key, unmet_hour|
       unmet_hour.annual_output = get_report_variable_data_annual(['EMS'], ["#{unmet_hour.ems_variable}_annual_outvar"], 1.0)
-      if args[:include_timeseries_unmet_hours]
-        unmet_hour.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{unmet_hour.ems_variable}_timeseries_outvar"], 1.0, 0, args[:timeseries_frequency])
+      if key == UHT::HotWaterShower + '%'
+        if unmet_hour.annual_output > 0
+          unmet_hour.annual_output = @unmet_hours[UHT::HotWaterShower + 'Time'].annual_output * 100.0 / unmet_hour.annual_output
+        else
+          unmet_hour.annual_output = 0.0
+        end
+      end
+      next unless args[:include_timeseries_unmet_hours]
+
+      unmet_hour.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{unmet_hour.ems_variable}_timeseries_outvar"], 1.0, 0, args[:timeseries_frequency])
+      if key == UHT::HotWaterShower + '%'
+        unmet_hour.timeseries_output = []
       end
     end
 
@@ -1773,7 +1791,7 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
       comp_loads_data = []
     end
     if args[:include_timeseries_unmet_hours]
-      unmet_hours_data = @unmet_hours.values.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
+      unmet_hours_data = @unmet_hours.values.select { |x| !x.timeseries_units.include?('%') }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(n_digits) } }
     else
       unmet_hours_data = []
     end
@@ -2362,6 +2380,15 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
   end
 
   # TODO
+  class UnmetLoads < BaseOutput
+    def initialize(ems_variable:)
+      super()
+      @ems_variable = ems_variable
+    end
+    attr_accessor(:ems_variable)
+  end
+
+  # TODO
   class IdealLoad < BaseOutput
     # @param variables [TODO] TODO
     def initialize(variables: [])
@@ -2712,11 +2739,20 @@ class ReportSimulationOutput < OpenStudio::Measure::ReportingMeasure
     @unmet_hours = {}
     @unmet_hours[UHT::Heating] = UnmetHours.new(ems_variable: 'htg_unmet_hours')
     @unmet_hours[UHT::Cooling] = UnmetHours.new(ems_variable: 'clg_unmet_hours')
+    @unmet_hours[UHT::HotWaterShower + 'Time'] = UnmetHours.new(ems_variable: 'total_shower_unmet_time')
+    @unmet_hours[UHT::HotWaterShower + '%'] = UnmetHours.new(ems_variable: 'total_shower_time')
 
     @unmet_hours.each do |load_type, unmet_hour|
+      annual_units = 'hr'
+      timeseries_units = 'hr'
+      if load_type.include?('%')
+        annual_units = '%'
+        timeseries_units = '%'
+      end
+      load_type = UHT::HotWaterShower if load_type.include?(UHT::HotWaterShower)
       unmet_hour.name = "Unmet Hours: #{load_type}"
-      unmet_hour.annual_units = 'hr'
-      unmet_hour.timeseries_units = 'hr'
+      unmet_hour.annual_units = annual_units
+      unmet_hour.timeseries_units = timeseries_units
     end
 
     # Peak Loads

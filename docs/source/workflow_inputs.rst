@@ -709,6 +709,7 @@ The column names available in the schedule CSV files are:
   ``hot_water_dishwasher``          frac     Dishwasher hot water use schedule.                                                 Yes
   ``hot_water_clothes_washer``      frac     Clothes washer hot water use schedule.                                             Yes
   ``hot_water_fixtures``            frac     Fixtures (sinks, showers, baths) hot water use schedule.                           Yes
+  ``hot_water_showers``             frac     Showers hot water use schedule. [#]_                                               Yes
   ``hot_water_recirculation_pump``  frac     Hot water recirculation pump schedule.                                             No
   ``general_water_use``             frac     General water use internal gains.                                                  No
   ``heating_setpoint``              F        Thermostat heating setpoint schedule.                                              No
@@ -719,6 +720,7 @@ The column names available in the schedule CSV files are:
   ``battery``                       -1 to 1  Battery schedule. Positive for charging, negative for discharging.                 No
   ================================  =======  =================================================================================  ===============================
 
+  .. [#] Used only for the calculation of unmet hot water load outputs. See :ref:`annual_outputs` and :ref:`timeseries_outputs` for descriptions of how the calculated unmet hot water loads appear in the output files.
   .. [#] A detailed stochastic occupancy schedule CSV file can also be automatically generated for these columns; see the :ref:`usage_instructions` for the commands.
          The stochastic occupancy schedules are generated using the methodology described in `Stochastic simulation of occupant-driven energy use in a bottom-up residential building stock model <https://www.sciencedirect.com/science/article/pii/S0306261922011540>`_.
          Inputs for the stochastic schedule generator are entered in:
