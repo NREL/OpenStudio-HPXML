@@ -31,10 +31,11 @@ __New Features__
 - BuildResidentialHPXML measure:
   - **Breaking change**: Replaced `slab_under_width` and `slab_perimeter_depth` arguments with `slab_under_insulation_width` and `slab_perimeter_insulation_depth`
   - **Breaking change**: Replaced `schedules_vacancy_periods`, `schedules_power_outage_periods`, and `schedules_power_outage_periods_window_natvent_availability` arguments with `schedules_unavailable_period_types`, `schedules_unavailable_period_dates`, and `schedules_unavailable_period_window_natvent_availabilities`; this improves flexibility for handling more unavailable period types.
-- **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+- Output updates:
+  - **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+  - Adds "Unmet Hours: Showers (hr)" and "Unmet Hours: Showers (%)" unmet showers outputs.
 - Updates `openei_rates.zip` with the latest residential utility rates from the [OpenEI U.S. Utility Rate database](https://apps.openei.org/USURDB/).
 - Adds a warning if the sum of supply/return duct leakage to outside values is very high.
-- Adds metrics for unmet hot water loads.
 
 __Bugfixes__
 - Prevents possible error if only one of FracSensible/FracLatent are provided for a PlugLoad or FuelLoad; **Breaking change**: FracSensible and FracLatent must now be both be provided or omitted.
