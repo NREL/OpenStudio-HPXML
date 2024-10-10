@@ -520,7 +520,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, unavailable_schedule_rules.size)
@@ -541,7 +541,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, unavailable_schedule_rules.size)
@@ -561,7 +561,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(2, unavailable_schedule_rules.size)
@@ -582,7 +582,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(2, unavailable_schedule_rules.size)
@@ -606,7 +606,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour) # note the change of end month/day
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(3, unavailable_schedule_rules.size)
@@ -638,7 +638,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(0, unavailable_schedule_rules.size)
@@ -656,7 +656,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, unavailable_schedule_rules.size)
@@ -674,7 +674,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour, natvent_availability)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, unavailable_schedule_rules.size)
@@ -704,7 +704,7 @@ class HPXMLtoOpenStudioSchedulesTest < Minitest::Test
     unavailable_periods = _add_unavailable_period(hpxml, 'Power Outage', begin_month, begin_day, begin_hour, end_month, end_day, end_hour)
 
     schedule_rules = schedule.scheduleRules
-    Schedule.set_unavailable_periods(schedule, sch_name, unavailable_periods, year)
+    Schedule.set_unavailable_periods(model, schedule, sch_name, unavailable_periods)
     unavailable_schedule_rules = schedule.scheduleRules - schedule_rules
 
     assert_equal(1, unavailable_schedule_rules.size)
