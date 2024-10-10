@@ -4408,6 +4408,76 @@ Maximum power output of the second PV system. For a shared system, this is the t
 
 <br/>
 
+**Electric Panel: Service Voltage**
+
+TODO
+
+- **Name:** ``electric_panel_service_voltage``
+- **Type:** ``Choice``
+
+- **Required:** ``false``
+
+- **Choices:** `120`, `240`
+
+<br/>
+
+**Electric Panel: Service Rating**
+
+TODO
+
+- **Name:** ``electric_panel_service_rating``
+- **Type:** ``Double``
+
+- **Units:** ``A``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Types**
+
+TODO
+
+- **Name:** ``electric_panel_load_types``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Watts**
+
+TODO
+
+- **Name:** ``electric_panel_load_watts``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Voltages**
+
+TODO
+
+- **Name:** ``electric_panel_load_voltages``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
+**Electric Panel: Load Additions**
+
+TODO
+
+- **Name:** ``electric_panel_load_additions``
+- **Type:** ``String``
+
+- **Required:** ``false``
+
+<br/>
+
 **Battery: Present**
 
 Whether there is a lithium ion battery present.

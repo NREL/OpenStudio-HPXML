@@ -2621,6 +2621,42 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(4000)
     args << arg
 
+    electric_panel_voltage_choices = OpenStudio::StringVector.new
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage120
+    electric_panel_voltage_choices << HPXML::ElectricPanelVoltage240
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('electric_panel_service_voltage', electric_panel_voltage_choices, false)
+    arg.setDisplayName('Electric Panel: Service Voltage')
+    arg.setDescription('TODO')
+    arg.setUnits('V')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('electric_panel_service_rating', false)
+    arg.setDisplayName('Electric Panel: Service Rating')
+    arg.setDescription('TODO')
+    arg.setUnits('A')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_types', false)
+    arg.setDisplayName('Electric Panel: Load Types')
+    arg.setDescription('TODO')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_watts', false)
+    arg.setDisplayName('Electric Panel: Load Watts')
+    arg.setDescription('TODO')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_voltages', false)
+    arg.setDisplayName('Electric Panel: Load Voltages')
+    arg.setDescription('TODO')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('electric_panel_load_additions', false)
+    arg.setDisplayName('Electric Panel: Load Additions')
+    arg.setDescription('TODO')
+    args << arg
+
     battery_location_choices = OpenStudio::StringVector.new
     battery_location_choices << HPXML::LocationConditionedSpace
     battery_location_choices << HPXML::LocationBasementConditioned
@@ -3934,6 +3970,7 @@ module HPXMLFile
     set_water_fixtures(hpxml_bldg, args)
     set_solar_thermal(hpxml_bldg, args, weather)
     set_pv_systems(hpxml_bldg, args, weather)
+    set_electric_panel(hpxml_bldg, args)
     set_battery(hpxml_bldg, args)
     set_lighting(hpxml_bldg, args)
     set_dehumidifier(hpxml_bldg, args)
@@ -6797,6 +6834,44 @@ module HPXMLFile
                              inverter_efficiency: args[:pv_system_inverter_efficiency])
     hpxml_bldg.pv_systems.each do |pv_system|
       pv_system.inverter_idref = hpxml_bldg.inverters[-1].id
+    end
+  end
+
+  # Set the electric panel properties, including:
+  # - service voltage
+  # - max current service rating
+  # - individual panel loads
+  #
+  # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
+  # @param args [Hash] Map of :argument_name => value
+  # @return [nil]
+  def self.set_electric_panel(hpxml_bldg, args)
+    return if args[:electric_panel_service_voltage].nil? && args[:electric_panel_service_rating].nil?
+
+    hpxml_bldg.electric_panels.add(id: "ElectricPanel#{hpxml_bldg.electric_panels.size + 1}",
+                                   voltage: args[:electric_panel_service_voltage],
+                                   max_current_rating: args[:electric_panel_service_rating])
+
+    if not args[:electric_panel_load_types].nil?
+      panel_loads = hpxml_bldg.electric_panels[0].panel_loads
+
+      electric_panel_load_types = args[:electric_panel_load_types].split(',').map(&:strip)
+      electric_panel_load_watts = args[:electric_panel_load_watts].split(',').map(&:strip)
+      electric_panel_load_voltages = args[:electric_panel_load_voltages].split(',').map(&:strip)
+      electric_panel_load_additions = args[:electric_panel_load_additions].split(',').map(&:strip)
+
+      electric_panel_loads = electric_panel_load_types.zip(electric_panel_load_watts,
+                                                           electric_panel_load_voltages,
+                                                           electric_panel_load_additions)
+
+      electric_panel_loads.each do |electric_panel_load|
+        type, watts, voltage, addition = electric_panel_load
+
+        panel_loads.add(type: type,
+                        watts: watts,
+                        voltage: voltage,
+                        addition: addition)
+      end
     end
   end
 
