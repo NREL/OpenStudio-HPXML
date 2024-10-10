@@ -424,6 +424,38 @@ Resilience outputs are listed below.
          The entire electric load is treated as a "critical load" that would be supported during an outage.
          Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
 
+Panel Capacities
+~~~~~~~~~~~~~~~~
+
+Panel outputs are listed below.
+
+  ====================================================  ====================
+  Type                                                  Notes
+  ====================================================  ====================
+  Electric Panel: Load: Heating (W)
+  Electric Panel: Load: Cooling (W)
+  Electric Panel: Load: Hot Water (W)
+  Electric Panel: Load: Clothes Dryer (W)
+  Electric Panel: Load: Dishwasher (W)
+  Electric Panel: Load: Range/Oven (W)
+  Electric Panel: Load: Permanent Spa Heater (W)
+  Electric Panel: Load: Permanent Spa Pump (W)
+  Electric Panel: Load: Pool Heater (W)
+  Electric Panel: Load: Pool Pump (W)
+  Electric Panel: Load: Well Pump (W)
+  Electric Panel: Load: Electric Vehicle Charging (W)
+  Electric Panel: Load: Lighting (W)
+  Electric Panel: Load: Other (W)
+  Electric Panel: Capacity: Load-Based (W)              220.83
+  Electric Panel: Capacity: Load-Based (A)              220.83
+  Electric Panel: Constraint: Load-Based (A)            220.83
+  Electric Panel: Capacity: Meter-Based (W)             220.87
+  Electric Panel: Capacity: Meter-Based (A)             220.87
+  Electric Panel: Constraint: Meter-Based (A)           220.87
+  Electric Panel: Breaker Space: HVAC (#)
+  Electric Panel: Breaker Space: Whole Panel (#)
+  ====================================================  ====================
+
 HVAC Capacities
 ~~~~~~~~~~~~~~~
 

@@ -4544,6 +4544,44 @@ In addition, the PVSystem must be connected to an inverter that is entered as a 
 
   .. [#] For homes with multiple inverters, all InverterEfficiency elements must have the same value.
 
+.. _hpxml_electric_panels:
+
+HPXML Electric Panels
+*********************
+
+A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Systems/ElectricPanels/ElectricPanel``.
+
+  ====================================================  =======  =========  =======================  ========  ========  ============================================
+  Element                                               Type     Units      Constraints              Required  Default   Notes
+  ====================================================  =======  =========  =======================  ========  ========  ============================================
+  ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
+  ``Voltage``                                           string              See [#]_                 No        240?
+  ``MaxCurrentRating``                                  double                                       No        ?
+  ``PanelLoads``                                        element                                      No        <none>    Individual electric panel loads [#]_
+  ====================================================  =======  =========  =======================  ========  ========  ============================================
+
+  .. [#] Voltage choices are "120" or "240".
+  .. [#] If PanelLoads is provided, see :ref:`panel_loads`.
+
+.. _panel_loads:
+
+Panel Loads
+~~~~~~~~~~~
+
+TODO entered in ``extension/PanelLoads/PanelLoad``.
+
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  Element                                         Type      Units           Constraints  Required  Default    Notes
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+  ``Type``                                        string                    See [#]_     Yes
+  ``Watts``                                       double    W                            Yes
+  ``Voltage``                                     string    V               See [#]_     No        120?
+  ``Addition``                                    boolean                                No        false
+  ==============================================  ========  ==============  ===========  ========  =========  ==========================================
+
+  .. [#] Type choices are "Heating", "Cooling", "Hot Water", or "Clothes Dryer".
+  .. [#] Voltage choices are "120" or "240".
+
 .. _hpxml_batteries:
 
 HPXML Batteries
