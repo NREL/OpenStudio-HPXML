@@ -2,9 +2,14 @@
 
 __New Features__
 - Updates to HPXML v4.0 final release.
+- Allows `Site/Address/ZipCode` to be provided instead of `ClimateandRiskZones/WeatherStation/extension/EPWFilePath`, in which case the closest TMY3 weather station will be automatically selected.
 - Adds inputs for modeling skylight curbs and/or shafts.
 - Allows modeling exterior horizontal insulation for a slab-on-grade foundation (or basement/crawlspace floor).
 - Allows alternative infiltration input `AirInfiltrationMeasurement/LeakinessDescription`, in which the infiltration level is estimated using age of home, climate zone, foundation type, etc.
+- Window shading enhancements:
+  - Allows optional `InteriorShading/Type` input (blinds, shades, curtains) as a way to default summer/winter shading coefficients.
+  - Allows optional `ExteriorShading/Type` input (trees, solar screens/films, etc.) as a way to default summer/winter shading coefficients.
+  - Allows optional `InsectScreen` input.
 - Adds optional `BuildingConstruction/UnitHeightAboveGrade` input for, e.g., apartment units of upper levels where the wind speed, and thus infiltration rate, is higher.
 - Updates operational calculations (i.e., when `NumberofResidents` provided):
   - Updates hot water usage based on FSEC study.
@@ -24,17 +29,20 @@ __New Features__
   - Optional input `SimulationControl/AdvancedResearchFeatures/HeatPumpBackupCapacityIncrement` to model multi-stage electric backup coils with time-based staging.
   - Maximum power ratio detailed schedule for variable-speed HVAC systems can now be used with `NumberofUnits` dwelling unit multiplier.
 - BuildResidentialHPXML measure:
-  - **Breaking change**: Replaced `slab_under_width` argument with `slab_under_insulation_width`.
-  - **Breaking change**: Replaced `slab_perimeter_depth` argument with `slab_perimeter_insulation_depth`.
+  - **Breaking change**: Replaced `slab_under_width` and `slab_perimeter_depth` arguments with `slab_under_insulation_width` and `slab_perimeter_insulation_depth`
+  - **Breaking change**: Replaced `schedules_vacancy_periods`, `schedules_power_outage_periods`, and `schedules_power_outage_periods_window_natvent_availability` arguments with `schedules_unavailable_period_types`, `schedules_unavailable_period_dates`, and `schedules_unavailable_period_window_natvent_availabilities`; this improves flexibility for handling more unavailable period types.
 - **Breaking change**: Disaggregates "Walls" into "Above Grade Walls" and "Below Grade Walls" in results_design_load_details.csv output file.
+- Updates `openei_rates.zip` with the latest residential utility rates from the [OpenEI U.S. Utility Rate database](https://apps.openei.org/USURDB/).
 - Adds a warning if the sum of supply/return duct leakage to outside values is very high.
 
 __Bugfixes__
+- Prevents possible error if only one of FracSensible/FracLatent are provided for a PlugLoad or FuelLoad; **Breaking change**: FracSensible and FracLatent must now be both be provided or omitted.
 - Prevents possible error when using multiple `Attic`/`Foundation` elements for the same attic/foundation type.
 - Adds error-checking for `NumberofConditionedFloorsAboveGrade`=0, which is not allowed per the documentation.
 - Fixes utility bill calculations if there is battery storage or a generator.
 - BuildResidentialScheduleFile measure: Fixes possible divide by zero error during generation of stochastic clothes washer and dishwasher schedules.
 - Allows negative values for `Building/Site/Elevation`.
+- Fixes lower element height for a water heater using the advanced `WaterHeatingSystem/extension/TankModelType=stratified`.
 
 ## OpenStudio-HPXML v1.8.1
 
