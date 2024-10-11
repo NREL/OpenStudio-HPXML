@@ -11184,7 +11184,7 @@ class HPXML < Object
   #
   # @return [Oga::XML::Document] The HPXML document
   def _create_hpxml_document
-    doc = XMLHelper.create_doc('1.0', 'UTF-8')
+    doc = XMLHelper.create_doc()
     hpxml = XMLHelper.add_element(doc, 'HPXML')
     XMLHelper.add_attribute(hpxml, 'xmlns', NameSpace)
     XMLHelper.add_attribute(hpxml, 'schemaVersion', Version::HPXML_Version)
