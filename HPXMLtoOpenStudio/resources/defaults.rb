@@ -3127,37 +3127,49 @@ module Defaults
         electric_panel.max_current_rating_isdefaulted = true
       end
 
-      if electric_panel.panel_loads.empty?
+      panel_loads = electric_panel.panel_loads
+      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeHeating }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeHeating)
+      end
+      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeCooling }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeCooling)
+      end
+      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeWaterHeater }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeWaterHeater)
+      end
+      if panel_loads.find { |pl| pl.type == HPXML::ElectricPanelLoadTypeClothesDryer }.nil?
         electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeClothesDryer)
       end
+      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLighting)
+      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeKitchen)
+      electric_panel.panel_loads.add(type: HPXML::ElectricPanelLoadTypeLaundry)
 
       electric_panel.panel_loads.each do |panel_load|
-        if panel_load.type == HPXML::ElectricPanelLoadTypeHeating
-          if panel_load.watts.nil?
-            panel_load.watts = default_values[:heating_watts]
-            panel_load.watts_isdefaulted = true
+        if panel_load.watts.nil?
+          if panel_load.type == HPXML::ElectricPanelLoadTypeHeating
+            watts = default_values[:heating_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeCooling
+            watts = default_values[:cooling_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
+            watts = default_values[:water_heater_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
+            watts = default_values[:clothes_dryer_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeLighting
+            watts = default_values[:lighting_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeKitchen
+            watts = default_values[:kitchen_watts]
+          elsif panel_load.type == HPXML::ElectricPanelLoadTypeLaundry
+            watts = default_values[:laundry_watts]
           end
-        elsif panel_load.type == HPXML::ElectricPanelLoadTypeCooling
-          if panel_load.watts.nil?
-            panel_load.watts = default_values[:cooling_watts]
-            panel_load.watts_isdefaulted = true
-          end
-        elsif panel_load.type == HPXML::ElectricPanelLoadTypeWaterHeater
-          if panel_load.watts.nil?
-            panel_load.watts = default_values[:water_heater_watts]
-            panel_load.watts_isdefaulted = true
-          end
-        elsif panel_load.type == HPXML::ElectricPanelLoadTypeClothesDryer
-          if panel_load.watts.nil?
-            panel_load.watts = default_values[:clothes_dryer_watts]
-            panel_load.watts_isdefaulted = true
-          end
+          panel_load.watts = watts
+          panel_load.watts_isdefaulted = true
         end
         if panel_load.voltage.nil?
-          panel_load.voltage = default_values[:load_voltage]
+          if panel_load.watts < default_values[:load_voltage_120_max]
+            panel_load.voltage = HPXML::ElectricPanelVoltage120
+          else
+            panel_load.voltage = HPXML::ElectricPanelVoltage240
+          end
           panel_load.voltage_isdefaulted = true
         end
         if panel_load.addition.nil?
@@ -5595,16 +5607,15 @@ module Defaults
     max_cooling_capacity = 0.0
 
     (hpxml_bldg.heating_systems + hpxml_bldg.heat_pumps).each do |heating_system|
-      next if heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
+      is_hp = heating_system.is_a? HPXML::HeatPump
+      next if !is_hp && heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
       max_heating_capacity = [max_heating_capacity, heating_system.heating_capacity].max
-      if heating_system.is_a? HPXML::HeatPump
+      if is_hp
         max_backup_heating_capacity = [max_backup_heating_capacity, heating_system.backup_heating_capacity].max
       end
     end
     (hpxml_bldg.cooling_systems + hpxml_bldg.heat_pumps).each do |cooling_system|
-      next if cooling_system.cooling_system_fuel != HPXML::FuelTypeElectricity
-
       max_cooling_capacity = [max_cooling_capacity, cooling_system.cooling_capacity].max
     end
 
@@ -5616,12 +5627,15 @@ module Defaults
     cooling_handler_watts = 230.0 * [0.111 * UnitConversions.convert(max_cooling_capacity, 'btu/hr', 'kbtu/hr') + 2.22, 5].max
 
     return { panel_voltage: HPXML::ElectricPanelVoltage240,
-             max_current_rating: 150.0,
+             max_current_rating: 150.0, # A
              heating_watts: heating_watts + heating_handler_watts + backup_heating_watts,
              cooling_watts: cooling_watts + cooling_handler_watts,
              water_heater_watts: 4500,
              clothes_dryer_watts: 5760,
-             load_voltage: HPXML::ElectricPanelVoltage120,
+             lighting_watts: 3 * hpxml_bldg.building_construction.conditioned_floor_area,
+             kitchen_watts: 3000,
+             laundry_watts: 1500,
+             load_voltage_120_max: 2500, # W
              load_addition: false }
   end
 

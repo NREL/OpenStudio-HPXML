@@ -4555,10 +4555,28 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``SystemIdentifier``                                  id                                           Yes                 Unique identifier
   ``Voltage``                                           string              See [#]_                 No        240
   ``MaxCurrentRating``                                  double                                       No        150
-  ``PanelLoads``                                        element                                      No        <none>    Individual electric panel loads [#]_
+  ``PanelLoads``                                        element                                      No        See [#]_  Individual electric panel loads [#]_
   ====================================================  =======  =========  =======================  ========  ========  ============================================
 
   .. [#] Voltage choices are "120" or "240".
+  .. [#] The following if they exist:
+
+         \- Heating
+
+         \- Cooling
+
+         \- Hot Water
+
+         \- Clothes Dryer
+
+         Always the following:
+
+         \- Lighting
+
+         \- Kitchen
+
+         \- Laundry
+
   .. [#] If PanelLoads is provided, see :ref:`panel_loads`.
 
 .. _panel_loads:
@@ -4566,20 +4584,36 @@ A single electric panel can be entered as a ``/HPXML/Building/BuildingDetails/Sy
 Panel Loads
 ~~~~~~~~~~~
 
-TODO entered in ``extension/PanelLoads/PanelLoad``.
+Individual panel loads entered in ``extension/PanelLoads/PanelLoad``.
 
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   Element                                         Type      Units           Constraints  Required  Default    Notes
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
   ``Type``                                        string                    See [#]_     Yes
-  ``Watts``                                       double    W                            No        autosized
+  ``Watts``                                       double    W                            No        See [#]_
   ``Voltage``                                     string    V               See [#]_     No        See [#]_
   ``Addition``                                    boolean                                No        false
   ==============================================  ========  ==============  ===========  ========  =========  ==========================================
 
   .. [#] Type choices are "Heating", "Cooling", "Hot Water", or "Clothes Dryer".
+  .. [#] If Watts not provided, defaults as follows:
+
+         \- Heating: autosized
+
+         \- Cooling: autosized
+
+         \- Hot Water: 4500
+
+         \- Clothes Dryer: 5760
+
+         \- Lighting: 3 * CFA
+
+         \- Kitchen: 3000
+
+         \- Laundry: 1500
+
   .. [#] Voltage choices are "120" or "240".
-  .. [#] "240" if Watts > X, otherwise "120"?
+  .. [#] "120" if Watts <= 2500, otherwise "240".
 
 .. _hpxml_batteries:
 
