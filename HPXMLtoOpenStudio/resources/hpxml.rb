@@ -11297,7 +11297,7 @@ class HPXML < Object
     # @return [nil]
     def delete
       (@parent_object.heating_systems + @parent_object.heat_pumps).each do |heating_system|
-        heating_system.cooling_detailed_performance_data.delete(self)
+        heating_system.heating_detailed_performance_data.delete(self)
       end
     end
 
