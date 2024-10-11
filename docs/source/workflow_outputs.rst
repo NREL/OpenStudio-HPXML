@@ -424,10 +424,11 @@ Resilience outputs are listed below.
          The entire electric load is treated as a "critical load" that would be supported during an outage.
          Resilience hours are set to 0 for any timestep where the battery is not charged, even if there is sufficient PV to power the building.
 
-Panel Capacities
-~~~~~~~~~~~~~~~~
+Electric Panel Capacities
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Panel outputs are listed below.
+Electric panel loads and calculated capacities are listed below.
+Loads and capacities can also be found in the ``in.xml`` file.
 
   ====================================================  ====================
   Type                                                  Notes

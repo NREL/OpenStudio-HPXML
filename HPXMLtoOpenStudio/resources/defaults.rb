@@ -3105,8 +3105,9 @@ module Defaults
   #
   # @param hpxml_bldg [HPXML::Building] HPXML Building object representing an individual dwelling unit
   # @param unit_num [Integer] Dwelling unit number
+  # @param update_hpxml [Boolean] Whether to update the HPXML object so that in.xml reports panel loads/capacities
   # @return [nil]
-  def self.apply_electric_panels(hpxml_bldg, unit_num)
+  def self.apply_electric_panels(hpxml_bldg, unit_num, update_hpxml: true)
     default_values = get_electric_panel_values(hpxml_bldg)
     if hpxml_bldg.electric_panels.empty?
       if not unit_num.nil?
@@ -3177,6 +3178,21 @@ module Defaults
           panel_load.addition_isdefaulted = true
         end
       end
+
+      # TODO
+      loads = PanelLoadValues.new
+      loads.LoadBased_CapacityW = 1
+      loads.LoadBased_CapacityA = 2
+      loads.MeterBased_CapacityW = 3
+      loads.MeterBased_CapacityA = 4
+
+      # Assign panel loads and capacities to HPXML objects for output
+      next unless update_hpxml
+
+      electric_panel.lp_capacityw = loads.LoadBased_CapacityW
+      electric_panel.lp_capacitya = loads.LoadBased_CapacityA
+      electric_panel.mp_capacityw = loads.MeterBased_CapacityW
+      electric_panel.mp_capacitya = loads.MeterBased_CapacityA
     end
   end
 

@@ -539,6 +539,11 @@ class HPXML < Object
                     cdl_lat_vent: 'Ventilation',
                     cdl_lat_intgains: 'InternalLoads' }
 
+  LP_ATTRS = { lp_capacityw: 'CapacityW',
+               lp_capacitya: 'CapacityA' }
+  MP_ATTRS = { mp_capacityw: 'CapacityW',
+               mp_capacitya: 'CapacityA' }
+
   def initialize(hpxml_path: nil, schema_validator: nil, schematron_validator: nil, building_id: nil)
     @hpxml_path = hpxml_path
     @errors = []
@@ -9160,7 +9165,9 @@ class HPXML < Object
     CLASS_ATTRS = [:panel_loads]
     ATTRS = [:id, # [String] SystemIdentifier/@id
              :voltage,
-             :max_current_rating]
+             :max_current_rating] +
+            LP_ATTRS.keys +
+            MP_ATTRS.keys
     attr_reader(*CLASS_ATTRS)
     attr_accessor(*ATTRS)
 
@@ -9190,9 +9197,10 @@ class HPXML < Object
       electric_panel = XMLHelper.add_element(electric_panels, 'ElectricPanel')
       sys_id = XMLHelper.add_element(electric_panel, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @is_voltage_defaulted) unless @voltage.nil?
-      XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_defaulted) unless @max_current_rating.nil?
+      XMLHelper.add_element(electric_panel, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
+      XMLHelper.add_element(electric_panel, 'MaxCurrentRating', @max_current_rating, :float, @max_current_rating_isdefaulted) unless @max_current_rating.nil?
       @panel_loads.to_doc(electric_panel)
+      HPXML.panel_loads_to_doc(self, electric_panel)
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -9206,6 +9214,7 @@ class HPXML < Object
       @voltage = XMLHelper.get_value(electric_panel, 'Voltage', :string)
       @max_current_rating = XMLHelper.get_value(electric_panel, 'MaxCurrentRating', :float)
       @panel_loads.from_doc(electric_panel)
+      HPXML.panel_loads_from_doc(self, electric_panel)
     end
   end
 
@@ -9265,10 +9274,10 @@ class HPXML < Object
 
       panel_loads = XMLHelper.create_elements_as_needed(electric_panel, ['extension', 'PanelLoads'])
       panel_load = XMLHelper.add_element(panel_loads, 'PanelLoad')
-      XMLHelper.add_element(panel_load, 'Type', @type, :string, @is_type_defaulted) unless @type.nil?
-      XMLHelper.add_element(panel_load, 'Watts', @watts, :float, @is_watts_defaulted) unless @watts.nil?
-      XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @is_voltage_defaulted) unless @voltage.nil?
-      XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @is_addition_defaulted) unless @addition.nil?
+      XMLHelper.add_element(panel_load, 'Type', @type, :string, @type_isdefaulted) unless @type.nil?
+      XMLHelper.add_element(panel_load, 'Watts', @watts, :float, @watts_isdefaulted) unless @watts.nil?
+      XMLHelper.add_element(panel_load, 'Voltage', @voltage, :string, @voltage_isdefaulted) unless @voltage.nil?
+      XMLHelper.add_element(panel_load, 'Addition', @addition, :boolean, @addition_isdefaulted) unless @addition.nil?
     end
 
     # Populates the HPXML object(s) from the XML document.
@@ -11600,6 +11609,37 @@ class HPXML < Object
         else
           hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/DesignLoads/#{dl_child_name}/#{element_name}", :float))
         end
+      end
+    end
+  end
+
+  # Adds this object's panel loads to the provided Oga XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
+  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
+  # @return [nil]
+  def self.panel_loads_to_doc(hpxml_object, hpxml_element)
+    { LP_ATTRS => 'LoadBased',
+      MP_ATTRS => 'MeterBased' }.each do |attrs, dl_child_name|
+      dl_extension = XMLHelper.create_elements_as_needed(hpxml_element, ['extension', 'Capacities'])
+      XMLHelper.add_attribute(dl_extension, 'dataSource', 'software')
+      dl_child = XMLHelper.add_element(dl_extension, dl_child_name)
+      attrs.each do |attr, element_name|
+        XMLHelper.add_element(dl_child, element_name, hpxml_object.send(attr), :float)
+      end
+    end
+  end
+
+  # Populates the HPXML object's panel loads from the XML element.
+  #
+  # @param hpxml_object [HPXML::XXX] The ElectricPanel object
+  # @param hpxml_element [Oga::XML::Element] The ElectricPanel XML element
+  # @return [nil]
+  def self.panel_loads_from_doc(hpxml_object, hpxml_element)
+    { LP_ATTRS => 'LoadBased',
+      MP_ATTRS => 'MeterBased' }.each do |attrs, dl_child_name|
+      attrs.each do |attr, element_name|
+        hpxml_object.send("#{attr}=", XMLHelper.get_value(hpxml_element, "extension/Capacities/#{dl_child_name}/#{element_name}", :float))
       end
     end
   end
